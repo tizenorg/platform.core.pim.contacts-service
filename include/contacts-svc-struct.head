@@ -1,0 +1,46 @@
+/*
+ * Contacts Service
+ *
+ * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
+ *
+ * Contact: Youngjae Shin <yj99.shin@samsung.com>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+#ifndef __CONTACTS_SVC_STRUCT_H__
+#define __CONTACTS_SVC_STRUCT_H__
+
+#include <stdbool.h>
+#include <glib.h>
+
+/**
+ * @defgroup   CONTACTS_SVC_STRUCT Structs & values
+ * @ingroup    CONTACTS_SVC
+ * @addtogroup CONTACTS_SVC_STRUCT
+ * @{
+ *
+ * This interface provides methods to handle Structs (= collection of values)
+ * and values of contacts service (individual properties of a contact).
+ *
+ * @section sec1 Properties and Policies
+ * - Memory always has to be freed by its creator, unless stated otherwise.
+ * \n contacts_svc_struct_store_XXX means "copy".
+ * But If list has a same start with contacts struct(#CTSstruct), it is not "copy"(just appendix)
+ * - Contacts structs(#CTSstruct) own data stored in them.(User cannot free each value in struct)
+ * - Contacts_svc_value_XXXX is called by reference.
+ * \n But Contacts_svc_value_set_str() is called by value for the data in contacts struct(#CTSstruct).
+ * - All "char *" strings use UTF-8 encoding.
+ *
+ */
+

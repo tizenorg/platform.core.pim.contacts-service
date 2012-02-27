@@ -1,0 +1,28 @@
+#!/bin/sh
+
+if [ ! -d /opt/dbspace ]
+then
+	mkdir -p /opt/dbspace
+fi
+
+contacts-svc-helper schema
+
+if [ "$USER" = "root" ]
+then
+# Change file owner
+   chown :6005 /opt/dbspace/.contacts-svc.db
+   chown :6005 /opt/dbspace/.contacts-svc.db-journal
+
+   chown root:root @PREFIX@/bin/contacts-svc-helper*
+   chown root:root /etc/rc.d/init.d/contacts-svc-helper.sh
+fi
+
+# Change file permissions
+# chmod 755 /usr/bin/contacts-svc-helper
+
+chmod 660 /opt/dbspace/.contacts-svc.db
+chmod 660 /opt/dbspace/.contacts-svc.db-journal
+
+chmod 755 /etc/rc.d/init.d/contacts-svc-helper.sh
+
+vconftool set -t int db/service/contacts/default_lang 1

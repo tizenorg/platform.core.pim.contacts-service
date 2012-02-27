@@ -1,0 +1,9 @@
+
+/**
+ * @}
+ */
+#ifdef __cplusplus
+   }
+#endif
+
+#endif //__CONTACTS_SVC_H__
