@@ -29,8 +29,6 @@
 
 typedef sqlite3_stmt* cts_stmt;
 
-//////////////////// iterator ////////////////////
-
 int cts_db_open(void);
 int cts_db_close(void);
 int cts_db_change();
@@ -38,7 +36,7 @@ int cts_db_get_last_insert_id(void);
 int cts_db_get_next_id(const char *table);
 
 int cts_query_get_first_int_result(const char *query);
-int cts_query_exec(char *query);
+int cts_query_exec(const char *query);
 cts_stmt cts_query_prepare(char *query);
 
 int cts_stmt_step(cts_stmt stmt);

@@ -21,6 +21,13 @@
 #ifndef __CTS_CONTACT_H__
 #define __CTS_CONTACT_H__
 
+enum{
+	CTS_GET_DATA_BY_CONTACT_ID,
+	CTS_GET_DATA_BY_ID
+};
+
+int cts_get_data_info(int op_code, int field, int index, contact_t *contact);
+
 //<!--
 /**
  * @defgroup   CONTACTS_SVC_NAME Contact Naming Rule

@@ -41,6 +41,16 @@ enum VCARDCONTENT {
 
 //<!--
 /**
+ * @defgroup   CONTACTS_SVC_VCARD vcard handling
+ * @ingroup    CONTACTS_SVC
+ * @addtogroup CONTACTS_SVC_VCARD
+ * @{
+ *
+ * This interface provides methods to handle the vcard.
+ *
+ */
+
+/**
  * This function makes contact record by using vcard file stream.
  *
  * @param[in] vcard_stream start point of the stream of vcard.
@@ -127,6 +137,9 @@ char* contacts_svc_vcard_put_content(const char *vcard_stream,
 int contacts_svc_vcard_get_content(const char *vcard_stream,
 		const char *content_type, int (*fn)(const char *content_value, void *data), void *data);
 
+/**
+ * @}
+ */
 //-->
 
 #endif //__CTS_VCARD_H__

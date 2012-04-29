@@ -57,11 +57,9 @@ uid TEXT,
 ringtone TEXT,
 note TEXT,
 image0 TEXT, -- normal image
-image1 TEXT, -- full image
-person_id INTEGER
+image1 TEXT -- full image
 );
 CREATE INDEX contacts_ver_idx ON contacts(changed_ver);
-CREATE INDEX contacts_person_idx ON contacts(person_id);
 CREATE TRIGGER trg_contacts_del AFTER DELETE ON contacts
  BEGIN
    DELETE FROM data WHERE contact_id = old.contact_id;
@@ -71,7 +69,7 @@ CREATE TRIGGER trg_contacts_del AFTER DELETE ON contacts
 
 CREATE TABLE deleteds
 (
-contact_id INTEGER,
+contact_id INTEGER PRIMARY KEY,
 addrbook_id INTEGER,
 deleted_ver INTEGER
 );
@@ -118,8 +116,7 @@ data6 TEXT,
 data7 TEXT,
 data8 TEXT,
 data9 TEXT,
-data10 TEXT,
-person_id INTEGER
+data10 TEXT
 );
 CREATE TRIGGER trg_data_number_del AFTER DELETE ON data
  WHEN old.datatype = 8
@@ -139,7 +136,6 @@ CREATE INDEX data_idx7 ON data(data7);
 CREATE INDEX data_idx8 ON data(data8);
 CREATE INDEX data_idx9 ON data(data9);
 CREATE INDEX data_idx10 ON data(data10);
-CREATE INDEX data_person_idx ON data(person_id);
 
 CREATE TABLE groups
 (

@@ -574,6 +574,10 @@ static inline cts_messenger* cts_struct_dup_messenger(const cts_messenger *src)
 
 		if (src->im_id)
 			result->im_id = strdup(src->im_id);
+		if (src->svc_name)
+			result->svc_name = strdup(src->svc_name);
+		if (src->svc_op)
+			result->svc_op = strdup(src->svc_op);
 	}
 
 	return result;

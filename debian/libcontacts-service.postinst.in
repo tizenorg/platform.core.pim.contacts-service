@@ -4,8 +4,9 @@ if [ "$USER" = "root" ]
 then
 # Change file owner
    chown root:root @PREFIX@/lib/libcontacts-service.so.*
+	#db_contact
    chown :6005 -R /opt/data/contacts-svc/img
-   chown :6005 /opt/data/contacts-svc/.CONTACTS_SVC_*
+   chown :6005 /opt/data/contacts-svc/.CONTACTS_SVC_*_CHANGED
    vconftool set -t int db/service/contacts/name_sorting_order 0 -g 6005
    vconftool set -t int db/service/contacts/name_display_order 0 -g 6005
 else
@@ -15,7 +16,7 @@ fi
 
 # Change file permissions
 # chmod 644 /usr/lib/libcontacts-service.so
-chmod 660 /opt/data/contacts-svc/.CONTACTS_SVC_*
+chmod 660 /opt/data/contacts-svc/.CONTACTS_SVC_*_CHANGED
 chmod 770 -R /opt/data/contacts-svc/img
 
 echo "Done"

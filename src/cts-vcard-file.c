@@ -60,7 +60,6 @@ enum {
 	CTS_VCARD_VALUE_UID,
 	CTS_VCARD_VALUE_URL,
 	CTS_VCARD_VALUE_X_ANNIVERSARY,
-	CTS_VCARD_VALUE_X_IRMC_LUID,
 	CTS_VCARD_VALUE_X_SLP_GROUP,
 	CTS_VCARD_VALUE_END,
 	CTS_VCARD_VALUE_MAX
@@ -133,19 +132,24 @@ static int cts_vcard_check_content_type(char **vcard)
 	}
 }
 
-static inline int cts_vcard_check_quoted(char *src)
+static inline int cts_vcard_check_quoted(char *src, int max, int *quoted)
 {
 	int ret;
+	if (CTS_TRUE == *quoted)
+		return CTS_TRUE;
 
-	while (*src) {
+	while (*src && max) {
 		if ('Q' == *src) {
 			ret = strncmp(src, "QUOTED-PRINTABLE", sizeof("QUOTED-PRINTABLE") - 1);
-			if (!ret)
+			if (!ret) {
+				*quoted = CTS_TRUE;
 				return CTS_TRUE;
+			}
 		}else if (':' == *src) {
 			break;
 		}
 		src++;
+		max--;
 	}
 	return CTS_FALSE;
 }
@@ -160,12 +164,13 @@ static inline int cts_vcard_hex_to_dec(char hex)
 	case 'A' ... 'F':
 		return hex - 'A' + 10;
 	default:
-		return 0;
+		return -1;
 	}
 }
 static inline int cts_vcard_decode_quoted_val(char *val)
 {
 	char *src, *dest;
+	int pre;
 
 	src = strchr(val, ':');
 	if (NULL == src)
@@ -174,12 +179,19 @@ static inline int cts_vcard_decode_quoted_val(char *val)
 	dest = src;
 	while (*src) {
 		if ('=' == *src) {
-			*dest = (char)((cts_vcard_hex_to_dec(*(src+1)) << 4) + cts_vcard_hex_to_dec(*(src+2)));
-			if (*(src+1) && *(src+2))
+			pre = cts_vcard_hex_to_dec(*(src+1));
+			if (0 <= pre) {
+				*dest = (char)((pre << 4) + cts_vcard_hex_to_dec(*(src+2)));
+				dest++;
 				src += 2;
-		}else
+			} else {
+				if ('\r' == *(src+1) && '\n' == *(src+2))
+					src += 2;
+			}
+		} else {
 			*dest = *src;
-		dest++;
+			dest++;
+		}
 		src++;
 	}
 
@@ -259,9 +271,33 @@ static inline char* cts_vcard_translate_charset(char *src, int len)
 	return NULL;
 }
 
+
+static inline int cts_vcard_remove_folding(char *folded_src)
+{
+	char *result = folded_src;
+
+	retv_if(NULL == folded_src, CTS_ERR_ARG_NULL);
+
+	while (*folded_src) {
+		if ('\r' == *folded_src && '\n' == *(folded_src+1) && ' ' == *(folded_src+2))
+			folded_src += 3;
+		else if ('\n' == *folded_src && ' ' == *(folded_src+1))
+			folded_src += 2;
+
+		if ('\0' == *folded_src)
+			break;
+
+		*result = *folded_src;
+		result++;
+		folded_src++;
+	}
+	*result = '\0';
+	return CTS_SUCCESS;
+}
+
 static char* cts_vcard_get_val(int ver, char *src, char **dest)
 {
-	int len;
+	int len, quoted;
 	bool start = false;
 	char *cursor;
 
@@ -284,17 +320,33 @@ static char* cts_vcard_get_val(int ver, char *src, char **dest)
 		if (start) break;
 	}
 
+	quoted = CTS_FALSE;
 	cursor = src;
 	len = 0;
-	while (*cursor)
-	{
-		if ('\r' == *cursor) cursor++;
-		if ('\n' == *cursor) {
-			if (' ' != *(cursor+1))
-				break;
-		}
+	if(CTS_VCARD_VER_2_1 == ver) {
+		while (*cursor) {
+			if ('=' == *cursor && cts_vcard_check_quoted(src, cursor - src, &quoted)) {
+				if ('\r' == *(cursor+1) && '\n' == *(cursor+2))
+					cursor += 2;
+			} else {
+				if ('\r' == *cursor && '\n' == *(cursor+1) && ' ' != *(cursor+2))
+					break;
+				if ('\n' == *cursor && ' ' != *(cursor+1))
+					break;
+			}
 
-		cursor++;
+			cursor++;
+		}
+	} else {
+		while (*cursor) {
+			if ('\r' == *cursor && '\n' == *(cursor+1) && ' ' != *(cursor+2))
+				break;
+
+			if ('\n' == *cursor && ' ' != *(cursor+1))
+				break;
+
+			cursor++;
+		}
 	}
 
 	if (src == cursor) {
@@ -308,8 +360,10 @@ static char* cts_vcard_get_val(int ver, char *src, char **dest)
 
 		*cursor = '\0';
 		*dest = strdup(src);
-		//if(CTS_VCARD_VER_2_1 == ver)
-		if (cts_vcard_check_quoted(*dest))
+		if(CTS_VCARD_VER_2_1 != ver)
+			cts_vcard_remove_folding(*dest);
+
+		if (cts_vcard_check_quoted(*dest, -1, &quoted))
 			len = cts_vcard_decode_quoted_val(*dest);
 		if (0 == len)
 			len = strlen(*dest);
@@ -347,29 +401,6 @@ static inline int cts_vcard_check_version(const char *src)
 		return CTS_VCARD_VER_3_0;
 	else
 		return CTS_VCARD_VER_2_1;
-}
-
-static inline int cts_vcard_remove_folding(char *folded_src)
-{
-	char *result = folded_src;
-
-	retv_if(NULL == folded_src, CTS_ERR_ARG_NULL);
-
-	while (*folded_src) {
-		if ('\r' == *folded_src)
-			folded_src++;
-		if ('\n' == *folded_src && ' ' == *(folded_src+1))
-			folded_src += 2;
-
-		if ('\0' == *folded_src)
-			break;
-
-		*result = *folded_src;
-		result++;
-		folded_src++;
-	}
-	*result = '\0';
-	return CTS_SUCCESS;
 }
 
 
@@ -1006,7 +1037,6 @@ static inline int cts_vcard_get_contact(int ver, int flags,
 			cursor = new_start;
 			continue;
 		}
-		cts_vcard_remove_folding(val);
 
 		switch (type) {
 		case CTS_VCARD_VALUE_FN:
@@ -1101,10 +1131,6 @@ static inline int cts_vcard_get_contact(int ver, int flags,
 					CTS_EVENT_TYPE_ANNIVERSARY, val);
 			free(val);
 			break;
-		case CTS_VCARD_VALUE_X_IRMC_LUID:
-			contact->base->id = atoi(val);
-			free(val);
-			break;
 		case CTS_VCARD_VALUE_X_SLP_GROUP:
 			if (flags & CTS_VCARD_CONTENT_X_SLP_GROUP)
 				contact->grouprelations = cts_vcard_get_group(contact->grouprelations, val);
@@ -1160,7 +1186,6 @@ static void cts_vcard_initial(void)
 		//content_name[CTS_VCARD_VALUE_KEY] = "KEY"; /* not supported */
 		content_name[CTS_VCARD_VALUE_X_ANNIVERSARY] = "X-ANNIVERSARY";
 		//content_name[CTS_VCARD_VALUE_X_CHILDREN] = "X-CHILDREN";
-		content_name[CTS_VCARD_VALUE_X_IRMC_LUID] = "X-IRMC-LUID";
 		content_name[CTS_VCARD_VALUE_X_SLP_GROUP] = "X-SLP-GROUP";
 		content_name[CTS_VCARD_VALUE_END] = "END";
 	}

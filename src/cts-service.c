@@ -25,11 +25,11 @@
 #include "cts-schema.h"
 #include "cts-sqlite.h"
 #include "cts-utils.h"
-#include "cts-service.h"
 #include "cts-socket.h"
 #include "cts-normalize.h"
 #include "cts-list.h"
 #include "cts-pthread.h"
+#include "cts-service.h"
 
 static int cts_conn_refcnt = 0;
 

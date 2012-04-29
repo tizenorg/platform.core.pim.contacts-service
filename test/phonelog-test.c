@@ -148,9 +148,9 @@ void phonelog_get_number_list_test(void)
 {
 	int ret;
 
-	ret = contats_svc_phonelog_get_all_number(plog_get_number_list_cb, NULL);
+	ret = contacts_svc_phonelog_get_all_number(plog_get_number_list_cb, NULL);
 	if (CTS_SUCCESS != ret)
-		printf("contats_svc_phonelog_get_all_number() Failed(%d)\n", ret);
+		printf("contacts_svc_phonelog_get_all_number() Failed(%d)\n", ret);
 
 }
 

@@ -47,8 +47,8 @@ int cts_increase_outgoing_count(int contact_id);
 int cts_get_next_ver(void);
 int cts_update_contact_changed_time(int contact_id);
 int cts_delete_image_file(int img_type, int index);
-int cts_add_image_file(int img_type, int index, char *src_img, char **dest_img);
-int cts_update_image_file(int img_type, int index, char *src_img, char **dest_img);
+int cts_add_image_file(int img_type, int index, char *src_img, char *dest_name, int dest_size);
+int cts_update_image_file(int img_type, int index, char *src_img, char *dest_name, int dest_size);
 
 #ifndef __CONTACTS_SVC_H__
 //<!--

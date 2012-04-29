@@ -51,7 +51,7 @@ int helper_unicode_to_utf8(char *src, int src_len, char *dest, int dest_size)
 
 static inline int check_utf8(char c)
 {
-	if (c < 128)
+	if ((c & 0xff) < (128 & 0xff))
 		return 1;
 	else if ((c & (char)0xe0) == (char)0xc0)
 		return 2;

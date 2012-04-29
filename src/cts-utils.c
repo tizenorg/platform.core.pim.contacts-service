@@ -19,6 +19,7 @@
  *
  */
 #include <sys/time.h>
+#include <sys/stat.h>
 #include <vconf.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -26,7 +27,6 @@
 #include <dirent.h>
 
 #include "cts-internal.h"
-#include "cts-utils.h"
 #include "cts-schema.h"
 #include "cts-sqlite.h"
 #include "cts-socket.h"
@@ -35,6 +35,7 @@
 #include "cts-vcard.h"
 #include "cts-pthread.h"
 #include "cts-types.h"
+#include "cts-utils.h"
 
 static const char *CTS_NOTI_CONTACT_CHANGED=CTS_NOTI_CONTACT_CHANGED_DEF;
 static const char *CTS_NOTI_PLOG_CHANGED="/opt/data/contacts-svc/.CONTACTS_SVC_PLOG_CHANGED";
@@ -196,6 +197,7 @@ API int contacts_svc_begin_trans(void)
 {
 	int ret = -1, progress;
 
+	cts_mutex_lock(CTS_MUTEX_TRANSACTION);
 	if (transaction_count <= 0)
 	{
 		ret = cts_query_exec("BEGIN IMMEDIATE TRANSACTION"); //taken 600ms
@@ -205,7 +207,11 @@ API int contacts_svc_begin_trans(void)
 			ret = cts_query_exec("BEGIN IMMEDIATE TRANSACTION");
 			progress *= 2;
 		}
-		retvm_if(CTS_SUCCESS != ret, ret, "cts_query_exec() Failed(%d)", ret);
+		if(CTS_SUCCESS != ret) {
+			ERR("cts_query_exec() Failed(%d)", ret);
+			cts_mutex_unlock(CTS_MUTEX_TRANSACTION);
+			return ret;
+		}
 
 		transaction_count = 0;
 
@@ -215,6 +221,7 @@ API int contacts_svc_begin_trans(void)
 	}
 	transaction_count++;
 	CTS_DBG("transaction_count : %d.", transaction_count);
+	cts_mutex_unlock(CTS_MUTEX_TRANSACTION);
 
 	return CTS_SUCCESS;
 }
@@ -236,16 +243,20 @@ API int contacts_svc_end_trans(bool is_success)
 	int ret = -1, progress;
 	char query[CTS_SQL_MIN_LEN];
 
+	cts_mutex_lock(CTS_MUTEX_TRANSACTION);
+
 	transaction_count--;
 
 	if (0 != transaction_count) {
 		CTS_DBG("contact transaction_count : %d.", transaction_count);
+		cts_mutex_unlock(CTS_MUTEX_TRANSACTION);
 		return CTS_SUCCESS;
 	}
 
 	if (false == is_success) {
 		cts_cancel_changes();
 		ret = cts_query_exec("ROLLBACK TRANSACTION");
+		cts_mutex_unlock(CTS_MUTEX_TRANSACTION);
 		return CTS_SUCCESS;
 	}
 
@@ -270,8 +281,11 @@ API int contacts_svc_end_trans(bool is_success)
 		cts_cancel_changes();
 		tmp_ret = cts_query_exec("ROLLBACK TRANSACTION");
 		warn_if(CTS_SUCCESS != tmp_ret, "cts_query_exec(ROLLBACK) Failed(%d)", tmp_ret);
+		cts_mutex_unlock(CTS_MUTEX_TRANSACTION);
 		return ret;
 	}
+	cts_mutex_unlock(CTS_MUTEX_TRANSACTION);
+
 	if (contact_change) cts_noti_publish_contact_change();
 	if (plog_change) cts_noti_publish_plog_change();
 	if (missed_change) cts_noti_publish_missed_call_change();
@@ -499,7 +513,7 @@ API int contacts_svc_get_image(cts_img_t img_type, int index, char **img_path)
 {
 	int ret;
 	cts_stmt stmt;
-	char *tmp_path;
+	char *img;
 	char query[CTS_SQL_MIN_LEN] = {0};
 
 	retvm_if(CTS_IMG_FULL != img_type && CTS_IMG_NORMAL != img_type,
@@ -522,10 +536,12 @@ API int contacts_svc_get_image(cts_img_t img_type, int index, char **img_path)
 		return CTS_ERR_DB_RECORD_NOT_FOUND;
 	}
 
-	tmp_path = cts_stmt_get_text(stmt, 0);
-	if (tmp_path) {
+	img = cts_stmt_get_text(stmt, 0);
+	if (img) {
+		char tmp_path[CTS_IMG_PATH_SIZE_MAX];
+		snprintf(tmp_path, sizeof(tmp_path), "%s/%s", CTS_IMAGE_LOCATION, img);
 		ret = cts_exist_file(tmp_path);
-		retvm_if(ret, ret, "cts_exist_file() Failed(%d)", ret);
+		retvm_if(ret, ret, "cts_exist_file(%s) Failed(%d)", tmp_path, ret);
 		*img_path = strdup(tmp_path);
 		if (NULL == *img_path) {
 			ERR("strdup() Failed");
@@ -562,14 +578,16 @@ int cts_delete_image_file(int img_type, int index)
 
 	tmp_path = cts_stmt_get_text(stmt, 0);
 	if (tmp_path) {
-		ret = unlink(tmp_path);
-		warn_if (ret < 0, "unlink(%s) Failed(%d)", tmp_path, errno);
+		char full_path[CTS_IMG_PATH_SIZE_MAX];
+		snprintf(full_path, sizeof(full_path), "%s/%s", CTS_IMAGE_LOCATION, tmp_path);
+		ret = unlink(full_path);
+		warn_if (ret < 0, "unlink(%s) Failed(%d)", full_path, errno);
 	}
 	cts_stmt_finalize(stmt);
 	return CTS_SUCCESS;
 }
 
-int cts_add_image_file(int img_type, int index, char *src_img, char **dest_img)
+int cts_add_image_file(int img_type, int index, char *src_img, char *dest_name, int dest_size)
 {
 	int src_fd;
 	int dest_fd;
@@ -579,15 +597,15 @@ int cts_add_image_file(int img_type, int index, char *src_img, char **dest_img)
 	char buf[CTS_COPY_SIZE_MAX];
 	char dest[CTS_IMG_PATH_SIZE_MAX];
 
-	*dest_img = NULL;
 	retvm_if(NULL == src_img, CTS_ERR_ARG_INVALID, "img_path is NULL");
 
 	ext = strrchr(src_img, '.');
-	if (NULL == ext) ext = "";
+	if (NULL == ext || strchr(ext, '/'))
+		ext = "";
 
 	size = snprintf(dest, sizeof(dest), "%s/%d-%d%s",
 			CTS_IMAGE_LOCATION, index, img_type, ext);
-	retvm_if(size<=0, CTS_ERR_FAIL, "Destination file name was not created");
+	retvm_if(size<=0, CTS_ERR_FAIL, "snprintf() Failed(%d)", errno);
 
 	src_fd = open(src_img, O_RDONLY);
 	retvm_if(src_fd < 0, CTS_ERR_IO_ERR, "Open(%s) Failed(%d)", src_img, errno);
@@ -621,21 +639,20 @@ int cts_add_image_file(int img_type, int index, char *src_img, char **dest_img)
 	fchmod(dest_fd, CTS_SECURITY_DEFAULT_PERMISSION);
 	close(src_fd);
 	close(dest_fd);
-	*dest_img = strdup(dest);
+	snprintf(dest_name, dest_size, "%d-%d%s", index, img_type, ext);
 	return CTS_SUCCESS;
 }
 
-int cts_update_image_file(int img_type, int index, char *src_img, char **dest_img)
+int cts_update_image_file(int img_type, int index, char *src_img, char *dest_name, int dest_size)
 {
 	int ret;
 
-	*dest_img = NULL;
 	ret = cts_delete_image_file(img_type, index);
 	retvm_if(CTS_SUCCESS != ret && CTS_ERR_DB_RECORD_NOT_FOUND != ret,
 		ret, "cts_delete_image_file() Failed(%d)", ret);
 
 	if (src_img) {
-		ret = cts_add_image_file(img_type, index, src_img, &(*dest_img));
+		ret = cts_add_image_file(img_type, index, src_img, dest_name, dest_size);
 		retvm_if(CTS_SUCCESS != ret, ret, "cts_add_image_file() Failed(%d)", ret);
 	}
 
@@ -662,14 +679,15 @@ int cts_update_contact_changed_time(int contact_id)
 API int contacts_svc_save_image(cts_img_t img_type, int index, char *src_img)
 {
 	int ret;
-	char *dest_img;
 	char query[CTS_SQL_MIN_LEN];
+	char dest_img[CTS_SQL_MIN_LEN];
 	cts_stmt stmt;
 
 	ret = contacts_svc_begin_trans();
 	retvm_if(ret, ret, "contacts_svc_begin_trans() Failed(%d)", ret);
 
-	ret = cts_update_image_file(img_type, index, src_img, &dest_img);
+	dest_img[0] = '\0';
+	ret = cts_update_image_file(img_type, index, src_img, dest_img, sizeof(dest_img));
 	if (CTS_SUCCESS != ret) {
 		ERR("cts_update_image_file() Failed(%d)", ret);
 		contacts_svc_end_trans(false);
@@ -686,7 +704,7 @@ API int contacts_svc_save_image(cts_img_t img_type, int index, char *src_img)
 		return CTS_ERR_DB_FAILED;
 	}
 
-	if(dest_img)
+	if(*dest_img)
 		cts_stmt_bind_text(stmt, 1, dest_img);
 	ret = cts_stmt_step(stmt);
 	warn_if(CTS_SUCCESS != ret, "cts_stmt_step() Failed(%d)", ret);

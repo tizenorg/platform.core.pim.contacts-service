@@ -37,6 +37,7 @@ static void get_contact(CTSstruct *contact)
 	contacts_svc_struct_get_value(contact, CTS_CF_BASE_INFO_VALUE, &value);
 	printf("ID = %d\n", contacts_svc_value_get_int(value, CTS_BASE_VAL_ID_INT));
 	printf("changed time = %d\n", contacts_svc_value_get_int(value, CTS_BASE_VAL_CHANGED_TIME_INT));
+	printf("note = %s\n", contacts_svc_value_get_str(value, CTS_BASE_VAL_NOTE_STR));
 
 	value = NULL;
 	contacts_svc_struct_get_value(contact, CTS_CF_NAME_VALUE, &value);
@@ -95,6 +96,8 @@ static void get_contact(CTSstruct *contact)
 			printf("Pobox = %s\n", tmp_str);
 		if ((tmp_str = contacts_svc_value_get_str(cursor->data, CTS_POSTAL_VAL_POSTALCODE_STR)))
 			printf("POSTALCODE = %s\n", tmp_str);
+		if ((tmp_str = contacts_svc_value_get_str(cursor->data, CTS_POSTAL_VAL_REGION_STR)))
+			printf("REGION = %s\n", tmp_str);
 		if ((tmp_str = contacts_svc_value_get_str(cursor->data, CTS_POSTAL_VAL_LOCALITY_STR)))
 			printf("LOCALITY = %s\n", tmp_str);
 		if ((tmp_str = contacts_svc_value_get_str(cursor->data, CTS_POSTAL_VAL_STREET_STR)))

@@ -107,7 +107,7 @@ int cts_query_get_first_int_result(const char *query)
 	return ret;
 }
 
-int cts_query_exec(char *query)
+int cts_query_exec(const char *query)
 {
 	int ret;
 	char *err_msg = NULL;
@@ -252,10 +252,18 @@ int cts_stmt_bind_event(cts_stmt stmt, int start_cnt, cts_event *event_struct)
 
 int cts_stmt_bind_messenger(cts_stmt stmt, int start_cnt, cts_messenger *im_struct)
 {
-	sqlite3_bind_int(stmt, start_cnt++, im_struct->type);
+	sqlite3_bind_int(stmt, start_cnt, im_struct->type);
 	if (im_struct->im_id)
-		sqlite3_bind_text(stmt, start_cnt++, im_struct->im_id,
+		sqlite3_bind_text(stmt, start_cnt+1, im_struct->im_id,
 				strlen(im_struct->im_id), SQLITE_STATIC);
+	if (0 == im_struct->type) {
+		if (im_struct->svc_name)
+			sqlite3_bind_text(stmt, start_cnt+2, im_struct->svc_name,
+					strlen(im_struct->svc_name), SQLITE_STATIC);
+		if (im_struct->svc_op)
+			sqlite3_bind_text(stmt, start_cnt+3, im_struct->svc_op,
+					strlen(im_struct->svc_op), SQLITE_STATIC);
+	}
 	return CTS_SUCCESS;
 }
 

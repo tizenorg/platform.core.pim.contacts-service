@@ -26,7 +26,8 @@
  * This function connect to contacts service.
  * \n Though the connection already exists, #CTS_SUCCESS is returned.
  * \n It has to disconnect as it connect.
- * for example, if you connect 3 times you have to disconnect 3times.
+ *
+ * for example, if you connect 3 times you have to disconnect 3 times.
  * \n To disconnect early minimizes the runtime resource consumption.
  * On the other hand, a pair of connection and disconnection is expensive.
  * Don't call frequently.

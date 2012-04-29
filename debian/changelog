@@ -1,7 +1,7 @@
-contacts-service (0.5.2-37) unstable; urgency=low
+contacts-service (0.6.1-10) unstable; urgency=low
 
   * release
   * Git: pkgs/c/contacts-service
-  * Tag: contacts-service_0.5.2-37
+  * Tag: contacts-service_0.6.1-9
 
- -- Youngjae Shin <yj99.shin@samsung.com>  Tue, 21 Feb 2012 18:36:56 +0900
+ -- Youngjae Shin <yj99.shin@samsung.com>  Mon, 09 Apr 2012 11:51:00 +0900

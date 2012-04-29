@@ -780,7 +780,8 @@ static inline void cts_contact_remove_dup_data_IM(GSList *IMs)
 			if(NULL == im2 || im1 == im2)
 				continue;
 			if (!im2->deleted && im1->type == im2->type &&
-					!cts_safe_strcmp(im1->im_id, im2->im_id)) {
+					!cts_safe_strcmp(im1->im_id, im2->im_id) &&
+					!cts_safe_strcmp(im1->svc_name, im2->svc_name)) {
 				im2->deleted = true;
 			}
 		}
@@ -887,8 +888,8 @@ static void cts_contact_remove_dup_data(contact_t *contact)
 static inline int cts_insert_contact(int addressbook_id, contact_t *contact)
 {
 	int ret;
-	char *img_path;
 	char query[CTS_SQL_MAX_LEN] = {0};
+	char normal_img[CTS_SQL_MAX_LEN], full_img[CTS_SQL_MAX_LEN];
 
 	retv_if(NULL == contact, CTS_ERR_ARG_NULL);
 
@@ -932,24 +933,29 @@ static inline int cts_insert_contact(int addressbook_id, contact_t *contact)
 	if (contact->base->note)
 		cts_stmt_bind_text(stmt, 3, contact->base->note);
 
+	normal_img[0] = '\0';
 	if (contact->base->img_path) {
-		ret = cts_add_image_file(CTS_IMG_NORMAL, contact->base->id, contact->base->img_path, &img_path);
+		ret = cts_add_image_file(CTS_IMG_NORMAL, contact->base->id, contact->base->img_path,
+			normal_img, sizeof(normal_img));
 		if (CTS_SUCCESS != ret) {
 			ERR("cts_add_image_file(NORMAL) Failed(%d)", ret);
 			cts_stmt_finalize(stmt);
 			return ret;
 		}
-		cts_stmt_bind_text(stmt, 4, img_path);
+		cts_stmt_bind_text(stmt, 4, normal_img);
 	}
 	else if (contact->base->vcard_img_path) {
-		ret = cts_add_image_file(CTS_IMG_NORMAL, contact->base->id, contact->base->vcard_img_path, &img_path);
+		ret = cts_add_image_file(CTS_IMG_NORMAL, contact->base->id, contact->base->vcard_img_path,
+			normal_img, sizeof(normal_img));
 		if (CTS_SUCCESS == ret)
-			cts_stmt_bind_text(stmt, 4, img_path);
+			cts_stmt_bind_text(stmt, 4, normal_img);
 	}
 
-	ret = cts_add_image_file(CTS_IMG_FULL, contact->base->id, contact->base->full_img_path, &img_path);
+	full_img[0] = '\0';
+	ret = cts_add_image_file(CTS_IMG_FULL, contact->base->id, contact->base->full_img_path,
+		full_img, sizeof(full_img));
 	if (CTS_SUCCESS == ret)
-		cts_stmt_bind_text(stmt, 5, img_path);
+		cts_stmt_bind_text(stmt, 5, full_img);
 
 	ret = cts_stmt_step(stmt);
 	if (CTS_SUCCESS != ret) {
@@ -966,7 +972,7 @@ static inline int cts_insert_contact(int addressbook_id, contact_t *contact)
 API int contacts_svc_insert_contact(int addressbook_id, CTSstruct* contact)
 {
 	int ret;
-	contact_t *record;
+	contact_t *record = (contact_t *)contact;;
 
 	CTS_FN_CALL;
 
@@ -978,8 +984,6 @@ API int contacts_svc_insert_contact(int addressbook_id, CTSstruct* contact)
 
 	ret = contacts_svc_begin_trans();
 	retvm_if(ret, ret, "contacts_svc_begin_trans() Failed(%d)", ret);
-
-	record = (contact_t *)contact;
 
 	ret = cts_db_get_next_id(CTS_TABLE_CONTACTS);
 	if (ret < CTS_SUCCESS)
@@ -1933,7 +1937,8 @@ static inline int cts_update_contact(contact_t *contact)
 {
 	int i, ret, len;
 	char query[CTS_SQL_MAX_LEN] = {0};
-	char *img_path;
+	char normal_img[CTS_SQL_MIN_LEN];
+	char full_img[CTS_SQL_MIN_LEN];
 
 	snprintf(query, sizeof(query),
 			"SELECT count(contact_id) FROM %s WHERE contact_id = %d",
@@ -2029,22 +2034,25 @@ static inline int cts_update_contact(contact_t *contact)
 
 	if (contact->base->img_changed ||
 			(NULL == contact->base->img_path && contact->base->vcard_img_path)) {
+		normal_img[0] = '\0';
 		if (contact->base->img_path) {
-			ret = cts_update_image_file(CTS_IMG_NORMAL, contact->base->id, contact->base->img_path, &img_path);
+			ret = cts_update_image_file(CTS_IMG_NORMAL, contact->base->id, contact->base->img_path,
+				normal_img, sizeof(normal_img));
 			if (CTS_SUCCESS != ret) {
 				ERR("cts_update_image_file() Failed(%d)", ret);
 				cts_stmt_finalize(stmt);
 				contacts_svc_end_trans(false);
 				return ret;
 			}
-			if (img_path)
-				cts_stmt_bind_text(stmt, i, img_path);
+			if (*normal_img)
+				cts_stmt_bind_text(stmt, i, normal_img);
 			i++;
 		} else {
 			if (contact->base->vcard_img_path) {
-				ret = cts_update_image_file(CTS_IMG_NORMAL, contact->base->id, contact->base->vcard_img_path, &img_path);
-				if (CTS_SUCCESS == ret && img_path)
-					cts_stmt_bind_text(stmt, i, img_path);
+				ret = cts_update_image_file(CTS_IMG_NORMAL, contact->base->id, contact->base->vcard_img_path,
+					normal_img, sizeof(normal_img));
+				if (CTS_SUCCESS == ret && *normal_img)
+					cts_stmt_bind_text(stmt, i, normal_img);
 				i++;
 			} else {
 				ret = cts_delete_image_file(CTS_IMG_NORMAL, contact->base->id);
@@ -2059,9 +2067,11 @@ static inline int cts_update_contact(contact_t *contact)
 	}
 
 	if (contact->base->full_img_changed) {
-		ret = cts_update_image_file(CTS_IMG_FULL, contact->base->id, contact->base->full_img_path, &img_path);
-		if (CTS_SUCCESS == ret && img_path)
-			cts_stmt_bind_text(stmt, i, img_path);
+		full_img[0] = '\0';
+		ret = cts_update_image_file(CTS_IMG_FULL, contact->base->id, contact->base->full_img_path,
+			full_img, sizeof(full_img));
+		if (CTS_SUCCESS == ret && *full_img)
+			cts_stmt_bind_text(stmt, i, full_img);
 		i++;
 	}
 
@@ -2086,8 +2096,8 @@ static inline int cts_update_contact(contact_t *contact)
 
 API int contacts_svc_update_contact(CTSstruct* contact)
 {
-	CTS_FN_CALL;
 	int ret;
+	contact_t *record = (contact_t *)contact;
 
 	retv_if(NULL == contact, CTS_ERR_ARG_NULL);
 	retvm_if(CTS_STRUCT_CONTACT != contact->s_type, CTS_ERR_ARG_INVALID,
@@ -2095,7 +2105,7 @@ API int contacts_svc_update_contact(CTSstruct* contact)
 
 	CTS_START_TIME_CHECK;
 
-	ret = cts_update_contact((contact_t *)contact);
+	ret = cts_update_contact(record);
 
 	CTS_END_TIME_CHECK();
 	return ret;
@@ -2269,7 +2279,6 @@ API int contacts_svc_put_contact_value(cts_put_contact_val_op op_code,
 		int contact_id, CTSvalue* value)
 {
 	CTS_FN_CALL;
-
 	int ret;
 
 	retv_if(NULL == value, CTS_ERR_ARG_NULL);
@@ -2408,11 +2417,18 @@ static int cts_get_main_contacts_info(int op_code, int index, contact_t *contact
 		contact->base->is_favorite = cts_stmt_get_int(stmt, count++);
 
 	if (op_code & CTS_MAIN_CTS_GET_IMG) {
+		char tmp_path[CTS_IMG_PATH_SIZE_MAX];
 		contact->base->embedded = true;
 		temp = cts_stmt_get_text(stmt, count++);
-		contact->base->img_path = SAFE_STRDUP(temp);
+		if (temp) {
+			snprintf(tmp_path, sizeof(tmp_path), "%s/%s", CTS_IMAGE_LOCATION, temp);
+			contact->base->img_path = strdup(tmp_path);
+		}
 		temp = cts_stmt_get_text(stmt, count++);
-		contact->base->full_img_path = SAFE_STRDUP(temp);
+		if (temp) {
+			snprintf(tmp_path, sizeof(tmp_path), "%s/%s", CTS_IMAGE_LOCATION, temp);
+			contact->base->full_img_path = strdup(tmp_path);
+		}
 	}
 
 	cts_stmt_finalize(stmt);
@@ -2498,7 +2514,12 @@ static inline int cts_get_data_info_messenger(cts_stmt stmt, contact_t *contact)
 		result->type = cts_stmt_get_int(stmt, cnt++);
 		temp = cts_stmt_get_text(stmt, cnt++);
 		result->im_id = SAFE_STRDUP(temp);
-
+		if (0 == result->type) {
+			temp = cts_stmt_get_text(stmt, cnt++);
+			result->svc_name = SAFE_STRDUP(temp);
+			temp = cts_stmt_get_text(stmt, cnt++);
+			result->svc_op = SAFE_STRDUP(temp);
+		}
 		contact->messengers = g_slist_append(contact->messengers, result);
 	}
 	return CTS_SUCCESS;
@@ -2651,12 +2672,8 @@ static inline int cts_get_data_info_extend(cts_stmt stmt, int type,
 	return CTS_SUCCESS;
 }
 
-enum{
-	CTS_GET_DATA_BY_CONTACT_ID,
-	CTS_GET_DATA_BY_ID
-};
 
-static int cts_get_data_info(int op_code, int field, int index, contact_t *contact)
+int cts_get_data_info(int op_code, int field, int index, contact_t *contact)
 {
 	int ret, datatype, len;
 	cts_stmt stmt = NULL;
@@ -3072,7 +3089,6 @@ API int contacts_svc_get_contact(int index, CTSstruct **contact)
 	record = (contact_t *)contacts_svc_struct_new(CTS_STRUCT_CONTACT);
 
 	ret = cts_get_main_contacts_info(CTS_MAIN_CTS_GET_ALL, index, record);
-
 	if (CTS_SUCCESS != ret) {
 		ERR("cts_get_main_contacts_info(ALL) Failed(%d)", ret);
 		goto CTS_RETURN_ERROR;

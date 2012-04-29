@@ -266,7 +266,6 @@ int cts_group_set_relation(int group_id, int contact_id, int contact_acc)
 	cts_stmt stmt = NULL;
 	char query[CTS_SQL_MIN_LEN];
 
-#ifdef CTS_CHECK_SAME_ADDRESSBOOK
 	snprintf(query, sizeof(query),
 			"SELECT addrbook_id FROM %s WHERE group_id = %d",
 			CTS_TABLE_GROUPS, group_id);
@@ -277,10 +276,9 @@ int cts_group_set_relation(int group_id, int contact_id, int contact_acc)
 	retvm_if(contact_acc != grp_acc, CTS_ERR_ARG_INVALID,
 			"addrbook_id(%d) of the contact and addrbook_id(%d) of the group is not same",
 			contact_acc, grp_acc);
-#endif
+
 	snprintf(query, sizeof(query), "INSERT OR IGNORE INTO %s VALUES(%d, %d)",
 			CTS_TABLE_GROUPING_INFO, group_id, contact_id);
-
 
 	stmt = cts_query_prepare(query);
 	retvm_if(NULL == stmt, CTS_ERR_DB_FAILED, "cts_query_prepare() Failed");
@@ -296,20 +294,15 @@ int cts_group_set_relation(int group_id, int contact_id, int contact_acc)
 API int contacts_svc_group_set_relation(int group_id, int contact_id)
 {
 	int ret, ct_acc=0;
-
-#ifndef CTS_CHECK_SAME_ADDRESSBOOK
-	retvm_if(!group_id, CTS_ERR_ARG_INVALID, "group_id is 0");
-	retvm_if(!contact_id, CTS_ERR_ARG_INVALID, "contact_id is 0");
-#else
 	char query[CTS_SQL_MIN_LEN];
 
 	snprintf(query, sizeof(query),
-			"SELECT addrbook_id FROM %s WHERE contact_id = %d",
+			"SELECT addrbook_id FROM %s WHERE contact_id = %d LIMIT 1",
 			CTS_TABLE_CONTACTS, contact_id);
 	ct_acc = cts_query_get_first_int_result(query);
 	retvm_if(CTS_ERR_DB_RECORD_NOT_FOUND == ct_acc, CTS_ERR_ARG_INVALID,
 			"contact_id(%d) is Invalid", contact_id);
-#endif
+
 	ret = contacts_svc_begin_trans();
 	retvm_if(ret, ret, "contacts_svc_begin_trans() Failed(%d)", ret);
 

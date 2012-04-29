@@ -351,12 +351,12 @@ API int contacts_svc_phonelog_set_seen(int index, int type)
 }
 
 /**
- * This is the signature of a callback function added with contats_svc_phonelog_get_all_number(),
+ * This is the signature of a callback function added with contacts_svc_phonelog_get_all_number(),
  * \n This function is invoked in the above functions.
  * \n If this function doesn't return #CTS_SUCCESS, foreach function is terminated.
  *
  * @param[in] number number.
- * @param[in] user_data The data which is set by contats_svc_phonelog_get_all_number(),
+ * @param[in] user_data The data which is set by contacts_svc_phonelog_get_all_number(),
  * @return #CTS_SUCCESS on success, other value on error
  */
 typedef int (*cts_plog_foreach_fn)(const char *number, void *user_data);
@@ -369,7 +369,7 @@ typedef int (*cts_plog_foreach_fn)(const char *number, void *user_data);
  * @param[in] user_data data which is passed to callback function
  * @return #CTS_SUCCESS on success, Negative value(#cts_error) on error
  */
-API int contats_svc_phonelog_get_all_number(cts_plog_foreach_fn cb,
+API int contacts_svc_phonelog_get_all_number(cts_plog_foreach_fn cb,
 		void *user_data)
 {
 	cts_stmt stmt = NULL;

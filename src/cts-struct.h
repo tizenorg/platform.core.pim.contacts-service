@@ -185,6 +185,8 @@ typedef struct {
 	int id;
 	int type;
 	char *im_id;
+	char *svc_name;
+	char *svc_op;
 }cts_messenger;//CTS_MESSENGER_VAL_
 
 typedef struct {
@@ -205,7 +207,7 @@ typedef struct {
 	char *ringtone_path;
 	char *vcard_group;
 	//   char *image_path;
-}cts_group; //CTS_GROUP_VAL_  or CTS_GROUPREL_VAL_
+}cts_group; //CTS_GROUP_VAL_ or CTS_GROUPREL_VAL_
 
 typedef struct {
 	int v_type:16;
@@ -554,6 +556,8 @@ enum MESSENGERVALUE {
 	CTS_MESSENGER_VAL_TYPE_INT,/**< #cts_im_type */
 	CTS_MESSENGER_VAL_DELETE_BOOL,/**< request to delete in the list of #CTSstruct. */
 	CTS_MESSENGER_VAL_IM_ID_STR,/**< .*/
+	CTS_MESSENGER_VAL_SERVICE_NAME_STR,/**< The name of unknown service. So, this is valid in CTS_IM_TYPE_NONE. */
+	CTS_MESSENGER_VAL_SERVICE_OP_STR,/**< The service operation related to launch unknown application. So, this is valid in CTS_IM_TYPE_NONE. */
 };
 
 /**
@@ -776,6 +780,7 @@ int contacts_svc_value_set_bool(CTSvalue* value, int field, bool boolval);
  * May only be used with fields of type string (_STR suffix in enum).
  * \n If it is in struct, free old string and copy strval to struct.(call by value)
  * \n empty string is handled as NULL and thus will result in NULL being stored
+ *
  * @param[in] value The contacts service value
  * @param[in] field The index of the string field in the contacts service value.
  * @param[in] strval The string value to be set.

@@ -41,6 +41,10 @@ enum ADDRESSBOOK{
  * @{
  *
  * This interface provides methods to insert/update/delete the addressbook.
+ * Addressbook supports groups and contacts. Several addressbooks can be included in the same account_id.
+ *
+ * If the ID of an addressbook is 'zero', it means it is the internal addressbook of a phone.
+ * It needs additional management because it is not included in database(physical storage).
  *
  * - getting all addressbook (0 is logical value for internal addressbook)
  * @code

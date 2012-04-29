@@ -43,7 +43,11 @@ static inline CTSvalue* cts_iter_get_info_contact(cts_stmt stmt, int type)
 	result->display = SAFE_STRDUP(temp);
 	result->acc_id = cts_stmt_get_int(stmt, i++);
 	temp = cts_stmt_get_text(stmt, i++);
-	result->img_path = SAFE_STRDUP(temp);
+	if (temp) {
+		char full_path[CTS_IMG_PATH_SIZE_MAX];
+		snprintf(full_path, sizeof(full_path), "%s/%s", CTS_IMAGE_LOCATION, temp);
+		result->img_path = strdup(full_path);
+	}
 
 	if (CTS_LANG_DEFAULT == lang)
 		lang = cts_get_default_language();
@@ -93,7 +97,12 @@ static inline CTSvalue* cts_iter_get_info_number_email(cts_stmt stmt, int type)
 	temp = cts_stmt_get_text(stmt, i++);
 	result->connect = SAFE_STRDUP(temp);
 	temp = cts_stmt_get_text(stmt, i++);
-	result->img_path = SAFE_STRDUP(temp);
+	if (temp) {
+		char full_path[CTS_IMG_PATH_SIZE_MAX];
+		snprintf(full_path, sizeof(full_path), "%s/%s", CTS_IMAGE_LOCATION, temp);
+		result->img_path = strdup(full_path);
+	}
+
 	if (CTS_ITER_NUMBERS_EMAILS == type) {
 		result->acc_id = cts_stmt_get_int(stmt, i++);
 		temp = cts_stmt_get_text(stmt, i++);
@@ -168,7 +177,11 @@ static inline CTSvalue* cts_iter_get_info_plog(int type, cts_stmt stmt)
 		temp = cts_stmt_get_text(stmt, cnt++);
 		result->display = SAFE_STRDUP(temp);
 		temp = cts_stmt_get_text(stmt, cnt++);
-		result->img_path = SAFE_STRDUP(temp);
+		if (temp) {
+			char full_path[CTS_IMG_PATH_SIZE_MAX];
+			snprintf(full_path, sizeof(full_path), "%s/%s", CTS_IMAGE_LOCATION, temp);
+			result->img_path = strdup(full_path);
+		}
 		if (CTS_LANG_DEFAULT == lang)
 			lang = cts_get_default_language();
 
@@ -268,7 +281,11 @@ static inline CTSvalue* cts_iter_get_info_shortcut(int type, cts_stmt stmt)
 	temp = cts_stmt_get_text(stmt, i++);
 	result->display = SAFE_STRDUP(temp);
 	temp = cts_stmt_get_text(stmt, i++);
-	result->img_path = SAFE_STRDUP(temp);
+	if (temp) {
+		char full_path[CTS_IMG_PATH_SIZE_MAX];
+		snprintf(full_path, sizeof(full_path), "%s/%s", CTS_IMAGE_LOCATION, temp);
+		result->img_path = strdup(full_path);
+	}
 	result->id = cts_stmt_get_int(stmt, i++);
 	if (CTS_LANG_DEFAULT == lang)
 		lang = cts_get_default_language();

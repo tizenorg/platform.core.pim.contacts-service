@@ -126,15 +126,17 @@ enum PHONELOGLIST{
 	CTS_LIST_PLOG_NUMBER_STR,/**< . */
 	CTS_LIST_PLOG_IMG_PATH_STR,/**< . */
 	CTS_LIST_PLOG_LOG_TIME_INT,/**< The time since the Epoch (00:00:00 UTC, January 1, 1970), measured in seconds. */
-	CTS_LIST_PLOG_LOG_TYPE_INT,/**< . */
+	CTS_LIST_PLOG_LOG_TYPE_INT,/**< #PLOGTYPE  */
 	CTS_LIST_PLOG_DURATION_INT,/**< seconds */
 	CTS_LIST_PLOG_MSGID_INT,/**< . */
 	CTS_LIST_PLOG_SHORTMSG_STR,/**< . */
 	CTS_LIST_PLOG_RELATED_ID_INT/**< contact id */
 };
 
+
 /**
  * Contact List
+ * Usually, This is sorted by name related with #CTS_ORDER_OF_SORTING
  */
 enum CONTACTLIST{
 	CTS_LIST_CONTACT_ID_INT,/**< . */
@@ -189,6 +191,7 @@ enum {
 
 /**
  * Addressbook List
+ * Usually, This is sorted by acc_id and addressbook id
  * Though it is same with ADDRESSBOOKVALUE, Use this for list
  */
 enum ADDRESSBOOKLIST{
@@ -210,6 +213,7 @@ enum CUSTOMNUMTYPELIST{
 
 /**
  * Group List
+ * Usually, This is sorted by addressbook_id and name.
  */
 enum GROUPLIST{
 	CTS_LIST_GROUP_ID_INT,/**< . */
@@ -247,7 +251,7 @@ enum SDNLIST{
 typedef enum{
 	CTS_LIST_ALL_CONTACT, /**< #CONTACTLIST */
 	CTS_LIST_ALL_GROUP,/**< #GROUPLIST */
-	CTS_LIST_ALL_CUSTOM_NUM_TYPE,/**< #GROUPLIST */
+	CTS_LIST_ALL_CUSTOM_NUM_TYPE,/**< #CUSTOMNUMTYPELIST */
 	CTS_LIST_ALL_CONTACT_FAVORITE,/**< #SHORTCUTLIST */
 	CTS_LIST_ALL_SPEEDDIAL,/**< #SHORTCUTLIST */
 	CTS_LIST_GROUPING_PLOG,/**< #PHONELOGLIST */
@@ -258,7 +262,7 @@ typedef enum{
 	CTS_LIST_ALL_CONTACT_HAD_EMAIL,/**< #CONTACTLIST */
 	CTS_LIST_ALL_EMAIL_NUMBER,/**< #CONTACTLIST */
 	CTS_LIST_ALL_NUMBER_FAVORITE,/**< #SHORTCUTLIST */
-	CTS_LIST_OFTEN_USED_CONTACT, /**< #CONTACTLIST */
+	CTS_LIST_OFTEN_USED_CONTACT, /**< #CONTACTLIST. sorted by count of using(using means outgoing call/video call)*/
 	CTS_LIST_ALL_ADDRESSBOOK, /**< #ADDRESSBOOKLIST */
 	CTS_LIST_ALL_PLOG, /**< #PHONELOGLIST */
 	CTS_LIST_ALL_MISSED_CALL, /**< #PHONELOGLIST */
@@ -588,7 +592,7 @@ int contacts_svc_list_with_filter_foreach(CTSfilter *filter,
    cts_foreach_fn cb, void *user_data);
 
 /**
- * It is the smartsearch exclusive function. It is supported for only smartsearch.
+ * It is the smartsearch exclusive function. It is supported for only smartsearch(inhouse application).
  * It can be changed without announcement.
  * This function calls #cts_foreach_fn for each record of list.
  *

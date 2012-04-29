@@ -1,7 +1,7 @@
 Name:       contacts-service
 Summary:    Contacts Service
-Version:    0.5.2
-Release:    3.6
+Version: 0.6.1
+Release:    10
 Group:      TO_BE/FILLED_IN
 License:    Apache-2.0
 Source0:    %{name}-%{version}.tar.gz
@@ -14,7 +14,6 @@ BuildRequires:  vconf-keys-devel
 BuildRequires:  pkgconfig(db-util)
 BuildRequires:  pkgconfig(vconf)
 BuildRequires:  pkgconfig(dlog)
-BuildRequires:  pkgconfig(heynoti)
 BuildRequires:  pkgconfig(sqlite3)
 BuildRequires:  pkgconfig(tapi)
 BuildRequires:  pkgconfig(glib-2.0)
@@ -37,46 +36,54 @@ Contacts Service Library (devel)
 
 %build
 cmake . -DCMAKE_INSTALL_PREFIX=%{_prefix}
+
+
 make %{?jobs:-j%jobs}
 
-mkdir -p %{buildroot}/opt/data/contacts-svc/img
-
 %install
+rm -rf %{buildroot}
 %make_install
 
-%post 
+mkdir -p %{buildroot}/etc/rc.d/rc3.d/
+mkdir -p %{buildroot}/etc/rc.d/rc5.d/
+ln -s ../init.d/contacts-svc-helper.sh %{buildroot}/etc/rc.d/rc3.d/S50contacts-svc-helper
+ln -s ../init.d/contacts-svc-helper.sh %{buildroot}/etc/rc.d/rc5.d/S50contacts-svc-helper
+
+%post
 /sbin/ldconfig
+
+# from contacts-service-bin.postinst
 contacts-svc-helper schema
 chown :6005 /opt/dbspace/.contacts-svc.db
 chown :6005 /opt/dbspace/.contacts-svc.db-journal
+chown :6005 -R /opt/data/contacts-svc/img
+chown :6005 /opt/data/contacts-svc/.CONTACTS_SVC_*
 
+chmod 660 /opt/dbspace/.contacts-svc.db
+chmod 660 /opt/dbspace/.contacts-svc.db-journal
+chmod 770 -R /opt/data/contacts-svc/img/
+chmod 660 /opt/data/contacts-svc/.CONTACTS_SVC_*
 vconftool set -t int db/service/contacts/default_lang 1
+
+# from libcontacts-service.postinst
 vconftool set -t int db/service/contacts/name_sorting_order 0 -g 6005
 vconftool set -t int db/service/contacts/name_display_order 0 -g 6005
-
-mkdir -p /etc/rc.d/rc3.d/
-mkdir -p /etc/rc.d/rc5.d/
-ln -s /etc/init.d/contacts-svc-helper.sh /etc/rc.d/rc3.d/S50contacts-svc-helper
-ln -s /etc/init.d/contacts-svc-helper.sh /etc/rc.d/rc5.d/S50contacts-svc-helper
 
 
 %postun -p /sbin/ldconfig
 
 
 %files
-%dir %attr(770,root,root) /opt/data/contacts-svc/img
-%attr(0660,root,db_contact)/opt/data/contacts-svc/.CONTACTS_SVC_AB_CHANGED
-%attr(0660,root,db_contact)/opt/data/contacts-svc/.CONTACTS_SVC_DB_CHANGED
-%attr(0660,root,db_contact)/opt/data/contacts-svc/.CONTACTS_SVC_FAVOR_CHANGED
-%attr(0660,root,db_contact)/opt/data/contacts-svc/.CONTACTS_SVC_GROUP_CHANGED
-%attr(0660,root,db_contact)/opt/data/contacts-svc/.CONTACTS_SVC_PLOG_CHANGED
-%attr(0660,root,db_contact)/opt/data/contacts-svc/.CONTACTS_SVC_SPEED_CHANGED
-%attr(0660,root,db_contact)/opt/data/contacts-svc/.CONTACTS_SVC_MISSED_CHANGED
-%{_libdir}/libcontacts-service.so.*
-%{_bindir}/contacts-svc-helper
+%defattr(-,root,root,-)
+%{_libdir}/libcontacts-service.so*
+%{_bindir}/contacts-svc-helper*
 %attr(0755,root,root) /etc/rc.d/init.d/contacts-svc-helper.sh
+/etc/rc.d/rc*.d/S50contacts-svc-helper
+/opt/data/contacts-svc/.CONTACTS_SVC_*
+/opt/data/contacts-svc/img/*
 
 %files devel
+%defattr(-,root,root,-)
 %{_libdir}/*.so
 %{_libdir}/pkgconfig/contacts-service.pc
 %{_includedir}/contacts-svc/*.h

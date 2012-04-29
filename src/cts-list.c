@@ -117,8 +117,8 @@ API int contacts_svc_iter_remove(CTSiter *iter)
 static inline int cts_get_list(cts_get_list_op op_code, CTSiter *iter)
 {
 	cts_stmt stmt = NULL;
-	char query[CTS_SQL_MAX_LEN] = {0};
 	const char *display;
+	char query[CTS_SQL_MAX_LEN] = {0};
 
 	retv_if(NULL == iter, CTS_ERR_ARG_NULL);
 
@@ -482,8 +482,8 @@ static inline int cts_get_list_with_str(cts_get_list_str_op op_code,
 {
 	int ret;
 	cts_stmt stmt = NULL;
-	char query[CTS_SQL_MAX_LEN] = {0};
 	const char *display;
+	char query[CTS_SQL_MAX_LEN] = {0};
 	char remake_val[CTS_SQL_MIN_LEN];
 
 	CTS_START_TIME_CHECK;
@@ -661,8 +661,8 @@ static inline int cts_get_list_with_int(cts_get_list_int_op op_code,
 		unsigned int search_value, CTSiter *iter)
 {
 	cts_stmt stmt = NULL;
-	char query[CTS_SQL_MAX_LEN] = {0};
 	const char *display;
+	char query[CTS_SQL_MAX_LEN] = {0};
 
 	retv_if(NULL == iter, CTS_ERR_ARG_NULL);
 	iter->i_type = CTS_ITER_NONE;
@@ -1319,6 +1319,7 @@ API int contacts_svc_list_with_filter_foreach(CTSfilter *filter,
 	return CTS_SUCCESS;
 }
 
+// same with check_dirty_number()
 static inline bool cts_is_number(const char *str)
 {
 	int i;
@@ -1330,6 +1331,10 @@ static inline bool cts_is_number(const char *str)
 		case '0' ... '9':
 		case 'p':
 		case 'w':
+		case 'P':
+		case 'W':
+		case '#':
+		case '*':
 		case '+':
 			break;
 		default:
@@ -1337,6 +1342,29 @@ static inline bool cts_is_number(const char *str)
 		}
 	}
 	return true;
+}
+
+static inline int cts_escape_like_patten(const char *src, char *dest, int dest_size)
+{
+	int s_pos=0, d_pos=0;
+
+	if (NULL == src) {
+		ERR("The parameter(src) is NULL");
+		dest[d_pos] = '\0';
+		return 0;
+	}
+
+	while (src[s_pos] != 0) {
+		if (dest_size == d_pos - 1)
+			break;
+		if ('%' == src[s_pos] || '_' == src[s_pos]) {
+			dest[d_pos++] = '\\';
+		}
+		dest[d_pos++] = src[s_pos++];
+	}
+
+	dest[d_pos] = '\0';
+	return d_pos;
 }
 
 API int contacts_svc_smartsearch_excl(const char *search_str, int limit, int offset,
@@ -1347,7 +1375,7 @@ API int contacts_svc_smartsearch_excl(const char *search_str, int limit, int off
 	const char *display;
 	cts_stmt stmt = NULL;
 	char query[CTS_SQL_MAX_LEN];
-	char remake_name[CTS_SQL_MIN_LEN];
+	char remake_name[CTS_SQL_MIN_LEN], escape_name[CTS_SQL_MIN_LEN];
 
 	retv_if(NULL == search_str, CTS_ERR_ARG_NULL);
 	retvm_if(CTS_SQL_MIN_LEN <= strlen(search_str), CTS_ERR_ARG_INVALID,
@@ -1362,26 +1390,25 @@ API int contacts_svc_smartsearch_excl(const char *search_str, int limit, int off
 
 	if (cts_is_number(search_str)) {
 		len = snprintf(query, sizeof(query),
-				"SELECT A.contact_id, A.data1, A.data2, A.data3, A.data5, B.data2, C.image0 "
-				"FROM %s A, %s B, %s C "
-				"ON A.contact_id = B.contact_id AND A.contact_id = C.contact_id "
-				"WHERE A.datatype = %d AND B.datatype = %d "
-				"AND (B.data2 LIKE '%%%s%%' OR A.%s LIKE ('%%' || ? || '%%')) "
+				"SELECT A.contact_id, A.data1, A.data2, A.data3, A.data5, C.data2, B.image0 "
+				"FROM (%s A, %s B ON A.contact_id = B.contact_id AND A.datatype = %d) "
+					"LEFT JOIN %s C ON B.contact_id = C.contact_id AND C.datatype = %d "
+				"WHERE C.data2 LIKE '%%%s%%' OR A.%s LIKE ('%%' || ? || '%%') "
 				"ORDER BY A.data1, A.%s",
-				CTS_TABLE_DATA, CTS_TABLE_DATA, CTS_TABLE_CONTACTS,
-				CTS_DATA_NAME, CTS_DATA_NUMBER,
+				CTS_TABLE_DATA, CTS_TABLE_CONTACTS, CTS_DATA_NAME,
+				CTS_TABLE_DATA, CTS_DATA_NUMBER,
 				search_str, display, CTS_SCHEMA_DATA_NAME_SORTING_KEY);
 	}
 	else {
 		len = snprintf(query, sizeof(query),
-				"SELECT A.contact_id, A.data1, A.data2, A.data3, A.data5, D.data2, D.image0 "
-				"FROM %s A "
-				"LEFT JOIN (%s B, %s C ON B.default_num = C.id AND C.datatype = %d ) D "
-				"ON A.contact_id = D.contact_id "
-				"WHERE A.datatype = %d AND A.%s LIKE ('%%' || ? || '%%') "
+				"SELECT A.contact_id, A.data1, A.data2, A.data3, A.data5, C.data2, B.image0 "
+				"FROM (%s A, %s B ON A.contact_id = B.contact_id AND A.datatype = %d) "
+					"LEFT JOIN %s C ON B.default_num = C.id AND C.datatype = %d "
+				"WHERE A.%s LIKE ('%%' || ? || '%%') ESCAPE '\\' "
 				"ORDER BY A.data1, A.%s",
-				CTS_TABLE_DATA, CTS_TABLE_CONTACTS, CTS_TABLE_DATA,
-				CTS_DATA_NUMBER, CTS_DATA_NAME, display, CTS_SCHEMA_DATA_NAME_SORTING_KEY);
+				CTS_TABLE_DATA, CTS_TABLE_CONTACTS, CTS_DATA_NAME,
+				CTS_TABLE_DATA, CTS_DATA_NUMBER,
+				display, CTS_SCHEMA_DATA_NAME_SORTING_KEY);
 	}
 
 	if (limit)
@@ -1393,7 +1420,8 @@ API int contacts_svc_smartsearch_excl(const char *search_str, int limit, int off
 	stmt = cts_query_prepare(query);
 	retvm_if(NULL == stmt, CTS_ERR_DB_FAILED, "cts_query_prepare() Failed");
 
-	cts_stmt_bind_copy_text(stmt, 1, remake_name, strlen(remake_name));
+	cts_escape_like_patten(remake_name, escape_name, sizeof(escape_name));
+	cts_stmt_bind_copy_text(stmt, 1, escape_name, strlen(escape_name));
 	iter.stmt = stmt;
 
 	cts_foreach_run(&iter, cb, user_data);

@@ -31,7 +31,7 @@ static int (*extra_normalize_fn)(char dest[][CTS_SQL_MAX_LEN]);
 
 static inline int check_utf8(char c)
 {
-	if (c < 128)
+	if ((c & 0xff) < (128 & 0xff))
 		return 1;
 	else if ((c & (char)0xe0) == (char)0xc0)
 		return 2;
@@ -56,6 +56,8 @@ static inline bool check_dirty_number(char digit)
 	case 'w':
 	case 'P':
 	case 'W':
+	case '#':
+	case '*':
 		return false;
 	case '+': //only first position
 	default:

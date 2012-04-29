@@ -36,6 +36,8 @@ static cts_thread_fns cts_thread_funtions =
 
 static pthread_mutex_t conn_mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t sockfd_mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t trans_mutex = PTHREAD_MUTEX_INITIALIZER;
+
 
 static inline pthread_mutex_t* cts_pthread_get_mutex(int type)
 {
@@ -47,6 +49,9 @@ static inline pthread_mutex_t* cts_pthread_get_mutex(int type)
 		break;
 	case CTS_MUTEX_SOCKET_FD:
 		ret_val = &sockfd_mutex;
+		break;
+	case CTS_MUTEX_TRANSACTION:
+		ret_val = &trans_mutex;
 		break;
 	default:
 		ERR("unknown type(%d)", type);

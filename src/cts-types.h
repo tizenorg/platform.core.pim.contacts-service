@@ -173,7 +173,7 @@ int contacts_svc_find_custom_type(cts_custom_type_class type_class, char *type_n
 
 /**
  * @defgroup   CONTACTS_SVC_EXTEND Using the Extend Data for Contact
- * @ingroup    CONTACTS_SVC_STRUCT
+ * @ingroup    CONTACTS_SVC
  * @addtogroup CONTACTS_SVC_EXTEND
  * @{
  *

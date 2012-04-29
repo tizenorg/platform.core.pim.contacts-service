@@ -28,7 +28,7 @@ static inline int cts_reset_internal_addressbook(void)
 {
 	CTS_FN_CALL;
 	int ret;
-	char query[CTS_SQL_MAX_LEN] = {0};
+	char query[CTS_SQL_MIN_LEN];
 
 	ret = contacts_svc_begin_trans();
 	retvm_if(ret, ret, "contacts_svc_begin_trans() Failed(%d)", ret);
