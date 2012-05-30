@@ -5,6 +5,7 @@ Release:    10
 Group:      TO_BE/FILLED_IN
 License:    Apache-2.0
 Source0:    %{name}-%{version}.tar.gz
+Source1001: packaging/contacts-service.manifest 
 Requires(post): /sbin/ldconfig
 Requires(post): /usr/bin/sqlite3
 Requires(post): /usr/bin/vconftool
@@ -35,6 +36,7 @@ Contacts Service Library (devel)
 
 
 %build
+cp %{SOURCE1001} .
 cmake . -DCMAKE_INSTALL_PREFIX=%{_prefix}
 
 
@@ -74,6 +76,7 @@ vconftool set -t int db/service/contacts/name_display_order 0 -g 6005
 
 
 %files
+%manifest contacts-service.manifest
 %defattr(-,root,root,-)
 %{_libdir}/libcontacts-service.so*
 %{_bindir}/contacts-svc-helper*
@@ -83,6 +86,7 @@ vconftool set -t int db/service/contacts/name_display_order 0 -g 6005
 /opt/data/contacts-svc/img/*
 
 %files devel
+%manifest contacts-service.manifest
 %defattr(-,root,root,-)
 %{_libdir}/*.so
 %{_libdir}/pkgconfig/contacts-service.pc
