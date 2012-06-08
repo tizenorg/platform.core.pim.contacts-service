@@ -1,0 +1,18 @@
+* Fri Jun 08 2012 Anas Nashif <anas.nashif@intel.com> b229f3d
+- Fixed permissions of contact data
+
+* Wed May 30 2012 Ryan Ware <ryan.r.ware@intel.com> 1a74b18
+- Add default Smack manifest for contacts-service.spec
+
+* Sun Apr 29 2012 Kim Kibum <kb0929.kim@samsung.com> 2d369e5
+- upload tizen1.0 source
+
+* Wed Mar 14 2012 Yan Yin <yan.yin@intel.com> 377beaa
+- update for beta universally
+
+* Tue Feb 28 2012 Kibum Kim <kb0929.kim@samsung.com> 713b62f
+- add missing file
+
+* Mon Feb 27 2012 Kibum Kim <kb0929.kim@samsung.com> a1311c9
+- tizen beta release
+
