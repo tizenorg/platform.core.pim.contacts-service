@@ -5,6 +5,7 @@ License:        Apache-2.0
 Summary:        Contacts Service
 Group:          PIM/Contacts
 Source0:        %{name}-%{version}.tar.gz
+Source1:        contacts-server.service
 Source1001:     contacts-service.manifest
 BuildRequires:  cmake
 BuildRequires:  vconf-keys-devel
@@ -50,6 +51,12 @@ mkdir -p %{buildroot}%{_sysconfdir}/rc.d/rc5.d/
 ln -s ../init.d/contacts-svc-helper.sh %{buildroot}%{_sysconfdir}/rc.d/rc3.d/S50contacts-svc-helper
 ln -s ../init.d/contacts-svc-helper.sh %{buildroot}%{_sysconfdir}/rc.d/rc5.d/S50contacts-svc-helper
 
+
+mkdir -p %{buildroot}%{_libdir}/systemd/user/tizen-middleware.target.wants
+install -m 0644 %SOURCE1 %{buildroot}%{_libdir}/systemd/user/contacts-server.service
+ln -s ../contacts-server.service %{buildroot}%{_libdir}/systemd/user/tizen-middleware.target.wants/contacts-server.service
+
+
 %post
 /sbin/ldconfig
 
@@ -65,8 +72,6 @@ chmod 660 /opt/dbspace/.contacts-svc.db-journal
 chmod 770 -R /opt/data/contacts-svc/img/
 chmod 660 /opt/data/contacts-svc/.CONTACTS_SVC_*
 vconftool set -t int db/service/contacts/default_lang 1
-
-# from libcontacts-service.postinst
 vconftool set -t int db/service/contacts/name_sorting_order 0 -g 6005
 vconftool set -t int db/service/contacts/name_display_order 0 -g 6005
 
@@ -82,6 +87,8 @@ vconftool set -t int db/service/contacts/name_display_order 0 -g 6005
 /etc/rc.d/rc*.d/S50contacts-svc-helper
 %attr(660,root,db_contacts) /opt/data/contacts-svc/.CONTACTS_SVC_*
 %attr(770,root,db_contacts) /opt/data/contacts-svc/img/*
+%{_libdir}/systemd/user/contacts-server.service
+%{_libdir}/systemd/user/tizen-middleware.target.wants/contacts-server.service
 
 %files devel
 %manifest contacts-service.manifest

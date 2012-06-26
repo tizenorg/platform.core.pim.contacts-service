@@ -1,3 +1,6 @@
+* Tue Jun 26 2012 Chris Ferron <chris.e.ferron@linux.intel.com>
+- Added systemd to the spec file, and add a service file for systemd.
+
 * Fri Jun 08 2012 Anas Nashif <anas.nashif@intel.com> b229f3d
 - Fixed permissions of contact data
 
