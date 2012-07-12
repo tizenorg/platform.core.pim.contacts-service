@@ -1,3 +1,6 @@
+* Thu Jul 12 2012 Karol Lewandowski <k.lewandowsk@samsung.com> f9d72be
+- Make it possible for user app to create files under contact's data directory.
+
 * Mon Jul 09 2012 Patrick McCarty <patrick.mccarty@linux.intel.com> 1e4eacf
 - Add a tag to trigger OBS submission
 
