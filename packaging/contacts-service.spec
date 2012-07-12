@@ -62,6 +62,7 @@ ln -s ../contacts-server.service %{buildroot}%{_libdir}/systemd/user/tizen-middl
 
 # from contacts-service-bin.postinst
 contacts-svc-helper schema
+chown :6005 /opt/data/contacts-svc
 chown :6005 /opt/dbspace/.contacts-svc.db
 chown :6005 /opt/dbspace/.contacts-svc.db-journal
 chown :6005 -R /opt/data/contacts-svc/img
@@ -69,6 +70,7 @@ chown :6005 /opt/data/contacts-svc/.CONTACTS_SVC_*
 
 chmod 660 /opt/dbspace/.contacts-svc.db
 chmod 660 /opt/dbspace/.contacts-svc.db-journal
+chmod 775 /opt/data/contacts-svc
 chmod 770 -R /opt/data/contacts-svc/img/
 chmod 660 /opt/data/contacts-svc/.CONTACTS_SVC_*
 vconftool set -t int db/service/contacts/default_lang 1
