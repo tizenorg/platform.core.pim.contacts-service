@@ -30,21 +30,21 @@ void phonelog_insert_test(void)
 	CTSvalue *plog;
 
 	plog = contacts_svc_value_new(CTS_VALUE_PHONELOG);
-	contacts_svc_value_set_str(plog, CTS_PLOG_VAL_NUMBER_STR, "0123456789");
+	contacts_svc_value_set_str(plog, CTS_PLOG_VAL_ADDRESS_STR, "0123456789");
 	contacts_svc_value_set_int(plog, CTS_PLOG_VAL_LOG_TIME_INT,(int) time(NULL));
 	contacts_svc_value_set_int(plog, CTS_PLOG_VAL_LOG_TYPE_INT,
 			CTS_PLOG_TYPE_VOICE_INCOMMING);
 	contacts_svc_value_set_int(plog, CTS_PLOG_VAL_DURATION_INT, 65);
 	contacts_svc_insert_phonelog(plog);
 
-	contacts_svc_value_set_str(plog, CTS_PLOG_VAL_NUMBER_STR, "0987654321");
+	contacts_svc_value_set_str(plog, CTS_PLOG_VAL_ADDRESS_STR, "0987654321");
 	contacts_svc_value_set_int(plog, CTS_PLOG_VAL_LOG_TIME_INT,(int) time(NULL));
 	contacts_svc_value_set_int(plog, CTS_PLOG_VAL_LOG_TYPE_INT,
 			CTS_PLOG_TYPE_VOICE_INCOMMING_UNSEEN);
 	contacts_svc_value_set_int(plog, CTS_PLOG_VAL_DURATION_INT, 65);
 	contacts_svc_insert_phonelog(plog);
 
-	contacts_svc_value_set_str(plog, CTS_PLOG_VAL_NUMBER_STR, "0987654321");
+	contacts_svc_value_set_str(plog, CTS_PLOG_VAL_ADDRESS_STR, "0987654321");
 	contacts_svc_value_set_int(plog, CTS_PLOG_VAL_LOG_TIME_INT,(int) time(NULL));
 	contacts_svc_value_set_int(plog, CTS_PLOG_VAL_LOG_TYPE_INT,
 			CTS_PLOG_TYPE_VOICE_INCOMMING);
@@ -54,6 +54,22 @@ void phonelog_insert_test(void)
 
 	contacts_svc_value_free(plog);
 }
+
+void phonelog_insert_email_test()
+{
+	CTSvalue *plog;
+
+	plog = contacts_svc_value_new(CTS_VALUE_PHONELOG);
+	contacts_svc_value_set_str(plog, CTS_PLOG_VAL_NUMBER_STR, "kildong.hong@samsung.com");
+	contacts_svc_value_set_int(plog, CTS_PLOG_VAL_LOG_TIME_INT, (int)time(NULL));
+	contacts_svc_value_set_int(plog, CTS_PLOG_VAL_LOG_TYPE_INT,
+			CTS_PLOG_TYPE_EMAIL_RECEIVED);
+	contacts_svc_value_set_str(plog, CTS_PLOG_VAL_SHORTMSG_STR, "Subject : Hello~");
+	contacts_svc_value_set_int(plog, CTS_PLOG_VAL_MSGID_INT, 1);
+	contacts_svc_insert_phonelog(plog);
+	contacts_svc_value_free(plog);
+}
+
 void phonelog_modify_test(void)
 {
 	contacts_svc_phonelog_set_seen(2, CTS_PLOG_TYPE_VOICE_INCOMMING_UNSEEN);
@@ -62,12 +78,12 @@ void phonelog_modify_test(void)
 	contacts_svc_delete_phonelog(CTS_PLOG_DEL_BY_NUMBER, "0123456789");
 }
 
-void phonelog_get_list_test(void)
+void phonelog_get_list_test(int op)
 {
 	CTSiter *iter = NULL;
 	char display[1024]={0};
 
-	contacts_svc_get_list(CTS_LIST_GROUPING_PLOG, &iter);
+	contacts_svc_get_list(op, &iter);
 
 	while (CTS_SUCCESS == contacts_svc_iter_next(iter))
 	{
@@ -169,10 +185,13 @@ int main()
 	sleep(2);
 	phonelog_insert_test();
 	printf("grouping List 1 <<<<<<<<<<<\n");
-	phonelog_get_list_test();
+	phonelog_get_list_test(CTS_LIST_GROUPING_PLOG);
 	phonelog_modify_test();
 	printf("grouping List 2 <<<<<<<<<<<\n");
-	phonelog_get_list_test();
+	phonelog_get_list_test(CTS_LIST_GROUPING_PLOG);
+	printf("email List 2 <<<<<<<<<<<\n");
+	phonelog_insert_email_test();
+	phonelog_get_list_test(CTS_LIST_ALL_EMAIL_PLOG);
 	printf("detail List <<<<<<<<<<<\n");
 	phonelog_get_detail_list_test();
 	printf("phonelog number List <<<<<<<<<<<\n");

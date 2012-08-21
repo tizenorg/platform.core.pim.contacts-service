@@ -1,5 +1,5 @@
 /*
- * Contacts Service Helper
+ * Contacts Service
  *
  * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
  *
@@ -18,13 +18,21 @@
  * limitations under the License.
  *
  */
-#ifndef __CTS_HELPER_SIM_H__
-#define __CTS_HELPER_SIM_H__
+#ifndef __TEST_LOG_H__
+#define __TEST_LOG_H__
 
-int helper_sim_read_pb_record(void* data);
-int helper_sim_write_pb_record(void* data, int index);
-int helper_sim_read_SDN(void* data);
+#include <stdio.h>
+#include <unistd.h>
 
+#define PRT(prio, fmt, arg...) \
+	do { fprintf((prio?stderr:stdout),fmt"\n", ##arg); } while (0)
+#define INFO(fmt, arg...) PRT(0, fmt, ##arg)
+#define ERR(fmt, arg...) PRT(1,"\x1b[101;38m[ERROR]\x1b[0m%s :" fmt, __FUNCTION__, ##arg)
+#define DBG(fmt, arg...) \
+	do { \
+		printf("\x1b[105;37m[%s]\x1b[0m" fmt"\n", __FUNCTION__, ##arg); \
+	} while (0)
 
-#endif // __CTS_HELPER_SIM_H__
+#define TEST_FN_START DBG("[FUNC_START]")
 
+#endif /* __TEST_LOG_H__ */

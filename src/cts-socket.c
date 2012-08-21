@@ -134,6 +134,35 @@ int cts_request_sim_import(void)
 	return msg.val;
 }
 
+int cts_request_sim_export(int index)
+{
+	int i, ret;
+	cts_socket_msg msg={0};
+	char src[64] = {0};
+
+	retvm_if(-1 == cts_csockfd, CTS_ERR_ENV_INVALID, "socket is not connected");
+
+	snprintf(src, sizeof(src), "%d", index);
+	msg.type = CTS_REQUEST_EXPORT_SIM;
+	msg.attach_num = 1;
+	msg.attach_sizes[0] = strlen(src);
+
+	ret = cts_safe_write(cts_csockfd, (char *)&msg, sizeof(msg));
+	retvm_if(-1 == ret, CTS_ERR_SOCKET_FAILED, "cts_safe_write() Failed(errno = %d)", errno);
+
+	ret = cts_safe_write(cts_csockfd, src, msg.attach_sizes[0]);
+	retvm_if(-1 == ret, CTS_ERR_SOCKET_FAILED, "cts_safe_write() Failed(errno = %d)", errno);
+
+	ret = cts_socket_handle_return(cts_csockfd, &msg);
+	retvm_if(CTS_SUCCESS != ret, ret, "cts_socket_handle_return() Failed(%d)", ret);
+	CTS_DBG("attach_num = %d", msg.attach_num);
+
+	for (i=0;i<msg.attach_num;i++)
+		cts_remove_invalid_msg(cts_csockfd, msg.attach_sizes[i]);
+
+	return msg.val;
+}
+
 int cts_request_normalize_str(const char *src, char *dest, int dest_size)
 {
 	int i, ret;

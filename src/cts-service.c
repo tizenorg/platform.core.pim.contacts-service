@@ -29,6 +29,7 @@
 #include "cts-normalize.h"
 #include "cts-list.h"
 #include "cts-pthread.h"
+#include "cts-restriction.h"
 #include "cts-service.h"
 
 static int cts_conn_refcnt = 0;
@@ -65,6 +66,13 @@ API int contacts_svc_connect(void)
 			cts_mutex_unlock(CTS_MUTEX_CONNECTION);
 			return ret;
 		}
+		ret = cts_restriction_init();
+		if (ret != CTS_SUCCESS) {
+			ERR("cts_restriction_init() Failed(%d)", ret);
+			cts_socket_final();
+			cts_mutex_unlock(CTS_MUTEX_CONNECTION);
+			return ret;
+		}
 
 		cts_register_noti();
 		cts_conn_refcnt = 1;
@@ -87,6 +95,7 @@ API int contacts_svc_disconnect(void)
 		cts_socket_final();
 		cts_deregister_noti();
 		cts_db_close();
+		cts_restriction_final();
 		cts_conn_refcnt--;
 	}
 	else

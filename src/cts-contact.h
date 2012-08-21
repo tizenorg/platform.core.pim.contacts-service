@@ -377,7 +377,7 @@ int contacts_svc_get_contact_value(cts_get_contact_val_op op_code,
 int contacts_svc_get_contact(int index, CTSstruct **contact);
 
 /**
- * Use for contacts_svc_find_contact_by().
+ * Use for contacts_svc_find_contact_by(), contacts_svc_find_person_by()
  */
 typedef enum {
 	CTS_FIND_NONE,

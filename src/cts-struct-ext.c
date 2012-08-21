@@ -596,6 +596,8 @@ static inline cts_group* cts_struct_dup_grouprel(const cts_group *src)
 			result->name = strdup(src->name);
 		if (src->ringtone_path)
 			result->ringtone_path = strdup(src->ringtone_path);
+		if (src->img_path)
+			result->img_path = strdup(src->img_path);
 	}
 
 	return result;

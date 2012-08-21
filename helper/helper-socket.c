@@ -26,6 +26,7 @@
 #include <sys/un.h>
 #include <errno.h>
 #include <contacts-svc.h>
+#include <sd-daemon.h>
 
 #include "internal.h"
 #include "cts-schema.h"
@@ -73,31 +74,32 @@ static inline int helper_safe_read(int fd, char *buf, int buf_size)
 }
 
 
-static void helper_discard_msg(int fd, int size)
+static void helper_discard_msg(GIOChannel *src, int size)
 {
-	int ret;
+	gsize len;
+	GError *gerr = NULL;
 	char dummy[CTS_SQL_MAX_LEN];
 
 	while (size) {
 		if (sizeof(dummy) < size) {
-			ret = read(fd, dummy, sizeof(dummy));
-			if (-1 == ret) {
-				if (EINTR == errno)
-					continue;
-				else
-					return;
+			g_io_channel_read_chars(src, dummy, sizeof(dummy), &len, &gerr);
+			if (gerr) {
+				ERR("g_io_channel_read_chars() Failed(%s)", gerr->message);
+				g_error_free(gerr);
+				return;
 			}
-			size -= ret;
+
+			size -= len;
 		}
 		else {
-			ret = read(fd, dummy, size);
-			if (-1 == ret) {
-				if (EINTR == errno)
-					continue;
-				else
-					return;
+			g_io_channel_read_chars(src, dummy, size, &len, &gerr);
+			if (gerr) {
+				ERR("g_io_channel_read_chars() Failed(%s)", gerr->message);
+				g_error_free(gerr);
+				return;
 			}
-			size -= ret;
+
+			size -= len;
 		}
 	}
 }
@@ -138,6 +140,32 @@ static void helper_handle_import_sim(GIOChannel *src)
 	if (CTS_SUCCESS != ret) {
 		ERR("helper_sim_read_pb_record() Failed(%d)", ret);
 		helper_socket_return(src, ret, 0, NULL);
+	}
+}
+
+static void helper_handle_export_sim(GIOChannel *src, int size)
+{
+	int ret;
+	gsize len;
+	GError *gerr = NULL;
+	char receiver[CTS_SQL_MAX_LEN];
+
+	g_io_channel_read_chars(src, receiver, size, &len, &gerr);
+	if (gerr) {
+		ERR("g_io_channel_read_chars() Failed(%s)", gerr->message);
+		g_error_free(gerr);
+		return;
+	}
+	HELPER_DBG("Receiver = %s(%d), read_size = %d", receiver, len, size);
+
+	if (len) {
+		receiver[len] = '\0';
+		HELPER_DBG("export contact %d", atoi(receiver));
+		ret = helper_sim_write_pb_record(src, atoi(receiver));
+		if (CTS_SUCCESS != ret) {
+			ERR("helper_sim_write_pb_record() Failed(%d)", ret);
+			helper_socket_return(src, ret, 0, NULL);
+		}
 	}
 }
 
@@ -226,8 +254,7 @@ static void helper_handle_normalize_name(GIOChannel *src, int* sizes)
 				sizeof(normalized_first));
 		if (ret < CTS_SUCCESS) {
 			ERR("helper_normalize() Failed(%d)", ret);
-			helper_discard_msg(g_io_channel_unix_get_fd(src),
-					sizes[CTS_NN_LAST] + sizes[CTS_NN_SORTKEY]);
+			helper_discard_msg(src,	sizes[CTS_NN_LAST] + sizes[CTS_NN_SORTKEY]);
 			helper_socket_return(src, ret, 0, NULL);
 			return;
 		}
@@ -242,7 +269,7 @@ static void helper_handle_normalize_name(GIOChannel *src, int* sizes)
 				sizeof(normalized_last));
 		if (ret < CTS_SUCCESS) {
 			ERR("helper_normalize() Failed(%d)", ret);
-			helper_discard_msg(g_io_channel_unix_get_fd(src), sizes[CTS_NN_SORTKEY]);
+			helper_discard_msg(src, sizes[CTS_NN_SORTKEY]);
 			helper_socket_return(src, ret, 0, NULL);
 			return;
 		}
@@ -288,14 +315,17 @@ static gboolean request_handler(GIOChannel *src, GIOCondition condition,
 	ret = helper_safe_read(g_io_channel_unix_get_fd(src), (char *)&msg, sizeof(msg));
 	h_retvm_if(-1 == ret, TRUE, "helper_safe_read() Failed(errno = %d)", errno);
 
-	HELPER_DBG("attach number = %d, attach1 = %d, attach2 = %d",
+	HELPER_DBG("attach number = %d, attach1 = %d, attach2 = %d, attach3 = %d",
 			msg.attach_num, msg.attach_sizes[CTS_NN_FIRST],
-			msg.attach_sizes[CTS_NN_LAST]);
+			msg.attach_sizes[CTS_NN_LAST], msg.attach_sizes[CTS_NN_SORTKEY]);
 
 	switch (msg.type)
 	{
 	case CTS_REQUEST_IMPORT_SIM:
 		helper_handle_import_sim(src);
+		break;
+	case CTS_REQUEST_EXPORT_SIM:
+		helper_handle_export_sim(src, msg.attach_sizes[0]);
 		break;
 	case CTS_REQUEST_NORMALIZE_STR:
 		if (CTS_NS_ATTACH_NUM != msg.attach_num) {
@@ -350,23 +380,27 @@ int helper_socket_init(void)
 	struct sockaddr_un addr;
 	GIOChannel *gio;
 
-	unlink(CTS_SOCKET_PATH);
+	if (sd_listen_fds(1) == 1 && sd_is_socket_unix(SD_LISTEN_FDS_START, SOCK_STREAM, -1, CTS_SOCKET_PATH, 0) > 0) {
+		sockfd = SD_LISTEN_FDS_START;
+	} else {
+		unlink(CTS_SOCKET_PATH);
 
-	bzero(&addr, sizeof(addr));
-	addr.sun_family = AF_UNIX;
-	snprintf(addr.sun_path, sizeof(addr.sun_path), "%s", CTS_SOCKET_PATH);
+		bzero(&addr, sizeof(addr));
+		addr.sun_family = AF_UNIX;
+		snprintf(addr.sun_path, sizeof(addr.sun_path), "%s", CTS_SOCKET_PATH);
 
-	sockfd = socket(PF_UNIX, SOCK_STREAM, 0);
-	h_retvm_if(-1 == sockfd, CTS_ERR_SOCKET_FAILED, "socket() Failed(errno = %d)", errno);
+		sockfd = socket(PF_UNIX, SOCK_STREAM, 0);
+		h_retvm_if(-1 == sockfd, CTS_ERR_SOCKET_FAILED, "socket() Failed(errno = %d)", errno);
 
-	ret = bind(sockfd, (struct sockaddr *)&addr, sizeof(addr));
-	h_retvm_if(-1 == ret, CTS_ERR_SOCKET_FAILED, "bind() Failed(errno = %d)", errno);
+		ret = bind(sockfd, (struct sockaddr *)&addr, sizeof(addr));
+		h_retvm_if(-1 == ret, CTS_ERR_SOCKET_FAILED, "bind() Failed(errno = %d)", errno);
 
-	chown(CTS_SOCKET_PATH, getuid(), CTS_SECURITY_FILE_GROUP);
-	chmod(CTS_SOCKET_PATH, CTS_SECURITY_DEFAULT_PERMISSION);
+		chown(CTS_SOCKET_PATH, getuid(), CTS_SECURITY_FILE_GROUP);
+		chmod(CTS_SOCKET_PATH, CTS_SECURITY_DEFAULT_PERMISSION);
 
-	ret = listen(sockfd, 30);
-	h_retvm_if(-1 == ret, CTS_ERR_SOCKET_FAILED, "listen() Failed(errno = %d)", errno);
+		ret = listen(sockfd, 30);
+		h_retvm_if(-1 == ret, CTS_ERR_SOCKET_FAILED, "listen() Failed(errno = %d)", errno);
+	}
 
 	gio = g_io_channel_unix_new(sockfd);
 	g_io_add_watch(gio, G_IO_IN, socket_handler, (gpointer)sockfd);

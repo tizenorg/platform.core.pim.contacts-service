@@ -97,6 +97,7 @@ typedef struct {
 	bool note_changed;
 	bool is_favorite;
 	int id;
+	int person_id;
 	int changed_time;
 	int addrbook_id;
 	char *uid;
@@ -201,12 +202,13 @@ typedef struct {
 	int v_type:16;
 	bool embedded;
 	bool deleted;
+	bool img_loaded;
 	int id;
 	int addrbook_id;
 	char *name;
 	char *ringtone_path;
 	char *vcard_group;
-	//   char *image_path;
+	char *img_path;
 }cts_group; //CTS_GROUP_VAL_ or CTS_GROUPREL_VAL_
 
 typedef struct {
@@ -238,7 +240,7 @@ typedef struct {
 	bool deleted;
 	int id;
 	char *number;
-	int related_id; /* contact id */
+	int related_id; /* person id */
 	int log_time;
 	int log_type;
 	int extra_data1; /* duration, message_id */
@@ -278,13 +280,15 @@ typedef struct {
 	int extra_data1; /* duration, message_id */
 	char *extra_data2; /*short message*/
 	int related_id; /* contact id */
+	int person_id;
 }plog_list;//CTS_LIST_PLOG_
 
 typedef struct {
 	int v_type:16;
 	bool embedded;
-	int id;
-	int acc_id;
+	int person_id;
+	int contact_id;
+	int addrbook_id;
 	char *img_path;
 	char *first;
 	char *last;
@@ -292,6 +296,23 @@ typedef struct {
 	char *connect;
 	char *normalize;
 }contact_list;//CTS_LIST_CONTACT_
+
+typedef struct {
+	int v_type:16;
+	bool embedded;
+	int person_id;
+	int contact_id;
+	int addrbook_id;
+	char *img_path;
+	char *first;
+	char *last;
+	char *display;
+	int def_num_type;
+	char *def_num;
+	int def_email_type;
+	char *def_email;
+	char *normalize;
+}osp_list;//OSPLIST
 
 typedef struct {
 	int v_type:16;
@@ -306,6 +327,7 @@ typedef struct {
 	int changed_type:8;
 	int id;
 	int changed_ver;
+	int addressbook_id;
 }change_list;//CTS_LIST_CHANGE_
 
 typedef struct {
@@ -327,6 +349,7 @@ typedef struct {
 	int v_type:16;
 	bool embedded;
 	int id;
+	int person_id;
 	int contact_id;
 	char *first;
 	char *last;
@@ -339,6 +362,7 @@ typedef struct {
 
 typedef struct {
 	int s_type;
+	int is_restricted;
 	cts_ct_base *base;
 	cts_name *name;
 	GSList *numbers;
@@ -373,6 +397,7 @@ enum{
 	CTS_VALUE_RDONLY_COMPANY,
 	CTS_VALUE_LIST_SHORTCUT,
 	CTS_VALUE_RDONLY_PLOG,
+	CTS_VALUE_LIST_OSP,
 };
 
 //basic
@@ -466,7 +491,8 @@ enum BASEVALUE {
 	CTS_BASE_VAL_UID_STR, /**< A globally (including outside of the device) unique ID. */
 	CTS_BASE_VAL_ADDRESSBOOK_ID_INT, /**< read only. Each contact is assigned to a addressbook. */
 	CTS_BASE_VAL_FULL_IMG_PATH_STR, /**< For full screen image. Should include extension at path */
-	CTS_BASE_VAL_FAVORITE_BOOL /**< read only. Use contacts_svc_set_favorite(CTS_FAVOR_CONTACT). It can assign for handling struct. But the changes are ignored */
+	CTS_BASE_VAL_FAVORITE_BOOL, /**< read only. Use contacts_svc_set_favorite(CTS_FAVOR_CONTACT). It can assign for handling struct. But the changes are ignored */
+	CTS_BASE_VAL_PERSON_ID_INT /**< read only */
 };
 
 /**
@@ -505,14 +531,25 @@ enum EMAILVALUE {
 };
 
 /**
+ * group
+ */
+enum GROUPVALUE {
+	CTS_GROUP_VAL_ID_INT = 0, /**< read only */
+	CTS_GROUP_VAL_ADDRESSBOOK_ID_INT = 1, /**< . */
+	CTS_GROUP_VAL_NAME_STR = 2,/**< . */
+	CTS_GROUP_VAL_RINGTONE_STR = 3,/**< . */
+	CTS_GROUP_VAL_IMG_PATH_STR = 4,/**< . */
+};
+
+/**
  * group relation information for contact
  */
 enum GROUPRELATIONVALUE {
-	CTS_GROUPREL_VAL_ID_INT, /**< [write only]group id */
-	CTS_GROUPREL_VAL_DELETE_BOOL,/**< request to delete in the list of #CTSstruct. */
-	CTS_GROUPREL_VAL_NAME_STR,/**< read only, but it can assign for handling struct(Not recommend) */
-	CTS_GROUPREL_VAL_RINGTONE_STR,/**< read only */
-	//   CTS_GROUPREL_VAL_IMG_PATH_STR,
+	CTS_GROUPREL_VAL_ID_INT = CTS_GROUP_VAL_ID_INT, /**< [write only]group id */
+	CTS_GROUPREL_VAL_DELETE_BOOL = 1,/**< request to delete in the list of #CTSstruct. */
+	CTS_GROUPREL_VAL_NAME_STR = CTS_GROUP_VAL_NAME_STR,/**< read only, but it can assign for handling struct(Not recommend) */
+	CTS_GROUPREL_VAL_RINGTONE_STR = CTS_GROUP_VAL_RINGTONE_STR,/**< read only */
+   CTS_GROUPREL_VAL_IMG_PATH_STR = CTS_GROUP_VAL_IMG_PATH_STR,/**< read only */
 };
 
 /**
@@ -583,25 +620,18 @@ enum NICKNAMEVALUE {
  * phone log
  */
 enum PHONELOGVALUE {
-	CTS_PLOG_VAL_NUMBER_STR,/**< .*/
+	CTS_PLOG_VAL_ADDRESS_STR = 0,/**< number or email address*/
 	CTS_PLOG_VAL_ID_INT,/**< read only */
 	CTS_PLOG_VAL_LOG_TIME_INT,/**< The time since the Epoch (00:00:00 UTC, January 1, 1970), measured in seconds.*/
 	CTS_PLOG_VAL_LOG_TYPE_INT,/**< #PLOGTYPE */
 	CTS_PLOG_VAL_DURATION_INT,/**< seconds. */
-	CTS_PLOG_VAL_SHORTMSG_STR,/**< . */
-	CTS_PLOG_VAL_MSGID_INT,/**< . */
+	CTS_PLOG_VAL_SHORTMSG_STR,/**<  message short message or email subject */
+	CTS_PLOG_VAL_MSGID_INT,/**< message id or email id */
 	CTS_PLOG_VAL_RELATED_ID_INT,/**< contact id */
 };
 
-/**
- * group
- */
-enum GROUPVALUE {
-	CTS_GROUP_VAL_ID_INT, /**< read only */
-	CTS_GROUP_VAL_ADDRESSBOOK_ID_INT, /**< . */
-	CTS_GROUP_VAL_NAME_STR,/**< . */
-	CTS_GROUP_VAL_RINGTONE_STR,/**< . */
-};
+/** deprecated */
+#define CTS_PLOG_VAL_NUMBER_STR CTS_PLOG_VAL_ADDRESS_STR
 
 /**
  * addressbook

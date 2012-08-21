@@ -31,8 +31,10 @@ cat ../include/contacts-svc.head > ../include/contacts-svc.h
 ./API-generator ../src/cts-errors.h >> ../include/contacts-svc.h
 ./API-generator ../src/cts-addressbook.h >> ../include/contacts-svc.h
 ./API-generator ../src/cts-contact.h >> ../include/contacts-svc.h
+./API-generator ../src/cts-person.h >> ../include/contacts-svc.h
 ./API-generator ../src/cts-normalize.h >> ../include/contacts-svc.h
 ./API-generator ../src/cts-list.h >> ../include/contacts-svc.h
+./API-generator ../src/cts-list-filter.h >> ../include/contacts-svc.h
 ./API-generator ../src/cts-utils.h >> ../include/contacts-svc.h
 ./API-generator ../src/cts-vcard.h >> ../include/contacts-svc.h
 cat ../include/contacts-svc.tail >> ../include/contacts-svc.h

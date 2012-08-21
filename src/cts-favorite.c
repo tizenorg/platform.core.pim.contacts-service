@@ -22,6 +22,7 @@
 #include "cts-schema.h"
 #include "cts-sqlite.h"
 #include "cts-utils.h"
+#include "cts-restriction.h"
 #include "cts-favorite.h"
 
 API int contacts_svc_set_favorite(cts_favor_type op, int related_id)
@@ -31,7 +32,7 @@ API int contacts_svc_set_favorite(cts_favor_type op, int related_id)
 	cts_stmt stmt;
 	char query[CTS_SQL_MAX_LEN] = {0};
 
-	retvm_if(CTS_FAVOR_CONTACT != op && CTS_FAVOR_NUMBER != op, CTS_ERR_ARG_INVALID,
+	retvm_if(CTS_FAVOR_PERSON != op && CTS_FAVOR_NUMBER != op, CTS_ERR_ARG_INVALID,
 			"op(%d) is invalid", op);
 
 	snprintf(query, sizeof(query),
@@ -57,8 +58,8 @@ API int contacts_svc_set_favorite(cts_favor_type op, int related_id)
 
 	prio = prio + 1.0;
 	snprintf(query, sizeof(query),
-			"INSERT INTO %s(type, related_id, favorite_prio) VALUES(%d, %d, %f)",
-			CTS_TABLE_FAVORITES, op, related_id, prio);
+			"INSERT INTO %s SELECT NULL, %d, contact_id, %f FROM %s WHERE person_id = %d",
+			CTS_TABLE_FAVORITES, op, prio, CTS_TABLE_CONTACTS, related_id);
 
 	ret = cts_query_exec(query);
 	if (CTS_SUCCESS != ret)
@@ -83,11 +84,17 @@ API int contacts_svc_unset_favorite(cts_favor_type op, int related_id)
 	cts_stmt stmt;
 	char query[CTS_SQL_MIN_LEN] = {0};
 
-	retvm_if(CTS_FAVOR_CONTACT != op && CTS_FAVOR_NUMBER != op, CTS_ERR_ARG_INVALID,
-			"op(%d) is invalid", op);
-
-	snprintf(query, sizeof(query), "DELETE FROM %s WHERE type = %d AND related_id = %d",
-			CTS_TABLE_FAVORITES, op, related_id);
+	if (CTS_FAVOR_PERSON == op) {
+		snprintf(query, sizeof(query), "DELETE FROM %s WHERE type = %d AND related_id IN "
+				"(SELECT contact_id FROM %s WHERE person_id = %d)",
+				CTS_TABLE_FAVORITES, CTS_FAVOR_PERSON, CTS_TABLE_CONTACTS, related_id);
+	} else if (CTS_FAVOR_NUMBER == op) {
+		snprintf(query, sizeof(query), "DELETE FROM %s WHERE type = %d AND related_id = %d",
+				CTS_TABLE_FAVORITES, CTS_FAVOR_NUMBER, related_id);
+	} else {
+		ERR("op(%d) is invalid", op);
+		return CTS_ERR_ARG_INVALID;
+	}
 
 	stmt = cts_query_prepare(query);
 	retvm_if(NULL == stmt, CTS_ERR_DB_FAILED, "cts_query_prepare() Failed");
@@ -314,13 +321,19 @@ API int contacts_svc_get_speeddial(int speed_num, CTSvalue **value)
 {
 	int ret;
 	cts_stmt stmt;
+	const char *data;
 	cts_number *number;
 	char query[CTS_SQL_MAX_LEN] = {0};
+
+	if (cts_restriction_get_permit())
+		data = CTS_TABLE_DATA;
+	else
+		data = CTS_TABLE_RESTRICTED_DATA_VIEW;
 
 	snprintf(query, sizeof(query),
 			"SELECT A.id, A.data1, A.data2, A.contact_id FROM %s A, %s B "
 			"WHERE A.datatype = %d AND B.speed_num = %d AND A.id = B.number_id",
-			CTS_TABLE_DATA, CTS_TABLE_SPEEDDIALS, CTS_DATA_NUMBER, speed_num);
+			data, CTS_TABLE_SPEEDDIALS, CTS_DATA_NUMBER, speed_num);
 
 	stmt = cts_query_prepare(query);
 	retvm_if(NULL == stmt, CTS_ERR_DB_FAILED, "cts_query_prepare() Failed");

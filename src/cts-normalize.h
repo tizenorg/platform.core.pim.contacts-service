@@ -25,7 +25,7 @@
 #include "cts-sqlite.h"
 
 #define CTS_COMPARE_BETWEEN(left_range, value, right_range) (((left_range) <= (value)) && ((value) <= (right_range)))
-#define CTS_VCONF_DEFAULT_LANGUAGE "db/service/contacts/default_lang"
+#define CTS_VCONF_DEFAULT_LANGUAGE "file/private/contacts-service/default_lang"
 
 /**
  * Language Type

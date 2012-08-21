@@ -8,7 +8,7 @@ ifdef REQUIRED_PKG
 	LDFLAGS += `pkg-config --libs $(REQUIRED_PKG)`
 endif
 
-SRCS = contact-test.c phonelog-test.c change-noti-test.c group-test.c vcard2contact-test.c SIMimport-test.c addressbook-test.c
+SRCS = contact-test.c phonelog-test.c change-noti-test.c group-test.c vcard2contact-test.c SIMimport-test.c addressbook-test.c person-test.c restriction-test.c myprofile-test.c SIMexport-test.c
 TIMESRC = timetest.c
 OBJECTS = $(SRCS:.c=.o)
 TIMEOBJ = $(TIMESRC:.c=.o)

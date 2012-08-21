@@ -22,6 +22,7 @@
 #include "cts-schema.h"
 #include "cts-sqlite.h"
 #include "cts-utils.h"
+#include "cts-person.h"
 #include "cts-addressbook.h"
 
 static inline int cts_reset_internal_addressbook(void)
@@ -128,6 +129,13 @@ API int contacts_svc_delete_addressbook(int addressbook_id)
 	ret = cts_query_exec(query);
 	if (CTS_SUCCESS != ret) {
 		ERR("cts_query_exec() Failed(%d)", ret);
+		contacts_svc_end_trans(false);
+		return ret;
+	}
+
+	ret = cts_person_garbagecollection();
+	if (CTS_SUCCESS != ret) {
+		ERR("cts_person_garbagecollection() Failed(%d)", ret);
 		contacts_svc_end_trans(false);
 		return ret;
 	}

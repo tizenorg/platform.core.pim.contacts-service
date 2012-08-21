@@ -7,7 +7,7 @@ SET(TARGET contacts-svc-helper)
 FILE(GLOB SRCS *.c)
 #SET(SRCS main.c schema-recovery.c)
 
-pkg_check_modules(helper_pkgs REQUIRED tapi icu-i18n)
+pkg_check_modules(helper_pkgs REQUIRED tapi icu-i18n libsystemd-daemon)
 
 UNSET(EXTRA_CFLAGS)
 FOREACH(flag ${helper_pkgs_CFLAGS})

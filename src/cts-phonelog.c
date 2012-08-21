@@ -18,6 +18,10 @@
  * limitations under the License.
  *
  */
+
+#include <sys/types.h>
+#include <regex.h>
+
 #include "cts-internal.h"
 #include "cts-schema.h"
 #include "cts-sqlite.h"
@@ -97,21 +101,19 @@ static int cts_phonelog_accumulation_handle(cts_plog *plog)
 	return CTS_SUCCESS;
 }
 
+//extra_data1 : duration, message_id, email_id
+//extra_data2 : short message, email subject
 static inline int cts_insert_phonelog(cts_plog *plog)
 {
 	int ret;
 	cts_stmt stmt = NULL;
-	char clean_num[CTS_NUMBER_MAX_LEN], query[CTS_SQL_MAX_LEN] = {0};
+	char clean_num[CTS_NUMBER_MAX_LEN] = {0};
+	char query[CTS_SQL_MAX_LEN] = {0};
 	const char *normal_num;
 
 	retvm_if(plog->log_type <= CTS_PLOG_TYPE_NONE
 			|| CTS_PLOG_TYPE_MAX <= plog->log_type,
 			CTS_ERR_ARG_INVALID, "phonelog type(%d) is invaid", plog->log_type);
-
-	cts_clean_number(plog->number, clean_num, sizeof(clean_num));
-
-	ret = contacts_svc_begin_trans();
-	retvm_if(ret, ret, "contacts_svc_begin_trans() Failed(%d)", ret);
 
 	snprintf(query, sizeof(query), "INSERT INTO %s("
 			"number, normal_num, related_id, log_type, log_time, data1, data2) "
@@ -120,16 +122,15 @@ static inline int cts_insert_phonelog(cts_plog *plog)
 			plog->log_time, plog->extra_data1);
 
 	stmt = cts_query_prepare(query);
-	if (NULL == stmt) {
-		ERR("cts_query_prepare() Failed");
-		contacts_svc_end_trans(false);
-		return CTS_ERR_DB_FAILED;
-	}
+	retvm_if(NULL == stmt, CTS_ERR_DB_FAILED, "cts_query_prepare() Failed");
 
-	if (*clean_num) {
-		cts_stmt_bind_text(stmt, 1, clean_num);
-		normal_num = cts_normalize_number(clean_num);
-		cts_stmt_bind_text(stmt, 2, normal_num);
+	cts_stmt_bind_text(stmt, 1, plog->number);
+	if (plog->log_type < CTS_PLOG_TYPE_EMAIL_RECEIVED) {
+		ret = cts_clean_number(plog->number, clean_num, sizeof(clean_num));
+		if (0 < ret) {
+			normal_num = cts_normalize_number(clean_num);
+			cts_stmt_bind_text(stmt, 2, normal_num);
+		}
 	}
 
 	if (0 < plog->related_id)
@@ -143,7 +144,6 @@ static inline int cts_insert_phonelog(cts_plog *plog)
 	{
 		ERR("cts_stmt_step() Failed(%d)", ret);
 		cts_stmt_finalize(stmt);
-		contacts_svc_end_trans(false);
 		return ret;
 	}
 	cts_stmt_finalize(stmt);
@@ -152,11 +152,7 @@ static inline int cts_insert_phonelog(cts_plog *plog)
 			|| CTS_PLOG_TYPE_VIDEO_OUTGOING == plog->log_type)
 	{
 		ret = cts_phonelog_accumulation_handle(plog);
-		if (CTS_SUCCESS != ret) {
-			ERR("cts_phonelog_accumulation_handle() Failed");
-			contacts_svc_end_trans(false);
-			return ret;
-		}
+		retvm_if(CTS_SUCCESS != ret, ret, "cts_phonelog_accumulation_handle() Failed");
 	}
 
 	if (CTS_PLOG_TYPE_VOICE_INCOMMING_UNSEEN == plog->log_type ||
@@ -164,15 +160,9 @@ static inline int cts_insert_phonelog(cts_plog *plog)
 		cts_set_missed_call_noti();
 
 	cts_set_plog_noti();
-	ret = contacts_svc_end_trans(true);
-	if (ret < CTS_SUCCESS)
-		return ret;
-	else
-		return CTS_SUCCESS;
+	return CTS_SUCCESS;
 }
 
-//extra_data1 : duration, message_id
-//extra_data2 : short message
 API int contacts_svc_insert_phonelog(CTSvalue* phone_log)
 {
 	int ret;
@@ -181,15 +171,27 @@ API int contacts_svc_insert_phonelog(CTSvalue* phone_log)
 	retv_if(NULL == phone_log, CTS_ERR_ARG_NULL);
 	retvm_if(plog->id, CTS_ERR_ARG_INVALID, "The phone_log has ID(%d)", plog->id);
 
+	ret = contacts_svc_begin_trans();
+	retvm_if(ret, ret, "contacts_svc_begin_trans() Failed(%d)", ret);
+
 	ret = cts_insert_phonelog(plog);
-	retvm_if(CTS_SUCCESS != ret, ret,"cts_insert_phonelog() Failed(%d)", ret);
+	if (CTS_SUCCESS != ret)
+	{
+		ERR("cts_insert_phonelog() Failed(%d)", ret);
+		contacts_svc_end_trans(false);
+		return ret;
+	}
 
 	if (0 < plog->related_id) {
 		ret = cts_increase_outgoing_count(plog->related_id);
 		warn_if(CTS_SUCCESS != ret, "cts_increase_outgoing_count() Failed(%d)", ret);
 	}
 
-	return CTS_SUCCESS;
+	ret = contacts_svc_end_trans(true);
+	if (ret < CTS_SUCCESS)
+		return ret;
+	else
+		return CTS_SUCCESS;
 }
 
 API int contacts_svc_delete_phonelog(cts_del_plog_op op_code, ...)

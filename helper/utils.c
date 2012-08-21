@@ -33,7 +33,7 @@
 
 static const char *HELPER_VCONF_TAPI_SIM_PB_INIT = VCONFKEY_TELEPHONY_SIM_PB_INIT;
 static const char *HELPER_VCONF_SYSTEM_LANGUAGE = VCONFKEY_LANGSET;
-static const char *HELPER_VCONF_DISPLAY_ORDER = CTS_VCONF_DISPLAY_ORDER_DEF;
+static const char *HELPER_VCONF_DISPLAY_ORDER = VCONFKEY_CONTACTS_SVC_NAME_DISPLAY_ORDER;
 
 static int default_language = -1;
 static int system_language = -1;

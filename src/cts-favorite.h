@@ -24,6 +24,17 @@
 //<!--
 
 /**
+ * favorite type
+ */
+typedef enum{
+	CTS_FAVOR_PERSON, /**< Favorite for a contact */
+	CTS_FAVOR_NUMBER /**< Favorite for a number */
+}cts_favor_type;
+
+/** deprecated */
+#define CTS_FAVOR_CONTACT CTS_FAVOR_PERSON
+
+/**
  * @defgroup   CONTACTS_SVC_FAVORITE Favorite(speeddial) Modification
  * @ingroup    CONTACTS_SVC
  * @addtogroup CONTACTS_SVC_FAVORITE
@@ -32,14 +43,6 @@
  * This interface provides methods to insert/update/delete the Favorite(speeddial).
  *
  */
-
-/**
- * favorite type
- */
-typedef enum{
-	CTS_FAVOR_CONTACT, /**< Favorite for a contact */
-	CTS_FAVOR_NUMBER /**< Favorite for a number */
-}cts_favor_type;
 
 /**
  * This function marks a number or a contact as "favorite".

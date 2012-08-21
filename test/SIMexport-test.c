@@ -1,5 +1,5 @@
 /*
- * Contacts Service Helper
+ * Contacts Service
  *
  * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
  *
@@ -18,13 +18,28 @@
  * limitations under the License.
  *
  */
-#ifndef __CTS_HELPER_SIM_H__
-#define __CTS_HELPER_SIM_H__
+#include <stdio.h>
+#include <contacts-svc.h>
 
-int helper_sim_read_pb_record(void* data);
-int helper_sim_write_pb_record(void* data, int index);
-int helper_sim_read_SDN(void* data);
+int main(int argc, char *argv[])
+{
+	int pindex;
+	int ret;
+	if (argc < 2)
+		return 0;
 
+	printf("%d, %s, %s\n", argc, argv[0], argv[1]);
+	pindex = atoi(argv[1]);
+	if (pindex < 0)
+		return 0;
+	printf("person index : %d\n", pindex);
+	contacts_svc_connect();
 
-#endif // __CTS_HELPER_SIM_H__
+	ret = contacts_svc_export_sim(pindex);
+	printf("contacts_svc_export_sim() return %d\n", ret);
+
+	contacts_svc_disconnect();
+	return 0;
+}
+
 

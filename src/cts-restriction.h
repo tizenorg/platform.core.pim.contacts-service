@@ -1,5 +1,5 @@
 /*
- * Contacts Service Helper
+ * Contacts Service
  *
  * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
  *
@@ -18,13 +18,13 @@
  * limitations under the License.
  *
  */
-#ifndef __CTS_HELPER_SIM_H__
-#define __CTS_HELPER_SIM_H__
+#ifndef __CTS_FACEBOOK_H__
+#define __CTS_FACEBOOK_H__
 
-int helper_sim_read_pb_record(void* data);
-int helper_sim_write_pb_record(void* data, int index);
-int helper_sim_read_SDN(void* data);
+int cts_restriction_init(void);
+void cts_restriction_final(void);
 
+int cts_restriction_get_permit(void);
 
-#endif // __CTS_HELPER_SIM_H__
+#endif //__CTS_FACEBOOK_H__
 

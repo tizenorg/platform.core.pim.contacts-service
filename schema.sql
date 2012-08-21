@@ -21,6 +21,12 @@
 --PRAGMA journal_mode = PERSIST;
 --PRAGMA journal_mode = TRUNCATE;
 
+CREATE TABLE persons
+(
+person_id INTEGER PRIMARY KEY AUTOINCREMENT,
+outgoing_count INTEGER DEFAULT 0
+);
+
 CREATE TABLE addressbooks
 (
 addrbook_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -39,11 +45,13 @@ CREATE TRIGGER trg_addressbook_del AFTER DELETE ON addressbooks
    DELETE FROM groups WHERE addrbook_id = old.addrbook_id;
    DELETE FROM contacts WHERE addrbook_id = old.addrbook_id;
    DELETE FROM deleteds WHERE addrbook_id = old.addrbook_id;
+   DELETE FROM group_deleteds WHERE addrbook_id = old.addrbook_id;
  END;
 
 CREATE TABLE contacts
 (
 contact_id INTEGER PRIMARY KEY AUTOINCREMENT,
+person_id INTEGER,
 addrbook_id INTEGER NOT NULL DEFAULT 0,
 default_num INTEGER,
 default_email INTEGER,
@@ -52,7 +60,6 @@ is_favorite INTEGER DEFAULT 0,
 created_ver INTEGER NOT NULL,
 changed_ver INTEGER NOT NULL,
 changed_time INTEGER NOT NULL,
-outgoing_count INTEGER DEFAULT 0,
 uid TEXT,
 ringtone TEXT,
 note TEXT,
@@ -60,6 +67,7 @@ image0 TEXT, -- normal image
 image1 TEXT -- full image
 );
 CREATE INDEX contacts_ver_idx ON contacts(changed_ver);
+CREATE INDEX contacts_person_idx ON contacts(person_id);
 CREATE TRIGGER trg_contacts_del AFTER DELETE ON contacts
  BEGIN
    DELETE FROM data WHERE contact_id = old.contact_id;
@@ -106,6 +114,7 @@ CREATE TABLE data
 (
 id INTEGER PRIMARY KEY AUTOINCREMENT,
 contact_id INTEGER NOT NULL,
+is_restricted INTEGER,
 datatype INTEGER NOT NULL,
 data1 INTEGER,
 data2 TEXT,
@@ -142,13 +151,24 @@ CREATE TABLE groups
 group_id INTEGER PRIMARY KEY AUTOINCREMENT,
 addrbook_id INTEGER,
 group_name TEXT,
+created_ver INTEGER NOT NULL,
+changed_ver INTEGER NOT NULL,
 ringtone TEXT,
 UNIQUE(addrbook_id, group_name)
 );
 CREATE TRIGGER trg_groups_del AFTER DELETE ON groups
  BEGIN
    DELETE FROM group_relations WHERE group_id = old.group_id;
+   DELETE FROM group_relations_log WHERE group_id = old.group_id;
  END;
+
+CREATE TABLE group_deleteds
+(
+group_id INTEGER PRIMARY KEY,
+addrbook_id INTEGER,
+deleted_ver INTEGER
+);
+CREATE INDEX grp_deleteds_ver_idx ON group_deleteds(deleted_ver);
 
 CREATE TABLE group_relations
 (
@@ -157,6 +177,15 @@ contact_id INTEGER NOT NULL,
 UNIQUE(group_id, contact_id)
 );
 CREATE INDEX group_idx1 ON group_relations(contact_id);
+
+CREATE TABLE group_relations_log
+(
+group_id INTEGER NOT NULL,
+--contact_id INTEGER NOT NULL,
+type INTEGER NOT NULL,
+ver INTEGER NOT NULL,
+UNIQUE(group_id, type, ver)
+);
 
 CREATE TABLE speeddials
 (
@@ -177,12 +206,12 @@ CREATE INDEX idx2_favorites ON favorites(type, related_id);
 CREATE TRIGGER trg_favorite_del BEFORE DELETE ON favorites
  BEGIN
    UPDATE data SET data3 = 0 WHERE old.type = 1 AND id = old.related_id AND datatype = 8;
-   UPDATE contacts SET is_favorite = 0 WHERE old.type = 0 AND contact_id = old.related_id;
+   UPDATE contacts SET is_favorite = 0 WHERE old.type = 0 AND person_id = old.related_id;
  END;
 CREATE TRIGGER trg_favorite_insert AFTER INSERT ON favorites
  BEGIN
    UPDATE data SET data3 = 1 WHERE new.type = 1 AND id = new.related_id AND datatype = 8;
-   UPDATE contacts SET is_favorite = 1 WHERE new.type = 0 AND contact_id = new.related_id;
+   UPDATE contacts SET is_favorite = 1 WHERE new.type = 0 AND person_id = new.related_id;
  END;
 
 CREATE TABLE phonelogs
@@ -190,7 +219,7 @@ CREATE TABLE phonelogs
 id INTEGER PRIMARY KEY AUTOINCREMENT,
 number TEXT,
 normal_num TEXT,
-related_id INTEGER, --contact_id
+related_id INTEGER, --person_id
 log_type INTEGER,
 log_time INTEGER,
 data1 INTEGER, --duration, message_id
@@ -214,3 +243,19 @@ duration INTEGER
 );
 INSERT INTO phonelog_accumulation VALUES(1, 0, NULL, 0);
 INSERT INTO phonelog_accumulation VALUES(2, 0, NULL, 0); --total
+
+CREATE TABLE my_profiles
+(
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+datatype INTEGER NOT NULL,
+data1 INTEGER,
+data2 TEXT,
+data3 TEXT,
+data4 TEXT,
+data5 TEXT,
+data6 TEXT,
+data7 TEXT,
+data8 TEXT,
+data9 TEXT,
+data10 TEXT
+);

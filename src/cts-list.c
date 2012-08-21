@@ -24,25 +24,26 @@
 #include "cts-types.h"
 #include "cts-normalize.h"
 #include "cts-favorite.h"
+#include "cts-restriction.h"
 #include "cts-list.h"
 
 #define CTS_MALLOC_DEFAULT_NUM 256 //4Kbytes
 #define CTS_OFTEN_USED_NUM 1
 
-static inline updated_contact* cts_updated_contact_add_mempool(void)
+static inline updated_record* cts_updated_info_add_mempool(void)
 {
 	int i;
-	updated_contact *mempool;
+	updated_record *mempool;
 
-	mempool = calloc(CTS_MALLOC_DEFAULT_NUM, sizeof(updated_contact));
+	mempool = calloc(CTS_MALLOC_DEFAULT_NUM, sizeof(updated_record));
 	for (i=0;i<CTS_MALLOC_DEFAULT_NUM-1;i++)
 		mempool[i].next = &mempool[i+1];
 	return mempool;
 }
 
-static inline int cts_updated_contact_free_mempool(updated_contact *mempool)
+static inline int cts_updated_contact_free_mempool(updated_record *mempool)
 {
-	updated_contact *memseg, *tmp;
+	updated_record *memseg, *tmp;
 
 	retv_if(NULL == mempool, CTS_ERR_ARG_NULL);
 
@@ -64,7 +65,7 @@ API int contacts_svc_iter_next(CTSiter *iter)
 	retvm_if(iter->i_type <= CTS_ITER_NONE || CTS_ITER_MAX <= iter->i_type,
 			CTS_ERR_ARG_INVALID, "iter is Invalid(type=%d", iter->i_type);
 
-	if (CTS_ITER_UPDATED_CONTACTS_AFTER_VER == iter->i_type)
+	if (CTS_ITER_UPDATED_INFO_AFTER_VER == iter->i_type)
 	{
 		retv_if(NULL == iter->info, CTS_ERR_ARG_INVALID);
 
@@ -82,13 +83,14 @@ API int contacts_svc_iter_next(CTSiter *iter)
 	else
 	{
 		ret = cts_stmt_step(iter->stmt);
-		if (CTS_TRUE != ret)
-		{
+		if (CTS_TRUE != ret) {
 			if (CTS_SUCCESS != ret)
 				ERR("cts_stmt_step() Failed(%d)", ret);
+			else
+				ret = CTS_ERR_FINISH_ITER;
 			cts_stmt_finalize(iter->stmt);
 			iter->stmt = NULL;
-			return CTS_ERR_FINISH_ITER;
+			return ret;
 		}
 	}
 	return CTS_SUCCESS;
@@ -100,7 +102,7 @@ API int contacts_svc_iter_remove(CTSiter *iter)
 	retvm_if(iter->i_type <= CTS_ITER_NONE || CTS_ITER_MAX <= iter->i_type,
 			CTS_ERR_ARG_INVALID, "iter is Invalid(type=%d", iter->i_type);
 
-	if (CTS_ITER_UPDATED_CONTACTS_AFTER_VER == iter->i_type) {
+	if (CTS_ITER_UPDATED_INFO_AFTER_VER == iter->i_type) {
 		retv_if(NULL == iter->info, CTS_ERR_ARG_INVALID);
 		if (iter->info->head)
 			cts_updated_contact_free_mempool(iter->info->head);
@@ -111,19 +113,25 @@ API int contacts_svc_iter_remove(CTSiter *iter)
 	}
 
 	free(iter);
+	INFO(",CTSiter,0");
 	return CTS_SUCCESS;
 }
 
 static inline int cts_get_list(cts_get_list_op op_code, CTSiter *iter)
 {
 	cts_stmt stmt = NULL;
-	const char *display;
+	const char *display, *data;
 	char query[CTS_SQL_MAX_LEN] = {0};
 
 	retv_if(NULL == iter, CTS_ERR_ARG_NULL);
 
 	iter->i_type = CTS_ITER_NONE;
 	iter->stmt = NULL;
+
+	if (cts_restriction_get_permit())
+		data = CTS_TABLE_DATA;
+	else
+		data = CTS_TABLE_RESTRICTED_DATA_VIEW;
 
 	switch (op_code)
 	{
@@ -136,11 +144,11 @@ static inline int cts_get_list(cts_get_list_op op_code, CTSiter *iter)
 			display = CTS_SCHEMA_DATA_NAME_LOOKUP;
 
 		snprintf(query, sizeof(query),
-				"SELECT A.contact_id, data1, data2, data3, data5, B.addrbook_id, B.image0, %s "
-				"FROM %s A, %s B ON A.contact_id = B.contact_id "
-				"WHERE A.datatype = %d "
+				"SELECT B.person_id, data1, data2, data3, data5, B.addrbook_id, B.image0, B.person_id, %s "
+				"FROM %s A, %s B ON A.contact_id = B.person_id "
+				"WHERE A.datatype = %d AND B.person_id = B.contact_id "
 				"ORDER BY A.data1, A.%s",
-				display, CTS_TABLE_DATA, CTS_TABLE_CONTACTS,
+				display, data, CTS_TABLE_CONTACTS,
 				CTS_DATA_NAME, CTS_SCHEMA_DATA_NAME_SORTING_KEY);
 		stmt = cts_query_prepare(query);
 		retvm_if(NULL == stmt, CTS_ERR_DB_FAILED, "cts_query_prepare() Failed");
@@ -159,7 +167,7 @@ static inline int cts_get_list(cts_get_list_op op_code, CTSiter *iter)
 		break;
 	case CTS_LIST_ALL_GROUP:
 		iter->i_type = CTS_ITER_GROUPS;
-		snprintf(query, sizeof(query), "SELECT group_id, addrbook_id, group_name "
+		snprintf(query, sizeof(query), "SELECT group_id, addrbook_id, group_name, ringtone "
 				"FROM %s ORDER BY addrbook_id, group_name COLLATE NOCASE",
 				CTS_TABLE_GROUPS);
 
@@ -189,14 +197,16 @@ static inline int cts_get_list(cts_get_list_op op_code, CTSiter *iter)
 				"NOT EXISTS (SELECT id FROM %s "
 				"WHERE datatype = %d AND contact_id = A.related_id "
 				"AND A.normal_num = data3)) "
+				"WHERE A.log_type < %d "
 				"GROUP BY A.id) C "
 				"LEFT JOIN (SELECT D.contact_id, data1, data2, data3, data5, image0 "
 				"FROM %s D, %s E ON D.datatype = %d AND D.contact_id = E.contact_id) F "
 				"ON C.contact_id = F.contact_id "
 				"GROUP BY F.data2, F.data3, F.data5, C.number "
 				"ORDER BY C.log_time DESC",
-				CTS_TABLE_PHONELOGS, CTS_TABLE_DATA, CTS_DATA_NUMBER, CTS_TABLE_DATA,
-				CTS_DATA_NUMBER, CTS_TABLE_DATA, CTS_TABLE_CONTACTS, CTS_DATA_NAME);
+				CTS_TABLE_PHONELOGS, data, CTS_DATA_NUMBER, data,
+				CTS_DATA_NUMBER, CTS_PLOG_TYPE_EMAIL_RECEIVED,
+				data, CTS_TABLE_CONTACTS, CTS_DATA_NAME);
 		stmt = cts_query_prepare(query);
 		retvm_if(NULL == stmt, CTS_ERR_DB_FAILED, "cts_query_prepare() Failed");
 		iter->stmt = stmt;
@@ -213,15 +223,16 @@ static inline int cts_get_list(cts_get_list_op op_code, CTSiter *iter)
 				"(A.related_id = B.contact_id OR A.related_id IS NULL OR "
 				"NOT EXISTS (SELECT id FROM %s WHERE datatype = %d AND contact_id = A.related_id "
 				"AND A.normal_num = data3)) "
-				"WHERE A.log_type >= %d "
+				"WHERE (A.log_type BETWEEN %d AND %d) "
 				"GROUP BY A.id) C "
 				"LEFT JOIN (SELECT D.contact_id, data1, data2, data3, data5, image0 "
 				"FROM %s D, %s E ON D.datatype = %d AND D.contact_id = E.contact_id) F "
 				"ON C.contact_id = F.contact_id "
 				"GROUP BY F.data2, F.data3, F.data5, C.number "
 				"ORDER BY C.log_time DESC",
-				CTS_TABLE_PHONELOGS, CTS_TABLE_DATA, CTS_DATA_NUMBER, CTS_TABLE_DATA, CTS_DATA_NUMBER,
-				CTS_PLOG_TYPE_MMS_INCOMMING, CTS_TABLE_DATA, CTS_TABLE_CONTACTS, CTS_DATA_NAME);
+				CTS_TABLE_PHONELOGS, data, CTS_DATA_NUMBER, data, CTS_DATA_NUMBER,
+				CTS_PLOG_TYPE_MMS_INCOMMING, CTS_PLOG_TYPE_MMS_BLOCKED,
+				data, CTS_TABLE_CONTACTS, CTS_DATA_NAME);
 		stmt = cts_query_prepare(query);
 		retvm_if(NULL == stmt, CTS_ERR_DB_FAILED, "cts_query_prepare() Failed");
 		iter->stmt = stmt;
@@ -245,8 +256,8 @@ static inline int cts_get_list(cts_get_list_op op_code, CTSiter *iter)
 				"ON C.contact_id = F.contact_id "
 				"GROUP BY F.data2, F.data3, F.data5, C.number "
 				"ORDER BY C.log_time DESC",
-				CTS_TABLE_PHONELOGS, CTS_TABLE_DATA, CTS_DATA_NUMBER, CTS_TABLE_DATA, CTS_DATA_NUMBER,
-				CTS_PLOG_TYPE_MMS_INCOMMING, CTS_TABLE_DATA, CTS_TABLE_CONTACTS, CTS_DATA_NAME);
+				CTS_TABLE_PHONELOGS, data, CTS_DATA_NUMBER, data, CTS_DATA_NUMBER,
+				CTS_PLOG_TYPE_MMS_INCOMMING, data, CTS_TABLE_CONTACTS, CTS_DATA_NAME);
 		stmt = cts_query_prepare(query);
 		retvm_if(NULL == stmt, CTS_ERR_DB_FAILED, "cts_query_prepare() Failed");
 		iter->stmt = stmt;
@@ -264,18 +275,72 @@ static inline int cts_get_list(cts_get_list_op op_code, CTSiter *iter)
 				"NOT EXISTS (SELECT id FROM %s "
 				"WHERE datatype = %d AND contact_id = A.related_id "
 				"AND A.normal_num = data3)) "
+				"WHERE A.log_type < %d "
 				"GROUP BY A.id) C "
 				"LEFT JOIN (SELECT D.contact_id, data1, data2, data3, data5, image0 "
 				"FROM %s D, %s E ON D.datatype = %d AND D.contact_id = E.contact_id) F "
 				"ON C.contact_id = F.contact_id "
 				"ORDER BY C.log_time DESC",
-				CTS_TABLE_PHONELOGS, CTS_TABLE_DATA, CTS_DATA_NUMBER, CTS_TABLE_DATA,
-				CTS_DATA_NUMBER, CTS_TABLE_DATA, CTS_TABLE_CONTACTS, CTS_DATA_NAME);
+				CTS_TABLE_PHONELOGS, data, CTS_DATA_NUMBER, data,
+				CTS_DATA_NUMBER, CTS_PLOG_TYPE_EMAIL_RECEIVED,
+				data, CTS_TABLE_CONTACTS, CTS_DATA_NAME);
+		stmt = cts_query_prepare(query);
+		retvm_if(NULL == stmt, CTS_ERR_DB_FAILED, "cts_query_prepare() Failed");
+		iter->stmt = stmt;
+		break;
+	case CTS_LIST_ALL_EMAIL_PLOG:
+		iter->i_type = CTS_ITER_GROUPING_PLOG;
+		snprintf(query, sizeof(query),
+				"SELECT C.id, F.data1, F.data2, F.data3, F.data5, F.image0, C.number, "
+				"C.log_type, C.log_time, C.data1, C.data2, C.contact_id, C.number_type "
+				"FROM "
+				"(SELECT A.id, A.number, A.log_type, A.log_time, A.data1, A.data2, "
+				"MIN(B.contact_id) contact_id, B.data1 number_type "
+				"FROM %s A LEFT JOIN %s B ON B.datatype = %d AND A.number = B.data2 AND "
+				"(A.related_id = B.contact_id OR A.related_id IS NULL OR "
+				"NOT EXISTS (SELECT id FROM %s "
+				"WHERE datatype = %d AND contact_id = A.related_id "
+				"AND A.number = data2)) "
+				"WHERE A.log_type >= %d "
+				"GROUP BY A.id) C "
+				"LEFT JOIN (SELECT D.contact_id, data1, data2, data3, data5, image0 "
+				"FROM %s D, %s E ON D.datatype = %d AND D.contact_id = E.contact_id) F "
+				"ON C.contact_id = F.contact_id "
+				"ORDER BY C.log_time DESC",
+				CTS_TABLE_PHONELOGS, data, CTS_DATA_EMAIL, data, CTS_DATA_EMAIL,
+				CTS_PLOG_TYPE_EMAIL_RECEIVED,
+				data, CTS_TABLE_CONTACTS, CTS_DATA_NAME);
 		stmt = cts_query_prepare(query);
 		retvm_if(NULL == stmt, CTS_ERR_DB_FAILED, "cts_query_prepare() Failed");
 		iter->stmt = stmt;
 		break;
 	case CTS_LIST_ALL_MISSED_CALL:
+		iter->i_type = CTS_ITER_GROUPING_PLOG;
+		snprintf(query, sizeof(query),
+				"SELECT C.id, F.data1, F.data2, F.data3, F.data5, F.image0, C.number, "
+				"C.log_type, C.log_time, C.data1, C.data2, C.contact_id, C.number_type "
+				"FROM "
+				"(SELECT A.id, A.number, A.log_type, A.log_time, A.data1, A.data2, "
+				"MIN(B.contact_id) contact_id, B.data1 number_type "
+				"FROM %s A LEFT JOIN %s B ON B.datatype = %d AND A.normal_num = B.data3 AND "
+				"(A.related_id = B.contact_id OR A.related_id IS NULL OR "
+				"NOT EXISTS (SELECT id FROM %s "
+				"WHERE datatype = %d AND contact_id = A.related_id "
+				"AND A.normal_num = data3)) "
+				"WHERE (A.log_type BETWEEN %d AND %d) "
+				"GROUP BY A.id) C "
+				"LEFT JOIN (SELECT D.contact_id, data1, data2, data3, data5, image0 "
+				"FROM %s D, %s E ON D.datatype = %d AND D.contact_id = E.contact_id) F "
+				"ON C.contact_id = F.contact_id "
+				"ORDER BY C.log_time DESC",
+				CTS_TABLE_PHONELOGS, data, CTS_DATA_NUMBER, data, CTS_DATA_NUMBER,
+				CTS_PLOG_TYPE_VOICE_INCOMMING_UNSEEN, CTS_PLOG_TYPE_VIDEO_INCOMMING_SEEN,
+				data, CTS_TABLE_CONTACTS, CTS_DATA_NAME);
+		stmt = cts_query_prepare(query);
+		retvm_if(NULL == stmt, CTS_ERR_DB_FAILED, "cts_query_prepare() Failed");
+		iter->stmt = stmt;
+		break;
+	case CTS_LIST_ALL_UNSEEN_MISSED_CALL:
 		iter->i_type = CTS_ITER_GROUPING_PLOG;
 		snprintf(query, sizeof(query),
 				"SELECT C.id, F.data1, F.data2, F.data3, F.data5, F.image0, C.number, "
@@ -294,9 +359,9 @@ static inline int cts_get_list(cts_get_list_op op_code, CTSiter *iter)
 				"FROM %s D, %s E ON D.datatype = %d AND D.contact_id = E.contact_id) F "
 				"ON C.contact_id = F.contact_id "
 				"ORDER BY C.log_time DESC",
-				CTS_TABLE_PHONELOGS, CTS_TABLE_DATA, CTS_DATA_NUMBER, CTS_TABLE_DATA, CTS_DATA_NUMBER,
+				CTS_TABLE_PHONELOGS, data, CTS_DATA_NUMBER, data, CTS_DATA_NUMBER,
 				CTS_PLOG_TYPE_VOICE_INCOMMING_UNSEEN, CTS_PLOG_TYPE_VIDEO_INCOMMING_UNSEEN,
-				CTS_TABLE_DATA, CTS_TABLE_CONTACTS, CTS_DATA_NAME);
+				data, CTS_TABLE_CONTACTS, CTS_DATA_NAME);
 		stmt = cts_query_prepare(query);
 		retvm_if(NULL == stmt, CTS_ERR_DB_FAILED, "cts_query_prepare() Failed");
 		iter->stmt = stmt;
@@ -304,13 +369,13 @@ static inline int cts_get_list(cts_get_list_op op_code, CTSiter *iter)
 	case CTS_LIST_ALL_NUMBER_FAVORITE:
 		iter->i_type = CTS_ITER_ALL_NUM_FAVORITE;
 		snprintf(query, sizeof(query),
-				"SELECT A.contact_id, A.data1, A.data2, A.data3, A.data5, D.image0, "
+				"SELECT D.person_id, A.data1, A.data2, A.data3, A.data5, D.image0, "
 				"B.id, B.data1, B.data2 "
 				"FROM %s A, %s B, %s C, %s D "
-				"ON A.contact_id = B.contact_id AND B.id = C.related_id AND A.contact_id = D.contact_id "
-				"WHERE A.datatype = %d AND B.datatype = %d AND C.type = %d "
+				"ON A.contact_id = B.contact_id AND B.id = C.related_id AND A.contact_id = D.person_id "
+				"WHERE A.datatype = %d AND B.datatype = %d AND C.type = %d AND D.person_id = D.contact_id "
 				"ORDER BY C.favorite_prio",
-				CTS_TABLE_DATA, CTS_TABLE_DATA, CTS_TABLE_FAVORITES, CTS_TABLE_CONTACTS,
+				data, data, CTS_TABLE_FAVORITES, CTS_TABLE_CONTACTS,
 				CTS_DATA_NAME, CTS_DATA_NUMBER, CTS_FAVOR_NUMBER);
 		stmt = cts_query_prepare(query);
 		retvm_if(NULL == stmt, CTS_ERR_DB_FAILED, "cts_query_prepare() Failed");
@@ -319,13 +384,43 @@ static inline int cts_get_list(cts_get_list_op op_code, CTSiter *iter)
 	case CTS_LIST_ALL_CONTACT_FAVORITE:
 		iter->i_type = CTS_ITER_ALL_CONTACT_FAVORITE;
 		snprintf(query, sizeof(query),
-				"SELECT A.contact_id, A.data1, A.data2, A.data3, A.data5, C.image0, B.id "
+				"SELECT C.person_id, A.data1, A.data2, A.data3, A.data5, C.image0, B.id "
 				"FROM %s A, %s B, %s C "
-				"ON A.contact_id = B.related_id AND A.contact_id = C.contact_id "
-				"WHERE A.datatype = %d AND B.type = %d "
+				"ON A.contact_id = B.related_id AND A.contact_id = C.person_id "
+				"WHERE A.datatype = %d AND B.type = %d AND C.person_id = C.contact_id "
 				"ORDER BY B.favorite_prio",
-				CTS_TABLE_DATA, CTS_TABLE_FAVORITES, CTS_TABLE_CONTACTS,
-				CTS_DATA_NAME, CTS_FAVOR_CONTACT);
+				data, CTS_TABLE_FAVORITES, CTS_TABLE_CONTACTS,
+				CTS_DATA_NAME, CTS_FAVOR_PERSON);
+		stmt = cts_query_prepare(query);
+		retvm_if(NULL == stmt, CTS_ERR_DB_FAILED, "cts_query_prepare() Failed");
+		iter->stmt = stmt;
+		break;
+	case CTS_LIST_ALL_CONTACT_FAVORITE_HAD_NUMBER:
+		iter->i_type = CTS_ITER_ALL_CONTACT_FAVORITE;
+		snprintf(query, sizeof(query),
+				"SELECT C.person_id, A.data1, A.data2, A.data3, A.data5, C.image0, B.id "
+				"FROM %s A, %s B, %s C "
+				"ON A.contact_id = B.related_id AND A.contact_id = C.person_id "
+				"WHERE A.datatype = %d AND B.type = %d AND C.default_num > 0 "
+				"GROUP BY C.person_id "
+				"ORDER BY B.favorite_prio",
+				data, CTS_TABLE_FAVORITES, CTS_TABLE_CONTACTS,
+				CTS_DATA_NAME, CTS_FAVOR_PERSON);
+		stmt = cts_query_prepare(query);
+		retvm_if(NULL == stmt, CTS_ERR_DB_FAILED, "cts_query_prepare() Failed");
+		iter->stmt = stmt;
+		break;
+	case CTS_LIST_ALL_CONTACT_FAVORITE_HAD_EMAIL:
+		iter->i_type = CTS_ITER_ALL_CONTACT_FAVORITE;
+		snprintf(query, sizeof(query),
+				"SELECT C.person_id, A.data1, A.data2, A.data3, A.data5, C.image0, B.id "
+				"FROM %s A, %s B, %s C "
+				"ON A.contact_id = B.related_id AND A.contact_id = C.person_id "
+				"WHERE A.datatype = %d AND B.type = %d AND C.default_email > 0 "
+				"GROUP BY C.person_id "
+				"ORDER BY B.favorite_prio",
+				data, CTS_TABLE_FAVORITES, CTS_TABLE_CONTACTS,
+				CTS_DATA_NAME, CTS_FAVOR_PERSON);
 		stmt = cts_query_prepare(query);
 		retvm_if(NULL == stmt, CTS_ERR_DB_FAILED, "cts_query_prepare() Failed");
 		iter->stmt = stmt;
@@ -333,13 +428,13 @@ static inline int cts_get_list(cts_get_list_op op_code, CTSiter *iter)
 	case CTS_LIST_ALL_SPEEDDIAL:
 		iter->i_type = CTS_ITER_ALL_SPEEDDIAL;
 		snprintf(query, sizeof(query),
-				"SELECT A.contact_id, A.data1, A.data2, A.data3, A.data5, D.image0, "
+				"SELECT D.contact_id, A.data1, A.data2, A.data3, A.data5, D.image0, "
 				"B.id, B.data1, B.data2, C.speed_num "
 				"FROM %s A, %s B, %s C, %s D "
 				"WHERE A.datatype = %d AND B.datatype = %d AND B.id = C.number_id "
-				"AND A.contact_id = B.contact_id AND A.contact_id = D.contact_id "
+				"AND A.contact_id = B.contact_id AND A.contact_id = D.person_id "
 				"ORDER BY C.speed_num",
-				CTS_TABLE_DATA, CTS_TABLE_DATA, CTS_TABLE_SPEEDDIALS,
+				data, data, CTS_TABLE_SPEEDDIALS,
 				CTS_TABLE_CONTACTS, CTS_DATA_NAME, CTS_DATA_NUMBER);
 		stmt = cts_query_prepare(query);
 		retvm_if(NULL == stmt, CTS_ERR_DB_FAILED, "cts_query_prepare() Failed");
@@ -362,11 +457,12 @@ static inline int cts_get_list(cts_get_list_op op_code, CTSiter *iter)
 			display = CTS_SCHEMA_DATA_NAME_LOOKUP;
 
 		snprintf(query, sizeof(query),
-				"SELECT A.contact_id, A.data1, A.data2, A.data3, A.data5, B.addrbook_id, B.image0, A.%s "
-				"FROM %s A, %s B ON A.contact_id = B.contact_id "
+				"SELECT B.person_id, A.data1, A.data2, A.data3, A.data5, B.addrbook_id, B.image0, B.contact_id, A.%s "
+				"FROM %s A, %s B ON A.contact_id = B.person_id "
 				"WHERE A.datatype = %d AND B.default_num > 0 "
+				"GROUP BY B.person_id "
 				"ORDER BY A.data1, A.%s",
-				display, CTS_TABLE_DATA, CTS_TABLE_CONTACTS, CTS_DATA_NAME, CTS_SCHEMA_DATA_NAME_SORTING_KEY);
+				display, data, CTS_TABLE_CONTACTS, CTS_DATA_NAME, CTS_SCHEMA_DATA_NAME_SORTING_KEY);
 		stmt = cts_query_prepare(query);
 		retvm_if(NULL == stmt, CTS_ERR_DB_FAILED, "cts_query_prepare() Failed");
 		iter->stmt = stmt;
@@ -379,11 +475,12 @@ static inline int cts_get_list(cts_get_list_op op_code, CTSiter *iter)
 			display = CTS_SCHEMA_DATA_NAME_LOOKUP;
 
 		snprintf(query, sizeof(query),
-				"SELECT A.contact_id, A.data1, A.data2, A.data3, A.data5, B.addrbook_id, B.image0, A.%s "
-				"FROM %s A, %s B ON A.contact_id = B.contact_id "
+				"SELECT B.person_id, A.data1, A.data2, A.data3, A.data5, B.addrbook_id, B.image0, B.contact_id, A.%s "
+				"FROM %s A, %s B ON A.contact_id = B.person_id "
 				"WHERE A.datatype = %d AND B.default_email > 0 "
+				"GROUP BY B.person_id "
 				"ORDER BY A.data1, A.%s",
-				display, CTS_TABLE_DATA, CTS_TABLE_CONTACTS, CTS_DATA_NAME, CTS_SCHEMA_DATA_NAME_SORTING_KEY);
+				display, data, CTS_TABLE_CONTACTS, CTS_DATA_NAME, CTS_SCHEMA_DATA_NAME_SORTING_KEY);
 		stmt = cts_query_prepare(query);
 		retvm_if(NULL == stmt, CTS_ERR_DB_FAILED, "cts_query_prepare() Failed");
 		iter->stmt = stmt;
@@ -397,12 +494,12 @@ static inline int cts_get_list(cts_get_list_op op_code, CTSiter *iter)
 			display = CTS_SCHEMA_DATA_NAME_LOOKUP;
 
 		snprintf(query, sizeof(query),
-				"SELECT A.contact_id, A.data1, A.data2, A.data3, A.data5, B.data2, C.image0, C.addrbook_id, A.%s "
+				"SELECT C.person_id, A.data1, A.data2, A.data3, A.data5, B.data2, C.image0, C.contact_id, C.addrbook_id, A.%s "
 				"FROM %s A, %s B, %s C "
-				"ON A.contact_id = B.contact_id AND A.contact_id = C.contact_id "
+				"ON A.contact_id = B.contact_id AND A.contact_id = C.person_id "
 				"WHERE A.datatype = %d AND (B.datatype = %d OR B.datatype = %d) "
 				"ORDER BY A.data1, A.%s",
-				display, CTS_TABLE_DATA, CTS_TABLE_DATA, CTS_TABLE_CONTACTS,
+				display, data, data, CTS_TABLE_CONTACTS,
 				CTS_DATA_NAME, CTS_DATA_NUMBER, CTS_DATA_EMAIL, CTS_SCHEMA_DATA_NAME_SORTING_KEY);
 		stmt = cts_query_prepare(query);
 		retvm_if(NULL == stmt, CTS_ERR_DB_FAILED, "cts_query_prepare() Failed");
@@ -417,12 +514,11 @@ static inline int cts_get_list(cts_get_list_op op_code, CTSiter *iter)
 			display = CTS_SCHEMA_DATA_NAME_LOOKUP;
 
 		snprintf(query, sizeof(query),
-				"SELECT A.contact_id, data1, data2, data3, data5, A.addrbook_id, A.image0, %s "
-				"FROM %s A, %s B "
+				"SELECT A.person_id, data1, data2, data3, data5, C.addrbook_id, C.image0, C.person_id, %s "
+				"FROM %s A, %s B, %s C ON A.person_id = B.contact_id AND B.contact_id = C.contact_id "
 				"WHERE A.outgoing_count > %d AND B.datatype = %d "
-				"AND B.contact_id = A.contact_id "
 				"ORDER BY A.outgoing_count DESC, data1, %s",
-				display, CTS_TABLE_CONTACTS, CTS_TABLE_DATA,
+				display, CTS_TABLE_PERSONS, data, CTS_TABLE_CONTACTS,
 				CTS_OFTEN_USED_NUM, CTS_DATA_NAME, CTS_SCHEMA_DATA_NAME_SORTING_KEY);
 		stmt = cts_query_prepare(query);
 		retvm_if(NULL == stmt, CTS_ERR_DB_FAILED, "cts_query_prepare() Failed");
@@ -437,12 +533,12 @@ static inline int cts_get_list(cts_get_list_op op_code, CTSiter *iter)
 			display = CTS_SCHEMA_DATA_NAME_LOOKUP;
 
 		snprintf(query, sizeof(query),
-				"SELECT A.contact_id, A.data1, A.data2, A.data3, A.data5, B.data2, C.image0, C.addrbook_id, A.%s "
+				"SELECT C.person_id, A.data1, A.data2, A.data3, A.data5, B.data2, C.image0, C.contact_id, C.addrbook_id, A.%s "
 				"FROM %s A, %s B, %s C "
-				"ON A.contact_id = B.contact_id AND A.contact_id = C.contact_id "
-				"WHERE A.datatype = %d AND (B.datatype = %d) "
+				"ON A.contact_id = B.contact_id AND A.contact_id = C.person_id "
+				"WHERE A.datatype = %d AND B.datatype = %d "
 				"ORDER BY A.data1, A.%s",
-				display, CTS_TABLE_DATA, CTS_TABLE_DATA, CTS_TABLE_CONTACTS,
+				display, data, data, CTS_TABLE_CONTACTS,
 				CTS_DATA_NAME, CTS_DATA_NUMBER, CTS_SCHEMA_DATA_NAME_SORTING_KEY);
 		stmt = cts_query_prepare(query);
 		retvm_if(NULL == stmt, CTS_ERR_DB_FAILED, "cts_query_prepare() Failed");
@@ -474,6 +570,7 @@ API int contacts_svc_get_list(cts_get_list_op op_code, CTSiter **iter)
 	}
 
 	*iter = (CTSiter *)result;
+	INFO(",CTSiter,1");
 	return CTS_SUCCESS;
 }
 
@@ -482,7 +579,7 @@ static inline int cts_get_list_with_str(cts_get_list_str_op op_code,
 {
 	int ret;
 	cts_stmt stmt = NULL;
-	const char *display;
+	const char *display, *data;
 	char query[CTS_SQL_MAX_LEN] = {0};
 	char remake_val[CTS_SQL_MIN_LEN];
 
@@ -495,6 +592,11 @@ static inline int cts_get_list_with_str(cts_get_list_str_op op_code,
 
 	retvm_if(NULL == search_value && CTS_LIST_PLOGS_OF_NUMBER != op_code,
 			CTS_ERR_ARG_NULL, "The search_value is NULL");
+
+	if (cts_restriction_get_permit())
+		data = CTS_TABLE_DATA;
+	else
+		data = CTS_TABLE_RESTRICTED_DATA_VIEW;
 
 	switch ((int)op_code)
 	{
@@ -510,12 +612,13 @@ static inline int cts_get_list_with_str(cts_get_list_str_op op_code,
 					"WHERE A.number = ? "
 					"GROUP BY A.id "
 					"ORDER BY A.log_time DESC",
-					CTS_TABLE_PHONELOGS, CTS_TABLE_DATA, CTS_DATA_NUMBER, CTS_TABLE_DATA, CTS_DATA_NUMBER);
+					CTS_TABLE_PHONELOGS, data, CTS_DATA_NUMBER, data, CTS_DATA_NUMBER);
 		}
 		else {
 			snprintf(query, sizeof(query),
 					"SELECT id, log_type, log_time, data1, data2, NULL "
-					"FROM %s WHERE number ISNULL ORDER BY id DESC", CTS_TABLE_PHONELOGS);
+					"FROM %s WHERE number ISNULL AND log_type < %d ORDER BY id DESC",
+					CTS_TABLE_PHONELOGS, CTS_PLOG_TYPE_EMAIL_RECEIVED);
 		}
 		stmt = cts_query_prepare(query);
 		retvm_if(NULL == stmt, CTS_ERR_DB_FAILED, "cts_query_prepare() Failed");
@@ -526,7 +629,7 @@ static inline int cts_get_list_with_str(cts_get_list_str_op op_code,
 
 			normal_num = cts_normalize_number(remake_val);
 			cts_stmt_bind_copy_text(stmt, 1, normal_num, strlen(normal_num));
-			cts_stmt_bind_copy_text(stmt, 2, remake_val, strlen(remake_val));
+			cts_stmt_bind_copy_text(stmt, 2, search_value, strlen(search_value));
 		}
 		iter->stmt = stmt;
 		break;
@@ -545,11 +648,11 @@ static inline int cts_get_list_with_str(cts_get_list_str_op op_code,
 			display = CTS_SCHEMA_DATA_NAME_LOOKUP;
 
 		snprintf(query, sizeof(query),
-				"SELECT A.contact_id, data1, data2, data3, data5, B.addrbook_id, B.image0 "
+				"SELECT B.person_id, data1, data2, data3, data5, B.addrbook_id, B.image0, B.contact_id "
 				"FROM %s A, %s B ON A.contact_id = B.contact_id "
 				"WHERE datatype = %d AND %s LIKE ('%%' || ? || '%%') "
 				"ORDER BY data1, %s",
-				CTS_TABLE_DATA, CTS_TABLE_CONTACTS, CTS_DATA_NAME, display, CTS_SCHEMA_DATA_NAME_SORTING_KEY);
+				data, CTS_TABLE_CONTACTS, CTS_DATA_NAME, display, CTS_SCHEMA_DATA_NAME_SORTING_KEY);
 		stmt = cts_query_prepare(query);
 		retvm_if(NULL == stmt, CTS_ERR_DB_FAILED, "cts_query_prepare() Failed");
 		cts_stmt_bind_copy_text(stmt, 1, remake_val, strlen(remake_val));
@@ -570,12 +673,12 @@ static inline int cts_get_list_with_str(cts_get_list_str_op op_code,
 			display = CTS_SCHEMA_DATA_NAME_LOOKUP;
 
 		snprintf(query, sizeof(query),
-				"SELECT A.contact_id, A.data1, A.data2, A.data3, A.data5, B.data2, C.image0 "
+				"SELECT C.person_id, A.data1, A.data2, A.data3, A.data5, B.data2, C.image0, C.contact_id "
 				"FROM %s A, %s B, %s C "
-				"ON A.contact_id = B.contact_id AND A.contact_id = C.contact_id "
+				"ON A.contact_id = C.person_id AND B.contact_id = C.contact_id "
 				"WHERE A.datatype = %d AND B.datatype = %d AND A.%s LIKE ('%%' || ? || '%%') "
 				"ORDER BY A.data1, A.%s",
-				CTS_TABLE_DATA, CTS_TABLE_DATA, CTS_TABLE_CONTACTS,
+				data, data, CTS_TABLE_CONTACTS,
 				CTS_DATA_NAME, CTS_DATA_NUMBER, display, CTS_SCHEMA_DATA_NAME_SORTING_KEY);
 
 		stmt = cts_query_prepare(query);
@@ -587,12 +690,12 @@ static inline int cts_get_list_with_str(cts_get_list_str_op op_code,
 		iter->i_type = CTS_ITER_NUMBERINFOS;
 
 		snprintf(query, sizeof(query),
-				"SELECT A.contact_id, A.data1, A.data2, A.data3, A.data5, B.data2, C.image0 "
+				"SELECT C.person_id, A.data1, A.data2, A.data3, A.data5, B.data2, C.image0, C.contact_id "
 				"FROM %s A, %s B, %s C "
-				"ON A.contact_id = B.contact_id AND A.contact_id = C.contact_id "
+				"ON A.contact_id = C.person_id AND B.contact_id = C.contact_id "
 				"WHERE A.datatype = %d AND B.datatype = %d AND B.data2 LIKE ('%%' || ? || '%%') "
 				"ORDER BY A.data1, A.%s",
-				CTS_TABLE_DATA, CTS_TABLE_DATA, CTS_TABLE_CONTACTS,
+				data, data, CTS_TABLE_CONTACTS,
 				CTS_DATA_NAME, CTS_DATA_NUMBER, CTS_SCHEMA_DATA_NAME_SORTING_KEY);
 
 		stmt = cts_query_prepare(query);
@@ -603,12 +706,12 @@ static inline int cts_get_list_with_str(cts_get_list_str_op op_code,
 	case CTS_LIST_EMAILINFOS_WITH_EMAIL:
 		iter->i_type = CTS_ITER_EMAILINFOS_WITH_EMAIL;
 		snprintf(query, sizeof(query),
-				"SELECT A.contact_id, A.data1, A.data2, A.data3, A.data5, B.data2, C.image0 "
+				"SELECT C.person_id, A.data1, A.data2, A.data3, A.data5, B.data2, C.image0, C.contact_id "
 				"FROM %s A, %s B, %s C "
-				"ON A.contact_id = B.contact_id AND A.contact_id = C.contact_id "
+				"ON A.contact_id = C.person_id AND B.contact_id = C.contact_id "
 				"WHERE A.datatype = %d AND B.datatype = %d AND B.data2 LIKE ('%%' || ? || '%%') "
 				"ORDER BY A.data1, A.%s",
-				CTS_TABLE_DATA, CTS_TABLE_DATA, CTS_TABLE_CONTACTS,
+				data, data, CTS_TABLE_CONTACTS,
 				CTS_DATA_NAME, CTS_DATA_EMAIL, CTS_SCHEMA_DATA_NAME_SORTING_KEY);
 		stmt = cts_query_prepare(query);
 		retvm_if(NULL == stmt, CTS_ERR_DB_FAILED, "cts_query_prepare() Failed");
@@ -620,7 +723,7 @@ static inline int cts_get_list_with_str(cts_get_list_str_op op_code,
 				CTS_ERR_ARG_INVALID, "search_value is too long");
 		iter->i_type = CTS_ITER_PLOGNUMBERS_WITH_NUM;
 		snprintf(query, sizeof(query),
-				"SELECT number FROM %s WHERE number LIKE '%%%s%%' GROUP BY number",
+				"SELECT number FROM %s WHERE number LIKE '%%%s%%' AND normal_num NOTNULL GROUP BY number",
 				CTS_TABLE_PHONELOGS, search_value);
 		stmt = cts_query_prepare(query);
 		retvm_if(NULL == stmt, CTS_ERR_DB_FAILED, "cts_query_prepare() Failed");
@@ -654,6 +757,7 @@ API int contacts_svc_get_list_with_str(cts_get_list_str_op op_code,
 	}
 
 	*iter = (CTSiter *)result;
+	INFO(",CTSiter,1");
 	return CTS_SUCCESS;
 }
 
@@ -661,7 +765,7 @@ static inline int cts_get_list_with_int(cts_get_list_int_op op_code,
 		unsigned int search_value, CTSiter *iter)
 {
 	cts_stmt stmt = NULL;
-	const char *display;
+	const char *display, *data;
 	char query[CTS_SQL_MAX_LEN] = {0};
 
 	retv_if(NULL == iter, CTS_ERR_ARG_NULL);
@@ -673,17 +777,22 @@ static inline int cts_get_list_with_int(cts_get_list_int_op op_code,
 	else
 		display = CTS_SCHEMA_DATA_NAME_LOOKUP;
 
-	switch (op_code)
-	{
+	if (cts_restriction_get_permit())
+		data = CTS_TABLE_DATA;
+	else
+		data = CTS_TABLE_RESTRICTED_DATA_VIEW;
+
+	switch (op_code) {
 	case CTS_LIST_MEMBERS_OF_GROUP_ID:
 		iter->i_type = CTS_ITER_CONTACTS;
 		snprintf(query, sizeof(query),
-				"SELECT A.contact_id, data1, data2, data3, data5, B.addrbook_id, B.image0, %s "
-				"FROM %s A, %s B WHERE datatype = %d AND A.contact_id IN "
+				"SELECT B.person_id, data1, data2, data3, data5, B.addrbook_id, B.image0, B.contact_id, %s "
+				"FROM %s A, %s B ON A.contact_id = B.person_id "
+				"WHERE datatype = %d AND B.contact_id IN "
 				"(SELECT contact_id FROM %s WHERE group_id = %d) "
-				"AND A.contact_id = B.contact_id "
+				"GROUP BY B.person_id "
 				"ORDER BY data1, %s",
-				display, CTS_TABLE_DATA, CTS_TABLE_CONTACTS, CTS_DATA_NAME,
+				display, data, CTS_TABLE_CONTACTS, CTS_DATA_NAME,
 				CTS_TABLE_GROUPING_INFO, search_value, CTS_SCHEMA_DATA_NAME_SORTING_KEY);
 		stmt = cts_query_prepare(query);
 		retvm_if(NULL == stmt, CTS_ERR_DB_FAILED, "cts_query_prepare() Failed");
@@ -692,15 +801,15 @@ static inline int cts_get_list_with_int(cts_get_list_int_op op_code,
 	case CTS_LIST_NO_GROUP_MEMBERS_OF_ADDRESSBOOK_ID:
 		iter->i_type = CTS_ITER_CONTACTS;
 		snprintf(query, sizeof(query),
-				"SELECT A.contact_id, data1, data2, data3, data5, A.addrbook_id, A.image0, %s "
-				"FROM %s A, %s B ON A.contact_id = B.contact_id "
-				"WHERE A.addrbook_id = %d AND NOT EXISTS "
-				"(SELECT contact_id FROM %s WHERE contact_id=A.contact_id LIMIT 1) "
-				"AND datatype = %d "
+				"SELECT B.person_id, data1, data2, data3, data5, B.addrbook_id, B.image0, B.contact_id, %s "
+				"FROM %s A, %s B ON A.contact_id = B.person_id "
+				"WHERE datatype = %d AND B.addrbook_id = %d AND NOT EXISTS "
+				"(SELECT contact_id FROM %s WHERE contact_id=B.contact_id LIMIT 1) "
+				"GROUP BY B.person_id "
 				"ORDER BY data1, %s",
-				display, CTS_TABLE_CONTACTS, CTS_TABLE_DATA,
-				search_value, CTS_TABLE_GROUPING_INFO, CTS_DATA_NAME,
-				CTS_SCHEMA_DATA_NAME_SORTING_KEY);
+				display, data, CTS_TABLE_CONTACTS,
+				CTS_DATA_NAME, search_value,
+				CTS_TABLE_GROUPING_INFO, CTS_SCHEMA_DATA_NAME_SORTING_KEY);
 
 		stmt = cts_query_prepare(query);
 		retvm_if(NULL == stmt, CTS_ERR_DB_FAILED, "cts_query_prepare() Failed");
@@ -709,12 +818,13 @@ static inline int cts_get_list_with_int(cts_get_list_int_op op_code,
 	case CTS_LIST_MEMBERS_OF_ADDRESSBOOK_ID:
 		iter->i_type = CTS_ITER_CONTACTS;
 		snprintf(query, sizeof(query),
-				"SELECT A.contact_id, data1, data2, data3, data5, B.addrbook_id, B.image0, %s "
-				"FROM %s A, %s B ON A.contact_id = B.contact_id "
+				"SELECT B.person_id, data1, data2, data3, data5, B.addrbook_id, B.image0, B.contact_id, %s "
+				"FROM %s A, %s B ON A.contact_id = B.person_id "
 				"WHERE datatype = %d AND B.addrbook_id = %d "
+				"GROUP BY B.person_id "
 				"ORDER BY data1, %s",
-				display, CTS_TABLE_DATA, CTS_TABLE_CONTACTS, CTS_DATA_NAME, search_value,
-				CTS_SCHEMA_DATA_NAME_SORTING_KEY);
+				display, data, CTS_TABLE_CONTACTS,
+				CTS_DATA_NAME, search_value, CTS_SCHEMA_DATA_NAME_SORTING_KEY);
 
 		stmt = cts_query_prepare(query);
 		retvm_if(NULL == stmt, CTS_ERR_DB_FAILED, "cts_query_prepare() Failed");
@@ -723,7 +833,7 @@ static inline int cts_get_list_with_int(cts_get_list_int_op op_code,
 	case CTS_LIST_GROUPS_OF_ADDRESSBOOK_ID:
 		iter->i_type = CTS_ITER_GROUPS;
 		snprintf(query, sizeof(query),
-				"SELECT group_id, %d, group_name "
+				"SELECT group_id, %d, group_name, ringtone "
 				"FROM %s WHERE addrbook_id = %d "
 				"ORDER BY group_name COLLATE NOCASE",
 				search_value, CTS_TABLE_GROUPS, search_value);
@@ -736,8 +846,67 @@ static inline int cts_get_list_with_int(cts_get_list_int_op op_code,
 		snprintf(query, sizeof(query),
 				"SELECT addrbook_id, addrbook_name, acc_id, acc_type, mode "
 				"FROM %s WHERE acc_id = %d "
-				"ORDER BY acc_id, addrbook_id",
+				"ORDER BY addrbook_id",
 				CTS_TABLE_ADDRESSBOOKS, search_value);
+		stmt = cts_query_prepare(query);
+		retvm_if(NULL == stmt, CTS_ERR_DB_FAILED, "cts_query_prepare() Failed");
+		iter->stmt = stmt;
+		break;
+	case CTS_LIST_MEMBERS_OF_PERSON_ID:
+		iter->i_type = CTS_ITER_CONTACTS;
+		snprintf(query, sizeof(query),
+				"SELECT B.person_id, data1, data2, data3, data5, B.addrbook_id, B.image0, B.contact_id, %s "
+				"FROM %s A, %s B ON A.contact_id = B.contact_id "
+				"WHERE A.datatype = %d AND B.person_id = %d "
+				"ORDER BY data1, %s",
+				display, data, CTS_TABLE_CONTACTS, CTS_DATA_NAME, search_value,
+				CTS_SCHEMA_DATA_NAME_SORTING_KEY);
+		stmt = cts_query_prepare(query);
+		retvm_if(NULL == stmt, CTS_ERR_DB_FAILED, "cts_query_prepare() Failed");
+		iter->stmt = stmt;
+		break;
+	case CTS_LIST_PLOG_OF_PERSON_ID:
+		iter->i_type = CTS_ITER_PLOGS_OF_PERSON_ID;
+		snprintf(query, sizeof(query),
+				"SELECT A.id, A.log_type, A.log_time, A.data1, A.data2, A.related_id, A.number "
+				"FROM %s A, %s B WHERE ((A.normal_num = B.data3 AND B.datatype = %d) OR "
+				"(A.number = B.data2 AND B.datatype = %d)) "
+				"AND EXISTS (SELECT contact_id from %s WHERE person_id = %d AND B.contact_id = contact_id) "
+				"ORDER BY A.log_time DESC",
+				CTS_TABLE_PHONELOGS, data, CTS_DATA_NUMBER, CTS_DATA_EMAIL,
+				CTS_TABLE_CONTACTS, search_value);
+		stmt = cts_query_prepare(query);
+		retvm_if(NULL == stmt, CTS_ERR_DB_FAILED, "cts_query_prepare() Failed");
+		iter->stmt = stmt;
+		break;
+	case CTS_LIST_NO_GROUP_MEMBERS_HAD_NUMBER_OF_ADDRESSBOOK_ID:
+		iter->i_type = CTS_ITER_CONTACTS;
+		snprintf(query, sizeof(query),
+				"SELECT B.person_id, data1, data2, data3, data5, B.addrbook_id, B.image0, B.contact_id, %s "
+				"FROM %s A, %s B ON A.contact_id = B.person_id "
+				"WHERE datatype = %d AND B.addrbook_id = %d AND B.default_num > 0 AND "
+				"NOT EXISTS (SELECT contact_id FROM %s WHERE contact_id=B.contact_id LIMIT 1) "
+				"GROUP BY B.person_id "
+				"ORDER BY data1, %s",
+				display, data, CTS_TABLE_CONTACTS,
+				CTS_DATA_NAME, search_value,
+				CTS_TABLE_GROUPING_INFO, CTS_SCHEMA_DATA_NAME_SORTING_KEY);
+		stmt = cts_query_prepare(query);
+		retvm_if(NULL == stmt, CTS_ERR_DB_FAILED, "cts_query_prepare() Failed");
+		iter->stmt = stmt;
+		break;
+	case CTS_LIST_NO_GROUP_MEMBERS_HAD_EMAIL_OF_ADDRESSBOOK_ID:
+		iter->i_type = CTS_ITER_CONTACTS;
+		snprintf(query, sizeof(query),
+				"SELECT B.person_id, data1, data2, data3, data5, B.addrbook_id, B.image0, B.contact_id, %s "
+				"FROM %s A, %s B ON A.contact_id = B.person_id "
+				"WHERE datatype = %d AND B.addrbook_id = %d AND B.default_email > 0 AND "
+				"NOT EXISTS (SELECT contact_id FROM %s WHERE contact_id=B.contact_id LIMIT 1) "
+				"GROUP BY B.person_id "
+				"ORDER BY data1, %s",
+				display, data, CTS_TABLE_CONTACTS,
+				CTS_DATA_NAME, search_value,
+				CTS_TABLE_GROUPING_INFO, CTS_SCHEMA_DATA_NAME_SORTING_KEY);
 		stmt = cts_query_prepare(query);
 		retvm_if(NULL == stmt, CTS_ERR_DB_FAILED, "cts_query_prepare() Failed");
 		iter->stmt = stmt;
@@ -769,6 +938,7 @@ API int contacts_svc_get_list_with_int(cts_get_list_int_op op_code,
 	}
 
 	*iter = (CTSiter *)result;
+	INFO(",CTSiter,1");
 	return CTS_SUCCESS;
 }
 
@@ -778,20 +948,34 @@ static inline int cts_get_updated_contacts(int addressbook_id, int version,
 	int ret;
 	cts_stmt stmt = NULL;
 	char query[CTS_SQL_MAX_LEN] = {0};
-	updated_contact *result;
+	updated_record *result;
 
 	retv_if(NULL == iter, CTS_ERR_ARG_NULL);
 	retv_if(NULL == iter->info, CTS_ERR_ARG_INVALID);
 
-	iter->i_type = CTS_ITER_UPDATED_CONTACTS_AFTER_VER;
-	snprintf(query, sizeof(query),
-			"SELECT %d, contact_id, changed_ver, created_ver FROM %s "
-			"WHERE changed_ver > %d AND addrbook_id = %d "
-			"UNION "
-			"SELECT %d, contact_id, deleted_ver, -1 FROM %s "
-			"WHERE deleted_ver > %d AND addrbook_id = %d",
-			CTS_OPERATION_UPDATED, CTS_TABLE_CONTACTS, version, addressbook_id,
-			CTS_OPERATION_DELETED, CTS_TABLE_DELETEDS, version, addressbook_id);
+	iter->i_type = CTS_ITER_UPDATED_INFO_AFTER_VER;
+
+	if (0 <= addressbook_id)
+	{
+		snprintf(query, sizeof(query),
+				"SELECT %d, contact_id, changed_ver, created_ver, addrbook_id FROM %s "
+				"WHERE changed_ver > %d AND addrbook_id = %d "
+				"UNION "
+				"SELECT %d, contact_id, deleted_ver, -1, addrbook_id FROM %s "
+				"WHERE deleted_ver > %d AND addrbook_id = %d",
+				CTS_OPERATION_UPDATED, CTS_TABLE_CONTACTS, version, addressbook_id,
+				CTS_OPERATION_DELETED, CTS_TABLE_DELETEDS, version, addressbook_id);
+	}
+	else {
+		snprintf(query, sizeof(query),
+				"SELECT %d, contact_id, changed_ver, created_ver, addrbook_id FROM %s "
+				"WHERE changed_ver > %d "
+				"UNION "
+				"SELECT %d, contact_id, deleted_ver, -1, addrbook_id FROM %s "
+				"WHERE deleted_ver > %d ",
+				CTS_OPERATION_UPDATED, CTS_TABLE_CONTACTS, version,
+				CTS_OPERATION_DELETED, CTS_TABLE_DELETEDS, version );
+	}
 
 	stmt = cts_query_prepare(query);
 	retvm_if(NULL == stmt, CTS_ERR_DB_FAILED, "cts_query_prepare() Failed");
@@ -804,15 +988,16 @@ static inline int cts_get_updated_contacts(int addressbook_id, int version,
 		return CTS_ERR_DB_RECORD_NOT_FOUND;
 	}
 
-	iter->info->head = result = cts_updated_contact_add_mempool();
+	iter->info->head = result = cts_updated_info_add_mempool();
 	do {
 		result->type = cts_stmt_get_int(stmt, 0);
 		result->id = cts_stmt_get_int(stmt, 1);
 		result->ver = cts_stmt_get_int(stmt, 2);
 		if (cts_stmt_get_int(stmt, 3) == result->ver || version < cts_stmt_get_int(stmt, 3))
 			result->type = CTS_OPERATION_INSERTED;
+		result->addressbook_id = cts_stmt_get_int(stmt, 4);
 		if (NULL == result->next)
-			result->next = cts_updated_contact_add_mempool();
+			result->next = cts_updated_info_add_mempool();
 		result = result->next;
 	}while(CTS_TRUE == cts_stmt_step(stmt));
 
@@ -833,7 +1018,7 @@ API int contacts_svc_get_updated_contacts(int addressbook_id,
 	result = calloc(1, sizeof(CTSiter));
 	retvm_if(NULL == result, CTS_ERR_OUT_OF_MEMORY, "calloc() Failed");
 
-	result->info = calloc(1, sizeof(updated_contact_info));
+	result->info = calloc(1, sizeof(updated_info));
 	if (NULL == result->info) {
 		ERR("calloc() Failed");
 		free(result);
@@ -849,10 +1034,105 @@ API int contacts_svc_get_updated_contacts(int addressbook_id,
 	}
 
 	*iter = (CTSiter *)result;
+	INFO(",CTSiter,1");
 	return CTS_SUCCESS;
 }
 
-static inline void cts_foreach_run(CTSiter *iter, cts_foreach_fn cb, void *data)
+static inline int cts_get_updated_groups(int addressbook_id, int version,
+		CTSiter *iter)
+{
+	int ret;
+	cts_stmt stmt = NULL;
+	char query[CTS_SQL_MAX_LEN] = {0};
+	updated_record *result;
+
+	retv_if(NULL == iter, CTS_ERR_ARG_NULL);
+	retv_if(NULL == iter->info, CTS_ERR_ARG_INVALID);
+
+	iter->i_type = CTS_ITER_UPDATED_INFO_AFTER_VER;
+	if (0 <= addressbook_id)
+	{
+		snprintf(query, sizeof(query),
+				"SELECT %d, group_id, changed_ver, created_ver, addrbook_id FROM %s "
+				"WHERE changed_ver > %d AND addrbook_id = %d "
+				"UNION "
+				"SELECT %d, group_id, deleted_ver, -1, addrbook_id FROM %s "
+				"WHERE deleted_ver > %d AND addrbook_id = %d",
+				CTS_OPERATION_UPDATED, CTS_TABLE_GROUPS, version, addressbook_id,
+				CTS_OPERATION_DELETED, CTS_TABLE_GROUP_DELETEDS, version, addressbook_id);
+	}
+	else {
+		snprintf(query, sizeof(query),
+				"SELECT %d, group_id, changed_ver, created_ver, addrbook_id FROM %s "
+				"WHERE changed_ver > %d "
+				"UNION "
+				"SELECT %d, group_id, deleted_ver, -1, addrbook_id FROM %s "
+				"WHERE deleted_ver > %d ",
+				CTS_OPERATION_UPDATED, CTS_TABLE_GROUPS, version,
+				CTS_OPERATION_DELETED, CTS_TABLE_GROUP_DELETEDS, version);
+	}
+	stmt = cts_query_prepare(query);
+	retvm_if(NULL == stmt, CTS_ERR_DB_FAILED, "cts_query_prepare() Failed");
+
+	ret = cts_stmt_step(stmt);
+	if (CTS_TRUE != ret) {
+		warn_if(CTS_SUCCESS != ret, "cts_stmt_step() Failed(%d)", ret);
+		cts_stmt_finalize(stmt);
+		return CTS_ERR_DB_RECORD_NOT_FOUND;
+	}
+
+	iter->info->head = result = cts_updated_info_add_mempool();
+	do {
+		result->type = cts_stmt_get_int(stmt, 0);
+		result->id = cts_stmt_get_int(stmt, 1);
+		result->ver = cts_stmt_get_int(stmt, 2);
+		if (cts_stmt_get_int(stmt, 3) == result->ver || version < cts_stmt_get_int(stmt, 3))
+			result->type = CTS_OPERATION_INSERTED;
+		result->addressbook_id = cts_stmt_get_int(stmt, 4);
+		if (NULL == result->next)
+			result->next = cts_updated_info_add_mempool();
+		result = result->next;
+	}while (CTS_TRUE == cts_stmt_step(stmt));
+
+	cts_stmt_finalize(stmt);
+
+	return CTS_SUCCESS;
+}
+
+
+API int contacts_svc_get_updated_groups(int addressbook_id,
+		int version, CTSiter **iter)
+{
+	int ret;
+	CTSiter *result;
+
+	retv_if(NULL == iter, CTS_ERR_ARG_NULL);
+	retvm_if(version < 0, CTS_ERR_ARG_INVALID, "The version(%d) is invalid", version);
+
+	result = calloc(1, sizeof(CTSiter));
+	retvm_if(NULL == result, CTS_ERR_OUT_OF_MEMORY, "calloc() Failed");
+
+	result->info = calloc(1, sizeof(updated_info));
+	if (NULL == result->info) {
+		ERR("calloc() Failed");
+		free(result);
+		return CTS_ERR_OUT_OF_MEMORY;
+	}
+
+	ret = cts_get_updated_groups(addressbook_id, version, result);
+	if (ret) {
+		ERR("cts_get_updated_groups() Failed(%d)", ret);
+		free(result->info);
+		free(result);
+		return ret;
+	}
+
+	*iter = (CTSiter *)result;
+	INFO(",CTSiter,1");
+	return CTS_SUCCESS;
+}
+
+void cts_foreach_run(CTSiter *iter, cts_foreach_fn cb, void *data)
 {
 	while (CTS_SUCCESS == contacts_svc_iter_next(iter)) {
 		int ret;
@@ -913,412 +1193,6 @@ API int contacts_svc_list_with_str_foreach(cts_get_list_str_op op_code,
 	return CTS_SUCCESS;
 }
 
-API int contacts_svc_list_filter_free(CTSfilter *filter)
-{
-	retv_if(NULL == filter, CTS_ERR_ARG_NULL);
-
-	free(filter->search_val);
-	free(filter);
-	return CTS_SUCCESS;
-}
-
-static inline int cts_filter_parse_args(va_list args, int type, CTSfilter *ret)
-{
-	while (type) {
-		switch (type) {
-		case CTS_LIST_FILTER_NONE:
-			break;
-		case CTS_LIST_FILTER_ADDRESBOOK_ID_INT:
-			ret->addrbook_on = true;
-			ret->addrbook_id = va_arg(args, int);
-			break;
-		case CTS_LIST_FILTER_GROUP_ID_INT:
-			ret->group_on = true;
-			ret->group_id = va_arg(args, int);
-			break;
-		case CTS_LIST_FILTER_LIMIT_INT:
-			ret->limit_on = true;
-			ret->limit = va_arg(args, int);
-			break;
-		case CTS_LIST_FILTER_OFFSET_INT:
-			ret->offset_on = true;
-			ret->offset = va_arg(args, int);
-			break;
-		default:
-			ERR("Invalid type. Your type(%d) is not supported.", type);
-			return CTS_ERR_ARG_INVALID;
-		}
-		type = va_arg(args, int);
-	}
-
-	retvm_if(ret->offset_on && !ret->limit_on, CTS_ERR_ARG_INVALID, "OFFSET is depends on LIMIT");
-
-	return CTS_SUCCESS;
-}
-
-enum {
-	CTS_FILTER_TYPE_NONE,
-	CTS_FILTER_TYPE_INT,
-	CTS_FILTER_TYPE_STR,
-};
-
-API CTSfilter* contacts_svc_list_str_filter_new(cts_str_filter_op list_type,
-		const char *search_value, cts_filter_type first_type, ...)
-{
-	int ret;
-	CTSfilter *ret_val;
-	va_list args;
-
-	retvm_if(NULL == search_value, NULL, "The parameter(search_value) is NULL");
-	retvm_if(CTS_LIST_FILTER_NONE == first_type, NULL,
-			"filter constraint is missing(use contacts_svc_get_list_with_str()");
-
-	ret_val = calloc(1, sizeof(CTSfilter));
-	ret_val->type = CTS_FILTER_TYPE_STR;
-	ret_val->list_type = list_type;
-	ret_val->search_val = strdup(search_value);
-
-	va_start(args, first_type);
-	ret = cts_filter_parse_args(args, first_type, ret_val);
-	va_end(args);
-
-	if (ret) {
-		contacts_svc_list_filter_free(ret_val);
-		return NULL;
-	}
-
-	return (CTSfilter *)ret_val;
-}
-
-API CTSfilter* contacts_svc_list_filter_new(cts_filter_op list_type, cts_filter_type first_type, ...)
-{
-	int ret;
-	CTSfilter *ret_val;
-	va_list args;
-
-	retvm_if(CTS_LIST_FILTER_NONE == first_type, NULL,
-			"filter constraint is missing(use contacts_svc_get_list()");
-
-	ret_val = calloc(1, sizeof(CTSfilter));
-	ret_val = CTS_FILTER_TYPE_NONE;
-	ret_val->list_type = list_type;
-
-	va_start(args, first_type);
-	ret = cts_filter_parse_args(args, first_type, ret_val);
-	va_end(args);
-
-	if (ret) {
-		contacts_svc_list_filter_free(ret_val);
-		return NULL;
-	}
-
-	return (CTSfilter *)ret_val;
-}
-
-static int cts_list_with_str_make_query(CTSfilter *filter, CTSiter *iter)
-{
-	int ret;
-	cts_stmt stmt;
-	const char *display;
-	char query[CTS_SQL_MAX_LEN] = {0};
-	char remake_val[CTS_SQL_MIN_LEN] = {0};
-
-	retvm_if(NULL == filter->search_val,
-			CTS_ERR_ARG_INVALID, "The parameter(filter) doesn't have search_val");
-
-	if (CTS_ORDER_NAME_LASTFIRST == contacts_svc_get_order(CTS_ORDER_OF_DISPLAY))
-		display = CTS_SCHEMA_DATA_NAME_REVERSE_LOOKUP;
-	else
-		display = CTS_SCHEMA_DATA_NAME_LOOKUP;
-
-	switch (filter->list_type) {
-	case CTS_LIST_PLOGS_OF_NUMBER:
-		iter->i_type = CTS_ITER_PLOGS_OF_NUMBER;
-		if (filter->search_val && *filter->search_val) {
-			ret = snprintf(query, sizeof(query),
-					"SELECT A.id, A.log_type, A.log_time, A.data1, A.data2, MIN(B.contact_id) "
-					"FROM %s A LEFT JOIN %s B ON A.normal_num = B.data3 AND B.datatype = %d AND "
-					"(A.related_id = B.contact_id OR A.related_id IS NULL OR "
-					"NOT EXISTS (SELECT id FROM %s "
-					"WHERE datatype = %d AND contact_id = A.related_id AND data3 = ?)) "
-					"WHERE A.number = ? "
-					"GROUP BY A.id "
-					"ORDER BY A.log_time DESC",
-					CTS_TABLE_PHONELOGS, CTS_TABLE_DATA, CTS_DATA_NUMBER, CTS_TABLE_DATA, CTS_DATA_NUMBER);
-		}
-		else {
-			ret = snprintf(query, sizeof(query),
-					"SELECT id, log_type, log_time, data1, data2, NULL "
-					"FROM %s WHERE number ISNULL ORDER BY id DESC", CTS_TABLE_PHONELOGS);
-		}
-		if (filter->limit_on) {
-			ret += snprintf(query+ret, sizeof(query)-ret, " LIMIT %d ", filter->limit);
-			if (filter->offset_on)
-				ret += snprintf(query+ret, sizeof(query)-ret, ", %d", filter->offset);
-		}
-
-		stmt = cts_query_prepare(query);
-		retvm_if(NULL == stmt, CTS_ERR_DB_FAILED, "cts_query_prepare() Failed");
-		if (filter->search_val) {
-			const char *normal_num;
-			ret = cts_clean_number(filter->search_val, remake_val, sizeof(remake_val));
-			retvm_if(ret <= 0, CTS_ERR_ARG_INVALID, "Number(%s) is invalid", filter->search_val);
-
-			normal_num = cts_normalize_number(remake_val);
-			cts_stmt_bind_copy_text(stmt, 1, normal_num, strlen(normal_num));
-			cts_stmt_bind_copy_text(stmt, 2, remake_val, strlen(remake_val));
-		}
-		iter->stmt = stmt;
-		break;
-	case CTS_LIST_CONTACTS_WITH_NAME:
-		retvm_if(CTS_SQL_MIN_LEN <= strlen(filter->search_val), CTS_ERR_ARG_INVALID,
-				"search_value is too long");
-		iter->i_type = CTS_ITER_CONTACTS_WITH_NAME;
-		memset(remake_val, 0x00, sizeof(remake_val));
-
-		ret = cts_normalize_str(filter->search_val, remake_val, CTS_SQL_MIN_LEN);
-		retvm_if(ret < CTS_SUCCESS, ret, "cts_normalize_str() Failed(%d)", ret);
-
-		if (filter->addrbook_on) {
-			ret = snprintf(query, sizeof(query),
-					"SELECT A.contact_id, data1, data2, data3, data5, B.addrbook_id, B.image0 "
-					"FROM %s A, %s B ON A.contact_id = B.contact_id "
-					"WHERE datatype = %d AND B.addrbook_id = %d AND %s LIKE ('%%' || ? || '%%') "
-					"ORDER BY data1, %s",
-					CTS_TABLE_DATA, CTS_TABLE_CONTACTS, CTS_DATA_NAME, filter->addrbook_id,
-					display, CTS_SCHEMA_DATA_NAME_SORTING_KEY);
-		} else if (filter->group_on) {
-			ret = snprintf(query, sizeof(query),
-					"SELECT A.contact_id, data1, data2, data3, data5, B.addrbook_id, B.image0 "
-					"FROM %s A, %s B ON A.contact_id = B.contact_id "
-					"WHERE datatype = %d AND %s LIKE ('%%' || ? || '%%') "
-					"AND contact_id IN (SELECT contact_id FROM %s WHERE group_id = %d) "
-					"ORDER BY data1, %s",
-					CTS_TABLE_DATA, CTS_TABLE_CONTACTS, CTS_DATA_NAME, display,
-					CTS_TABLE_GROUPING_INFO, filter->group_id,
-					CTS_SCHEMA_DATA_NAME_SORTING_KEY);
-		} else {
-			ret = snprintf(query, sizeof(query),
-					"SELECT A.contact_id, data1, data2, data3, data5, B.addrbook_id, B.image0 "
-					"FROM %s A, %s B ON A.contact_id = B.contact_id "
-					"WHERE datatype = %d AND %s LIKE ('%%' || ? || '%%') "
-					"ORDER BY data1, %s",
-					CTS_TABLE_DATA, CTS_TABLE_CONTACTS, CTS_DATA_NAME, display,
-					CTS_SCHEMA_DATA_NAME_SORTING_KEY);
-		}
-
-		if (filter->limit_on) {
-			ret += snprintf(query+ret, sizeof(query)-ret, " LIMIT %d ", filter->limit);
-			if (filter->offset_on)
-				ret += snprintf(query+ret, sizeof(query)-ret, ", %d", filter->offset);
-		}
-		stmt = cts_query_prepare(query);
-		retvm_if(NULL == stmt, CTS_ERR_DB_FAILED, "cts_query_prepare() Failed");
-		cts_stmt_bind_copy_text(stmt, 1, remake_val, strlen(remake_val));
-		break;
-	case CTS_LIST_NUMBERINFOS_WITH_NAME:
-		retvm_if(CTS_SQL_MIN_LEN <= strlen(filter->search_val), CTS_ERR_ARG_INVALID,
-				"search_value is too long");
-		iter->i_type = CTS_ITER_NUMBERINFOS;
-		memset(remake_val, 0x00, sizeof(remake_val));
-
-		ret = cts_normalize_str(filter->search_val, remake_val, CTS_SQL_MIN_LEN);
-		retvm_if(ret < CTS_SUCCESS, ret, "cts_normalize_str() Failed(%d)", ret);
-
-		if (filter->addrbook_on) {
-			ret = snprintf(query, sizeof(query),
-					"SELECT A.contact_id, A.data1, A.data2, A.data3, A.data5, B.data2, C.image0 "
-					"FROM %s A, %s B, %s C "
-					"ON A.contact_id = B.contact_id AND A.contact_id = C.contact_id "
-					"WHERE A.datatype = %d AND A.datatype = %d "
-					"AND C.addrbook_id = %d AND A.%s LIKE ('%%' || ? || '%%') "
-					"ORDER BY A.data1, A.%s",
-					CTS_TABLE_DATA, CTS_TABLE_DATA, CTS_TABLE_CONTACTS,
-					CTS_DATA_NAME, CTS_DATA_NUMBER,
-					filter->addrbook_id, display, CTS_SCHEMA_DATA_NAME_SORTING_KEY);
-		} else if (filter->group_on) {
-			ret = snprintf(query, sizeof(query),
-					"SELECT A.contact_id, A.data1, A.data2, A.data3, A.data5, B.data2, C.image0 "
-					"FROM %s A, %s B, %s C "
-					"ON A.contact_id = B.contact_id AND A.contact_id = C.contact_id "
-					"WHERE A.datatype = %d AND B.datatype = %d AND A.%s LIKE ('%%' || ? || '%%') "
-					"AND A.contact_id IN "
-					"(SELECT contact_id FROM %s WHERE group_id = %d) "
-					"ORDER BY A.data1, A.%s",
-					CTS_TABLE_DATA, CTS_TABLE_DATA, CTS_TABLE_CONTACTS,
-					CTS_DATA_NAME, CTS_DATA_NUMBER, display,
-					CTS_TABLE_GROUPING_INFO, filter->group_id, CTS_SCHEMA_DATA_NAME_SORTING_KEY);
-		} else {
-			ret = snprintf(query, sizeof(query),
-					"SELECT A.contact_id, A.data1, A.data2, A.data3, A.data5, B.data2, C.image0 "
-					"FROM %s A, %s B, %s C "
-					"ON A.contact_id = B.contact_id AND A.contact_id = C.contact_id "
-					"WHERE A.datatype = %d AND B.datatype = %d AND A.%s LIKE ('%%' || ? || '%%') "
-					"ORDER BY A.data1, A.%s",
-					CTS_TABLE_DATA, CTS_TABLE_DATA, CTS_TABLE_CONTACTS,
-					CTS_DATA_NAME, CTS_DATA_NUMBER,
-					display, CTS_SCHEMA_DATA_NAME_SORTING_KEY);
-		}
-		if (filter->limit_on) {
-			ret += snprintf(query+ret, sizeof(query)-ret, " LIMIT %d ", filter->limit);
-			if (filter->offset_on)
-				ret += snprintf(query+ret, sizeof(query)-ret, ", %d", filter->offset);
-		}
-
-		stmt = cts_query_prepare(query);
-		retvm_if(NULL == stmt, CTS_ERR_DB_FAILED, "cts_query_prepare() Failed");
-		cts_stmt_bind_copy_text(stmt, 1, remake_val, strlen(remake_val));
-		break;
-	case CTS_LIST_NUMBERINFOS_WITH_NUM:
-		iter->i_type = CTS_ITER_NUMBERINFOS;
-
-		if (filter->addrbook_on) {
-			ret = snprintf(query, sizeof(query),
-					"SELECT A.contact_id, A.data1, A.data2, A.data3, A.data5, B.data2, C.image0 "
-					"FROM %s A, %s B, %s C "
-					"ON A.contact_id = B.contact_id AND A.contact_id = C.contact_id "
-					"WHERE A.datatype = %d AND B.datatype = %d "
-					"AND C.addrbook_id = %d AND B.data2 LIKE ('%%' || ? || '%%') "
-					"ORDER BY A.data1, A.%s",
-					CTS_TABLE_DATA, CTS_TABLE_DATA, CTS_TABLE_CONTACTS,
-					CTS_DATA_NAME, CTS_DATA_NUMBER,
-					filter->addrbook_id, CTS_SCHEMA_DATA_NAME_SORTING_KEY);
-		} else if (filter->group_on) {
-			ret = snprintf(query, sizeof(query),
-					"SELECT A.contact_id, A.data1, A.data2, A.data3, A.data5, B.data2, C.image0 "
-					"FROM %s A, %s B, %s C "
-					"ON A.contact_id = B.contact_id AND A.contact_id = C.contact_id "
-					"WHERE A.datatype = %d AND B.datatype = %d AND B.data2 LIKE ('%%' || ? || '%%') "
-					"AND A.contact_id IN (SELECT contact_id FROM %s WHERE group_id = %d) "
-					"ORDER BY A.data1, A.%s",
-					CTS_TABLE_DATA, CTS_TABLE_DATA, CTS_TABLE_CONTACTS,
-					CTS_DATA_NAME, CTS_DATA_NUMBER,
-					CTS_TABLE_GROUPING_INFO, filter->group_id, CTS_SCHEMA_DATA_NAME_SORTING_KEY);
-		} else {
-			ret = snprintf(query, sizeof(query),
-					"SELECT A.contact_id, A.data1, A.data2, A.data3, A.data5, B.data2, C.image0 "
-					"FROM %s A, %s B, %s C "
-					"ON A.contact_id = B.contact_id AND A.contact_id = C.conatct_id "
-					"WHERE B.data2 LIKE ('%%' || ? || '%%') "
-					"AND A.datatype = %d AND B.datatype = %d "
-					"ORDER BY A.data1, A.%s",
-					CTS_TABLE_DATA, CTS_TABLE_DATA, CTS_TABLE_CONTACTS,
-					CTS_DATA_NAME, CTS_DATA_NUMBER, CTS_SCHEMA_DATA_NAME_SORTING_KEY);
-		}
-		if (filter->limit_on) {
-			ret += snprintf(query+ret, sizeof(query)-ret, " LIMIT %d ", filter->limit);
-			if (filter->offset_on)
-				ret += snprintf(query+ret, sizeof(query)-ret, ", %d", filter->offset);
-		}
-
-		stmt = cts_query_prepare(query);
-		retvm_if(NULL == stmt, CTS_ERR_DB_FAILED, "cts_query_prepare() Failed");
-		cts_stmt_bind_copy_text(stmt, 1, filter->search_val, strlen(filter->search_val));
-		break;
-	case CTS_LIST_EMAILINFOS_WITH_EMAIL:
-		iter->i_type = CTS_ITER_EMAILINFOS_WITH_EMAIL;
-
-		if (filter->addrbook_on) {
-			ret = snprintf(query, sizeof(query),
-					"SELECT A.contact_id, A.data1, A.data2, A.data3, A.data5, B.data2, C.image0 "
-					"FROM %s A, %s B, %s C "
-					"ON A.contact_id = B.contact_id AND A.contact_id = C.contact_id "
-					"WHERE A.datatype = %d AND B.datatype = %d AND C.addrbook_id = %d "
-					"AND B.data2 LIKE ('%%' || ? || '%%') "
-					"ORDER BY A.data1, A.%s",
-					CTS_TABLE_DATA, CTS_TABLE_DATA, CTS_TABLE_CONTACTS,
-					CTS_DATA_NAME, CTS_DATA_NUMBER, filter->addrbook_id,
-					CTS_SCHEMA_DATA_NAME_SORTING_KEY);
-		} else if (filter->group_on) {
-			ret = snprintf(query, sizeof(query),
-					"SELECT A.contact_id, A.data1, A.data2, A.data3, A.data5, B.data2, C.image0 "
-					"FROM %s A, %s B, %s C "
-					"ON A.contact_id = B.contact_id AND A.contact_id = C.contact_id "
-					"WHERE A.datatype = %d AND B.datatype = %d AND "
-					"B.data2 LIKE ('%%' || ? || '%%') AND A.contact_id IN "
-					"(SELECT contact_id FROM %s WHERE group_id = %d) "
-					"ORDER BY A.data1, A.%s",
-					CTS_TABLE_DATA, CTS_TABLE_DATA, CTS_TABLE_CONTACTS,
-					CTS_DATA_NAME, CTS_DATA_NUMBER,
-					CTS_TABLE_GROUPING_INFO, filter->group_id,
-					CTS_SCHEMA_DATA_NAME_SORTING_KEY);
-		} else {
-			ret = snprintf(query, sizeof(query),
-					"SELECT A.contact_id, A.data1, A.data2, A.data3, A.data5, B.data2, C.image0 "
-					"FROM %s A, %s B, %s C "
-					"ON A.contact_id = B.contact_id AND A.contact_id = C.contact_id "
-					"WHERE A.datatype = %d AND B.datatype = %d AND B.data2 LIKE ('%%' || ? || '%%') "
-					"ORDER BY A.data1, A.%s",
-					CTS_TABLE_DATA, CTS_TABLE_DATA, CTS_TABLE_CONTACTS,
-					CTS_DATA_NAME, CTS_DATA_EMAIL,
-					CTS_SCHEMA_DATA_NAME_SORTING_KEY);
-		}
-		if (filter->limit_on) {
-			ret += snprintf(query+ret, sizeof(query)-ret, " LIMIT %d ", filter->limit);
-			if (filter->offset_on)
-				ret += snprintf(query+ret, sizeof(query)-ret, ", %d", filter->offset);
-		}
-
-		stmt = cts_query_prepare(query);
-		retvm_if(NULL == stmt, CTS_ERR_DB_FAILED, "cts_query_prepare() Failed");
-		cts_stmt_bind_copy_text(stmt, 1, filter->search_val, strlen(filter->search_val));
-		break;
-	default:
-		ERR("Invalid parameter : The op_code(%d) is not supported", filter->list_type);
-		return CTS_ERR_ARG_INVALID;
-	}
-	iter->stmt = stmt;
-
-	return CTS_SUCCESS;
-}
-
-#ifdef CTS_DEPRECATED
-API int contacts_svc_get_list_with_filter(CTSfilter *filter, CTSiter **iter)
-{
-	int ret;
-	CTSiter *result;
-
-	retv_if(NULL == filter, CTS_ERR_ARG_NULL);
-	retv_if(NULL == iter, CTS_ERR_ARG_NULL);
-
-	if (CTS_FILTER_TYPE_STR == filter->type) {
-		result = calloc(1, sizeof(CTSiter));
-		retvm_if(NULL == result, CTS_ERR_OUT_OF_MEMORY, "calloc() Failed");
-
-		ret = cts_list_with_str_make_query(filter, result);
-		if (ret) {
-			ERR("cts_list_with_str_make_query() Failed(%d)", ret);
-			free(result);
-			return ret;
-		}
-	} else {
-		ERR("Invalid CTSfilter(type = %d)", filter->type);
-		return CTS_ERR_ARG_INVALID;
-	}
-
-	return CTS_SUCCESS;
-}
-#endif
-
-API int contacts_svc_list_with_filter_foreach(CTSfilter *filter,
-		cts_foreach_fn cb, void *user_data)
-{
-	int ret;
-	CTSiter iter = {0};
-
-	if (CTS_FILTER_TYPE_STR == filter->type) {
-		ret = cts_list_with_str_make_query(filter, &iter);
-		retvm_if(CTS_SUCCESS != ret, ret, "contacts_svc_get_list_with_filter() Failed(%d)", ret);
-	} else {
-		ERR("Invalid CTSfilter(type = %d)", filter->type);
-		return CTS_ERR_ARG_INVALID;
-	}
-
-	cts_foreach_run(&iter, cb, user_data);
-
-	return CTS_SUCCESS;
-}
-
 // same with check_dirty_number()
 static inline bool cts_is_number(const char *str)
 {
@@ -1372,7 +1246,7 @@ API int contacts_svc_smartsearch_excl(const char *search_str, int limit, int off
 {
 	int ret, len;
 	CTSiter iter = {0};
-	const char *display;
+	const char *display, *data;
 	cts_stmt stmt = NULL;
 	char query[CTS_SQL_MAX_LEN];
 	char remake_name[CTS_SQL_MIN_LEN], escape_name[CTS_SQL_MIN_LEN];
@@ -1388,26 +1262,31 @@ API int contacts_svc_smartsearch_excl(const char *search_str, int limit, int off
 	else
 		display = CTS_SCHEMA_DATA_NAME_LOOKUP;
 
+	if (cts_restriction_get_permit())
+		data = CTS_TABLE_DATA;
+	else
+		data = CTS_TABLE_RESTRICTED_DATA_VIEW;
+
 	if (cts_is_number(search_str)) {
 		len = snprintf(query, sizeof(query),
-				"SELECT A.contact_id, A.data1, A.data2, A.data3, A.data5, C.data2, B.image0 "
-				"FROM (%s A, %s B ON A.contact_id = B.contact_id AND A.datatype = %d) "
+				"SELECT B.person_id, A.data1, A.data2, A.data3, A.data5, C.data2, B.image0, B.contact_id "
+				"FROM (%s A, %s B ON A.contact_id = B.person_id AND A.datatype=%d) "
 					"LEFT JOIN %s C ON B.contact_id = C.contact_id AND C.datatype = %d "
 				"WHERE C.data2 LIKE '%%%s%%' OR A.%s LIKE ('%%' || ? || '%%') "
 				"ORDER BY A.data1, A.%s",
-				CTS_TABLE_DATA, CTS_TABLE_CONTACTS, CTS_DATA_NAME,
-				CTS_TABLE_DATA, CTS_DATA_NUMBER,
+				data, CTS_TABLE_CONTACTS, CTS_DATA_NAME,
+				data, CTS_DATA_NUMBER,
 				search_str, display, CTS_SCHEMA_DATA_NAME_SORTING_KEY);
 	}
 	else {
 		len = snprintf(query, sizeof(query),
-				"SELECT A.contact_id, A.data1, A.data2, A.data3, A.data5, C.data2, B.image0 "
-				"FROM (%s A, %s B ON A.contact_id = B.contact_id AND A.datatype = %d) "
+				"SELECT B.person_id, A.data1, A.data2, A.data3, A.data5, C.data2, B.image0, B.contact_id "
+				"FROM (%s A, %s B ON A.contact_id = B.person_id AND A.datatype = %d) "
 					"LEFT JOIN %s C ON B.default_num = C.id AND C.datatype = %d "
 				"WHERE A.%s LIKE ('%%' || ? || '%%') ESCAPE '\\' "
 				"ORDER BY A.data1, A.%s",
-				CTS_TABLE_DATA, CTS_TABLE_CONTACTS, CTS_DATA_NAME,
-				CTS_TABLE_DATA, CTS_DATA_NUMBER,
+				data, CTS_TABLE_CONTACTS, CTS_DATA_NAME,
+				data, CTS_DATA_NUMBER,
 				display, CTS_SCHEMA_DATA_NAME_SORTING_KEY);
 	}
 
@@ -1435,17 +1314,23 @@ static inline int cts_group_get_relation_changes(int addressbook_id, int version
 	int ret;
 	cts_stmt stmt = NULL;
 	char query[CTS_SQL_MAX_LEN] = {0};
-	updated_contact *result;
+	updated_record *result;
 
 	retv_if(NULL == iter, CTS_ERR_ARG_NULL);
 	retv_if(NULL == iter->info, CTS_ERR_ARG_INVALID);
 
-	iter->i_type = CTS_ITER_UPDATED_CONTACTS_AFTER_VER;
-	snprintf(query, sizeof(query),
-			"SELECT group_id, type, ver FROM %s, %s USING (group_id) "
-			"WHERE ver > %d AND addrbook_id = %d ",
-			"group_relations_log", CTS_TABLE_GROUPS,
-			version, addressbook_id);
+	iter->i_type = CTS_ITER_UPDATED_INFO_AFTER_VER;
+
+	ret = snprintf(query, sizeof(query),
+			"SELECT group_id, type, ver, addrbook_id FROM %s, %s USING (group_id) "
+			"WHERE ver > %d ",
+			"group_relations_log", CTS_TABLE_GROUPS, version);
+
+	if (0 <= addressbook_id)
+	{
+		snprintf(query + ret , sizeof(query) -ret ,
+				"AND addrbook_id = %d ", addressbook_id);
+	}
 
 	stmt = cts_query_prepare(query);
 	retvm_if(NULL == stmt, CTS_ERR_DB_FAILED, "cts_query_prepare() Failed");
@@ -1458,14 +1343,14 @@ static inline int cts_group_get_relation_changes(int addressbook_id, int version
 		return CTS_ERR_DB_RECORD_NOT_FOUND;
 	}
 
-	iter->info->head = result = cts_updated_contact_add_mempool();
+	iter->info->head = result = cts_updated_info_add_mempool();
 	do {
 		result->id = cts_stmt_get_int(stmt, 0);
 		result->type = cts_stmt_get_int(stmt, 1);
 		result->ver = cts_stmt_get_int(stmt, 2);
-
+		result->addressbook_id = cts_stmt_get_int(stmt, 3);
 		if (NULL == result->next)
-			result->next = cts_updated_contact_add_mempool();
+			result->next = cts_updated_info_add_mempool();
 		result = result->next;
 	}while(CTS_TRUE == cts_stmt_step(stmt));
 
@@ -1473,3 +1358,37 @@ static inline int cts_group_get_relation_changes(int addressbook_id, int version
 
 	return CTS_SUCCESS;
 }
+
+/* This function is only for OSP */
+API int contacts_svc_group_get_relation_changes(int addressbook_id,
+		int version, CTSiter **iter)
+{
+	int ret;
+	CTSiter *result;
+
+	retv_if(NULL == iter, CTS_ERR_ARG_NULL);
+	retvm_if(version < 0, CTS_ERR_ARG_INVALID, "The version(%d) is invalid", version);
+
+	result = calloc(1, sizeof(CTSiter));
+	retvm_if(NULL == result, CTS_ERR_OUT_OF_MEMORY, "calloc() Failed");
+
+	result->info = calloc(1, sizeof(updated_info));
+	if (NULL == result->info) {
+		ERR("calloc() Failed");
+		free(result);
+		return CTS_ERR_OUT_OF_MEMORY;
+	}
+
+	ret = cts_group_get_relation_changes(addressbook_id, version, result);
+	if (ret) {
+		ERR("cts_group_get_relation_changes() Failed(%d)", ret);
+		free(result->info);
+		free(result);
+		return ret;
+	}
+
+	*iter = (CTSiter *)result;
+	INFO(",CTSiter,1");
+	return CTS_SUCCESS;
+}
+

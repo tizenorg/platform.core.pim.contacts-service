@@ -1,3 +1,11 @@
+contacts-service (0.6.12-1) unstable; urgency=low
+
+  * Release Tizen 2.0 beta
+  * Git: framework/pim/contacts-service
+  * Tag: contacts-service_0.6.12-1
+
+ -- DongHee Ye <donghee.ye@samsung.com>  Wed, 08 Aug 2012 10:34:40 +0900
+
 contacts-service (0.6.1-10) unstable; urgency=low
 
   * release

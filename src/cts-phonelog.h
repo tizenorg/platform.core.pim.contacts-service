@@ -44,21 +44,21 @@
     CTSvalue *plog;
 
     plog = contacts_svc_value_new(CTS_VALUE_PHONELOG);
-    contacts_svc_value_set_str(plog, CTS_PLOG_VAL_NUMBER_STR, "0123456789");
+    contacts_svc_value_set_str(plog, CTS_PLOG_VAL_ADDRESS_STR, "0123456789");
     contacts_svc_value_set_int(plog, CTS_PLOG_VAL_LOG_TIME_INT,(int) time(NULL));
     contacts_svc_value_set_int(plog, CTS_PLOG_VAL_LOG_TYPE_INT,
                                      CTS_PLOG_TYPE_VOICE_INCOMMING);
     contacts_svc_value_set_int(plog, CTS_PLOG_VAL_DURATION_INT, 65);
     contacts_svc_insert_phonelog(plog);
 
-    contacts_svc_value_set_str(plog, CTS_PLOG_VAL_NUMBER_STR, "0987654321");
+    contacts_svc_value_set_str(plog, CTS_PLOG_VAL_ADDRESS_STR, "0987654321");
     contacts_svc_value_set_int(plog, CTS_PLOG_VAL_LOG_TIME_INT,(int) time(NULL));
     contacts_svc_value_set_int(plog, CTS_PLOG_VAL_LOG_TYPE_INT,
                                      CTS_PLOG_TYPE_VOICE_INCOMMING_UNSEEN);
     contacts_svc_value_set_int(plog, CTS_PLOG_VAL_DURATION_INT, 65);
     contacts_svc_insert_phonelog(plog);
 
-    contacts_svc_value_set_str(plog, CTS_PLOG_VAL_NUMBER_STR, "0987654321");
+    contacts_svc_value_set_str(plog, CTS_PLOG_VAL_ADDRESS_STR, "0987654321");
     contacts_svc_value_set_int(plog, CTS_PLOG_VAL_LOG_TIME_INT,(int) time(NULL));
     contacts_svc_value_set_int(plog, CTS_PLOG_VAL_LOG_TYPE_INT,
                                      CTS_PLOG_TYPE_VOICE_INCOMMING);
@@ -77,7 +77,7 @@ int contacts_svc_insert_phonelog(CTSvalue* phone_log);
  */
 typedef enum{
 	CTS_PLOG_DEL_BY_ID, /**< .*/
-	CTS_PLOG_DEL_BY_NUMBER, /**< .*/
+	CTS_PLOG_DEL_BY_NUMBER, /**< number or email address */
 	CTS_PLOG_DEL_NO_NUMBER, /**< .*/
 	CTS_PLOG_DEL_BY_MSGID, /**< .*/
 }cts_del_plog_op;
@@ -151,7 +151,7 @@ char* contacts_svc_phonelog_get_last_number(cts_plog_get_last_op op);
        return;
     }
 
-    printf("Number : %s\n", contacts_svc_value_get_str(plog, CTS_PLOG_VAL_NUMBER_STR));
+    printf("Number : %s\n", contacts_svc_value_get_str(plog, CTS_PLOG_VAL_ADDRESS_STR));
     printf("Related ID : %d\n", contacts_svc_value_get_int(plog, CTS_PLOG_VAL_ID_INT));
     printf("Time : %d\n", contacts_svc_value_get_int(plog, CTS_PLOG_VAL_LOG_TIME_INT));
     printf("Type : %d\n", contacts_svc_value_get_int(plog, CTS_PLOG_VAL_LOG_TYPE_INT));

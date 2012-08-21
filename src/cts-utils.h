@@ -26,8 +26,9 @@
 #define CTS_IMG_PATH_SIZE_MAX 1024
 #define CTS_IMAGE_LOCATION "/opt/data/contacts-svc/img"
 #define CTS_VCARD_IMAGE_LOCATION "/opt/data/contacts-svc/img/vcard"
+#define CTS_GROUP_IMAGE_LOCATION "/opt/data/contacts-svc/img/group"
+#define CTS_MY_IMAGE_LOCATION "/opt/data/contacts-svc/img/my"
 #define CTS_NOTI_CONTACT_CHANGED_DEF "/opt/data/contacts-svc/.CONTACTS_SVC_DB_CHANGED"
-#define CTS_VCONF_DISPLAY_ORDER_DEF "db/service/contacts/name_display_order"
 
 void cts_deregister_noti(void);
 void cts_register_noti(void);
@@ -40,15 +41,20 @@ void cts_set_speed_noti(void);
 void cts_set_addrbook_noti(void);
 void cts_set_group_noti(void);
 void cts_set_group_rel_noti(void);
+void cts_set_link_noti(void);
 int cts_exist_file(char *path);
 int cts_convert_nicknames2textlist(GSList *src, char *dest, int dest_size);
 GSList* cts_convert_textlist2nicknames(char *text_list);
 int cts_increase_outgoing_count(int contact_id);
 int cts_get_next_ver(void);
 int cts_update_contact_changed_time(int contact_id);
-int cts_delete_image_file(int img_type, int index);
-int cts_add_image_file(int img_type, int index, char *src_img, char *dest_name, int dest_size);
-int cts_update_image_file(int img_type, int index, char *src_img, char *dest_name, int dest_size);
+int cts_contact_delete_image_file(int img_type, int index);
+int cts_contact_add_image_file(int img_type, int index, char *src_img, char *dest_name, int dest_size);
+int cts_contact_update_image_file(int img_type, int index, char *src_img, char *dest_name, int dest_size);
+
+char* cts_get_img(const char *dir, int index, char *dest, int dest_size);
+int cts_set_img(const char *dir, int index, const char *path);
+
 
 #ifndef __CONTACTS_SVC_H__
 //<!--
@@ -103,8 +109,8 @@ int contacts_svc_end_trans(bool is_success);
  * @see contacts_svc_get_order()
  */
 typedef enum{
-	CTS_ORDER_NAME_FIRSTLAST, /**<First Name first */
-	CTS_ORDER_NAME_LASTFIRST  /**<Last Name first */
+	CTS_ORDER_NAME_FIRSTLAST = 0, /**<First Name first */
+	CTS_ORDER_NAME_LASTFIRST = 1 /**<Last Name first */
 }cts_order_type;
 
 /**
@@ -143,7 +149,9 @@ typedef enum{
 	CTS_SUBSCRIBE_GROUP_CHANGE,
 	CTS_SUBSCRIBE_SPEEDDIAL_CHANGE,
 	CTS_SUBSCRIBE_ADDRESSBOOK_CHANGE,
-	CTS_SUBSCRIBE_MISSED_CALL_CHANGE
+	CTS_SUBSCRIBE_MISSED_CALL_CHANGE,
+	CTS_SUBSCRIBE_LINK_CHANGE,
+	CTS_SUBSCRIBE_GROUP_RELATION_CHANGE /**< This is only for OSP. We cannot guarantee action for your use */
 }cts_subscribe_type;
 
 /**
@@ -213,6 +221,10 @@ typedef enum
 	CTS_GET_COUNT_SDN, /**< The count of SDN(Service Dialing Number) in SIM */
 	CTS_GET_ALL_PHONELOG, /**< The count of all phonelog */
 	CTS_GET_UNSEEN_MISSED_CALL, /**< The count of unseen missed call */
+	CTS_GET_INCOMING_CALL, /**< The count of incomming call */
+	CTS_GET_OUTGOING_CALL, /**< The count of outgoing call */
+	CTS_GET_MISSED_CALL, /**< The count of missed call */
+	CTS_GET_COUNT_ALL_GROUP, /**< The count of groups */
 }cts_count_op;
 /**
  * This function gets count related with op_code.
@@ -230,6 +242,7 @@ typedef enum
 	CTS_GET_COUNT_CONTACTS_IN_ADDRESSBOOK, /**< The count of contacts in the addressbook related to index(search_value) */
 	CTS_GET_COUNT_CONTACTS_IN_GROUP, /**< The count of contacts in the group related to index(search_value) */
 	CTS_GET_COUNT_NO_GROUP_CONTACTS_IN_ADDRESSBOOK, /**< The count of not assigned contacts in the addressbook related to index(search_value) */
+	CTS_GET_COUNT_GROUPS_IN_ADDRESSBOOK /**< The count of groups in the addressbook related to index(search_value) */
 }cts_count_int_op;
 /**
  * This function gets count related with op_code and search_value.
@@ -279,13 +292,20 @@ int contacts_svc_get_image(cts_img_t img_type, int index, char **img_path);
 int contacts_svc_import_sim(void);
 
 /**
+ * This function exports sim phonebook.
+ * @param[in] index index of contact
+ * @return #CTS_SUCCESS on success, Negative value(#cts_error) on error
+ */
+int contacts_svc_export_sim(int index);
+
+/**
  * This function sets the outgoing count of the contact to zero.
  *
- * @param[in] contact_id The index of contact
+ * @param[in] person_id The index of person
  * @return #CTS_SUCCESS on success, Negative value(#cts_error) on error
  * @see contacts_svc_get_list(), #CTS_LIST_OFTEN_USED_CONTACT
  */
-int contacts_svc_reset_outgoing_count(int contact_id);
+int contacts_svc_reset_outgoing_count(int person_id);
 
 //-->
 #endif //#ifndef __CONTACTS_SVC_H__

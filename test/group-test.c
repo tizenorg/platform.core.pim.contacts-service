@@ -30,6 +30,7 @@ void insert_group(const char *group_name)
 
 	contacts_svc_value_set_str(group, CTS_GROUP_VAL_NAME_STR, group_name);
 	contacts_svc_value_set_str(group, CTS_GROUP_VAL_RINGTONE_STR,"/tmp/test.mp3");
+	contacts_svc_value_set_str(group, CTS_GROUP_VAL_IMG_PATH_STR,"/tmp/test.jpg");
 
 	ret = contacts_svc_insert_group(0, group);
 	if (ret < CTS_SUCCESS)
@@ -54,6 +55,9 @@ void get_group(void)
 	if (contacts_svc_value_get_str(group, CTS_GROUP_VAL_RINGTONE_STR))
 		printf("ringtone : %s\n",
 				contacts_svc_value_get_str(group, CTS_GROUP_VAL_RINGTONE_STR));
+	if (contacts_svc_value_get_str(group, CTS_GROUP_VAL_IMG_PATH_STR))
+		printf("image path : %s\n",
+				contacts_svc_value_get_str(group, CTS_GROUP_VAL_IMG_PATH_STR));
 }
 
 void update_group(void)
@@ -68,6 +72,7 @@ void update_group(void)
 
 	contacts_svc_value_set_str(group, CTS_GROUP_VAL_NAME_STR,"Fix-Friends");
 	contacts_svc_value_set_str(group, CTS_GROUP_VAL_RINGTONE_STR,"/tmp/change.mp3");
+	contacts_svc_value_set_str(group, CTS_GROUP_VAL_IMG_PATH_STR,"/tmp/change.jpg");
 
 	//free("Fix-Friends");
 	//free("/tmp/change.mp3");

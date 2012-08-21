@@ -33,6 +33,7 @@ enum{
 	CTS_REQUEST_IMPORT_SIM,
 	CTS_REQUEST_NORMALIZE_STR,
 	CTS_REQUEST_NORMALIZE_NAME,
+	CTS_REQUEST_EXPORT_SIM,
 };
 //#define CTS_REQUEST_IMPORT_SIM "cts_request_import_sim"
 //#define CTS_REQUEST_NORMALIZE_STR "cts_request_normalize_str"
@@ -53,6 +54,7 @@ int cts_socket_init(void);
 int cts_request_normalize_name(char dest[][CTS_SQL_MAX_LEN]);
 int cts_request_normalize_str(const char * src, char * dest, int dest_size);
 int cts_request_sim_import(void);
+int cts_request_sim_export(int index);
 void cts_socket_final(void);
 
 #endif //__CTS_SOCKET_H__

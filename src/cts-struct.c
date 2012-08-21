@@ -33,12 +33,13 @@ static shortcut_list *favorite_list_mempool=NULL;
 static cts_group *group_list_mempool=NULL;
 static cts_addrbook *addrbook_list_mempool=NULL;
 static sdn_list *sdn_list_mempool=NULL;
+static osp_list *osp_list_mempool=NULL;
+
 
 API CTSstruct* contacts_svc_struct_new(cts_struct_type type)
 {
 	CTSstruct* ret_val;
-	switch (type)
-	{
+	switch (type) {
 	case CTS_STRUCT_CONTACT:
 		ret_val = (CTSstruct*)calloc(1, sizeof(contact_t));
 		if (ret_val) ret_val->s_type = CTS_STRUCT_CONTACT;
@@ -75,6 +76,7 @@ static void cts_group_free(gpointer data, gpointer user_data)
 
 	free(data0->name);
 	free(data0->ringtone_path);
+	free(data0->img_path);
 	free(data0->vcard_group);
 	free(data);
 }
@@ -248,8 +250,7 @@ API int contacts_svc_struct_free(CTSstruct* structure)
 {
 	retv_if(NULL == structure, CTS_ERR_ARG_NULL);
 
-	switch (structure->s_type)
-	{
+	switch (structure->s_type) {
 	case CTS_STRUCT_CONTACT:
 		cts_contact_free((contact_t *)structure);
 		free(structure);
@@ -271,8 +272,7 @@ API int contacts_svc_struct_get_list(CTSstruct *contact,
 	retvm_if(CTS_STRUCT_CONTACT != contact->s_type, CTS_ERR_ARG_INVALID,
 			"The contact(%d) must be type of CTS_STRUCT_CONTACT.", contact->s_type);
 
-	switch (field)
-	{
+	switch (field) {
 	case CTS_CF_NUMBER_LIST:
 		*retlist = record->numbers;
 		break;
@@ -312,8 +312,7 @@ static cts_extend* cts_extend_slist_search(int type, GSList *list)
 {
 	cts_extend *tmp_extend;
 	GSList *tmp_gslist=list;
-	while (tmp_gslist)
-	{
+	while (tmp_gslist) {
 		tmp_extend = tmp_gslist->data;
 		retvm_if(CTS_VALUE_EXTEND != tmp_extend->v_type, NULL,
 				"List has other type");
@@ -328,8 +327,7 @@ static inline int cts_contact_get_value(contact_t *contact,
 		cts_struct_field field, CTSvalue** retval)
 {
 
-	switch (field)
-	{
+	switch (field) {
 	case CTS_CF_NAME_VALUE:
 		*retval = (CTSvalue *)contact->name;
 		break;
@@ -359,8 +357,7 @@ API int contacts_svc_struct_get_value(CTSstruct *structure,
 	retv_if(NULL == structure, CTS_ERR_ARG_NULL);
 	retv_if(NULL == retval, CTS_ERR_ARG_NULL);
 
-	switch (structure->s_type)
-	{
+	switch (structure->s_type) {
 	case CTS_STRUCT_CONTACT:
 		ret = cts_contact_get_value((contact_t *)structure, field, retval);
 		if (CTS_SUCCESS != ret)
@@ -395,24 +392,19 @@ static inline int cts_struct_store_num_list(contact_t *contact, GSList* list)
 	cts_number *tmp_number;
 
 	GSList *new_gslist=NULL, *tmp_gslist=list, *prev=NULL;
-	if (contact->numbers && tmp_gslist == contact->numbers)
-	{
-		while (tmp_gslist)
-		{
+	if (contact->numbers && tmp_gslist == contact->numbers) {
+		while (tmp_gslist) {
 			tmp_number = tmp_gslist->data;
-			if (tmp_number)
-			{
+			if (tmp_number) {
 				retvm_if(CTS_VALUE_NUMBER != tmp_number->v_type, CTS_ERR_ARG_INVALID,
 						"List has other type");
 
-				if (!tmp_number->id && tmp_number->deleted)
-				{
+				if (!tmp_number->id && tmp_number->deleted) {
 					CTS_REMOVE_GSLIST_ITEM(number, numbers);
 					continue;
 				}
 
-				if (!tmp_number->embedded)
-				{
+				if (!tmp_number->embedded) {
 					tmp_number->embedded = true;
 					tmp_number->number = SAFE_STRDUP(tmp_number->number);
 				}
@@ -421,17 +413,13 @@ static inline int cts_struct_store_num_list(contact_t *contact, GSList* list)
 			tmp_gslist = tmp_gslist->next;
 		}
 	}
-	else
-	{
-		while (tmp_gslist)
-		{
+	else {
+		while (tmp_gslist) {
 			tmp_number = tmp_gslist->data;
-			if (tmp_number)
-			{
+			if (tmp_number) {
 				retvm_if(tmp_number && CTS_VALUE_NUMBER != tmp_number->v_type, CTS_ERR_ARG_INVALID,
 						"List has other type");
-				if (!tmp_number->embedded)
-				{
+				if (!tmp_number->embedded) {
 					tmp_number->embedded = true;
 					tmp_number->number = SAFE_STRDUP(tmp_number->number);
 					new_gslist = g_slist_append(new_gslist, tmp_number);
@@ -449,13 +437,10 @@ static inline int cts_struct_store_email_list(contact_t *contact, GSList* list)
 	cts_email *tmp_email;
 
 	GSList *new_gslist=NULL, *tmp_gslist=list, *prev=NULL;
-	if (contact->emails && tmp_gslist == contact->emails)
-	{
-		while (tmp_gslist)
-		{
+	if (contact->emails && tmp_gslist == contact->emails) {
+		while (tmp_gslist) {
 			tmp_email = tmp_gslist->data;
-			if (tmp_email)
-			{
+			if (tmp_email) {
 				retvm_if(CTS_VALUE_EMAIL != tmp_email->v_type, CTS_ERR_ARG_INVALID,
 						"List has other type");
 
@@ -464,8 +449,7 @@ static inline int cts_struct_store_email_list(contact_t *contact, GSList* list)
 					continue;
 				}
 
-				if (!tmp_email->embedded)
-				{
+				if (!tmp_email->embedded) {
 					tmp_email->embedded = true;
 					tmp_email->email_addr = SAFE_STRDUP(tmp_email->email_addr);
 				}
@@ -474,17 +458,13 @@ static inline int cts_struct_store_email_list(contact_t *contact, GSList* list)
 			tmp_gslist = tmp_gslist->next;
 		}
 	}
-	else
-	{
-		while (tmp_gslist)
-		{
+	else {
+		while (tmp_gslist) {
 			tmp_email = tmp_gslist->data;
-			if (tmp_email)
-			{
+			if (tmp_email) {
 				retvm_if(CTS_VALUE_EMAIL != tmp_email->v_type, CTS_ERR_ARG_INVALID,
 						"List has other type");
-				if (!tmp_email->embedded)
-				{
+				if (!tmp_email->embedded) {
 					tmp_email->embedded = true;
 					tmp_email->email_addr = SAFE_STRDUP(tmp_email->email_addr);
 					new_gslist = g_slist_append(new_gslist, tmp_email);
@@ -502,13 +482,10 @@ static inline int cts_struct_store_grouprel_list(contact_t *contact, GSList* lis
 	cts_group *tmp_group;
 
 	GSList *new_gslist=NULL, *tmp_gslist=list, *prev=NULL;
-	if (contact->grouprelations && tmp_gslist == contact->grouprelations)
-	{
-		while (tmp_gslist)
-		{
+	if (contact->grouprelations && tmp_gslist == contact->grouprelations) {
+		while (tmp_gslist) {
 			tmp_group = tmp_gslist->data;
-			if (tmp_group)
-			{
+			if (tmp_group) {
 				retvm_if(CTS_VALUE_GROUP_RELATION != tmp_group->v_type, CTS_ERR_ARG_INVALID,
 						"List has other type");
 
@@ -523,17 +500,13 @@ static inline int cts_struct_store_grouprel_list(contact_t *contact, GSList* lis
 			tmp_gslist = tmp_gslist->next;
 		}
 	}
-	else
-	{
-		while (tmp_gslist)
-		{
+	else {
+		while (tmp_gslist) {
 			tmp_group = tmp_gslist->data;
-			if (tmp_group)
-			{
+			if (tmp_group) {
 				retvm_if(CTS_VALUE_GROUP_RELATION != tmp_group->v_type, CTS_ERR_ARG_INVALID,
 						"List has other type");
-				if (!tmp_group->embedded)
-				{
+				if (!tmp_group->embedded) {
 					tmp_group->embedded = true;
 					new_gslist = g_slist_append(new_gslist, tmp_group);
 				}
@@ -550,13 +523,10 @@ static inline int cts_struct_store_event_list(contact_t *contact, GSList* list)
 	cts_event *tmp_event;
 
 	GSList *new_gslist=NULL, *tmp_gslist=list, *prev=NULL;
-	if (contact->events && tmp_gslist == contact->events)
-	{
-		while (tmp_gslist)
-		{
+	if (contact->events && tmp_gslist == contact->events) {
+		while (tmp_gslist) {
 			tmp_event = tmp_gslist->data;
-			if (tmp_event)
-			{
+			if (tmp_event) {
 				retvm_if(CTS_VALUE_EVENT != tmp_event->v_type, CTS_ERR_ARG_INVALID,
 						"List has other type");
 
@@ -571,17 +541,13 @@ static inline int cts_struct_store_event_list(contact_t *contact, GSList* list)
 			tmp_gslist = tmp_gslist->next;
 		}
 	}
-	else
-	{
-		while (tmp_gslist)
-		{
+	else {
+		while (tmp_gslist) {
 			tmp_event = tmp_gslist->data;
-			if (tmp_event)
-			{
+			if (tmp_event) {
 				retvm_if(CTS_VALUE_EVENT != tmp_event->v_type, CTS_ERR_ARG_INVALID,
 						"List has other type");
-				if (!tmp_event->embedded)
-				{
+				if (!tmp_event->embedded) {
 					tmp_event->embedded = true;
 					new_gslist = g_slist_append(new_gslist, tmp_event);
 				}
@@ -598,13 +564,10 @@ static inline int cts_struct_store_messenger_list(contact_t *contact, GSList* li
 	cts_messenger *tmp_messenger;
 
 	GSList *new_gslist=NULL, *tmp_gslist=list, *prev=NULL;
-	if (contact->messengers && tmp_gslist == contact->messengers)
-	{
-		while (tmp_gslist)
-		{
+	if (contact->messengers && tmp_gslist == contact->messengers) {
+		while (tmp_gslist) {
 			tmp_messenger = tmp_gslist->data;
-			if (tmp_messenger)
-			{
+			if (tmp_messenger) {
 				retvm_if(CTS_VALUE_MESSENGER != tmp_messenger->v_type, CTS_ERR_ARG_INVALID,
 						"List has other type");
 
@@ -624,17 +587,13 @@ static inline int cts_struct_store_messenger_list(contact_t *contact, GSList* li
 			tmp_gslist = tmp_gslist->next;
 		}
 	}
-	else
-	{
-		while (tmp_gslist)
-		{
+	else {
+		while (tmp_gslist) {
 			tmp_messenger = tmp_gslist->data;
-			if (tmp_messenger)
-			{
+			if (tmp_messenger) {
 				retvm_if(CTS_VALUE_MESSENGER != tmp_messenger->v_type, CTS_ERR_ARG_INVALID,
 						"List has other type");
-				if (!tmp_messenger->embedded)
-				{
+				if (!tmp_messenger->embedded) {
 					tmp_messenger->embedded = true;
 					tmp_messenger->im_id = SAFE_STRDUP(tmp_messenger->im_id);
 					tmp_messenger->svc_name = SAFE_STRDUP(tmp_messenger->svc_name);
@@ -654,13 +613,10 @@ static inline int cts_struct_store_postal_list(contact_t *contact, GSList* list)
 	cts_postal *tmp_postal;
 
 	GSList *new_gslist=NULL, *tmp_gslist=list, *prev=NULL;
-	if (contact->postal_addrs && tmp_gslist == contact->postal_addrs)
-	{
-		while (tmp_gslist)
-		{
+	if (contact->postal_addrs && tmp_gslist == contact->postal_addrs) {
+		while (tmp_gslist) {
 			tmp_postal = tmp_gslist->data;
-			if (tmp_postal)
-			{
+			if (tmp_postal) {
 				retvm_if(CTS_VALUE_POSTAL != tmp_postal->v_type, CTS_ERR_ARG_INVALID,
 						"List has other type");
 
@@ -684,11 +640,9 @@ static inline int cts_struct_store_postal_list(contact_t *contact, GSList* list)
 			tmp_gslist = tmp_gslist->next;
 		}
 	}
-	else
-	{
+	else {
 		//retvm_if(NULL != contact->postal_addrs, CTS_ERR_ARG_INVALID, "New list can be stored when struct has no list");
-		while (tmp_gslist)
-		{
+		while (tmp_gslist) {
 			tmp_postal = tmp_gslist->data;
 			if (tmp_postal) {
 				retvm_if(tmp_postal && CTS_VALUE_POSTAL != tmp_postal->v_type, CTS_ERR_ARG_INVALID,
@@ -717,13 +671,10 @@ static inline int cts_struct_store_web_list(contact_t *contact, GSList* list)
 	cts_web *tmp_web;
 
 	GSList *new_gslist=NULL, *tmp_gslist=list, *prev=NULL;
-	if (contact->web_addrs && tmp_gslist == contact->web_addrs)
-	{
-		while (tmp_gslist)
-		{
+	if (contact->web_addrs && tmp_gslist == contact->web_addrs) {
+		while (tmp_gslist) {
 			tmp_web = tmp_gslist->data;
-			if (tmp_web)
-			{
+			if (tmp_web) {
 				retvm_if(CTS_VALUE_WEB != tmp_web->v_type, CTS_ERR_ARG_INVALID,
 						"List has other type");
 
@@ -741,13 +692,10 @@ static inline int cts_struct_store_web_list(contact_t *contact, GSList* list)
 			tmp_gslist = tmp_gslist->next;
 		}
 	}
-	else
-	{
-		while (tmp_gslist)
-		{
+	else {
+		while (tmp_gslist) {
 			tmp_web = tmp_gslist->data;
-			if (tmp_web)
-			{
+			if (tmp_web) {
 				retvm_if(tmp_web && CTS_VALUE_WEB != tmp_web->v_type, CTS_ERR_ARG_INVALID,
 						"List has other type");
 				if (!tmp_web->embedded) {
@@ -768,13 +716,10 @@ static inline int cts_struct_store_nickname_list(contact_t *contact, GSList* lis
 	cts_nickname *tmp_nickname;
 
 	GSList *new_gslist=NULL, *tmp_gslist=list, *prev=NULL;
-	if (contact->nicknames && tmp_gslist == contact->nicknames)
-	{
-		while (tmp_gslist)
-		{
+	if (contact->nicknames && tmp_gslist == contact->nicknames) {
+		while (tmp_gslist) {
 			tmp_nickname = tmp_gslist->data;
-			if (tmp_nickname)
-			{
+			if (tmp_nickname) {
 				retvm_if(CTS_VALUE_NICKNAME != tmp_nickname->v_type, CTS_ERR_ARG_INVALID,
 						"List has other type");
 
@@ -792,17 +737,14 @@ static inline int cts_struct_store_nickname_list(contact_t *contact, GSList* lis
 			tmp_gslist = tmp_gslist->next;
 		}
 	}
-	else
-	{
+	else {
 		//retvm_if(NULL != contact->web_addrs, CTS_ERR_ARG_INVALID, "New list can be stored when struct has no list");
-		while (tmp_gslist)
-		{
+		while (tmp_gslist) {
 			tmp_nickname = tmp_gslist->data;
 			if (tmp_nickname) {
 				retvm_if(tmp_nickname && CTS_VALUE_NICKNAME != tmp_nickname->v_type, CTS_ERR_ARG_INVALID,
 						"List has other type");
-				if (!tmp_nickname->embedded)
-				{
+				if (!tmp_nickname->embedded) {
 					tmp_nickname->embedded = true;
 					tmp_nickname->nick = SAFE_STRDUP(tmp_nickname->nick);
 					new_gslist = g_slist_append(new_gslist, tmp_nickname);
@@ -825,8 +767,7 @@ API int contacts_svc_struct_store_list(CTSstruct *contact,
 	retvm_if(CTS_STRUCT_CONTACT != contact->s_type, CTS_ERR_ARG_INVALID,
 			"The contact(%d) must be type of CTS_STRUCT_CONTACT.", contact->s_type);
 
-	switch (field)
-	{
+	switch (field) {
 	case CTS_CF_NUMBER_LIST:
 		ret = cts_struct_store_num_list((contact_t *)contact, list);
 		retvm_if(CTS_SUCCESS != ret, ret, "cts_struct_store_num_list() Failed(%d)",ret);
@@ -869,8 +810,7 @@ API int contacts_svc_struct_store_list(CTSstruct *contact,
 
 static inline void cts_contact_store_name(contact_t *contact, cts_name *value)
 {
-	if (contact->name)
-	{
+	if (contact->name) {
 		if (value->is_changed) {
 			FREEandSTRDUP(contact->name->first, value->first);
 			FREEandSTRDUP(contact->name->last, value->last);
@@ -881,8 +821,7 @@ static inline void cts_contact_store_name(contact_t *contact, cts_name *value)
 			contact->name->is_changed = true;
 		}
 	}
-	else
-	{
+	else {
 		//contact->name = (cts_name *)contacts_svc_value_new(CTS_VALUE_NAME);
 		contact->name = value;
 		contact->name->embedded = true;
@@ -897,8 +836,7 @@ static inline void cts_contact_store_name(contact_t *contact, cts_name *value)
 
 static inline void cts_contact_store_base(contact_t *contact, cts_ct_base *value)
 {
-	if (contact->base)
-	{
+	if (contact->base) {
 		if (value->uid_changed) {
 			FREEandSTRDUP(contact->base->uid, value->uid);
 			contact->base->uid_changed = true;
@@ -920,8 +858,7 @@ static inline void cts_contact_store_base(contact_t *contact, cts_ct_base *value
 			contact->base->note_changed = true;
 		}
 	}
-	else
-	{
+	else {
 		contact->base = value;
 		contact->base->embedded = true;
 		contact->base->uid = SAFE_STRDUP(value->uid);
@@ -934,16 +871,14 @@ static inline void cts_contact_store_base(contact_t *contact, cts_ct_base *value
 
 static inline void cts_contact_store_company(contact_t *contact, cts_company *value)
 {
-	if (contact->company)
-	{
+	if (contact->company) {
 		FREEandSTRDUP(contact->company->name, value->name);
 		FREEandSTRDUP(contact->company->department, value->department);
 		FREEandSTRDUP(contact->company->jot_title, value->jot_title);
 		FREEandSTRDUP(contact->company->role, value->role);
 		FREEandSTRDUP(contact->company->assistant_name, value->assistant_name);
 	}
-	else
-	{
+	else {
 		//contact->company = (cts_company *)contacts_svc_value_new(CTS_VALUE_COMPANY);
 		contact->company = value;
 		contact->company->embedded = true;
@@ -961,8 +896,7 @@ static inline int cts_contact_store_extend(contact_t *contact,
 	cts_extend *stored_extend;
 
 	stored_extend = cts_extend_slist_search(type, contact->extended_values);
-	if (NULL == stored_extend)
-	{
+	if (NULL == stored_extend) {
 		retvm_if(value->embedded, CTS_ERR_ARG_INVALID, "This Value is already stored");
 		value->embedded = true;
 		value->type = type;
@@ -977,8 +911,7 @@ static inline int cts_contact_store_extend(contact_t *contact,
 		value->data9 = SAFE_STRDUP(value->data9);
 		value->data10 = SAFE_STRDUP(value->data10);
 	}
-	else
-	{
+	else {
 		retvm_if(stored_extend == value, CTS_SUCCESS, "This value is already stored");
 
 		FREEandSTRDUP(stored_extend->data2, value->data2);
@@ -1007,8 +940,7 @@ API int contacts_svc_struct_store_value(CTSstruct *contact,
 	CTS_DBG("contact type = %d, field = %d, value type = %d",
 			contact->s_type, field, value->v_type);
 
-	switch (field)
-	{
+	switch (field) {
 	case CTS_CF_NAME_VALUE:
 		retvm_if(CTS_VALUE_NAME != value->v_type, CTS_ERR_ARG_INVALID,
 				"The value must be a CTS_VALUE_NAME for field(CTS_CF_NAME_VALUE).");
@@ -1041,8 +973,7 @@ API int contacts_svc_struct_store_value(CTSstruct *contact,
 API CTSvalue* contacts_svc_value_new(cts_value_type type)
 {
 	CTSvalue* ret_val;
-	switch ((int)type)
-	{
+	switch ((int)type) {
 	case CTS_VALUE_BASIC:
 		ret_val = (CTSvalue*)calloc(1, sizeof(cts_basic));
 		break;
@@ -1162,6 +1093,15 @@ API CTSvalue* contacts_svc_value_new(cts_value_type type)
 		else
 			ret_val = (CTSvalue*)calloc(1, sizeof(sdn_list));
 		break;
+	case CTS_VALUE_LIST_OSP:
+		if (osp_list_mempool) {
+			memset(osp_list_mempool, 0x00, sizeof(osp_list));
+			ret_val = (CTSvalue*)osp_list_mempool;
+			osp_list_mempool = NULL;
+		}
+		else
+			ret_val = (CTSvalue*)calloc(1, sizeof(osp_list));
+		break;
 	default:
 		ERR("your type is Not supported");
 		return NULL;
@@ -1186,9 +1126,9 @@ static inline void cts_internal_value_info_free(CTSvalue *value)
 	cts_group *group;
 	cts_addrbook *ab;
 	sdn_list *sdn;
+	osp_list *osp;
 
-	switch (value->v_type)
-	{
+	switch (value->v_type) {
 	case CTS_VALUE_LIST_CONTACT:
 	case CTS_VALUE_LIST_NUMBERINFO:
 	case CTS_VALUE_LIST_EMAILINFO:
@@ -1206,6 +1146,23 @@ static inline void cts_internal_value_info_free(CTSvalue *value)
 		else
 			if (contact_list_mempool != contact)
 				free(contact);
+		break;
+	case CTS_VALUE_LIST_OSP:
+		osp = (osp_list *)value;
+		free(osp->img_path);
+		free(osp->first);
+		free(osp->last);
+		free(osp->display);
+		free(osp->def_num);
+		free(osp->def_email);
+		free(osp->normalize);
+
+		if (!osp_list_mempool) {
+			osp_list_mempool = osp;
+		}
+		else
+			if (osp_list_mempool != osp)
+				free(osp);
 		break;
 	case CTS_VALUE_LIST_PLOG:
 		plog = (plog_list *)value;
@@ -1243,6 +1200,9 @@ static inline void cts_internal_value_info_free(CTSvalue *value)
 	case CTS_VALUE_LIST_GROUP:
 		group = (cts_group *)value;
 		free(group->name);
+		free(group->ringtone_path);
+		free(group->img_path);
+		free(group->vcard_group);
 
 		if (!group_list_mempool) {
 			group_list_mempool = group;
@@ -1325,6 +1285,7 @@ API int contacts_svc_value_free(CTSvalue *value)
 			if (value->embedded) {
 				free(((cts_group *)value)->name);
 				free(((cts_group *)value)->ringtone_path);
+				free(((cts_group *)value)->img_path);
 			}
 			break;
 		case CTS_VALUE_ADDRESSBOOK:
@@ -1356,8 +1317,7 @@ static inline int cts_value_get_int_base(cts_ct_base *value, int field)
 {
 	int ret = 0;
 
-	switch (field)
-	{
+	switch (field) {
 	case CTS_BASE_VAL_ID_INT:
 		ret = value->id;
 		break;
@@ -1366,6 +1326,9 @@ static inline int cts_value_get_int_base(cts_ct_base *value, int field)
 		break;
 	case CTS_BASE_VAL_ADDRESSBOOK_ID_INT:
 		ret = value->addrbook_id;
+		break;
+	case CTS_BASE_VAL_PERSON_ID_INT:
+		ret = value->person_id;
 		break;
 	default:
 		ERR("The field(%d) is not supported in value(Base_info)", field);
@@ -1378,8 +1341,7 @@ static inline int cts_value_get_int_plog_list(plog_list *value, int field)
 {
 	int ret = 0;
 
-	switch (field)
-	{
+	switch (field) {
 	case CTS_LIST_PLOG_ID_INT:
 		ret = value->id;
 		break;
@@ -1410,8 +1372,7 @@ static inline int cts_value_get_int_plog(cts_plog *value, int field)
 {
 	int ret = 0;
 
-	switch (field)
-	{
+	switch (field) {
 	case CTS_PLOG_VAL_ID_INT:
 		ret = value->id;
 		break;
@@ -1439,8 +1400,7 @@ static inline int cts_value_get_int_change_list(change_list *value, int field)
 {
 	int ret = 0;
 
-	switch (field)
-	{
+	switch (field) {
 	case CTS_LIST_CHANGE_ID_INT:
 		ret = value->id;
 		break;
@@ -1449,6 +1409,9 @@ static inline int cts_value_get_int_change_list(change_list *value, int field)
 		break;
 	case CTS_LIST_CHANGE_VER_INT:
 		ret = value->changed_ver;
+		break;
+	case CTS_LIST_CHANGE_ADDRESSBOOK_ID_INT:
+		ret = value->addressbook_id;
 		break;
 	default:
 		ERR("The field(%d) is not supported in value(change list)", field);
@@ -1461,8 +1424,7 @@ static inline int cts_value_get_int_shortcut_list(shortcut_list *value, int fiel
 {
 	int ret = 0;
 
-	switch (field)
-	{
+	switch (field) {
 	case CTS_LIST_SHORTCUT_ID_INT:
 		ret = value->id;
 		break;
@@ -1486,8 +1448,7 @@ static inline int cts_value_get_int_addrbook(cts_addrbook *value, int field)
 {
 	int ret = 0;
 
-	switch (field)
-	{
+	switch (field) {
 	case CTS_ADDRESSBOOK_VAL_ID_INT:
 		ret = value->id;
 		break;
@@ -1507,13 +1468,39 @@ static inline int cts_value_get_int_addrbook(cts_addrbook *value, int field)
 	return ret;
 }
 
+static inline int cts_value_get_int_osp(osp_list *value, int field)
+{
+	int ret = 0;
+
+	switch (field) {
+	case CTS_LIST_OSP_PERSON_ID_INT:
+		ret = value->person_id;
+		break;
+	case CTS_LIST_OSP_CONTACT_ID_INT:
+		ret = value->contact_id;
+		break;
+	case CTS_LIST_OSP_ADDRESSBOOK_ID_INT:
+		ret = value->addrbook_id;
+		break;
+	case CTS_LIST_OSP_DEF_NUM_TYPE_INT:
+		ret = value->def_num_type;
+		break;
+	case CTS_LIST_OSP_DEF_EMAIL_TYPE_INT:
+		ret = value->def_email_type;
+		break;
+	default:
+		ERR("The field(%d) is not supported in value(osp_list)", field);
+		break;
+	}
+	return ret;
+}
+
 API int contacts_svc_value_get_int(CTSvalue *value, int field)
 {
 	int ret = 0;
 	retvm_if(NULL == value, 0, "The Parameter(value) is NULL");
 
-	switch (value->v_type)
-	{
+	switch (value->v_type) {
 	case CTS_VALUE_BASIC:
 		retvm_if(CTS_BASIC_VAL_INT != ((cts_basic*)value)->type, 0,
 				"The type of Basic_value is not integer");
@@ -1555,9 +1542,11 @@ API int contacts_svc_value_get_int(CTSvalue *value, int field)
 	case CTS_VALUE_LIST_CONTACT:
 	case CTS_VALUE_LIST_NUMS_EMAILS:
 		if (CTS_LIST_CONTACT_ID_INT == field)
-			ret = ((contact_list *)value)->id;
+			ret = ((contact_list *)value)->contact_id;
 		else if (CTS_LIST_CONTACT_ADDRESSBOOK_ID_INT == field)
-			ret = ((contact_list *)value)->acc_id;
+			ret = ((contact_list *)value)->addrbook_id;
+		else if (CTS_LIST_CONTACT_PERSON_ID_INT == field)
+			ret = ((contact_list *)value)->person_id;
 		else
 			ERR("The field(%d) is not supported in value(contact_list)", field);
 		break;
@@ -1567,9 +1556,12 @@ API int contacts_svc_value_get_int(CTSvalue *value, int field)
 		break;
 	case CTS_VALUE_LIST_NUMBERINFO:
 	case CTS_VALUE_LIST_EMAILINFO: // CTS_LIST_EMAIL_CONTACT_ID_INT is same to CTS_LIST_NUM_CONTACT_ID_INT
-		retvm_if(CTS_LIST_NUM_CONTACT_ID_INT != field, 0,
-				"The field(%d) is not supported in value(Number list)", field);
-		ret = ((contact_list*)value)->id;
+		if (CTS_LIST_NUM_CONTACT_ID_INT == field)
+			ret = ((contact_list *)value)->contact_id;
+		else if (CTS_LIST_NUM_PERSON_ID_INT == field)
+			ret = ((contact_list *)value)->person_id;
+		else
+			ERR("The field(%d) is not supported in value(Number list)", field);
 		break;
 	case CTS_VALUE_LIST_CUSTOM_NUM_TYPE:
 		if (CTS_LIST_CUSTOM_NUM_TYPE_ID_INT == field)
@@ -1631,6 +1623,9 @@ API int contacts_svc_value_get_int(CTSvalue *value, int field)
 		else
 			ERR("Not supported field(%d)", field);
 		break;
+	case CTS_VALUE_LIST_OSP:
+		ret = cts_value_get_int_osp((osp_list *)value, field);
+		break;
 	case CTS_VALUE_PHONELOG:
 		/* phonelog value is write only */
 	case CTS_VALUE_COMPANY:
@@ -1638,7 +1633,7 @@ API int contacts_svc_value_get_int(CTSvalue *value, int field)
 	case CTS_VALUE_NAME:
 		/* name value doesn't have interger value */
 	default:
-		ERR("The value has unsupported type");
+		ERR("The value has unsupported type(%d)", value->v_type);
 		break;
 	}
 	return ret;
@@ -1648,8 +1643,7 @@ double contacts_svc_value_get_dbl(CTSvalue *value, int field)
 {
 	retv_if(NULL == value, CTS_ERR_ARG_NULL);
 
-	switch (value->v_type)
-	{
+	switch (value->v_type) {
 	case CTS_VALUE_BASIC:
 		retvm_if(CTS_BASIC_VAL_DBL != ((cts_basic*)value)->type, 0.0,
 				"The type of value is not double");
@@ -1664,7 +1658,7 @@ double contacts_svc_value_get_dbl(CTSvalue *value, int field)
 	case CTS_VALUE_GROUP_RELATION:
 	case CTS_VALUE_COMPANY:
 	default:
-		ERR("The value has unsupported type");
+		ERR("The value has unsupported type(%d)", value->v_type);
 		return CTS_ERR_ARG_INVALID;
 	}
 
@@ -1672,10 +1666,9 @@ double contacts_svc_value_get_dbl(CTSvalue *value, int field)
 
 API bool contacts_svc_value_get_bool(CTSvalue *value, int field)
 {
-	retvm_if(NULL == value, false, "The Parameter(value) is NULL");
+	retv_if(NULL == value, false);
 
-	switch (value->v_type)
-	{
+	switch (value->v_type) {
 	case CTS_VALUE_CONTACT_BASE_INFO:
 		if (CTS_BASE_VAL_FAVORITE_BOOL == field) {
 			return ((cts_ct_base*)value)->is_favorite;
@@ -1789,7 +1782,7 @@ API bool contacts_svc_value_get_bool(CTSvalue *value, int field)
 	case CTS_VALUE_COMPANY:
 		/* company value doesn't have boolean value */
 	default:
-		ERR("The value has unsupported type");
+		ERR("The value has unsupported type(%d)", value->v_type);
 		return false;
 	}
 }
@@ -1799,8 +1792,7 @@ static inline char* cts_value_get_str_name(int op_code,
 {
 	char *ret_val;
 
-	switch (field)
-	{
+	switch (field) {
 	case CTS_NAME_VAL_FIRST_STR:
 		HANDLE_STEAL_STRING(op_code, ret_val, value->first);
 		break;
@@ -1832,8 +1824,7 @@ static inline char* cts_value_get_str_extend(int op_code,
 {
 	char *ret_val;
 
-	switch (field)
-	{
+	switch (field) {
 	case CTS_EXTEND_VAL_DATA2_STR:
 		HANDLE_STEAL_STRING(op_code, ret_val, value->data2);
 		break;
@@ -1874,8 +1865,7 @@ static inline char* cts_value_get_str_base(int op_code,
 {
 	char *ret_val;
 
-	switch (field)
-	{
+	switch (field) {
 	case CTS_BASE_VAL_IMG_PATH_STR:
 		HANDLE_STEAL_STRING(op_code, ret_val, value->img_path);
 		if (NULL == ret_val && value->vcard_img_path) {
@@ -1909,8 +1899,7 @@ static inline char* cts_value_get_str_contact_list(int op_code,
 		contact_list *value, int field)
 {
 	char *ret_val;
-	switch (field)
-	{
+	switch (field) {
 	case CTS_LIST_CONTACT_FIRST_STR:
 		HANDLE_STEAL_STRING(op_code, ret_val, value->first);
 		break;
@@ -1947,8 +1936,7 @@ static inline char* cts_value_get_str_num_email_list(int op_code,
 		contact_list *value, int field)
 {
 	char *ret_val;
-	switch (field)
-	{
+	switch (field) {
 	case CTS_LIST_NUM_CONTACT_FIRST_STR:
 		HANDLE_STEAL_STRING(op_code, ret_val, value->first);
 		break;
@@ -1972,12 +1960,45 @@ static inline char* cts_value_get_str_num_email_list(int op_code,
 	return ret_val;
 }
 
+static inline char* cts_value_get_str_osp_list(int op_code,
+		osp_list *value, int field)
+{
+	char *ret_val;
+	switch (field) {
+	case CTS_LIST_OSP_FIRST_STR:
+		HANDLE_STEAL_STRING(op_code, ret_val, value->first);
+		break;
+	case CTS_LIST_OSP_LAST_STR:
+		HANDLE_STEAL_STRING(op_code, ret_val, value->last);
+		break;
+	case CTS_LIST_OSP_DISPLAY_STR:
+		HANDLE_STEAL_STRING(op_code, ret_val, value->display);
+		break;
+	case CTS_LIST_OSP_IMG_PATH_STR:
+		HANDLE_STEAL_STRING(op_code, ret_val, value->img_path);
+		break;
+	case CTS_LIST_OSP_DEF_NUM_STR:
+		HANDLE_STEAL_STRING(op_code, ret_val, value->def_num);
+		break;
+	case CTS_LIST_OSP_DEF_EMAIL_STR:
+		HANDLE_STEAL_STRING(op_code, ret_val, value->def_email);
+		break;
+	case CTS_LIST_OSP_NORMALIZED_STR:
+		HANDLE_STEAL_STRING(op_code, ret_val, value->normalize);
+		break;
+	default:
+		ERR("The parameter(field:%d) is not interpreted", field);
+		ret_val = NULL;
+		break;
+	}
+	return ret_val;
+}
+
 static inline char* cts_value_get_str_favorite_list(int op_code,
 		shortcut_list *value, int field)
 {
 	char *ret_val;
-	switch (field)
-	{
+	switch (field) {
 	case CTS_LIST_SHORTCUT_FIRST_NAME_STR:
 		HANDLE_STEAL_STRING(op_code, ret_val, value->first);
 		break;
@@ -2005,8 +2026,7 @@ static inline char* cts_value_get_str_plog_list(int op_code,
 		plog_list *value, int field)
 {
 	char *ret_val;
-	switch (field)
-	{
+	switch (field) {
 	case CTS_LIST_PLOG_FIRST_NAME_STR:
 		HANDLE_STEAL_STRING(op_code, ret_val, value->first);
 		break;
@@ -2037,8 +2057,7 @@ static inline char* cts_value_get_str_postal(int op_code,
 		cts_postal *value, int field)
 {
 	char *ret_val;
-	switch (field)
-	{
+	switch (field) {
 	case CTS_POSTAL_VAL_POBOX_STR:
 		HANDLE_STEAL_STRING(op_code, ret_val, value->pobox);
 		break;
@@ -2072,8 +2091,7 @@ static inline char* cts_value_get_str_company(int op_code,
 		cts_company *value, int field)
 {
 	char *ret_val;
-	switch (field)
-	{
+	switch (field) {
 	case CTS_COMPANY_VAL_NAME_STR:
 		HANDLE_STEAL_STRING(op_code, ret_val, value->name);
 		break;
@@ -2102,8 +2120,7 @@ static inline char* cts_value_get_str_im(int op_code,
 		cts_messenger *value, int field)
 {
 	char *ret_val;
-	switch (field)
-	{
+	switch (field) {
 	case CTS_MESSENGER_VAL_IM_ID_STR:
 		HANDLE_STEAL_STRING(op_code, ret_val, value->im_id);
 		break;
@@ -2121,13 +2138,39 @@ static inline char* cts_value_get_str_im(int op_code,
 	return ret_val;
 }
 
+static inline char* cts_value_get_str_group(int op_code,
+		cts_group *value, int field)
+{
+	char *ret_val;
+	switch (field) {
+	case CTS_GROUP_VAL_NAME_STR:
+		HANDLE_STEAL_STRING(op_code, ret_val, value->name);
+		break;
+	case CTS_GROUP_VAL_RINGTONE_STR:
+		HANDLE_STEAL_STRING(op_code, ret_val, value->ringtone_path);
+		break;
+	case CTS_GROUP_VAL_IMG_PATH_STR:
+		if (false == value->img_loaded) {
+			value->img_path = cts_get_img(CTS_GROUP_IMAGE_LOCATION, value->id, NULL, 0);
+			value->img_loaded = true;
+		}
+		HANDLE_STEAL_STRING(op_code, ret_val, value->img_path);
+		break;
+	default:
+		ERR("The parameter(field:%d) is not interpreted", field);
+		ret_val = NULL;
+		break;
+	}
+
+	return ret_val;
+}
+
 static char* cts_value_handle_str(int op_code, CTSvalue *value, int field)
 {
 	char *ret_val;
 	retvm_if(NULL == value, NULL, "The Parameter(value) is NULL");
 
-	switch (value->v_type)
-	{
+	switch (value->v_type) {
 	case CTS_VALUE_BASIC:
 		retvm_if(CTS_BASIC_VAL_STR != ((cts_basic *)value)->type, NULL,
 				"The type of value is not string");
@@ -2154,6 +2197,9 @@ static char* cts_value_handle_str(int op_code, CTSvalue *value, int field)
 	case CTS_VALUE_LIST_NUMS_EMAILS:
 		ret_val = cts_value_get_str_contact_list(op_code, (contact_list *)value, field);
 		break;
+	case CTS_VALUE_LIST_OSP:
+		ret_val = cts_value_get_str_osp_list(op_code, (osp_list *)value, field);
+		break;
 	case CTS_VALUE_LIST_NUMBERINFO:
 	case CTS_VALUE_LIST_EMAILINFO:
 		ret_val = cts_value_get_str_num_email_list(op_code, (contact_list *)value, field);
@@ -2167,8 +2213,13 @@ static char* cts_value_handle_str(int op_code, CTSvalue *value, int field)
 	case CTS_VALUE_MESSENGER:
 		ret_val = cts_value_get_str_im(op_code, (cts_messenger *)value, field);
 		break;
+	case CTS_VALUE_GROUP:
+	case CTS_VALUE_GROUP_RELATION:
+	case CTS_VALUE_LIST_GROUP:
+		ret_val = cts_value_get_str_group(op_code, (cts_group *)value, field);
+		break;
 	case CTS_VALUE_RDONLY_PLOG:
-		if (CTS_PLOG_VAL_NUMBER_STR == field) {
+		if (CTS_PLOG_VAL_ADDRESS_STR == field) {
 			HANDLE_STEAL_STRING(op_code, ret_val, ((cts_plog *)value)->number);
 		} else if (CTS_PLOG_VAL_SHORTMSG_STR == field) {
 			HANDLE_STEAL_STRING(op_code, ret_val, ((cts_plog *)value)->extra_data2);
@@ -2195,18 +2246,6 @@ static char* cts_value_handle_str(int op_code, CTSvalue *value, int field)
 				"This field(%d) is not supported in value(addressbook)", field);
 		HANDLE_STEAL_STRING(op_code, ret_val, ((cts_addrbook *)value)->name);
 		break;
-	case CTS_VALUE_GROUP_RELATION:
-		if (CTS_GROUPREL_VAL_NAME_STR == field) {
-			HANDLE_STEAL_STRING(op_code, ret_val, ((cts_group *)value)->name);
-		}
-		else if (CTS_GROUPREL_VAL_RINGTONE_STR == field) {
-			HANDLE_STEAL_STRING(op_code, ret_val, ((cts_group *)value)->ringtone_path);
-		}
-		else {
-			ERR("Not supported field(%d)", field);
-			ret_val = NULL;
-		}
-		break;
 	case CTS_VALUE_WEB:
 		if (CTS_WEB_VAL_ADDR_STR == field) {
 			HANDLE_STEAL_STRING(op_code, ret_val, ((cts_web *)value)->url);
@@ -2219,27 +2258,6 @@ static char* cts_value_handle_str(int op_code, CTSvalue *value, int field)
 	case CTS_VALUE_NICKNAME:
 		if (CTS_NICKNAME_VAL_NAME_STR == field) {
 			HANDLE_STEAL_STRING(op_code, ret_val, ((cts_nickname *)value)->nick);
-		}
-		else {
-			ERR("Not supported field(%d)", field);
-			ret_val = NULL;
-		}
-		break;
-	case CTS_VALUE_GROUP:
-		if (CTS_GROUP_VAL_NAME_STR == field) {
-			HANDLE_STEAL_STRING(op_code, ret_val, ((cts_group *)value)->name);
-		}
-		else if (CTS_GROUP_VAL_RINGTONE_STR == field) {
-			HANDLE_STEAL_STRING(op_code, ret_val, ((cts_group *)value)->ringtone_path);
-		}
-		else {
-			ERR("Not supported field(%d)", field);
-			ret_val = NULL;
-		}
-		break;
-	case CTS_VALUE_LIST_GROUP:
-		if (CTS_LIST_GROUP_NAME_STR == field) {
-			HANDLE_STEAL_STRING(op_code, ret_val, ((cts_group *)value)->name);
 		}
 		else {
 			ERR("Not supported field(%d)", field);
@@ -2273,7 +2291,7 @@ static char* cts_value_handle_str(int op_code, CTSvalue *value, int field)
 	case CTS_VALUE_EVENT:
 		/* evet value doesn't have string value */
 	default:
-		ERR("The value has unsupported type");
+		ERR("The value has unsupported type(%d)", value->v_type);
 		ret_val = NULL;
 		break;
 	}
@@ -2292,8 +2310,7 @@ API char* contacts_svc_value_steal_str(CTSvalue *value, int field)
 
 static inline int cts_value_set_int_plog(cts_plog *value, int field, int intval)
 {
-	switch (field)
-	{
+	switch (field) {
 	case CTS_PLOG_VAL_LOG_TIME_INT:
 		value->log_time = intval;
 		break;
@@ -2317,8 +2334,7 @@ static inline int cts_value_set_int_plog(cts_plog *value, int field, int intval)
 static inline int cts_value_set_int_addrbook(cts_addrbook *value,
 		int field, int intval)
 {
-	switch (field)
-	{
+	switch (field) {
 	case CTS_ADDRESSBOOK_VAL_ACC_ID_INT:
 		value->acc_id = intval;
 		break;
@@ -2339,8 +2355,7 @@ API int contacts_svc_value_set_int(CTSvalue *value, int field, int intval)
 {
 	retv_if(NULL == value, CTS_ERR_ARG_NULL);
 
-	switch (value->v_type)
-	{
+	switch (value->v_type) {
 	case CTS_VALUE_BASIC:
 		((cts_basic*)value)->type = CTS_BASIC_VAL_INT;
 		((cts_basic*)value)->val.i = intval;
@@ -2350,11 +2365,15 @@ API int contacts_svc_value_set_int(CTSvalue *value, int field, int intval)
 				"Not supported field");
 		((cts_extend *)value)->data1 = intval;
 		break;
-	case CTS_VALUE_EMAIL:
 	case CTS_VALUE_NUMBER:
 		retvm_if(CTS_NUM_VAL_TYPE_INT != field, CTS_ERR_ARG_INVALID,
 				"Not supported field");
 		((cts_number *)value)->type = intval;
+		break;
+	case CTS_VALUE_EMAIL:
+		retvm_if(CTS_EMAIL_VAL_TYPE_INT != field, CTS_ERR_ARG_INVALID,
+				"Not supported field");
+		((cts_email *)value)->type = intval;
 		break;
 	case CTS_VALUE_PHONELOG:
 		return cts_value_set_int_plog((cts_plog *)value, field, intval);
@@ -2387,8 +2406,7 @@ API int contacts_svc_value_set_int(CTSvalue *value, int field, int intval)
 			((cts_event *)value)->type = intval;
 		else if (CTS_EVENT_VAL_DATE_INT == field)
 			((cts_event *)value)->date = intval;
-		else
-		{
+		else {
 			ERR("Not supported field");
 			return CTS_ERR_ARG_INVALID;
 		}
@@ -2407,7 +2425,7 @@ API int contacts_svc_value_set_int(CTSvalue *value, int field, int intval)
 	case CTS_VALUE_CONTACT_BASE_INFO:
 		/* base_info value doesn't have integer value for set */
 	default:
-		ERR("The value has unsupported type");
+		ERR("The value has unsupported type(%d)", value->v_type);
 		return CTS_ERR_ARG_INVALID;
 	}
 
@@ -2418,8 +2436,7 @@ int contacts_svc_value_set_dbl(CTSvalue *value, int field, double dblval)
 {
 	retv_if(NULL == value, CTS_ERR_ARG_NULL);
 
-	switch (value->v_type)
-	{
+	switch (value->v_type) {
 	case CTS_VALUE_BASIC:
 		((cts_basic*)value)->type = CTS_BASIC_VAL_DBL;
 		((cts_basic*)value)->val.d = dblval;
@@ -2435,7 +2452,7 @@ int contacts_svc_value_set_dbl(CTSvalue *value, int field, double dblval)
 	case CTS_VALUE_NAME:
 	case CTS_VALUE_CONTACT_BASE_INFO:
 	default:
-		ERR("The value has unsupported type");
+		ERR("The value has unsupported type(%d)", value->v_type);
 		return CTS_ERR_ARG_INVALID;
 	}
 
@@ -2447,8 +2464,7 @@ API int contacts_svc_value_set_bool(CTSvalue *value,
 {
 	retv_if(NULL == value, CTS_ERR_ARG_NULL);
 
-	switch (value->v_type)
-	{
+	switch (value->v_type) {
 	case CTS_VALUE_CONTACT_BASE_INFO:
 		if (CTS_BASE_VAL_FAVORITE_BOOL == field)
 			((cts_ct_base*)value)->is_favorite = boolval;
@@ -2549,7 +2565,7 @@ API int contacts_svc_value_set_bool(CTSvalue *value,
 	case CTS_VALUE_NAME:
 		/* name value doesn't have boolean value */
 	default:
-		ERR("The value has unsupported type");
+		ERR("The value has unsupported type(%d)", value->v_type);
 		return CTS_ERR_ARG_INVALID;
 	}
 
@@ -2558,8 +2574,7 @@ API int contacts_svc_value_set_bool(CTSvalue *value,
 
 static inline int cts_value_set_str_base(cts_ct_base *base, int field, char *strval)
 {
-	switch (field)
-	{
+	switch (field) {
 	case CTS_BASE_VAL_IMG_PATH_STR:
 		if (base->embedded)
 			FREEandSTRDUP(base->img_path, strval);
@@ -2596,7 +2611,7 @@ static inline int cts_value_set_str_base(cts_ct_base *base, int field, char *str
 		base->full_img_changed = true;
 		break;
 	default:
-		ERR("Not supported field");
+		ERR("Not supported field(%d)", field);
 		return CTS_ERR_ARG_INVALID;
 	}
 	return CTS_SUCCESS;
@@ -2604,8 +2619,7 @@ static inline int cts_value_set_str_base(cts_ct_base *base, int field, char *str
 
 static inline int cts_value_set_str_name(cts_name *name, int field, char *strval)
 {
-	switch (field)
-	{
+	switch (field) {
 	case CTS_NAME_VAL_FIRST_STR:
 		if (name->embedded) {
 			FREEandSTRDUP(name->first, strval);
@@ -2649,7 +2663,7 @@ static inline int cts_value_set_str_name(cts_name *name, int field, char *strval
 			name->suffix = strval;
 		break;
 	default:
-		ERR("Not supported field");
+		ERR("Not supported field(%d)", field);
 		return CTS_ERR_ARG_INVALID;
 	}
 	name->is_changed = true;
@@ -2658,8 +2672,7 @@ static inline int cts_value_set_str_name(cts_name *name, int field, char *strval
 
 static inline int cts_value_set_str_postal(cts_postal *postal, int field, char *strval)
 {
-	switch (field)
-	{
+	switch (field) {
 	case CTS_POSTAL_VAL_POBOX_STR:
 		if (postal->embedded) {
 			FREEandSTRDUP(postal->pobox, strval);
@@ -2710,7 +2723,7 @@ static inline int cts_value_set_str_postal(cts_postal *postal, int field, char *
 			postal->country = strval;
 		break;
 	default:
-		ERR("Not supported field");
+		ERR("Not supported field(%d)", field);
 		return CTS_ERR_ARG_INVALID;
 	}
 	return CTS_SUCCESS;
@@ -2719,8 +2732,7 @@ static inline int cts_value_set_str_postal(cts_postal *postal, int field, char *
 static inline int cts_value_set_str_company(
 		cts_company *com, int field, char *strval)
 {
-	switch (field)
-	{
+	switch (field) {
 	case CTS_COMPANY_VAL_NAME_STR:
 		if (com->embedded) {
 			FREEandSTRDUP(com->name, strval);
@@ -2757,7 +2769,7 @@ static inline int cts_value_set_str_company(
 			com->assistant_name = strval;
 		break;
 	default:
-		ERR("Not supported field");
+		ERR("Not supported field(%d)", field);
 		return CTS_ERR_ARG_INVALID;
 	}
 	return CTS_SUCCESS;
@@ -2766,8 +2778,7 @@ static inline int cts_value_set_str_company(
 static inline int cts_value_set_str_group(
 		cts_group *group, int field, char *strval)
 {
-	switch (field)
-	{
+	switch (field) {
 	case CTS_GROUP_VAL_NAME_STR:
 		if (group->embedded) {
 			FREEandSTRDUP(group->name, strval);
@@ -2782,8 +2793,16 @@ static inline int cts_value_set_str_group(
 		else
 			group->ringtone_path = strval;
 		break;
+	case CTS_GROUP_VAL_IMG_PATH_STR:
+		if (group->embedded) {
+			FREEandSTRDUP(group->img_path, strval);
+		}
+		else
+			group->img_path = strval;
+		group->img_loaded = true;
+		break;
 	default:
-		ERR("Not supported field");
+		ERR("Not supported field(%d)", field);
 		return CTS_ERR_ARG_INVALID;
 	}
 	return CTS_SUCCESS;
@@ -2791,8 +2810,7 @@ static inline int cts_value_set_str_group(
 
 static inline int cts_value_set_str_extend(cts_extend *extend, int field, char *strval)
 {
-	switch (field)
-	{
+	switch (field) {
 	case CTS_EXTEND_VAL_DATA2_STR:
 		if (extend->embedded) {
 			FREEandSTRDUP(extend->data2, strval);
@@ -2858,7 +2876,7 @@ static inline int cts_value_set_str_extend(cts_extend *extend, int field, char *
 			extend->data10 = strval;
 		break;
 	default:
-		ERR("Not supported field");
+		ERR("Not supported field(%d)", field);
 		return CTS_ERR_ARG_INVALID;
 	}
 	return CTS_SUCCESS;
@@ -2867,8 +2885,7 @@ static inline int cts_value_set_str_extend(cts_extend *extend, int field, char *
 
 static inline int cts_value_set_str_im(cts_messenger *im, int field, char *strval)
 {
-	switch (field)
-	{
+	switch (field) {
 	case CTS_MESSENGER_VAL_IM_ID_STR:
 		if (im->embedded)
 			FREEandSTRDUP(im->im_id, strval);
@@ -2888,7 +2905,7 @@ static inline int cts_value_set_str_im(cts_messenger *im, int field, char *strva
 			im->svc_op = strval;
 		break;
 	default:
-		ERR("Not supported field");
+		ERR("Not supported field(%d)", field);
 		return CTS_ERR_ARG_INVALID;
 	}
 	return CTS_SUCCESS;
@@ -2906,8 +2923,7 @@ API int contacts_svc_value_set_str(CTSvalue *value, int field, const char *strva
 	else
 		str = NULL;
 
-	switch (value->v_type)
-	{
+	switch (value->v_type) {
 	case CTS_VALUE_BASIC:
 		((cts_basic*)value)->type = CTS_BASIC_VAL_STR;
 		if (value->embedded)
@@ -2952,12 +2968,11 @@ API int contacts_svc_value_set_str(CTSvalue *value, int field, const char *strva
 		((cts_group *)value)->name = str;
 		break;
 	case CTS_VALUE_PHONELOG:  /* phonelog value never be embedded*/
-		if (CTS_PLOG_VAL_NUMBER_STR == field)
+		if (CTS_PLOG_VAL_ADDRESS_STR == field)
 			((cts_plog *)value)->number = str;
 		else if (CTS_PLOG_VAL_SHORTMSG_STR == field)
 			((cts_plog *)value)->extra_data2 = str;
-		else
-		{
+		else {
 			ERR("Not supported field");
 			return CTS_ERR_ARG_INVALID;
 		}
@@ -2987,7 +3002,7 @@ API int contacts_svc_value_set_str(CTSvalue *value, int field, const char *strva
 	case CTS_VALUE_EVENT:
 		/* evet value doesn't have string value */
 	default:
-		ERR("The value has unsupported type");
+		ERR("The value has unsupported type(%d)", value->v_type);
 		return CTS_ERR_ARG_INVALID;
 	}
 

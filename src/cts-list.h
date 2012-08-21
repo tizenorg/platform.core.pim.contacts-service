@@ -43,40 +43,29 @@ enum
 	CTS_ITER_ADDRESSBOOKS,
 	CTS_ITER_EMAILS_OF_CONTACT_ID,
 	CTS_ITER_NUMBERS_OF_CONTACT_ID,
-	CTS_ITER_UPDATED_CONTACTS_AFTER_VER,
+	CTS_ITER_UPDATED_INFO_AFTER_VER,
+	CTS_ITER_PLOGS_OF_PERSON_ID,
+	CTS_ITER_OSP,
 	CTS_ITER_MAX
 };
 
-typedef struct _updated_contact {
+typedef struct _updated_record {
 	int type;
 	int id;
 	int ver;
-	struct _updated_contact *next;
-}updated_contact;
+	int addressbook_id;
+	struct _updated_record *next;
+}updated_record;
 
 typedef struct {
-	updated_contact *head;
-	updated_contact *cursor;
-}updated_contact_info;
+	updated_record *head;
+	updated_record *cursor;
+}updated_info;
 
 struct _cts_iter {
 	int i_type;
 	cts_stmt stmt;
-	updated_contact_info *info;
-};
-
-struct cts_filter {
-	int type;
-	int list_type;
-	char *search_val;
-	bool addrbook_on;
-	bool group_on;
-	bool limit_on;
-	bool offset_on;
-	int addrbook_id;
-	int group_id;
-	int limit;
-	int offset;
+	updated_info *info;
 };
 
 //<!--
@@ -102,13 +91,6 @@ struct cts_filter {
  */
 typedef struct _cts_iter CTSiter;
 
-/**
- * CTSiter is an opaque type, it must be
- * used via accessor functions.
- * @see contacts_svc_list_filter_new(), contacts_svc_list_str_filter_new(), contacts_svc_list_filter_free()
- */
-typedef struct cts_filter CTSfilter;
-
 //////////////////// read only value ////////////////////
 //////////////////// List row info ////////////////////
 /**
@@ -116,6 +98,9 @@ typedef struct cts_filter CTSfilter;
  * For #CTS_LIST_PLOGS_OF_NUMBER, it supports CTS_LIST_PLOG_ID_INT, CTS_LIST_PLOG_LOG_TIME_INT,
  * CTS_LIST_PLOG_LOG_TYPE_INT, CTS_LIST_PLOG_DURATION_INT(or CTS_LIST_PLOG_MSGID_INT), CTS_LIST_PLOG_SHORTMSG_STR
  * and CTS_LIST_PLOG_RELATED_ID_INT.
+ * For #CTS_LIST_PLOGS_OF_PERSON_ID, it supports CTS_LIST_PLOG_ID_INT, CTS_LIST_PLOG_LOG_TIME_INT,
+ * CTS_LIST_PLOG_LOG_TYPE_INT, CTS_LIST_PLOG_DURATION_INT(or CTS_LIST_PLOG_MSGID_INT), CTS_LIST_PLOG_SHORTMSG_STR
+ * CTS_LIST_PLOG_RELATED_ID_INT and CTS_LIST_PLOG_NUMBER_STR.
  */
 enum PHONELOGLIST{
 	CTS_LIST_PLOG_ID_INT,/**< . */
@@ -130,9 +115,27 @@ enum PHONELOGLIST{
 	CTS_LIST_PLOG_DURATION_INT,/**< seconds */
 	CTS_LIST_PLOG_MSGID_INT,/**< . */
 	CTS_LIST_PLOG_SHORTMSG_STR,/**< . */
-	CTS_LIST_PLOG_RELATED_ID_INT/**< contact id */
+	CTS_LIST_PLOG_RELATED_ID_INT/**< person id */
 };
 
+/**
+ * Contact List for OSP(C++)
+ * Usually, This is sorted by name related with #CTS_ORDER_OF_SORTING
+ */
+enum OSPLIST{
+	CTS_LIST_OSP_PERSON_ID_INT,/**< . */
+	CTS_LIST_OSP_CONTACT_ID_INT,/**< . */
+	CTS_LIST_OSP_ADDRESSBOOK_ID_INT,/**< . */
+	CTS_LIST_OSP_IMG_PATH_STR,/**< . */
+	CTS_LIST_OSP_FIRST_STR,/**< . */
+	CTS_LIST_OSP_LAST_STR,/**< . */
+	CTS_LIST_OSP_DISPLAY_STR,/**< . */
+	CTS_LIST_OSP_DEF_NUM_TYPE_INT,/**< Default number type */
+	CTS_LIST_OSP_DEF_NUM_STR,/**< Default number */
+	CTS_LIST_OSP_DEF_EMAIL_TYPE_INT,/**< Default email type */
+	CTS_LIST_OSP_DEF_EMAIL_STR,/**< Default email */
+	CTS_LIST_OSP_NORMALIZED_STR,/**< . */
+};
 
 /**
  * Contact List
@@ -147,6 +150,7 @@ enum CONTACTLIST{
 	CTS_LIST_CONTACT_NUM_OR_EMAIL_STR,/**< optional. related with #CTS_LIST_ALL_EMAIL_NUMBER */
 	CTS_LIST_CONTACT_NORMALIZED_STR,/**< optional */
 	CTS_LIST_CONTACT_ADDRESSBOOK_ID_INT,/**< . */
+	CTS_LIST_CONTACT_PERSON_ID_INT,/**< . */
 };
 
 /**
@@ -158,7 +162,8 @@ enum NUMBERLIST{
 	CTS_LIST_NUM_CONTACT_FIRST_STR,/**< . */
 	CTS_LIST_NUM_CONTACT_LAST_STR,/**< . */
 	CTS_LIST_NUM_CONTACT_DISPLAY_STR,/**< . */
-	CTS_LIST_NUM_NUMBER_STR /**< . */
+	CTS_LIST_NUM_NUMBER_STR, /**< . */
+	CTS_LIST_NUM_PERSON_ID_INT,/**< . */
 };
 
 /**
@@ -170,7 +175,8 @@ enum EMAILLIST{
 	CTS_LIST_EMAIL_CONTACT_FIRST_STR,/**< . */
 	CTS_LIST_EMAIL_CONTACT_LAST_STR,/**< . */
 	CTS_LIST_EMAIL_CONTACT_DISPLAY_STR,/**< . */
-	CTS_LIST_EMAIL_ADDR_STR /**< . */
+	CTS_LIST_EMAIL_ADDR_STR,/**< . */
+	CTS_LIST_EMAIL_PERSON_ID_INT /**< . */
 };
 
 
@@ -181,6 +187,7 @@ enum CHANGELIST{
 	CTS_LIST_CHANGE_ID_INT,/**< . */
 	CTS_LIST_CHANGE_TYPE_INT, /**< #CTS_OPERATION_UPDATED, #CTS_OPERATION_DELETED, #CTS_OPERATION_INSERTED */
 	CTS_LIST_CHANGE_VER_INT,/**< The version when this contact is changed */
+	CTS_LIST_CHANGE_ADDRESSBOOK_ID_INT, /**< The version when this contact is changed */
 };
 
 enum {
@@ -216,9 +223,11 @@ enum CUSTOMNUMTYPELIST{
  * Usually, This is sorted by addressbook_id and name.
  */
 enum GROUPLIST{
-	CTS_LIST_GROUP_ID_INT,/**< . */
-	CTS_LIST_GROUP_ADDRESSBOOK_ID_INT,/**< . */
-	CTS_LIST_GROUP_NAME_STR,/**< . */
+	CTS_LIST_GROUP_ID_INT = CTS_GROUP_VAL_ID_INT,/**< . */
+	CTS_LIST_GROUP_ADDRESSBOOK_ID_INT = CTS_GROUP_VAL_ADDRESSBOOK_ID_INT,/**< . */
+	CTS_LIST_GROUP_NAME_STR = CTS_GROUP_VAL_NAME_STR,/**< . */
+	CTS_LIST_GROUP_RINGTONE_STR = CTS_GROUP_VAL_RINGTONE_STR,/**< . */
+	CTS_LIST_GROUP_IMAGE_STR = CTS_GROUP_VAL_IMG_PATH_STR,/**< . */
 };
 
 /**
@@ -226,7 +235,7 @@ enum GROUPLIST{
  */
 enum SHORTCUTLIST{
 	CTS_LIST_SHORTCUT_ID_INT,/**< . */
-	CTS_LIST_SHORTCUT_CONTACT_ID_INT,/**< . */
+	CTS_LIST_SHORTCUT_PERSON_ID_INT,/**< . */
 	CTS_LIST_SHORTCUT_FIRST_NAME_STR,/**< . */
 	CTS_LIST_SHORTCUT_LAST_NAME_STR,/**< . */
 	CTS_LIST_SHORTCUT_DISPLAY_NAME_STR,/**< . */
@@ -235,6 +244,11 @@ enum SHORTCUTLIST{
 	CTS_LIST_SHORTCUT_NUMBER_TYPE_INT,/**< only for #CTS_FAVOR_NUMBER */
 	CTS_LIST_SHORTCUT_SPEEDDIAL_INT /**< only for #CTS_LIST_ALL_SPEEDDIAL */
 };
+
+/**
+ * deprecated
+ */
+#define CTS_LIST_SHORTCUT_CONTACT_ID_INT CTS_LIST_SHORTCUT_PERSON_ID_INT
 
 
 /**
@@ -267,6 +281,10 @@ typedef enum{
 	CTS_LIST_ALL_PLOG, /**< #PHONELOGLIST */
 	CTS_LIST_ALL_MISSED_CALL, /**< #PHONELOGLIST */
 	CTS_LIST_ALL_NUMBER, /**< #CONTACTLIST */
+	CTS_LIST_ALL_UNSEEN_MISSED_CALL, /**< #PHONELOGLIST */
+	CTS_LIST_ALL_CONTACT_FAVORITE_HAD_NUMBER,/**< #SHORTCUTLIST */
+	CTS_LIST_ALL_CONTACT_FAVORITE_HAD_EMAIL,/**< #SHORTCUTLIST */
+	CTS_LIST_ALL_EMAIL_PLOG, /**< #PHONELOGLIST */
 }cts_get_list_op;
 /**
  * This function gets iterator of the gotten data by op_code.
@@ -345,6 +363,10 @@ typedef enum{
 	CTS_LIST_NO_GROUP_MEMBERS_OF_ADDRESSBOOK_ID, /**< #CONTACTLIST */
 	CTS_LIST_GROUPS_OF_ADDRESSBOOK_ID, /**< #GROUPLIST */
 	CTS_LIST_ADDRESSBOOKS_OF_ACCOUNT_ID, /**< #ADDRESSBOOKLIST */
+	CTS_LIST_MEMBERS_OF_PERSON_ID, /**< #CONTACTLIST */
+	CTS_LIST_NO_GROUP_MEMBERS_HAD_NUMBER_OF_ADDRESSBOOK_ID, /**< #CONTACTLIST */
+	CTS_LIST_NO_GROUP_MEMBERS_HAD_EMAIL_OF_ADDRESSBOOK_ID, /**< #CONTACTLIST */
+	CTS_LIST_PLOG_OF_PERSON_ID,/**< #PHONELOGLIST */
 	//CTS_LIST_EMAILS_OF_CONTACT_ID,/**< only use #CTS_LIST_EMAIL_CONTACT_ID_INT, #CTS_LIST_EMAIL_ADDR_STR */
 	//CTS_LIST_NUMBERS_OF_CONTACT_ID,/**< only use #CTS_LIST_NUM_CONTACT_ID_INT, #CTS_LIST_NUM_NUMBER_STR */
 }cts_get_list_int_op;
@@ -511,87 +533,6 @@ int contacts_svc_list_with_str_foreach(cts_get_list_str_op op_code,
    const char *search_value, cts_foreach_fn cb, void *data);
 
 /**
- * Use for contacts_svc_list_str_filter_new().
- */
-typedef enum {
-	CTS_FILTERED_PLOGS_OF_NUMBER = CTS_LIST_PLOGS_OF_NUMBER,/**< #PHONELOGLIST */
-	CTS_FILTERED_CONTACTS_WITH_NAME = CTS_LIST_CONTACTS_WITH_NAME,/**< #CONTACTLIST */
-	CTS_FILTERED_NUMBERINFOS_WITH_NAME = CTS_LIST_NUMBERINFOS_WITH_NAME,/**< #NUMBERLIST */
-	CTS_FILTERED_NUMBERINFOS_WITH_NUM = CTS_LIST_NUMBERINFOS_WITH_NUM,/**< #NUMBERLIST */
-	CTS_FILTERED_EMAILINFOS_WITH_EMAIL= CTS_LIST_EMAILINFOS_WITH_EMAIL,/**< #EMAILLIST */
-}cts_str_filter_op;
-
-/**
- * Use for contacts_svc_list_filter_new().
- */
-typedef enum {
-	CTS_FILTERED_ALL_CONTACT,/**< #CONTACTLIST */
-}cts_filter_op;
-
-/**
- * Use for contacts_svc_list_filter_new(), contacts_svc_list_str_filter_new().
- */
-typedef enum {
-	CTS_LIST_FILTER_NONE, /**< . */
-	CTS_LIST_FILTER_ADDRESBOOK_ID_INT, /**< exclusive with #CTS_LIST_FILTER_GROUP_ID_INT */
-	CTS_LIST_FILTER_GROUP_ID_INT, /**< exclusive with #CTS_LIST_FILTER_ADDRESBOOK_ID_INT */
-	CTS_LIST_FILTER_LIMIT_INT, /**< . */
-	CTS_LIST_FILTER_OFFSET_INT, /**< Offset depends on Limit(#CTS_LIST_FILTER_LIMIT_INT) */
-}cts_filter_type;
-
-/**
- * Allocate, initialize and return a new contacts service list filter with constraints.
- * The constaint is composed with the pair of (type, val).
- * The constaints list should be terminated with #CTS_LIST_FILTER_NONE,
- * therefore the count of parameter is an odd number.
- * This should be used for getting filtered list only,
- * if not, be sure to use contacts_svc_get_list_with_str().
- *
- * @param[in] list_type type of list(#cts_str_filter_op)
- * @param[in] search_value String search value
- * @param[in] first_type type of first constraint
- * @return The pointer of New contacts service list filter, NULL on error
- * @see contacts_svc_list_filter_free()
- */
-CTSfilter* contacts_svc_list_str_filter_new(cts_str_filter_op list_type,
-   const char *search_value, cts_filter_type first_type, ...);
-
-/**
- * Allocate, initialize and return a new contacts service list filter with constraints.
- * The constaint is composed with the pair of (type, val).
- * The constaints list should be terminated with #CTS_LIST_FILTER_NONE,
- * therefore the count of parameter is an even number.
- * This should be used for getting filtered list only,
- * if not, be sure to use contacts_svc_get_list().
- *
- * @param[in] list_type type of list(#cts_filter_op)
- * @param[in] first_type type of first constraint
- * @return The pointer of New contacts service list filter, NULL on error
- * @see contacts_svc_list_filter_free()
- */
-CTSfilter* contacts_svc_list_filter_new(cts_filter_op list_type, cts_filter_type first_type, ...);
-
-/**
- * A destructor for contacts service list filter.
- *
- * @param[in] filter A contacts service struct
- * @return #CTS_SUCCESS on success, Negative value(#cts_error) on error
- * @see contacts_svc_list_filter_new(), contacts_svc_list_str_filter_new()
- */
-int contacts_svc_list_filter_free(CTSfilter *filter);
-
-/**
- * This function calls cb(#cts_foreach_fn) for each record of list gotten by filter.
- *
- * @param[in] filter The filter for searching
- * @param[in] cb callback function pointer(#cts_foreach_fn)
- * @param[in] user_data data which is passed to callback function
- * @return #CTS_SUCCESS on success, Negative value(#cts_error) on error
- */
-int contacts_svc_list_with_filter_foreach(CTSfilter *filter,
-   cts_foreach_fn cb, void *user_data);
-
-/**
  * It is the smartsearch exclusive function. It is supported for only smartsearch(inhouse application).
  * It can be changed without announcement.
  * This function calls #cts_foreach_fn for each record of list.
@@ -610,6 +551,8 @@ int contacts_svc_smartsearch_excl(const char *search_str, int limit, int offset,
  * @}
  */
 //-->
+
+void cts_foreach_run(CTSiter *iter, cts_foreach_fn cb, void *data);
 
 
 #endif //__CTS_LIST_H__

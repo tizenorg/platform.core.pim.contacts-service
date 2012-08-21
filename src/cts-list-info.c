@@ -33,7 +33,7 @@ static inline CTSvalue* cts_iter_get_info_contact(cts_stmt stmt, int type)
 	retvm_if(NULL == result, NULL, "contacts_svc_value_new() Failed");
 
 	i = 0;
-	result->id = cts_stmt_get_int(stmt, i++);
+	result->person_id = cts_stmt_get_int(stmt, i++);
 	lang = cts_stmt_get_int(stmt, i++);
 	temp = cts_stmt_get_text(stmt, i++);
 	result->first = SAFE_STRDUP(temp);
@@ -41,13 +41,14 @@ static inline CTSvalue* cts_iter_get_info_contact(cts_stmt stmt, int type)
 	result->last = SAFE_STRDUP(temp);
 	temp = cts_stmt_get_text(stmt, i++);
 	result->display = SAFE_STRDUP(temp);
-	result->acc_id = cts_stmt_get_int(stmt, i++);
+	result->addrbook_id = cts_stmt_get_int(stmt, i++);
 	temp = cts_stmt_get_text(stmt, i++);
 	if (temp) {
 		char full_path[CTS_IMG_PATH_SIZE_MAX];
 		snprintf(full_path, sizeof(full_path), "%s/%s", CTS_IMAGE_LOCATION, temp);
 		result->img_path = strdup(full_path);
 	}
+	result->contact_id = cts_stmt_get_int(stmt, i++);
 
 	if (CTS_LANG_DEFAULT == lang)
 		lang = cts_get_default_language();
@@ -70,6 +71,58 @@ static inline CTSvalue* cts_iter_get_info_contact(cts_stmt stmt, int type)
 	return (CTSvalue *)result;
 }
 
+static inline CTSvalue* cts_iter_get_info_osp(cts_stmt stmt)
+{
+	int i, lang;
+	char *temp;
+	osp_list *result;
+
+	result = (osp_list *)contacts_svc_value_new(CTS_VALUE_LIST_OSP);
+	retvm_if(NULL == result, NULL, "contacts_svc_value_new() Failed");
+
+	i = 0;
+	result->person_id = cts_stmt_get_int(stmt, i++);
+	lang = cts_stmt_get_int(stmt, i++);
+	temp = cts_stmt_get_text(stmt, i++);
+	result->first = SAFE_STRDUP(temp);
+	temp = cts_stmt_get_text(stmt, i++);
+	result->last = SAFE_STRDUP(temp);
+	temp = cts_stmt_get_text(stmt, i++);
+	result->display = SAFE_STRDUP(temp);
+	result->addrbook_id = cts_stmt_get_int(stmt, i++);
+	temp = cts_stmt_get_text(stmt, i++);
+	if (temp) {
+		char full_path[CTS_IMG_PATH_SIZE_MAX];
+		snprintf(full_path, sizeof(full_path), "%s/%s", CTS_IMAGE_LOCATION, temp);
+		result->img_path = strdup(full_path);
+	}
+	result->contact_id = cts_stmt_get_int(stmt, i++);
+	result->def_num_type = cts_stmt_get_int(stmt, i++);
+	temp = cts_stmt_get_text(stmt, i++);
+	result->def_num = SAFE_STRDUP(temp);
+	result->def_email_type = cts_stmt_get_int(stmt, i++);
+	temp = cts_stmt_get_text(stmt, i++);
+	result->def_email = SAFE_STRDUP(temp);
+
+	if (CTS_LANG_DEFAULT == lang)
+		lang = cts_get_default_language();
+
+	if (NULL == result->display && result->first && result->last
+			&& CTS_LANG_ENGLISH == lang) {
+		char display[CTS_SQL_MAX_LEN];
+		if (CTS_ORDER_NAME_FIRSTLAST == contacts_svc_get_order(CTS_ORDER_OF_DISPLAY))
+			snprintf(display, sizeof(display), "%s %s", result->first, result->last);
+		else
+			snprintf(display, sizeof(display), "%s, %s", result->last, result->first);
+
+		result->display = strdup(display);
+	}
+	temp = cts_stmt_get_text(stmt, i++);
+	result->normalize = SAFE_STRDUP(temp);
+
+	return (CTSvalue *)result;
+}
+
 static inline CTSvalue* cts_iter_get_info_number_email(cts_stmt stmt, int type)
 {
 	int i, lang;
@@ -86,7 +139,7 @@ static inline CTSvalue* cts_iter_get_info_number_email(cts_stmt stmt, int type)
 		result->v_type = CTS_VALUE_LIST_NUMBERINFO;
 
 	i = 0;
-	result->id = cts_stmt_get_int(stmt, i++);
+	result->person_id = cts_stmt_get_int(stmt, i++);
 	lang = cts_stmt_get_int(stmt, i++);
 	temp = cts_stmt_get_text(stmt, i++);
 	result->first = SAFE_STRDUP(temp);
@@ -102,9 +155,9 @@ static inline CTSvalue* cts_iter_get_info_number_email(cts_stmt stmt, int type)
 		snprintf(full_path, sizeof(full_path), "%s/%s", CTS_IMAGE_LOCATION, temp);
 		result->img_path = strdup(full_path);
 	}
-
+	result->contact_id = cts_stmt_get_int(stmt, i++);
 	if (CTS_ITER_NUMBERS_EMAILS == type) {
-		result->acc_id = cts_stmt_get_int(stmt, i++);
+		result->addrbook_id = cts_stmt_get_int(stmt, i++);
 		temp = cts_stmt_get_text(stmt, i++);
 		result->normalize = SAFE_STRDUP(temp);
 	}
@@ -142,7 +195,7 @@ static inline CTSvalue* cts_iter_get_info_sdn(cts_stmt stmt, int type)
 	return (CTSvalue *)result;
 }
 
-static inline CTSvalue* cts_iter_get_info_change(updated_contact *cursor)
+static inline CTSvalue* cts_iter_get_info_change(updated_record *cursor)
 {
 	change_list *result;
 
@@ -152,6 +205,7 @@ static inline CTSvalue* cts_iter_get_info_change(updated_contact *cursor)
 	result->changed_type = cursor->type;
 	result->id = cursor->id;
 	result->changed_ver = cursor->ver;
+	result->addressbook_id = cursor->addressbook_id;
 
 	return (CTSvalue *)result;
 }
@@ -215,6 +269,17 @@ static inline CTSvalue* cts_iter_get_info_plog(int type, cts_stmt stmt)
 		result->extra_data2 = SAFE_STRDUP(temp);
 		result->related_id = cts_stmt_get_int(stmt, cnt++);
 		break;
+	case CTS_ITER_PLOGS_OF_PERSON_ID:
+		result->id = cts_stmt_get_int(stmt, cnt++);
+		result->log_type = cts_stmt_get_int(stmt, cnt++);
+		result->log_time = cts_stmt_get_int(stmt, cnt++);
+		result->extra_data1 = cts_stmt_get_int(stmt, cnt++);
+		temp = cts_stmt_get_text(stmt, cnt++);
+		result->extra_data2 = SAFE_STRDUP(temp);
+		result->related_id = cts_stmt_get_int(stmt, cnt++);
+		temp = cts_stmt_get_text(stmt, cnt++);
+		result->number = SAFE_STRDUP(temp);
+		break;
 	default:
 		ERR("Invalid parameter : The type(%d) is unknown type", type);
 		contacts_svc_value_free((CTSvalue*)result);
@@ -258,6 +323,8 @@ static inline CTSvalue* cts_iter_get_info_group(cts_stmt stmt)
 	result->id = cts_stmt_get_int(stmt, 0);
 	result->addrbook_id = cts_stmt_get_int(stmt, 1);
 	result->name = SAFE_STRDUP(cts_stmt_get_text(stmt, 2));
+	result->ringtone_path = SAFE_STRDUP(cts_stmt_get_text(stmt, 3));
+	result->img_loaded = false; //It will load at cts_value_get_str_group()
 
 	return (CTSvalue *)result;
 }
@@ -336,12 +403,13 @@ API CTSvalue* contacts_svc_iter_get_info(CTSiter *iter)
 		result = cts_iter_get_info_sdn(iter->stmt, iter->i_type);
 		retvm_if(NULL == result, NULL, "cts_iter_get_info_number() Failed");
 		break;
-	case CTS_ITER_UPDATED_CONTACTS_AFTER_VER:
+	case CTS_ITER_UPDATED_INFO_AFTER_VER:
 		result = cts_iter_get_info_change(iter->info->cursor);
 		retvm_if(NULL == result, NULL, "cts_iter_get_info_change() Failed");
 		break;
 	case CTS_ITER_GROUPING_PLOG:
 	case CTS_ITER_PLOGS_OF_NUMBER:
+	case CTS_ITER_PLOGS_OF_PERSON_ID:
 		result = cts_iter_get_info_plog(iter->i_type, iter->stmt);
 		retvm_if(NULL == result, NULL, "cts_iter_get_info_plog() Failed");
 		break;
@@ -365,6 +433,9 @@ API CTSvalue* contacts_svc_iter_get_info(CTSiter *iter)
 		break;
 	case CTS_ITER_PLOGNUMBERS_WITH_NUM:
 		result = (CTSvalue*)(SAFE_STRDUP(cts_stmt_get_text(iter->stmt, 0)));
+		break;
+	case CTS_ITER_OSP:
+		result = cts_iter_get_info_osp(iter->stmt);
 		break;
 	default:
 		ERR("Invalid parameter : The iter(%d) has unknown type", iter->i_type);

@@ -32,6 +32,7 @@
 #define CTS_SCHEMA_TABLE_TOTAL 10
 
 // Tables
+#define CTS_TABLE_PERSONS "persons"
 #define CTS_TABLE_CONTACTS "contacts"
 #define CTS_TABLE_GROUPS "groups"
 #define CTS_TABLE_ADDRESSBOOKS "addressbooks"
@@ -41,10 +42,14 @@
 #define CTS_TABLE_PHONELOG_ACC "phonelog_accumulation"
 #define CTS_TABLE_GROUPING_INFO "group_relations"
 #define CTS_TABLE_DELETEDS "deleteds"
+#define CTS_TABLE_GROUP_DELETEDS "group_deleteds"
 #define CTS_TABLE_CUSTOM_TYPES "custom_types"
 #define CTS_TABLE_SIM_SERVICES "sim_services"
 #define CTS_TABLE_SPEEDDIALS "speeddials"
 #define CTS_TABLE_VERSION "cts_version"
+#define CTS_TABLE_MY_PROFILES "my_profiles"
+
+#define CTS_TABLE_RESTRICTED_DATA_VIEW "restricted_data"
 
 #define CTS_SCHEMA_DATA_NAME_LANG_INFO "data1"
 #define CTS_SCHEMA_DATA_NAME_LOOKUP "data8"

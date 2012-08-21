@@ -35,6 +35,7 @@
 #include "cts-vcard.h"
 #include "cts-pthread.h"
 #include "cts-types.h"
+#include "cts-restriction.h"
 #include "cts-utils.h"
 
 static const char *CTS_NOTI_CONTACT_CHANGED=CTS_NOTI_CONTACT_CHANGED_DEF;
@@ -45,9 +46,10 @@ static const char *CTS_NOTI_ADDRBOOK_CHANGED="/opt/data/contacts-svc/.CONTACTS_S
 static const char *CTS_NOTI_GROUP_CHANGED="/opt/data/contacts-svc/.CONTACTS_SVC_GROUP_CHANGED";
 static const char *CTS_NOTI_GROUP_RELATION_CHANGED="/opt/data/contacts-svc/.CONTACTS_SVC_GROUP_REL_CHANGED";
 static const char *CTS_NOTI_MISSED_CALL_CHANGED="/opt/data/contacts-svc/.CONTACTS_SVC_MISSED_CHANGED";
+static const char *CTS_NOTI_LINK_CHANGED="/opt/data/contacts-svc/.CONTACTS_SVC_LINK_CHANGED";
 
-static const char *CTS_VCONF_SORTING_ORDER="db/service/contacts/name_sorting_order";
-static const char *CTS_VCONF_DISPLAY_ORDER=CTS_VCONF_DISPLAY_ORDER_DEF;
+static const char *CTS_VCONF_SORTING_ORDER=VCONFKEY_CONTACTS_SVC_NAME_SORTING_ORDER;
+static const char *CTS_VCONF_DISPLAY_ORDER=VCONFKEY_CONTACTS_SVC_NAME_DISPLAY_ORDER;
 
 static int transaction_count = 0;
 static int transaction_ver = 0;
@@ -61,6 +63,7 @@ static bool speed_change=false;
 static bool addrbook_change=false;
 static bool group_change=false;
 static bool group_rel_change=false;
+static bool link_change=false;
 
 static int name_sorting_order = -1;
 static int name_display_order = -1;
@@ -118,6 +121,10 @@ void cts_set_group_noti(void)
 void cts_set_group_rel_noti(void)
 {
 	group_rel_change = true;
+}
+void cts_set_link_noti(void)
+{
+	link_change = true;
 }
 
 static inline void cts_noti_publish_contact_change(void)
@@ -192,6 +199,15 @@ static inline void cts_noti_publish_group_rel_change(void)
 	}
 }
 
+static inline void cts_noti_publish_link_change(void)
+{
+	int fd = open(CTS_NOTI_LINK_CHANGED, O_TRUNC | O_RDWR);
+	if (0 <= fd) {
+		close(fd);
+		link_change = false;
+	}
+}
+
 #define CTS_COMMIT_TRY_MAX 500000 // For 3second
 API int contacts_svc_begin_trans(void)
 {
@@ -220,7 +236,7 @@ API int contacts_svc_begin_trans(void)
 		version_up = false;
 	}
 	transaction_count++;
-	CTS_DBG("transaction_count : %d.", transaction_count);
+	INFO("transaction_count : %d", transaction_count);
 	cts_mutex_unlock(CTS_MUTEX_TRANSACTION);
 
 	return CTS_SUCCESS;
@@ -236,6 +252,7 @@ static inline void cts_cancel_changes(void)
 	addrbook_change = false;
 	group_change = false;
 	group_rel_change = false;
+	link_change = false;
 }
 
 API int contacts_svc_end_trans(bool is_success)
@@ -246,6 +263,7 @@ API int contacts_svc_end_trans(bool is_success)
 	cts_mutex_lock(CTS_MUTEX_TRANSACTION);
 
 	transaction_count--;
+	INFO("%s, transaction_count : %d", is_success?"True": "False",  transaction_count);
 
 	if (0 != transaction_count) {
 		CTS_DBG("contact transaction_count : %d.", transaction_count);
@@ -294,6 +312,7 @@ API int contacts_svc_end_trans(bool is_success)
 	if (addrbook_change) cts_noti_publish_addrbook_change();
 	if (group_change) cts_noti_publish_group_change();
 	if (group_rel_change) cts_noti_publish_group_rel_change();
+	if (link_change) cts_noti_publish_link_change();
 
 	return transaction_ver;
 }
@@ -440,6 +459,12 @@ static inline const char* cts_noti_get_file_path(int type)
 	case CTS_SUBSCRIBE_ADDRESSBOOK_CHANGE:
 		noti = CTS_NOTI_ADDRBOOK_CHANGED;
 		break;
+	case CTS_SUBSCRIBE_LINK_CHANGE:
+		noti = CTS_NOTI_LINK_CHANGED;
+		break;
+	case CTS_SUBSCRIBE_GROUP_RELATION_CHANGE: //for OSP
+		noti = CTS_NOTI_GROUP_RELATION_CHANGED;
+		break;
 	default:
 		ERR("Invalid parameter : The type(%d) is not supported", type);
 		return NULL;
@@ -553,7 +578,7 @@ API int contacts_svc_get_image(cts_img_t img_type, int index, char **img_path)
 	return CTS_SUCCESS;
 }
 
-int cts_delete_image_file(int img_type, int index)
+int cts_contact_delete_image_file(int img_type, int index)
 {
 	int ret;
 	cts_stmt stmt;
@@ -587,28 +612,15 @@ int cts_delete_image_file(int img_type, int index)
 	return CTS_SUCCESS;
 }
 
-int cts_add_image_file(int img_type, int index, char *src_img, char *dest_name, int dest_size)
+static int cts_copy_file(const char *src, const char *dest)
 {
-	int src_fd;
-	int dest_fd;
-	int size;
 	int ret;
-	char *ext;
+	int size;
+	int src_fd, dest_fd;
 	char buf[CTS_COPY_SIZE_MAX];
-	char dest[CTS_IMG_PATH_SIZE_MAX];
 
-	retvm_if(NULL == src_img, CTS_ERR_ARG_INVALID, "img_path is NULL");
-
-	ext = strrchr(src_img, '.');
-	if (NULL == ext || strchr(ext, '/'))
-		ext = "";
-
-	size = snprintf(dest, sizeof(dest), "%s/%d-%d%s",
-			CTS_IMAGE_LOCATION, index, img_type, ext);
-	retvm_if(size<=0, CTS_ERR_FAIL, "snprintf() Failed(%d)", errno);
-
-	src_fd = open(src_img, O_RDONLY);
-	retvm_if(src_fd < 0, CTS_ERR_IO_ERR, "Open(%s) Failed(%d)", src_img, errno);
+	src_fd = open(src, O_RDONLY);
+	retvm_if(src_fd < 0, CTS_ERR_IO_ERR, "Open(%s) Failed(%d)", src, errno);
 	dest_fd = open(dest, O_WRONLY|O_CREAT|O_TRUNC, 0660);
 	if (dest_fd < 0) {
 		ERR("Open(%s) Failed(%d)", dest, errno);
@@ -639,24 +651,113 @@ int cts_add_image_file(int img_type, int index, char *src_img, char *dest_name, 
 	fchmod(dest_fd, CTS_SECURITY_DEFAULT_PERMISSION);
 	close(src_fd);
 	close(dest_fd);
+
+	return CTS_SUCCESS;
+}
+
+int cts_contact_add_image_file(int img_type, int index, char *src_img, char *dest_name, int dest_size)
+{
+	int ret;
+	char *ext;
+	char dest[CTS_IMG_PATH_SIZE_MAX];
+
+	retvm_if(NULL == src_img, CTS_ERR_ARG_INVALID, "img_path is NULL");
+
+	ext = strrchr(src_img, '.');
+	if (NULL == ext || strchr(ext, '/'))
+		ext = "";
+
+	snprintf(dest, sizeof(dest), "%s/%d-%d%s",
+			CTS_IMAGE_LOCATION, index, img_type, ext);
+
+	ret = cts_copy_file(src_img, dest);
+	retvm_if(CTS_SUCCESS != ret, ret, "cts_copy_file() Failed(%d)", ret);
+
 	snprintf(dest_name, dest_size, "%d-%d%s", index, img_type, ext);
 	return CTS_SUCCESS;
 }
 
-int cts_update_image_file(int img_type, int index, char *src_img, char *dest_name, int dest_size)
+int cts_contact_update_image_file(int img_type, int index, char *src_img, char *dest_name, int dest_size)
 {
 	int ret;
 
-	ret = cts_delete_image_file(img_type, index);
+	ret = cts_contact_delete_image_file(img_type, index);
 	retvm_if(CTS_SUCCESS != ret && CTS_ERR_DB_RECORD_NOT_FOUND != ret,
-		ret, "cts_delete_image_file() Failed(%d)", ret);
+		ret, "cts_contact_delete_image_file() Failed(%d)", ret);
 
 	if (src_img) {
-		ret = cts_add_image_file(img_type, index, src_img, dest_name, dest_size);
-		retvm_if(CTS_SUCCESS != ret, ret, "cts_add_image_file() Failed(%d)", ret);
+		ret = cts_contact_add_image_file(img_type, index, src_img, dest_name, dest_size);
+		retvm_if(CTS_SUCCESS != ret, ret, "cts_contact_add_image_file() Failed(%d)", ret);
 	}
 
 	return ret;
+}
+
+/*
+ * This function is for MY profile and group image.
+ */
+char* cts_get_img(const char *dir, int index, char *dest, int dest_size)
+{
+	DIR *dp;
+	char *ret_val;
+	struct dirent *file_info;
+	char tmp_path[CTS_IMG_PATH_SIZE_MAX] = {0};
+
+	if (0 < index)
+		snprintf(tmp_path, sizeof(tmp_path), "%d", index);
+
+	dp = opendir(dir);
+	if (dp) {
+		while ((file_info = readdir(dp)) != NULL) {
+			CTS_DBG("file = %s", file_info->d_name);
+			if ('.' != *file_info->d_name) {
+				if (0 == index || !strncmp(tmp_path, file_info->d_name, strlen(tmp_path))) {
+					if (dest) {
+						snprintf(dest, dest_size, "%s/%s", dir, file_info->d_name);
+						ret_val = dest;
+					} else {
+						snprintf(tmp_path, sizeof(tmp_path), "%s/%s", dir, file_info->d_name);
+						ret_val = strdup(tmp_path);
+					}
+					closedir(dp);
+					return ret_val;
+				}
+			}
+		}
+		closedir(dp);
+	}
+
+	return NULL;
+}
+
+/*
+ * This function is for MY profile and group image.
+ */
+int cts_set_img(const char *dir, int index, const char *path)
+{
+	int ret;
+	char dest[CTS_IMG_PATH_SIZE_MAX];
+
+	if (cts_get_img(dir, index, dest, sizeof(dest))) {
+		if (path && 0 == strcmp(dest, path))
+			return CTS_SUCCESS;
+		ret = unlink(dest);
+		retvm_if(ret < 0, CTS_ERR_FAIL, "unlink(%s) Failed(%d)", dest, errno);
+	}
+
+	if (path) {
+		char *ext;
+		ext = strrchr(path, '.');
+		if (NULL == ext || strchr(ext, '/'))
+			ext = "";
+
+		snprintf(dest, sizeof(dest), "%s/%d%s",
+				dir, index, ext);
+		ret = cts_copy_file(path, dest);
+		retvm_if(CTS_SUCCESS != ret, ret, "cts_copy_file() Failed(%d)", ret);
+	}
+
+	return CTS_SUCCESS;
 }
 
 int cts_update_contact_changed_time(int contact_id)
@@ -687,9 +788,9 @@ API int contacts_svc_save_image(cts_img_t img_type, int index, char *src_img)
 	retvm_if(ret, ret, "contacts_svc_begin_trans() Failed(%d)", ret);
 
 	dest_img[0] = '\0';
-	ret = cts_update_image_file(img_type, index, src_img, dest_img, sizeof(dest_img));
+	ret = cts_contact_update_image_file(img_type, index, src_img, dest_img, sizeof(dest_img));
 	if (CTS_SUCCESS != ret) {
-		ERR("cts_update_image_file() Failed(%d)", ret);
+		ERR("cts_contact_update_image_file() Failed(%d)", ret);
 		contacts_svc_end_trans(false);
 		return ret;
 	}
@@ -724,24 +825,30 @@ API int contacts_svc_count_with_int(cts_count_int_op op_code, int search_value)
 	cts_stmt stmt;
 	char query[CTS_SQL_MIN_LEN] = {0};
 
-	switch (op_code)
-	{
+	switch ((int)op_code) {
 	case CTS_GET_COUNT_CONTACTS_IN_ADDRESSBOOK:
 		snprintf(query, sizeof(query),
-				"SELECT COUNT(contact_id) FROM %s "
+				"SELECT COUNT(DISTINCT person_id) FROM %s "
 				"WHERE addrbook_id = ?", CTS_TABLE_CONTACTS);
 		break;
 	case CTS_GET_COUNT_CONTACTS_IN_GROUP:
 		snprintf(query, sizeof(query),
-				"SELECT COUNT(contact_id) FROM %s WHERE group_id = ?",
-				CTS_TABLE_GROUPING_INFO);
+				"SELECT COUNT(DISTINCT person_id) "
+				"FROM %s A, %s B ON A.contact_id = B.contact_id "
+				"WHERE group_id = ?",
+				CTS_TABLE_GROUPING_INFO, CTS_TABLE_CONTACTS);
 		break;
 	case CTS_GET_COUNT_NO_GROUP_CONTACTS_IN_ADDRESSBOOK:
 		snprintf(query, sizeof(query),
-				"SELECT COUNT(contact_id) FROM %s A "
+				"SELECT COUNT(DISTINCT person_id) FROM %s A "
 				"WHERE addrbook_id = ? AND NOT EXISTS "
 				"(SELECT contact_id FROM %s WHERE contact_id=A.contact_id LIMIT 1)",
 				CTS_TABLE_CONTACTS, CTS_TABLE_GROUPING_INFO);
+		break;
+	case CTS_GET_COUNT_GROUPS_IN_ADDRESSBOOK: // FIXME: should be removed (for OSP): CTS_GET_COUNT_GROUPS_IN_ADDRESSBOOK
+		snprintf(query, sizeof(query),
+				"SELECT COUNT(*) FROM %s WHERE addrbook_id = ?",
+				CTS_TABLE_GROUPS);
 		break;
 	default:
 		ERR("Invalid parameter : The op_code(%d) is not supported", op_code);
@@ -764,8 +871,15 @@ API int contacts_svc_count(cts_count_op op_code)
 	switch ((int)op_code)
 	{
 	case CTS_GET_ALL_CONTACT:
-		snprintf(query, sizeof(query),"SELECT COUNT(*) FROM %s",
-				CTS_TABLE_CONTACTS);
+		if (cts_restriction_get_permit())
+			snprintf(query, sizeof(query),"SELECT COUNT(*) FROM %s",
+				CTS_TABLE_PERSONS);
+		else
+			snprintf(query, sizeof(query),"SELECT COUNT(*) FROM %s "
+						"WHERE person_id NOT IN "
+						"(SELECT contact_id FROM %s WHERE is_restricted = 1)",
+				CTS_TABLE_PERSONS, CTS_TABLE_DATA);
+
 		break;
 	case CTS_GET_COUNT_SDN:
 		snprintf(query, sizeof(query),"SELECT COUNT(*) FROM %s",
@@ -781,6 +895,32 @@ API int contacts_svc_count(cts_count_op op_code)
 				"WHERE log_type = %d OR log_type = %d",
 				CTS_TABLE_PHONELOGS,
 				CTS_PLOG_TYPE_VOICE_INCOMMING_UNSEEN, CTS_PLOG_TYPE_VIDEO_INCOMMING_UNSEEN);
+		break;
+	case CTS_GET_INCOMING_CALL:
+		snprintf(query, sizeof(query),
+				"SELECT COUNT(*) FROM %s "
+				"WHERE log_type = %d OR log_type = %d",
+				CTS_TABLE_PHONELOGS,
+				CTS_PLOG_TYPE_VOICE_INCOMMING, CTS_PLOG_TYPE_VIDEO_INCOMMING);
+		break;
+	case CTS_GET_OUTGOING_CALL:
+		snprintf(query, sizeof(query),
+				"SELECT COUNT(*) FROM %s "
+				"WHERE log_type = %d OR log_type = %d",
+				CTS_TABLE_PHONELOGS,
+				CTS_PLOG_TYPE_VOICE_OUTGOING, CTS_PLOG_TYPE_VIDEO_OUTGOING);
+		break;
+	case CTS_GET_MISSED_CALL:
+		snprintf(query, sizeof(query),
+				"SELECT COUNT(*) FROM %s "
+				"WHERE log_type BETWEEN %d AND %d",
+				CTS_TABLE_PHONELOGS,
+				CTS_PLOG_TYPE_VOICE_INCOMMING_UNSEEN, CTS_PLOG_TYPE_VIDEO_INCOMMING_SEEN);
+		break;
+	case CTS_GET_COUNT_ALL_GROUP: // FIXME: should be removed (for OSP): CTS_GET_COUNT_ALL_GROUP
+		snprintf(query, sizeof(query),
+				"SELECT COUNT(*) FROM %s",
+				CTS_TABLE_GROUPS);
 		break;
 	default:
 		ERR("Invalid parameter : The op_code(%d) is not supported", op_code);
@@ -864,41 +1004,42 @@ API int contacts_svc_import_sim(void)
 	return ret;
 }
 
-int cts_increase_outgoing_count(int contact_id)
+API int contacts_svc_export_sim(int index)
+{
+	int ret;
+
+	retvm_if(index <= 0, CTS_ERR_ARG_INVALID, "index is invalid", index);
+
+	cts_mutex_lock(CTS_MUTEX_SOCKET_FD);
+	ret = cts_request_sim_export(index);
+	cts_mutex_unlock(CTS_MUTEX_SOCKET_FD);
+
+	return ret;
+}
+
+int cts_increase_outgoing_count(int person_id)
 {
 	int ret;
 	char query[CTS_SQL_MIN_LEN];
 
-	ret = contacts_svc_begin_trans();
-	retvm_if(ret, ret, "contacts_svc_begin_trans() Failed(%d)", ret);
-
 	snprintf(query, sizeof(query),
-			"UPDATE %s SET outgoing_count = outgoing_count + 1 WHERE contact_id = %d",
-			CTS_TABLE_CONTACTS, contact_id);
+			"UPDATE %s SET outgoing_count = outgoing_count + 1 WHERE person_id = %d",
+			CTS_TABLE_PERSONS, person_id);
 
 	ret = cts_query_exec(query);
-	if (CTS_SUCCESS != ret)
-	{
-		ERR("cts_query_exec() Failed(%d)", ret);
-		contacts_svc_end_trans(false);
-		return ret;
-	}
+	retvm_if(CTS_SUCCESS != ret, ret, "cts_query_exec() Failed(%d)", ret);
 
-	ret = contacts_svc_end_trans(true);
-	if (ret < CTS_SUCCESS)
-		return ret;
-	else
-		return CTS_SUCCESS;
+	return CTS_SUCCESS;
 }
 
-API int contacts_svc_reset_outgoing_count(int contact_id)
+API int contacts_svc_reset_outgoing_count(int person_id)
 {
 	int ret ;
 	char query[CTS_SQL_MAX_LEN];
 
 	snprintf(query, sizeof(query),
-			"UPDATE %s SET outgoing_count = 0 WHERE contact_id = %d",
-			CTS_TABLE_CONTACTS, contact_id);
+			"UPDATE %s SET outgoing_count = 0 WHERE person_id = %d",
+			CTS_TABLE_PERSONS, person_id);
 
 	ret = contacts_svc_begin_trans();
 	retvm_if(ret, ret, "contacts_svc_begin_trans() Failed(%d)", ret);

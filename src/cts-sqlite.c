@@ -23,6 +23,7 @@
 
 #include "cts-internal.h"
 #include "cts-schema.h"
+#include "cts-im.h"
 #include "cts-sqlite.h"
 
 static sqlite3 *cts_db;
@@ -256,7 +257,7 @@ int cts_stmt_bind_messenger(cts_stmt stmt, int start_cnt, cts_messenger *im_stru
 	if (im_struct->im_id)
 		sqlite3_bind_text(stmt, start_cnt+1, im_struct->im_id,
 				strlen(im_struct->im_id), SQLITE_STATIC);
-	if (0 == im_struct->type) {
+	if (CTS_IM_TYPE_NONE == im_struct->type) {
 		if (im_struct->svc_name)
 			sqlite3_bind_text(stmt, start_cnt+2, im_struct->svc_name,
 					strlen(im_struct->svc_name), SQLITE_STATIC);

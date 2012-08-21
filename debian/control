@@ -2,7 +2,7 @@ Source: contacts-service
 Section: devel
 Priority: extra
 Maintainer: Youngjae Shin <yj99.shin@samsung.com>, Donghee Ye <donghee.ye@samsung.com>
-Build-Depends: debhelper (>= 5), libslp-db-util-dev, libsqlite3-dev, libglib2.0-dev, dlog-dev, libvconf-dev, libvconf-keys-dev, libslp-tapi-dev, libicu-dev
+Build-Depends: debhelper (>= 5), libslp-db-util-dev, libsqlite3-dev, libglib2.0-dev, dlog-dev, libvconf-dev, libvconf-keys-dev, libtapi-dev, libicu-dev, libsystemd-daemon-dev
 Standards-Version: 3.7.2
 Homepage: N/A
 

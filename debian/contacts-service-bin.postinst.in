@@ -25,4 +25,4 @@ chmod 660 /opt/dbspace/.contacts-svc.db-journal
 
 chmod 755 /etc/rc.d/init.d/contacts-svc-helper.sh
 
-vconftool set -t int db/service/contacts/default_lang 1
+vconftool set -t int file/private/contacts-service/default_lang 1

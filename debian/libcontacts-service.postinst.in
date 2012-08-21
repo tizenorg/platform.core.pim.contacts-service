@@ -7,16 +7,19 @@ then
 	#db_contact
    chown :6005 -R /opt/data/contacts-svc/img
    chown :6005 /opt/data/contacts-svc/.CONTACTS_SVC_*_CHANGED
-   vconftool set -t int db/service/contacts/name_sorting_order 0 -g 6005
-   vconftool set -t int db/service/contacts/name_display_order 0 -g 6005
+	#db_sns
+   chown :6016 /opt/data/contacts-svc/.CONTACTS_SVC_RESTRICTION_CHECK
+   vconftool set -t int db/contacts-svc/name_sorting_order 0 -g 6005
+   vconftool set -t int db/contacts-svc/name_display_order 0 -g 6005
 else
-   vconftool set -t int db/service/contacts/name_sorting_order 0
-   vconftool set -t int db/service/contacts/name_display_order 0
+   vconftool set -t int db/contacts-svc/name_sorting_order 0
+   vconftool set -t int db/contacts-svc/name_display_order 0
 fi
 
 # Change file permissions
 # chmod 644 /usr/lib/libcontacts-service.so
 chmod 660 /opt/data/contacts-svc/.CONTACTS_SVC_*_CHANGED
+chmod 660 /opt/data/contacts-svc/.CONTACTS_SVC_RESTRICTION_CHECK
 chmod 770 -R /opt/data/contacts-svc/img
 
 echo "Done"

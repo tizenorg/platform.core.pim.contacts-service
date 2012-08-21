@@ -1,5 +1,5 @@
 /*
- * Contacts Service Helper
+ * Contacts Service
  *
  * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
  *
@@ -18,13 +18,20 @@
  * limitations under the License.
  *
  */
-#ifndef __CTS_HELPER_SIM_H__
-#define __CTS_HELPER_SIM_H__
+#include "cts-internal.h"
+#include "cts-im.h"
 
-int helper_sim_read_pb_record(void* data);
-int helper_sim_write_pb_record(void* data, int index);
-int helper_sim_read_SDN(void* data);
+API int contacts_svc_get_im_status(cts_get_im_op op_code, int search_id,
+		cts_im_callback_fn cb, void *user_data)
+{
+	// select MAX(status) from connected_im where contact_id = index
+	// select status from connected_im where data_id = index
+	return CTS_SUCCESS;
+}
 
-
-#endif // __CTS_HELPER_SIM_H__
+API int contacts_svc_set_im_status(cts_im_type type,
+		const char *im_id, cts_im_status status)
+{
+	return CTS_SUCCESS;
+}
 

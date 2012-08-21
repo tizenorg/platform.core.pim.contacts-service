@@ -43,7 +43,7 @@ enum {
 #include <dlog.h>
 #define DLOG(prio, fmt, arg...) \
 	do { SLOG(prio, LOG_TAG, fmt, ##arg); } while (0)
-#define INFO(fmt, arg...) SLOGI(fmt, ##arg)
+#define INFO(fmt, arg...) SLOGI("%s:" fmt, __FUNCTION__, ##arg)
 #define ERR(fmt, arg...) SLOGE("%s(%d): " fmt, __FUNCTION__, __LINE__, ##arg)
 #define DBG(fmt, arg...) SLOGD("%s:" fmt, __FUNCTION__, ##arg)
 #else //HELPER_DLOG_OUT

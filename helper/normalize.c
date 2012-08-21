@@ -72,8 +72,8 @@ int helper_normalize_str(const char *src, char *dest, int dest_size)
 	int type = CTS_LANG_OTHERS;
 	int32_t size;
 	UErrorCode status = 0;
-	UChar tmp_result[CTS_SQL_MAX_LEN];
-	UChar result[CTS_SQL_MAX_LEN];
+	UChar tmp_result[CTS_SQL_MAX_LEN*2];
+	UChar result[CTS_SQL_MAX_LEN*2];
 	int i = 0;
 	int j = 0;
 	int str_len = strlen(src);

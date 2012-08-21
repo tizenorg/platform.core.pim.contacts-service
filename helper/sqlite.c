@@ -130,8 +130,8 @@ int helper_update_default_language(int prev_lang, int new_lang)
 	ret = helper_begin_trans();
 	h_retvm_if(ret, ret, "helper_begin_trans() Failed(%d)", ret);
 
-	snprintf(query, sizeof(query), "UPDATE %s SET %s=%d WHERE %s=%d",
-			CTS_TABLE_DATA, CTS_SCHEMA_DATA_NAME_LANG_INFO, prev_lang,
+	snprintf(query, sizeof(query), "UPDATE %s SET %s=%d WHERE datatype = %d AND %s=%d",
+			CTS_TABLE_DATA, CTS_SCHEMA_DATA_NAME_LANG_INFO, prev_lang, CTS_DATA_NAME,
 			CTS_SCHEMA_DATA_NAME_LANG_INFO, CTS_LANG_DEFAULT);
 
 	ret = sqlite3_exec(db, query, NULL, NULL, &errmsg);
@@ -143,8 +143,8 @@ int helper_update_default_language(int prev_lang, int new_lang)
 		return CTS_ERR_DB_FAILED;
 	}
 
-	snprintf(query, sizeof(query), "UPDATE %s SET %s=%d WHERE %s=%d",
-			CTS_TABLE_DATA, CTS_SCHEMA_DATA_NAME_LANG_INFO, CTS_LANG_DEFAULT,
+	snprintf(query, sizeof(query), "UPDATE %s SET %s=%d WHERE datatype = %d AND %s=%d",
+			CTS_TABLE_DATA, CTS_SCHEMA_DATA_NAME_LANG_INFO, CTS_LANG_DEFAULT, CTS_DATA_NAME,
 			CTS_SCHEMA_DATA_NAME_LANG_INFO, new_lang);
 
 	ret = sqlite3_exec(db, query, NULL, NULL, &errmsg);
@@ -181,17 +181,20 @@ int helper_insert_SDN_contact(const char *name, const char *number)
 			CTS_TABLE_SIM_SERVICES);
 
 	ret = sqlite3_prepare_v2(db, query, strlen(query), &stmt, NULL);
-	h_retvm_if(SQLITE_OK != ret, CTS_ERR_DB_FAILED,
-			"sqlite3_prepare_v2(%s) Failed(%s)", query, sqlite3_errmsg(db));
+	if(SQLITE_OK != ret) {
+		ERR("sqlite3_prepare_v2(%s) Failed(%s)", query, sqlite3_errmsg(db));
+		helper_db_close();
+		return CTS_ERR_DB_FAILED;
+	}
 
 	sqlite3_bind_text(stmt, 1, name, strlen(name), SQLITE_STATIC);
 	sqlite3_bind_text(stmt, 2, number, strlen(number), SQLITE_STATIC);
 
 	ret = sqlite3_step(stmt);
-	if (SQLITE_DONE != ret)
-	{
+	if (SQLITE_DONE != ret) {
 		ERR("sqlite3_step() Failed(%d)", ret);
 		sqlite3_finalize(stmt);
+		helper_db_close();
 		return CTS_ERR_DB_FAILED;
 	}
 	sqlite3_finalize(stmt);
@@ -213,14 +216,17 @@ int helper_delete_SDN_contact(void)
 	snprintf(query, sizeof(query), "DELETE FROM %s", CTS_TABLE_SIM_SERVICES);
 
 	ret = sqlite3_prepare_v2(db, query, strlen(query), &stmt, NULL);
-	h_retvm_if(SQLITE_OK != ret, CTS_ERR_DB_FAILED,
-			"sqlite3_prepare_v2(%s) Failed(%s)", query, sqlite3_errmsg(db));
+	if(SQLITE_OK != ret) {
+		ERR("sqlite3_prepare_v2(%s) Failed(%s)", query, sqlite3_errmsg(db));
+		helper_db_close();
+		return CTS_ERR_DB_FAILED;
+	}
 
 	ret = sqlite3_step(stmt);
-	if (SQLITE_DONE != ret)
-	{
+	if (SQLITE_DONE != ret) {
 		ERR("sqlite3_step() Failed(%d)", ret);
 		sqlite3_finalize(stmt);
+		helper_db_close();
 		return CTS_ERR_DB_FAILED;
 	}
 	sqlite3_finalize(stmt);
