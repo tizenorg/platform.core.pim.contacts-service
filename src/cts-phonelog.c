@@ -124,12 +124,14 @@ static inline int cts_insert_phonelog(cts_plog *plog)
 	stmt = cts_query_prepare(query);
 	retvm_if(NULL == stmt, CTS_ERR_DB_FAILED, "cts_query_prepare() Failed");
 
-	cts_stmt_bind_text(stmt, 1, plog->number);
-	if (plog->log_type < CTS_PLOG_TYPE_EMAIL_RECEIVED) {
-		ret = cts_clean_number(plog->number, clean_num, sizeof(clean_num));
-		if (0 < ret) {
-			normal_num = cts_normalize_number(clean_num);
-			cts_stmt_bind_text(stmt, 2, normal_num);
+	if (plog->number) {
+		cts_stmt_bind_text(stmt, 1, plog->number);
+		if (plog->log_type < CTS_PLOG_TYPE_EMAIL_RECEIVED) {
+			ret = cts_clean_number(plog->number, clean_num, sizeof(clean_num));
+			if (0 < ret) {
+				normal_num = cts_normalize_number(clean_num);
+				cts_stmt_bind_text(stmt, 2, normal_num);
+			}
 		}
 	}
 
