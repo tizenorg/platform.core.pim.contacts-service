@@ -95,7 +95,8 @@ CREATE TABLE contacts
 	vibration			TEXT,
 	message_alert		TEXT,
 	image_thumbnail_path		TEXT,
-	image_path			TEXT
+	image_path			TEXT,
+	is_unknown			INTEGER DEFAULT 0
 );
 
 CREATE INDEX contacts_idx1 ON contacts(changed_ver);

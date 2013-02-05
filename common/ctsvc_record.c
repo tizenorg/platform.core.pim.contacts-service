@@ -70,6 +70,8 @@ static const ctsvc_record_plugin_cb_s *__ctsvc_record_get_plugin_cb(int r_type)
 		return &person_plugin_cbs;
 	case CTSVC_RECORD_CONTACT:
 		return &contact_plugin_cbs;
+	case CTSVC_RECORD_UNKNOWN:
+		return &contact_plugin_cbs;
 	case CTSVC_RECORD_MY_PROFILE:
 		return &my_profile_plugin_cbs;
 	case CTSVC_RECORD_SIMPLE_CONTACT:
