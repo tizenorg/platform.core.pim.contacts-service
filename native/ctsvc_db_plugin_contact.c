@@ -51,6 +51,7 @@ static int __ctsvc_db_contact_delete_record( int id );
 static int __ctsvc_db_contact_replace_record( contacts_record_h record, int id );
 
 static int __ctsvc_db_contact_get_all_records( int offset, int limit, contacts_list_h* out_list );
+static int __ctsvc_db_contact_unknown_get_all_records( int offset, int limit, contacts_list_h* out_list );
 static int __ctsvc_db_contact_get_records_with_query( contacts_query_h query, int offset, int limit, contacts_list_h* out_list );
 //static int __ctsvc_db_contact_insert_records(const contacts_list_h in_list, int **ids);
 //static int __ctsvc_db_contact_update_records(const contacts_list_h in_list);
@@ -63,6 +64,23 @@ ctsvc_db_plugin_info_s ctsvc_db_plugin_contact = {
 	.update_record = __ctsvc_db_contact_update_record,
 	.delete_record = __ctsvc_db_contact_delete_record,
 	.get_all_records = __ctsvc_db_contact_get_all_records,
+	.get_records_with_query = __ctsvc_db_contact_get_records_with_query,
+	.insert_records = NULL,//__ctsvc_db_contact_insert_records,
+	.update_records = NULL,//__ctsvc_db_contact_update_records,
+	.delete_records = NULL,//__ctsvc_db_contact_delete_records
+	.get_count = NULL,
+	.get_count_with_query = NULL,
+	.replace_record = __ctsvc_db_contact_replace_record,
+	.replace_records = NULL,
+};
+
+ctsvc_db_plugin_info_s ctsvc_db_plugin_unknown = {
+	.is_query_only = false,
+	.insert_record = __ctsvc_db_contact_insert_record,
+	.get_record = __ctsvc_db_contact_get_record,
+	.update_record = __ctsvc_db_contact_update_record,
+	.delete_record = __ctsvc_db_contact_delete_record,
+	.get_all_records = __ctsvc_db_contact_unknown_get_all_records,
 	.get_records_with_query = __ctsvc_db_contact_get_records_with_query,
 	.insert_records = NULL,//__ctsvc_db_contact_insert_records,
 	.update_records = NULL,//__ctsvc_db_contact_update_records,
@@ -87,7 +105,7 @@ static int __ctsvc_db_get_contact_base_info(int id, ctsvc_contact_s *contact)
 				"display_name_source, image_thumbnail_path, "
 				"ringtone_path, vibration, message_alert, "
 				"uid, is_favorite, has_phonenumber, has_email, "
-				"sort_name, reverse_sort_name "
+				"sort_name, reverse_sort_name, is_unknown "
 				"FROM "CTS_TABLE_CONTACTS" WHERE contact_id = %d AND deleted = 0",
 				ctsvc_get_display_column(), id);
 
@@ -132,6 +150,7 @@ static int __ctsvc_db_get_contact_base_info(int id, ctsvc_contact_s *contact)
 	contact->is_favorite = ctsvc_stmt_get_int(stmt, i++);
 	contact->has_phonenumber = ctsvc_stmt_get_int(stmt, i++);
 	contact->has_email = ctsvc_stmt_get_int(stmt, i++);
+	contact->is_unknown = ctsvc_stmt_get_int(stmt, i++);
 	temp = ctsvc_stmt_get_text(stmt, i++);
 	contact->sort_name = SAFE_STRDUP(temp);
 	temp = ctsvc_stmt_get_text(stmt, i++);
@@ -153,7 +172,7 @@ static int __ctsvc_db_get_data(int id, ctsvc_contact_s *contact)
 					"data3, data4, data5, data6, data7, data8, data9, data10, data11, data12 "
 					"FROM "CTS_TABLE_DATA", "CTSVC_DB_VIEW_CONTACT" "
 					"ON "CTS_TABLE_DATA".contact_id = "CTSVC_DB_VIEW_CONTACT".contact_id "
-					"WHERE data.contact_id = %d  AND is_my_profile = 0 "
+					"WHERE data.contact_id = %d  AND is_my_profile = 0 AND is_unknown = 0 "
 					"ORDER BY is_default DESC", id);
 
 	ret = ctsvc_query_prepare(query, &stmt);
@@ -1381,7 +1400,7 @@ static int __ctsvc_db_contact_update_record( contacts_record_h record )
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_db_contact_get_all_records( int offset, int limit, contacts_list_h* out_list )
+static int __get_all_records(const char *view, int offset, int limit, contacts_list_h* out_list)
 {
 	int ret;
 	int len;
@@ -1390,8 +1409,7 @@ static int __ctsvc_db_contact_get_all_records( int offset, int limit, contacts_l
 	char query[CTS_SQL_MAX_LEN] = {0};
 	contacts_list_h list;
 
-	len = snprintf(query, sizeof(query),
-			"SELECT contact_id FROM "CTS_TABLE_CONTACTS" WHERE deleted = 0");
+	len = snprintf(query, sizeof(query), "SELECT contact_id FROM %s", view);
 
 	if (0 != limit) {
 		len += snprintf(query+len, sizeof(query)-len, " LIMIT %d", limit);
@@ -1441,6 +1459,17 @@ static int __ctsvc_db_contact_get_changed_ver(ctsvc_contact_s *contact,
 	if (CONTACTS_ERROR_NONE == ret)
 		contact->changed_ver = version;
 	return ret;
+}
+
+static int __ctsvc_db_contact_unknown_get_all_records( int offset, int limit, contacts_list_h* out_list )
+{
+	return __get_all_records(CTSVC_DB_VIEW_CONTACT_INCLUDE_UNKNOWN,
+				 offset, limit, out_list);
+}
+
+static int __ctsvc_db_contact_get_all_records( int offset, int limit, contacts_list_h* out_list )
+{
+	return __get_all_records(CTSVC_DB_VIEW_CONTACT, offset, limit, out_list);
 }
 
 static int __ctsvc_db_contact_get_records_with_query( contacts_query_h query, int offset, int limit, contacts_list_h* out_list )
@@ -1545,6 +1574,9 @@ static int __ctsvc_db_contact_get_records_with_query( contacts_query_h query, in
 				break;
 			case CTSVC_PROPERTY_CONTACT_HAS_EMAIL:
 				contact->has_email = ctsvc_stmt_get_int(stmt, i);
+				break;
+			case CTSVC_PROPERTY_CONTACT_IS_UNKNOWN:
+				contact->is_unknown = ctsvc_stmt_get_int(stmt, i);
 				break;
 			case CTSVC_PROPERTY_CONTACT_PERSON_ID:
 				contact->person_id = ctsvc_stmt_get_int(stmt, i);
@@ -1874,7 +1906,8 @@ inline static int __ctsvc_find_person_to_link_with_number(const char *number, in
 				"SELECT C.person_id FROM "CTS_TABLE_CONTACTS" C, "CTS_TABLE_DATA" D "
 				"ON C.contact_id=D.contact_id AND D.datatype=%d AND C.deleted = 0 "
 				"AND C.addressbook_id <> %d "
-				"WHERE D.data4='%s' AND D.is_my_profile = 0",
+				"WHERE D.data4='%s' AND D.is_my_profile = 0 "
+			        "AND is_unknown = 0",
 				CTSVC_DATA_NUMBER, addressbook_id, minmatch);
 		ret = ctsvc_query_get_first_int_result(query, person_id);
 		CTS_DBG("%s", query);
@@ -1894,7 +1927,8 @@ inline static int __ctsvc_find_person_to_link_with_email(const char *email_addr,
 			"SELECT C.person_id FROM "CTS_TABLE_CONTACTS" C, "CTS_TABLE_DATA" D "
 			"ON C.contact_id=D.contact_id AND D.datatype=%d AND C.deleted = 0 "
 			"AND C.addressbook_id <> %d "
-			"WHERE D.data3='%s' AND D.is_my_profile = 0",
+			"WHERE D.data3='%s' AND D.is_my_profile = 0 "
+		        "AND is_unknown = 0",
 			CTSVC_DATA_EMAIL, addressbook_id, email_addr);
 	ret = ctsvc_query_get_first_int_result(query, person_id);
 	CTS_DBG("%s", query);
@@ -2051,12 +2085,12 @@ static int __ctsvc_db_contact_insert_record( contacts_record_h record, int *id)
 			"display_name_language, reverse_display_name_language, "
 			"sort_name, reverse_sort_name, "
 			"sortkey, reverse_sortkey, "
-			"uid, ringtone_path, vibration, message_alert, image_thumbnail_path) "
-			"VALUES(%d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, ?, ?, %d, %d, %d, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+			"uid, ringtone_path, vibration, message_alert, image_thumbnail_path, is_unknown) "
+			"VALUES(%d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, ?, ?, %d, %d, %d, ?, ?, ?, ?, ?, ?, ?, ?, ?, %d)",
 			contact->id, contact->person_id, contact->addressbook_id, contact->is_favorite,
 			version, version, (int)time(NULL), contact->link_mode,
 			(NULL !=contact->image_thumbnail_path)?version:0, contact->has_phonenumber, contact->has_email,
-			contact->display_source_type, contact->display_name_language, contact->reverse_display_name_language);
+		        contact->display_source_type, contact->display_name_language, contact->reverse_display_name_language, contact->is_unknown);
 
 	ret = ctsvc_query_prepare(query, &stmt);
 	if (NULL == stmt) {
@@ -2144,7 +2178,8 @@ static int __ctsvc_db_contact_replace_record( contacts_record_h record, int cont
 
 	snprintf(query, sizeof(query),
 		"SELECT person_id FROM "CTS_TABLE_CONTACTS" "
-		"WHERE contact_id = %d AND deleted = 0", contact_id);
+		"WHERE contact_id = %d AND deleted = 0 AND is_unknown = 0",
+		 contact_id);
 	ret = ctsvc_query_get_first_int_result(query, &person_id);
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("The index(%d) is Invalid. %d Record(s) is(are) not found", contact->id, ret);

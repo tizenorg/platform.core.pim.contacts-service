@@ -36,6 +36,7 @@
 
 extern ctsvc_db_plugin_info_s ctsvc_db_plugin_addressbook;
 extern ctsvc_db_plugin_info_s ctsvc_db_plugin_contact;
+extern ctsvc_db_plugin_info_s ctsvc_db_plugin_unknown;
 extern ctsvc_db_plugin_info_s ctsvc_db_plugin_my_profile;
 extern ctsvc_db_plugin_info_s ctsvc_db_plugin_simple_contact;
 extern ctsvc_db_plugin_info_s ctsvc_db_plugin_group;
@@ -132,6 +133,7 @@ static const db_table_info_s __db_tables[] = {
 
 	{CTSVC_VIEW_URI_READ_ONLY_PHONELOG_NUMBER, CTSVC_DB_VIEW_PHONELOG_NUMBER, CTSVC_PERMISSION_PHONELOG_READ, CTSVC_PERMISSION_CONTACT_NONE},
 	{CTSVC_VIEW_URI_READ_ONLY_PHONELOG_STAT, CTS_TABLE_PHONELOG_STAT, CTSVC_PERMISSION_PHONELOG_READ, CTSVC_PERMISSION_CONTACT_NONE},
+	{CTSVC_VIEW_URI_CONTACT_INCLUDE_UNKNOWN, CTSVC_DB_VIEW_CONTACT_INCLUDE_UNKNOWN, CTSVC_PERMISSION_PHONELOG_READ, CTSVC_PERMISSION_CONTACT_NONE},
 };
 
 // this function is called in mutex lock
@@ -225,6 +227,8 @@ ctsvc_db_plugin_info_s* ctsvc_db_get_plugin_info(ctsvc_record_type_e type)
 		return &ctsvc_db_plugin_contact;
 	case CTSVC_RECORD_MY_PROFILE:
 		return &ctsvc_db_plugin_my_profile;
+	case CTSVC_RECORD_UNKNOWN:
+		return &ctsvc_db_plugin_unknown;
 	case CTSVC_RECORD_SIMPLE_CONTACT:
 		return &ctsvc_db_plugin_simple_contact;
 	case CTSVC_RECORD_NAME:
@@ -284,6 +288,13 @@ static int __ctsvc_db_create_views()
 	// CTSVC_DB_VIEW_CONTACT
 	snprintf(query, sizeof(query),
 		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_CONTACT" AS "
+			"SELECT * FROM "CTS_TABLE_CONTACTS" WHERE deleted = 0 AND is_unknown = 0");
+	ret = ctsvc_query_exec(query);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Failed(%d)", ret);
+
+	// CTSVC_DB_VIEW_CONTACT_INCLUDE_UNKNOWN
+	snprintf(query, sizeof(query),
+		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_CONTACT_INCLUDE_UNKNOWN" AS "
 			"SELECT * FROM "CTS_TABLE_CONTACTS" WHERE deleted = 0");
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_execs() Failed(%d)", ret);
@@ -292,6 +303,32 @@ static int __ctsvc_db_create_views()
 	snprintf(query, sizeof(query),
 		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_MY_PROFILE" AS "
 			"SELECT * FROM "CTS_TABLE_MY_PROFILES" WHERE deleted = 0");
+	ret = ctsvc_query_exec(query);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Failed(%d)", ret);
+
+	// CTSVC_DB_VIEW_PERSON_INCLUDE_UNKNOWN
+	snprintf(query, sizeof(query),
+		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_PERSON_INCLUDE_UNKNOWN" AS "
+			"SELECT persons.person_id, "
+					"display_name, reverse_display_name, "
+					"display_name_language, "
+					"reverse_display_name_language, "
+					"sort_name, reverse_sort_name, "
+					"sortkey, reverse_sortkey, "
+					"name_contact_id, "
+					"persons.ringtone_path, "
+					"persons.image_thumbnail_path, "
+					"persons.vibration, "
+					"persons.message_alert, "
+					"status, "
+					"link_count, "
+					"addressbook_ids, "
+					"persons.has_phonenumber, "
+					"persons.has_email, "
+					"EXISTS(SELECT person_id FROM "CTS_TABLE_FAVORITES" WHERE person_id=persons.person_id) is_favorite, "
+					"(SELECT favorite_prio FROM "CTS_TABLE_FAVORITES" WHERE person_id=persons.person_id) favorite_prio "
+			"FROM "CTS_TABLE_CONTACTS", "CTS_TABLE_PERSONS" "
+			"ON (persons.person_id = contacts.person_id) ");
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Failed(%d)", ret);
 
@@ -317,7 +354,8 @@ static int __ctsvc_db_create_views()
 					"EXISTS(SELECT person_id FROM "CTS_TABLE_FAVORITES" WHERE person_id=persons.person_id) is_favorite, "
 					"(SELECT favorite_prio FROM "CTS_TABLE_FAVORITES" WHERE person_id=persons.person_id) favorite_prio "
 			"FROM "CTS_TABLE_CONTACTS", "CTS_TABLE_PERSONS" "
-			"ON (persons.person_id = contacts.person_id) ");
+			"ON (persons.person_id = contacts.person_id) "
+			"WHERE is_unknown = 0 ");
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Failed(%d)", ret);
 
@@ -371,8 +409,8 @@ static int __ctsvc_db_create_views()
 					"data1, "
 					"data2, "
 					"data3 "
-			"FROM "CTS_TABLE_DATA", "CTSVC_DB_VIEW_CONTACT" "
-			"ON "CTS_TABLE_DATA".contact_id = "CTSVC_DB_VIEW_CONTACT".contact_id "
+			"FROM "CTS_TABLE_DATA", "CTSVC_DB_VIEW_CONTACT_INCLUDE_UNKNOWN" "
+			"ON "CTS_TABLE_DATA".contact_id = "CTSVC_DB_VIEW_CONTACT_INCLUDE_UNKNOWN".contact_id "
 			"WHERE datatype = %d AND is_my_profile = 0 ",
 				CTSVC_DATA_EMAIL);
 	ret = ctsvc_query_exec(query);
@@ -647,7 +685,7 @@ static int __ctsvc_db_create_views()
 		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_CONTACTS_UPDATED_INFO" AS "
 			"SELECT %d, contact_id, changed_ver version, addressbook_id "
 				"FROM "CTS_TABLE_CONTACTS" "
-				"WHERE changed_ver == created_ver "
+				"WHERE changed_ver == created_ver AND is_unknown = 0 "
 			"UNION SELECT %d, contact_id, changed_ver version, addressbook_id "
 				"FROM "CTS_TABLE_CONTACTS" "
 				"WHERE changed_ver > created_ver "
@@ -843,7 +881,7 @@ static int __ctsvc_db_create_views()
 					"FROM "CTS_TABLE_PHONELOGS" A "
 						"LEFT JOIN (SELECT G.person_id person_id, G.contact_id contact_id, "
 									"H.datatype datatype, H.data1 data1, H.data4 data4 "
-								"FROM "CTSVC_DB_VIEW_CONTACT" G, "CTS_TABLE_DATA" H "
+								"FROM "CTSVC_DB_VIEW_CONTACT_INCLUDE_UNKNOWN" G, "CTS_TABLE_DATA" H "
 								"ON H.datatype = %d AND G.contact_id = H.contact_id AND H.is_my_profile = 0 ) B "
 						"ON A.minmatch = B.data4 "
 							"AND (A.person_id = B.person_id "
@@ -921,7 +959,7 @@ static int __ctsvc_db_create_views()
 	// CTSVC_DB_VIEW_CONTACT_NUMBER
 	snprintf(query, sizeof(query),
 		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_CONTACT_NUMBER" AS "
-			"SELECT * FROM "CTSVC_DB_VIEW_CONTACT" "
+			"SELECT * FROM "CTSVC_DB_VIEW_CONTACT_INCLUDE_UNKNOWN" "
 			"JOIN (SELECT id number_id, "
 								"contact_id, "
 								"data1 type, "
@@ -931,7 +969,7 @@ static int __ctsvc_db_create_views()
 								"data4 minmatch, "
 								"data5 normalized_number "
 					"FROM "CTS_TABLE_DATA" WHERE datatype = %d AND is_my_profile = 0) temp_data "
-			"ON temp_data.contact_id = "CTSVC_DB_VIEW_CONTACT".contact_id",
+			"ON temp_data.contact_id = "CTSVC_DB_VIEW_CONTACT_INCLUDE_UNKNOWN".contact_id",
 				CTSVC_DATA_NUMBER);
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Failed(%d)", ret);

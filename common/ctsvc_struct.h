@@ -93,6 +93,7 @@ typedef enum {
 	CTSVC_RECORD_SPEEDDIAL,
 	CTSVC_RECORD_SDN,
 	CTSVC_RECORD_RESULT,
+	CTSVC_RECORD_UNKNOWN,
 }ctsvc_record_type_e;
 
 typedef enum {
@@ -516,6 +517,7 @@ typedef struct {
 	ctsvc_list_s* relationships;
 	ctsvc_list_s* images;
 	ctsvc_list_s* extensions;
+	int is_unknown;
 }ctsvc_contact_s;
 
 typedef struct {

@@ -177,7 +177,7 @@ static int __ctsvc_db_email_insert_record( contacts_record_h record, int *id )
 	}
 
 	snprintf(query, sizeof(query),
-			"SELECT addressbook_id, person_id FROM "CTSVC_DB_VIEW_CONTACT" WHERE contact_id = %d", email->contact_id);
+			"SELECT addressbook_id, person_id FROM "CTSVC_DB_VIEW_CONTACT_INCLUDE_UNKNOWN" WHERE contact_id = %d", email->contact_id);
 	ret = ctsvc_query_prepare(query, &stmt);
 	if (NULL == stmt) {
 		CTS_ERR("DB error : ctsvc_query_prepare() Failed(%d)", ret);
@@ -259,8 +259,8 @@ static int __ctsvc_db_email_get_record( int id, contacts_record_h* out_record )
 
 	len = snprintf(query, sizeof(query),
 			"SELECT id, data.contact_id, is_default, data1, data2, data3 "
-				"FROM "CTS_TABLE_DATA", "CTSVC_DB_VIEW_CONTACT" "
-				"ON "CTS_TABLE_DATA".contact_id = "CTSVC_DB_VIEW_CONTACT".contact_id "
+				"FROM "CTS_TABLE_DATA", "CTSVC_DB_VIEW_CONTACT_INCLUDE_UNKNOWN" "
+				"ON "CTS_TABLE_DATA".contact_id = "CTSVC_DB_VIEW_CONTACT_INCLUDE_UNKNOWN".contact_id "
 				"WHERE id = %d AND datatype = %d ",
 				id, CTSVC_DATA_EMAIL);
 
@@ -299,7 +299,7 @@ static int __ctsvc_db_email_update_record( contacts_record_h record )
 	}
 
 	snprintf(query, sizeof(query),
-			"SELECT addressbook_id FROM "CTSVC_DB_VIEW_CONTACT" WHERE contact_id = %d", email->contact_id);
+			"SELECT addressbook_id FROM "CTSVC_DB_VIEW_CONTACT_INCLUDE_UNKNOWN" WHERE contact_id = %d", email->contact_id);
 	ret = ctsvc_query_get_first_int_result(query, &addressbook_id);
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("No data : contact_id (%d) is not exist", email->contact_id);
@@ -359,7 +359,7 @@ static int __ctsvc_db_email_delete_record( int id )
 	}
 
 	snprintf(query, sizeof(query),
-			"SELECT contact_id, person_id FROM "CTSVC_DB_VIEW_CONTACT " "
+			"SELECT contact_id, person_id FROM "CTSVC_DB_VIEW_CONTACT_INCLUDE_UNKNOWN " "
 			"WHERE contact_id = (SELECT contact_id FROM "CTS_TABLE_DATA" WHERE id = %d)", id);
 
 	ret = ctsvc_query_prepare(query, &stmt);
@@ -464,8 +464,8 @@ static int __ctsvc_db_email_get_all_records( int offset, int limit, contacts_lis
 
 	len = snprintf(query, sizeof(query),
 			"SELECT id, data.contact_id, is_default, data1, data2, data3 "
-				"FROM "CTS_TABLE_DATA", "CTSVC_DB_VIEW_CONTACT" "
-				"ON "CTS_TABLE_DATA".contact_id = "CTSVC_DB_VIEW_CONTACT".contact_id "
+				"FROM "CTS_TABLE_DATA", "CTSVC_DB_VIEW_CONTACT_INCLUDE_UNKNOWN" "
+				"ON "CTS_TABLE_DATA".contact_id = "CTSVC_DB_VIEW_CONTACT_INCLUDE_UNKNOWN".contact_id "
 				"WHERE datatype = %d AND is_my_profile=0 ",
 				CTSVC_DATA_EMAIL);
 	if (0 != limit) {
