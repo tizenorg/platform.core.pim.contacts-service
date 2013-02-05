@@ -61,7 +61,9 @@
 
 // DB views /////////////////////////////////////////////////////////////////////
 #define CTSVC_DB_VIEW_PERSON					"view_person"
+#define CTSVC_DB_VIEW_PERSON_INCLUDE_UNKNOWN			"view_person_include_unknown"
 #define CTSVC_DB_VIEW_CONTACT					"view_contact"
+#define CTSVC_DB_VIEW_CONTACT_INCLUDE_UNKNOWN			"view_contact_include_unknown"
 #define CTSVC_DB_VIEW_MY_PROFILE				"view_my_profile"
 
 #define CTSVC_DB_VIEW_NAME						"view_name"

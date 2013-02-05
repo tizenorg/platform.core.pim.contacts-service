@@ -1255,6 +1255,9 @@ static int __ctsvc_contact_get_int(contacts_record_h record, unsigned int proper
 	case CTSVC_PROPERTY_CONTACT_LINK_MODE:
 		*out = contact->link_mode;
 		break;
+	case CTSVC_PROPERTY_CONTACT_IS_UNKNOWN:
+		*out = contact->is_unknown;
+		break;
 	default:
 		ASSERT_NOT_REACHED("Invalid parameter : property_id(%d) is not supported in value(contact)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
@@ -1657,6 +1660,9 @@ static int __ctsvc_contact_set_int(contacts_record_h record, unsigned int proper
 		break;
 	case CTSVC_PROPERTY_CONTACT_CHANGED_TIME:
 		contact->changed_time = value;
+		break;
+       case CTSVC_PROPERTY_CONTACT_IS_UNKNOWN:
+		contact->is_unknown = value;
 		break;
 /*
 		CTS_ERR("Invalid parameter : property_id(%d) is a read-only value (contact)", property_id);
@@ -3770,6 +3776,7 @@ static int __ctsvc_contact_clone(contacts_record_h record, contacts_record_h *ou
 	RETVM_IF(NULL == out_data, CONTACTS_ERROR_OUT_OF_MEMORY,
 			"Out of memeory : calloc(ctsvc_contact_s) Failed(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
 
+	out_data->is_unknown = src_data->is_unknown;
 	out_data->id = src_data->id;
 	out_data->person_id = src_data->person_id;
 	out_data->addressbook_id = src_data->addressbook_id;

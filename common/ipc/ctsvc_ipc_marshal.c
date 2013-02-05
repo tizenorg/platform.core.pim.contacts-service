@@ -78,6 +78,8 @@ static ctsvc_ipc_marshal_record_plugin_cb_s* __ctsvc_ipc_marshal_get_plugin_cb(c
 		return (&_ctsvc_ipc_record_person_plugin_cb);
 	case CTSVC_RECORD_CONTACT:
 		return (&_ctsvc_ipc_record_contact_plugin_cb);
+	case CTSVC_RECORD_UNKNOWN:
+		return (&_ctsvc_ipc_record_contact_plugin_cb);
 	case CTSVC_RECORD_MY_PROFILE:
 		return (&_ctsvc_ipc_record_my_profile_plugin_cb);
 	case CTSVC_RECORD_UPDATED_INFO:

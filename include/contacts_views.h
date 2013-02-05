@@ -121,7 +121,44 @@ _CONTACTS_BEGIN_VIEW()
 	_CONTACTS_PROPERTY_CHILD_MULTIPLE( group_relation )		// read, write
 	_CONTACTS_PROPERTY_CHILD_MULTIPLE( extension )		// read, write
 	_CONTACTS_PROPERTY_STR( message_alert )				// read, write
+	_CONTACTS_PROPERTY_INT( is_unknown )                    // read, write
+
 _CONTACTS_END_VIEW( _contacts_contact )
+
+// unknown contacts
+_CONTACTS_BEGIN_VIEW()
+	_CONTACTS_PROPERTY_INT( id )					// read only
+	_CONTACTS_PROPERTY_STR( display_name )			// read only
+	_CONTACTS_PROPERTY_INT( display_source_type )	// read only
+	_CONTACTS_PROPERTY_INT( address_book_id )		// read, write once
+	_CONTACTS_PROPERTY_STR( ringtone_path )			// read, write
+	_CONTACTS_PROPERTY_STR( image_thumbnail_path )	// read, write
+	_CONTACTS_PROPERTY_BOOL( is_favorite )			// read only
+	_CONTACTS_PROPERTY_BOOL( has_phonenumber )		// read only
+	_CONTACTS_PROPERTY_BOOL( has_email )			// read only
+	_CONTACTS_PROPERTY_INT( person_id )				// read only
+	_CONTACTS_PROPERTY_STR( uid )					// read, write
+	_CONTACTS_PROPERTY_STR( vibration )				// read, write
+	_CONTACTS_PROPERTY_INT( changed_time )			// read only
+	_CONTACTS_PROPERTY_INT( link_mode )			// read, write
+	_CONTACTS_PROPERTY_CHILD_SINGLE( name )					// read, write
+	_CONTACTS_PROPERTY_CHILD_SINGLE( image )				// read, write
+	_CONTACTS_PROPERTY_CHILD_MULTIPLE( company )				// read, write
+	_CONTACTS_PROPERTY_CHILD_MULTIPLE( note )					// read, write
+	_CONTACTS_PROPERTY_CHILD_MULTIPLE( number )					// read, write
+	_CONTACTS_PROPERTY_CHILD_MULTIPLE( email )					// read, write
+	_CONTACTS_PROPERTY_CHILD_MULTIPLE( event )					// read, write
+	_CONTACTS_PROPERTY_CHILD_MULTIPLE( messenger )				// read, write
+	_CONTACTS_PROPERTY_CHILD_MULTIPLE( address )				// read, write
+	_CONTACTS_PROPERTY_CHILD_MULTIPLE( url )					// read, write
+	_CONTACTS_PROPERTY_CHILD_MULTIPLE( nickname )				// read, write
+	_CONTACTS_PROPERTY_CHILD_MULTIPLE( profile )				// read, write
+	_CONTACTS_PROPERTY_CHILD_MULTIPLE( relationship )			// read, write
+	_CONTACTS_PROPERTY_CHILD_MULTIPLE( group_relation )		// read, write
+	_CONTACTS_PROPERTY_CHILD_MULTIPLE( extension )		// read, write
+	_CONTACTS_PROPERTY_STR( message_alert )				// read, write
+	_CONTACTS_PROPERTY_INT( is_unknown )         // read, write
+_CONTACTS_END_VIEW( _contacts_unknown )
 
 // my_profile
 _CONTACTS_BEGIN_VIEW()

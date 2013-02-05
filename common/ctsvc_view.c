@@ -97,6 +97,42 @@ API const _contacts_contact_property_ids _contacts_contact = {
 	.image					= CTSVC_PROPERTY_CONTACT_IMAGE,
 	.group_relation			= CTSVC_PROPERTY_CONTACT_GROUP_RELATION,
 	.extension				= CTSVC_PROPERTY_CONTACT_EXTENSION,
+	.is_unknown				= CTSVC_PROPERTY_CONTACT_IS_UNKNOWN,
+};
+
+API const _contacts_unknown_property_ids _contacts_unknown = {
+        ._uri                                   = CTSVC_VIEW_URI_CONTACT_INCLUDE_UNKNOWN,
+        .id                                             = CTSVC_PROPERTY_CONTACT_ID,
+        .display_name                   = CTSVC_PROPERTY_CONTACT_DISPLAY_NAME,
+        .display_source_type    = CTSVC_PROPERTY_CONTACT_DISPLAY_SOURCE_DATA_ID,
+        .address_book_id                = CTSVC_PROPERTY_CONTACT_ADDRESSBOOK_ID,
+        .ringtone_path                  = CTSVC_PROPERTY_CONTACT_RINGTONE,
+        .image_thumbnail_path   = CTSVC_PROPERTY_CONTACT_IMAGE_THUMBNAIL,
+        .is_favorite                    = CTSVC_PROPERTY_CONTACT_IS_FAVORITE,
+        .has_phonenumber                = CTSVC_PROPERTY_CONTACT_HAS_PHONENUMBER,
+        .has_email                              = CTSVC_PROPERTY_CONTACT_HAS_EMAIL,
+        .person_id                              = CTSVC_PROPERTY_CONTACT_PERSON_ID,
+        .uid                                    = CTSVC_PROPERTY_CONTACT_UID,
+        .vibration                              = CTSVC_PROPERTY_CONTACT_VIBRATION,
+	.message_alert		= CTSVC_PROPERTY_CONTACT_MESSAGE_ALERT,
+        .changed_time                   = CTSVC_PROPERTY_CONTACT_CHANGED_TIME,
+	.link_mode		= CTSVC_PROPERTY_CONTACT_LINK_MODE,
+        .name                                   = CTSVC_PROPERTY_CONTACT_NAME,
+        .company                                = CTSVC_PROPERTY_CONTACT_COMPANY,
+        .note                                   = CTSVC_PROPERTY_CONTACT_NOTE,
+        .number                                 = CTSVC_PROPERTY_CONTACT_NUMBER,
+        .email                                  = CTSVC_PROPERTY_CONTACT_EMAIL,
+        .event                                  = CTSVC_PROPERTY_CONTACT_EVENT,
+        .messenger                              = CTSVC_PROPERTY_CONTACT_MESSENGER,
+        .address                                = CTSVC_PROPERTY_CONTACT_ADDRESS,
+        .url                                    = CTSVC_PROPERTY_CONTACT_URL,
+        .nickname                               = CTSVC_PROPERTY_CONTACT_NICKNAME,
+        .profile                                = CTSVC_PROPERTY_CONTACT_PROFILE,
+        .relationship                   = CTSVC_PROPERTY_CONTACT_RELATIONSHIP,
+        .image                                  = CTSVC_PROPERTY_CONTACT_IMAGE,
+        .group_relation                 = CTSVC_PROPERTY_CONTACT_GROUP_RELATION,
+        .extension                              = CTSVC_PROPERTY_CONTACT_EXTENSION,
+        .is_unknown                             = CTSVC_PROPERTY_CONTACT_IS_UNKNOWN,
 };
 
 API const _contacts_my_profile_property_ids _contacts_my_profile = {
@@ -984,6 +1020,7 @@ const property_info_s __property_contact[] = {
 	{CTSVC_PROPERTY_CONTACT_VIBRATION,			CTSVC_SEARCH_PROPERTY_ALL,	"vibration"},
 	{CTSVC_PROPERTY_CONTACT_MESSAGE_ALERT,		CTSVC_SEARCH_PROPERTY_ALL,	"message_alert"},
 	{CTSVC_PROPERTY_CONTACT_CHANGED_TIME,		CTSVC_SEARCH_PROPERTY_ALL,	"changed_time"},
+	{CTSVC_PROPERTY_CONTACT_IS_UNKNOWN,		CTSVC_SEARCH_PROPERTY_ALL,      "is_unknown"},
 	{CTSVC_PROPERTY_CONTACT_LINK_MODE,			CTSVC_SEARCH_PROPERTY_ALL,	"link_mode"},
 	{CTSVC_PROPERTY_CONTACT_NAME,					CTSVC_SEARCH_PROPERTY_NONE,(void*)__property_name},
 	{CTSVC_PROPERTY_CONTACT_COMPANY,				CTSVC_SEARCH_PROPERTY_NONE,(void*)__property_company},
@@ -1373,6 +1410,7 @@ static const view_uri_info_s __tables[] = {
 	{CTSVC_VIEW_URI_READ_ONLY_CONTACT_ACTIVITY,			CTSVC_RECORD_RESULT, PTR_COUNT(__property_contact_activity)},
 	{CTSVC_VIEW_URI_READ_ONLY_PHONELOG_NUMBER,				CTSVC_RECORD_RESULT, PTR_COUNT(__property_phonelog_number)},
 	{CTSVC_VIEW_URI_READ_ONLY_PHONELOG_STAT,				CTSVC_RECORD_RESULT, PTR_COUNT(__property_phonelog_stat)},
+	{CTSVC_VIEW_URI_CONTACT_INCLUDE_UNKNOWN,        CTSVC_RECORD_UNKNOWN,                   PTR_COUNT(__property_contact)},
 };
 
 static GHashTable *__ctsvc_view_uri_hash = NULL;

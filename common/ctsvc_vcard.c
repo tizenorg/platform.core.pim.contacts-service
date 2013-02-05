@@ -1638,7 +1638,7 @@ API int contacts_vcard_make_from_contact(contacts_record_h record, char **vcard_
 		"Invalid parameter : contact(%p), vcard_stream(%p)", record, vcard_stream);
 
 	contact = (ctsvc_contact_s*)record;
-	RETVM_IF(CTSVC_RECORD_CONTACT != contact->base.r_type, CONTACTS_ERROR_INVALID_PARAMETER,
+	RETVM_IF(CTSVC_RECORD_CONTACT != contact->base.r_type && CTSVC_RECORD_UNKNOWN != contact->base.r_type, CONTACTS_ERROR_INVALID_PARAMETER,
 		"Invalid parameter : The record is not conatct record (type : %d)", contact->base.r_type);
 
 	return __ctsvc_vcard_make(contact, vcard_stream);
