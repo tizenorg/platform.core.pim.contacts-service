@@ -1,0 +1,179 @@
+/*
+ * Contacts Service
+ *
+ * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+#include <pims-ipc.h>
+#include <pims-ipc-svc.h>
+#include <pims-ipc-data.h>
+
+#include "contacts.h"
+#include "ctsvc_internal.h"
+#include "ctsvc_ipc_define.h"
+#include "ctsvc_mutex.h"
+
+typedef struct
+{
+	contacts_db_change_cb_with_info cb;
+	void *user_data;
+}callback_info_s;
+
+typedef struct
+{
+	char *view_uri;
+	GSList *callbacks;
+}subscribe_info_s;
+
+static pims_ipc_h __ipc = NULL;
+static GSList *__subscribe_list = NULL;
+
+static void __ctsvc_subscriber_callback(pims_ipc_h ipc, pims_ipc_data_h data, void *user_data)
+{
+	unsigned int size = 0;
+	char *str = NULL;
+	subscribe_info_s *info = user_data;
+
+	INFO("(%x) subscribe_callback(%p)", (unsigned int)pthread_self(), ipc);
+	if (data) {
+		str = (char*)pims_ipc_data_get(data, &size);
+		if (!str) {
+			CTS_ERR("pims_ipc_data_get fail()");
+			return;
+		}
+	}
+	if (info) {
+		GSList *l;
+		for (l = info->callbacks;l;l=l->next) {
+			callback_info_s *cb_info = l->data;
+			cb_info->cb(info->view_uri, str, cb_info->user_data);
+		}
+	}
+}
+
+int ctsvc_ipc_create_for_change_subscription()
+{
+	ctsvc_mutex_lock(CTS_MUTEX_PIMS_IPC_PUBSUB);
+
+	if (!__ipc) {
+		__ipc = pims_ipc_create_for_subscribe(CTSVC_IPC_SOCKET_PATH_FOR_CHANGE_SUBSCRIPTION);
+		if (!__ipc) {
+			CTS_ERR("pims_ipc_create_for_subscribe error\n");
+			ctsvc_mutex_unlock(CTS_MUTEX_PIMS_IPC_PUBSUB);
+			return CONTACTS_ERROR_IPC;
+		}
+	}
+	ctsvc_mutex_unlock(CTS_MUTEX_PIMS_IPC_PUBSUB);
+	return CONTACTS_ERROR_NONE;
+}
+
+int ctsvc_ipc_destroy_for_change_subscription()
+{
+	ctsvc_mutex_lock(CTS_MUTEX_PIMS_IPC_PUBSUB);
+
+	pims_ipc_destroy_for_subscribe(__ipc);
+	__ipc = NULL;
+
+	ctsvc_mutex_unlock(CTS_MUTEX_PIMS_IPC_PUBSUB);
+	return CONTACTS_ERROR_NONE;
+}
+
+API int contacts_db_add_changed_cb_with_info(const char* view_uri,
+		contacts_db_change_cb_with_info cb, void* user_data)
+{
+	GSList *it = NULL;
+	subscribe_info_s *info = NULL;
+	callback_info_s *cb_info;
+
+	ctsvc_mutex_lock(CTS_MUTEX_PIMS_IPC_PUBSUB);
+
+	for (it=__subscribe_list;it;it=it->next) {
+		if (!it->data) continue;
+
+		info = it->data;
+		if (strcmp(info->view_uri, view_uri) == 0)
+			break;
+		else
+			info = NULL;
+	}
+
+	if (!info) {
+		info = calloc(1, sizeof(subscribe_info_s));
+		if (NULL == info) {
+			CTS_ERR("calloc() Failed");
+			ctsvc_mutex_unlock(CTS_MUTEX_PIMS_IPC_PUBSUB);
+			return CONTACTS_ERROR_OUT_OF_MEMORY;
+		}
+
+		if (pims_ipc_subscribe(__ipc, CTSVC_IPC_SUBSCRIBE_MODULE, (char*)view_uri,
+					__ctsvc_subscriber_callback, (void*)info) != 0) {
+			CTS_ERR("pims_ipc_subscribe error\n");
+			free(info);
+			ctsvc_mutex_unlock(CTS_MUTEX_PIMS_IPC_PUBSUB);
+			return CONTACTS_ERROR_IPC;
+		}
+		info->view_uri = strdup(view_uri);
+		__subscribe_list = g_slist_append(__subscribe_list, info);
+	}
+
+	cb_info = calloc(1, sizeof(callback_info_s));
+	cb_info->user_data = user_data;
+	cb_info->cb = cb;
+	info->callbacks = g_slist_append(info->callbacks, cb_info);
+
+	ctsvc_mutex_unlock(CTS_MUTEX_PIMS_IPC_PUBSUB);
+	return CONTACTS_ERROR_NONE;
+}
+
+API int contacts_db_remove_changed_cb_with_info(const char* view_uri,
+		contacts_db_change_cb_with_info cb, void* user_data)
+{
+	GSList *it = NULL;
+	subscribe_info_s *info = NULL;
+
+	ctsvc_mutex_lock(CTS_MUTEX_PIMS_IPC_PUBSUB);
+
+	for (it=__subscribe_list;it;it=it->next) {
+		if (!it->data) continue;
+
+		info = it->data;
+		if (strcmp(info->view_uri, view_uri) == 0)
+			break;
+		else
+			info = NULL;
+	}
+
+	if (info) {
+		GSList *l;
+		for(l = info->callbacks;l;l=l->next) {
+			callback_info_s *cb_info = l->data;
+			if (cb == cb_info->cb && user_data == cb_info->user_data) {
+				info->callbacks = g_slist_remove(info->callbacks, cb_info);
+				break;
+			}
+		}
+		if (g_slist_length(info->callbacks) == 0) {
+			pims_ipc_unsubscribe(__ipc, CTSVC_IPC_SUBSCRIBE_MODULE, info->view_uri);
+			__subscribe_list = g_slist_remove(__subscribe_list, info);
+			free(info->view_uri);
+			free(info);
+		}
+	}
+
+	ctsvc_mutex_unlock(CTS_MUTEX_PIMS_IPC_PUBSUB);
+	return CONTACTS_ERROR_NONE;
+}
+

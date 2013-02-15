@@ -1,0 +1,2240 @@
+contacts-service (0.9.10) unstable; urgency=low
+
+  * Fix bugs, Change view_uri
+  * Git: framework/pim/contacts-service
+  * Tag: contacts-service_0.9.10
+
+ -- Donghee Ye <donghee.ye@samsung.com>  Thu, 27 Dec 2012 11:25:45 +0900
+
+contacts-service (0.9.6) unstable; urgency=low
+
+  * Fix bugs, Add new notification mechanishm
+  * Git: framework/pim/contacts-service
+  * Tag: contacts-service_0.9.6
+
+ -- Donghee Ye <donghee.ye@samsung.com>  Fri, 7 Dec 2012 11:25:45 +0900
+
+contacts-service (0.8.27) unstable; urgency=low
+
+  * Apply IPC version
+  * Git: framework/pim/contacts-service
+  * Tag: contacts-service_0.8.27
+
+ -- Donghee Ye <donghee.ye@samsung.com>  Tue, 27 Nov 2012 11:25:45 +0900
+
+contacts-service (0.8.5.1-1) unstable; urgency=low
+
+  * Add manifest file
+  * Git: framework/pim/contacts-service
+  * Tag: contacts-service_0.8.5.1-1
+
+ -- Donghee Ye <donghee.ye@samsung.com>  Fri, 2 Nov 2012 11:25:45 +0900
+
+contacts-service (0.8.5-1) unstable; urgency=low
+
+  * Add new managed API
+  * Git: framework/pim/contacts-service
+  * Tag: contacts-service_0.8.5-1
+
+ -- Donghee Ye <donghee.ye@samsung.com>  Wed, 17 Oct 2012 11:25:45 +0900
+
+contacts-service (0.7.33-1) unstable; urgency=low
+
+  * fix Fix timeout crash problem
+  * Git: framework/pim/contacts-service
+  * Tag: contacts-service_0.7.32-1
+
+ -- DoHyung Jin <dh.jin@samsung.com>  Wed, 19 Sep 2012 11:25:45 +0900
+
+contacts-service (0.7.32-1) unstable; urgency=low
+
+  * fix query of CTS_LIST_PLOG_OF_PERSON_ID
+  * Git: framework/pim/contacts-service
+  * Tag: contacts-service_0.7.32-1
+
+ -- DoHyung Jin <dh.jin@samsung.com>  Wed, 19 Sep 2012 11:25:45 +0900
+
+contacts-service (0.7.31-1) unstable; urgency=low
+
+  * when language changed, update display_name_language
+  * Git: framework/pim/contacts-service
+  * Tag: contacts-service_0.7.31-1
+
+ -- DoHyung Jin <dh.jin@samsung.com>  Wed, 19 Sep 2012 11:25:45 +0900
+
+contacts-service (0.7.30-1) unstable; urgency=low
+
+  * fix seg_falut when callback from tapi sim 
+  * Git: framework/pim/contacts-service
+  * Tag: contacts-service_0.7.30-1
+
+ -- DoHyung Jin <dh.jin@samsung.com>  Wed, 19 Sep 2012 11:25:45 +0900
+
+contacts-service (0.7.29-1) unstable; urgency=low
+
+  * version update error fix 
+  * Git: framework/pim/contacts-service
+  * Tag: contacts-service_0.7.29-1
+
+ -- JongWon Lee <gogosing.lee@samsung.com>  Wed, 19 Sep 2012 11:25:45 +0900
+
+contacts-service (0.7.28-1) unstable; urgency=low
+
+  * version update error fix 
+  * Git: framework/pim/contacts-service
+  * Tag: contacts-service_0.7.28-1
+
+ -- JongWon Lee <gogosing.lee@samsung.com>  Wed, 19 Sep 2012 11:25:45 +0900
+
+contacts-service (0.7.26-1) unstable; urgency=low
+
+  * add manifest file 
+  * Git: framework/pim/contacts-service
+  * Tag: contacts-service_0.7.26-1
+
+ -- JongWon Lee <gogosing.lee@samsung.com>  Wed, 19 Sep 2012 11:25:45 +0900
+
+contacts-service (0.7.25-1) unstable; urgency=low
+
+  * Fix search by number failure 
+  * Git: framework/pim/contacts-service
+  * Tag: contacts-service_0.7.25-1
+
+ -- JongWon Lee <gogosing.lee@samsung.com>  Wed, 19 Sep 2012 11:25:45 +0900
+
+contacts-service (0.7.24-1) unstable; urgency=low
+
+  * Fix add resize image / fix CTS_FILTERED_ALL_CONTACT problem
+  * Git: framework/pim/contacts-service
+  * Tag: contacts-service_0.7.24-1
+
+ -- JongWon Lee <gogosing.lee@samsung.com>  Wed, 19 Sep 2012 11:25:45 +0900
+
+contacts-service (0.7.23-1) unstable; urgency=low
+
+  * Fix build error : make display name for vcard contact
+  * Git: framework/pim/contacts-service
+  * Tag: contacts-service_0.7.23-1
+
+ -- JongWon Lee <gogosing.lee@samsung.com>  Fri, 14 Sep 2012 19:10:03 +0900
+
+contacts-service (0.7.22-1) unstable; urgency=low
+
+  * Fix build error : changed systemd header file path
+  * Git: framework/pim/contacts-service
+  * Tag: contacts-service_0.7.22-1
+
+ -- DongHee Ye <donghee.ye@samsung.com>  Fri, 14 Sep 2012 11:02:26 +0900
+
+contacts-service (0.7.21-1) unstable; urgency=low
+
+  * fix Disable auto link
+  * Git: framework/pim/contacts-service
+  * Tag: contacts-service_0.7.21-1
+
+ -- JongWon Lee <gogosing.lee@samsung.com>  Thu, 13 Sep 2012 22:10:00 +0900
+
+contacts-service (0.7.20-1) unstable; urgency=low
+
+  * fix add phonelog statistic functions
+  * Git: framework/pim/contacts-service
+  * Tag: contacts-service_0.7.20-1
+
+ -- JongWon Lee <gogosing.lee@samsung.com>  Wed, 12 Sep 2012 17:49:00 +0900
+
+contacts-service (0.7.19-1) unstable; urgency=low
+
+  * fix remove C/S communication while normalizing name or string / add contacts_svc_get_vcard_from_person
+  * Git: framework/pim/contacts-service
+  * Tag: contacts-service_0.7.19-1
+
+ -- JongWon Lee <gogosing.lee@samsung.com>  Tue, 11 Sep 2012 19:22:00 +0900
+
+contacts-service (0.7.18-1) unstable; urgency=low
+
+  * fix Auto Link
+  * Git: framework/pim/contacts-service
+  * Tag: contacts-service_0.7.18-1
+
+ -- JongWon Lee <gogosing.lee@samsung.com>  Mon, 10 Sep 2012 20:24:00 +0900
+
+contacts-service (0.7.17-1) unstable; urgency=low
+
+  * fix set has_phonenumber, has_email when update contact
+  * Git: framework/pim/contacts-service
+  * Tag: contacts-service_0.7.17-1
+
+ -- JongWon Lee <gogosing.lee@samsung.com>  Mon, 10 Sep 2012 11:21:00 +0900
+
+contacts-service (0.7.16-1) unstable; urgency=low
+
+  * fix set has_phonenumber, has_email when update contact
+  * Git: framework/pim/contacts-service
+  * Tag: contacts-service_0.7.16-1
+
+ -- JongWon Lee <gogosing.lee@samsung.com>  Fri, 7 Sep 2012 18:21:00 +0900
+
+contacts-service (0.7.15-1) unstable; urgency=low
+
+  * fix add activity delete function
+  * Git: framework/pim/contacts-service
+  * Tag: contacts-service_0.7.15-1
+
+ -- JongWon Lee <gogosing.lee@samsung.com>  Tue, 4 Sep 2012 19:50:01 +0900
+
+contacts-service (0.7.14-1) unstable; urgency=low
+
+  * fix fix list members of group_id
+  * Git: framework/pim/contacts-service
+  * Tag: contacts-service_0.7.14-1
+
+ -- JongWon Lee <gogosing.lee@samsung.com>  Tue, 4 Sep 2012 16:04:02 +0900
+
+contacts-service (0.7.13-1) unstable; urgency=low
+
+  * fix fix emailinfo list / fix label of number,email,web,postal
+  * Git: framework/pim/contacts-service
+  * Tag: contacts-service_0.7.13-1
+
+ -- JongWon Lee <gogosing.lee@samsung.com>  Tue, 4 Sep 2012 13:45:24 +0900
+
+contacts-service (0.7.12-1) unstable; urgency=low
+
+  * fix fix smartsearch list / fix account delete
+  * Git: framework/pim/contacts-service
+  * Tag: contacts-service_0.7.12-1
+
+ -- JongWon Lee <gogosing.lee@samsung.com>  Mon, 3 Sep 2012 17:05:03 +0900
+
+contacts-service (0.7.10-1) unstable; urgency=low
+
+  * fix fix person link
+  * Git: framework/pim/contacts-service
+  * Tag: contacts-service_0.7.10-1
+
+ -- JongWon Lee <gogosing.lee@samsung.com>  Fri, 31 Aug 2012 21:25:01 +0900
+
+contacts-service (0.7.9-1) unstable; urgency=low
+
+  * fix change number normalization style / set phone default number, email/ fix plog problem
+  * Git: framework/pim/contacts-service
+  * Tag: contacts-service_0.7.9-1
+
+ -- JongWon Lee <gogosing.lee@samsung.com>  Thu, 30 Aug 2012 19:57:32 +0900
+
+contacts-service (0.7.8-1) unstable; urgency=low
+
+  * fix group thumbnail path problem/search by name problem/add is_primary_default to data table / activity is deleted when contact is deleted
+  * Git: framework/pim/contacts-service
+  * Tag: contacts-service_0.7.8-1
+
+ -- JongWon Lee <gogosing.lee@samsung.com>  Thu, 30 Aug 2012 14:27:53 +0900
+
+contacts-service (0.7.7-1) unstable; urgency=low
+
+  * fix Fix contact struct duplicate problem
+  * Git: framework/pim/contacts-service
+  * Tag: contacts-service_0.7.7-1
+
+ -- JongWon Lee <gogosing.lee@samsung.com>  Tue, 28 Aug 2012 19:40:21 +0900
+
+contacts-service (0.7.6-1) unstable; urgency=low
+
+  * fix Person Notification/ contact struct duplicate
+  * Git: framework/pim/contacts-service
+  * Tag: contacts-service_0.7.6-1
+
+ -- JongWon Lee <gogosing.lee@samsung.com>  Mon, 27 Aug 2012 11:11:23 +0900
+
+contacts-service (0.7.5-1) unstable; urgency=low
+
+  * fix fix default number, email problems/ fix speed_number column in speeddials table
+  * Git: framework/pim/contacts-service
+  * Tag: contacts-service_0.7.5-1
+
+ -- JongWon Lee <gogosing.lee@samsung.com>  Fri, 24 Aug 2012 19:21:52 +0900
+
+contacts-service (0.7.4-1) unstable; urgency=low
+
+  * fix change sortkey collation / remove contact unnecessary trigger
+  * Git: framework/pim/contacts-service
+  * Tag: contacts-service_0.7.4-1
+
+ -- JongWon Lee <gogosing.lee@samsung.com>  Wed, 22 Aug 2012 19:22:23 +0900
+
+contacts-service (0.7.3-1) unstable; urgency=low
+
+  * fix fix person notification / add vibration 
+  * Git: framework/pim/contacts-service
+  * Tag: contacts-service_0.7.3-1
+
+ -- JongWon Lee <gogosing.lee@samsung.com>  Tue, 21 Aug 2012 17:02:23 +0900
+
+contacts-service (0.7.2-1) unstable; urgency=low
+
+  * fix the mis-implementaion about deleting group & writing deleted_group
+  * Git: framework/pim/contacts-service
+  * Tag: contacts-service_0.7.2-1
+
+ -- DoHyung Jin <dh.jin@samsung.com>  Tue, 21 Aug 2012 15:02:21 +0900
+
+contacts-service (0.7.1-1) unstable; urgency=low
+
+  * Apply new db schema
+  * Git: framework/pim/contacts-service
+  * Tag: contacts-service_0.7.1-1
+
+ -- JongWon Lee <gogosing.lee@samsung.com>  Mon, 20 Aug 2012 13:48:04 +0900
+
+contacts-service (0.6.15-1) unstable; urgency=low
+
+  * removal of dlogutil script 
+  * Git: framework/pim/contacts-service
+  * Tag: contacts-service_0.6.15-1
+
+ -- DoHyung Jin <dh.jin@samsung.com>  Mon, 20 Aug 2012 09:58:04 +0900
+
+contacts-service (0.6.14-1) unstable; urgency=low
+
+  * Fix get empty_pb_count
+  * Git: framework/pim/contacts-service
+  * Tag: contacts-service_0.6.14-1
+
+ -- DongHee Ye <donghee.ye@samsung.com>  Fri, 17 Aug 2012 19:54:37 +0900
+
+contacts-service (0.6.13-1) unstable; urgency=low
+
+  * Add API to get sim empty slot count
+  * Git: framework/pim/contacts-service
+  * Tag: contacts-service_0.6.13-1
+
+ -- DongHee Ye <donghee.ye@samsung.com>  Mon, 13 Aug 2012 17:13:22 +0900
+
+contacts-service (0.6.12-1) unstable; urgency=low
+
+  * Apply new TAPI
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.6.12-1
+
+ -- DongHee Ye <donghee.ye@samsung.com>  Wed, 08 Aug 2012 10:34:40 +0900
+
+contacts-service (0.6.11-1) unstable; urgency=low
+
+  * Add CTS_LIST_CHANGE_ADDRESSBOOK_ID_INT
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.6.11-1
+
+ -- DoHyung Jin <dh.jin@samsung.com>  Tue, 07 Aug 2012 10:48:57 +0900
+
+contacts-service (0.6.10-1) unstable; urgency=low
+
+  * change hard code "20000 -> CTS_GET_COUNT_GROUPS_IN_ADDRESSBOOK"
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.6.10-1
+
+ -- DoHyung Jin <dh.jin@samsung.com>  Wed, 25 Jul 2012 18:23:34 +0900
+
+contacts-service (0.6.9-1) unstable; urgency=low
+
+  * for OSP - permission of making transparent filter
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.6.9-1
+
+ -- DoHyung Jin <dh.jin@samsung.com>  Mon, 23 Jul 2012 16:42:55 +0900
+
+contacts-service (0.6.8-1) unstable; urgency=low
+
+  * Add enum to get count of incoming/outgoing call
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.6.8-1
+
+ -- DongHee Ye <donghee.ye@samsung.com>  Wed, 18 Jul 2012 21:57:53 +0900
+
+contacts-service (0.6.7-1) unstable; urgency=low
+
+  * Update version for submit request
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.6.7-1
+
+ -- Donghee Ye <donghee.ye@samsung.com>  Thu, 12 Jul 2012 22:28:47 +0900
+
+contacts-service (0.6.6-1) unstable; urgency=low
+
+  * Add log create
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.6.6-1
+
+ -- Donghee Ye <donghee.ye@samsung.com>  Thu, 12 Jul 2012 21:54:24 +0900
+
+contacts-service (0.6.5-1) unstable; urgency=low
+
+  * Fix : update cts_version when changing group
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.6.5-1
+
+ -- Donghee Ye <donghee.ye@samsung.com>  Fri, 06 Jul 2012 14:48:43 +0900
+
+contacts-service (0.6.4-1) unstable; urgency=low
+
+  * Fix filter bugs
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.6.4-1
+
+ -- DongHee Ye <donghee.ye@samsung.com>  Tue, 03 Jul 2012 18:03:20 +0900
+
+contacts-service (0.6.3-1) unstable; urgency=low
+
+  * Enable to add/delete email logs
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.6.3-1
+
+ -- Donghee Ye <donghee.ye@samsung.com>  Tue, 26 Jun 2012 17:36:15 +0900
+
+contacts-service (0.6.2-1) unstable; urgency=low
+
+  * Fix group relation
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.6.2-1
+
+ -- Donghee Ye <donghee.ye@samsung.com>  Wed, 13 Jun 2012 23:26:06 +0900
+
+contacts-service (0.6.1-19) unstable; urgency=low
+
+  * Add feature for OSP : group ringtone return, group relation change
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.6.1-19
+
+ -- Donghee Ye <donghee.ye@samsung.com>  Thu, 07 Jun 2012 23:29:08 +0900
+
+contacts-service (0.6.1-18) unstable; urgency=low
+
+  * Add feature for OSP : group count, default number of contact list
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.6.1-18
+
+ -- Donghee Ye <donghee.ye@samsung.com>  Wed, 30 May 2012 20:52:08 +0900
+
+contacts-service (0.6.1-17) unstable; urgency=low
+
+  * Change vconf key name
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.6.1-17
+
+ -- Donghee Ye <donghee.ye@samsung.com>  Fri, 25 May 2012 15:00:00 +0900
+
+contacts-service (0.6.1-16) unstable; urgency=low
+
+  * Add feature : to get phonelogs of person (history)
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.6.1-16
+
+ -- Donghee Ye <donghee.ye@samsung.com>  Fri, 25 May 2012 09:42:39 +0900
+
+contacts-service (0.6.1-15) unstable; urgency=low
+
+  * Add feature : myprofile
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.6.1-15
+
+ -- Donghee Ye <donghee.ye@samsung.com>  Thu, 24 May 2012 09:06:24 +0900
+
+contacts-service (0.6.1-14) unstable; urgency=low
+
+  * Add feature : set group image
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.6.1-14
+
+ -- Donghee Ye <donghee.ye@samsung.com>  Fri, 11 May 2012 13:50:27 +0900
+
+contacts-service (0.6.1-13) unstable; urgency=low
+
+  * fix bugs(chang language)
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.6.1-13
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Mon, 30 Apr 2012 16:45:13 +0900
+
+contacts-service (0.6.1-12) unstable; urgency=low
+
+  * fix bugs(socket and outgoing count).
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.6.1-12
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Fri, 27 Apr 2012 10:56:30 +0900
+
+contacts-service (0.6.1-11) unstable; urgency=low
+
+  * Add CTS_LIST_ALL_UNSEEN_MISSED_CALL
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.6.1-11
+
+ -- Donghee Ye <donghee.ye@samsung.com>  Tue, 10 Apr 2012 16:55:49 +0900
+
+contacts-service (0.6.1-10) unstable; urgency=low
+
+  * fix bug on emulator
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.6.1-10
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Mon, 09 Apr 2012 11:51:00 +0900
+
+contacts-service (0.6.1-9) unstable; urgency=low
+
+  * fix bug(image handling)
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.6.1-9
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Thu, 05 Apr 2012 10:22:33 +0900
+
+contacts-service (0.6.1-8) unstable; urgency=low
+
+  * fix bug(vcard parser)
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.6.1-8
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Tue, 03 Apr 2012 20:09:09 +0900
+
+contacts-service (0.6.1-7) unstable; urgency=low
+
+  * Fix smartsearch query in case of searching by number
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.6.1-7
+
+ -- Donghee Ye <donghee.ye@samsung.com>  Fri, 30 Mar 2012 11:08:19 +0900
+
+contacts-service (0.6.1-6) unstable; urgency=low
+
+  * fix bug(image handling)
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.6.1-6
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Thu, 29 Mar 2012 08:38:20 +0900
+
+contacts-service (0.6.1-5) unstable; urgency=low
+
+  * Fix smartsearch query
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.6.1-5
+
+ -- Donghee Ye <donghee.ye@samsung.com>  Wed, 28 Mar 2012 19:55:12 +0900
+
+contacts-service (0.6.1-4) unstable; urgency=low
+
+  * fix memory leak
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.6.1-4
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Mon, 26 Mar 2012 11:42:11 +0900
+
+contacts-service (0.6.1-3) unstable; urgency=low
+
+  * fix bug
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.6.1-3
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Wed, 21 Mar 2012 10:13:44 +0900
+
+contacts-service (0.6.1-2) unstable; urgency=low
+
+  * apply revised telephony
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.6.1-2
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Mon, 19 Mar 2012 21:20:46 +0900
+
+contacts-service (0.6.1-1) unstable; urgency=low
+
+  * handling restricted data AND quoted printable
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.6.1-1
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Sat, 03 Mar 2012 15:23:35 +0900
+
+contacts-service (0.6.0-2) unstable; urgency=low
+
+  * make strong in thread for transaction functions
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.6.0-2
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Mon, 27 Feb 2012 20:56:07 +0900
+
+contacts-service (0.6.0-1) unstable; urgency=low
+
+  * added link mechanism
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.6.0-1
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Mon, 27 Feb 2012 14:25:42 +0900
+
+contacts-service (0.5.2-37) unstable; urgency=low
+
+  * fix bug(group relation while inserting contact)
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.5.2-37
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Tue, 21 Feb 2012 18:36:56 +0900
+
+contacts-service (0.5.2-36) unstable; urgency=low
+
+  * revise doxygen
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.5.2-36
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Fri, 10 Feb 2012 14:42:34 +0900
+
+contacts-service (0.5.2-35) unstable; urgency=low
+
+  * fix bug(normalize and missed call noti)
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.5.2-35
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Wed, 08 Feb 2012 21:23:06 +0900
+
+contacts-service (0.5.2-34) unstable; urgency=low
+
+  * fix bug(normalize overflow)
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.5.2-34
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Tue, 31 Jan 2012 18:15:29 +0900
+
+contacts-service (0.5.2-33) unstable; urgency=low
+
+  * fix bugs
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.5.2-33
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Sat, 28 Jan 2012 11:54:30 +0900
+
+contacts-service (0.5.2-32) unstable; urgency=low
+
+  * fix bug(uid updating)
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.5.2-32
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Thu, 19 Jan 2012 15:25:29 +0900
+
+contacts-service (0.5.2-31) unstable; urgency=low
+
+  * fix bugs(vcard note)
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.5.2-31
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Fri, 13 Jan 2012 14:34:53 +0900
+
+contacts-service (0.5.2-30) unstable; urgency=low
+
+  * fix busg and revise doxygen
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.5.2-30
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Fri, 06 Jan 2012 17:33:07 +0900
+
+contacts-service (0.5.2-29) unstable; urgency=low
+
+  * fix bugs
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.5.2-29
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Mon, 02 Jan 2012 13:35:53 +0900
+
+contacts-service (0.5.2-28) unstable; urgency=low
+
+  * line up cts_str_filter_op
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.5.2-28
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Wed, 28 Dec 2011 19:34:34 +0900
+
+contacts-service (0.5.2-27) unstable; urgency=low
+
+  * change function name
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.5.2-27
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Wed, 28 Dec 2011 14:44:02 +0900
+
+contacts-service (0.5.2-26) unstable; urgency=low
+
+  * change type from cts_find_contact_op to cts_find_op
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.5.2-26
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Wed, 21 Dec 2011 11:06:00 +0900
+
+contacts-service (0.5.2-25) unstable; urgency=low
+
+  * fix errata
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.5.2-25
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Tue, 20 Dec 2011 20:40:33 +0900
+
+contacts-service (0.5.2-24) unstable; urgency=low
+
+  * fix helper socket ipc
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.5.2-24
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Wed, 14 Dec 2011 16:38:02 +0900
+
+contacts-service (0.5.2-23) unstable; urgency=low
+
+  * cleanup
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.5.2-23
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Thu, 08 Dec 2011 17:06:54 +0900
+
+contacts-service (0.5.2-22) unstable; urgency=low
+
+  * revise handling photo
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.5.2-22
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Tue, 06 Dec 2011 18:09:35 +0900
+
+contacts-service (0.5.2-21) unstable; urgency=low
+
+  * fix bug
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.5.2-21
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Thu, 01 Dec 2011 12:48:38 +0900
+
+contacts-service (0.5.2-20) unstable; urgency=low
+
+  * debugging vcard parser
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.5.2-20
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Tue, 29 Nov 2011 11:06:43 +0900
+
+contacts-service (0.5.2-19) unstable; urgency=low
+
+  * debug contacts_svc_smartsearch_excl()
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.5.2-19
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Tue, 22 Nov 2011 17:07:18 +0900
+
+contacts-service (0.5.2-18) unstable; urgency=low
+
+  * revise contacts_svc_phonelog_set_seen()
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.5.2-18
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Mon, 21 Nov 2011 16:14:48 +0900
+
+contacts-service (0.5.2-17) unstable; urgency=low
+
+  * Remove unused code, add normalized_strstr
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.5.2-17
+
+ -- Donghee Ye <donghee.ye@samsung.com>  Thu, 17 Nov 2011 15:53:14 +0900
+
+contacts-service (0.5.2-16) unstable; urgency=low
+
+  * remove duplicated data when insert and update
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.5.2-16
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Mon, 14 Nov 2011 10:09:39 +0900
+
+contacts-service (0.5.2-15) unstable; urgency=low
+
+  * fix bug(number and email list)
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.5.2-15
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Tue, 08 Nov 2011 15:04:49 +0900
+
+contacts-service (0.5.2-14) unstable; urgency=low
+
+  * fix BS(handling no_name) and add type for contacts_svc_get_list
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.5.2-14
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Mon, 07 Nov 2011 14:44:34 +0900
+
+contacts-service (0.5.2-13) unstable; urgency=low
+
+  * revise
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.5.2-13
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Sat, 05 Nov 2011 19:21:12 +0900
+
+contacts-service (0.5.2-12) unstable; urgency=low
+
+  * fix BS
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.5.2-12
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Thu, 03 Nov 2011 09:47:47 +0900
+
+contacts-service (0.5.2-11) unstable; urgency=low
+
+  * revise no name and fix bug(email searched list)
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.5.2-11
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Wed, 02 Nov 2011 21:34:11 +0900
+
+contacts-service (0.5.2-10) unstable; urgency=low
+
+  * revise numer handling(support 'P' and 'w' and remove invalid speeddial)
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.5.2-10
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Mon, 31 Oct 2011 16:12:45 +0900
+
+contacts-service (0.5.2-9) unstable; urgency=low
+
+  * fix bug(defult number and email)
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.5.2-9
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Sat, 29 Oct 2011 17:42:50 +0900
+
+contacts-service (0.5.2-8) unstable; urgency=low
+
+  * fix BS and revise vcard parsing
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.5.2-8
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Fri, 28 Oct 2011 17:29:11 +0900
+
+contacts-service (0.5.2-7) unstable; urgency=low
+
+  * fix bug(update number and email)
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.5.2-7
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Thu, 27 Oct 2011 08:31:23 +0900
+
+contacts-service (0.5.2-6) unstable; urgency=low
+
+  * fix memory leak
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.5.2-6
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Wed, 26 Oct 2011 16:24:35 +0900
+
+contacts-service (0.5.2-5) unstable; urgency=low
+
+  * Fix build error
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.5.2-5
+
+ -- Donghee Ye <donghee.ye@samsung.com>  Fri, 21 Oct 2011 21:51:09 +0900
+
+contacts-service (0.5.2-4) unstable; urgency=low
+
+  * change vconf key of system language
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.5.2-4
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Fri, 21 Oct 2011 17:49:16 +0900
+
+contacts-service (0.5.2-3) unstable; urgency=low
+
+  * update icu
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.5.2-3
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Thu, 20 Oct 2011 20:54:52 +0900
+
+contacts-service (0.5.2-2) unstable; urgency=low
+
+  * fix bug(ordering)
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.5.2-2
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Wed, 19 Oct 2011 21:02:07 +0900
+
+contacts-service (0.5.2-1) unstable; urgency=low
+
+  * revise vcard encoding
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.5.2-1
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Mon, 17 Oct 2011 21:58:09 +0900
+
+contacts-service (0.5.1-5) unstable; urgency=low
+
+  * fix bug(speeddial)
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.5.1-5
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Tue, 11 Oct 2011 15:37:59 +0900
+
+contacts-service (0.5.1-4) unstable; urgency=low
+
+  * revise vcard handling
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.5.1-4
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Sat, 08 Oct 2011 07:16:20 +0900
+
+contacts-service (0.5.1-3) unstable; urgency=low
+
+  * fix bug(update number and email)
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.5.1-3
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Fri, 07 Oct 2011 13:43:00 +0900
+
+contacts-service (0.5.1-2) unstable; urgency=low
+
+  * fix bug
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.5.1-2
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Thu, 06 Oct 2011 20:14:15 +0900
+
+contacts-service (0.5.1-1) unstable; urgency=low
+
+  * change schema
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.5.1-1
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Thu, 06 Oct 2011 10:49:29 +0900
+
+contacts-service (0.4.2-7) unstable; urgency=low
+
+  * revise missed call handling
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.4.2-7
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Wed, 05 Oct 2011 14:28:59 +0900
+
+contacts-service (0.4.2-6) unstable; urgency=low
+
+  * fix bug
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.4.2-6
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Tue, 04 Oct 2011 19:49:45 +0900
+
+contacts-service (0.4.2-5) unstable; urgency=low
+
+  * change address type
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.4.2-5
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Mon, 03 Oct 2011 13:28:47 +0900
+
+contacts-service (0.4.2-4) unstable; urgency=low
+
+  * fix bug
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.4.2-4
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Thu, 29 Sep 2011 17:19:09 +0900
+
+contacts-service (0.4.2-3) unstable; urgency=low
+
+  * revise contacts-service
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.4.2-3
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Thu, 29 Sep 2011 15:00:50 +0900
+
+contacts-service (0.4.2-2) unstable; urgency=low
+
+  * fix errata
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.4.2-2
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Wed, 28 Sep 2011 10:40:01 +0900
+
+contacts-service (0.4.2-1) unstable; urgency=low
+
+  * revise updated_contacts and support bada
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.4.2-1
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Tue, 27 Sep 2011 13:20:36 +0900
+
+contacts-service (0.4.1-2) unstable; urgency=low
+
+  * fix bug of phonelog
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.4.1-2
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Mon, 26 Sep 2011 13:23:41 +0900
+
+contacts-service (0.4.1-1) unstable; urgency=low
+
+  * revise iterator
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.4.1-1
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Fri, 23 Sep 2011 17:59:57 +0900
+
+contacts-service (0.3.4-4) unstable; urgency=low
+
+  * add list of all phonelog
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.3.4-4
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Wed, 07 Sep 2011 20:49:43 +0900
+
+contacts-service (0.3.4-3) unstable; urgency=low
+
+  * revise image handling
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.3.4-3
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Mon, 05 Sep 2011 10:44:15 +0900
+
+contacts-service (0.3.4-2) unstable; urgency=low
+
+  * revise
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.3.4-2
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Thu, 01 Sep 2011 22:24:11 +0900
+
+contacts-service (0.3.4-1) unstable; urgency=low
+
+  * revise vcard
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.3.4-1
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Wed, 31 Aug 2011 17:43:51 +0900
+
+contacts-service (0.3.3-1) unstable; urgency=low
+
+  * add struct handling functions
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.3.3-1
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Sat, 27 Aug 2011 15:35:36 +0900
+
+contacts-service (0.3.2-7) unstable; urgency=low
+
+  * modify by prevent comment
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.3.2-7
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Tue, 23 Aug 2011 11:24:06 +0900
+
+contacts-service (0.3.2-6) unstable; urgency=low
+
+  * revise vcard parser
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.3.2-6
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Thu, 18 Aug 2011 08:20:47 +0900
+
+contacts-service (0.3.2-5) unstable; urgency=low
+
+  * revise to handle write()
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.3.2-5
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Wed, 17 Aug 2011 16:34:05 +0900
+
+contacts-service (0.3.2-4) unstable; urgency=low
+
+  * revise to handle sqlite errors
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.3.2-4
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Tue, 16 Aug 2011 18:22:18 +0900
+
+contacts-service (0.3.2-3) unstable; urgency=low
+
+  * revise vcard parsing
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.3.2-3
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Wed, 10 Aug 2011 15:38:41 +0900
+
+contacts-service (0.3.2-2) unstable; urgency=low
+
+  * revise version mechanism
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.3.2-2
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Wed, 10 Aug 2011 10:45:06 +0900
+
+contacts-service (0.3.2-1) unstable; urgency=low
+
+  * apply version
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.3.2-1
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Tue, 09 Aug 2011 20:24:14 +0900
+
+contacts-service (0.3.1-9) unstable; urgency=low
+
+  * fix errata
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.3.1-9
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Fri, 05 Aug 2011 10:02:08 +0900
+
+contacts-service (0.3.1-8) unstable; urgency=low
+
+  * revise contacts-service
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.3.1-8
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Wed, 03 Aug 2011 18:56:18 +0900
+
+contacts-service (0.3.1-7) unstable; urgency=low
+
+  * add display name handling code
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.3.1-7
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Tue, 26 Jul 2011 19:38:25 +0900
+
+contacts-service (0.3.1-6) unstable; urgency=low
+
+  * revise contacts-service
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.3.1-6
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Mon, 25 Jul 2011 21:37:40 +0900
+
+contacts-service (0.3.1-5) unstable; urgency=low
+
+  * revise vcard parsing
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.3.1-5
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Sat, 23 Jul 2011 17:20:42 +0900
+
+contacts-service (0.3.1-4) unstable; urgency=low
+
+  * fix bug for making vcard
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.3.1-4
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Sat, 23 Jul 2011 11:59:01 +0900
+
+contacts-service (0.3.1-3) unstable; urgency=low
+
+  * check duplicated contacts for importing sim
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.3.1-3
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Sat, 23 Jul 2011 10:48:25 +0900
+
+contacts-service (0.3.1-2) unstable; urgency=low
+
+  * revise error handling code for inotify
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.3.1-2
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Thu, 21 Jul 2011 10:59:52 +0900
+
+contacts-service (0.3.1-1) unstable; urgency=low
+
+  * remove the dependeny with vobject service
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.3.1-1
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Tue, 19 Jul 2011 10:17:59 +0900
+
+contacts-service (0.3.0-5) unstable; urgency=low
+
+  * fix bug
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.3.0-5
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Thu, 14 Jul 2011 18:33:16 +0900
+
+contacts-service (0.3.0-4) unstable; urgency=low
+
+  * revise contacts-service
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.3.0-4
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Wed, 13 Jul 2011 13:23:28 +0900
+
+contacts-service (0.3.0-3) unstable; urgency=low
+
+  * fix prevent bug
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.3.0-3
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Fri, 08 Jul 2011 18:35:20 +0900
+
+contacts-service (0.3.0-2) unstable; urgency=low
+
+  * add noti for modifing addressbook
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.3.0-2
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Thu, 07 Jul 2011 15:21:36 +0900
+
+contacts-service (0.3.0-1) unstable; urgency=low
+
+  * add concepts of addressbook
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.3.0-1
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Mon, 04 Jul 2011 21:25:36 +0900
+
+contacts-service (0.2.14-2) unstable; urgency=low
+
+  * fix errata
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.2.14-2
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Thu, 30 Jun 2011 09:06:43 +0900
+
+contacts-service (0.2.14-1) unstable; urgency=low
+
+  * add contacts_svc_unsubscribe_change_with_data()
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.2.14-1
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Wed, 29 Jun 2011 17:31:03 +0900
+
+contacts-service (0.2.13-2) unstable; urgency=low
+
+  * add doxygen about contacts_svc_get_phonelog()
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.2.13-2
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Mon, 27 Jun 2011 15:19:27 +0900
+
+contacts-service (0.2.13-1) unstable; urgency=low
+
+  * change favorite and speeddial functions
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.2.13-1
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Wed, 22 Jun 2011 21:07:31 +0900
+
+contacts-service (0.2.12-15) unstable; urgency=low
+
+  * fix bugs
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.2.12-15
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Tue, 14 Jun 2011 18:32:28 +0900
+
+contacts-service (0.2.12-14) unstable; urgency=low
+
+  * check invalid string
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.2.12-14
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Mon, 13 Jun 2011 19:54:33 +0900
+
+contacts-service (0.2.12-13) unstable; urgency=low
+
+  * add a operation of contacts_svc_get_contact_value
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.2.12-13
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Mon, 13 Jun 2011 11:23:21 +0900
+
+contacts-service (0.2.12-12) unstable; urgency=low
+
+  * revise name ordering
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.2.12-12
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Thu, 09 Jun 2011 14:37:02 +0900
+
+contacts-service (0.2.12-11) unstable; urgency=low
+
+  * change the policy for name ordering
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.2.12-11
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Wed, 08 Jun 2011 14:21:52 +0900
+
+contacts-service (0.2.12-10) unstable; urgency=low
+
+  * fix socket handling
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.2.12-10
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Wed, 08 Jun 2011 07:54:17 +0900
+
+contacts-service (0.2.12-9) unstable; urgency=low
+
+  * fix BS
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.2.12-9
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Fri, 03 Jun 2011 15:41:10 +0900
+
+contacts-service (0.2.12-8) unstable; urgency=low
+
+  * fix errta
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.2.12-8
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Thu, 26 May 2011 15:56:41 +0900
+
+contacts-service (0.2.12-7) unstable; urgency=low
+
+  * revise
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.2.12-7
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Thu, 19 May 2011 15:01:31 +0900
+
+contacts-service (0.2.12-6) unstable; urgency=low
+
+  * sort group list
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.2.12-6
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Tue, 17 May 2011 17:02:57 +0900
+
+contacts-service (0.2.12-5) unstable; urgency=low
+
+  * update icu
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.2.12-5
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Mon, 16 May 2011 11:08:58 +0900
+
+contacts-service (0.2.12-4) unstable; urgency=low
+
+  * revise insert_contact(guarantee atomic)
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.2.12-4
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Fri, 13 May 2011 20:25:44 +0900
+
+contacts-service (0.2.12-3) unstable; urgency=low
+
+  * add debugging code
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.2.12-3
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Mon, 09 May 2011 18:35:41 +0900
+
+contacts-service (0.2.12-2) unstable; urgency=low
+
+  * debugging normalization
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.2.12-2
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Thu, 05 May 2011 11:29:13 +0900
+
+contacts-service (0.2.12-1) unstable; urgency=low
+
+  * revise normalization and phonelog
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.2.12-1
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Sat, 30 Apr 2011 16:45:38 +0900
+
+contacts-service (0.2.11-4) unstable; urgency=low
+
+  * change retry term
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.2.11-4
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Fri, 15 Apr 2011 16:10:35 +0900
+
+contacts-service (0.2.11-3) unstable; urgency=low
+
+  * revise group api
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.2.11-3
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Mon, 11 Apr 2011 11:46:47 +0900
+
+contacts-service (0.2.11-2) unstable; urgency=low
+
+  * fix TC
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.2.11-2
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Mon, 04 Apr 2011 14:50:45 +0900
+
+contacts-service (0.2.11-1) unstable; urgency=low
+
+  * add normalization for number
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.2.11-1
+
+ -- Youngjae <yj99.shin@samsung.com>  Sat, 26 Mar 2011 11:17:53 +0900
+
+contacts-service (0.2.10-5) unstable; urgency=low
+
+  * add contacts_svc_delete_group_with_members()
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.2.10-5
+
+ -- Youngjae <yj99.shin@samsung.com>  Thu, 17 Mar 2011 17:43:29 +0900
+
+contacts-service (0.2.10-4) unstable; urgency=low
+
+  * fix bug
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.2.10-4
+
+ -- Youngjae <yj99.shin@samsung.com>  Wed, 09 Mar 2011 20:55:38 +0900
+
+contacts-service (0.2.10-3) unstable; urgency=low
+
+  * add group notification
+  * Git: slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.2.10-3
+
+ -- Youngjae <yj99.shin@samsung.com>  Wed, 09 Mar 2011 16:08:50 +0900
+
+contacts-service (0.2.10-2) unstable; urgency=low
+
+  * revise handling empty string and Unkown log
+  * Git: slp-source.sec.samsung.net:slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.2.10-2
+
+ -- Youngjae <yj99.shin@samsung.com>  Tue, 08 Mar 2011 11:06:57 +0900
+
+contacts-service (0.2.10-1) unstable; urgency=low
+
+  * change the policy of number types
+  * Git: slp-source.sec.samsung.net:slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.2.10-1
+
+ -- Youngjae <yj99.shin@samsung.com>  Tue, 01 Mar 2011 11:05:39 +0900
+
+contacts-service (0.2.9-10) unstable; urgency=low
+
+  * fix phonelog error
+  * Git: slp-source.sec.samsung.net:slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.2.9-10
+
+ -- Youngjae <yj99.shin@samsung.com>  Sat, 26 Feb 2011 11:17:32 +0900
+
+contacts-service (0.2.9-9) unstable; urgency=low
+
+  * fix errata
+  * Git: slp-source.sec.samsung.net:slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.2.9-9
+
+ -- Youngjae <yj99.shin@samsung.com>  Fri, 25 Feb 2011 15:44:30 +0900
+
+contacts-service (0.2.9-8) unstable; urgency=low
+
+  * fix bug
+  * Git: slp-source.sec.samsung.net:slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.2.9-8
+
+ -- Youngjae <yj99.shin@samsung.com>  Thu, 24 Feb 2011 15:19:29 +0900
+
+contacts-service (0.2.9-7) unstable; urgency=low
+
+  * fix some bug and revise retry mechanism
+  * Git: slp-source.sec.samsung.net:slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.2.9-7
+
+ -- Youngjae <yj99.shin@samsung.com>  Thu, 24 Feb 2011 13:44:54 +0900
+
+contacts-service (0.2.9-6) unstable; urgency=low
+
+  * revise lock mechanism and check constraint for handling group
+  * Git: slp-source.sec.samsung.net:slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.2.9-6
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Wed, 23 Feb 2011 17:56:47 +0900
+
+contacts-service (0.2.9-5) unstable; urgency=low
+
+  * fix prevent bug
+  * Git: slp-source.sec.samsung.net:slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.2.9-5
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Tue, 22 Feb 2011 13:44:54 +0900
+
+contacts-service (0.2.9-4) unstable; urgency=low
+
+  * support full image in a contact
+  * Git: slp-source.sec.samsung.net:slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.2.9-4
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Mon, 21 Feb 2011 17:59:20 +0900
+
+contacts-service (0.2.9-3) unstable; urgency=low
+
+  * remove MWC code in source.
+  * Git: slp-source.sec.samsung.net:slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.2.9-3
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Wed, 16 Feb 2011 19:36:17 +0900
+
+contacts-service (0.2.9-2) unstable; urgency=low
+
+  * handling contact struct which have no name and no id
+  * Git: slp-source.sec.samsung.net:slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.2.9-2
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Wed, 16 Feb 2011 12:08:48 +0900
+
+contacts-service (0.2.9-1) unstable; urgency=low
+
+  * remove MWC code
+  * Git: slp-source.sec.samsung.net:slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.2.9-1
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Mon, 14 Feb 2011 11:19:19 +0900
+
+contacts-service (0.2.8-9MWC2011) unstable; urgency=low
+
+  * revise handling invalid name
+  * Git: slp-source.sec.samsung.net:slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.2.8-9MWC2011
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Thu, 10 Feb 2011 09:36:32 +0900
+
+contacts-service (0.2.8-8MWC2011) unstable; urgency=low
+
+  * revise MWC code
+  * Git: slp-source.sec.samsung.net:slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.2.8-8MWC2011
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Mon, 31 Jan 2011 17:20:04 +0900
+
+contacts-service (0.2.8-7MWC2011) unstable; urgency=low
+
+  * add contacts_svc_value_get_type()
+  * Git: slp-source.sec.samsung.net:slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.2.8-7MWC2011
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Mon, 31 Jan 2011 09:23:25 +0900
+
+contacts-service (0.2.8-6MWC2011) unstable; urgency=low
+
+  * fix prevent errors
+  * Git: slp-source.sec.samsung.net:slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.2.8-6MWC2011
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Sat, 29 Jan 2011 15:34:17 +0900
+
+contacts-service (0.2.8-5MWC2011) unstable; urgency=low
+
+  * add options for contacts_svc_get_contact_value()
+  * Git: slp-source.sec.samsung.net:slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.2.8-5MWC2011
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Tue, 25 Jan 2011 19:41:50 +0900
+
+contacts-service (0.2.8-4MWC2011) unstable; urgency=low
+
+  * fix prevent errors
+  * Git: slp-source.sec.samsung.net:slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.2.8-4MWC2011
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Sat, 22 Jan 2011 14:11:58 +0900
+
+contacts-service (0.2.8-3MWC2011) unstable; urgency=low
+
+  * handle NULL pointer
+  * Git: slp-source.sec.samsung.net:slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.2.8-3MWC2011
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Thu, 20 Jan 2011 08:49:36 +0900
+
+contacts-service (0.2.8-2MWC2011) unstable; urgency=low
+
+  * add UID for MWC2011
+  * Git: slp-source.sec.samsung.net:slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.2.8-2MWC2011
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Tue, 18 Jan 2011 11:02:03 +0900
+
+contacts-service (0.2.8-1MWC2011) unstable; urgency=low
+
+  * debugging MWC code
+  * Git: slp-source.sec.samsung.net:slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.2.8-1MWC2011
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Thu, 13 Jan 2011 20:58:41 +0900
+
+contacts-service (0.2.7.MWC2011-3) unstable; urgency=low
+
+  * rebuild
+  * Git: slp-source.sec.samsung.net:slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.2.7.MWC2011-3
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Thu, 13 Jan 2011 14:29:44 +0900
+
+contacts-service (0.2.7.MWC2011-2) unstable; urgency=low
+
+  * revise postinst
+  * Git: slp-source.sec.samsung.net:slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.2.7.MWC2011-2
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Thu, 13 Jan 2011 11:17:47 +0900
+
+contacts-service (0.2.7.MWC2011-1) unstable; urgency=low
+
+  * for MWC2011
+  * Git: slp-source.sec.samsung.net:slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.2.7.MWC2011-1
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Thu, 13 Jan 2011 09:34:33 +0900
+
+contacts-service (0.2.7-2) unstable; urgency=low
+
+  * modify enum
+  * Git: slp-source.sec.samsung.net:slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.2.7-2
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Thu, 06 Jan 2011 15:09:33 +0900
+
+contacts-service (0.2.7-1) unstable; urgency=low
+
+  * change enum(MESSENGERVALUE)
+  * Git: slp-source.sec.samsung.net:slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.2.7-1
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Tue, 04 Jan 2011 08:37:02 +0900
+
+contacts-service (0.2.6-1) unstable; urgency=low
+
+  * change enum and minor debugging
+  * Git: slp-source.sec.samsung.net:slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.2.6-1
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Tue, 28 Dec 2010 13:52:52 +0900
+
+contacts-service (0.2.5-2) unstable; urgency=low
+
+  * fix socket handling
+  * Git: slp-source.sec.samsung.net:slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.2.5-2
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Wed, 15 Dec 2010 14:05:35 +0900
+
+contacts-service (0.2.5-1) unstable; urgency=low
+
+  * remove contacts_svc_get_count and update vobject_servcie
+  * Git: slp-source.sec.samsung.net:slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.2.5-1
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Mon, 13 Dec 2010 11:34:09 +0900
+
+contacts-service (0.2.4-4) unstable; urgency=low
+
+  * debugging compare function
+  * Git: slp-source.sec.samsung.net:slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.2.4-4
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Thu, 09 Dec 2010 13:35:29 +0900
+
+contacts-service (0.2.4-3) unstable; urgency=low
+
+  * remove old files
+  * Git: slp-source.sec.samsung.net:slp/pkgs/c/contacts-service
+  * Tag: contacts-service_0.2.4-3
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Wed, 08 Dec 2010 13:16:58 +0900
+
+contacts-service (0.2.4-2) unstable; urgency=low
+
+  * debugging contacts_svc_nomalize_str()
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.2.4-2
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Thu, 02 Dec 2010 09:51:45 +0900
+
+contacts-service (0.2.4-1) unstable; urgency=low
+
+  * deprecate contacts_svc_get_count and add contacts_svc_count,
+    contacts_svc_count_with_int
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.2.4-1
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Wed, 01 Dec 2010 21:26:20 +0900
+
+contacts-service (0.2.3-14) unstable; urgency=low
+
+  * change libicu from 36 to 40
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.2.3-14
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Tue, 30 Nov 2010 21:44:00 +0900
+
+contacts-service (0.2.3-13) unstable; urgency=low
+
+  * debugging
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.2.3-13
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Mon, 29 Nov 2010 08:45:27 +0900
+
+contacts-service (0.2.3-12) unstable; urgency=low
+
+  * optimize query for favorite
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.2.3-12
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Wed, 17 Nov 2010 14:22:14 +0900
+
+contacts-service (0.2.3-11) unstable; urgency=low
+
+  * debugging extend value
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.2.3-11
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Tue, 16 Nov 2010 20:10:58 +0900
+
+contacts-service (0.2.3-10) unstable; urgency=low
+
+  * debugging
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.2.3-10
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Tue, 16 Nov 2010 09:36:50 +0900
+
+contacts-service (0.2.3-9) unstable; urgency=low
+
+  * debugging
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.2.3-9
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Mon, 15 Nov 2010 15:23:49 +0900
+
+contacts-service (0.2.3-8) unstable; urgency=low
+
+  * remove db file in package
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.2.3-8
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Mon, 15 Nov 2010 10:51:34 +0900
+
+contacts-service (0.2.3-7) unstable; urgency=low
+
+  * debugging count function
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.2.3-7
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Fri, 12 Nov 2010 08:09:49 +0900
+
+contacts-service (0.2.3-6) unstable; urgency=low
+
+  * revise normalization
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.2.3-6
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Wed, 10 Nov 2010 20:51:04 +0900
+
+contacts-service (0.2.3-5) unstable; urgency=low
+
+  * change policy of group
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.2.3-5
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Tue, 09 Nov 2010 09:35:13 +0900
+
+contacts-service (0.2.3-4) unstable; urgency=low
+
+  * change policy of SDN
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.2.3-4
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Mon, 08 Nov 2010 11:44:02 +0900
+
+contacts-service (0.2.3-3) unstable; urgency=low
+
+  * change vobject-service
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.2.3-3
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Wed, 03 Nov 2010 21:29:52 +0900
+
+contacts-service (0.2.3-2) unstable; urgency=low
+
+  * revise socket msg
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.2.3-2
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Sat, 30 Oct 2010 15:37:54 +0900
+
+contacts-service (0.2.3-1) unstable; urgency=low
+
+  * add normalization
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.2.3-1
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Fri, 29 Oct 2010 11:58:20 +0900
+
+contacts-service (0.2.2-2) unstable; urgency=low
+
+  * debugging get_updated_contacts()
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.2.2-2
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Thu, 28 Oct 2010 14:41:57 +0900
+
+contacts-service (0.2.2-1) unstable; urgency=low
+
+  * revise get_updated_contacts()
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.2.2-1
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Wed, 27 Oct 2010 21:22:31 +0900
+
+contacts-service (0.2.1-9) unstable; urgency=low
+
+  * debugging about cpu share and handling delete_bool
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.2.1-9
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Wed, 27 Oct 2010 09:39:22 +0900
+
+contacts-service (0.2.1-8) unstable; urgency=low
+
+  * add import_sim function and debugging
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.2.1-8
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Tue, 26 Oct 2010 14:08:49 +0900
+
+contacts-service (0.2.1-7) unstable; urgency=low
+
+  * revise image functions
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.2.1-7
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Fri, 22 Oct 2010 20:37:12 +0900
+
+contacts-service (0.2.1-6) unstable; urgency=low
+
+  * debugging group list
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.2.1-6
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Thu, 21 Oct 2010 17:24:53 +0900
+
+contacts-service (0.2.1-5) unstable; urgency=low
+
+  * debugging transaction rule
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.2.1-5
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Wed, 20 Oct 2010 20:57:18 +0900
+
+contacts-service (0.2.1-4) unstable; urgency=low
+
+  * update vcard converting functions
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.2.1-4
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Mon, 18 Oct 2010 21:14:33 +0900
+
+contacts-service (0.2.1-3) unstable; urgency=low
+
+  * fix errata
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.2.1-3
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Mon, 18 Oct 2010 09:39:47 +0900
+
+contacts-service (0.2.1-2) unstable; urgency=low
+
+  * change phonelog schema
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.2.1-2
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Fri, 15 Oct 2010 12:22:04 +0900
+
+contacts-service (0.2.1-1) unstable; urgency=low
+
+  * change update_list method and add vcard function
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.2.1-1
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Wed, 13 Oct 2010 10:08:00 +0900
+
+contacts-service (0.2.0-12) unstable; urgency=low
+
+  * add recovery mechanism
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.2.0-12
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Mon, 11 Oct 2010 17:01:20 +0900
+
+contacts-service (0.2.0-11) unstable; urgency=low
+
+  * debugging group functions
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.2.0-11
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Mon, 11 Oct 2010 15:18:39 +0900
+
+contacts-service (0.2.0-10) unstable; urgency=low
+
+  * debugging add more field
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.2.0-10
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Tue, 05 Oct 2010 19:03:22 +0900
+
+contacts-service (0.2.0-9) unstable; urgency=low
+
+  * add temporary library link
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.2.0-9
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Tue, 05 Oct 2010 10:48:40 +0900
+
+contacts-service (0.2.0-8) unstable; urgency=low
+
+  * debugging name search
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.2.0-8
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Mon, 04 Oct 2010 18:18:11 +0900
+
+contacts-service (0.2.0-7) unstable; urgency=low
+
+  * debugging double free
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.2.0-7
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Mon, 04 Oct 2010 16:22:06 +0900
+
+contacts-service (0.2.0-6) unstable; urgency=low
+
+  * add number list searched by number
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.2.0-6
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Mon, 04 Oct 2010 13:14:13 +0900
+
+contacts-service (0.2.0-5) unstable; urgency=low
+
+  * debugging name order
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.2.0-5
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Sat, 02 Oct 2010 11:33:16 +0900
+
+contacts-service (0.2.0-4) unstable; urgency=low
+
+  * debugging contacts_svc_get_contact_from_vcard()
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.2.0-4
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Sat, 02 Oct 2010 11:15:00 +0900
+
+contacts-service (0.2.0-3) unstable; urgency=low
+
+  * debugging contacts_svc_get_custom_type()
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.2.0-3
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Fri, 01 Oct 2010 13:59:02 +0900
+
+contacts-service (0.2.0-2) unstable; urgency=low
+
+  * debugging(assigning group and vcard crash)
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.2.0-2
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Fri, 01 Oct 2010 10:25:30 +0900
+
+contacts-service (0.2.0-1) unstable; urgency=low
+
+  * remove old contacts-service
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.2.0-1
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Tue, 28 Sep 2010 20:10:10 +0900
+
+contacts-service (0.1.2-11) unstable; urgency=low
+
+  * debugging connection mechanism
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.1.2-11
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Mon, 27 Sep 2010 22:09:41 +0900
+
+contacts-service (0.1.2-10) unstable; urgency=low
+
+  * debugging update_contact(default num, email)
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.1.2-10
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Mon, 27 Sep 2010 16:38:29 +0900
+
+contacts-service (0.1.2-9) unstable; urgency=low
+
+  * change image path from ums to opt
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.1.2-9
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Mon, 27 Sep 2010 09:59:17 +0900
+
+contacts-service (0.1.2-8) unstable; urgency=low
+
+  * add group API and favorite noti
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.1.2-8
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Thu, 16 Sep 2010 09:33:52 +0900
+
+contacts-service (0.1.2-7) unstable; urgency=low
+
+  * add/modify function(deprecate contacts_svc_save_image)
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.1.2-7
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Tue, 14 Sep 2010 14:38:08 +0900
+
+contacts-service (0.1.2-6) unstable; urgency=low
+
+  * debugging dpkg
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.1.2-6
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Sat, 11 Sep 2010 16:42:04 +0900
+
+contacts-service (0.1.2-5) unstable; urgency=low
+
+  * remove eina dependency
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.1.2-5
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Sat, 11 Sep 2010 15:13:10 +0900
+
+contacts-service (0.1.2-4) unstable; urgency=low
+
+  * add favorite list, modify count function, fix sorting bug
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.1.2-4
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Thu, 09 Sep 2010 20:29:27 +0900
+
+contacts-service (0.1.2-3) unstable; urgency=low
+
+  * complete get_contact()
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.1.2-3
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Wed, 08 Sep 2010 21:05:17 +0900
+
+contacts-service (0.1.2-2) unstable; urgency=low
+
+  * modify doxygen and add account API
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.1.2-2
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Wed, 08 Sep 2010 12:22:10 +0900
+
+contacts-service (0.1.2-1) unstable; urgency=low
+
+  * revise some API by Mike
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.1.2-1
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Mon, 06 Sep 2010 17:57:19 +0900
+
+contacts-service (0.1.1-2) unstable; urgency=low
+
+  * add some functions
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.1.1-2
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Sat, 04 Sep 2010 17:37:38 +0900
+
+contacts-service (0.1.1-1) unstable; urgency=low
+
+  * apply some requirements
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.1.1-1
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Thu, 02 Sep 2010 09:47:05 +0900
+
+contacts-service (0.1.1-0) unstable; urgency=low
+
+  * release
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.1.1-0
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Wed, 01 Sep 2010 15:07:42 +0900
+
+contacts-service (0.1.0-5) unstable; urgency=low
+
+  * remove alarm dependency
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.1.0-5
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Tue, 31 Aug 2010 21:10:10 +0900
+
+contacts-service (0.1.0-4) unstable; urgency=low
+
+  * add doxygen
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.1.0-4
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Fri, 27 Aug 2010 22:02:07 +0900
+
+contacts-service (0.1.0-3) unstable; urgency=low
+
+  * fix package config file
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.1.0-3
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Wed, 18 Aug 2010 13:29:08 +0900
+
+contacts-service (0.1.0-2) unstable; urgency=low
+
+  * add phone logs
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.1.0-2
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Wed, 18 Aug 2010 12:53:44 +0900
+
+contacts-service (0.1.0-1) unstable; urgency=low
+
+  * add new contacts-service
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.1.0-1
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Fri, 13 Aug 2010 09:48:32 +0900
+
+contacts-service (0.0.2-8) unstable; urgency=low
+
+  * fix errata in schema
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.0.2-8
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Sat, 07 Aug 2010 09:40:28 +0900
+
+contacts-service (0.0.2-7) unstable; urgency=low
+
+  * change parameter name for vcard API
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.0.2-7
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Wed, 04 Aug 2010 14:18:58 +0900
+
+contacts-service (0.0.2-6) unstable; urgency=low
+
+  * add some missed old API
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.0.2-6
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Fri, 30 Jul 2010 20:34:45 +0900
+
+contacts-service (0.0.2-5) unstable; urgency=low
+
+  * fix buf(not finalize)
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.0.2-5
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Fri, 30 Jul 2010 17:38:04 +0900
+
+contacts-service (0.0.2-4) unstable; urgency=low
+
+  * fix BS
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.0.2-4
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Fri, 30 Jul 2010 14:01:48 +0900
+
+contacts-service (0.0.2-3) unstable; urgency=low
+
+  * fix a problem of version
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.0.2-3
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Fri, 30 Jul 2010 10:37:21 +0900
+
+contacts-service (0.0.2-2) unstable; urgency=low
+
+  * fix build-break(upload contacts-svc-struct.h)
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.0.2-2
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Fri, 30 Jul 2010 08:56:29 +0900
+
+contacts-service (0.0.2-1) unstable; urgency=low
+
+  * add image handling and struct handling code
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.0.2-1
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Thu, 29 Jul 2010 11:38:38 +0900
+
+contacts-service (0.0.1-9) unstable; urgency=low
+
+  * debugging BS which is occurred for handling sim
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.0.1-9
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Wed, 28 Jul 2010 10:02:09 +0900
+
+contacts-service (0.0.1-8) unstable; urgency=low
+
+  * remove log
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.0.1-8
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Tue, 27 Jul 2010 09:22:46 +0900
+
+contacts-service (0.0.1-7) unstable; urgency=low
+
+  * fix sim init in helper
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.0.1-7
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Mon, 26 Jul 2010 11:46:10 +0900
+
+contacts-service (0.0.1-6) unstable; urgency=low
+
+  * fix some bug(related group)
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.0.1-6
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Fri, 23 Jul 2010 10:01:42 +0900
+
+contacts-service (0.0.1-5) unstable; urgency=low
+
+  * modify bulid process for database file and change some API
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.0.1-5
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Wed, 21 Jul 2010 11:30:34 +0900
+
+contacts-service (0.0.1-4) unstable; urgency=low
+
+  * fix some bugs(related image) and change some API
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.0.1-4
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Tue, 20 Jul 2010 14:51:25 +0900
+
+contacts-service (0.0.1-3) unstable; urgency=low
+
+  * the hidden symbol change
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.0.1-3
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Mon, 19 Jul 2010 10:42:11 +0900
+
+contacts-service (0.0.1-2) unstable; urgency=low
+
+  * include old API header in package
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.0.1-2
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Mon, 19 Jul 2010 09:59:55 +0900
+
+contacts-service (0.0.1-1) unstable; urgency=low
+
+  * change package name and source tree
+  * Git: /git/slp/pkgs/contacts-service
+  * Tag: contacts-service_0.0.1-1
+
+ -- Youngjae Shin <yj99.shin@samsung.com>  Fri, 16 Jul 2010 13:23:35 +0900
