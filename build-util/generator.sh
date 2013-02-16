@@ -25,37 +25,10 @@ echo "###### API Generator #####"
 cd build-util
 make
 
-#contacts-svc.h
-cat ../include/contacts-svc.head > ../include/contacts-svc.h
-./API-generator ../src/cts-service.h >> ../include/contacts-svc.h
-./API-generator ../src/cts-errors.h >> ../include/contacts-svc.h
-./API-generator ../src/cts-addressbook.h >> ../include/contacts-svc.h
-./API-generator ../src/cts-contact.h >> ../include/contacts-svc.h
-./API-generator ../src/cts-normalize.h >> ../include/contacts-svc.h
-./API-generator ../src/cts-list.h >> ../include/contacts-svc.h
-./API-generator ../src/cts-utils.h >> ../include/contacts-svc.h
-./API-generator ../src/cts-vcard.h >> ../include/contacts-svc.h
-cat ../include/contacts-svc.tail >> ../include/contacts-svc.h
-
-# contacts-svc-struct.h
-cat ../include/contacts-svc-struct.head > ../include/contacts-svc-struct.h
-./API-generator ../src/cts-struct.h >> ../include/contacts-svc-struct.h
-./API-generator ../src/cts-struct-ext.h >> ../include/contacts-svc-struct.h
-cat ../include/contacts-svc-struct.tail >> ../include/contacts-svc-struct.h
-
-# contacts-svc-sub.h
-cat ../include/contacts-svc-sub.head > ../include/contacts-svc-sub.h
-./API-generator ../src/cts-phonelog.h >> ../include/contacts-svc-sub.h
-./API-generator ../src/cts-favorite.h >> ../include/contacts-svc-sub.h
-./API-generator ../src/cts-group.h >> ../include/contacts-svc-sub.h
-./API-generator ../src/cts-im.h >> ../include/contacts-svc-sub.h
-./API-generator ../src/cts-types.h >> ../include/contacts-svc-sub.h
-cat ../include/contacts-svc-sub.tail >> ../include/contacts-svc-sub.h
-
-# Schema
-echo "static const char *schema_query = \"\\" > ../helper/schema.h
-./DB-schema-gen ../schema.sql >> ../helper/schema.h
-echo \"\; >> ../helper/schema.h
+# New server daemon Schema
+echo "static const char *schema_query = \"\\" > ../server/schema.h
+./DB-schema-gen ../schema.sql >> ../server/schema.h
+echo \"\; >> ../server/schema.h
 
 
 make clean

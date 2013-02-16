@@ -1,0 +1,418 @@
+/*
+ * Contacts Service
+ *
+ * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+#include <glib.h>
+
+#include "contacts.h"
+#include "ctsvc_internal.h"
+#include "ctsvc_ipc_define.h"
+#include "ctsvc_client_ipc.h"
+#include <pims-ipc-data.h>
+#include "ctsvc_ipc_marshal.h"
+
+API int contacts_person_link_person(int base_person_id, int person_id)
+{
+
+	int ret = CONTACTS_ERROR_NONE;
+
+	pims_ipc_data_h indata = NULL;
+	pims_ipc_data_h outdata = NULL;
+
+	RETVM_IF(base_person_id <= 0 || person_id <= 0, CONTACTS_ERROR_INVALID_PARAMETER,"id should be greater than 0");
+	RETVM_IF(ctsvc_get_ipc_handle() == NULL,CONTACTS_ERROR_IPC,"contacts not connected");
+
+	// make indata
+	indata = pims_ipc_data_create(0);
+	if (indata == NULL)
+	{
+		CTS_ERR("ipc data created fail!");
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
+	}
+
+	bool success = false;
+	do {
+		if( ctsvc_ipc_marshal_int( base_person_id, indata) != CONTACTS_ERROR_NONE ) break;
+		if( ctsvc_ipc_marshal_int( person_id, indata) != CONTACTS_ERROR_NONE ) break;
+
+		success = true;
+	} while(0);
+
+	if( success == false ) {
+		CTS_ERR("marshal fail");
+		pims_ipc_data_destroy(indata);
+		return CONTACTS_ERROR_IPC;
+	}
+
+/*
+	ret = ctsvc_ipc_marshal_int( base_person_id, indata);
+	if (ret != CONTACTS_ERROR_NONE)
+	{
+		CTS_ERR("marshal fail");
+		return ret;
+	}
+	ret = ctsvc_ipc_marshal_int( person_id, indata);
+	if (ret != CONTACTS_ERROR_NONE)
+	{
+		CTS_ERR("marshal fail");
+		return ret;
+	}
+*/
+
+	// ipc call
+	if (ctsvc_ipc_call(CTSVC_IPC_PERSON_MODULE, CTSVC_IPC_SERVER_PERSON_LINK_PERSON, indata, &outdata) != 0)
+	{
+		CTS_ERR("pims_ipc_call failed");
+		return CONTACTS_ERROR_IPC;
+	}
+
+	if (indata)
+	{
+		pims_ipc_data_destroy(indata);
+	}
+
+	if (outdata)
+	{
+		// check result
+		unsigned int size = 0;
+		ret = *(int*) pims_ipc_data_get(outdata, &size);
+
+		pims_ipc_data_destroy(outdata);
+	}
+
+	return ret;
+}
+
+API int contacts_person_unlink_contact(int person_id, int contact_id, int* unlinked_person_id)
+{
+	int ret = CONTACTS_ERROR_NONE;
+
+	pims_ipc_data_h indata = NULL;
+	pims_ipc_data_h outdata = NULL;
+
+	RETVM_IF(person_id <= 0 || contact_id <= 0, CONTACTS_ERROR_INVALID_PARAMETER,"id should be greater than 0");
+	RETVM_IF(ctsvc_get_ipc_handle() == NULL,CONTACTS_ERROR_IPC,"contacts not connected");
+
+	if (unlinked_person_id)
+		*unlinked_person_id = 0;
+
+	// make indata
+	indata = pims_ipc_data_create(0);
+	if (indata == NULL)
+	{
+		CTS_ERR("ipc data created fail!");
+		ret = CONTACTS_ERROR_OUT_OF_MEMORY;
+		return ret;
+	}
+
+	ret = ctsvc_ipc_marshal_int( person_id, indata);
+	if (ret != CONTACTS_ERROR_NONE)
+	{
+		CTS_ERR("marshal fail");
+		pims_ipc_data_destroy(indata);
+		return ret;
+	}
+	ret = ctsvc_ipc_marshal_int( contact_id, indata);
+	if (ret != CONTACTS_ERROR_NONE)
+	{
+		CTS_ERR("marshal fail");
+		pims_ipc_data_destroy(indata);
+		return ret;
+	}
+
+	// ipc call
+	if (ctsvc_ipc_call(CTSVC_IPC_PERSON_MODULE, CTSVC_IPC_SERVER_PERSON_UNLINK_CONTACT, indata, &outdata) != 0)
+	{
+		CTS_ERR("pims_ipc_call failed");
+		pims_ipc_data_destroy(indata);
+		return CONTACTS_ERROR_IPC;
+	}
+
+	if (indata)
+	{
+		pims_ipc_data_destroy(indata);
+	}
+
+	if (outdata)
+	{
+		// check result
+		unsigned int size = 0;
+		ret = *(int*) pims_ipc_data_get(outdata, &size);
+
+		if (CONTACTS_ERROR_NONE == ret) {
+			if (unlinked_person_id)
+				*unlinked_person_id = *(int*)pims_ipc_data_get(outdata,&size);
+		}
+
+		pims_ipc_data_destroy(outdata);
+	}
+
+	return ret;
+}
+
+API int contacts_person_reset_usage(int person_id, contacts_usage_type_e type)
+{
+	int ret = CONTACTS_ERROR_NONE;
+
+	pims_ipc_data_h indata = NULL;
+	pims_ipc_data_h outdata = NULL;
+
+	RETVM_IF(person_id <= 0, CONTACTS_ERROR_INVALID_PARAMETER,"contact_id should be greater than 0");
+	RETVM_IF(ctsvc_get_ipc_handle() == NULL,CONTACTS_ERROR_IPC,"contacts not connected");
+
+	// make indata
+	indata = pims_ipc_data_create(0);
+	if (indata == NULL)
+	{
+		CTS_ERR("ipc data created fail!");
+		ret = CONTACTS_ERROR_OUT_OF_MEMORY;
+		return ret;
+	}
+
+	ret = ctsvc_ipc_marshal_int( person_id, indata);
+	if (ret != CONTACTS_ERROR_NONE)
+	{
+		CTS_ERR("marshal fail");
+		pims_ipc_data_destroy(indata);
+		return ret;
+	}
+	ret = ctsvc_ipc_marshal_int( (int)type, indata);
+	if (ret != CONTACTS_ERROR_NONE)
+	{
+		CTS_ERR("marshal fail");
+		pims_ipc_data_destroy(indata);
+		return ret;
+	}
+
+	// ipc call
+	if (ctsvc_ipc_call(CTSVC_IPC_PERSON_MODULE, CTSVC_IPC_SERVER_PERSON_RESET_USAGE, indata, &outdata) != 0)
+	{
+		CTS_ERR("pims_ipc_call failed");
+		pims_ipc_data_destroy(indata);
+		return CONTACTS_ERROR_IPC;
+	}
+
+	if (indata)
+	{
+		pims_ipc_data_destroy(indata);
+	}
+
+	if (outdata)
+	{
+		// check result
+		unsigned int size = 0;
+		ret = *(int*) pims_ipc_data_get(outdata, &size);
+
+		pims_ipc_data_destroy(outdata);
+	}
+
+	return ret;
+}
+
+API int contacts_person_set_favorite_order(int person_id, int previous_person_id, int next_person_id)
+{
+	int ret = CONTACTS_ERROR_NONE;
+
+	pims_ipc_data_h indata = NULL;
+	pims_ipc_data_h outdata = NULL;
+
+	RETVM_IF(person_id <= 0 || previous_person_id < 0 || next_person_id < 0, CONTACTS_ERROR_INVALID_PARAMETER,"id should be greater than 0");
+	RETVM_IF(ctsvc_get_ipc_handle() == NULL,CONTACTS_ERROR_IPC,"contacts not connected");
+
+	// make indata
+	indata = pims_ipc_data_create(0);
+	if (indata == NULL)
+	{
+		CTS_ERR("ipc data created fail!");
+		ret = CONTACTS_ERROR_OUT_OF_MEMORY;
+		return ret;
+	}
+
+	ret = ctsvc_ipc_marshal_int( person_id, indata);
+	if (ret != CONTACTS_ERROR_NONE)
+	{
+		CTS_ERR("marshal fail");
+		pims_ipc_data_destroy(indata);
+		return ret;
+	}
+	ret = ctsvc_ipc_marshal_int( previous_person_id, indata);
+	if (ret != CONTACTS_ERROR_NONE)
+	{
+		CTS_ERR("marshal fail");
+		pims_ipc_data_destroy(indata);
+		return ret;
+	}
+	ret = ctsvc_ipc_marshal_int( next_person_id, indata);
+	if (ret != CONTACTS_ERROR_NONE)
+	{
+		CTS_ERR("marshal fail");
+		pims_ipc_data_destroy(indata);
+		return ret;
+	}
+
+	// ipc call
+	if (ctsvc_ipc_call(CTSVC_IPC_PERSON_MODULE, CTSVC_IPC_SERVER_PERSON_SET_FAVORITE_ORDER, indata, &outdata) != 0)
+	{
+		CTS_ERR("pims_ipc_call failed");
+		return CONTACTS_ERROR_IPC;
+	}
+
+	if (indata)
+	{
+		pims_ipc_data_destroy(indata);
+	}
+
+	if (outdata)
+	{
+		// check result
+		unsigned int size = 0;
+		ret = *(int*) pims_ipc_data_get(outdata, &size);
+
+		pims_ipc_data_destroy(outdata);
+	}
+
+	return ret;
+
+}
+
+API int contacts_person_set_default_property(contacts_person_property_e property,
+		int person_id, int id)
+{
+	int ret = CONTACTS_ERROR_NONE;
+
+	pims_ipc_data_h indata = NULL;
+	pims_ipc_data_h outdata = NULL;
+
+	RETVM_IF(person_id <= 0 || id <= 0, CONTACTS_ERROR_INVALID_PARAMETER,"id should be greater than 0");
+	RETVM_IF(ctsvc_get_ipc_handle() == NULL,CONTACTS_ERROR_IPC,"contacts not connected");
+
+	// make indata
+	indata = pims_ipc_data_create(0);
+	if (indata == NULL)
+	{
+		CTS_ERR("ipc data created fail!");
+		ret = CONTACTS_ERROR_OUT_OF_MEMORY;
+		return ret;
+	}
+
+	ret = ctsvc_ipc_marshal_int( person_id, indata);
+	if (ret != CONTACTS_ERROR_NONE)
+	{
+		CTS_ERR("marshal fail");
+		pims_ipc_data_destroy(indata);
+		return ret;
+	}
+	ret = ctsvc_ipc_marshal_unsigned_int( property, indata);
+	if (ret != CONTACTS_ERROR_NONE)
+	{
+		CTS_ERR("marshal fail");
+		pims_ipc_data_destroy(indata);
+		return ret;
+	}
+	ret = ctsvc_ipc_marshal_int( id, indata);
+	if (ret != CONTACTS_ERROR_NONE)
+	{
+		CTS_ERR("marshal fail");
+		pims_ipc_data_destroy(indata);
+		return ret;
+	}
+
+	// ipc call
+	if (ctsvc_ipc_call(CTSVC_IPC_PERSON_MODULE, CTSVC_IPC_SERVER_PERSON_SET_DEFAULT_PROPERTY, indata, &outdata) != 0)
+	{
+		CTS_ERR("pims_ipc_call failed");
+		pims_ipc_data_destroy(indata);
+		return CONTACTS_ERROR_IPC;
+	}
+
+	if (indata)
+	{
+		pims_ipc_data_destroy(indata);
+	}
+
+	if (outdata)
+	{
+		// check result
+		unsigned int size = 0;
+		ret = *(int*) pims_ipc_data_get(outdata, &size);
+
+		pims_ipc_data_destroy(outdata);
+	}
+
+	return ret;
+}
+
+API int contacts_person_get_default_property(contacts_person_property_e property,
+		int person_id, int *id)
+{
+	int ret = CONTACTS_ERROR_NONE;
+	pims_ipc_data_h indata = NULL;
+	pims_ipc_data_h outdata = NULL;
+
+	RETVM_IF(person_id <= 0 || id == NULL, CONTACTS_ERROR_INVALID_PARAMETER,"id should be greater than 0");
+	*id = 0;
+	RETVM_IF(ctsvc_get_ipc_handle() == NULL,CONTACTS_ERROR_IPC,"contacts not connected");
+
+	// make indata
+	indata = pims_ipc_data_create(0);
+	if (indata == NULL) {
+		CTS_ERR("ipc data created fail!");
+		ret = CONTACTS_ERROR_OUT_OF_MEMORY;
+		return ret;
+	}
+
+	ret = ctsvc_ipc_marshal_int(person_id, indata);
+	if (ret != CONTACTS_ERROR_NONE) {
+		CTS_ERR("marshal fail");
+		pims_ipc_data_destroy(indata);
+		return ret;
+	}
+
+	ret = ctsvc_ipc_marshal_unsigned_int(property, indata);
+	if (ret != CONTACTS_ERROR_NONE) {
+		CTS_ERR("marshal fail");
+		pims_ipc_data_destroy(indata);
+		return ret;
+	}
+
+	// ipc call
+	if (ctsvc_ipc_call(CTSVC_IPC_PERSON_MODULE, CTSVC_IPC_SERVER_PERSON_GET_DEFAULT_PROPERTY,
+				indata, &outdata) != 0) {
+		CTS_ERR("pims_ipc_call failed");
+		pims_ipc_data_destroy(indata);
+		return CONTACTS_ERROR_IPC;
+	}
+
+	if (indata) {
+		pims_ipc_data_destroy(indata);
+	}
+
+	if (outdata) {
+		// check result
+		unsigned int size = 0;
+		ret = *(int*) pims_ipc_data_get(outdata, &size);
+		if (ret == CONTACTS_ERROR_NONE) {
+			if (id)
+				*id = *(int*)pims_ipc_data_get(outdata,&size);
+		}
+		pims_ipc_data_destroy(outdata);
+	}
+
+	return ret;
+}
+
