@@ -1,0 +1,13 @@
+# Package Information for pkg-config
+
+prefix=@PREFIX@
+exec_prefix=@EXEC_PREFIX@
+libdir=@LIBDIR@
+includedir=@INCLUDEDIR@
+
+Name: @TARGET@
+Description: @PROJECT_NAME@ library
+Version: @VERSION@
+Requires: glib-2.0 @PC_REQUIRED@
+Libs: -L${libdir} -l@CLIENT@
+Cflags: -I${includedir}
