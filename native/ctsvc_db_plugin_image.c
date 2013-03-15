@@ -28,6 +28,7 @@
 #include "ctsvc_record.h"
 #include "ctsvc_db_query.h"
 #include "ctsvc_list.h"
+#include "ctsvc_notification.h"
 
 static int __ctsvc_db_image_insert_record( contacts_record_h record, int *id );
 static int __ctsvc_db_image_get_record( int id, contacts_record_h* out_record );
@@ -59,6 +60,7 @@ ctsvc_db_plugin_info_s ctsvc_db_plugin_image = {
 static int __ctsvc_db_image_insert_record( contacts_record_h record, int *id )
 {
 	int ret;
+	int version;
 	int contact_id;
 	char query[CTS_SQL_MAX_LEN] = {0};
 	ctsvc_image_s *image = (ctsvc_image_s *)record;
@@ -88,12 +90,21 @@ static int __ctsvc_db_image_insert_record( contacts_record_h record, int *id )
 		return ret;
 	}
 
-	ret = ctsvc_db_contact_update_changed_time(image->contact_id);
+	version = ctsvc_get_next_ver();
+	snprintf(query, sizeof(query),
+		"UPDATE "CTS_TABLE_CONTACTS" SET changed_ver = %d, changed_time = %d, image_changed_ver = %d "
+			"WHERE contact_id = %d",
+			version, (int)time(NULL), version, image->contact_id);
+
+	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB error : ctsvc_query_exec() Failed(%d)", ret);
+		CTS_ERR("cts_query_exec() Failed(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
+
+	ctsvc_set_contact_noti();
+	ctsvc_set_person_noti();
 
 	ret = ctsvc_end_trans(true);
 	if (ret < CONTACTS_ERROR_NONE)
@@ -142,6 +153,7 @@ static int __ctsvc_db_image_get_record( int id, contacts_record_h* out_record )
 static int __ctsvc_db_image_update_record( contacts_record_h record )
 {
 	int ret;
+	int version;
 	int contact_id;
 	char query[CTS_SQL_MAX_LEN] = {0};
 	ctsvc_image_s *image = (ctsvc_image_s *)record;
@@ -156,9 +168,9 @@ static int __ctsvc_db_image_update_record( contacts_record_h record )
 			"SELECT contact_id FROM "CTSVC_DB_VIEW_CONTACT" WHERE contact_id = %d", image->contact_id);
 	ret = ctsvc_query_get_first_int_result(query, &contact_id);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("No data : contact_id (%d) is not exist", contact_id);
+		CTS_ERR("No data : contact_id (%d) is not exist", image->contact_id);
 		ctsvc_end_trans(false);
-		return CONTACTS_ERROR_INVALID_PARAMETER;
+		return ret;
 	}
 
 	ret = ctsvc_db_image_update(record, image->contact_id, false);
@@ -168,12 +180,21 @@ static int __ctsvc_db_image_update_record( contacts_record_h record )
 		return ret;
 	}
 
-	ret = ctsvc_db_contact_update_changed_time(image->contact_id);
+	version = ctsvc_get_next_ver();
+	snprintf(query, sizeof(query),
+		"UPDATE "CTS_TABLE_CONTACTS" SET changed_ver = %d, changed_time = %d, image_changed_ver = %d "
+			"WHERE contact_id = %d",
+			version, (int)time(NULL), version, image->contact_id);
+
+	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB error : ctsvc_query_exec() Failed(%d)", ret);
+		CTS_ERR("cts_query_exec() Failed(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
+
+	ctsvc_set_contact_noti();
+	ctsvc_set_person_noti();
 
 	ret = ctsvc_end_trans(true);
 	if (ret < CONTACTS_ERROR_NONE)
@@ -188,6 +209,7 @@ static int __ctsvc_db_image_update_record( contacts_record_h record )
 static int __ctsvc_db_image_delete_record( int id )
 {
 	int ret;
+	int version;
 	int contact_id;
 	char query[CTS_SQL_MAX_LEN] = {0};
 
@@ -204,22 +226,32 @@ static int __ctsvc_db_image_delete_record( int id )
 	if( ret != CONTACTS_ERROR_NONE ) {
 		CTS_ERR("The id(%d) is Invalid(%d)", id, ret);
 		ctsvc_end_trans(false);
-		return contact_id;
+		return ret;
 	}
 
-	ret = ctsvc_db_image_delete(id);
+	ret = ctsvc_db_image_delete(id, false);
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("DB error : ctsvc_begin_trans() Failed(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
 
-	ret = ctsvc_db_contact_update_changed_time(contact_id);
+	version = ctsvc_get_next_ver();
+	snprintf(query, sizeof(query),
+		"UPDATE "CTS_TABLE_CONTACTS" SET changed_ver = %d, changed_time = %d, image_changed_ver = %d "
+			"WHERE contact_id = %d",
+			version, (int)time(NULL), version, contact_id);
+
+	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB error : ctsvc_query_exec() Failed(%d)", ret);
+		CTS_ERR("cts_query_exec() Failed(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
+
+	ctsvc_set_contact_noti();
+	ctsvc_set_person_noti();
+
 	ret = ctsvc_end_trans(true);
 	if (ret < CONTACTS_ERROR_NONE)
 	{

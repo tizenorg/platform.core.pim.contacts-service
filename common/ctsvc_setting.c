@@ -29,21 +29,17 @@
 #include "ctsvc_internal.h"
 #include "ctsvc_setting.h"
 #include "ctsvc_normalize.h"
+#include "ctsvc_localize.h"
 
 static int name_display_order = -1;
-static int default_lang = -1;
-static int secondary_lang = -1;
+static int primary_sort = -1;
+static int secondary_sort = -1;
 
 static const char *CTSVC_VCONF_DISPLAY_ORDER = VCONFKEY_CONTACTS_SVC_NAME_DISPLAY_ORDER;
 
 const char* ctsvc_get_default_language_vconfkey(void)
 {
 	return "file/private/contacts-service/default_lang";
-}
-
-const char* ctsvc_get_secondary_language_vconfkey(void)
-{
-	return "file/private/contacts-service/secondary_lang";
 }
 
 API int contacts_setting_get_name_display_order(contacts_name_display_order_e *order)
@@ -81,12 +77,15 @@ static void ctsvc_vconf_diplay_order_cb(keynode_t *key, void *data)
 
 static void ctsvc_vconf_language_cb(keynode_t *key, void *data)
 {
-	default_lang = vconf_keynode_get_int(key);
-}
-
-static void ctsvc_vconf_secondary_language_cb(keynode_t *key, void *data)
-{
-	secondary_lang = vconf_keynode_get_int(key);
+	primary_sort = vconf_keynode_get_int(key);
+	{
+		if (primary_sort==CTSVC_SORT_KOREAN)
+			secondary_sort = CTSVC_SORT_WESTERN;
+		else if (primary_sort==CTSVC_SORT_WESTERN)
+			secondary_sort = CTSVC_SORT_KOREAN;
+		else
+			secondary_sort = CTSVC_SORT_WESTERN;
+	}
 }
 
 int ctsvc_register_vconf(void)
@@ -99,11 +98,17 @@ int ctsvc_register_vconf(void)
 		name_display_order = CONTACTS_NAME_DISPLAY_ORDER_FIRSTLAST;
 	}
 
-	ret = vconf_get_int(ctsvc_get_default_language_vconfkey(), &default_lang);
+	ret = vconf_get_int(ctsvc_get_default_language_vconfkey(), &primary_sort);
 	WARN_IF(ret < 0, "vconf_get_int() Failed(%d)", ret);
 
-	ret = vconf_get_int(ctsvc_get_secondary_language_vconfkey(), &secondary_lang);
-	WARN_IF(ret < 0, "vconf_get_int() Failed(%d)", ret);
+	{
+		if (primary_sort==CTSVC_SORT_KOREAN)
+			secondary_sort = CTSVC_SORT_WESTERN;
+		else if (primary_sort==CTSVC_SORT_WESTERN)
+			secondary_sort = CTSVC_SORT_KOREAN;
+		else
+			secondary_sort = CTSVC_SORT_WESTERN;
+	}
 
 	ret = vconf_notify_key_changed(CTSVC_VCONF_DISPLAY_ORDER,
 			ctsvc_vconf_diplay_order_cb, NULL);
@@ -113,11 +118,6 @@ int ctsvc_register_vconf(void)
 			ctsvc_vconf_language_cb, NULL);
 	RETVM_IF(ret<0, CONTACTS_ERROR_SYSTEM, "vconf_notify_key_changed(%s) Failed(%d)",
 			ctsvc_get_default_language_vconfkey(), ret);
-
-	ret = vconf_notify_key_changed(ctsvc_get_secondary_language_vconfkey(),
-			ctsvc_vconf_secondary_language_cb, NULL);
-	RETVM_IF(ret<0, CONTACTS_ERROR_SYSTEM, "vconf_notify_key_changed(%s) Failed(%d)",
-			ctsvc_get_secondary_language_vconfkey(), ret);
 
 	return CONTACTS_ERROR_NONE;
 }
@@ -130,27 +130,29 @@ void ctsvc_deregister_vconf(void)
 	RETM_IF(ret<0,"vconf_ignore_key_changed(%s) Failed(%d)",CTSVC_VCONF_DISPLAY_ORDER,ret);
 	ret = vconf_ignore_key_changed(ctsvc_get_default_language_vconfkey(), ctsvc_vconf_language_cb);
 	RETM_IF(ret<0,"vconf_ignore_key_changed(%s) Failed(%d)", ctsvc_get_default_language_vconfkey(),ret);
-	ret = vconf_ignore_key_changed(ctsvc_get_secondary_language_vconfkey(), ctsvc_vconf_secondary_language_cb);
-	RETM_IF(ret<0,"vconf_ignore_key_changed(%s) Failed(%d)", ctsvc_get_secondary_language_vconfkey(),ret);
 }
 
 int ctsvc_get_default_language(void)
 {
-	if (default_lang < 0) {
+	if (primary_sort < 0) {
 		int ret;
-		ret = vconf_get_int(ctsvc_get_default_language_vconfkey(), &default_lang);
+		ret = vconf_get_int(ctsvc_get_default_language_vconfkey(), &primary_sort);
 		WARN_IF(ret < 0, "vconf_get_int() Failed(%d)", ret);
+		{
+			if (primary_sort==CTSVC_SORT_KOREAN)
+				secondary_sort = CTSVC_SORT_WESTERN;
+			else if (primary_sort==CTSVC_SORT_WESTERN)
+				secondary_sort = CTSVC_SORT_KOREAN;
+			else
+				secondary_sort = CTSVC_SORT_WESTERN;
+		}
 	}
-	return default_lang;
+
+	return primary_sort;
 }
 
 int ctsvc_get_secondary_language(void)
 {
-	if (secondary_lang < 0) {
-		int ret;
-		ret = vconf_get_int(ctsvc_get_secondary_language_vconfkey(), &secondary_lang);
-		WARN_IF(ret < 0, "vconf_get_int() Failed(%d)", ret);
-	}
-	return secondary_lang;
+	return secondary_sort;
 }
 

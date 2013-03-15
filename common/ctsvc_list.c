@@ -405,7 +405,7 @@ int ctsvc_list_get_deleted_nth_record_p( contacts_list_h list, int index, contac
 
 	RETV_IF(NULL == list_s->deleted_records, CONTACTS_ERROR_NO_DATA);
 
-	*record = (ctsvc_record_s *)g_list_nth_data(list_s->deleted_records, index);
+	*record = (contacts_record_h)g_list_nth_data(list_s->deleted_records, index);
 
 	return CONTACTS_ERROR_NONE;
 }

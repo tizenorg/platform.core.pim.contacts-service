@@ -29,6 +29,8 @@ static int __ctsvc_updated_info_destroy(contacts_record_h record, bool delete_ch
 static int __ctsvc_updated_info_clone(contacts_record_h record, contacts_record_h *out_record);
 static int __ctsvc_updated_info_get_int(contacts_record_h record, unsigned int property_id, int *out);
 static int __ctsvc_updated_info_set_int(contacts_record_h record, unsigned int property_id, int value);
+static int __ctsvc_updated_info_get_bool(contacts_record_h record, unsigned int property_id, bool *out);
+static int __ctsvc_updated_info_set_bool(contacts_record_h record, unsigned int property_id, bool value);
 
 ctsvc_record_plugin_cb_s updated_info_plugin_cbs = {
 	.create = __ctsvc_updated_info_create,
@@ -37,12 +39,12 @@ ctsvc_record_plugin_cb_s updated_info_plugin_cbs = {
 	.get_str = NULL,
 	.get_str_p = NULL,
 	.get_int = __ctsvc_updated_info_get_int,
-	.get_bool = NULL,
+	.get_bool = __ctsvc_updated_info_get_bool,
 	.get_lli = NULL,
 	.get_double = NULL,
 	.set_str = NULL,
 	.set_int = __ctsvc_updated_info_set_int,
-	.set_bool = NULL,
+	.set_bool = __ctsvc_updated_info_set_bool,
 	.set_lli = NULL,
 	.set_double = NULL,
 	.add_child_record = NULL,
@@ -111,6 +113,9 @@ static int __ctsvc_updated_info_get_int(contacts_record_h record, unsigned int p
 	case CTSVC_PROPERTY_UPDATE_INFO_VERSION:
 		*out = updated_info->changed_ver;
 		break;
+	case CTSVC_PROPERTY_UPDATE_INFO_LAST_CHANGED_TYPE:
+		*out = updated_info->last_changed_type;
+		break;
 	default:
 		ASSERT_NOT_REACHED("This field(%d) is not supported in value(updated_info)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
@@ -134,6 +139,39 @@ static int __ctsvc_updated_info_set_int(contacts_record_h record, unsigned int p
 		break;
 	case CTSVC_PROPERTY_UPDATE_INFO_VERSION:
 		updated_info->changed_ver = value;
+		break;
+	case CTSVC_PROPERTY_UPDATE_INFO_LAST_CHANGED_TYPE:
+		updated_info->last_changed_type = value;
+		break;
+	default:
+		ASSERT_NOT_REACHED("This field(%d) is not supported in value(updated_info)", property_id);
+		return CONTACTS_ERROR_INVALID_PARAMETER;
+	}
+	return CONTACTS_ERROR_NONE;
+}
+
+static int __ctsvc_updated_info_get_bool(contacts_record_h record, unsigned int property_id, bool *out)
+{
+	ctsvc_updated_info_s* updated_info = (ctsvc_updated_info_s*)record;
+
+	switch(property_id) {
+	case CTSVC_PROPERTY_UPDATE_INFO_IMAGE_CHANGED :
+		*out = updated_info->image_changed;
+		break;
+	default:
+		ASSERT_NOT_REACHED("This field(%d) is not supported in value(updated_info)", property_id);
+		return CONTACTS_ERROR_INVALID_PARAMETER;
+	}
+	return CONTACTS_ERROR_NONE;
+}
+
+static int __ctsvc_updated_info_set_bool(contacts_record_h record, unsigned int property_id, bool value)
+{
+	ctsvc_updated_info_s* updated_info = (ctsvc_updated_info_s*)record;
+
+	switch(property_id) {
+	case CTSVC_PROPERTY_UPDATE_INFO_IMAGE_CHANGED :
+		updated_info->image_changed = value;
 		break;
 	default:
 		ASSERT_NOT_REACHED("This field(%d) is not supported in value(updated_info)", property_id);

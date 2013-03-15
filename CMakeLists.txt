@@ -14,7 +14,7 @@ SET(EXEC_PREFIX "\${prefix}")
 SET(LIBDIR "\${prefix}/lib")
 SET(INCLUDEDIR "\${prefix}/${DEST_INCLUDE_DIR}")
 SET(VERSION_MAJOR 0)
-SET(VERSION "${VERSION_MAJOR}.9.24.8")
+SET(VERSION "${VERSION_MAJOR}.9.45.3")
 
 EXECUTE_PROCESS(COMMAND build-util/generator.sh)
 
@@ -52,6 +52,10 @@ INSTALL(DIRECTORY DESTINATION /opt/usr/data/contacts-svc/img/logo)
 # Install header file
 FILE(GLOB HEADER_FILES ${CMAKE_CURRENT_SOURCE_DIR}/include/*.h)
 INSTALL(FILES ${HEADER_FILES} DESTINATION ${DEST_INCLUDE_DIR})
+
+# Install DB file
+FILE(GLOB DB_FILES ${CMAKE_CURRENT_SOURCE_DIR}/build-util/.contacts-svc.db*)
+INSTALL(FILES ${DB_FILES} DESTINATION /opt/usr/dbspace)
 
 ADD_SUBDIRECTORY(native)
 ADD_SUBDIRECTORY(client)

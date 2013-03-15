@@ -23,6 +23,7 @@
 #include "ctsvc_sqlite.h"
 #include "ctsvc_normalize.h"
 #include "ctsvc_db_init.h"
+#include "ctsvc_db_query.h"
 #include "ctsvc_db_plugin_name_helper.h"
 #include "ctsvc_record.h"
 #include "ctsvc_setting.h"
@@ -99,15 +100,13 @@ static int __ctsvc_normalize_name(ctsvc_name_s *src, char *dest[])
 	int language_type = 0;
 
 	if (src->first) {
-		dest[CTSVC_NN_FIRST] = calloc(1, strlen(src->first)* 5);
-		ret = ctsvc_normalize_str(src->first, dest[CTSVC_NN_FIRST], strlen(src->first)*5);
+		ret = ctsvc_normalize_str(src->first, &dest[CTSVC_NN_FIRST]);
 		RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "_cts_normalize_str() Failed(%d)", ret);
 		language_type = ret;
 	}
 
 	if (src->last) {
-		dest[CTSVC_NN_LAST] = calloc(1, strlen(src->last)* 5);
-		ret = ctsvc_normalize_str(src->last, dest[CTSVC_NN_LAST], strlen(src->last)*5);
+		ret = ctsvc_normalize_str(src->last, &dest[CTSVC_NN_LAST]);
 		RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "_cts_normalize_str() Failed(%d)", ret);
 		if (language_type < ret)
 			language_type = ret;
@@ -128,7 +127,6 @@ int ctsvc_db_name_insert(contacts_record_h record, int contact_id, bool is_my_pr
 
 	RETV_IF(NULL == name, CONTACTS_ERROR_INVALID_PARAMETER);
 
-//	RETVM_IF(name->deleted, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : deleted name record");
 	RETVM_IF(contact_id <= 0, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : contact_id(%d) is mandatory field to insert name record ", name->contact_id);
 	RETVM_IF(0 < name->id, CONTACTS_ERROR_INVALID_PARAMETER,
@@ -199,9 +197,6 @@ int ctsvc_db_name_insert(contacts_record_h record, int contact_id, bool is_my_pr
 		__ctsvc_make_name_lookup(CONTACTS_NAME_DISPLAY_ORDER_LASTFIRST,
 									temp_normal_first, temp_normal_last, &name->reverse_lookup);
 
-//		CTS_DBG("lookup=%s(%d), reverse_lookup=%s(%d)",
-//				lookup, strlen(lookup), reverse_lookup, strlen(reverse_lookup));
-
 		free(normal_name[CTSVC_NN_FIRST]);
 		free(normal_name[CTSVC_NN_LAST]);
 
@@ -270,26 +265,28 @@ int ctsvc_db_name_get_value_from_stmt(cts_stmt stmt, contacts_record_h *record, 
 	return CONTACTS_ERROR_NONE;
 }
 
-int ctsvc_db_name_update(contacts_record_h record, int contact_id, bool is_my_profile)
+int ctsvc_db_name_update(contacts_record_h record, bool is_my_profile)
 {
 	int ret, len=0;
+	int id;
+	char* set = NULL;
+	GSList *cursor = NULL;
+	GSList *bind_text = NULL;
 	ctsvc_name_s *name = (ctsvc_name_s*)record;
 	char *tmp_first, *tmp_last;
-	char query[CTS_SQL_MAX_LEN] = {0};
 	char *normal_name[CTSVC_NN_MAX] = {NULL};
 	char *temp_normal_first = NULL;
 	char *temp_normal_last = NULL;
-	cts_stmt stmt;
+	char query[CTS_SQL_MIN_LEN] = {0};
 
 	RETV_IF(false == name->is_changed, CONTACTS_ERROR_NONE);
 	RETVM_IF(!name->id, CONTACTS_ERROR_INVALID_PARAMETER, "name of contact has no ID.");
+	RETVM_IF(CTSVC_PROPERTY_FLAG_DIRTY != (name->base.property_flag & CTSVC_PROPERTY_FLAG_DIRTY), CONTACTS_ERROR_NONE, "No update");
 
 	snprintf(query, sizeof(query),
-		"UPDATE "CTS_TABLE_DATA" SET contact_id=%d, is_my_profile=%d, is_default=?, data1=?, data2=?, data3=?, data4=?,"
-			"data5=?, data6=?, data7=?, data8=?, data9=?, data10=?, data11=?, data12=? WHERE id=%d", contact_id, is_my_profile, name->id);
-
-	stmt = cts_query_prepare(query);
-	RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB, "DB error : cts_query_prepare() Failed");
+			"SELECT id FROM "CTS_TABLE_DATA" WHERE id = %d", name->id);
+	ret = ctsvc_query_get_first_int_result(query, &id);
+	RETV_IF(ret != CONTACTS_ERROR_NONE, ret);
 
 	tmp_first = name->first;
 	tmp_last = name->last;
@@ -297,7 +294,6 @@ int ctsvc_db_name_update(contacts_record_h record, int contact_id, bool is_my_pr
 	ret = __ctsvc_normalize_name(name, normal_name);
 	if (ret < CONTACTS_ERROR_NONE) {
 		CTS_ERR("cts_normalize_name() Failed(%d)", ret);
-		cts_stmt_finalize(stmt);
 		return ret;
 	}
 
@@ -344,32 +340,36 @@ int ctsvc_db_name_update(contacts_record_h record, int contact_id, bool is_my_pr
 	__ctsvc_make_name_lookup(CONTACTS_NAME_DISPLAY_ORDER_LASTFIRST,
 								temp_normal_first, temp_normal_last, &name->reverse_lookup);
 
-//	CTS_DBG("lookup=%s(%d), reverse_lookup=%s(%d)",
-//			lookup, strlen(lookup), reverse_lookup, strlen(reverse_lookup));
-
 	free(normal_name[CTSVC_NN_FIRST]);
 	free(normal_name[CTSVC_NN_LAST]);
 
-	__ctsvc_name_bind_stmt(stmt, name, 1);
-	name->contact_id = contact_id;
+	do {
+		char query_set[CTS_SQL_MAX_LEN] = {0};
+		if (CONTACTS_ERROR_NONE != (ret = ctsvc_db_create_set_query(record, &set, &bind_text))) break;
+		snprintf(query_set, sizeof(query_set), "%s, is_default=%d, data1=%d, data11=?, data12=?",
+				set, name->is_default, name->language_type);
+		bind_text = g_slist_append(bind_text, strdup(SAFE_STR(name->lookup)));
+		bind_text = g_slist_append(bind_text, strdup(SAFE_STR(name->reverse_lookup)));
+		if (CONTACTS_ERROR_NONE != (ret = ctsvc_db_update_record_with_set_query(query_set, bind_text, CTS_TABLE_DATA, name->id))) break;
 
-	ret = cts_stmt_step(stmt);
-	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("cts_stmt_step() Failed(%d)", ret);
-		cts_stmt_finalize(stmt);
-		return ret;
+		if (!is_my_profile)
+			ctsvc_set_name_noti();
+	} while (0);
+
+	CTSVC_RECORD_RESET_PROPERTY_FLAGS((ctsvc_record_s *)record);
+	CONTACTS_FREE(set);
+	if (bind_text) {
+		for (cursor=bind_text;cursor;cursor=cursor->next)
+			CONTACTS_FREE(cursor->data);
+		g_slist_free(bind_text);
 	}
-	cts_stmt_finalize(stmt);
 
-	if (!is_my_profile)
-		ctsvc_set_name_noti();
 	name->is_changed = false;
-
 
 	return CONTACTS_ERROR_NONE;
 }
 
-int ctsvc_db_name_delete(int id)
+int ctsvc_db_name_delete(int id, bool is_my_profile)
 {
 	int ret;
 	char query[CTS_SQL_MIN_LEN] = {0};
@@ -378,7 +378,9 @@ int ctsvc_db_name_delete(int id)
 
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_query_exec() Failed(%d)", ret);
-	ctsvc_set_name_noti();
+
+	if (!is_my_profile)
+		ctsvc_set_name_noti();
 
 	return CONTACTS_ERROR_NONE;
 }

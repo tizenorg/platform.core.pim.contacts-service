@@ -61,6 +61,7 @@
 
 #define CTSVC_IPC_SERVER_GROUP_ADD_CONTACT            	 "group_add_contact"
 #define CTSVC_IPC_SERVER_GROUP_REMOVE_CONTACT            "group_remove_contact"
+#define CTSVC_IPC_SERVER_GROUP_SET_GROUP_ORDER       "group_set_group_order"
 
 #define CTSVC_IPC_SERVER_PERSON_LINK_PERSON       	"person_link_person"
 #define CTSVC_IPC_SERVER_PERSON_UNLINK_CONTACT      "person_unlink_contact"

@@ -139,6 +139,22 @@ static int __ctsvc_db_simple_contact_get_record( int id, contacts_record_h* out_
 	return CONTACTS_ERROR_NONE;
 }
 
+static int __ctsvc_db_simple_contact_get_default_image_id(int contact_id)
+{
+	int ret = 0;
+	int image_id = 0;
+	char query[CTS_SQL_MAX_LEN] = {0};
+
+	snprintf(query, sizeof(query),
+			"SELECT id FROM "CTS_TABLE_DATA" WHERE datatype=%d AND contact_id=%d AND is_default=1",
+			CTSVC_DATA_IMAGE, contact_id);
+
+	ret = ctsvc_query_get_first_int_result(query, &image_id);
+	if (CONTACTS_ERROR_NONE != ret)
+		return 0;
+	return image_id;
+}
+
 static int __ctsvc_db_simple_contact_update_record( contacts_record_h record )
 {
 	int ret;
@@ -151,7 +167,6 @@ static int __ctsvc_db_simple_contact_update_record( contacts_record_h record )
 	cts_stmt stmt;
 
 	// These check should be done in client side
-//	RETVM_IF(contact->deleted, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : deleted contact record");
 	RETVM_IF(NULL == contact, CONTACTS_ERROR_INVALID_PARAMETER,
 					"Invalid parameter : contact is NULL");
 	RETVM_IF(contact->addressbook_id <= 0, CONTACTS_ERROR_INVALID_PARAMETER,
@@ -169,7 +184,8 @@ static int __ctsvc_db_simple_contact_update_record( contacts_record_h record )
 	ret = ctsvc_query_get_first_int_result(query, &id);
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("Invalid Parameter : contact_id (%d) is not exist", contact->contact_id);
-		return CONTACTS_ERROR_INVALID_PARAMETER;
+		ctsvc_end_trans(false);
+		return ret;
 	}
 
 	len = snprintf(query, sizeof(query),
@@ -197,28 +213,41 @@ static int __ctsvc_db_simple_contact_update_record( contacts_record_h record )
 		return CONTACTS_ERROR_DB;
 	}
 
-	i = 0;
+	i = 1;
 	if (contact->uid_changed) {
-		if(contact->uid)
-			cts_stmt_bind_text(stmt, i++, contact->uid);
+		if (contact->uid)
+			cts_stmt_bind_text(stmt, i, contact->uid);
 		i++;
 	}
+
 	if (contact->ringtone_changed) {
 		if (contact->ringtone_path)
 			cts_stmt_bind_text(stmt, i, contact->ringtone_path);
 		i++;
 	}
+
 	if (contact->vibration_changed) {
 		if (contact->vibration)
 			cts_stmt_bind_text(stmt, i, contact->vibration);
 		i++;
 	}
 
+	//////////////////////////////////////////////////////////////////////
+	// This code will be removed
 	if (contact->image_thumbnail_changed) {
+		int img_id;
 		image[0] = '\0';
-		ret = ctsvc_contact_update_image_file(CTSVC_IMG_NORMAL, contact->contact_id,
-					contact->image_thumbnail_path, image, sizeof(image));
+		img_id = __ctsvc_db_simple_contact_get_default_image_id(contact->contact_id);
 
+		if (0 == img_id) {
+			img_id = cts_db_get_next_id(CTS_TABLE_DATA);
+			ret = ctsvc_contact_add_image_file(CTSVC_IMG_NORMAL, contact->contact_id, img_id, contact->image_thumbnail_path,
+					image, sizeof(image));
+		}
+		else  {
+			ret = ctsvc_contact_update_image_file(CTSVC_IMG_NORMAL, contact->contact_id, img_id,
+					contact->image_thumbnail_path, image, sizeof(image));
+		}
 		if (*image) {
 			free(contact->image_thumbnail_path);
 			contact->image_thumbnail_path = strdup(image);
@@ -227,6 +256,7 @@ static int __ctsvc_db_simple_contact_update_record( contacts_record_h record )
 		}
 		i++;
 	}
+	//////////////////////////////////////////////////////////////////////
 
 	ret = cts_stmt_step(stmt);
 	if (CONTACTS_ERROR_NONE != ret) {
@@ -248,10 +278,20 @@ static int __ctsvc_db_simple_contact_update_record( contacts_record_h record )
 static int __ctsvc_db_simple_contact_delete_record( int id )
 {
 	int ret;
+	int addressbook_id;
 	char query[CTS_SQL_MAX_LEN] = {0};
 
 	ret = ctsvc_begin_trans();
 	RETVM_IF(ret, ret, "ctsvc_begin_trans() Failed(%d)", ret);
+
+	snprintf(query, sizeof(query),
+		"SELECT addressbook_id FROM "CTS_TABLE_CONTACTS" WHERE contact_id = %d AND deleted = 0", id);
+	ret = ctsvc_query_get_first_int_result(query, &addressbook_id);
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("DB error : cts_stmt_step() Failed(%d)", ret);
+		ctsvc_end_trans(false);
+		return ret;
+	}
 
 	snprintf(query, sizeof(query), "DELETE FROM %s WHERE contact_id = %d AND deleted = 0",
 			CTS_TABLE_CONTACTS, id);
@@ -437,7 +477,6 @@ static int __ctsvc_db_simple_contact_insert_record( contacts_record_h record, in
 	cts_stmt stmt;
 
 	// These check should be done in client side
-//	RETVM_IF(contact->deleted, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : deleted contact record");
 	RETVM_IF(NULL == contact, CONTACTS_ERROR_INVALID_PARAMETER,
 					"Invalid parameter : contact is NULL");
 	RETVM_IF(contact->addressbook_id < 0, CONTACTS_ERROR_INVALID_PARAMETER,
@@ -459,8 +498,10 @@ static int __ctsvc_db_simple_contact_insert_record( contacts_record_h record, in
 		*id = ret;
 
 	if (contact->image_thumbnail_path) {
+		int image_id;
 		image[0] = '\0';
-		ret = ctsvc_contact_add_image_file(CTSVC_IMG_NORMAL, contact->contact_id, contact->image_thumbnail_path,
+		image_id = __ctsvc_db_simple_contact_get_default_image_id(contact->contact_id);
+		ret = ctsvc_contact_add_image_file(CTSVC_IMG_NORMAL, contact->contact_id, image_id, contact->image_thumbnail_path,
 				image, sizeof(image));
 		if (CONTACTS_ERROR_NONE != ret) {
 			CTS_ERR("ctsvc_contact_add_image_file(NORMAL) Failed(%d)", ret);

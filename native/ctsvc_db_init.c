@@ -79,7 +79,7 @@ static const db_table_info_s __db_tables[] = {
 	{CTSVC_VIEW_URI_PERSON,		 	CTSVC_DB_VIEW_PERSON},
 	{CTSVC_VIEW_URI_SIMPLE_CONTACT, CTSVC_DB_VIEW_CONTACT},
 	{CTSVC_VIEW_URI_CONTACT,		CTSVC_DB_VIEW_CONTACT},
-	{CTSVC_VIEW_URI_MY_PROFILE,		CTS_TABLE_MY_PROFILES},
+	{CTSVC_VIEW_URI_MY_PROFILE,	CTSVC_DB_VIEW_MY_PROFILE},
 	{CTSVC_VIEW_URI_ACTIVITY,		CTSVC_DB_VIEW_ACTIVITY},
 	{CTSVC_VIEW_URI_PHONELOG,		CTS_TABLE_PHONELOGS},
 	{CTSVC_VIEW_URI_SPEEDDIAL,		CTSVC_DB_VIEW_SPEEDIDAL},
@@ -105,6 +105,7 @@ static const db_table_info_s __db_tables[] = {
 //	{CTSVC_VIEW_URI_GROUPS_UPDATED_INFO, CTSVC_DB_VIEW_GROUPS_UPDATED_INFO},
 //	{CTSVC_VIEW_URI_GROUPS_MEMBER_UPDATED_INFO, CTSVC_DB_VIEW_GROUPS_MEMBER_UPDATED_INFO},
 //	{CTSVC_VIEW_URI_CONTACTS_UPDATED_INFO, CTSVC_DB_VIEW_CONTACTS_UPDATED_INFO},
+//	{CTSVC_VIEW_URI_MY_PROFILE_UPDATED_INFO, NULL},
 //	{CTSVC_VIEW_URI_GROUPRELS_UPDATED_INFO, NULL,	NULL},
 
 	{CTSVC_VIEW_URI_READ_ONLY_PERSON_CONTACT, CTSVC_DB_VIEW_PERSON_CONTACT},
@@ -136,53 +137,10 @@ int ctsvc_db_plugin_init()
 	__ctsvc_db_view_hash_table = g_hash_table_new(g_str_hash, g_str_equal);
 
 	if (__ctsvc_db_view_hash_table) {
-		i = 0;
-		g_hash_table_insert(__ctsvc_db_view_hash_table, CTSVC_VIEW_URI_ADDRESSBOOK, GINT_TO_POINTER(&(__db_tables[i++])));
-		g_hash_table_insert(__ctsvc_db_view_hash_table, CTSVC_VIEW_URI_GROUP, GINT_TO_POINTER(&(__db_tables[i++])));
-		g_hash_table_insert(__ctsvc_db_view_hash_table, CTSVC_VIEW_URI_PERSON, GINT_TO_POINTER(&(__db_tables[i++])));
-		g_hash_table_insert(__ctsvc_db_view_hash_table, CTSVC_VIEW_URI_SIMPLE_CONTACT, GINT_TO_POINTER(&(__db_tables[i++])));
-		g_hash_table_insert(__ctsvc_db_view_hash_table, CTSVC_VIEW_URI_CONTACT, GINT_TO_POINTER(&(__db_tables[i++])));
-		g_hash_table_insert(__ctsvc_db_view_hash_table, CTSVC_VIEW_URI_MY_PROFILE, GINT_TO_POINTER(&(__db_tables[i++])));
-		g_hash_table_insert(__ctsvc_db_view_hash_table, CTSVC_VIEW_URI_ACTIVITY, GINT_TO_POINTER(&(__db_tables[i++])));
-		g_hash_table_insert(__ctsvc_db_view_hash_table, CTSVC_VIEW_URI_PHONELOG, GINT_TO_POINTER(&(__db_tables[i++])));
-		g_hash_table_insert(__ctsvc_db_view_hash_table, CTSVC_VIEW_URI_SPEEDDIAL, GINT_TO_POINTER(&(__db_tables[i++])));
-		g_hash_table_insert(__ctsvc_db_view_hash_table, CTSVC_VIEW_URI_SDN, GINT_TO_POINTER(&(__db_tables[i++])));
+		int count = sizeof(__db_tables) /sizeof(db_table_info_s);
+		for (i=0;i<count;i++)
+			g_hash_table_insert(__ctsvc_db_view_hash_table, __db_tables[i].view_uri, GINT_TO_POINTER(&(__db_tables[i])));
 
-		g_hash_table_insert(__ctsvc_db_view_hash_table, CTSVC_VIEW_URI_NAME, GINT_TO_POINTER(&(__db_tables[i++])));
-		g_hash_table_insert(__ctsvc_db_view_hash_table, CTSVC_VIEW_URI_COMPANY, GINT_TO_POINTER(&(__db_tables[i++])));
-		g_hash_table_insert(__ctsvc_db_view_hash_table, CTSVC_VIEW_URI_NUMBER, GINT_TO_POINTER(&(__db_tables[i++])));
-		g_hash_table_insert(__ctsvc_db_view_hash_table, CTSVC_VIEW_URI_EMAIL, GINT_TO_POINTER(&(__db_tables[i++])));
-		g_hash_table_insert(__ctsvc_db_view_hash_table, CTSVC_VIEW_URI_URL, GINT_TO_POINTER(&(__db_tables[i++])));
-		g_hash_table_insert(__ctsvc_db_view_hash_table, CTSVC_VIEW_URI_ADDRESS, GINT_TO_POINTER(&(__db_tables[i++])));
-		g_hash_table_insert(__ctsvc_db_view_hash_table, CTSVC_VIEW_URI_PROFILE, GINT_TO_POINTER(&(__db_tables[i++])));
-		g_hash_table_insert(__ctsvc_db_view_hash_table, CTSVC_VIEW_URI_RELATIONSHIP, GINT_TO_POINTER(&(__db_tables[i++])));
-		g_hash_table_insert(__ctsvc_db_view_hash_table, CTSVC_VIEW_URI_IMAGE, GINT_TO_POINTER(&(__db_tables[i++])));
-		g_hash_table_insert(__ctsvc_db_view_hash_table, CTSVC_VIEW_URI_NOTE, GINT_TO_POINTER(&(__db_tables[i++])) );
-		g_hash_table_insert(__ctsvc_db_view_hash_table, CTSVC_VIEW_URI_NICKNAME, GINT_TO_POINTER(&(__db_tables[i++])));
-		g_hash_table_insert(__ctsvc_db_view_hash_table, CTSVC_VIEW_URI_EVENT, GINT_TO_POINTER(&(__db_tables[i++])));
-		g_hash_table_insert(__ctsvc_db_view_hash_table, CTSVC_VIEW_URI_MESSENGER, GINT_TO_POINTER(&(__db_tables[i++])));
-		g_hash_table_insert(__ctsvc_db_view_hash_table, CTSVC_VIEW_URI_GROUP_RELATION, GINT_TO_POINTER(&(__db_tables[i++])));
-		g_hash_table_insert(__ctsvc_db_view_hash_table, CTSVC_VIEW_URI_EXTENSION, GINT_TO_POINTER(&(__db_tables[i++])));
-
-//		g_hash_table_insert(__ctsvc_db_view_hash_table, CTSVC_VIEW_URI_GROUPS_UPDATED_INFO, GINT_TO_POINTER(&(__db_tables[i++])) );
-//		g_hash_table_insert(__ctsvc_db_view_hash_table, CTSVC_VIEW_URI_GROUPS_MEMBER_UPDATED_INFO, GINT_TO_POINTER(&(__db_tables[i++])) );
-//		g_hash_table_insert(__ctsvc_db_view_hash_table, CTSVC_VIEW_URI_CONTACTS_UPDATED_INFO, GINT_TO_POINTER(&(__db_tables[i++])) );
-//		g_hash_table_insert(__ctsvc_db_view_hash_table, CTSVC_VIEW_URI_GROUPRELS_UPDATED_INFO, GINT_TO_POINTER(&(__db_tables[i++])) );
-
-		g_hash_table_insert(__ctsvc_db_view_hash_table, CTSVC_VIEW_URI_READ_ONLY_PERSON_CONTACT, GINT_TO_POINTER(&(__db_tables[i++])));
-		g_hash_table_insert(__ctsvc_db_view_hash_table, CTSVC_VIEW_URI_READ_ONLY_PERSON_NUMBER, GINT_TO_POINTER(&(__db_tables[i++])));
-		g_hash_table_insert(__ctsvc_db_view_hash_table, CTSVC_VIEW_URI_READ_ONLY_PERSON_EMAIL, GINT_TO_POINTER(&(__db_tables[i++])));
-		g_hash_table_insert(__ctsvc_db_view_hash_table, CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP, GINT_TO_POINTER(&(__db_tables[i++])));
-		g_hash_table_insert(__ctsvc_db_view_hash_table, CTSVC_VIEW_URI_READ_ONLY_PERSON_PHONELOG, GINT_TO_POINTER(&(__db_tables[i++])));
-		g_hash_table_insert(__ctsvc_db_view_hash_table, CTSVC_VIEW_URI_READ_ONLY_PERSON_USAGE, GINT_TO_POINTER(&(__db_tables[i++])));
-
-		g_hash_table_insert(__ctsvc_db_view_hash_table, CTSVC_VIEW_URI_READ_ONLY_CONTACT_NUMBER, GINT_TO_POINTER(&(__db_tables[i++])));
-		g_hash_table_insert(__ctsvc_db_view_hash_table, CTSVC_VIEW_URI_READ_ONLY_CONTACT_EMAIL, GINT_TO_POINTER(&(__db_tables[i++])));
-		g_hash_table_insert(__ctsvc_db_view_hash_table, CTSVC_VIEW_URI_READ_ONLY_CONTACT_GROUP, GINT_TO_POINTER(&(__db_tables[i++])));
-		g_hash_table_insert(__ctsvc_db_view_hash_table, CTSVC_VIEW_URI_READ_ONLY_CONTACT_ACTIVITY, GINT_TO_POINTER(&(__db_tables[i++])));
-
-		g_hash_table_insert(__ctsvc_db_view_hash_table, CTSVC_VIEW_URI_READ_ONLY_PHONELOG_NUMBER, GINT_TO_POINTER(&(__db_tables[i++])));
-		g_hash_table_insert(__ctsvc_db_view_hash_table, CTSVC_VIEW_URI_READ_ONLY_PHONELOG_STAT, GINT_TO_POINTER(&(__db_tables[i++])));
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -226,6 +184,8 @@ ctsvc_db_plugin_info_s* ctsvc_db_get_plugin_info(ctsvc_record_type_e type)
 		return &ctsvc_db_plugin_person;
 	case CTSVC_RECORD_CONTACT:
 		return &ctsvc_db_plugin_contact;
+	case CTSVC_RECORD_MY_PROFILE:
+		return &ctsvc_db_plugin_my_profile;
 	case CTSVC_RECORD_SIMPLE_CONTACT:
 		return &ctsvc_db_plugin_simple_contact;
 	case CTSVC_RECORD_NAME:
@@ -287,6 +247,13 @@ static int __ctsvc_db_create_views()
 		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_CONTACT" AS "
 			"SELECT * FROM "CTS_TABLE_CONTACTS" WHERE deleted = 0");
 	ret = ctsvc_query_exec(query);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_execs() Failed(%d)", ret);
+
+	// CTSVC_DB_VIEW_MY_PROFILE
+	snprintf(query, sizeof(query),
+		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_MY_PROFILE" AS "
+			"SELECT * FROM "CTS_TABLE_MY_PROFILES" WHERE deleted = 0");
+	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Failed(%d)", ret);
 
 	// CTSVC_DB_VIEW_PERSON
@@ -295,6 +262,7 @@ static int __ctsvc_db_create_views()
 			"SELECT persons.person_id, "
 					"display_name, reverse_display_name, "
 					"display_name_language, "
+					"sort_name, reverse_sort_name, "
 					"sortkey, reverse_sortkey, "
 					"name_contact_id, "
 					"persons.ringtone_path, "
@@ -320,14 +288,14 @@ static int __ctsvc_db_create_views()
 		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_NAME" AS "
 			"SELECT id, "
 				"data.contact_id, "
-				"data2 first, "
-				"data3 last, "
-				"data4 addition, "
-				"data5 prefix, "
-				"data6 suffix, "
-				"data7 phonetic_first, "
-				"data8 phonetic_middle, "
-				"data9 phonetic_last "
+				"data2, "
+				"data3, "
+				"data4, "
+				"data5, "
+				"data6, "
+				"data7, "
+				"data8, "
+				"data9 "
 			"FROM "CTS_TABLE_DATA", "CTSVC_DB_VIEW_CONTACT" "
 			"ON "CTS_TABLE_DATA".contact_id = "CTSVC_DB_VIEW_CONTACT".contact_id "
 			"WHERE datatype = %d AND is_my_profile = 0 ",
@@ -341,10 +309,10 @@ static int __ctsvc_db_create_views()
 			"SELECT id, "
 					"data.contact_id, "
 					"is_default, "
-					"data1 type, "
-					"data2 label, "
-					"data3 number, "
-					"data4 lookup "
+					"data1, "
+					"data2, "
+					"data3, "
+					"data4 "
 			"FROM "CTS_TABLE_DATA", "CTSVC_DB_VIEW_CONTACT" "
 			"ON "CTS_TABLE_DATA".contact_id = "CTSVC_DB_VIEW_CONTACT".contact_id "
 			"WHERE datatype = %d AND is_my_profile = 0 ",
@@ -358,9 +326,9 @@ static int __ctsvc_db_create_views()
 			"SELECT id, "
 					"data.contact_id, "
 					"is_default, "
-					"data1 type, "
-					"data2 label, "
-					"data3 email "
+					"data1, "
+					"data2, "
+					"data3 "
 			"FROM "CTS_TABLE_DATA", "CTSVC_DB_VIEW_CONTACT" "
 			"ON "CTS_TABLE_DATA".contact_id = "CTSVC_DB_VIEW_CONTACT".contact_id "
 			"WHERE datatype = %d AND is_my_profile = 0 ",
@@ -374,15 +342,15 @@ static int __ctsvc_db_create_views()
 			"SELECT id, "
 					"data.contact_id, "
 					"is_default, "
-					"data1 type, "
-					"data2 label, "
-					"data3 postbox, "
-					"data4 postal_code, "
-					"data5 region, "
-					"data6 locality, "
-					"data7 street, "
-					"data8 extend, "
-					"data9 country "
+					"data1, "
+					"data2, "
+					"data3, "
+					"data4, "
+					"data5, "
+					"data6, "
+					"data7, "
+					"data8, "
+					"data9 "
 			"FROM "CTS_TABLE_DATA", "CTSVC_DB_VIEW_CONTACT" "
 			"ON "CTS_TABLE_DATA".contact_id = "CTSVC_DB_VIEW_CONTACT".contact_id "
 			"WHERE datatype = %d AND is_my_profile = 0 ",
@@ -395,9 +363,9 @@ static int __ctsvc_db_create_views()
 		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_URL" AS "
 			"SELECT id, "
 					"data.contact_id, "
-					"data1 type, "
-					"data2 label, "
-					"data3 url "
+					"data1, "
+					"data2, "
+					"data3 "
 			"FROM "CTS_TABLE_DATA", "CTSVC_DB_VIEW_CONTACT" "
 			"ON "CTS_TABLE_DATA".contact_id = "CTSVC_DB_VIEW_CONTACT".contact_id "
 			"WHERE datatype = %d AND is_my_profile = 0 ",
@@ -410,9 +378,11 @@ static int __ctsvc_db_create_views()
 		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_EVENT" AS "
 			"SELECT id, "
 					"data.contact_id, "
-					"data1 type, "
-					"data2 label, "
-					"data3 date "
+					"data1, "
+					"data2, "
+					"data3, "
+					"data4, "
+					"data5 "
 			"FROM "CTS_TABLE_DATA", "CTSVC_DB_VIEW_CONTACT" "
 			"ON "CTS_TABLE_DATA".contact_id = "CTSVC_DB_VIEW_CONTACT".contact_id "
 			"WHERE datatype = %d AND is_my_profile = 0 ",
@@ -428,7 +398,7 @@ static int __ctsvc_db_create_views()
 					"group_name "
 			"FROM "CTS_TABLE_GROUP_RELATIONS", "CTS_TABLE_GROUPS" "
 			"ON "CTS_TABLE_GROUP_RELATIONS".group_id = "CTS_TABLE_GROUPS".group_id AND deleted = 0 "
-			"ORDER BY group_name COLLATE NOCASE");
+			"ORDER BY group_prio");
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Failed(%d)", ret);
 
@@ -437,9 +407,9 @@ static int __ctsvc_db_create_views()
 		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_RELATIONSHIP" AS "
 			"SELECT id, "
 					"data.contact_id, "
-					"data1 type, "
-					"data2 label, "
-					"data3 name "
+					"data1, "
+					"data2, "
+					"data3  "
 			"FROM "CTS_TABLE_DATA", "CTSVC_DB_VIEW_CONTACT" "
 			"ON "CTS_TABLE_DATA".contact_id = "CTSVC_DB_VIEW_CONTACT".contact_id "
 			"WHERE datatype = %d AND is_my_profile = 0 ",
@@ -453,9 +423,9 @@ static int __ctsvc_db_create_views()
 			"SELECT id, "
 					"is_default, "
 					"data.contact_id, "
-					"data1 type, "
-					"data2 label, "
-					"data3 path "
+					"data1, "
+					"data2, "
+					"data3 "
 			"FROM "CTS_TABLE_DATA", "CTSVC_DB_VIEW_CONTACT" "
 			"ON "CTS_TABLE_DATA".contact_id = "CTSVC_DB_VIEW_CONTACT".contact_id "
 			"WHERE datatype = %d AND is_my_profile = 0 ",
@@ -468,17 +438,17 @@ static int __ctsvc_db_create_views()
 		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_COMPANY" AS "
 			"SELECT id, "
 					"data.contact_id, "
-					"data1 type, "
-					"data2 label, "
-					"data3 name, "
-					"data4 department, "
-					"data5 job_title, "
-					"data6 assistant, "
-					"data7 role, "
-					"data8 logo, "
-					"data9 location, "
-					"data10 description, "
-					"data11 phonetic_name "
+					"data1, "
+					"data2, "
+					"data3, "
+					"data4, "
+					"data5, "
+					"data6, "
+					"data7, "
+					"data8, "
+					"data9, "
+					"data10, "
+					"data11 "
 			"FROM "CTS_TABLE_DATA", "CTSVC_DB_VIEW_CONTACT" "
 			"ON "CTS_TABLE_DATA".contact_id = "CTSVC_DB_VIEW_CONTACT".contact_id "
 			"WHERE datatype = %d AND is_my_profile = 0 ",
@@ -491,7 +461,7 @@ static int __ctsvc_db_create_views()
 		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_NICKNAME" AS "
 			"SELECT id, "
 					"data.contact_id, "
-					"data3 nickname "
+					"data3 "
 			"FROM "CTS_TABLE_DATA", "CTSVC_DB_VIEW_CONTACT" "
 			"ON "CTS_TABLE_DATA".contact_id = "CTSVC_DB_VIEW_CONTACT".contact_id "
 			"WHERE datatype = %d AND is_my_profile = 0 ",
@@ -504,9 +474,9 @@ static int __ctsvc_db_create_views()
 		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_MESSENGER" AS "
 			"SELECT id, "
 					"data.contact_id, "
-					"data1 type, "
-					"data2 label, "
-					"data3 im_id "
+					"data1, "
+					"data2, "
+					"data3 "
 			"FROM "CTS_TABLE_DATA", "CTSVC_DB_VIEW_CONTACT" "
 			"ON "CTS_TABLE_DATA".contact_id = "CTSVC_DB_VIEW_CONTACT".contact_id "
 			"WHERE datatype = %d AND is_my_profile = 0 ",
@@ -519,7 +489,7 @@ static int __ctsvc_db_create_views()
 		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_NOTE" AS "
 			"SELECT id, "
 					"data.contact_id, "
-					"data3 note "
+					"data3 "
 			"FROM "CTS_TABLE_DATA", "CTSVC_DB_VIEW_CONTACT" "
 			"ON "CTS_TABLE_DATA".contact_id = "CTSVC_DB_VIEW_CONTACT".contact_id "
 			"WHERE datatype = %d AND is_my_profile = 0 ",
@@ -532,16 +502,16 @@ static int __ctsvc_db_create_views()
 		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_PROFILE" AS "
 			"SELECT id, "
 					"data.contact_id, "
-					"data1 type, "
-					"data2 label, "
-					"data3 uid, "
-					"data4 text, "
-					"data5 profile_order, "
-					"data6 appsvc_op, "
-					"data7 data1, "
-					"data8 data2, "
-					"data9 data3, "
-					"data10 data4 "
+					"data1, "
+					"data2, "
+					"data3, "
+					"data4, "
+					"data5, "
+					"data6, "
+					"data7, "
+					"data8, "
+					"data9, "
+					"data10 "
 			"FROM "CTS_TABLE_DATA", "CTSVC_DB_VIEW_CONTACT" "
 			"ON "CTS_TABLE_DATA".contact_id = "CTSVC_DB_VIEW_CONTACT".contact_id "
 			"WHERE datatype = %d AND is_my_profile = 0 ",
@@ -597,6 +567,7 @@ static int __ctsvc_db_create_views()
 			"SELECT persons.person_id, "
 					"name_contacts.display_name, name_contacts.reverse_display_name, "
 					"name_contacts.display_name_language, "
+					"name_contacts.sort_name, name_contacts.reverse_sort_name, "
 					"name_contacts.sortkey, name_contacts.reverse_sortkey, "
 					"persons.image_thumbnail_path, "
 					"data.id number_id, "
@@ -644,7 +615,6 @@ static int __ctsvc_db_create_views()
 				CONTACTS_CHANGE_INSERTED, CONTACTS_CHANGE_UPDATED, CONTACTS_CHANGE_DELETED);
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Failed(%d)", ret);
-#endif
 
 	// CTSVC_DB_VIEW_GROUPS_MEMBER_UPDATED_INFO
 	snprintf(query, sizeof(query),
@@ -653,6 +623,7 @@ static int __ctsvc_db_create_views()
 				"FROM "CTS_TABLE_GROUPS);
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Failed(%d)", ret);
+#endif
 
 	// CTSVC_DB_VIEW_PERSON_CONTACT
 	snprintf(query, sizeof(query),
@@ -708,6 +679,7 @@ static int __ctsvc_db_create_views()
 			"SELECT C.id phonelog_id, "
 					"F.display_name, F.reverse_display_name, "
 					"F.display_name_language, "
+					"F.sort_name, F.reverse_sort_name, "
 					"F.sortkey, F.reverse_sortkey, "
 					"F.image_thumbnail_path, "
 					"C.number address, "
@@ -735,7 +707,9 @@ static int __ctsvc_db_create_views()
 													"AND A.normal_num = data4)) "
 					"GROUP BY A.id) C "
 				"LEFT JOIN (SELECT D.person_id, D.display_name, D.reverse_display_name, "
-							"D.display_name_language, D.sortkey, D.reverse_sortkey, "
+							"D.display_name_language, "
+							"D.sort_name, D.reverse_sort_name, "
+							"D.sortkey, D.reverse_sortkey, "
 							"E.image_thumbnail_path "
 							"FROM "CTS_TABLE_CONTACTS" D, "CTS_TABLE_PERSONS" E "
 							"ON E.name_contact_id = D.contact_id) F "
@@ -825,6 +799,7 @@ static int __ctsvc_db_create_views()
 					"A.display_name_source, "
 					"A.reverse_display_name, "
 					"A.display_name_language, "
+					"A.sort_name, A.reverse_sort_name, "
 					"A.sortkey, A.reverse_sortkey, "
 					"A.addressbook_id, "
 					"AB.account_id, "
@@ -876,6 +851,10 @@ int ctsvc_db_init()
 
 #ifdef _CONTACTS_IPC_SERVER
 	ret = __ctsvc_db_create_views();
+	if (ret != CONTACTS_ERROR_NONE) {
+		CTS_ERR("__ctsvc_db_create_views() Failed(%d)", ret);
+		return ret;
+	}
 #endif
 
 	return ret;

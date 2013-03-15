@@ -91,6 +91,20 @@ API int contacts_vcard_parse_to_contacts(const char *vcard_stream, contacts_list
 API int contacts_vcard_make_from_contact(contacts_record_h contact, char **vcard_stream);
 
 /**
+ * @brief      Retrieves vCard stream from a contact.
+ *
+ * @param[in]	my_profile					The my_profile record handle
+ * @param[out]	vcard_stream			The vCard stream
+ *
+ * @return  0 on success, otherwise a negative error value.
+ * @retval  #CONTACTS_ERROR_NONE                Successful
+ * @retval  #CONTACTS_ERROR_OUT_OF_MEMORY       Out of memory
+ * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ */
+API int contacts_vcard_make_from_my_profile(contacts_record_h my_profile, char **vcard_stream);
+
+
+/**
  * @brief      Retrieves vCard stream from a person.
  *
  * @param[in]	person					The person record handle

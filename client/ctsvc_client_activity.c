@@ -53,7 +53,7 @@ API int contacts_activity_delete_by_contact_id(int contact_id)
 	// ipc call
 	if (ctsvc_ipc_call( CTSVC_IPC_ACTIVITY_MODULE, CTSVC_IPC_SERVER_ACTIVITY_DELETE_BY_CONTACT_ID, indata, &outdata) != 0)
 	{
-		CTS_ERR("pims_ipc_call failed");
+		CTS_ERR("ctsvc_ipc_call failed");
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
 	}
@@ -68,6 +68,11 @@ API int contacts_activity_delete_by_contact_id(int contact_id)
 		// check result
 		unsigned int size = 0;
 		ret = *(int*) pims_ipc_data_get(outdata, &size);
+		if (CONTACTS_ERROR_NONE == ret) {
+			int transaction_ver = 0;
+			transaction_ver = *(int*)pims_ipc_data_get(outdata,&size);
+			ctsvc_client_ipc_set_change_version(transaction_ver);
+		}
 
 		pims_ipc_data_destroy(outdata);
 	}
@@ -102,7 +107,7 @@ API int contacts_activity_delete_by_account_id(int account_id)
 	// ipc call
 	if (ctsvc_ipc_call( CTSVC_IPC_ACTIVITY_MODULE, CTSVC_IPC_SERVER_ACTIVITY_DELETE_BY_ACCOUNT_ID, indata, &outdata) != 0)
 	{
-		CTS_ERR("pims_ipc_call failed");
+		CTS_ERR("ctsvc_ipc_call failed");
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
 	}
@@ -117,6 +122,11 @@ API int contacts_activity_delete_by_account_id(int account_id)
 		// check result
 		unsigned int size = 0;
 		ret = *(int*) pims_ipc_data_get(outdata, &size);
+		if (CONTACTS_ERROR_NONE == ret) {
+			int transaction_ver = 0;
+			transaction_ver = *(int*)pims_ipc_data_get(outdata,&size);
+			ctsvc_client_ipc_set_change_version(transaction_ver);
+		}
 
 		pims_ipc_data_destroy(outdata);
 	}

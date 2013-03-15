@@ -26,6 +26,7 @@
 #include "internal.h"
 #include "ctsvc_server_sqlite.h"
 #include "schema.h"
+#include "ctsvc_sqlite.h"
 #include "ctsvc_schema_recovery.h"
 #include "ctsvc_schema.h"
 
@@ -81,9 +82,44 @@ static inline int __ctsvc_server_remake_db_file()
 	return CONTACTS_ERROR_NONE;
 }
 
+static int __ctsvc_server_check_table()
+{
+	int ret;
+	sqlite3 *db;
+	char query[CTS_SQL_MAX_LEN] = {0};
+	cts_stmt stmt = NULL;
+
+	ret = ctsvc_server_db_open(&db);
+	h_retvm_if(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_server_db_open() Failed(%d)", ret);
+
+	snprintf(query, sizeof(query),
+			"SELECT name FROM sqlite_master WHERE type='table' AND name='%s'",
+			CTS_TABLE_CONTACTS);
+	ret = sqlite3_prepare_v2(db, query, strlen(query), &stmt, NULL);
+	if (SQLITE_OK != ret) {
+		ERR("DB error : sqlite3_prepare_v2(%s) Failed(%s)", query, sqlite3_errmsg(db));
+		ctsvc_server_db_close();
+		return CONTACTS_ERROR_DB;
+	}
+
+	ret = sqlite3_step(stmt);
+	if (SQLITE_ROW != ret) {
+		ERR("contacts table does not exist in contacts DB file : %s", sqlite3_errmsg(db));
+		sqlite3_finalize(stmt);
+		ctsvc_server_db_close();
+		return CTSVC_ERR_NO_TABLE;
+	}
+
+	sqlite3_finalize(stmt);
+	ctsvc_server_db_close();
+	return CONTACTS_ERROR_NONE;
+}
+
 int ctsvc_server_check_schema(void)
 {
 	if (CTSVC_ERR_NO_DB_FILE == __ctsvc_server_check_db_file())
+		__ctsvc_server_remake_db_file();
+	else if (CTSVC_ERR_NO_TABLE == __ctsvc_server_check_table())
 		__ctsvc_server_remake_db_file();
 
 	return CONTACTS_ERROR_NONE;

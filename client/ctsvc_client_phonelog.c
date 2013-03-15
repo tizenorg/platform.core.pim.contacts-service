@@ -47,7 +47,7 @@ API int contacts_phone_log_reset_statistics(void)
 	// ipc call
 	if (ctsvc_ipc_call(CTSVC_IPC_PHONELOG_MODULE, CTSVC_IPC_SERVER_PHONELOG_RESET_STATISTICS, indata, &outdata) != 0)
 	{
-		CTS_ERR("pims_ipc_call failed");
+		CTS_ERR("ctsvc_ipc_call failed");
 		return CONTACTS_ERROR_IPC;
 	}
 
@@ -61,6 +61,12 @@ API int contacts_phone_log_reset_statistics(void)
 		// check result
 		unsigned int size = 0;
 		ret = *(int*) pims_ipc_data_get(outdata, &size);
+
+		if (CONTACTS_ERROR_NONE == ret) {
+			int transaction_ver = 0;
+			transaction_ver = *(int*)pims_ipc_data_get(outdata,&size);
+			ctsvc_client_ipc_set_change_version(transaction_ver);
+		}
 
 		pims_ipc_data_destroy(outdata);
 	}
@@ -130,7 +136,7 @@ API int contacts_phone_log_delete(contacts_phone_log_delete_e op, ...)
 
 	if (ctsvc_ipc_call(CTSVC_IPC_PHONELOG_MODULE,
 			CTSVC_IPC_SERVER_PHONELOG_DELETE, indata, &outdata) != 0) {
-		CTS_ERR("pims_ipc_call failed");
+		CTS_ERR("ctsvc_ipc_call failed");
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
 	}
@@ -140,6 +146,13 @@ API int contacts_phone_log_delete(contacts_phone_log_delete_e op, ...)
 	if (outdata) {
 		unsigned int size = 0;
 		ret = *(int*) pims_ipc_data_get(outdata, &size);
+
+		if (CONTACTS_ERROR_NONE == ret) {
+			int transaction_ver = 0;
+			transaction_ver = *(int*)pims_ipc_data_get(outdata,&size);
+			ctsvc_client_ipc_set_change_version(transaction_ver);
+		}
+
 		pims_ipc_data_destroy(outdata);
 	}
 

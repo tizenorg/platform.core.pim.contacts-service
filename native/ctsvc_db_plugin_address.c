@@ -28,6 +28,8 @@
 #include "ctsvc_record.h"
 #include "ctsvc_db_query.h"
 #include "ctsvc_list.h"
+#include "ctsvc_notification.h"
+
 
 static int __ctsvc_db_address_insert_record( contacts_record_h record, int *id );
 static int __ctsvc_db_address_get_record( int id, contacts_record_h* out_record );
@@ -92,10 +94,11 @@ static int __ctsvc_db_address_insert_record( contacts_record_h record, int *id )
 
 	ret = ctsvc_db_contact_update_changed_time(address->contact_id);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB error : ctsvc_query_exec() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_db_contact_update_changed_time() Failed(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
+	ctsvc_set_person_noti();
 
 	ret = ctsvc_end_trans(true);
 	if (ret < CONTACTS_ERROR_NONE)
@@ -103,7 +106,6 @@ static int __ctsvc_db_address_insert_record( contacts_record_h record, int *id )
 	else
 		return CONTACTS_ERROR_NONE;
 }
-
 
 static int __ctsvc_db_address_update_record( contacts_record_h record )
 {
@@ -120,26 +122,28 @@ static int __ctsvc_db_address_update_record( contacts_record_h record )
 
 	snprintf(query, sizeof(query),
 			"SELECT contact_id FROM "CTSVC_DB_VIEW_CONTACT" WHERE contact_id = %d", address->contact_id);
+
 	ret = ctsvc_query_get_first_int_result(query, &contact_id);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("No data : contact_id (%d) is not exist", contact_id);
+		CTS_ERR("No data : contact_id (%d) is not exist", address->contact_id);
 		ctsvc_end_trans(false);
-		return CONTACTS_ERROR_INVALID_PARAMETER;
+		return ret;
 	}
 
-	ret = ctsvc_db_address_update(record, address->contact_id, false);
+	ret = ctsvc_db_address_update(record, false);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB error : ctsvc_begin_trans() Failed(%d)", ret);
+		CTS_ERR("update record failed(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
 
 	ret = ctsvc_db_contact_update_changed_time(address->contact_id);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB error : ctsvc_query_exec() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_db_contact_update_changed_time() Failed(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
+	ctsvc_set_person_noti();
 
 	ret = ctsvc_end_trans(true);
 	if (ret < CONTACTS_ERROR_NONE)
@@ -157,26 +161,32 @@ static int __ctsvc_db_address_delete_record( int id )
 	ret = ctsvc_begin_trans();
 	RETVM_IF(ret, ret, "ctsvc_begin_trans() Failed(%d)", ret);
 
-	snprintf(query, sizeof(query), "SELECT contact_id FROM "CTS_TABLE_DATA" WHERE id = %d", id);
+	snprintf(query, sizeof(query),
+			"SELECT contact_id FROM "CTSVC_DB_VIEW_CONTACT" "
+				"WHERE contact_id = (SELECT contact_id FROM "CTS_TABLE_DATA" WHERE id = %d)", id);
 	ret = ctsvc_query_get_first_int_result(query, &contact_id);
 	if (CONTACTS_ERROR_NONE != ret ) {
 		CTS_ERR("No data : id (%d)", id);
 		ctsvc_end_trans(false);
-		return CONTACTS_ERROR_NO_DATA;
+		return ret;
 	}
 
-	ret = ctsvc_db_address_delete(id);
+	ret = ctsvc_db_address_delete(id, false);
 	if (CONTACTS_ERROR_NONE != ret) {
-		ret = ctsvc_db_contact_update_changed_time(contact_id);
-		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("DB error : ctsvc_query_exec() Failed(%d)", ret);
-			ctsvc_end_trans(false);
-			return ret;
-		}
-		ret = ctsvc_end_trans(true);
-	}
-	else
+		CTS_ERR("DB error : ctsvc_query_exec() Failed(%d)", ret);
 		ctsvc_end_trans(false);
+		return ret;
+	}
+
+	ret = ctsvc_db_contact_update_changed_time(contact_id);
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("DB error : ctsvc_db_contact_update_changed_time() Failed(%d)", ret);
+		ctsvc_end_trans(false);
+		return ret;
+	}
+	ctsvc_set_person_noti();
+
+	ret = ctsvc_end_trans(true);
 
 	if (ret < CONTACTS_ERROR_NONE)
 		return ret;
@@ -192,7 +202,7 @@ static int __ctsvc_db_address_get_record( int id, contacts_record_h* out_record 
 	ctsvc_address_s *address;
 
 	snprintf(query, sizeof(query),
-				"SELECT data.contact_id, is_default, "
+				"SELECT id, data.contact_id, is_default, "
 						"data1, data2, data3, data4, data5, data6, data7, data8, data9 "
 						"FROM "CTS_TABLE_DATA", "CTSVC_DB_VIEW_CONTACT" "
 						"ON "CTS_TABLE_DATA".contact_id = "CTSVC_DB_VIEW_CONTACT".contact_id "

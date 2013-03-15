@@ -44,11 +44,7 @@ API int contacts_activity_delete_by_contact_id(int contact_id)
 	}
 
 	ctsvc_set_activity_noti();
-
-/* why notify twice?
-	ctsvc_set_contact_noti();
-	ctsvc_db_contact_update_changed_time(contact_id);
-*/
+	ctsvc_set_person_noti();
 
 	ret = ctsvc_end_trans(true);
 	return ret;
@@ -76,10 +72,7 @@ API int contacts_activity_delete_by_account_id(int account_id)
 	}
 
 	ctsvc_set_activity_noti();
-/*
-	ctsvc_set_contact_noti();
-	ctsvc_db_contact_update_changed_time(contact_id);
-*/
+	ctsvc_set_person_noti();
 
 	ret = ctsvc_end_trans(true);
 	return ret;

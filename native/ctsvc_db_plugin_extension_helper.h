@@ -24,8 +24,8 @@
 #include "ctsvc_sqlite.h"
 
 int ctsvc_db_extension_insert(contacts_record_h record, int contact_id, bool is_my_profile, int *id);
-int ctsvc_db_extension_update(contacts_record_h record, int contact_id, bool is_my_profile);
-int ctsvc_db_extension_delete(int id);
+int ctsvc_db_extension_update(contacts_record_h record);
+int ctsvc_db_extension_delete(int id, bool is_my_profile);
 
 int ctsvc_db_extension_get_value_from_stmt(cts_stmt stmt, contacts_record_h *record, int start_count);
 

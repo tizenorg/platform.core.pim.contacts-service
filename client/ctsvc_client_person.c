@@ -77,7 +77,8 @@ API int contacts_person_link_person(int base_person_id, int person_id)
 	// ipc call
 	if (ctsvc_ipc_call(CTSVC_IPC_PERSON_MODULE, CTSVC_IPC_SERVER_PERSON_LINK_PERSON, indata, &outdata) != 0)
 	{
-		CTS_ERR("pims_ipc_call failed");
+		CTS_ERR("ctsvc_ipc_call failed");
+		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
 	}
 
@@ -91,6 +92,12 @@ API int contacts_person_link_person(int base_person_id, int person_id)
 		// check result
 		unsigned int size = 0;
 		ret = *(int*) pims_ipc_data_get(outdata, &size);
+
+		if (CONTACTS_ERROR_NONE == ret) {
+			int transaction_ver = 0;
+			transaction_ver = *(int*)pims_ipc_data_get(outdata,&size);
+			ctsvc_client_ipc_set_change_version(transaction_ver);
+		}
 
 		pims_ipc_data_destroy(outdata);
 	}
@@ -138,7 +145,7 @@ API int contacts_person_unlink_contact(int person_id, int contact_id, int* unlin
 	// ipc call
 	if (ctsvc_ipc_call(CTSVC_IPC_PERSON_MODULE, CTSVC_IPC_SERVER_PERSON_UNLINK_CONTACT, indata, &outdata) != 0)
 	{
-		CTS_ERR("pims_ipc_call failed");
+		CTS_ERR("ctsvc_ipc_call failed");
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
 	}
@@ -155,6 +162,10 @@ API int contacts_person_unlink_contact(int person_id, int contact_id, int* unlin
 		ret = *(int*) pims_ipc_data_get(outdata, &size);
 
 		if (CONTACTS_ERROR_NONE == ret) {
+			int transaction_ver = 0;
+			transaction_ver = *(int*)pims_ipc_data_get(outdata,&size);
+			ctsvc_client_ipc_set_change_version(transaction_ver);
+
 			if (unlinked_person_id)
 				*unlinked_person_id = *(int*)pims_ipc_data_get(outdata,&size);
 		}
@@ -202,7 +213,7 @@ API int contacts_person_reset_usage(int person_id, contacts_usage_type_e type)
 	// ipc call
 	if (ctsvc_ipc_call(CTSVC_IPC_PERSON_MODULE, CTSVC_IPC_SERVER_PERSON_RESET_USAGE, indata, &outdata) != 0)
 	{
-		CTS_ERR("pims_ipc_call failed");
+		CTS_ERR("ctsvc_ipc_call failed");
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
 	}
@@ -217,6 +228,12 @@ API int contacts_person_reset_usage(int person_id, contacts_usage_type_e type)
 		// check result
 		unsigned int size = 0;
 		ret = *(int*) pims_ipc_data_get(outdata, &size);
+
+		if (CONTACTS_ERROR_NONE == ret) {
+			int transaction_ver = 0;
+			transaction_ver = *(int*)pims_ipc_data_get(outdata,&size);
+			ctsvc_client_ipc_set_change_version(transaction_ver);
+		}
 
 		pims_ipc_data_destroy(outdata);
 	}
@@ -268,7 +285,8 @@ API int contacts_person_set_favorite_order(int person_id, int previous_person_id
 	// ipc call
 	if (ctsvc_ipc_call(CTSVC_IPC_PERSON_MODULE, CTSVC_IPC_SERVER_PERSON_SET_FAVORITE_ORDER, indata, &outdata) != 0)
 	{
-		CTS_ERR("pims_ipc_call failed");
+		CTS_ERR("ctsvc_ipc_call failed");
+		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
 	}
 
@@ -282,6 +300,12 @@ API int contacts_person_set_favorite_order(int person_id, int previous_person_id
 		// check result
 		unsigned int size = 0;
 		ret = *(int*) pims_ipc_data_get(outdata, &size);
+
+		if (CONTACTS_ERROR_NONE == ret) {
+			int transaction_ver = 0;
+			transaction_ver = *(int*)pims_ipc_data_get(outdata,&size);
+			ctsvc_client_ipc_set_change_version(transaction_ver);
+		}
 
 		pims_ipc_data_destroy(outdata);
 	}
@@ -335,7 +359,7 @@ API int contacts_person_set_default_property(contacts_person_property_e property
 	// ipc call
 	if (ctsvc_ipc_call(CTSVC_IPC_PERSON_MODULE, CTSVC_IPC_SERVER_PERSON_SET_DEFAULT_PROPERTY, indata, &outdata) != 0)
 	{
-		CTS_ERR("pims_ipc_call failed");
+		CTS_ERR("ctsvc_ipc_call failed");
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
 	}
@@ -350,6 +374,11 @@ API int contacts_person_set_default_property(contacts_person_property_e property
 		// check result
 		unsigned int size = 0;
 		ret = *(int*) pims_ipc_data_get(outdata, &size);
+		if (CONTACTS_ERROR_NONE == ret) {
+			int transaction_ver = 0;
+			transaction_ver = *(int*)pims_ipc_data_get(outdata,&size);
+			ctsvc_client_ipc_set_change_version(transaction_ver);
+		}
 
 		pims_ipc_data_destroy(outdata);
 	}
@@ -393,7 +422,7 @@ API int contacts_person_get_default_property(contacts_person_property_e property
 	// ipc call
 	if (ctsvc_ipc_call(CTSVC_IPC_PERSON_MODULE, CTSVC_IPC_SERVER_PERSON_GET_DEFAULT_PROPERTY,
 				indata, &outdata) != 0) {
-		CTS_ERR("pims_ipc_call failed");
+		CTS_ERR("ctsvc_ipc_call failed");
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
 	}

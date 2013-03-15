@@ -39,6 +39,8 @@ int ctsvc_ipc_destroy_for_change_subscription();
 int ctsvc_ipc_call(char *module, char *function, pims_ipc_h data_in, pims_ipc_data_h *data_out);
 int ctsvc_ipc_call_async(char *module, char *function, pims_ipc_h data_in, pims_ipc_call_async_cb callback, void *userdata);
 
+void ctsvc_client_ipc_set_change_version(int version);
+int ctsvc_client_ipc_get_change_version(void);
 
 #endif /*  __TIZEN_SOCIAL_CTSVC_CLIENT_IPC_H__ */
 

@@ -476,6 +476,7 @@ int ctsvc_ipc_unmarshal_record(const pims_ipc_data_h ipc_data, contacts_record_h
 	int ret = CONTACTS_ERROR_NONE;
 
 	ctsvc_record_s common = {0,};
+	ctsvc_record_s *precord_common = NULL;
 
 	if (ctsvc_ipc_unmarshal_record_common(ipc_data, &common) != CONTACTS_ERROR_NONE)
 	{
@@ -487,6 +488,11 @@ int ctsvc_ipc_unmarshal_record(const pims_ipc_data_h ipc_data, contacts_record_h
 
 	ret = contacts_record_create(common.view_uri, precord);
 	RETVM_IF(ret != CONTACTS_ERROR_NONE, ret, "create activity record fail");
+
+	precord_common = (ctsvc_record_s *)(*precord);
+	precord_common->property_max_count = common.property_max_count;
+	precord_common->properties_flags = common.properties_flags;
+	precord_common->property_flag = common.property_flag;
 
 	ctsvc_ipc_marshal_record_plugin_cb_s *plugin_cb = __ctsvc_ipc_marshal_get_plugin_cb(common.r_type);
 
@@ -714,28 +720,19 @@ int ctsvc_ipc_unmarshal_record_common(const pims_ipc_data_h ipc_data, ctsvc_reco
 	common->view_uri = ctsvc_view_get_uri(str);
 	common->property_max_count = *(unsigned int*)pims_ipc_data_get(ipc_data,&size);
 
-	tmp = pims_ipc_data_get(ipc_data,&size);
-	if ( tmp == NULL ){
-		CTS_ERR("pims_ipc_data unmarshal fail");
-		return CONTACTS_ERROR_INVALID_PARAMETER;
-	}
-	int length = *(int*)tmp;
-	if(length == -1)
-	{
-		CTS_VERBOSE("properties_flags is null");
-	}
-	else {
-		tmp = (unsigned char*)pims_ipc_data_get(ipc_data,&size);
-		{
-			common->properties_flags = calloc(common->property_max_count, sizeof(unsigned char));
-			if (common->properties_flags == NULL)
-			{
-				CTS_ERR("calloc fail");
-				return CONTACTS_ERROR_OUT_OF_MEMORY;
-			}
-			memcpy(common->properties_flags, tmp, sizeof(unsigned char)*(common->property_max_count));
+	if (common->property_max_count > 0) {
+		unsigned char *tmp_properties_flags;
+		tmp_properties_flags = (unsigned char*)pims_ipc_data_get(ipc_data, &size);
+		common->properties_flags  = calloc(common->property_max_count, sizeof(char));
+		if (common->properties_flags == NULL) {
+			ERR("calloc fail");
+			return CONTACTS_ERROR_OUT_OF_MEMORY;
 		}
+		memcpy(common->properties_flags, tmp_properties_flags, sizeof(char)*common->property_max_count);
 	}
+	tmp = pims_ipc_data_get(ipc_data,&size);
+	common->property_flag = *(unsigned char*)tmp;
+
 	return CONTACTS_ERROR_NONE;
 }
 
@@ -855,35 +852,24 @@ int ctsvc_ipc_marshal_record_common(const ctsvc_record_s* common, pims_ipc_data_
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 
-	if(pims_ipc_data_put(ipc_data,(void*)&common->property_max_count,sizeof(unsigned int)) < 0)
+	if (pims_ipc_data_put(ipc_data,(void*)&common->property_max_count,sizeof(unsigned int)) < 0)
 	{
 		return CONTACTS_ERROR_NO_DATA;
 	}
 
-	if (common->properties_flags != NULL)
+	if (0 < common->property_max_count)
 	{
-		int length = common->property_max_count;
-		if (pims_ipc_data_put(ipc_data,(void*)&length,sizeof(int)) != 0)
-		{
-			CTS_ERR("_ctsvc_ipc_marshal fail");
-			return CONTACTS_ERROR_OUT_OF_MEMORY;
-		}
-		if(pims_ipc_data_put(ipc_data,(void*)common->properties_flags,sizeof(unsigned char)*common->property_max_count) < 0)
+		if (pims_ipc_data_put(ipc_data,(void*)common->properties_flags,sizeof(unsigned char)*common->property_max_count) < 0)
 		{
 			CTS_ERR("_ctsvc_ipc_marshal fail");
 			return CONTACTS_ERROR_NO_DATA;
 		}
 	}
-	else
-	{
-		int length = -1;
-		if (pims_ipc_data_put(ipc_data,(void*)&length,sizeof(int)) != 0)
-		{
-			CTS_ERR("_ctsvc_ipc_marshal fail");
-			return CONTACTS_ERROR_OUT_OF_MEMORY;
-		}
-	}
 
+	if (pims_ipc_data_put(ipc_data,(void*)&common->property_flag,sizeof(char)) < 0)
+	{
+		return CONTACTS_ERROR_NO_DATA;
+	}
 	return CONTACTS_ERROR_NONE;
 }
 
@@ -923,7 +909,7 @@ int ctsvc_ipc_unmarshal_query(const pims_ipc_data_h ipc_data, contacts_query_h *
 	}
 	else
 	{
-		contacts_filter_h filter = (contacts_filter_h)que->filter;
+		contacts_filter_h filter;
 		if (contacts_filter_create(que->view_uri,&filter) != CONTACTS_ERROR_NONE)
 		{
 			CTS_ERR("contacts_filter_create fail");
@@ -1105,6 +1091,7 @@ int ctsvc_ipc_unmarshal_list(const pims_ipc_data_h ipc_data, contacts_list_h* li
 
 	if (ctsvc_ipc_unmarshal_unsigned_int(ipc_data,&(count)) != CONTACTS_ERROR_NONE)
 	{
+		contacts_list_destroy(*list, true);
 		CTS_ERR("_ctsvc_ipc_unmarshal fail");
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}

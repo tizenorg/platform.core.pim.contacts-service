@@ -35,6 +35,7 @@
 #include "ctsvc_db_init.h"
 #include "ctsvc_view.h"
 #include "ctsvc_inotify.h"
+#include "ctsvc_localize.h"
 
 #include "ctsvc_db_plugin_person_helper.h"
 
@@ -89,7 +90,7 @@ static inline int __ctsvc_db_get_property_type(const property_info_s *properties
 	for (i=0;i<count;i++) {
 		property_info_s *p = (property_info_s*)&(properties[i]);
 		if (property_id == p->property_id) {
-			return p->type;
+			return (property_id & CTSVC_VIEW_DATA_TYPE_MASK);
 		}
 	}
 	return -1;
@@ -265,7 +266,7 @@ static inline int __ctsvc_db_create_str_condition(ctsvc_composite_filter_s *com_
 	if (filter->value.s) {
 		if (filter->property_id == CTSVC_PROPERTY_NUMBER_NUMBER_FILTER) {
 			char dest[strlen(filter->value.s)+1];
-			ret = ctsvc_normalize_number(filter->value.s, dest, sizeof(dest));
+			ret = ctsvc_normalize_number(filter->value.s, dest, sizeof(dest), CTSVC_MIN_MATCH_NORMALIZED_NUMBER_SIZE);
 			if (CONTACTS_ERROR_NONE == ret)
 				*bind_text = g_slist_append(*bind_text, strdup(dest));
 			else
@@ -386,6 +387,119 @@ static inline int __ctsvc_db_create_composite_condition(ctsvc_composite_filter_s
 	return CONTACTS_ERROR_NONE;
 }
 
+int ctsvc_db_update_record_with_set_query(const char *set, GSList *bind_text, const char *table, int id)
+{
+	int ret = CONTACTS_ERROR_NONE;
+	char query[CTS_SQL_MAX_LEN] = {0};
+	sqlite3_stmt *stmt = NULL;
+	GSList *cursor = NULL;
+
+	snprintf(query, sizeof(query), "UPDATE %s SET %s WHERE id = %d", table, set, id);
+
+	stmt = cts_query_prepare(query);
+	if (NULL == stmt) {
+		CTS_ERR("DB error : cts_query_prepare() Failed");
+		return CONTACTS_ERROR_DB;
+	}
+
+	if (bind_text) {
+		int i = 0;
+		for (cursor=bind_text,i=1;cursor;cursor=cursor->next,i++) {
+			const char *text = cursor->data;
+			if (text && *text)
+				cts_stmt_bind_text(stmt, i, text);
+		}
+	}
+	ret = cts_stmt_step(stmt);
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("cts_stmt_step() Failed(%d)", ret);
+		cts_stmt_finalize(stmt);
+		return ret;
+	}
+	cts_stmt_finalize(stmt);
+	return ret;
+}
+
+int ctsvc_db_create_set_query(contacts_record_h record, char **set, GSList **bind_text)
+{
+	ctsvc_record_s *s_record;
+	int i = 0;
+	const property_info_s* property_info = NULL;
+	unsigned int property_info_count = 0;
+	char out_set[CTS_SQL_MAX_LEN] = {0};
+	int len = 0;
+	const char *field_name;
+	int ret = CONTACTS_ERROR_NONE;
+
+	RETV_IF(record == NULL, CONTACTS_ERROR_INVALID_PARAMETER);
+
+	s_record = (ctsvc_record_s *)record;
+	if (0 == s_record->property_max_count || NULL == s_record->properties_flags) {
+		ERR("record don't have properties");
+		return CONTACTS_ERROR_INVALID_PARAMETER;
+	}
+
+	property_info = ctsvc_view_get_all_property_infos(s_record->view_uri, &property_info_count);
+
+	for(i=0;i<property_info_count;i++) {
+		if (ctsvc_record_check_property_flag(s_record, property_info[i].property_id, CTSVC_PROPERTY_FLAG_DIRTY)) {
+			field_name = property_info[i].fields;
+			if (NULL == field_name)
+				continue;
+
+			if (CTSVC_VIEW_CHECK_DATA_TYPE(property_info[i].property_id, CTSVC_VIEW_DATA_TYPE_BOOL)) {
+				bool tmp = false;
+				ret = contacts_record_get_bool(record,property_info[i].property_id, &tmp);
+				if (ret != CONTACTS_ERROR_NONE)
+					continue;
+				if (len != 0)
+					len += snprintf(out_set+len, sizeof(out_set)-len, ", ");
+				len += snprintf(out_set+len, sizeof(out_set)-len, "%s=%d", field_name, tmp);
+			}
+			else if (CTSVC_VIEW_CHECK_DATA_TYPE(property_info[i].property_id, CTSVC_VIEW_DATA_TYPE_INT)) {
+				int tmp = 0;
+				ret = contacts_record_get_int(record,property_info[i].property_id, &tmp);
+				if (ret != CONTACTS_ERROR_NONE)
+					continue;
+				if (len != 0)
+					len += snprintf(out_set+len, sizeof(out_set)-len, ", ");
+				len += snprintf(out_set+len, sizeof(out_set)-len, "%s=%d", field_name, tmp);
+			}
+			else if (CTSVC_VIEW_CHECK_DATA_TYPE(property_info[i].property_id, CTSVC_VIEW_DATA_TYPE_LLI)) {
+				long long int tmp = 0;
+				ret = contacts_record_get_lli(record, property_info[i].property_id, &tmp);
+				if (ret != CONTACTS_ERROR_NONE)
+					continue;
+				if (len != 0)
+					len += snprintf(out_set+len, sizeof(out_set)-len, ", ");
+				len += snprintf(out_set+len, sizeof(out_set)-len, "%s=%lld", field_name,tmp);
+			}
+			else if (CTSVC_VIEW_CHECK_DATA_TYPE(property_info[i].property_id, CTSVC_VIEW_DATA_TYPE_STR)) {
+				char *tmp = NULL;
+				ret = contacts_record_get_str_p(record,property_info[i].property_id, &tmp);
+				if (ret != CONTACTS_ERROR_NONE)
+					continue;
+				if (len != 0)
+					len += snprintf(out_set+len, sizeof(out_set)-len, ", ");
+				len += snprintf(out_set+len, sizeof(out_set)-len, "%s=?", field_name);
+				*bind_text = g_slist_append(*bind_text, strdup(SAFE_STR(tmp)));
+			}
+			else if (CTSVC_VIEW_CHECK_DATA_TYPE(property_info[i].property_id, CTSVC_VIEW_DATA_TYPE_DOUBLE)) {
+				double tmp = 0;
+				ret = contacts_record_get_double(record, property_info[i].property_id, &tmp);
+				if (ret != CONTACTS_ERROR_NONE)
+					continue;
+				if (len != 0)
+					len += snprintf(out_set+len, sizeof(out_set)-len, ", ");
+				len += snprintf(out_set+len, sizeof(out_set)-len, "%s=%lf", field_name, tmp);
+			}
+		}
+	}
+	*set = strdup(out_set);
+
+	return CONTACTS_ERROR_NONE;
+}
+
 static int __ctsvc_db_create_projection(const property_info_s *properties, int ids_count,
 		unsigned int *projections, int pro_count, char **projection)
 {
@@ -401,7 +515,7 @@ static int __ctsvc_db_create_projection(const property_info_s *properties, int i
 	if (0 < pro_count) {
 		for (i=0;i<pro_count;i++) {
 			if (projections[i] == CTSVC_PROPERTY_PERSON_DISPLAY_NAME_INDEX) {
-				snprintf(temp, sizeof(temp), "_NORMALIZE_INDEX_(%s)", ctsvc_get_display_column());
+				snprintf(temp, sizeof(temp), "_NORMALIZE_INDEX_(%s)", ctsvc_get_sort_name_column());
 				field_name = temp;
 			}
 			else
@@ -419,12 +533,12 @@ static int __ctsvc_db_create_projection(const property_info_s *properties, int i
 	}
 	else {
 		for (i=0;i<ids_count;i++) {
-			if (CTSVC_VIEW_DATA_TYPE_REC == properties[i].type)
+			if (CTSVC_VIEW_DATA_TYPE_REC == (properties[i].property_id & CTSVC_VIEW_DATA_TYPE_MASK))
 				continue;
 			if (properties[i].fields)
 				field_name = properties[i].fields;
 			else if (properties[i].property_id == CTSVC_PROPERTY_PERSON_DISPLAY_NAME_INDEX) {
-				snprintf(temp, sizeof(temp), "_NORMALIZE_INDEX_(%s)", ctsvc_get_display_column());
+				snprintf(temp, sizeof(temp), "_NORMALIZE_INDEX_(%s)", ctsvc_get_sort_name_column());
 				field_name = temp;
 				CTS_DBG("field_name : %s", field_name);
 			}
@@ -531,6 +645,8 @@ int ctsvc_db_make_get_records_query_stmt(ctsvc_query_s *s_query, int offset, int
 	}
 	else if (sortkey)
 		len += snprintf(query+len, sizeof(query)-len, " ORDER BY %s", sortkey);
+	else if (0 == strcmp(s_query->view_uri, CTSVC_VIEW_URI_GROUP))
+		len += snprintf(query+len, sizeof(query)-len, " ORDER BY group_prio");
 
 	if (0 < limit) {
 		len += snprintf(query+len, sizeof(query)-len, " LIMIT %d", limit);
@@ -649,7 +765,8 @@ static int __ctsvc_db_get_all_records_exec(const char *view_uri, const property_
 	if (__ctsvc_db_view_has_display_name(view_uri, properties, ids_count)) {
 		sortkey = ctsvc_get_sort_column();
 		len += snprintf(query+len, sizeof(query)-len, " ORDER BY %s", sortkey);
-	}
+	} else if (0 == strcmp(view_uri, CTSVC_VIEW_URI_GROUP))
+		len += snprintf(query+len, sizeof(query)-len, " ORDER BY group_prio");
 
 	if (0 < limit) {
 		len += snprintf(query+len, sizeof(query)-len, " LIMIT %d", limit);
@@ -674,7 +791,7 @@ static int __ctsvc_db_get_all_records_exec(const char *view_uri, const property_
 
 		contacts_record_create(view_uri, &record);
 		for(i=0;i<ids_count;i++) {
-			type = properties[i].type;
+			type = (properties[i].property_id & CTSVC_VIEW_DATA_TYPE_MASK);
 			if (type == CTSVC_VIEW_DATA_TYPE_INT)
 				ctsvc_record_set_int(record, properties[i].property_id, ctsvc_stmt_get_int(stmt, i));
 			else if (type == CTSVC_VIEW_DATA_TYPE_STR)
@@ -725,6 +842,87 @@ static inline bool __ctsvc_db_view_can_keyword_search(const char *view_uri)
 	return false;
 }
 
+static int __ctsvc_db_append_search_query(const char *keyword, char *query, int size)
+{
+	bool emailaddress = false;
+	bool phonenumber = false;
+	int ret;
+	int len = 0, i;
+	if (strstr(keyword, "@") != NULL) {
+		emailaddress = true;
+	}
+	else {
+		len = strlen(keyword);
+
+		phonenumber = true;
+		for(i=0; i<len; i++) {
+			if (keyword[i] < '0' || keyword[i] > '9') {
+				phonenumber = false;
+				break;
+			}
+		}
+	}
+
+	if (emailaddress) {
+		ret = snprintf(query, size,
+				"(SELECT contact_id FROM %s WHERE %s MATCH 'data:%s*') ",
+				CTS_TABLE_SEARCH_INDEX, CTS_TABLE_SEARCH_INDEX,
+				keyword );
+	}
+	else if (phonenumber) {
+		char normalized_number[CTSVC_NUMBER_MAX_LEN];
+
+		ctsvc_normalize_number(keyword, normalized_number, CTSVC_NUMBER_MAX_LEN, CTSVC_NUMBER_MAX_LEN -1);
+
+		ret =snprintf(query, size,
+				"(SELECT contact_id FROM %s WHERE %s MATCH 'name:%s* OR number:%s* OR  data:%s*' "
+					"UNION "
+					"SELECT contact_id FROM %s WHERE number LIKE '%%%s%%') ",
+				CTS_TABLE_SEARCH_INDEX, CTS_TABLE_SEARCH_INDEX,
+				keyword, keyword, keyword, CTS_TABLE_PHONE_LOOKUP, normalized_number );
+	}
+	else {
+		char *normalized_name = NULL;
+		ret = ctsvc_normalize_str(keyword, &normalized_name);
+
+		if (CTSVC_LANG_KOREAN == ret) {
+			char *chosung = calloc(1, strlen(keyword) * 5);
+			char *korean_pattern = calloc(1, strlen(keyword) * 5);
+
+			ctsvc_get_chosung(keyword, chosung, strlen(keyword) * 5 );
+			ctsvc_get_korean_search_pattern(keyword, korean_pattern, strlen(keyword) * 5 );
+			ret = snprintf(query, size,
+					"(SELECT contact_id FROM %s WHERE %s MATCH 'name:%s* OR number:%s* OR  data:%s*' "
+						"INTERSECT "
+						"SELECT contact_id FROM %s WHERE name GLOB '*%s*') ",
+					CTS_TABLE_SEARCH_INDEX, CTS_TABLE_SEARCH_INDEX,
+					chosung, keyword, keyword, CTS_TABLE_NAME_LOOKUP, korean_pattern );
+			free(chosung);
+			free(korean_pattern);
+		}
+		else if (CTSVC_LANG_JAPANESE == ret){
+			char *hiragana = NULL;
+
+			ctsvc_convert_japanese_to_hiragana(keyword, &hiragana);
+
+			ret = snprintf(query, size,
+								"(SELECT contact_id FROM %s WHERE %s MATCH 'name:%s* OR number:%s* OR  data:%s*') ",
+								CTS_TABLE_SEARCH_INDEX, CTS_TABLE_SEARCH_INDEX,
+								hiragana, hiragana, hiragana);
+			free(hiragana);
+		}
+		else {
+			ret = snprintf(query, size,
+					"(SELECT contact_id FROM %s WHERE %s MATCH 'name:%s* OR number:%s* OR  data:%s*') ",
+					CTS_TABLE_SEARCH_INDEX, CTS_TABLE_SEARCH_INDEX,
+					normalized_name, keyword, keyword);
+		}
+		free(normalized_name);
+	}
+
+	return ret;
+}
+
 static int __ctsvc_db_search_records_exec(const char *view_uri, const property_info_s* properties,
 		int ids_count, const char *projection, const char *keyword, int offset,	int limit, contacts_list_h* out_list )
 {
@@ -737,34 +935,28 @@ static int __ctsvc_db_search_records_exec(const char *view_uri, const property_i
 	cts_stmt stmt = NULL;
 	contacts_list_h list = NULL;
 	ctsvc_record_type_e r_type;
-	char remake_val[CTS_SQL_MIN_LEN] = {0};
 	const char *sortkey;
 
 	ret = ctsvc_db_get_table_name(view_uri, &table);
 	RETVM_IF (CONTACTS_ERROR_NONE != ret, ret, "Invalid parameter : view uri (%s)", view_uri);
 
-	ret = ctsvc_normalize_str(keyword, remake_val, sizeof(remake_val));
-
 	if (CONTACTS_ERROR_NONE <= ret) {
 		if (0 == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_CONTACT)
 				|| 0 == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP)) {
-			len = snprintf(query, sizeof(query), "SELECT %s FROM %s, %s "
-						"ON %s.contact_id = %s.contact_id "
-						"WHERE (%s MATCH 'name:%s* OR number:%s* OR  data:%s*') ",
-						projection, table, CTS_TABLE_SEARCH_INDEX,
-						table, CTS_TABLE_SEARCH_INDEX,
-						CTS_TABLE_SEARCH_INDEX,	remake_val, keyword, keyword);
+			len = snprintf(query, sizeof(query), "SELECT %s FROM %s "
+						"WHERE contact_id IN ",
+						projection, table);
+			len += __ctsvc_db_append_search_query(keyword, query + len, sizeof(query) - len);
 		}
 		else {		// CTSVC_VIEW_URI_PERSON
 			len = snprintf(query, sizeof(query), "SELECT %s FROM %s, "
-					"(SELECT person_id person_id_in_contact "
-							"FROM "CTS_TABLE_CONTACTS", "CTS_TABLE_SEARCH_INDEX" "
-							"ON contacts.contact_id = search_index.contact_id AND deleted = 0 "
-							"WHERE ("CTS_TABLE_SEARCH_INDEX" MATCH 'name:%s* OR number:%s* OR  data:%s*') "
-							"GROUP BY person_id_in_contact) temp_contacts "
-						"ON %s.person_id = temp_contacts.person_id_in_contact",
-						projection, table, remake_val, keyword, keyword, table);
-
+						"(SELECT person_id person_id_in_contact "
+								"FROM "CTS_TABLE_CONTACTS " "
+								"WHERE deleted = 0 AND contact_id IN ",
+								projection, table);
+			len += __ctsvc_db_append_search_query(keyword, query + len, sizeof(query) - len);
+			len += snprintf(query + len, sizeof(query) - len, " GROUP BY person_id_in_contact) temp_contacts "
+							"ON %s.person_id = temp_contacts.person_id_in_contact",	 table);
 		}
 /*
 		len += snprintf(query+len, sizeof(query)-len, "FROM %s, %s "
@@ -778,29 +970,28 @@ static int __ctsvc_db_search_records_exec(const char *view_uri, const property_i
 	else {
 		if (0 == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_CONTACT)
 				|| 0 == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP)) {
-			len = snprintf(query, sizeof(query), "SELECT %s FROM %s, %s "
-						"ON %s.contact_id = %s.contact_id "
-						"WHERE (%s MATCH 'name:%s* OR number:%s* OR  data:%s*') ",
-						projection, table, CTS_TABLE_SEARCH_INDEX,
-						table, CTS_TABLE_SEARCH_INDEX,
-						CTS_TABLE_SEARCH_INDEX,	keyword, keyword, keyword);
+			len = snprintf(query, sizeof(query), "SELECT %s FROM %s "
+						"WHERE contact_id IN ",
+						projection, table);
+			len += __ctsvc_db_append_search_query(keyword, query + len, sizeof(query) - len);
 		}
 		else {		// CTSVC_VIEW_URI_PERSON
 			len = snprintf(query, sizeof(query),
-						"SELECT %s FROM %s, "CTS_TABLE_SEARCH_INDEX", "
+						"SELECT %s FROM %s, "
 							"(SELECT contact_id, person_id person_id_in_contact FROM "CTS_TABLE_CONTACTS") temp_contacts "
 						"ON %s.person_id = temp_contacts.person_id_in_contact "
-							"AND temp_contacts.contact_id = "CTS_TABLE_SEARCH_INDEX".contact_id "
 							"AND temp_contacts.deleted = 0 "
-						"WHERE ("CTS_TABLE_SEARCH_INDEX" MATCH 'name:%s* OR number:%s* OR  data:%s*') ",
-						projection, table, table, keyword, keyword, keyword);
+						"WHERE temp_contacts.contact_id IN ",
+						projection, table, table);
+			len += __ctsvc_db_append_search_query(keyword, query + len, sizeof(query) - len);
 		}
 	}
 
 	if (__ctsvc_db_view_has_display_name(view_uri, properties, ids_count)) {
 		sortkey = ctsvc_get_sort_column();
 		len += snprintf(query+len, sizeof(query)-len, " ORDER BY %s", sortkey);
-	}
+	} else if (0 == strcmp(view_uri, CTSVC_VIEW_URI_GROUP))
+		len += snprintf(query+len, sizeof(query)-len, " ORDER BY group_prio");
 
 	if (0 < limit) {
 		len += snprintf(query+len, sizeof(query)-len, " LIMIT %d", limit);
@@ -810,12 +1001,6 @@ static int __ctsvc_db_search_records_exec(const char *view_uri, const property_i
 
 	stmt = cts_query_prepare(query);
 	RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB , "DB error : cts_query_prepare() Failed");
-
-/*
-	sqlite3_bind_text(stmt, 1, keyword, strlen(keyword), SQLITE_STATIC);
-	if (CONTACTS_ERROR_NONE <= ret)
-		sqlite3_bind_text(stmt, 2, remake_val, strlen(remake_val), SQLITE_STATIC);
-*/
 
 	r_type = ctsvc_view_get_record_type(view_uri);
 
@@ -851,7 +1036,7 @@ static int __ctsvc_db_search_records_exec(const char *view_uri, const property_i
 			contacts_record_create(view_uri, &record);
 
 			for(i=0;i<ids_count;i++) {
-				type = properties[i].type;
+				type = (properties[i].property_id & CTSVC_VIEW_DATA_TYPE_MASK);
 				if (type == CTSVC_VIEW_DATA_TYPE_INT)
 					ctsvc_record_set_int(record, properties[i].property_id, ctsvc_stmt_get_int(stmt, i));
 				else if (type == CTSVC_VIEW_DATA_TYPE_STR)
@@ -869,6 +1054,7 @@ static int __ctsvc_db_search_records_exec(const char *view_uri, const property_i
 
 		ctsvc_list_prepend(list, record);
 	}
+
 	cts_stmt_finalize(stmt);
 	ctsvc_list_reverse(list);
 	*out_list = (contacts_list_h)list;
@@ -914,7 +1100,6 @@ static inline int __ctsvc_db_search_records_with_query_exec(ctsvc_query_s *s_que
 	contacts_list_h list = NULL;
 	const char *table;
 	const char *sortkey = NULL;
-	char remake_val[CTS_SQL_MIN_LEN] = {0};
 
 	RETV_IF(NULL == projection || '\0' == *projection, CONTACTS_ERROR_INVALID_PARAMETER);
 
@@ -928,30 +1113,20 @@ static inline int __ctsvc_db_search_records_with_query_exec(ctsvc_query_s *s_que
 
 	if (0 == strcmp(s_query->view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_CONTACT)
 			|| 0 == strcmp(s_query->view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP)) {
-		len += snprintf(query+len, sizeof(query)-len, "FROM %s, %s "
-					"ON %s.contact_id = %s.contact_id ",
-					table, CTS_TABLE_SEARCH_INDEX,
-					table, CTS_TABLE_SEARCH_INDEX);
+		len += snprintf(query+len, sizeof(query)-len, "FROM %s temp_contacts ", table);
 	}
 	else {		// CTSVC_VIEW_URI_PERSON
-		len += snprintf(query+len, sizeof(query)-len, "FROM %s, %s, "
+		len += snprintf(query+len, sizeof(query)-len, "FROM %s, "
 						"(SELECT contact_id, person_id person_id_in_contact FROM %s WHERE deleted = 0) temp_contacts "
 						"ON %s.person_id = temp_contacts.person_id_in_contact "
-							"AND temp_contacts.contact_id = %s.contact_id",
-						table, CTS_TABLE_SEARCH_INDEX, CTS_TABLE_CONTACTS, table, CTS_TABLE_SEARCH_INDEX);
+						, table, CTS_TABLE_CONTACTS, table);
 	}
 /*	len += snprintf(query+len, sizeof(query)-len, "FROM %s, "CTS_TABLE_SEARCH_INDEX" "
 					"ON %s.contact_id = "CTS_TABLE_SEARCH_INDEX".contact_id", table, table);*/
 
-	ret = ctsvc_normalize_str(keyword, remake_val, sizeof(remake_val));
-
-	if (CONTACTS_ERROR_NONE <= ret) {
-		len += snprintf(query+len, sizeof(query)-len,
-				" WHERE ("CTS_TABLE_SEARCH_INDEX" MATCH 'name:%s* OR number:%s* OR  data:%s*') ", remake_val, keyword, keyword);
-	}
-	else
-		len += snprintf(query+len, sizeof(query)-len,
-				" WHERE ("CTS_TABLE_SEARCH_INDEX" MATCH 'name:%s* OR number:%s* OR  data:%s*') ", keyword, keyword, keyword);
+	len += snprintf(query+len, sizeof(query)-len,
+			" WHERE temp_contacts.contact_id IN ");
+	len += __ctsvc_db_append_search_query(keyword, query + len, sizeof(query) - len);
 
 	if (condition && *condition)
 		len += snprintf(query+len, sizeof(query)-len, " AND (%s)", condition);
@@ -984,6 +1159,8 @@ static inline int __ctsvc_db_search_records_with_query_exec(ctsvc_query_s *s_que
 	}
 	else if (sortkey)
 		len += snprintf(query+len, sizeof(query)-len, " ORDER BY %s", sortkey);
+	else if (0 == strcmp(s_query->view_uri, CTSVC_VIEW_URI_GROUP))
+		len += snprintf(query+len, sizeof(query)-len, " ORDER BY group_prio");
 
 	if (0 < limit) {
 		len += snprintf(query+len, sizeof(query)-len, " LIMIT %d", limit);
@@ -996,9 +1173,6 @@ static inline int __ctsvc_db_search_records_with_query_exec(ctsvc_query_s *s_que
 	RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB , "DB error : cts_query_prepare() Failed");
 
 	i = 1;
-//	sqlite3_bind_text(stmt, i++, keyword, strlen(keyword), SQLITE_STATIC);
-//	if (*remake_val)
-//		sqlite3_bind_text(stmt, i++, remake_val, strlen(remake_val), SQLITE_STATIC);
 
 	len = g_slist_length(bind);
 	for (cursor=bind; cursor;cursor=cursor->next, i++)
@@ -1227,19 +1401,23 @@ static int __ctsvc_db_delete_records(const char* view_uri, int ids[], int count)
 	index = 0;
 	do {
 		ret = contacts_db_delete_record(view_uri, ids[index++]);
-		if( ret != CONTACTS_ERROR_NONE ) {
+		if (CONTACTS_ERROR_NO_DATA == ret) {
+			CTS_DBG("the record is not exist : %d", ret);
+			continue;
+		}
+		else if( ret != CONTACTS_ERROR_NONE ) {
 			CTS_ERR("contacts_db_delete_record is faild(%d)", ret);
 			ctsvc_end_trans(false);
 			return ret;
 		}
-	}while(index < count);
+	} while(index < count);
+
 	ret = ctsvc_end_trans(true);
 	if (ret < CONTACTS_ERROR_NONE)
 	{
 		CTS_ERR("DB error : ctsvc_end_trans() Failed(%d)", ret);
 		return ret;
 	}
-
 
 	return CONTACTS_ERROR_NONE;
 }
@@ -1459,23 +1637,147 @@ API int contacts_db_get_records_with_query( contacts_query_h query, int offset, 
 	return __ctsvc_db_get_records_with_query_exec(s_query, offset, limit, out_list);
 }
 
-
-static int __ctsvc_db_update_info_create_record_from_stmt(const char *view_uri,
-		cts_stmt stmt, int version, contacts_record_h* record)
+static int __ctsvc_db_get_contact_changes(const char* view_uri, int addressbook_id,
+		int version, contacts_list_h* out_list, int* out_current_version)
 {
-	int ret = contacts_record_create(view_uri, record);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "contacts_record_create is failed(%d)", ret);
+	int ret;
+	char query[CTS_SQL_MAX_LEN] = {0};
+	contacts_list_h list;
+	cts_stmt stmt;
 
-	ctsvc_updated_info_s *update_info = (ctsvc_updated_info_s *)*record;
+	if (0 <= addressbook_id) {
+		snprintf(query, sizeof(query),
+			"SELECT %d, contact_id, changed_ver, created_ver, addressbook_id, image_changed_ver FROM %s "
+			"WHERE changed_ver > %d AND addressbook_id = %d AND deleted = 0 "
+			"UNION "
+			"SELECT %d, contact_id, deleted_ver, -1, addressbook_id, 0 FROM %s "
+			"WHERE deleted_ver > %d AND created_ver <= %d AND addressbook_id = %d "
+			"UNION "
+			"SELECT %d, contact_id, changed_ver, -1, addressbook_id, 0 FROM %s "
+			"WHERE changed_ver > %d AND addressbook_id = %d AND deleted = 1",
+			CONTACTS_CHANGE_UPDATED, CTS_TABLE_CONTACTS, version, addressbook_id,
+			CONTACTS_CHANGE_DELETED, CTS_TABLE_DELETEDS, version, version, addressbook_id,
+			CONTACTS_CHANGE_DELETED, CTS_TABLE_CONTACTS, version, addressbook_id);
+	}
+	else {
+		snprintf(query, sizeof(query),
+			"SELECT %d, contact_id, changed_ver, created_ver, addressbook_id, image_changed_ver FROM %s "
+			"WHERE changed_ver > %d AND deleted = 0 "
+			"UNION "
+			"SELECT %d, contact_id, deleted_ver, -1, addressbook_id, 0 FROM %s "
+			"WHERE deleted_ver > %d AND created_ver <= %d "
+			"UNION "
+			"SELECT %d, contact_id, changed_ver, -1, addressbook_id, 0 FROM %s "
+			"WHERE changed_ver > %d AND deleted = 1",
+			CONTACTS_CHANGE_UPDATED, CTS_TABLE_CONTACTS, version,
+			CONTACTS_CHANGE_DELETED, CTS_TABLE_DELETEDS, version, version,
+			CONTACTS_CHANGE_DELETED, CTS_TABLE_CONTACTS, version);
+	}
 
-	update_info->changed_type = ctsvc_stmt_get_int(stmt, 0);
-	update_info->id = ctsvc_stmt_get_int(stmt, 1);
-	update_info->changed_ver = ctsvc_stmt_get_int(stmt, 2);
+	stmt = cts_query_prepare(query);
+	RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB , "DB error : cts_query_prepare() Failed");
 
-	if (ctsvc_stmt_get_int(stmt, 3) == update_info->changed_ver || version < ctsvc_stmt_get_int(stmt, 3))
-		update_info->changed_type = CONTACTS_CHANGE_INSERTED;
+	contacts_list_create(&list);
+	while ((ret = cts_stmt_step(stmt))) {
+		contacts_record_h record;
+		ctsvc_updated_info_s *update_info;
 
-	update_info->addressbook_id = ctsvc_stmt_get_int(stmt, 4);
+		if (1 != ret) {
+			CTS_ERR("DB error : cts_stmt_step() Failed(%d)", ret);
+			cts_stmt_finalize(stmt);
+			contacts_list_destroy(list, true);
+			return ret;
+		}
+
+		ret = contacts_record_create(_contacts_contact_updated_info._uri, &record);
+		update_info = (ctsvc_updated_info_s *)record;
+		update_info->changed_type = ctsvc_stmt_get_int(stmt, 0);
+		update_info->id = ctsvc_stmt_get_int(stmt, 1);
+		update_info->changed_ver = ctsvc_stmt_get_int(stmt, 2);
+
+		if (ctsvc_stmt_get_int(stmt, 3) == update_info->changed_ver || version < ctsvc_stmt_get_int(stmt, 3))
+			update_info->changed_type = CONTACTS_CHANGE_INSERTED;
+
+		update_info->addressbook_id = ctsvc_stmt_get_int(stmt, 4);
+
+		if (version < ctsvc_stmt_get_int(stmt, 5))
+			update_info->image_changed = true;
+
+		ctsvc_list_prepend(list, record);
+	}
+	cts_stmt_finalize(stmt);
+	ctsvc_list_reverse(list);
+
+	*out_list = list;
+	snprintf(query, sizeof(query), "SELECT ver FROM "CTS_TABLE_VERSION);
+	ret = ctsvc_query_get_first_int_result(query, out_current_version);
+
+	return CONTACTS_ERROR_NONE;
+}
+
+static int __ctsvc_db_get_group_changes(const char* view_uri, int addressbook_id,
+		int version, contacts_list_h* out_list, int* out_current_version)
+{
+	int ret;
+	char query[CTS_SQL_MAX_LEN] = {0};
+	contacts_list_h list;
+	cts_stmt stmt;
+
+	if (0 <= addressbook_id) {
+		snprintf(query, sizeof(query),
+			"SELECT %d, group_id, changed_ver, created_ver, addressbook_id FROM %s "
+			"WHERE changed_ver > %d AND addressbook_id = %d "
+			"UNION "
+			"SELECT %d, group_id, deleted_ver, -1, addressbook_id FROM %s "
+			"WHERE deleted_ver > %d AND created_ver <= %d AND addressbook_id = %d",
+			CONTACTS_CHANGE_UPDATED, CTS_TABLE_GROUPS, version, addressbook_id,
+			CONTACTS_CHANGE_DELETED, CTS_TABLE_GROUP_DELETEDS, version, version, addressbook_id);
+	}
+	else {
+		snprintf(query, sizeof(query),
+			"SELECT %d, group_id, changed_ver, created_ver, addressbook_id FROM %s "
+			"WHERE changed_ver > %d "
+			"UNION "
+			"SELECT %d, group_id, deleted_ver, -1, addressbook_id FROM %s "
+			"WHERE deleted_ver > %d AND created_ver <= %d",
+			CONTACTS_CHANGE_UPDATED, CTS_TABLE_GROUPS, version,
+			CONTACTS_CHANGE_DELETED, CTS_TABLE_GROUP_DELETEDS, version, version);
+	}
+
+	stmt = cts_query_prepare(query);
+	RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB , "DB error : cts_query_prepare() Failed");
+
+	contacts_list_create(&list);
+	while ((ret = cts_stmt_step(stmt))) {
+		contacts_record_h record;
+		ctsvc_updated_info_s *update_info;
+
+		if (1 != ret) {
+			CTS_ERR("DB error : cts_stmt_step() Failed(%d)", ret);
+			cts_stmt_finalize(stmt);
+			contacts_list_destroy(list, true);
+			return ret;
+		}
+
+		ret = contacts_record_create(_contacts_group_updated_info._uri, &record);
+		update_info = (ctsvc_updated_info_s *)record;
+		update_info->changed_type = ctsvc_stmt_get_int(stmt, 0);
+		update_info->id = ctsvc_stmt_get_int(stmt, 1);
+		update_info->changed_ver = ctsvc_stmt_get_int(stmt, 2);
+
+		if (ctsvc_stmt_get_int(stmt, 3) == update_info->changed_ver || version < ctsvc_stmt_get_int(stmt, 3))
+			update_info->changed_type = CONTACTS_CHANGE_INSERTED;
+
+		update_info->addressbook_id = ctsvc_stmt_get_int(stmt, 4);
+
+		ctsvc_list_prepend(list, record);
+	}
+	cts_stmt_finalize(stmt);
+	ctsvc_list_reverse(list);
+
+	*out_list = list;
+	snprintf(query, sizeof(query), "SELECT ver FROM "CTS_TABLE_VERSION);
+	ret = ctsvc_query_get_first_int_result(query, out_current_version);
 
 	return CONTACTS_ERROR_NONE;
 }
@@ -1549,8 +1851,8 @@ static int __ctsvc_db_get_group_member_changes(const char* view_uri, int address
 	cts_stmt stmt;
 
 	len = snprintf(query, sizeof(query),
-			"SELECT group_id, version, addressbook_id "
-				"FROM "CTSVC_DB_VIEW_GROUPS_MEMBER_UPDATED_INFO" WHERE version > %d", version);
+			"SELECT group_id, member_changed_ver, addressbook_id "
+				"FROM "CTS_TABLE_GROUPS" WHERE member_changed_ver > %d", version);
 
 	if (0 <= addressbook_id)
 		len += snprintf(query+len, sizeof(query)-len, " AND addressbook_id = %d ", addressbook_id);
@@ -1585,6 +1887,72 @@ static int __ctsvc_db_get_group_member_changes(const char* view_uri, int address
 	return CONTACTS_ERROR_NONE;
 }
 
+static int __ctsvc_db_get_my_profile_changes(const char* view_uri, int addressbook_id,
+		int version, contacts_list_h* out_list, int* out_current_version)
+{
+	int ret;
+	char query[CTS_SQL_MAX_LEN] = {0};
+	contacts_list_h list;
+	cts_stmt stmt;
+
+	if (0 <= addressbook_id) {
+		snprintf(query, sizeof(query),
+			"SELECT changed_ver, addressbook_id, %d FROM %s "
+			"WHERE changed_ver > %d AND changed_ver == created_ver AND deleted = 0 AND addressbook_id = %d "
+			"UNION "
+			"SELECT changed_ver, addressbook_id, %d FROM %s "
+			"WHERE changed_ver > %d AND changed_ver != created_ver AND deleted = 0 AND addressbook_id = %d "
+			"UNION "
+			"SELECT changed_ver, addressbook_id, %d FROM %s "
+			"WHERE changed_ver > %d AND deleted = 1 AND addressbook_id = %d",
+			CONTACTS_CHANGE_INSERTED, CTS_TABLE_MY_PROFILES, version, addressbook_id,
+			CONTACTS_CHANGE_UPDATED, CTS_TABLE_MY_PROFILES, version, addressbook_id,
+			CONTACTS_CHANGE_DELETED, CTS_TABLE_MY_PROFILES, version, addressbook_id);
+	}
+	else {
+		snprintf(query, sizeof(query),
+			"SELECT changed_ver, addressbook_id, %d FROM %s "
+			"WHERE changed_ver > %d AND changed_ver == created_ver AND deleted = 0 "
+			"UNION "
+			"SELECT changed_ver, addressbook_id, %d FROM %s "
+			"WHERE changed_ver > %d AND changed_ver != created_ver AND deleted = 0 "
+			"UNION "
+			"SELECT changed_ver, addressbook_id, %d FROM %s "
+			"WHERE changed_ver > %d AND deleted = 1",
+			CONTACTS_CHANGE_INSERTED, CTS_TABLE_MY_PROFILES, version,
+			CONTACTS_CHANGE_UPDATED, CTS_TABLE_MY_PROFILES, version,
+			CONTACTS_CHANGE_DELETED, CTS_TABLE_MY_PROFILES, version);
+	}
+
+	stmt = cts_query_prepare(query);
+	RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB , "DB error : cts_query_prepare() Failed");
+
+	contacts_list_create(&list);
+	while ((ret = cts_stmt_step(stmt))) {
+		contacts_record_h record;
+		if (1 != ret) {
+			CTS_ERR("DB error : cts_stmt_step() Failed(%d)", ret);
+			cts_stmt_finalize(stmt);
+			contacts_list_destroy(list, true);
+			return ret;
+		}
+
+		ret = contacts_record_create(view_uri, &record);
+		ctsvc_record_set_int(record, _contacts_my_profile_updated_info.version, ctsvc_stmt_get_int(stmt, 0));
+		ctsvc_record_set_int(record, _contacts_my_profile_updated_info.address_book_id, ctsvc_stmt_get_int(stmt, 1));
+		ctsvc_record_set_int(record, _contacts_my_profile_updated_info.last_changed_type, ctsvc_stmt_get_int(stmt, 2));
+		ctsvc_list_prepend(list, record);
+	}
+	cts_stmt_finalize(stmt);
+	ctsvc_list_reverse(list);
+
+	*out_list = list;
+	snprintf(query, sizeof(query), "SELECT ver FROM "CTS_TABLE_VERSION);
+	ret = ctsvc_query_get_first_int_result(query, out_current_version);
+
+	return CONTACTS_ERROR_NONE;
+}
+
 API int contacts_db_get_changes_by_version( const char* view_uri, int addressbook_id,
 		int version, contacts_list_h* out_list, int* out_current_version )
 {
@@ -1595,126 +1963,39 @@ API int contacts_db_get_changes_by_version( const char* view_uri, int addressboo
 	RETV_IF(NULL == out_current_version, CONTACTS_ERROR_INVALID_PARAMETER);
 	*out_current_version = 0;
 
-	char query[CTS_SQL_MAX_LEN] = {0};
-	if (0 == strcmp(view_uri, _contacts_contact_updated_info._uri))
-	{
-		if (0 <= addressbook_id)
-		{
-			snprintf(query, sizeof(query),
-				"SELECT %d, contact_id, changed_ver, created_ver, addressbook_id FROM %s "
-				"WHERE changed_ver > %d AND addressbook_id = %d AND deleted = 0 "
-				"UNION "
-				"SELECT %d, contact_id, deleted_ver, -1, addressbook_id FROM %s "
-				"WHERE deleted_ver > %d AND addressbook_id = %d "
-				"UNION "
-				"SELECT %d, contact_id, changed_ver, -1, addressbook_id FROM %s "
-				"WHERE changed_ver > %d AND addressbook_id = %d AND deleted = 1",
-				CONTACTS_CHANGE_UPDATED, CTS_TABLE_CONTACTS, version, addressbook_id,
-				CONTACTS_CHANGE_DELETED, CTS_TABLE_DELETEDS, version, addressbook_id,
-				CONTACTS_CHANGE_DELETED, CTS_TABLE_CONTACTS, version, addressbook_id);
-		}
-		else {
-			snprintf(query, sizeof(query),
-				"SELECT %d, contact_id, changed_ver, created_ver, addressbook_id FROM %s "
-				"WHERE changed_ver > %d AND deleted = 0 "
-				"UNION "
-				"SELECT %d, contact_id, deleted_ver, -1, addressbook_id FROM %s "
-				"WHERE deleted_ver > %d "
-				"UNION "
-				"SELECT %d, contact_id, changed_ver, -1, addressbook_id FROM %s "
-				"WHERE changed_ver > %d AND deleted = 1",
-				CONTACTS_CHANGE_UPDATED, CTS_TABLE_CONTACTS, version,
-				CONTACTS_CHANGE_DELETED, CTS_TABLE_DELETEDS, version,
-				CONTACTS_CHANGE_DELETED, CTS_TABLE_CONTACTS, version);
-		}
+	if (0 == strcmp(view_uri, _contacts_contact_updated_info._uri)) {
+		ret = __ctsvc_db_get_contact_changes(view_uri, addressbook_id,
+					version, out_list, out_current_version);
+		return ret;
 	}
-	else if(0 == strcmp(view_uri, _contacts_group_updated_info._uri))
-	{
-		if (0 <= addressbook_id)
-		{
-			snprintf(query, sizeof(query),
-				"SELECT %d, group_id, changed_ver, created_ver, addressbook_id FROM %s "
-				"WHERE changed_ver > %d AND addressbook_id = %d "
-				"UNION "
-				"SELECT %d, group_id, deleted_ver, -1, addressbook_id FROM %s "
-				"WHERE deleted_ver > %d AND addressbook_id = %d",
-				CONTACTS_CHANGE_UPDATED, CTS_TABLE_GROUPS, version, addressbook_id,
-				CONTACTS_CHANGE_DELETED, CTS_TABLE_GROUP_DELETEDS, version, addressbook_id);
-		}
-		else {
-			snprintf(query, sizeof(query),
-				"SELECT %d, group_id, changed_ver, created_ver, addressbook_id FROM %s "
-				"WHERE changed_ver > %d "
-				"UNION "
-				"SELECT %d, group_id, deleted_ver, -1, addressbook_id FROM %s "
-				"WHERE deleted_ver > %d ",
-				CONTACTS_CHANGE_UPDATED, CTS_TABLE_GROUPS, version,
-				CONTACTS_CHANGE_DELETED, CTS_TABLE_GROUP_DELETEDS, version);
-		}
+	else if (0 == strcmp(view_uri, _contacts_group_updated_info._uri)) {
+		ret = __ctsvc_db_get_group_changes(view_uri, addressbook_id,
+					version, out_list, out_current_version);
+		return ret;
 	}
-	else if(0 == strcmp(view_uri, _contacts_group_member_updated_info._uri)) {
+	else if (0 == strcmp(view_uri, _contacts_group_member_updated_info._uri)) {
 		ret = __ctsvc_db_get_group_member_changes(view_uri, addressbook_id,
 					version, out_list, out_current_version);
 		return ret;
 	}
-	else if(0 == strcmp(view_uri, _contacts_grouprel_updated_info._uri)) {
+	else if (0 == strcmp(view_uri, _contacts_grouprel_updated_info._uri)) {
 		ret = __ctsvc_db_get_group_relations_changes(view_uri, addressbook_id,
 					version, out_list, out_current_version);
 		return ret;
 	}
-/*
-	else if(0 == strcmp(view_uri, CTSVC_VIEW_URI_PERSON_UPDATED_INFO))
-	{
-
-	}
-*/
-	else
-	{
-		CTS_ERR("Invalid parameter : this API does not support uri(%s)", view_uri);
-		return CONTACTS_ERROR_INVALID_PARAMETER;
+	else if (0 == strcmp(view_uri, _contacts_my_profile_updated_info._uri)) {
+		ret = __ctsvc_db_get_my_profile_changes(view_uri, addressbook_id,
+					version, out_list, out_current_version);
+		return ret;
 	}
 
-	cts_stmt stmt = cts_query_prepare(query);
-	RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB , "DB error : cts_query_prepare() Failed");
-
-	contacts_list_h list;
-	contacts_list_create(&list);
-
-	while ((ret = cts_stmt_step(stmt))) {
-		contacts_record_h record;
-		if (1 != ret) {
-			CTS_ERR("DB error : cts_stmt_step() Failed(%d)", ret);
-			cts_stmt_finalize(stmt);
-			contacts_list_destroy(list, true);
-			return ret;
-		}
-
-		ret = __ctsvc_db_update_info_create_record_from_stmt(view_uri, stmt, version, &record);
-		if( ret != CONTACTS_ERROR_NONE )
-		{
-			CTS_ERR("DB error : __ctsvc_db_update_info_create_record_from_stmt() Failed(%d)", ret);
-			cts_stmt_finalize(stmt);
-			contacts_list_destroy(list, true);
-			return CONTACTS_ERROR_DB;
-		}
-
-		ctsvc_list_prepend(list, record);
-	}
-	cts_stmt_finalize(stmt);
-	ctsvc_list_reverse(list);
-
-	*out_list = (contacts_list_h)list;
-
-	// why should be return with current_version ??
-	const char *version_query = "SELECT ver FROM "CTS_TABLE_VERSION;
-	ret = ctsvc_query_get_first_int_result(version_query, out_current_version);
-
-	return CONTACTS_ERROR_NONE;
+	CTS_ERR("Invalid parameter : this API does not support uri(%s)", view_uri);
+	return CONTACTS_ERROR_INVALID_PARAMETER;
 }
 
 API int contacts_db_get_current_version( int* out_current_version )
 {
-	RETVM_IF(NULL == out_current_version, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid paramter");
+	RETVM_IF(NULL == out_current_version, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter");
 
 	return ctsvc_get_current_version(out_current_version);
 }
@@ -1724,7 +2005,7 @@ API int contacts_db_search_records(const char* view_uri, const char *keyword,
 {
 	RETV_IF(NULL == out_list, CONTACTS_ERROR_INVALID_PARAMETER);
 	*out_list = NULL;
-	RETVM_IF(NULL == view_uri, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid paramter");
+	RETVM_IF(NULL == view_uri, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter");
 
 	return __ctsvc_db_search_records(view_uri, keyword, offset, limit, out_list);
 }
@@ -1734,7 +2015,7 @@ API int contacts_db_search_records_with_query( contacts_query_h query, const cha
 {
 	RETV_IF(NULL == out_list, CONTACTS_ERROR_INVALID_PARAMETER);
 	*out_list = NULL;
-	RETVM_IF(NULL == query, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid paramter");
+	RETVM_IF(NULL == query, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter");
 
 	return __ctsvc_db_search_records_with_query(query, keyword, offset, limit, out_list);
 }
@@ -1746,7 +2027,7 @@ API int contacts_db_get_count( const char* view_uri, int *out_count)
 
 	RETV_IF(NULL == out_count, CONTACTS_ERROR_INVALID_PARAMETER);
 	*out_count = 0;
-	RETVM_IF(NULL == view_uri, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid paramter");
+	RETVM_IF(NULL == view_uri, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter");
 
 	if (( plugin_info = ctsvc_db_get_plugin_info(ctsvc_view_get_record_type(view_uri)))){
 		if( plugin_info->get_count ) {
@@ -1768,7 +2049,7 @@ API int contacts_db_get_count_with_query( contacts_query_h query, int *out_count
 	RETV_IF(NULL == out_count, CONTACTS_ERROR_INVALID_PARAMETER);
 	*out_count = 0;
 
-	RETVM_IF(NULL == query, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid paramter");
+	RETVM_IF(NULL == query, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter");
 	s_query = (ctsvc_query_s*)query;
 
 	type = ctsvc_view_get_record_type(s_query->view_uri);
@@ -1791,7 +2072,7 @@ API int contacts_db_insert_record(contacts_record_h record, int *id )
 	if (id)
 		*id = 0;
 
-	RETVM_IF(NULL == record, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid paramter");
+	RETVM_IF(NULL == record, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter");
 
 	plugin_info = ctsvc_db_get_plugin_info(((ctsvc_record_s*)record)->r_type);
 	RETVM_IF(NULL == plugin_info, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter");
@@ -1804,7 +2085,7 @@ API int contacts_db_update_record(contacts_record_h record)
 {
 	ctsvc_db_plugin_info_s* plugin_info = NULL;
 
-	RETVM_IF(NULL == record, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid paramter");
+	RETVM_IF(NULL == record, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter");
 
 	plugin_info = ctsvc_db_get_plugin_info(((ctsvc_record_s*)record)->r_type);
 	RETVM_IF(NULL == plugin_info, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter");
@@ -1818,7 +2099,7 @@ API int contacts_db_delete_record(const char* view_uri, int id)
 	ctsvc_record_type_e type = CTSVC_RECORD_INVALID;
 	ctsvc_db_plugin_info_s* plugin_info = NULL;
 
-	RETVM_IF(NULL == view_uri, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid paramter");
+	RETVM_IF(NULL == view_uri, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter");
 
 	type = ctsvc_view_get_record_type(view_uri);
 	plugin_info = ctsvc_db_get_plugin_info(type);
@@ -1835,7 +2116,7 @@ API int contacts_db_get_record(const char* view_uri, int id, contacts_record_h* 
 
 	RETV_IF(NULL == out_record, CONTACTS_ERROR_INVALID_PARAMETER);
 	*out_record = NULL;
-	RETVM_IF(NULL == view_uri, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid paramter");
+	RETVM_IF(NULL == view_uri, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter");
 
 	type = ctsvc_view_get_record_type(view_uri);
 	plugin_info = ctsvc_db_get_plugin_info(type);
@@ -1850,7 +2131,7 @@ API int contacts_db_replace_record( contacts_record_h record, int id )
 {
 	ctsvc_db_plugin_info_s* plugin_info = NULL;
 
-	RETVM_IF(NULL == record, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid paramter : record is NULL");
+	RETVM_IF(NULL == record, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : record is NULL");
 
 	plugin_info = ctsvc_db_get_plugin_info(((ctsvc_record_s*)record)->r_type);
 	RETVM_IF(NULL == plugin_info, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter");
@@ -1867,7 +2148,7 @@ API int contacts_db_get_all_records(const char* view_uri, int offset, int limit,
 
 	RETV_IF(NULL == out_list, CONTACTS_ERROR_INVALID_PARAMETER);
 	*out_list = NULL;
-	RETVM_IF(NULL == view_uri, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid paramter");
+	RETVM_IF(NULL == view_uri, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter");
 
 	type = ctsvc_view_get_record_type(view_uri);
 	plugin_info = ctsvc_db_get_plugin_info(type);
@@ -1887,7 +2168,7 @@ int ctsvc_db_insert_records(contacts_list_h list, int **ids, unsigned int *count
 	int ret = CONTACTS_ERROR_NONE;
 	ctsvc_db_plugin_info_s* plugin_info = NULL;
 
-	RETVM_IF(NULL == list, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid paramter");
+	RETVM_IF(NULL == list, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter");
 
 	if (count)
 		contacts_list_get_count(list, count);
@@ -1904,7 +2185,7 @@ int ctsvc_db_insert_records(contacts_list_h list, int **ids, unsigned int *count
 API int contacts_db_insert_records_async( contacts_list_h list,
 		contacts_db_insert_result_cb callback, void *user_data)
 {
-	RETVM_IF(NULL == list, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid paramter");
+	RETVM_IF(NULL == list, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter");
 
 #ifdef _CONTACTS_NATIVE
 	if (callback) {
@@ -1925,7 +2206,7 @@ int ctsvc_db_update_records(contacts_list_h list)
 	int ret = CONTACTS_ERROR_NONE;
 	ctsvc_db_plugin_info_s* plugin_info = NULL;
 
-	RETVM_IF(NULL == list, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid paramter");
+	RETVM_IF(NULL == list, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter");
 
 	if (( plugin_info = ctsvc_db_get_plugin_info(((ctsvc_list_s*)list)->l_type))){
 		if( plugin_info->update_records ) {
@@ -1940,7 +2221,7 @@ int ctsvc_db_update_records(contacts_list_h list)
 API int contacts_db_update_records_async( contacts_list_h list,
 		contacts_db_result_cb callback, void *user_data)
 {
-	RETVM_IF(NULL == list, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid paramter");
+	RETVM_IF(NULL == list, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter");
 
 #ifdef _CONTACTS_NATIVE
 	if (callback) {
@@ -1976,8 +2257,8 @@ int ctsvc_db_delete_records(const char* view_uri, int* ids, int count)
 API int contacts_db_delete_records_async( const char* view_uri, int* ids, int count,
 		contacts_db_result_cb callback, void *user_data)
 {
-	RETVM_IF(NULL == view_uri, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid paramter");
-	RETVM_IF(NULL == ids, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid paramter");
+	RETVM_IF(NULL == view_uri, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter");
+	RETVM_IF(NULL == ids, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter");
 
 #ifdef _CONTACTS_NATIVE
 	if (callback) {
@@ -2061,8 +2342,8 @@ int ctsvc_db_replace_records(contacts_list_h list, int ids[], unsigned int count
 	int ret = CONTACTS_ERROR_NONE;
 	ctsvc_db_plugin_info_s* plugin_info = NULL;
 
-	RETVM_IF(NULL == list, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid paramter");
-	RETVM_IF(NULL == ids, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid paramter");
+	RETVM_IF(NULL == list, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter");
+	RETVM_IF(NULL == ids, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter");
 
 	if (( plugin_info = ctsvc_db_get_plugin_info(((ctsvc_list_s*)list)->l_type))){
 		if( plugin_info->replace_records ) {
@@ -2077,8 +2358,8 @@ int ctsvc_db_replace_records(contacts_list_h list, int ids[], unsigned int count
 API int contacts_db_replace_records_async( contacts_list_h list, int ids[], unsigned int count,
 		contacts_db_result_cb callback, void *user_data )
 {
-	RETVM_IF(NULL == list, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid paramter");
-	RETVM_IF(NULL == ids, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid paramter");
+	RETVM_IF(NULL == list, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter");
+	RETVM_IF(NULL == ids, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter");
 
 #ifdef _CONTACTS_NATIVE
 	if (callback) {
@@ -2117,3 +2398,11 @@ API int contacts_db_replace_records( contacts_list_h list, int record_id_array[]
 	return ctsvc_db_replace_records(list, record_id_array, count);
 }
 
+API int contacts_db_get_last_change_version(int* last_version)
+{
+	int ret = CONTACTS_ERROR_NONE;
+
+	RETVM_IF(NULL == last_version, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter");
+	*last_version = ctsvc_get_transaction_ver();
+	return ret;
+}

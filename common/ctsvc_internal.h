@@ -36,10 +36,8 @@
 //#undef API
 #endif
 
-
 //#define CONTACTS_DEBUGGING
 //#define CONTACTS_TIMECHECK
-
 
 #define LOG_TAG "CONTACTS_SERVICE"
 #include <dlog.h>

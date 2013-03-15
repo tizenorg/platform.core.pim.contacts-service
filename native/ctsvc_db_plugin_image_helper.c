@@ -22,6 +22,7 @@
 #include "ctsvc_schema.h"
 #include "ctsvc_sqlite.h"
 #include "ctsvc_db_init.h"
+#include "ctsvc_db_query.h"
 #include "ctsvc_db_plugin_image_helper.h"
 #include "ctsvc_db_plugin_contact_helper.h"
 #include "ctsvc_record.h"
@@ -66,21 +67,22 @@ static inline int __ctsvc_image_bind_stmt(cts_stmt stmt, ctsvc_image_s *image, i
 int ctsvc_db_image_insert(contacts_record_h record, int contact_id, bool is_my_profile, int *id)
 {
 	int ret;
+	int image_id;
 	cts_stmt stmt = NULL;
 	char query[CTS_SQL_MAX_LEN] = {0};
 	char image_path[CTS_SQL_MAX_LEN] = {0};
 	ctsvc_image_s *image = (ctsvc_image_s *)record;
 
 	// These check should be done in client side
-//	RETVM_IF(image->deleted, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : deleted image record");
 	RETV_IF(NULL == image->path, CONTACTS_ERROR_NONE);
 	RETVM_IF(contact_id <= 0, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : contact_id(%d) is mandatory field to insert image record", image->contact_id);
 	RETVM_IF(0 < image->id, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : id(%d), This record is already inserted", image->id);
 
-	ret = ctsvc_contact_add_image_file(CTSVC_IMG_NORMAL, contact_id, image->path,
-			image_path, sizeof(image_path));
+	image_id = cts_db_get_next_id(CTS_TABLE_DATA);
+	ret = ctsvc_contact_add_image_file(CTSVC_IMG_NORMAL, contact_id, image_id, image->path, image_path, sizeof(image_path));
+
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("ctsvc_contact_add_image_file(NORMAL) Failed(%d)", ret);
 		return ret;
@@ -89,9 +91,9 @@ int ctsvc_db_image_insert(contacts_record_h record, int contact_id, bool is_my_p
 	image->path = strdup(image_path);
 
 	snprintf(query, sizeof(query),
-		"INSERT INTO "CTS_TABLE_DATA"(contact_id, is_my_profile, datatype, is_default, data1, data2, data3) "
-									"VALUES(%d, %d, %d, %d, %d, ?, ?)",
-					contact_id, is_my_profile, CTSVC_DATA_IMAGE, image->is_default, image->type);
+			"INSERT INTO "CTS_TABLE_DATA"(id, contact_id, is_my_profile, datatype, is_default, data1, data2, data3) "
+			"VALUES(%d, %d, %d, %d, %d, %d, ?, ?)",
+			image_id, contact_id, is_my_profile, CTSVC_DATA_IMAGE, image->is_default, image->type);
 
 	stmt = cts_query_prepare(query);
 	RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB, "DB error : cts_query_prepare() Failed");
@@ -118,50 +120,53 @@ int ctsvc_db_image_insert(contacts_record_h record, int contact_id, bool is_my_p
 
 int ctsvc_db_image_update(contacts_record_h record, int contact_id, bool is_my_profile)
 {
-	int ret;
+	int id;
+	int ret = CONTACTS_ERROR_NONE;
+	char* set = NULL;
+	GSList *bind_text = NULL;
+	GSList *cursor = NULL;
 	ctsvc_image_s *image = (ctsvc_image_s*)record;
 	char query[CTS_SQL_MAX_LEN] = {0};
-	char image_path[CTS_SQL_MAX_LEN] = {0};
-	cts_stmt stmt;
 
 	RETVM_IF(!image->id, CONTACTS_ERROR_INVALID_PARAMETER, "image of contact has no ID.");
-
-	ret = ctsvc_contact_update_image_file(CTSVC_IMG_NORMAL, contact_id,
-				image->path, image_path, sizeof(image_path));
-
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_contact_update_image_file() Failed(%d)", ret);
-
-	if (*image_path) {
-		free(image->path);
-		image->path = strdup(image_path);
-	}
+	RETVM_IF(CTSVC_PROPERTY_FLAG_DIRTY != (image->base.property_flag & CTSVC_PROPERTY_FLAG_DIRTY), CONTACTS_ERROR_NONE, "No update");
 
 	snprintf(query, sizeof(query),
-		"UPDATE "CTS_TABLE_DATA" SET contact_id=%d, is_my_profile=%d, is_default=%d, data1=%d, data2=?, data3=? WHERE id=%d",
-				contact_id, is_my_profile, image->is_default, image->type, image->id);
+			"SELECT id FROM "CTS_TABLE_DATA" WHERE id = %d", image->id);
+	ret = ctsvc_query_get_first_int_result(query, &id);
+	RETV_IF(ret != CONTACTS_ERROR_NONE, ret);
 
-	stmt = cts_query_prepare(query);
-	RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB, "DB error : cts_query_prepare() Failed");
+	if (image->is_changed) {
+		char image_path[CTS_SQL_MAX_LEN] = {0};
 
-	__ctsvc_image_bind_stmt(stmt, image, 1);
+		ret = ctsvc_contact_update_image_file(CTSVC_IMG_NORMAL, contact_id, image->id, image->path, image_path, sizeof(image_path));
+		RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_contact_update_image_file() Failed(%d)", ret);
 
-	ret = cts_stmt_step(stmt);
-	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("cts_stmt_step() Failed(%d)", ret);
-		cts_stmt_finalize(stmt);
-		return ret;
+		if (*image_path) {
+			free(image->path);
+			image->path = strdup(image_path);
+		}
+		image->is_changed = false;
 	}
 
-	cts_stmt_finalize(stmt);
+	do {
+		if (CONTACTS_ERROR_NONE != (ret = ctsvc_db_create_set_query(record, &set, &bind_text))) break;
+		if (CONTACTS_ERROR_NONE != (ret = ctsvc_db_update_record_with_set_query(set, bind_text, CTS_TABLE_DATA, image->id))) break;
+		if (!is_my_profile)
+			ctsvc_set_image_noti();
+	} while (0);
 
-	if (!is_my_profile)
-		ctsvc_set_image_noti();
-	image->is_changed = false;
-
-	return CONTACTS_ERROR_NONE;
+	CTSVC_RECORD_RESET_PROPERTY_FLAGS((ctsvc_record_s *)record);
+	CONTACTS_FREE(set);
+	if (bind_text) {
+		for (cursor=bind_text;cursor;cursor=cursor->next)
+			CONTACTS_FREE(cursor->data);
+		g_slist_free(bind_text);
+	}
+	return ret;
 }
 
-int ctsvc_db_image_delete(int id)
+int ctsvc_db_image_delete(int id, bool is_my_profile)
 {
 	int ret;
 	char query[CTS_SQL_MIN_LEN] = {0};
@@ -171,8 +176,29 @@ int ctsvc_db_image_delete(int id)
 
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_query_exec() Failed(%d)", ret);
-	ctsvc_set_image_noti();
+
+	if (!is_my_profile)
+		ctsvc_set_image_noti();
 
 	return CONTACTS_ERROR_NONE;
 }
+
+void ctsvc_db_data_image_delete_callback(sqlite3_context *context, int argc, sqlite3_value ** argv)
+{
+	int ret;
+	const unsigned char* image_path;
+
+	if (argc > 1) {
+		sqlite3_result_null(context);
+		return;
+	}
+	image_path = sqlite3_value_text(argv[0]);
+
+	ret = ctsvc_contact_delete_image_file_with_path(image_path);
+	WARN_IF (CONTACTS_ERROR_NONE != ret && CONTACTS_ERROR_NO_DATA != ret,
+			"ctsvc_contact_delete_image_file_with_path(NORMAL) Failed(%d)", ret);
+
+	return;
+}
+
 

@@ -53,7 +53,7 @@ API int contacts_sim_insert(contacts_record_h record, int *contact_id)
 	if (ctsvc_ipc_call(CTSVC_IPC_SIM_MODULE, CTSVC_IPC_SERVER_SIM_INSERT_CONTACT, indata, &outdata) != 0)
 	{
 		pims_ipc_data_destroy(indata);
-		CTS_ERR("pims_ipc_call failed");
+		CTS_ERR("ctsvc_ipc_call failed");
 		return CONTACTS_ERROR_IPC;
 	}
 
@@ -100,7 +100,7 @@ API int contacts_sim_update(contacts_record_h record)
 	if (ctsvc_ipc_call(CTSVC_IPC_SIM_MODULE, CTSVC_IPC_SERVER_SIM_UPDATE_CONTACT, indata, &outdata) != 0)
 	{
 		pims_ipc_data_destroy(indata);
-		CTS_ERR("pims_ipc_call failed");
+		CTS_ERR("ctsvc_ipc_call failed");
 		return CONTACTS_ERROR_IPC;
 	}
 
@@ -148,7 +148,7 @@ API int contacts_sim_delete(int person_id)
 	if (ctsvc_ipc_call(CTSVC_IPC_SIM_MODULE, CTSVC_IPC_SERVER_SIM_DELETE_CONTACT, indata, &outdata) != 0)
 	{
 		pims_ipc_data_destroy(indata);
-		CTS_ERR("pims_ipc_call failed");
+		CTS_ERR("ctsvc_ipc_call failed");
 		return CONTACTS_ERROR_IPC;
 	}
 

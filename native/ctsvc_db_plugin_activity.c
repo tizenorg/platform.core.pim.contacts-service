@@ -71,7 +71,6 @@ static int __ctsvc_db_activity_photo_insert_record( ctsvc_activity_photo_s *phot
 	stmt = cts_query_prepare(query);
 	RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB, "DB error : cts_query_prepare() Failed");
 
-
 	cts_stmt_bind_text(stmt, 1, photo->photo_url);
 
 	ret = cts_stmt_step(stmt);
@@ -174,14 +173,7 @@ static int __ctsvc_db_activity_insert_record( contacts_record_h record, int *id 
 	}
 
 	ctsvc_set_activity_noti();
-	ctsvc_set_contact_noti();
-
-	ret = ctsvc_db_contact_update_changed_time(activity->contact_id);
-	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("cts_query_exec() Failed(%d)", ret);
-		ctsvc_end_trans(false);
-		return ret;
-	}
+	ctsvc_set_person_noti();
 
 	if (id)
 		*id = activity_id;
@@ -282,7 +274,6 @@ static int __ctsvc_db_activity_get_record( int id, contacts_record_h* out_record
 	cts_stmt stmt = NULL;
 	contacts_record_h record;
 
-
 	snprintf(query, sizeof(query), "SELECT id, contact_id, source_name, status, "
 					"timestamp, sync_data1, sync_data2, sync_data3, sync_data4 "
 					"FROM "CTSVC_DB_VIEW_ACTIVITY" WHERE id = %d", id);
@@ -328,7 +319,7 @@ static int __ctsvc_db_activity_delete_record( int id )
 	if (CONTACTS_ERROR_NONE != ret ) {
 		CTS_ERR("No data : id (%d)", id);
 		ctsvc_end_trans(false);
-		return CONTACTS_ERROR_NO_DATA;
+		return ret;
 	}
 
 	snprintf(query, sizeof(query),
@@ -341,14 +332,7 @@ static int __ctsvc_db_activity_delete_record( int id )
 	}
 
 	ctsvc_set_activity_noti();
-	ctsvc_set_contact_noti();
-
-	ret = ctsvc_db_contact_update_changed_time(contact_id);
-	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("cts_query_exec() Failed(%d)", ret);
-		ctsvc_end_trans(false);
-		return ret;
-	}
+	ctsvc_set_person_noti();
 
 	ret = ctsvc_end_trans(true);
 	if (ret < CONTACTS_ERROR_NONE)

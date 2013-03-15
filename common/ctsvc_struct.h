@@ -104,27 +104,8 @@ typedef enum {
 	CTSVC_FILTER_COMPOSITE,
 }ctsvc_filter_type_e;
 
-/*
-typedef enum {
-	TYPE_BOOL,
-	TYPE_INT,
-	TYPE_LLI,
-	TYPE_STR,
-	TYPE_DOUBLE,
-	TYPE_PTR,
-}value_type_e;
-
-typedef enum {
-	PROPERTY_NONE,
-	PROPERTY_FILTER,
-	PROPERTY_PROJECTION,
-	PROPERTY_ALL,
-}property_type_e;
-*/
-
 typedef struct{
 	unsigned int property_id;
-	int type;
 	int property_type;
 	void* fields;
 }property_info_s;
@@ -176,11 +157,11 @@ typedef struct {
 
 typedef struct {
 	int r_type;
-	bool deleted;
 	const ctsvc_record_plugin_cb_s *plugin_cbs;
 	const char* view_uri;
 	unsigned int property_max_count;
 	unsigned char* properties_flags;
+	unsigned char property_flag;
 }ctsvc_record_s;
 
 typedef struct  {
@@ -253,7 +234,6 @@ typedef struct {
 typedef struct {
 	ctsvc_record_s base;
 	bool name_contact_id_changed;
-	bool image_thumbnail_changed;
 	bool ringtone_changed;
 	bool vibration_changed;
 	bool is_favorite_changed;
@@ -534,6 +514,8 @@ typedef struct {
 	char *reverse_display_name;
 	int display_source_type;
 	int display_name_language;
+	char *sort_name;
+	char *reverse_sort_name;
 	char *sortkey;
 	char *reverse_sortkey;
 	char *uid;
@@ -599,6 +581,8 @@ typedef struct {
 	int id;
 	int changed_ver;
 	int addressbook_id;
+	bool image_changed;
+	int last_changed_type;	// it is used for _contacts_my_profile_updated_info
 }ctsvc_updated_info_s;
 
 typedef struct {

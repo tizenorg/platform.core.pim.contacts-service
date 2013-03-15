@@ -53,6 +53,8 @@
 #define CTS_TABLE_VERSION "cts_version"
 #define CTS_TABLE_MY_PROFILES "my_profiles"
 #define CTS_TABLE_CONTACT_STAT "contact_stat"
+#define CTS_TABLE_NAME_LOOKUP "name_lookup"
+#define CTS_TABLE_PHONE_LOOKUP "phone_lookup"
 #define CTS_TABLE_SEARCH_INDEX "search_index"
 #define CTS_TABLE_ACTIVITIES "activities"
 #define CTS_TABLE_ACTIVITY_PHOTOS "activity_photos"
@@ -62,6 +64,7 @@
 // DB views /////////////////////////////////////////////////////////////////////
 #define CTSVC_DB_VIEW_PERSON					"view_person"
 #define CTSVC_DB_VIEW_CONTACT					"view_contact"
+#define CTSVC_DB_VIEW_MY_PROFILE				"view_my_profile"
 
 #define CTSVC_DB_VIEW_NAME						"view_name"
 #define CTSVC_DB_VIEW_NUMBER					"view_number"
@@ -83,7 +86,7 @@
 #define CTSVC_DB_VIEW_SPEEDIDAL					"view_speeddial"
 
 //#define CTSVC_DB_VIEW_GROUPS_UPDATED_INFO		"view_group_changes"
-#define CTSVC_DB_VIEW_GROUPS_MEMBER_UPDATED_INFO	"view_group_member_changes"
+//#define CTSVC_DB_VIEW_GROUPS_MEMBER_UPDATED_INFO	"view_group_member_changes"
 //#define CTSVC_DB_VIEW_CONTACTS_UPDATED_INFO		"view_contacts_changes"
 
 #define CTSVC_DB_VIEW_PERSON_CONTACT			"view_person_contact"

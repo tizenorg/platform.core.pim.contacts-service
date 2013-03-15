@@ -50,10 +50,13 @@ enum {
 	CTSVC_VCARD_VALUE_FN,
 	CTSVC_VCARD_VALUE_N,
 	CTSVC_VCARD_VALUE_PHONETIC_FIRST_NAME,
+	CTSVC_VCARD_VALUE_PHONETIC_MIDDLE_NAME,
 	CTSVC_VCARD_VALUE_PHONETIC_LAST_NAME,
 	CTSVC_VCARD_VALUE_NICKNAME,
 	CTSVC_VCARD_VALUE_PHOTO,
 	CTSVC_VCARD_VALUE_BDAY,
+	CTSVC_VCARD_VALUE_X_ANNIVERSARY,
+	CTSVC_VCARD_VALUE_X_TIZEN_EVENT,
 	CTSVC_VCARD_VALUE_ADR,
 	CTSVC_VCARD_VALUE_LABEL,
 	CTSVC_VCARD_VALUE_TEL,
@@ -62,19 +65,25 @@ enum {
 	CTSVC_VCARD_VALUE_ROLE,
 	CTSVC_VCARD_VALUE_LOGO,
 	CTSVC_VCARD_VALUE_ORG,
+	CTSVC_VCARD_VALUE_X_TIZEN_COMPANY_LOCATION,
+	CTSVC_VCARD_VALUE_X_TIZEN_COMPANY_DESCRIPTION,
+	CTSVC_VCARD_VALUE_X_TIZEN_COMPANY_PHONETIC_NAME,
+	CTSVC_VCARD_VALUE_X_TIZEN_COMPANY_ASSISTANT_NAME,
 	CTSVC_VCARD_VALUE_NOTE,
 	CTSVC_VCARD_VALUE_REV,
 	CTSVC_VCARD_VALUE_UID,
 	CTSVC_VCARD_VALUE_URL,
-	CTSVC_VCARD_VALUE_X_ANNIVERSARY,
 	CTSVC_VCARD_VALUE_X_MSN,
 	CTSVC_VCARD_VALUE_X_YAHOO,
 	CTSVC_VCARD_VALUE_X_ICQ,
 	CTSVC_VCARD_VALUE_X_AIM,
 	CTSVC_VCARD_VALUE_X_JABBER,
+	CTSVC_VCARD_VALUE_X_SKYPE_USERNAME,
 	CTSVC_VCARD_VALUE_X_SKYPE,
 	CTSVC_VCARD_VALUE_X_QQ,
 	CTSVC_VCARD_VALUE_X_GOOGLE_TALK,
+	CTSVC_VCARD_VALUE_X_TIZEN_MESSENGER,
+	CTSVC_VCARD_VALUE_X_TIZEN_RELATIONSHIP,
 	CTSVC_VCARD_VALUE_END,
 	CTSVC_VCARD_VALUE_MAX
 };
@@ -102,10 +111,13 @@ static void __ctsvc_vcard_initial(void)
 		content_name[CTSVC_VCARD_VALUE_FN] = "FN";
 		content_name[CTSVC_VCARD_VALUE_N] = "N";
 		content_name[CTSVC_VCARD_VALUE_PHONETIC_FIRST_NAME] = "X-PHONETIC-FIRST-NAME";
+		content_name[CTSVC_VCARD_VALUE_PHONETIC_MIDDLE_NAME] = "X-PHONETIC-MIDDLE-NAME";
 		content_name[CTSVC_VCARD_VALUE_PHONETIC_LAST_NAME] = "X-PHONETIC-LAST-NAME";
 		content_name[CTSVC_VCARD_VALUE_NICKNAME] = "NICKNAME";
 		content_name[CTSVC_VCARD_VALUE_PHOTO] = "PHOTO";
 		content_name[CTSVC_VCARD_VALUE_BDAY] = "BDAY";
+		content_name[CTSVC_VCARD_VALUE_X_ANNIVERSARY] = "ANNIVERSARY";
+		content_name[CTSVC_VCARD_VALUE_X_TIZEN_EVENT] = "X-TIZEN-EVENT";
 		content_name[CTSVC_VCARD_VALUE_ADR] = "ADR";
 		content_name[CTSVC_VCARD_VALUE_LABEL] = "LABEL"; /* not supported */
 		content_name[CTSVC_VCARD_VALUE_TEL] = "TEL";
@@ -118,6 +130,10 @@ static void __ctsvc_vcard_initial(void)
 		content_name[CTSVC_VCARD_VALUE_LOGO] = "LOGO";
 		//content_name[CTSVC_VCARD_VALUE_AGENT] = "AGENT"; /* not supported */
 		content_name[CTSVC_VCARD_VALUE_ORG] = "ORG";
+		content_name[CTSVC_VCARD_VALUE_X_TIZEN_COMPANY_LOCATION] = "X-TIZEN-COMPANY-LOCATION";
+		content_name[CTSVC_VCARD_VALUE_X_TIZEN_COMPANY_DESCRIPTION] = "X-TIZEN-COMPANY-DESCRIPTION";
+		content_name[CTSVC_VCARD_VALUE_X_TIZEN_COMPANY_PHONETIC_NAME] = "X-TIZEN-COMPANY-PHONETIC-NAME";
+		content_name[CTSVC_VCARD_VALUE_X_TIZEN_COMPANY_ASSISTANT_NAME] = "X-TIZEN-COMPANY-ASSISTANT-NAME";
 		//content_name[CTSVC_VCARD_VALUE_CATEGORIES] = "CATEGORIES"; /* not supported */
 		content_name[CTSVC_VCARD_VALUE_NOTE] = "NOTE";
 		//content_name[CTSVC_VCARD_VALUE_PRODID] = "PRODID"; /* not supported */
@@ -129,15 +145,17 @@ static void __ctsvc_vcard_initial(void)
 		//content_name[CTSVC_VCARD_VALUE_VERSION] = "VERSION"; /* not supported */
 		//content_name[CTSVC_VCARD_VALUE_CLASS] = "CLASS";         /* not supported */
 		//content_name[CTSVC_VCARD_VALUE_KEY] = "KEY"; /* not supported */
-		content_name[CTSVC_VCARD_VALUE_X_ANNIVERSARY] = "X-ANNIVERSARY";
 		content_name[CTSVC_VCARD_VALUE_X_MSN] = "X-MSN";
 		content_name[CTSVC_VCARD_VALUE_X_YAHOO] = "X-YAHOO";
 		content_name[CTSVC_VCARD_VALUE_X_ICQ] = "X-ICQ";
 		content_name[CTSVC_VCARD_VALUE_X_AIM] = "X-AIM";
 		content_name[CTSVC_VCARD_VALUE_X_JABBER] = "X-JABBER";
+		content_name[CTSVC_VCARD_VALUE_X_SKYPE_USERNAME] = "X-SKYPE-USERNAME";
 		content_name[CTSVC_VCARD_VALUE_X_SKYPE] = "X-SKYPE";
 		content_name[CTSVC_VCARD_VALUE_X_QQ] = "X-QQ";
 		content_name[CTSVC_VCARD_VALUE_X_GOOGLE_TALK] = "X-GOOGLE-TALK";
+		content_name[CTSVC_VCARD_VALUE_X_TIZEN_MESSENGER] = "X-TIZEN-MESSENGER";
+		content_name[CTSVC_VCARD_VALUE_X_TIZEN_RELATIONSHIP] = "X-TIZEN-RELATIONSHIP";
 		//content_name[CTSVC_VCARD_VALUE_X_CHILDREN] = "X-CHILDREN";
 		content_name[CTSVC_VCARD_VALUE_END] = "END";
 	}
@@ -256,6 +274,12 @@ static inline int __ctsvc_vcard_append_name(ctsvc_list_s *names,
 		RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
 	}
 
+	if (name->phonetic_middle) {
+		ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s:%s%s",
+				content_name[CTSVC_VCARD_VALUE_PHONETIC_MIDDLE_NAME], name->phonetic_middle, CTSVC_CRLF);
+		RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
+	}
+
 	if (name->phonetic_last) {
 		ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s:%s%s",
 				content_name[CTSVC_VCARD_VALUE_PHONETIC_LAST_NAME], name->phonetic_last, CTSVC_CRLF);
@@ -368,47 +392,91 @@ static inline int __ctsvc_vcard_put_company_logo(const char *path, char *dest, i
 	return ret;
 }
 
+static inline int __ctsvc_vcard_put_company_type(int type, char *label, char *dest, int dest_size)
+{
+	int ret_len = 0;
+	if (type == CONTACTS_COMPANY_TYPE_WORK)
+		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "WORK");
+	else if (type == CONTACTS_COMPANY_TYPE_CUSTOM)
+		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=X-%s", label);
+	return ret_len;
+}
+
 static inline int __ctsvc_vcard_append_company(ctsvc_list_s *company_list,
 		char *dest, int dest_size)
 {
 	int ret_len = 0;
-	GList *cursor = company_list->records;
+	GList *cursor;
 	ctsvc_company_s *company;
-	RETV_IF(NULL == cursor, 0);
 
-	company = (ctsvc_company_s *)cursor->data;
+	for (cursor=company_list->records;cursor;cursor=cursor->next) {
+		company = (ctsvc_company_s *)cursor->data;
 
-	ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s:%s",
-			content_name[CTSVC_VCARD_VALUE_ORG],
-			SAFE_STR(company->name));
-	RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
-
-	if (company->department) {
-		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";%s",
-				company->department);
+		ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s",
+				content_name[CTSVC_VCARD_VALUE_ORG]);
 		RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
-	}
 
-	ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s", CTSVC_CRLF);
-	RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
-
-	if (company->job_title) {
-		ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s:%s%s",
-				content_name[CTSVC_VCARD_VALUE_TITLE],
-				company->job_title, CTSVC_CRLF);
+		ret_len += __ctsvc_vcard_put_company_type(company->type, SAFE_STR(company->label), dest+ret_len, dest_size-ret_len);
 		RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
-	}
 
-	if (company->role) {
-		ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s:%s%s",
-				content_name[CTSVC_VCARD_VALUE_ROLE],
-				company->role, CTSVC_CRLF);
+		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ":%s", SAFE_STR(company->name));
 		RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
-	}
 
-	if (company->logo) {
-		ret_len += __ctsvc_vcard_put_company_logo(company->logo, dest+ret_len, dest_size-ret_len);
+		if (company->department) {
+			ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";%s",
+					company->department);
+			RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
+		}
+
+		ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s", CTSVC_CRLF);
 		RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
+
+		if (company->job_title) {
+			ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s:%s%s",
+					content_name[CTSVC_VCARD_VALUE_TITLE],
+					company->job_title, CTSVC_CRLF);
+			RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
+		}
+
+		if (company->role) {
+			ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s:%s%s",
+					content_name[CTSVC_VCARD_VALUE_ROLE],
+					company->role, CTSVC_CRLF);
+			RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
+		}
+
+		if (company->location) {
+			ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s:%s%s",
+					content_name[CTSVC_VCARD_VALUE_X_TIZEN_COMPANY_LOCATION],
+					company->location, CTSVC_CRLF);
+			RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
+		}
+
+		if (company->description) {
+			ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s:%s%s",
+					content_name[CTSVC_VCARD_VALUE_X_TIZEN_COMPANY_DESCRIPTION],
+					company->description, CTSVC_CRLF);
+			RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
+		}
+
+		if (company->phonetic_name) {
+			ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s:%s%s",
+					content_name[CTSVC_VCARD_VALUE_X_TIZEN_COMPANY_PHONETIC_NAME],
+					company->phonetic_name, CTSVC_CRLF);
+			RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
+		}
+
+		if (company->assistant_name) {
+			ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s:%s%s",
+					content_name[CTSVC_VCARD_VALUE_X_TIZEN_COMPANY_ASSISTANT_NAME],
+					company->assistant_name, CTSVC_CRLF);
+			RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
+		}
+
+		if (company->logo) {
+			ret_len += __ctsvc_vcard_put_company_logo(company->logo, dest+ret_len, dest_size-ret_len);
+			RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
+		}
 	}
 
 	return ret_len;
@@ -418,18 +486,17 @@ static inline int __ctsvc_vcard_append_note(ctsvc_list_s *note_list,
 		char *dest, int dest_size)
 {
 	int ret_len = 0;
-	GList *cursor = note_list->records;
+	GList *cursor;
 	ctsvc_note_s *note;
 
-	RETV_IF(NULL == cursor, 0);
-
-	note = (ctsvc_note_s *)cursor->data;
-
-	if (note->note) {
-		ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s:%s%s",
-				content_name[CTSVC_VCARD_VALUE_NOTE],
-				SAFE_STR(note->note), CTSVC_CRLF);
-		RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
+	for (cursor=note_list->records;cursor;cursor=cursor->next) {
+		note = (ctsvc_note_s *)cursor->data;
+		if (note->note) {
+			ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s:%s%s",
+					content_name[CTSVC_VCARD_VALUE_NOTE],
+					SAFE_STR(note->note), CTSVC_CRLF);
+			RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
+		}
 	}
 
 	return ret_len;
@@ -459,19 +526,19 @@ static inline int __ctsvc_vcard_put_postal_type(int type, char *label, char *des
 {
 	int ret_len = 0;
 
-	if (type & CONTACTS_ADDRESS_TYPE_DOM)
+	if (type == CONTACTS_ADDRESS_TYPE_DOM)
 		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "DOM");
-	if (type & CONTACTS_ADDRESS_TYPE_INTL)
+	if (type == CONTACTS_ADDRESS_TYPE_INTL)
 		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "INTL");
-	if (type & CONTACTS_ADDRESS_TYPE_HOME)
+	if (type == CONTACTS_ADDRESS_TYPE_HOME)
 		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "HOME");
-	if (type & CONTACTS_ADDRESS_TYPE_WORK)
+	if (type == CONTACTS_ADDRESS_TYPE_WORK)
 		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "WORK");
-	if (type & CONTACTS_ADDRESS_TYPE_POSTAL)
+	if (type == CONTACTS_ADDRESS_TYPE_POSTAL)
 		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "POSTAL");
-	if (type & CONTACTS_ADDRESS_TYPE_PARCEL)
+	if (type == CONTACTS_ADDRESS_TYPE_PARCEL)
 		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "PARCEL");
-	if (type & CONTACTS_ADDRESS_TYPE_CUSTOM)
+	if (type == CONTACTS_ADDRESS_TYPE_CUSTOM)
 		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=X-%s", label);
 
 	return ret_len;
@@ -491,7 +558,7 @@ static inline int __ctsvc_vcard_append_postals(ctsvc_list_s *address_list,
 					content_name[CTSVC_VCARD_VALUE_ADR]);
 			RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
 
-			ret_len += __ctsvc_vcard_put_postal_type(address->type, address->label, dest+ret_len,
+			ret_len += __ctsvc_vcard_put_postal_type(address->type, SAFE_STR(address->label), dest+ret_len,
 					dest_size-ret_len);
 			RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
 
@@ -607,8 +674,6 @@ static inline int __ctsvc_vcard_put_number_type(int type, char *label, char *des
 		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "VOICE");
 	if (type & CONTACTS_NUMBER_TYPE_FAX)
 		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "FAX");
-	if (type & CONTACTS_NUMBER_TYPE_VOICE)
-		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "VOICE");
 	if (type & CONTACTS_NUMBER_TYPE_CELL)
 		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "CELL");
 	if (type & CONTACTS_NUMBER_TYPE_VIDEO)
@@ -627,7 +692,7 @@ static inline int __ctsvc_vcard_put_number_type(int type, char *label, char *des
 		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "PCS");
 	if (type & CONTACTS_NUMBER_TYPE_ASSISTANT)
 		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "X-ASSISTANT");
-	if (type & CONTACTS_NUMBER_TYPE_CUSTOM)
+	if (type == CONTACTS_NUMBER_TYPE_CUSTOM)
 		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=X-%s", label);
 	return ret_len;
 }
@@ -647,7 +712,7 @@ static inline int __ctsvc_vcard_append_numbers(ctsvc_list_s *number_list,
 					content_name[CTSVC_VCARD_VALUE_TEL]);
 			RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
 
-			ret_len += __ctsvc_vcard_put_number_type(number->type, number->label, dest+ret_len, dest_size-ret_len);
+			ret_len += __ctsvc_vcard_put_number_type(number->type, SAFE_STR(number->label), dest+ret_len, dest_size-ret_len);
 			if (number->is_default) {
 				ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";%s", "PREF");
 				RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
@@ -677,11 +742,13 @@ static inline int __ctsvc_vcard_put_email_type(int type, char *label, char *dest
 {
 	int ret_len = 0;
 
-	if (CONTACTS_EMAIL_TYPE_HOME & type)
+	if (CONTACTS_EMAIL_TYPE_HOME == type)
 		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "HOME");
-	if (CONTACTS_EMAIL_TYPE_WORK & type)
+	else if (CONTACTS_EMAIL_TYPE_WORK == type)
 		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "WORK");
-	if (CONTACTS_EMAIL_TYPE_CUSTOM & type)
+	else if (CONTACTS_EMAIL_TYPE_MOBILE == type)
+		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "CELL");
+	else if (CONTACTS_EMAIL_TYPE_CUSTOM == type)
 		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=X-%s", label);
 
 	return ret_len;
@@ -701,7 +768,7 @@ static inline int __ctsvc_vcard_append_emails(ctsvc_list_s *email_list,
 					content_name[CTSVC_VCARD_VALUE_EMAIL]);
 			RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
 
-			ret_len += __ctsvc_vcard_put_email_type(email->type, email->label, dest+ret_len, dest_size-ret_len);
+			ret_len += __ctsvc_vcard_put_email_type(email->type, SAFE_STR(email->label), dest+ret_len, dest_size-ret_len);
 			RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
 
 			if (email->is_default) {
@@ -718,6 +785,20 @@ static inline int __ctsvc_vcard_append_emails(ctsvc_list_s *email_list,
 	return ret_len;
 }
 
+static inline int __ctsvc_vcard_put_url_type(int type, char *label, char *dest, int dest_size)
+{
+	int ret_len = 0;
+
+	if (CONTACTS_URL_TYPE_HOME == type)
+		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "HOME");
+	else if (CONTACTS_URL_TYPE_WORK == type)
+		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "WORK");
+	else if (CONTACTS_URL_TYPE_CUSTOM == type)
+		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=X-%s", label);
+
+	return ret_len;
+}
+
 static inline int __ctsvc_vcard_append_webs(ctsvc_list_s *url_list,
 		char *dest, int dest_size)
 {
@@ -727,12 +808,17 @@ static inline int __ctsvc_vcard_append_webs(ctsvc_list_s *url_list,
 
 	for (cursor=url_list->records;cursor;cursor=cursor->next) {
 		url = cursor->data;
-		if (url->url && *url->url) {
-			ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s:%s%s",
-					content_name[CTSVC_VCARD_VALUE_URL],
-					url->url, CTSVC_CRLF);
-			RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
-		}
+
+		ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s",
+				content_name[CTSVC_VCARD_VALUE_URL]);
+		RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
+
+		ret_len += __ctsvc_vcard_put_url_type(url->type, SAFE_STR(url->label), dest+ret_len, dest_size-ret_len);
+		RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
+
+		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ":%s%s",
+				url->url, CTSVC_CRLF);
+		RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
 	}
 
 	return ret_len;
@@ -750,15 +836,30 @@ static inline int __ctsvc_vcard_append_events(ctsvc_list_s *event_list,
 		if (!data->date) continue;
 
 		if (CONTACTS_EVENT_TYPE_BIRTH == data->type) {
-			ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s:%d-%02d-%d%s",
+			ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s:%d-%02d-%02d%s",
 					content_name[CTSVC_VCARD_VALUE_BDAY],
 					data->date/10000, (data->date%10000)/100, data->date%100,
 					CTSVC_CRLF);
 			RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
 		}
 		else if (CONTACTS_EVENT_TYPE_ANNIVERSARY == data->type) {
-			ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s:%d-%02d-%d%s",
-					content_name[CTSVC_VCARD_VALUE_X_ANNIVERSARY],
+			ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s;TYPE=ANNIVERSARY:%d-%02d-%02d%s",
+					content_name[CTSVC_VCARD_VALUE_X_TIZEN_EVENT],
+					data->date/10000, (data->date%10000)/100, data->date%100,
+					CTSVC_CRLF);
+			RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
+		}
+		else if (CONTACTS_EVENT_TYPE_CUSTOM == data->type) {
+			ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s;X-%s:%d-%02d-%02d%s",
+					content_name[CTSVC_VCARD_VALUE_X_TIZEN_EVENT],
+					SAFE_STR(data->label),
+					data->date/10000, (data->date%10000)/100, data->date%100,
+					CTSVC_CRLF);
+			RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
+		}
+		else {
+			ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s:%d-%02d-%02d%s",
+					content_name[CTSVC_VCARD_VALUE_X_TIZEN_EVENT],
 					data->date/10000, (data->date%10000)/100, data->date%100,
 					CTSVC_CRLF);
 			RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
@@ -800,7 +901,7 @@ static inline int __ctsvc_vcard_append_messengers(ctsvc_list_s *messenger_list, 
 				break;
 			case CONTACTS_MESSENGER_TYPE_SKYPE:
 				ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s:%s%s",
-						content_name[CTSVC_VCARD_VALUE_X_SKYPE], messenger->im_id, CTSVC_CRLF);
+						content_name[CTSVC_VCARD_VALUE_X_SKYPE_USERNAME], messenger->im_id, CTSVC_CRLF);
 				break;
 			case CONTACTS_MESSENGER_TYPE_QQ:
 				ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s:%s%s",
@@ -810,12 +911,105 @@ static inline int __ctsvc_vcard_append_messengers(ctsvc_list_s *messenger_list, 
 				ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s:%s%s",
 						content_name[CTSVC_VCARD_VALUE_X_GOOGLE_TALK], messenger->im_id, CTSVC_CRLF);
 				break;
+			case CONTACTS_MESSENGER_TYPE_FACEBOOK:
+				ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s;TYPE=FACEBOOK:%s%s",
+						content_name[CTSVC_VCARD_VALUE_X_TIZEN_MESSENGER], messenger->im_id, CTSVC_CRLF);
+				break;
+			case CONTACTS_MESSENGER_TYPE_IRC:
+				ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s;TYPE=IRC:%s%s",
+						content_name[CTSVC_VCARD_VALUE_X_TIZEN_MESSENGER], messenger->im_id, CTSVC_CRLF);
+				break;
+			case CONTACTS_MESSENGER_TYPE_CUSTOM:
+				ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s;TYPE=X-%s:%s%s",
+						content_name[CTSVC_VCARD_VALUE_X_TIZEN_MESSENGER], SAFE_STR(messenger->label), messenger->im_id, CTSVC_CRLF);
+				break;
 			default:
+				ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s:%s%s",
+						content_name[CTSVC_VCARD_VALUE_X_TIZEN_MESSENGER], messenger->im_id, CTSVC_CRLF);
 				break;
 			}
 			RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
 		}
 	}
+	return ret_len;
+}
+
+static inline int __ctsvc_vcard_put_relationship_type(int type, char *label, char *dest, int dest_size)
+{
+	int ret_len = 0;
+	switch (type) {
+	case CONTACTS_RELATIONSHIP_TYPE_ASSISTANT:
+		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "ASSISTANT");
+		break;
+	case CONTACTS_RELATIONSHIP_TYPE_BROTHER:
+		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "BROTHER");
+		break;
+	case CONTACTS_RELATIONSHIP_TYPE_CHILD:
+		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "CHILD");
+		break;
+	case CONTACTS_RELATIONSHIP_TYPE_DOMESTIC_PARTNER:
+		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "DOMESTIC_PARTNER");
+		break;
+	case CONTACTS_RELATIONSHIP_TYPE_FATHER:
+		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "FATHER");
+		break;
+	case CONTACTS_RELATIONSHIP_TYPE_FRIEND:
+		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "FRIEND");
+		break;
+	case CONTACTS_RELATIONSHIP_TYPE_MANAGER:
+		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "MANAGER");
+		break;
+	case CONTACTS_RELATIONSHIP_TYPE_MOTHER:
+		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "MOTHER");
+		break;
+	case CONTACTS_RELATIONSHIP_TYPE_PARENT:
+		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "PARENT");
+		break;
+	case CONTACTS_RELATIONSHIP_TYPE_PARTNER:
+		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "PARTNER");
+		break;
+	case CONTACTS_RELATIONSHIP_TYPE_REFERRED_BY:
+		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "REFERRED_BY");
+		break;
+	case CONTACTS_RELATIONSHIP_TYPE_RELATIVE:
+		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "RELATIVE");
+		break;
+	case CONTACTS_RELATIONSHIP_TYPE_SISTER:
+		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "SISTER");
+		break;
+	case CONTACTS_RELATIONSHIP_TYPE_SPOUSE:
+		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "SPOUSE");
+		break;
+	case CONTACTS_RELATIONSHIP_TYPE_CUSTOM:
+		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=X-%s", label);
+		break;
+	}
+	return ret_len;
+}
+
+
+
+static inline int __ctsvc_vcard_append_relationships(ctsvc_list_s *relationship_list, char *dest, int dest_size)
+{
+	int ret_len = 0;
+	GList *cursor;
+	ctsvc_relationship_s *relationship;
+
+	for (cursor=relationship_list->records;cursor;cursor=cursor->next) {
+		relationship = cursor->data;
+
+		if (relationship->name) {
+			ret_len += snprintf(dest+ret_len, dest_size-ret_len, "X-TIZEN-RELATIONSHIP");
+			RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
+
+			ret_len += __ctsvc_vcard_put_relationship_type(relationship->type, SAFE_STR(relationship->label), dest+ret_len, dest_size-ret_len);
+			RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
+
+			ret_len += snprintf(dest+ret_len, dest_size-ret_len, ":%s%s", relationship->name, CTSVC_CRLF);
+			RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
+		}
+	}
+
 	return ret_len;
 }
 
@@ -943,6 +1137,11 @@ static inline int __ctsvc_vcard_append_contact(ctsvc_contact_s *contact,
 		RETV_IF(ret < 0, ret);
 		ret_len += ret;
 	}
+	if (contact->relationships) {
+		ret = __ctsvc_vcard_append_relationships(contact->relationships, dest+ret_len, dest_size-ret_len);
+		RETV_IF(ret < 0, ret);
+		ret_len += ret;
+	}
 	if (contact->uid)
 		ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s:%s%s",
 				content_name[CTSVC_VCARD_VALUE_UID],
@@ -957,12 +1156,104 @@ static inline int __ctsvc_vcard_append_contact(ctsvc_contact_s *contact,
 				CTSVC_CRLF);
 	}
 #if 0
-	char *image_path;
-	ctsvc_list_s* grouprelations;
 	ctsvc_list_s* profile;
-	ctsvc_list_s* relationships;
 #endif
 	return ret_len;
+}
+
+static inline int __ctsvc_vcard_append_my_profile(ctsvc_my_profile_s *my_profile, char *dest, int dest_size)
+{
+	int ret_len = 0;
+	int ret;
+
+	if (my_profile->name) {
+		ret = __ctsvc_vcard_append_name(my_profile->name,
+				dest+ret_len, dest_size-ret_len);
+		RETV_IF(ret < 0, ret);
+		ret_len += ret;
+	}
+	if (my_profile->company) {
+		ret = __ctsvc_vcard_append_company(my_profile->company,
+				dest+ret_len, dest_size-ret_len);
+		RETV_IF(ret < 0, ret);
+		ret_len += ret;
+	}
+	if (my_profile->note) {
+		ret = __ctsvc_vcard_append_note(my_profile->note,
+				dest+ret_len, dest_size-ret_len);
+		RETV_IF(ret < 0, ret);
+		ret_len += ret;
+	}
+	if (my_profile->postal_addrs) {
+		ret = __ctsvc_vcard_append_postals(my_profile->postal_addrs,
+				dest+ret_len, dest_size-ret_len);
+		RETV_IF(ret < 0, ret);
+		ret_len += ret;
+	}
+	if (my_profile->numbers) {
+		ret = __ctsvc_vcard_append_numbers(my_profile->numbers,
+				dest+ret_len, dest_size-ret_len);
+		RETV_IF(ret < 0, ret);
+		ret_len += ret;
+	}
+	if (my_profile->emails) {
+		ret = __ctsvc_vcard_append_emails(my_profile->emails,
+				dest+ret_len, dest_size-ret_len);
+		RETV_IF(ret < 0, ret);
+		ret_len += ret;
+	}
+	if (my_profile->nicknames) {
+		ret = __ctsvc_vcard_append_nicknames(my_profile->nicknames,
+				dest+ret_len, dest_size-ret_len);
+		RETV_IF(ret < 0, ret);
+		ret_len += ret;
+	}
+	if (my_profile->urls) {
+		ret = __ctsvc_vcard_append_webs(my_profile->urls,
+				dest+ret_len, dest_size-ret_len);
+		RETV_IF(ret < 0, ret);
+		ret_len += ret;
+	}
+	if (my_profile->events) {
+		ret = __ctsvc_vcard_append_events(my_profile->events,
+				dest+ret_len, dest_size-ret_len);
+		RETV_IF(ret < 0, ret);
+		ret_len += ret;
+	}
+	if (my_profile->images) {
+		ret = __ctsvc_vcard_put_photo(my_profile->images,
+				dest+ret_len, dest_size-ret_len);
+		RETV_IF(ret < 0, ret);
+		ret_len += ret;
+	}
+	if (my_profile->messengers) {
+		ret = __ctsvc_vcard_append_messengers(my_profile->messengers, dest+ret_len, dest_size-ret_len);
+		RETV_IF(ret < 0, ret);
+		ret_len += ret;
+	}
+	if (my_profile->relationships) {
+		ret = __ctsvc_vcard_append_relationships(my_profile->relationships, dest+ret_len, dest_size-ret_len);
+		RETV_IF(ret < 0, ret);
+		ret_len += ret;
+	}
+	if (my_profile->uid)
+		ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s:%s%s",
+				content_name[CTSVC_VCARD_VALUE_UID],
+				my_profile->uid, CTSVC_CRLF);
+	if (my_profile->changed_time) {
+		struct tm ts;
+		gmtime_r((time_t *)&my_profile->changed_time, &ts);
+		ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s:%04d-%02d-%02dT%02d:%02d:%02dZ%s",
+				content_name[CTSVC_VCARD_VALUE_REV],
+				1900+ts.tm_year, 1+ts.tm_mon, ts.tm_mday,
+				ts.tm_hour, ts.tm_min, ts.tm_sec,
+				CTSVC_CRLF);
+	}
+#if 0
+		ctsvc_list_s* profile;
+#endif
+		return ret_len;
+
 }
 
 static int __ctsvc_vcard_make(ctsvc_contact_s *contact, char **vcard_stream)
@@ -995,6 +1286,37 @@ static int __ctsvc_vcard_make(ctsvc_contact_s *contact, char **vcard_stream)
 	return CONTACTS_ERROR_NONE;
 }
 
+static int __ctsvc_vcard_make_from_my_profile(ctsvc_my_profile_s *my_profile, char **vcard_stream)
+{
+	int ret_len, ret;
+	char result[CTSVC_VCARD_FILE_MAX_SIZE] = {0};
+
+	__ctsvc_vcard_initial();
+
+	ret_len = snprintf(result, sizeof(result), "%s%s", "BEGIN:VCARD", CTSVC_CRLF);
+	ret_len += snprintf(result+ret_len, sizeof(result)-ret_len,
+			"%s%s%s", "VERSION:", "3.0", CTSVC_CRLF);
+
+	ret = __ctsvc_vcard_append_my_profile(my_profile,
+			result+ret_len, sizeof(result)-ret_len);
+	RETVM_IF(ret < 0, CONTACTS_ERROR_INTERNAL,
+					"This contact has too many information");
+	ret_len += ret;
+	RETVM_IF(sizeof(result)-ret_len <= 0, CONTACTS_ERROR_INTERNAL,
+			"This contact has too many information");
+
+	ret_len += snprintf(result+ret_len, sizeof(result)-ret_len,
+			"%s%s", "END:VCARD", CTSVC_CRLF);
+
+	ret = __ctsvc_vcard_add_folding(result);
+	RETV_IF (CONTACTS_ERROR_NONE != ret, ret);
+
+	*vcard_stream = strdup(result);
+
+	return CONTACTS_ERROR_NONE;
+}
+
+
 API int contacts_vcard_make_from_contact(contacts_record_h record, char **vcard_stream)
 {
 	ctsvc_contact_s *contact;
@@ -1008,9 +1330,25 @@ API int contacts_vcard_make_from_contact(contacts_record_h record, char **vcard_
 	RETVM_IF(CTSVC_RECORD_CONTACT != contact->base.r_type, CONTACTS_ERROR_INVALID_PARAMETER,
 		"Invalid parameter : The record is not conatct record (type : %d)", contact->base.r_type);
 
-	__ctsvc_vcard_make(contact, vcard_stream);
-	return CONTACTS_ERROR_NONE;
+	return __ctsvc_vcard_make(contact, vcard_stream);
 }
+
+API int contacts_vcard_make_from_my_profile(contacts_record_h record, char **vcard_stream)
+{
+	ctsvc_my_profile_s *my_profile;
+	RETV_IF(NULL == vcard_stream, CONTACTS_ERROR_INVALID_PARAMETER);
+	*vcard_stream = NULL;
+
+	RETVM_IF(NULL == record, CONTACTS_ERROR_INVALID_PARAMETER,
+		"Invalid parameter : my_profile(%p), vcard_stream(%p)", record, vcard_stream);
+
+	my_profile = (ctsvc_my_profile_s*)record;
+	RETVM_IF(CTSVC_RECORD_MY_PROFILE != my_profile->base.r_type, CONTACTS_ERROR_INVALID_PARAMETER,
+		"Invalid parameter : The record is not conatct record (type : %d)", my_profile->base.r_type);
+
+	return __ctsvc_vcard_make_from_my_profile(my_profile, vcard_stream);
+}
+
 
 static int __ctsvc_vcard_append_person(ctsvc_person_s *person, ctsvc_list_s *list_contacts, char *dest, int dest_size)
 {
@@ -1123,6 +1461,17 @@ static int __ctsvc_vcard_append_person(ctsvc_person_s *person, ctsvc_list_s *lis
 			total_len += ret_len;
 		}
 	}
+
+	for(cursor=list_contacts->records;cursor;cursor=cursor->next) {
+		simple_contact = (ctsvc_simple_contact_s *)cursor->data;
+		ret = contacts_db_get_record(_contacts_contact._uri, simple_contact->contact_id, (contacts_record_h *)&contact);
+		if (CONTACTS_ERROR_NONE == ret && contact && contact->relationships && contact->relationships->cursor) {
+			ret_len = __ctsvc_vcard_append_relationships(contact->relationships, dest+total_len, dest_size-total_len);
+			RETVM_IF(ret_len < 0, CONTACTS_ERROR_INTERNAL, "This person has too many information");
+			total_len += ret_len;
+		}
+	}
+
 	for(cursor=list_contacts->records;cursor;cursor=cursor->next) {
 		simple_contact = (ctsvc_simple_contact_s *)cursor->data;
 		ret = contacts_db_get_record(_contacts_contact._uri, simple_contact->contact_id, (contacts_record_h *)&contact);
@@ -1150,10 +1499,7 @@ static int __ctsvc_vcard_append_person(ctsvc_person_s *person, ctsvc_list_s *lis
 		total_len += ret_len;
 	}
 #if 0
-	char *image_path;
-	ctsvc_list_s* grouprelations;
 	ctsvc_list_s* profile;
-	ctsvc_list_s* relationships;
 #endif
 	return total_len;
 }
@@ -1221,12 +1567,12 @@ API int contacts_vcard_make_from_person(contacts_record_h record, char **vcard_s
 	person = (ctsvc_person_s *)record;
 
 	RETVM_IF(CTSVC_RECORD_PERSON != person->base.r_type, CONTACTS_ERROR_INVALID_PARAMETER,
-		"Invalid paramter : The record is not conatct record (type : %d)", person->base.r_type);
+		"Invalid parameter : The record is not conatct record (type : %d)", person->base.r_type);
 
 	contacts_filter_create(_contacts_simple_contact._uri, &filter);
 	ret = contacts_filter_add_int(filter, _contacts_simple_contact.person_id, CONTACTS_MATCH_EQUAL, person->person_id);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("Invalid paramter : contacts_filter_add_int is failed", ret);
+		CTS_ERR("Invalid parameter : contacts_filter_add_int is failed", ret);
 		contacts_filter_destroy(filter);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
@@ -1235,13 +1581,13 @@ API int contacts_vcard_make_from_person(contacts_record_h record, char **vcard_s
 	ret = contacts_db_get_records_with_query(query, 0, 0, &list);
 
 	if (ret == CONTACTS_ERROR_NONE)
-		__ctsvc_vcard_make_from_person(person, (ctsvc_list_s *)list, vcard_stream);
+		ret = __ctsvc_vcard_make_from_person(person, (ctsvc_list_s *)list, vcard_stream);
 
 	contacts_query_destroy(query);
 	contacts_filter_destroy(filter);
 	contacts_list_destroy(list, true);
 
-	return CONTACTS_ERROR_NONE;
+	return ret;
 }
 
 ////////////////////////////////////////////////////////////////////////////
@@ -1695,7 +2041,9 @@ static inline int __ctsvc_vcard_get_phonetic_name(ctsvc_list_s *name_list, int t
 	__ctsvc_strtok(start, separator);
 	if (CTSVC_VCARD_VALUE_PHONETIC_FIRST_NAME == type)
 		contacts_record_set_str(name, _contacts_name.phonetic_first, start);
-	else
+	else if (CTSVC_VCARD_VALUE_PHONETIC_MIDDLE_NAME == type)
+		contacts_record_set_str(name, _contacts_name.phonetic_middle, start);
+	else if (CTSVC_VCARD_VALUE_PHONETIC_LAST_NAME == type)
 		contacts_record_set_str(name, _contacts_name.phonetic_last, start);
 
 	return CONTACTS_ERROR_NONE;
@@ -1812,11 +2160,47 @@ static inline int __ctsvc_vcard_get_photo(contacts_record_h contact, ctsvc_list_
 	return CONTACTS_ERROR_NONE;
 }
 
+static inline void __ctsvc_vcard_get_event_type(contacts_record_h event, char *val)
+{
+	int type = CONTACTS_EVENT_TYPE_OTHER;
+	char *temp, *result, *last = NULL;
+	char *lower, *lower_temp;
+
+	temp = strtok_r(val, ";", &last);
+	while (temp) {
+		lower = strdup(temp);
+		lower_temp = lower;
+		while (*lower_temp) {
+			*lower_temp = tolower(*lower_temp);
+			lower_temp++;
+		}
+		if (strstr(lower, "anniversary"))
+			type = CONTACTS_EVENT_TYPE_ANNIVERSARY;
+		else if (NULL != (result = strstr(lower, "x-"))) {
+			type = CONTACTS_EVENT_TYPE_CUSTOM;
+			contacts_record_set_str(event, _contacts_event.label, temp+(result-lower)+2);
+		}
+
+		free(lower);
+		temp = strtok_r(NULL, ";", &last);
+	}
+	contacts_record_set_int(event, _contacts_event.type, type);
+}
+
+
 static inline int __ctsvc_vcard_get_event(ctsvc_list_s *event_list, int type, char *val)
 {
 	int ret;
 	contacts_record_h event;
-	char *dest, *src;
+	char *dest, *src, *temp, *cpy;
+
+	cpy = strdup(val);
+	temp = __ctsvc_get_content_value(cpy);
+	if (NULL == temp) {
+		free(cpy);
+		ERR("Invalid parameter : vcard(%s)", val);
+		return CONTACTS_ERROR_INVALID_PARAMETER;
+	}
 
 	dest = src = val;
 	while (*src) {
@@ -1829,55 +2213,113 @@ static inline int __ctsvc_vcard_get_event(ctsvc_list_s *event_list, int type, ch
 			break;
 	}
 	*dest = '\0';
-
-	RETVM_IF('\0' == *val, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : val(%d)", val);
+	if ('\0' == *val) {
+		free(cpy);
+		ERR("Invalid parameter : val(%d)", val);
+		return CONTACTS_ERROR_INVALID_PARAMETER;
+	}
 
 	ret = contacts_record_create(_contacts_event._uri, &event);
-	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create is failed(%d)", ret);
+	if (ret < CONTACTS_ERROR_NONE) {
+		free(cpy);
+		ERR("contacts_record_create is failed(%d)", ret);
+		return ret;
+	}
 
 	contacts_record_set_int(event, _contacts_event.date, atoi(val));
-	contacts_record_set_int(event, _contacts_event.type, type);
+
+	if (CTSVC_VCARD_VALUE_BDAY == type)
+		contacts_record_set_int(event, _contacts_event.type, CONTACTS_EVENT_TYPE_BIRTH);
+	else if (CTSVC_VCARD_VALUE_X_ANNIVERSARY == type)
+		contacts_record_set_int(event, _contacts_event.type, CONTACTS_EVENT_TYPE_ANNIVERSARY);
+	else if (CTSVC_VCARD_VALUE_X_TIZEN_EVENT == type) {
+		if (temp != cpy) {
+			*(temp-1) = '\0';
+			__ctsvc_vcard_get_event_type(event, cpy);
+		}
+	}
 	contacts_list_add((contacts_list_h)event_list, event);
+	free(cpy);
+	return CONTACTS_ERROR_NONE;
+}
+
+
+static inline void __ctsvc_vcard_get_company_type(contacts_record_h company, char *val)
+{
+	char *temp, *result, *last = NULL;
+	char *lower, *lower_temp;
+	int type = CONTACTS_COMPANY_TYPE_OTHER;
+
+	temp = strtok_r(val, ";", &last);
+	while (temp) {
+		lower = strdup(temp);
+		lower_temp = lower;
+		while (*lower_temp) {
+			*lower_temp = tolower(*lower_temp);
+			lower_temp++;
+		}
+		result = strstr(lower, "work");
+		if (result) type = CONTACTS_COMPANY_TYPE_WORK;
+		result = strstr(lower, "x-");
+		if (result) {
+			type = CONTACTS_COMPANY_TYPE_CUSTOM;
+			contacts_record_set_str(company, _contacts_company.label, temp+(result-lower)+2);
+		}
+		free(lower);
+		temp = strtok_r(NULL, ";", &last);
+	}
+	contacts_record_set_int(company, _contacts_company.type, type);
+}
+
+static inline int __ctsvc_vcard_get_company_value(ctsvc_list_s *company_list, int property_id, char *val)
+{
+	unsigned int count;
+	char *value;
+	contacts_record_h company;
+
+	contacts_list_get_count((contacts_list_h)company_list, &count);
+	RETVM_IF(count == 0, CONTACTS_ERROR_INVALID_PARAMETER, "list is empty");
+
+	contacts_list_last((contacts_list_h)company_list);
+	contacts_list_get_current_record_p((contacts_list_h)company_list, &company);
+	RETVM_IF(NULL == company, CONTACTS_ERROR_INVALID_PARAMETER, "contacts_list_get_current_record_p() return NULL");
+
+	value = __ctsvc_get_content_value(val);
+	RETV_IF(NULL == value, CONTACTS_ERROR_NO_DATA);
+
+	contacts_record_set_str(company, property_id, value);
 
 	return CONTACTS_ERROR_NONE;
 }
 
-static inline int __ctsvc_vcard_get_company(ctsvc_list_s *company_list, unsigned int property_id, char *val)
+
+static inline int __ctsvc_vcard_get_company(ctsvc_list_s *company_list, char *val)
 {
 	int ret;
-	unsigned int count;
 	char *temp, *start;
 	contacts_record_h company;
 
-	contacts_list_get_count((contacts_list_h)company_list, &count);
-	if (count <= 0) {
-		ret = contacts_record_create(_contacts_company._uri, &company);
-		RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create is failed(%d)", ret);
-		contacts_list_add((contacts_list_h)company_list, company);
-	}
-	else {
-		contacts_list_get_current_record_p((contacts_list_h)company_list, &company);
+	ret = contacts_record_create(_contacts_company._uri, &company);
+	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create is failed(%d)", ret);
+	contacts_list_add((contacts_list_h)company_list, company);
+
+	start = __ctsvc_get_content_value(val);
+	RETV_IF(NULL == start, CONTACTS_ERROR_NO_DATA);
+
+	temp = strchr(start, ';');
+	if (NULL == temp) {
+		contacts_record_set_str(company, _contacts_company.name, start);
+		return CONTACTS_ERROR_NONE;
 	}
 
-	if (property_id == _contacts_company.name) {
-		start = __ctsvc_get_content_value(val);
-		RETV_IF(NULL == start, CONTACTS_ERROR_NO_DATA);
+	*temp = '\0';
+	contacts_record_set_str(company, _contacts_company.name, start);
+	contacts_record_set_str(company, _contacts_company.department, temp+1);
 
-		temp = strchr(start, ';');
-		if (temp) {
-			*temp = '\0';
-			contacts_record_set_str(company, property_id, start);
-			contacts_record_set_str(company, _contacts_company.department, temp+1);
-		}
-		else
-			contacts_record_set_str(company, property_id, start);
+	if (val != temp) {
+		*(temp-1) = '\0';
+		__ctsvc_vcard_get_company_type(company, val);
 	}
-	else if (property_id == _contacts_company.job_title
-			|| property_id == _contacts_company.role) {
-		contacts_record_set_str(company, property_id, val);
-	}
-	else
-		return CONTACTS_ERROR_INVALID_PARAMETER;
 
 	return CONTACTS_ERROR_NONE;
 }
@@ -1893,14 +2335,11 @@ static inline int __ctsvc_vcard_get_company_logo(ctsvc_list_s *company_list, cha
 	contacts_record_h company;
 
 	contacts_list_get_count((contacts_list_h)company_list, &count);
-	if (count <= 0) {
-		ret = contacts_record_create(_contacts_company._uri, &company);
-		RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create is failed(%d)", ret);
-		contacts_list_add((contacts_list_h)company_list, company);
-	}
-	else {
-		contacts_list_get_current_record_p((contacts_list_h)company_list, &company);
-	}
+	RETVM_IF(count == 0, CONTACTS_ERROR_INVALID_PARAMETER, "list is empty");
+
+	contacts_list_last((contacts_list_h)company_list);
+	contacts_list_get_current_record_p((contacts_list_h)company_list, &company);
+	RETVM_IF(NULL == company, CONTACTS_ERROR_INVALID_PARAMETER, "contacts_list_get_current_record_p() return NULL");
 
 	temp = strchr(val , ':');
 	RETVM_IF(NULL == temp, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : val is invalid(%s)", val);
@@ -1945,22 +2384,16 @@ static inline int __ctsvc_vcard_get_company_logo(ctsvc_list_s *company_list, cha
 static inline int __ctsvc_vcard_get_note(ctsvc_list_s *note_list, char *val)
 {
 	int ret;
-	unsigned int count;
 	char *temp;
 	contacts_record_h note;
 
-	contacts_list_get_count((contacts_list_h)note_list, &count);
-	if (count <= 0) {
-		ret = contacts_record_create(_contacts_note._uri, &note);
-		RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create is failed(%d)", ret);
-		contacts_list_add((contacts_list_h)note_list, note);
-	}
-	else {
-		contacts_list_get_current_record_p((contacts_list_h)note_list, &note);
-	}
+	ret = contacts_record_create(_contacts_note._uri, &note);
+	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create is failed(%d)", ret);
+	contacts_list_add((contacts_list_h)note_list, note);
 
 	temp = __ctsvc_get_content_value(val);
 	RETV_IF(NULL == temp, CONTACTS_ERROR_NO_DATA);
+
 	contacts_record_set_str(note, _contacts_note.note, g_strcompress(temp));
 
 	return CONTACTS_ERROR_NONE;
@@ -2035,6 +2468,35 @@ static inline int __ctsvc_vcard_get_time(char *val)
 	return (int)mktime(&ts);
 }
 
+static inline void __ctsvc_vcard_get_url_type(contacts_record_h url, char *val)
+{
+	char *temp, *result, *last = NULL;
+	char *lower, *lower_temp;
+	int type = CONTACTS_URL_TYPE_OTHER;
+
+	temp = strtok_r(val, ";", &last);
+	while (temp) {
+		lower = strdup(temp);
+		lower_temp = lower;
+		while (*lower_temp) {
+			*lower_temp = tolower(*lower_temp);
+			lower_temp++;
+		}
+		result = strstr(lower, "home");
+		if (result) type = CONTACTS_URL_TYPE_HOME;
+		result = strstr(lower, "work");
+		if (result) type = CONTACTS_URL_TYPE_WORK;
+		result = strstr(lower, "x-");
+		if (result) {
+			type = CONTACTS_URL_TYPE_CUSTOM;
+			contacts_record_set_str(url, _contacts_url.label, temp+(result-lower)+2);
+		}
+
+		free(lower);
+		temp = strtok_r(NULL, ";", &last);
+	}
+	contacts_record_set_int(url, _contacts_url.type, type);
+}
 
 static inline int __ctsvc_vcard_get_url(ctsvc_list_s* url_list, char *val)
 {
@@ -2051,19 +2513,7 @@ static inline int __ctsvc_vcard_get_url(ctsvc_list_s* url_list, char *val)
 	contacts_record_set_str(url, _contacts_url.url, temp);
 	if (val != temp) {
 		*(temp-1) = '\0';
-		temp = val;
-		while (*temp) {
-			*temp = tolower(*temp);
-			temp++;
-		}
-
-		temp = strchr(val, ';');
-		if (temp) {
-			if (strstr(val, "home"))
-				contacts_record_set_int(url, _contacts_url.type, CONTACTS_URL_TYPE_HOME);
-			else if (strstr(val, "work"))
-				contacts_record_set_int(url, _contacts_url.type, CONTACTS_URL_TYPE_WORK);
-		}
+		__ctsvc_vcard_get_url_type(url, val);
 	}
 	contacts_list_add((contacts_list_h)url_list, url);
 
@@ -2168,14 +2618,15 @@ static inline bool __ctsvc_vcard_get_email_type(contacts_record_h email, char *v
 			*lower_temp = tolower(*lower_temp);
 			lower_temp++;
 		}
-		result = strstr(lower, "home");
-		if (result) type = CONTACTS_EMAIL_TYPE_HOME;
-		result = strstr(lower, "work");
-		if (result) type = CONTACTS_EMAIL_TYPE_WORK;
-		result = strstr(lower, "pref");
-		if (result) pref = true;
-		result = strstr(lower, "x-");
-		if (result) {
+		if (strstr(lower, "pref"))
+			pref = true;
+		if (strstr(lower, "home"))
+			type = CONTACTS_EMAIL_TYPE_HOME;
+		else if (strstr(lower, "work"))
+			type = CONTACTS_EMAIL_TYPE_WORK;
+		else if (strstr(lower, "cell"))
+			type = CONTACTS_EMAIL_TYPE_MOBILE;
+		else if (NULL != (result = strstr(lower, "x-"))) {
 			type = CONTACTS_EMAIL_TYPE_CUSTOM;
 			contacts_record_set_str(email, _contacts_email.label, temp+(result-lower)+2);
 		}
@@ -2313,6 +2764,35 @@ static inline int __ctsvc_vcard_get_address(ctsvc_list_s *address_list, char *va
 	return CONTACTS_ERROR_NONE;
 }
 
+static inline void __ctsvc_vcard_get_messenger_type(contacts_record_h messenger, char *val)
+{
+	char *temp, *result, *last = NULL;
+	char *lower, *lower_temp;
+	int type = CONTACTS_MESSENGER_TYPE_OTHER;
+
+	temp = strtok_r(val, ";", &last);
+	while (temp) {
+		lower = strdup(temp);
+		lower_temp = lower;
+		while (*lower_temp) {
+			*lower_temp = tolower(*lower_temp);
+			lower_temp++;
+		}
+		result = strstr(lower, "facebook");
+		if (result) type = CONTACTS_MESSENGER_TYPE_FACEBOOK;
+		result = strstr(lower, "irc");
+		if (result) type = CONTACTS_MESSENGER_TYPE_IRC;
+		result = strstr(lower, "x-");
+		if (result) {
+			type = CONTACTS_MESSENGER_TYPE_CUSTOM;
+			contacts_record_set_str(messenger, _contacts_messenger.label, temp+(result-lower)+2);
+		}
+		free(lower);
+		temp = strtok_r(NULL, ";", &last);
+	}
+	contacts_record_set_int(messenger, _contacts_messenger.type, type);
+}
+
 static inline int __ctsvc_vcard_get_messenger(ctsvc_list_s* messenger_list, int type, char *val)
 {
 	int ret;
@@ -2343,6 +2823,7 @@ static inline int __ctsvc_vcard_get_messenger(ctsvc_list_s* messenger_list, int 
 	case CTSVC_VCARD_VALUE_X_JABBER:
 		contacts_record_set_int(messenger, _contacts_messenger.type, CONTACTS_MESSENGER_TYPE_JABBER);
 		break;
+	case CTSVC_VCARD_VALUE_X_SKYPE_USERNAME:
 	case CTSVC_VCARD_VALUE_X_SKYPE:
 		contacts_record_set_int(messenger, _contacts_messenger.type, CONTACTS_MESSENGER_TYPE_SKYPE);
 		break;
@@ -2352,10 +2833,92 @@ static inline int __ctsvc_vcard_get_messenger(ctsvc_list_s* messenger_list, int 
 	case CTSVC_VCARD_VALUE_X_GOOGLE_TALK:
 		contacts_record_set_int(messenger, _contacts_messenger.type, CONTACTS_MESSENGER_TYPE_GOOGLE);
 		break;
+	case CTSVC_VCARD_VALUE_X_TIZEN_MESSENGER:
+		if (val != temp) {
+			*(temp-1) = '\0';
+			__ctsvc_vcard_get_messenger_type(messenger, val);
+		}
+		break;
 	}
 	contacts_list_add((contacts_list_h)messenger_list, messenger);
 
 	return CONTACTS_ERROR_NONE;
+}
+
+static inline void __ctsvc_vcard_get_relationship_type(contacts_record_h relationship, char *val)
+{
+	char *temp, *result, *last = NULL;
+	char *lower, *lower_temp;
+	int type = CONTACTS_RELATIONSHIP_TYPE_OTHER;
+
+	temp = strtok_r(val, ";", &last);
+	while (temp) {
+		lower = strdup(temp);
+		lower_temp = lower;
+		while (*lower_temp) {
+			*lower_temp = tolower(*lower_temp);
+			lower_temp++;
+		}
+		if (strstr(lower, "assistant"))
+			type = CONTACTS_RELATIONSHIP_TYPE_ASSISTANT;
+		else if (strstr(lower, "brother"))
+			type = CONTACTS_RELATIONSHIP_TYPE_BROTHER;
+		else if (strstr(lower, "child"))
+			type = CONTACTS_RELATIONSHIP_TYPE_CHILD;
+		else if (strstr(lower, "domestic_partner"))
+			type = CONTACTS_RELATIONSHIP_TYPE_DOMESTIC_PARTNER;
+		else if (strstr(lower, "father"))
+			type = CONTACTS_RELATIONSHIP_TYPE_FATHER;
+		else if (strstr(lower, "friend"))
+			type = CONTACTS_RELATIONSHIP_TYPE_FRIEND;
+		else if (strstr(lower, "manager"))
+			type = CONTACTS_RELATIONSHIP_TYPE_MANAGER;
+		else if (strstr(lower, "mother"))
+			type = CONTACTS_RELATIONSHIP_TYPE_MOTHER;
+		else if (strstr(lower, "parent"))
+			type = CONTACTS_RELATIONSHIP_TYPE_PARENT;
+		else if (strstr(lower, "partner"))
+			type = CONTACTS_RELATIONSHIP_TYPE_PARTNER;
+		else if (strstr(lower, "referred_by"))
+			type = CONTACTS_RELATIONSHIP_TYPE_REFERRED_BY;
+		else if (strstr(lower, "relative"))
+			type = CONTACTS_RELATIONSHIP_TYPE_RELATIVE;
+		else if (strstr(lower, "sister"))
+			type = CONTACTS_RELATIONSHIP_TYPE_SISTER;
+		else if (strstr(lower, "spouse"))
+			type = CONTACTS_RELATIONSHIP_TYPE_SPOUSE;
+		else if (NULL != (result = strstr(lower, "x-"))) {
+			type = CONTACTS_RELATIONSHIP_TYPE_CUSTOM;
+			contacts_record_set_str(relationship, _contacts_relationship.label, temp+(result-lower)+2);
+		}
+		free(lower);
+		temp = strtok_r(NULL, ";", &last);
+	}
+	contacts_record_set_int(relationship, _contacts_relationship.type, type);
+}
+
+
+static inline int __ctsvc_vcard_get_relationship(ctsvc_list_s* relationship_list, int type, char *val)
+{
+	int ret;
+	char *temp;
+	contacts_record_h relationship;
+
+	temp = __ctsvc_get_content_value(val);
+	RETVM_IF(NULL == temp, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : vcard(%s)", val);
+
+	ret = contacts_record_create(_contacts_relationship._uri, &relationship);
+	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create is failed(%d)", ret);
+
+	contacts_record_set_str(relationship, _contacts_relationship.name, temp);
+	if (val != temp) {
+		*(temp-1) = '\0';
+		__ctsvc_vcard_get_relationship_type(relationship, val);
+	}
+	contacts_list_add((contacts_list_h)relationship_list, relationship);
+
+	return CONTACTS_ERROR_NONE;
+
 }
 
 static inline int __ctsvc_vcard_get_contact(int ver, char *vcard, contacts_record_h *record)
@@ -2396,6 +2959,7 @@ static inline int __ctsvc_vcard_get_contact(int ver, char *vcard, contacts_recor
 			free(val);
 			break;
 		case CTSVC_VCARD_VALUE_PHONETIC_FIRST_NAME:
+		case CTSVC_VCARD_VALUE_PHONETIC_MIDDLE_NAME:
 		case CTSVC_VCARD_VALUE_PHONETIC_LAST_NAME:
 			__ctsvc_vcard_get_phonetic_name(contact->name, type, val);
 			free(val);
@@ -2409,7 +2973,9 @@ static inline int __ctsvc_vcard_get_contact(int ver, char *vcard, contacts_recor
 			free(val);
 			break;
 		case CTSVC_VCARD_VALUE_BDAY:
-			__ctsvc_vcard_get_event(contact->events, CONTACTS_EVENT_TYPE_BIRTH, val);
+		case CTSVC_VCARD_VALUE_X_ANNIVERSARY:
+		case CTSVC_VCARD_VALUE_X_TIZEN_EVENT:
+			__ctsvc_vcard_get_event(contact->events, type, val);
 			free(val);
 			break;
 		case CTSVC_VCARD_VALUE_ADR:
@@ -2426,11 +2992,27 @@ static inline int __ctsvc_vcard_get_contact(int ver, char *vcard, contacts_recor
 			free(val);
 			break;
 		case CTSVC_VCARD_VALUE_TITLE:
-			__ctsvc_vcard_get_company(contact->company, _contacts_company.job_title, val);
+			__ctsvc_vcard_get_company_value(contact->company, _contacts_company.job_title, val);
 			free(val);
 			break;
 		case CTSVC_VCARD_VALUE_ROLE:
-			__ctsvc_vcard_get_company(contact->company, _contacts_company.role, val);
+			__ctsvc_vcard_get_company_value(contact->company, _contacts_company.role, val);
+			free(val);
+			break;
+		case CTSVC_VCARD_VALUE_X_TIZEN_COMPANY_LOCATION:
+			__ctsvc_vcard_get_company_value(contact->company, _contacts_company.location, val);
+			free(val);
+			break;
+		case CTSVC_VCARD_VALUE_X_TIZEN_COMPANY_DESCRIPTION:
+			__ctsvc_vcard_get_company_value(contact->company, _contacts_company.description, val);
+			free(val);
+			break;
+		case CTSVC_VCARD_VALUE_X_TIZEN_COMPANY_PHONETIC_NAME:
+			__ctsvc_vcard_get_company_value(contact->company, _contacts_company.phonetic_name, val);
+			free(val);
+			break;
+		case CTSVC_VCARD_VALUE_X_TIZEN_COMPANY_ASSISTANT_NAME:
+			__ctsvc_vcard_get_company_value(contact->company, _contacts_company.assistant_name, val);
 			free(val);
 			break;
 		case CTSVC_VCARD_VALUE_LOGO:
@@ -2438,7 +3020,7 @@ static inline int __ctsvc_vcard_get_contact(int ver, char *vcard, contacts_recor
 			free(val);
 			break;
 		case CTSVC_VCARD_VALUE_ORG:
-			__ctsvc_vcard_get_company(contact->company, _contacts_company.name, val);
+			__ctsvc_vcard_get_company(contact->company, val);
 			free(val);
 			break;
 		case CTSVC_VCARD_VALUE_NOTE:
@@ -2458,19 +3040,22 @@ static inline int __ctsvc_vcard_get_contact(int ver, char *vcard, contacts_recor
 			__ctsvc_vcard_get_url(contact->urls, val);
 			free(val);
 			break;
-		case CTSVC_VCARD_VALUE_X_ANNIVERSARY:
-			__ctsvc_vcard_get_event(contact->events, CONTACTS_EVENT_TYPE_ANNIVERSARY, val);
-			free(val);
-			break;
 		case CTSVC_VCARD_VALUE_X_MSN:
 		case CTSVC_VCARD_VALUE_X_YAHOO:
 		case CTSVC_VCARD_VALUE_X_ICQ:
 		case CTSVC_VCARD_VALUE_X_AIM:
 		case CTSVC_VCARD_VALUE_X_JABBER:
+		case CTSVC_VCARD_VALUE_X_SKYPE_USERNAME:
 		case CTSVC_VCARD_VALUE_X_SKYPE:
 		case CTSVC_VCARD_VALUE_X_QQ:
 		case CTSVC_VCARD_VALUE_X_GOOGLE_TALK:
+		case CTSVC_VCARD_VALUE_X_TIZEN_MESSENGER:
 			__ctsvc_vcard_get_messenger(contact->messengers, type, val);
+			free(val);
+			break;
+
+		case CTSVC_VCARD_VALUE_X_TIZEN_RELATIONSHIP:
+			__ctsvc_vcard_get_relationship(contact->relationships, type, val);
 			free(val);
 			break;
 		case CTSVC_VCARD_VALUE_END:

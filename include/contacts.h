@@ -642,7 +642,7 @@
  * <tr><td>string</td><td> display_name_index </td><td>read only</td><td> The first character of first string for grouping. This is normalized using icu. </td></tr>
  * <tr><td>integer</td><td> display_contact_id </td><td>read only</td><td> </td></tr>
  * <tr><td>string</td><td> ringtone_path </td><td>read, write</td><td> </td></tr>
- * <tr><td>string</td><td> image_thumbnail_path </td><td>read, write</td><td> </td></tr>
+ * <tr><td>string</td><td> image_thumbnail_path </td><td>read only</td><td> </td></tr>
  * <tr><td>string</td><td> vibration </td><td>read, write</td><td> </td></tr>
  * <tr><td>string</td><td> status </td><td>read only</td><td> </td></tr>
  * <tr><td>boolean</td><td> is_favorite </td><td>read, write</td><td> </td></tr>
@@ -811,7 +811,7 @@
  * <tr><td>integer</td><td> contact_id </td><td>read, write once</td><td> </td></tr>
  * <tr><td>integer</td><td> type </td><td>read, write</td><td> </td></tr>
  * <tr><td>string</td><td> label </td><td>read, write</td><td> </td></tr>
- * <tr><td>integer</td><td> date </td><td>read, write</td><td> </td></tr>
+ * <tr><td>integer</td><td> date </td><td>read, write</td><td> year * 10000 + month * 100 + day </td></tr>
  * <tr><td>integer</td><td> is_lunar </td><td>read, write</td><td> </td></tr>
  * <tr><td>integer</td><td> lunar_date </td><td>read, write</td><td> </td></tr>
  * </table>
@@ -1053,6 +1053,22 @@
  * <tr><td>integer</td><td> contact_id </td><td>*</td><td> </td></tr>
  * <tr><td>integer</td><td> address_book_id </td><td></td><td> </td></tr>
  * <tr><td>integer</td><td> type </td><td></td><td> </td></tr>
+ * <tr><td>integer</td><td> version </td><td></td><td> </td></tr>
+ * <tr><td>boolean</td><td> image_changed </td><td></td><td> </td></tr>
+ * </table>
+ *
+ * @section CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_my_profile_updated_info _contacts_my_profile_updated_info view
+ * <table>
+ * <tr>
+ *	  <th>Type</th>
+ *	  <th>Property ID</th>
+ *	  <th>Primay Key</th>
+ *	  <th>Description</th>
+ * </tr>
+ * <tr><td>string</td><td>_uri</td><td></td><td> </td></tr>
+ * <tr><td>integer</td><td> address_book_id </td><td></td><td> </td></tr>
+ * <tr><td>integer</td><td> last_changed_type </td><td></td><td> </td></tr>
+ * <tr><td>integer</td><td> version </td><td></td><td> </td></tr>
  * </table>
  *
  * @section CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_group_updated_info _contacts_group_updated_info view
@@ -1067,6 +1083,21 @@
  * <tr><td>integer</td><td> group_id </td><td>*</td><td> </td></tr>
  * <tr><td>integer</td><td> address_book_id </td><td></td><td> </td></tr>
  * <tr><td>integer</td><td> type </td><td></td><td> </td></tr>
+ * <tr><td>integer</td><td> version </td><td></td><td> </td></tr>
+ * </table>
+ *
+ * @section CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_group_member_updated_info _contacts_group_member_updated_info view
+ * <table>
+ * <tr>
+ *	  <th>Type</th>
+ *	  <th>Property ID</th>
+ *	  <th>Primary Key</th>
+ *	  <th>Description</th>
+ * </tr>
+ * <tr><td>string</td><td>_uri</td><td></td><td> </td></tr>
+ * <tr><td>integer</td><td> group_id </td><td>*</td><td> </td></tr>
+ * <tr><td>integer</td><td> address_book_id </td><td></td><td> </td></tr>
+ * <tr><td>integer</td><td> version </td><td></td><td> </td></tr>
  * </table>
  *
  * @section CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_person_number _contacts_person_number view

@@ -2193,9 +2193,8 @@ bool ctsvc_has_chinese(const char *src)
 
 int ctsvc_convert_chinese_to_pinyin(const char *src, pinyin_name_s **name, int *size)
 {
-	char 		spell[CHINESE_PINYIN_MAX_LEN][CHINESE_DUOYINZI_MAX_COUNT][CHINESE_PINYIN_SPELL_MAX_LEN]
-	     		                                                          = {NULL};
-	int			pinyin_spell_count[CHINESE_PINYIN_MAX_LEN] = {0};;
+	char spell[CHINESE_PINYIN_MAX_LEN][CHINESE_DUOYINZI_MAX_COUNT][CHINESE_PINYIN_SPELL_MAX_LEN];
+	int pinyin_spell_count[CHINESE_PINYIN_MAX_LEN] = {0};
 	UChar	temp_result[strlen(src)+1];
 	int	count = 0, len=0, total_count=0;
 	int ret, i, j;
@@ -2204,6 +2203,8 @@ int ctsvc_convert_chinese_to_pinyin(const char *src, pinyin_name_s **name, int *
 
 	RETVM_IF(src==NULL, CONTACTS_ERROR_SYSTEM, "src is NULL");
 	RETVM_IF(!*src, CONTACTS_ERROR_SYSTEM, "*src is NULL");
+
+	memset(spell, 0x0, CHINESE_PINYIN_MAX_LEN * CHINESE_DUOYINZI_MAX_COUNT * CHINESE_PINYIN_SPELL_MAX_LEN);
 
 	u_strFromUTF8(temp_result, array_sizeof(temp_result), NULL, src, -1, &status);
 	if (U_FAILURE(status)){
@@ -2255,19 +2256,17 @@ int ctsvc_convert_chinese_to_pinyin(const char *src, pinyin_name_s **name, int *
 			}
 
 			if (spell[i][index][0]) {
+				if(temp_name[j].pinyin_name[0])
+					name_len[j] += snprintf(temp_name[j].pinyin_name + name_len[j], sizeof(temp_name[j].pinyin_name) - name_len[j], " ");
+
 				name_len[j] += snprintf(temp_name[j].pinyin_name + name_len[j], sizeof(temp_name[j].pinyin_name) - name_len[j],
-								"%s ", spell[i][index]);
+								"%s", spell[i][index]);
 				initial_len[j] += snprintf(temp_name[j].pinyin_initial + initial_len[j], sizeof(temp_name[j].pinyin_initial) - initial_len[j],
 								"%c", spell[i][index][0]);
 			}
 		}
 		repeat *= pinyin_spell_count[i];
 	}
-
-//	for(j=0;j<total_count;j++) {
-//		DBG("temp_name[%d]->pinyin_name %s", j, temp_name[j].pinyin_name);
-//		DBG("temp_name[%d]->pinyin_initial %s", j, temp_name[j].pinyin_initial);
-//	}
 
 	*name = temp_name;
 

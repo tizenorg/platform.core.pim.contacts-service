@@ -35,7 +35,7 @@ static inline bool __ctsvc_filters_property_check(const property_info_s *propert
 		property_info_s *p = (property_info_s*)&(properties[i]);
 		if (property_id == p->property_id) {
 			if (p->property_type == CTSVC_SEARCH_PROPERTY_ALL || p->property_type == CTSVC_SEARCH_PROPERTY_FILTER) {
-				*type = p->type;
+				*type = (property_id & CTSVC_VIEW_DATA_TYPE_MASK);
 				return true;
 			}
 			else

@@ -22,6 +22,7 @@
 #include "ctsvc_schema.h"
 #include "ctsvc_sqlite.h"
 #include "ctsvc_db_init.h"
+#include "ctsvc_db_query.h"
 #include "ctsvc_db_plugin_profile_helper.h"
 #include "ctsvc_record.h"
 #include "ctsvc_notification.h"
@@ -91,7 +92,6 @@ int ctsvc_db_profile_insert(contacts_record_h record, int contact_id, bool is_my
 	char query[CTS_SQL_MAX_LEN] = {0};
 	ctsvc_profile_s *profile = (ctsvc_profile_s *)record;
 
-//	RETVM_IF(profile->deleted, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : deleted profile record");
 	RETV_IF(NULL == profile->appsvc_operation, CONTACTS_ERROR_NONE);
 	RETVM_IF(contact_id <= 0, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : contact_id(%d) is mandatory field to insert profile record ", profile->contact_id);
@@ -128,40 +128,45 @@ int ctsvc_db_profile_insert(contacts_record_h record, int contact_id, bool is_my
 
 }
 
-int ctsvc_db_profile_update(contacts_record_h record, int contact_id, bool is_my_profile)
+int ctsvc_db_profile_update(contacts_record_h record, bool is_my_profile)
 {
-	int ret;
+	int id;
+	int ret = CONTACTS_ERROR_NONE;
+	char* set = NULL;
+	GSList *bind_text = NULL;
+	GSList *cursor = NULL;
 	ctsvc_profile_s *profile = (ctsvc_profile_s*)record;
 	char query[CTS_SQL_MAX_LEN] = {0};
-	cts_stmt stmt;
 
 	RETVM_IF(!profile->id, CONTACTS_ERROR_INVALID_PARAMETER, "profile of contact has no ID.");
 
 	snprintf(query, sizeof(query),
-		"UPDATE "CTS_TABLE_DATA" SET contact_id=%d, is_my_profile=%d, data1=%d, data2=?, data3=?, data4=?, data5=?, "
-				"data6=?, data7=?, data8=?, data9=?, data10=?, data11=?, data12=?  WHERE id=%d",
-				contact_id, is_my_profile, profile->type, profile->id);
+			"SELECT id FROM "CTS_TABLE_DATA" WHERE id = %d", profile->id);
+	ret = ctsvc_query_get_first_int_result(query, &id);
+	RETV_IF(ret != CONTACTS_ERROR_NONE, ret);
 
-	stmt = cts_query_prepare(query);
-	RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB, "DB error : cts_query_prepare() Failed");
+	RETVM_IF(CTSVC_PROPERTY_FLAG_DIRTY != (profile->base.property_flag & CTSVC_PROPERTY_FLAG_DIRTY), CONTACTS_ERROR_NONE, "No update");
 
-	__ctsvc_profile_bind_stmt(stmt, profile, 1);
+	do {
+		if (CONTACTS_ERROR_NONE != (ret = ctsvc_db_create_set_query(record, &set, &bind_text))) break;
+		if (CONTACTS_ERROR_NONE != (ret = ctsvc_db_update_record_with_set_query(set, bind_text, CTS_TABLE_DATA, profile->id))) break;
+		if (!is_my_profile)
+			ctsvc_set_profile_noti();
+	} while (0);
 
-	ret = cts_stmt_step(stmt);
-	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("cts_stmt_step() Failed(%d)", ret);
-		cts_stmt_finalize(stmt);
-		return ret;
+	CTSVC_RECORD_RESET_PROPERTY_FLAGS((ctsvc_record_s *)record);
+	CONTACTS_FREE(set);
+	if (bind_text) {
+		for (cursor=bind_text;cursor;cursor=cursor->next)
+			CONTACTS_FREE(cursor->data);
+		g_slist_free(bind_text);
 	}
 
-	cts_stmt_finalize(stmt);
-
-	if (!is_my_profile)
-		ctsvc_set_profile_noti();
-	return CONTACTS_ERROR_NONE;
+	return ret;
 }
 
-int ctsvc_db_profile_delete(int id)
+
+int ctsvc_db_profile_delete(int id, bool is_my_profile)
 {
 	int ret;
 	char query[CTS_SQL_MIN_LEN] = {0};
@@ -171,7 +176,9 @@ int ctsvc_db_profile_delete(int id)
 
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_query_exec() Failed(%d)", ret);
-	ctsvc_set_profile_noti();
+
+	if (!is_my_profile)
+		ctsvc_set_profile_noti();
 
 	return CONTACTS_ERROR_NONE;
 }

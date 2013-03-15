@@ -107,8 +107,6 @@ static int __ctsvc_db_get_my_profile_base_info(int id, ctsvc_my_profile_s *my_pr
 	return CONTACTS_ERROR_NONE;
 }
 
-
-
 static int __ctsvc_db_my_profile_get_data(int id, ctsvc_my_profile_s *my_profile)
 {
 	int ret, len;
@@ -223,12 +221,23 @@ static int __ctsvc_db_my_profile_delete_record( int id )
 {
 	CTS_FN_CALL;
 	int ret;
+	int addressbook_id;
 	char query[CTS_SQL_MAX_LEN] = {0};
 
 	ret = ctsvc_begin_trans();
 	RETVM_IF(ret, ret, "DB error : ctsvc_begin_trans() Failed(%d)", ret);
 
-	snprintf(query, sizeof(query), "DELETE FROM %s WHERE my_profile_id = %d", CTS_TABLE_MY_PROFILES, id);
+	snprintf(query, sizeof(query),
+		"SELECT addressbook_id FROM "CTSVC_DB_VIEW_MY_PROFILE" WHERE my_profile_id = %d", id);
+	ret  = ctsvc_query_get_first_int_result(query, &addressbook_id);
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("ctsvc_query_get_first_int_result Failed(%d)", ret);
+		ctsvc_end_trans(false);
+		return ret;
+	}
+
+	snprintf(query, sizeof(query), "UPDATE "CTS_TABLE_MY_PROFILES" "
+					"SET deleted = 1, changed_ver = %d WHERE my_profile_id = %d", ctsvc_get_next_ver(), id);
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("ctsvc_query_exec() Failed(%d)", ret);
@@ -490,14 +499,17 @@ static int __ctsvc_db_my_profile_update_record( contacts_record_h record )
 	ctsvc_my_profile_s *my_profile = (ctsvc_my_profile_s*)record;
 	cts_stmt stmt;
 
-	snprintf(query, sizeof(query),
-		"SELECT count(my_profile_id) FROM "CTS_TABLE_MY_PROFILES" WHERE my_profile_id = %d", my_profile->id);
-	ret = ctsvc_query_get_first_int_result(query, &count);
-	RETVM_IF(1 != count, CONTACTS_ERROR_NO_DATA,
-			"The index(%d) is Invalid. %d Record(s) is(are) found", my_profile->id, ret);
-
 	ret = ctsvc_begin_trans();
 	RETVM_IF(ret, ret, "ctsvc_begin_trans() Failed(%d)", ret);
+
+	snprintf(query, sizeof(query),
+		"SELECT count(my_profile_id) FROM "CTSVC_DB_VIEW_MY_PROFILE" WHERE my_profile_id = %d", my_profile->id);
+	ret = ctsvc_query_get_first_int_result(query, &count);
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("The index(%d) is Invalid. %d Record(s) is(are) found", my_profile->id, ret);
+		ctsvc_end_trans(false);
+		return ret;
+	}
 
 	__ctsvc_update_my_profile_display_name(my_profile);
 	__ctsvc_my_profile_check_default_data(my_profile);
@@ -523,7 +535,7 @@ static int __ctsvc_db_my_profile_update_record( contacts_record_h record )
 		ctsvc_image_s *image;
 		GList *cursor;
 
-		for(cursor = list->deleted_records;cursor;cursor=cursor->next) {
+		for(cursor=list->deleted_records;cursor;cursor=cursor->next) {
 			image = (ctsvc_image_s *)cursor->data;
 			my_profile->image_thumbnail_path = NULL;
 		}
@@ -600,7 +612,7 @@ static int __ctsvc_db_my_profile_get_all_records( int offset, int limit, contact
 	contacts_list_h list;
 
 	len = snprintf(query, sizeof(query),
-			"SELECT my_profile_id FROM "CTS_TABLE_MY_PROFILES);
+			"SELECT my_profile_id FROM "CTSVC_DB_VIEW_MY_PROFILE);
 
 	if (0 < limit) {
 		len += snprintf(query+len, sizeof(query)-len, " LIMIT %d", limit);
@@ -694,8 +706,14 @@ static int __ctsvc_db_my_profile_get_records_with_query( contacts_query_h query,
 		my_profile = (ctsvc_my_profile_s*)record;
 		if (0 == s_query->projection_count)
 			field_count = s_query->property_count;
-		else
+		else {
 			field_count = s_query->projection_count;
+			ret = ctsvc_record_set_projection_flags(record, s_query->projection,
+					s_query->projection_count, s_query->property_count);
+
+			if (CONTACTS_ERROR_NONE != ret)
+				ASSERT_NOT_REACHED("To set projection is failed.\n");
+		}
 
 		for(i=0;i<field_count;i++) {
 			char *temp;
@@ -985,7 +1003,6 @@ static int __ctsvc_db_my_profile_insert_record( contacts_record_h record, int *i
 	cts_stmt stmt;
 
 	// These check should be done in client side
-//	RETVM_IF(my_profile->deleted, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : deleted my_profile record");
 	RETVM_IF(NULL == my_profile, CONTACTS_ERROR_INVALID_PARAMETER,
 					"Invalid parameter : my_profile is NULL");
 	RETVM_IF(my_profile->addressbook_id < 0, CONTACTS_ERROR_INVALID_PARAMETER,
@@ -995,6 +1012,10 @@ static int __ctsvc_db_my_profile_insert_record( contacts_record_h record, int *i
 
 	ret = ctsvc_begin_trans();
 	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "ctsvc_begin_trans() Failed(%d)", ret);
+
+	snprintf(query, sizeof(query), "DELETE FROM "CTS_TABLE_MY_PROFILES" WHERE addressbook_id = %d AND deleted = 1", my_profile->addressbook_id);
+	ret = ctsvc_query_exec(query);
+	WARN_IF(CONTACTS_ERROR_NONE != ret, "Delete deleted my_profile of addressbook(%d) failed", my_profile->addressbook_id);
 
 	ret = cts_db_get_next_id(CTS_TABLE_MY_PROFILES);
 	if (ret < CONTACTS_ERROR_NONE) {

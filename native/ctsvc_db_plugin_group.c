@@ -36,6 +36,7 @@ static int __ctsvc_db_group_update_record( contacts_record_h record );
 static int __ctsvc_db_group_delete_record( int id );
 static int __ctsvc_db_group_get_all_records( int offset, int limit, contacts_list_h* out_list );
 static int __ctsvc_db_group_get_records_with_query( contacts_query_h query, int offset, int limit, contacts_list_h* out_list );
+static double __ctsvc_db_group_get_next_group_prio(void);
 //static int __ctsvc_db_group_insert_records(const contacts_list_h in_list, int **ids);
 //static int __ctsvc_db_group_update_records(const contacts_list_h in_list);
 //static int __ctsvc_db_group_delete_records( int ids[], int count);
@@ -62,6 +63,7 @@ static int __ctsvc_db_group_insert_record( contacts_record_h record, int *id )
 	int ret;
 	int ver;
 	cts_stmt stmt;
+	double group_prio = 0.0;
 	ctsvc_group_s *group = (ctsvc_group_s *)record;
 	char query[CTS_SQL_MAX_LEN] = {0};
 	char image[CTSVC_IMG_FULL_PATH_SIZE_MAX] = {0};
@@ -79,15 +81,16 @@ static int __ctsvc_db_group_insert_record( contacts_record_h record, int *id )
 		return ret;
 	}
 
+	group_prio = __ctsvc_db_group_get_next_group_prio();
 	group->id = cts_db_get_next_id(CTS_TABLE_GROUPS);
 	if (id)
 		*id = group->id;
 
 	snprintf(query, sizeof(query),
 			"INSERT INTO "CTS_TABLE_GROUPS"(group_id, addressbook_id, group_name, created_ver, changed_ver, ringtone_path, "
-						"vibration, image_thumbnail_path, system_id, is_read_only) "
-			"VALUES(%d, %d, ?, ?, ?, ?, ?, ?, ?, %d)",
-			group->id, group->addressbook_id, group->is_read_only);
+						"vibration, image_thumbnail_path, system_id, is_read_only, group_prio) "
+			"VALUES(%d, %d, ?, ?, ?, ?, ?, ?, ?, %d, %lf)",
+			group->id, group->addressbook_id, group->is_read_only, group_prio);
 
 	stmt = cts_query_prepare(query);
 	if (NULL == stmt) {
@@ -148,81 +151,94 @@ static int __ctsvc_db_group_insert_record( contacts_record_h record, int *id )
 
 static int __ctsvc_db_group_update_record( contacts_record_h record )
 {
-	int ret;
-	ctsvc_group_s *group = (ctsvc_group_s *)record;
-	char image[CTSVC_IMG_FULL_PATH_SIZE_MAX] = {0};
-	char query[CTS_SQL_MIN_LEN] = {0};
-	cts_stmt stmt;
-	int len;
+	int addressbook_id = 0;
+	int ret = CONTACTS_ERROR_NONE;
+	char* set = NULL;
+	GSList *bind_text = NULL;
+	GSList *cursor = NULL;
+	ctsvc_group_s *group =  (ctsvc_group_s*)record;
+	char query[CTS_SQL_MAX_LEN] = {0};
 
 	RETV_IF(NULL == record, CONTACTS_ERROR_INVALID_PARAMETER);
 	RETVM_IF(CTSVC_RECORD_GROUP != group->base.r_type, CONTACTS_ERROR_INVALID_PARAMETER,
 			"Invalid parameter : group is invalid type(%d)", group->base.r_type);
+	RETVM_IF(CTSVC_PROPERTY_FLAG_DIRTY != (group->base.property_flag & CTSVC_PROPERTY_FLAG_DIRTY), CONTACTS_ERROR_NONE, "No update");
 	RETVM_IF(NULL == group->name, CONTACTS_ERROR_INVALID_PARAMETER,
 			"Invalid parameter : The name of group is empty.");
 
-	len = snprintf(query, sizeof(query),
-		"UPDATE "CTS_TABLE_GROUPS" SET group_name=?, changed_ver=?, ringtone_path=?, vibration=? ");
-
-	if (group->image_thumbnail_changed)
-		len += snprintf(query+len, sizeof(query)-len, ", image_thumbnail_path = ? ");
-
-	snprintf(query+len, sizeof(query)-len, "WHERE group_id=%d", group->id);
-
-	stmt = cts_query_prepare(query);
-	if (NULL == stmt) {
-		CTS_ERR("DB error : cts_query_prepare() Failed");
-		return CONTACTS_ERROR_DB;
-	}
-
-	ret = ctsvc_begin_trans();
-	if( ret < CONTACTS_ERROR_NONE ) {
-		CTS_ERR("DB error : ctsvc_begin_trans() Failed(%d)", ret);
-		cts_stmt_finalize(stmt);
+	snprintf(query, sizeof(query),
+			"SELECT addressbook_id FROM %s WHERE group_id = %d",
+			CTS_TABLE_GROUPS, group->id);
+	ret = ctsvc_query_get_first_int_result(query, &addressbook_id);
+	if ( ret < CONTACTS_ERROR_NONE) {
+		CTS_ERR("DB error : The group record(%d) is Invalid(%d)", group->id, ret);
 		return ret;
 	}
 
-	cts_stmt_bind_text(stmt, 1, group->name);
-	cts_stmt_bind_int(stmt, 2, ctsvc_get_next_ver());
-
-	if (group->ringtone_path)
-		cts_stmt_bind_text(stmt, 3, group->ringtone_path);
-
-	if (group->vibration)
-		cts_stmt_bind_text(stmt, 4, group->vibration);
-
 	if (group->image_thumbnail_changed) {
-		ret = ctsvc_change_image(CTS_GROUP_IMAGE_LOCATION, group->id, group->image_thumbnail_path,
-			image, sizeof(image));
-		if(CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("DB error : ctsvc_change_image() Failed(%d)", ret);
-			cts_stmt_finalize(stmt);
-			ctsvc_end_trans(false);
-			return ret;
-		}
+		char image[CTS_SQL_MAX_LEN] = {0};
+		ret = ctsvc_change_image(CTS_GROUP_IMAGE_LOCATION, group->id, group->image_thumbnail_path, image, sizeof(image));
 		if (*image) {
 			free(group->image_thumbnail_path);
 			group->image_thumbnail_path = strdup(image);
-			cts_stmt_bind_text(stmt, 5, image);
 		}
+		group->image_thumbnail_changed = false;
 	}
 
-	ret = cts_stmt_step(stmt);
-	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB error : cts_stmt_step() Failed(%d)", ret);
+	ret = ctsvc_begin_trans();
+	RETVM_IF(ret, ret, "ctsvc_begin_trans() Failed(%d)", ret);
+
+	do {
+		char query[CTS_SQL_MAX_LEN] = {0};
+		char query_set[CTS_SQL_MAX_LEN] = {0};
+		cts_stmt stmt = NULL;
+
+		if (CONTACTS_ERROR_NONE != (ret = ctsvc_db_create_set_query(record, &set, &bind_text))) break;
+		if (NULL == set || '\0' == *set)
+			break;
+		snprintf(query_set, sizeof(query_set), "%s, changed_ver=%d ", set, ctsvc_get_next_ver());
+
+		snprintf(query, sizeof(query), "UPDATE %s SET %s WHERE group_id = %d", CTS_TABLE_GROUPS, query_set, group->id);
+		stmt = cts_query_prepare(query);
+		if (NULL == stmt) {
+			CTS_ERR("DB error : cts_query_prepare() Failed");
+			ret = CONTACTS_ERROR_DB;
+			break;
+		}
+		if (bind_text) {
+			int i = 0;
+			for (cursor=bind_text,i=1;cursor;cursor=cursor->next,i++) {
+				const char *text = cursor->data;
+				if (text && *text)
+					cts_stmt_bind_text(stmt, i, text);
+			}
+		}
+		ret = cts_stmt_step(stmt);
+		if (CONTACTS_ERROR_NONE != ret) {
+			CTS_ERR("cts_stmt_step() Failed(%d)", ret);
+			cts_stmt_finalize(stmt);
+			break;
+		}
 		cts_stmt_finalize(stmt);
+
+		ctsvc_set_group_noti();
+	} while (0);
+
+	CTSVC_RECORD_RESET_PROPERTY_FLAGS((ctsvc_record_s *)record);
+	CONTACTS_FREE(set);
+	if (bind_text) {
+		for (cursor=bind_text;cursor;cursor=cursor->next)
+			CONTACTS_FREE(cursor->data);
+		g_slist_free(bind_text);
+	}
+
+	if (CONTACTS_ERROR_NONE != ret) {
 		ctsvc_end_trans(false);
 		return ret;
 	}
-	cts_stmt_finalize(stmt);
-
-	ctsvc_set_group_noti();
 
 	ret = ctsvc_end_trans(true);
-	if(ret < CONTACTS_ERROR_NONE ) {
-		CTS_ERR("DB error : ctsvc_end_trans() Failed(%d)", ret);
-		return ret;
-	}
+	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "DB error : ctsvc_end_trans() Failed(%d)", ret);
 
 	return CONTACTS_ERROR_NONE;
 }
@@ -263,14 +279,7 @@ static int __ctsvc_db_group_delete_record( int index )
 		return CONTACTS_ERROR_NO_DATA;
 	}
 
-	snprintf(query, sizeof(query), "INSERT INTO %s VALUES(%d, %d, %d)",
-			CTS_TABLE_GROUP_DELETEDS, index, addressbook_id, ctsvc_get_next_ver());
-	ret = ctsvc_query_exec(query);
-	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB error : ctsvc_query_exec() Failed(%d)", ret);
-		ctsvc_end_trans(false);
-		return ret;
-	}
+	ctsvc_get_next_ver();
 
 	ret = ctsvc_change_image(CTS_GROUP_IMAGE_LOCATION, index, NULL, NULL, 0);
 	if (ret < 0) {
@@ -372,7 +381,7 @@ static int __ctsvc_db_group_get_all_records( int offset, int limit, contacts_lis
 	len = snprintf(query, sizeof(query),
 			"SELECT group_id, addressbook_id, group_name, system_id, is_read_only, "
 				"ringtone_path, vibration, image_thumbnail_path "
-				"FROM "CTS_TABLE_GROUPS" ORDER BY addressbook_id, group_name COLLATE NOCASE");
+				"FROM "CTS_TABLE_GROUPS" ORDER BY addressbook_id, group_prio");
 
 	if (0 < limit) {
 		len += snprintf(query+len, sizeof(query)-len, " LIMIT %d", limit);
@@ -499,6 +508,26 @@ static int __ctsvc_db_group_get_records_with_query( contacts_query_h query,
 	*out_list = (contacts_list_h)list;
 
 	return CONTACTS_ERROR_NONE;
+}
+
+double __ctsvc_db_group_get_next_group_prio(void)
+{
+	int ret;
+	double prio = 0.0;
+	cts_stmt stmt;
+	char query[CTS_SQL_MAX_LEN] = {0};
+
+	snprintf(query, sizeof(query), "SELECT MAX(group_prio) FROM "CTS_TABLE_GROUPS" ");
+
+	stmt = cts_query_prepare(query);
+	RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB, "cts_query_prepare() Failed");
+
+	ret = cts_stmt_step(stmt);
+	if (1 /*CTS_TRUE*/  == ret)
+		prio = ctsvc_stmt_get_dbl(stmt, 0);
+	cts_stmt_finalize(stmt);
+
+	return prio + 1.0;
 }
 //static int __ctsvc_db_group_insert_records(const contacts_list_h in_list, int **ids) { return CONTACTS_ERROR_NONE; }
 //static int __ctsvc_db_group_update_records(const contacts_list_h in_list) { return CONTACTS_ERROR_NONE; }

@@ -25,13 +25,13 @@
 #define CTSVC_NOTI_PERSON_CHANGED  "/opt/usr/data/contacts-svc/.CONTACTS_SVC_PERSON_CHANGED"
 #define CTSVC_NOTI_SIMPLE_CONTACT_CHANGED  "/opt/usr/data/contacts-svc/.CONTACTS_SVC_SIMPLE_CONTACT_CHANGED"
 #define CTSVC_NOTI_CONTACT_CHANGED  "/opt/usr/data/contacts-svc/.CONTACTS_SVC_DB_CHANGED"
-#define CTSVC_NOTI_MY_PROFILE_CHANGED  "/opt/usr/data/contacts-svc/.CONTACTS_SVC_MYPROFILE_CHANGED"
+#define CTSVC_NOTI_MY_PROFILE_CHANGED  "/opt/usr/data/contacts-svc/.CONTACTS_SVC_MY_PROFILE_CHANGED"
 #define CTSVC_NOTI_NAME_CHANGED  "/opt/usr/data/contacts-svc/.CONTACTS_SVC_NAME_CHANGED"
 #define CTSVC_NOTI_NUMBER_CHANGED  "/opt/usr/data/contacts-svc/.CONTACTS_SVC_NUMBER_CHANGED"
 #define CTSVC_NOTI_EMAIL_CHANGED  "/opt/usr/data/contacts-svc/.CONTACTS_SVC_EMAIL_CHANGED"
 #define CTSVC_NOTI_EVENT_CHANGED  "/opt/usr/data/contacts-svc/.CONTACTS_SVC_EVENT_CHANGED"
 #define CTSVC_NOTI_URL_CHANGED  "/opt/usr/data/contacts-svc/.CONTACTS_SVC_URL_CHANGED"
-#define CTSVC_NOTI_GROUP_RELATION_CHANGED  "/opt/usr/data/contacts-svc/.CONTACTS_SVC_GROUP_REL_CHANGED"
+#define CTSVC_NOTI_GROUP_RELATION_CHANGED  "/opt/usr/data/contacts-svc/.CONTACTS_SVC_GROUP_RELATION_CHANGED"
 #define CTSVC_NOTI_ADDRESS_CHANGED  "/opt/usr/data/contacts-svc/.CONTACTS_SVC_ADDRESS_CHANGED"
 #define CTSVC_NOTI_NOTE_CHANGED  "/opt/usr/data/contacts-svc/.CONTACTS_SVC_NOTE_CHANGED"
 #define CTSVC_NOTI_COMPANY_CHANGED  "/opt/usr/data/contacts-svc/.CONTACTS_SVC_COMPANY_CHANGED"
@@ -44,9 +44,7 @@
 #define CTSVC_NOTI_PROFILE_CHANGED  "/opt/usr/data/contacts-svc/.CONTACTS_SVC_PROFILE_CHANGED"
 #define CTSVC_NOTI_ACTIVITY_CHANGED  "/opt/usr/data/contacts-svc/.CONTACTS_SVC_ACTIVITY_CHANGED"
 #define CTSVC_NOTI_PHONELOG_CHANGED  "/opt/usr/data/contacts-svc/.CONTACTS_SVC_PLOG_CHANGED"
-#define CTSVC_NOTI_FAVORITE_CHANGED  "/opt/usr/data/contacts-svc/.CONTACTS_SVC_FAVOR_CHANGED"
 #define CTSVC_NOTI_SPEEDDIAL_CHANGED  "/opt/usr/data/contacts-svc/.CONTACTS_SVC_SPEED_CHANGED"
-#define CTSVC_NOTI_MISSED_CALL_CHANGED  "/opt/usr/data/contacts-svc/.CONTACTS_SVC_MISSED_CHANGED"
 
 
 #endif /* __TIZEN_SOCIAL_CTSVC_NOTIFY_H__ */

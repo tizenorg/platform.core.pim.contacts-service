@@ -26,6 +26,7 @@
 #include "ctsvc_ipc_marshal.h"
 #include "ctsvc_internal.h"
 #include "ctsvc_ipc_server.h"
+#include "ctsvc_utils.h"
 
 void ctsvc_ipc_server_connect(pims_ipc_h ipc, pims_ipc_data_h indata, pims_ipc_data_h *outdata, void *userdata)
 {
@@ -124,13 +125,20 @@ void ctsvc_ipc_server_db_insert_record(pims_ipc_h ipc, pims_ipc_data_h indata, p
 			ERR("pims_ipc_data_put fail");
 			goto DATA_FREE;
 		}
-		if (ret == CONTACTS_ERROR_NONE)
-		{
+		if (ret == CONTACTS_ERROR_NONE) {
+			int transaction_ver = ctsvc_get_transaction_ver();
+			if (ctsvc_ipc_marshal_int(transaction_ver, *outdata) != CONTACTS_ERROR_NONE) {
+				pims_ipc_data_destroy(*outdata);
+				*outdata = NULL;
+				ERR("ctsvc_ipc_marshal_int fail");
+				ret = CONTACTS_ERROR_OUT_OF_MEMORY;
+				goto ERROR_RETURN;
+			}
 			if (ctsvc_ipc_marshal_int(id,*outdata) != CONTACTS_ERROR_NONE)
 			{
 				pims_ipc_data_destroy(*outdata);
 				ERR("ctsvc_ipc_marshal fail");
-				ret = CONTACTS_ERROR_INVALID_PARAMETER;
+				ret = CONTACTS_ERROR_OUT_OF_MEMORY;
 				goto ERROR_RETURN;
 			}
 		}
@@ -269,7 +277,36 @@ void ctsvc_ipc_server_db_update_record(pims_ipc_h ipc, pims_ipc_data_h indata, p
 
 	ret = contacts_db_update_record(record);
 
-	// goto 주의..
+	if (outdata)
+	{
+		*outdata = pims_ipc_data_create(0);
+		if (!*outdata)
+		{
+			ERR("pims_ipc_data_create fail");
+			goto DATA_FREE;
+		}
+		if (pims_ipc_data_put(*outdata,(void*)&ret,sizeof(int)) != 0)
+		{
+			pims_ipc_data_destroy(*outdata);
+			*outdata = NULL;
+			ERR("pims_ipc_data_put fail");
+			goto DATA_FREE;
+		}
+
+		if (ret == CONTACTS_ERROR_NONE) {
+			int transaction_ver = ctsvc_get_transaction_ver();
+			if (ctsvc_ipc_marshal_int(transaction_ver, *outdata) != CONTACTS_ERROR_NONE) {
+				pims_ipc_data_destroy(*outdata);
+				*outdata = NULL;
+				ERR("ctsvc_ipc_marshal_int fail");
+				ret = CONTACTS_ERROR_OUT_OF_MEMORY;
+				goto ERROR_RETURN;
+			}
+		}
+	}
+
+	goto DATA_FREE;
+
 ERROR_RETURN:
 	if (outdata)
 	{
@@ -328,7 +365,36 @@ void ctsvc_ipc_server_db_delete_record(pims_ipc_h ipc, pims_ipc_data_h indata, p
 
 	ret = contacts_db_delete_record(view_uri,id);
 
-	// goto 주의..
+	if (outdata)
+	{
+		*outdata = pims_ipc_data_create(0);
+		if (!*outdata)
+		{
+			ERR("pims_ipc_data_create fail");
+			goto DATA_FREE;
+		}
+		if (pims_ipc_data_put(*outdata,(void*)&ret,sizeof(int)) != 0)
+		{
+			pims_ipc_data_destroy(*outdata);
+			*outdata = NULL;
+			ERR("pims_ipc_data_put fail");
+			goto DATA_FREE;
+		}
+
+		if (ret == CONTACTS_ERROR_NONE) {
+			int transaction_ver = ctsvc_get_transaction_ver();
+			if (ctsvc_ipc_marshal_int(transaction_ver, *outdata) != CONTACTS_ERROR_NONE) {
+				pims_ipc_data_destroy(*outdata);
+				*outdata = NULL;
+				ERR("ctsvc_ipc_marshal_int fail");
+				ret = CONTACTS_ERROR_OUT_OF_MEMORY;
+				goto ERROR_RETURN;
+			}
+		}
+	}
+
+	goto DATA_FREE;
+
 ERROR_RETURN:
 	if (outdata)
 	{
@@ -350,6 +416,7 @@ ERROR_RETURN:
 	{
 		ERR("outdata is NULL");
 	}
+
 DATA_FREE:
 
 	CONTACTS_FREE(view_uri);
@@ -382,6 +449,35 @@ void ctsvc_ipc_server_db_replace_record(pims_ipc_h ipc, pims_ipc_data_h indata,
 	}
 
 	ret = contacts_db_replace_record(record, id);
+
+	if (outdata) {
+		*outdata = pims_ipc_data_create(0);
+		if (!*outdata) {
+			ERR("pims_ipc_data_create fail");
+			goto DATA_FREE;
+		}
+		if (pims_ipc_data_put(*outdata, (void*)&ret, sizeof(int)) != 0) {
+			pims_ipc_data_destroy(*outdata);
+			*outdata = NULL;
+			ERR("pims_ipc_data_put fail");
+			goto DATA_FREE;
+		}
+
+		if (ret == CONTACTS_ERROR_NONE) {
+			int transaction_ver = ctsvc_get_transaction_ver();
+			if (ctsvc_ipc_marshal_int(transaction_ver, *outdata) != CONTACTS_ERROR_NONE) {
+				pims_ipc_data_destroy(*outdata);
+				*outdata = NULL;
+				ERR("ctsvc_ipc_marshal_int fail");
+				ret = CONTACTS_ERROR_OUT_OF_MEMORY;
+				goto ERROR_RETURN;
+			}
+		}
+	}
+	else {
+		ERR("outdata is NULL");
+	}
+	goto DATA_FREE;
 
 ERROR_RETURN:
 	if (outdata) {
@@ -845,9 +941,16 @@ void ctsvc_ipc_server_db_insert_records(pims_ipc_h ipc, pims_ipc_data_h indata,
 			goto DATA_FREE;
 		}
 
-		if(ret == CONTACTS_ERROR_NONE)
-		{
+		if(ret == CONTACTS_ERROR_NONE) {
 			contacts_record_h record = NULL;
+			int transaction_ver = ctsvc_get_transaction_ver();
+			if (ctsvc_ipc_marshal_int(transaction_ver, *outdata) != CONTACTS_ERROR_NONE) {
+				pims_ipc_data_destroy(*outdata);
+				*outdata = NULL;
+				ERR("ctsvc_ipc_marshal_int fail");
+				ret = CONTACTS_ERROR_OUT_OF_MEMORY;
+				goto ERROR_RETURN;
+			}
 			// marshal : id_count+property_id+[ids]*id_count
 			// id_count
 			if (pims_ipc_data_put(*outdata,(void*)&id_count,sizeof(int)) != 0)
@@ -855,9 +958,10 @@ void ctsvc_ipc_server_db_insert_records(pims_ipc_h ipc, pims_ipc_data_h indata,
 				pims_ipc_data_destroy(*outdata);
 				*outdata = NULL;
 				ERR("pims_ipc_data_put fail");
-				ret = CONTACTS_ERROR_INVALID_PARAMETER;
+				ret = CONTACTS_ERROR_OUT_OF_MEMORY;
 				goto ERROR_RETURN;
 			}
+
 			for(i=0;i<id_count;i++)
 			{
 				record = NULL;
@@ -867,7 +971,7 @@ void ctsvc_ipc_server_db_insert_records(pims_ipc_h ipc, pims_ipc_data_h indata,
 					pims_ipc_data_destroy(*outdata);
 					*outdata = NULL;
 					ERR("pims_ipc_data_put fail");
-					ret = CONTACTS_ERROR_INVALID_PARAMETER;
+					ret = CONTACTS_ERROR_OUT_OF_MEMORY;
 					goto ERROR_RETURN;
 				}
 			}
@@ -879,7 +983,6 @@ void ctsvc_ipc_server_db_insert_records(pims_ipc_h ipc, pims_ipc_data_h indata,
 	}
 	goto DATA_FREE;
 
-	// goto 주의..
 ERROR_RETURN:
 	if (outdata)
 	{
@@ -947,6 +1050,17 @@ void ctsvc_ipc_server_db_update_records(pims_ipc_h ipc, pims_ipc_data_h indata,
 			*outdata = NULL;
 			ERR("pims_ipc_data_put fail");
 			goto DATA_FREE;
+		}
+
+		if (ret == CONTACTS_ERROR_NONE) {
+			int transaction_ver = ctsvc_get_transaction_ver();
+			if (ctsvc_ipc_marshal_int(transaction_ver, *outdata) != CONTACTS_ERROR_NONE) {
+				pims_ipc_data_destroy(*outdata);
+				*outdata = NULL;
+				ERR("ctsvc_ipc_marshal_int fail");
+				ret = CONTACTS_ERROR_OUT_OF_MEMORY;
+				goto ERROR_RETURN;
+			}
 		}
 	}
 	else
@@ -1044,6 +1158,18 @@ void ctsvc_ipc_server_db_delete_records(pims_ipc_h ipc, pims_ipc_data_h indata,
 			pims_ipc_data_destroy(*outdata);
 			*outdata = NULL;
 			ERR("pims_ipc_data_put fail");
+			goto DATA_FREE;
+		}
+
+		if (ret == CONTACTS_ERROR_NONE) {
+			int transaction_ver = ctsvc_get_transaction_ver();
+			if (ctsvc_ipc_marshal_int(transaction_ver, *outdata) != CONTACTS_ERROR_NONE) {
+				pims_ipc_data_destroy(*outdata);
+				*outdata = NULL;
+				ERR("ctsvc_ipc_marshal_int fail");
+				ret = CONTACTS_ERROR_OUT_OF_MEMORY;
+				goto ERROR_RETURN;
+			}
 		}
 	}
 	else
@@ -1053,7 +1179,6 @@ void ctsvc_ipc_server_db_delete_records(pims_ipc_h ipc, pims_ipc_data_h indata,
 
 	goto DATA_FREE;
 
-	// goto 주의..
 ERROR_RETURN:
 	if (outdata)
 	{
@@ -1135,6 +1260,16 @@ void ctsvc_ipc_server_db_replace_records(pims_ipc_h ipc, pims_ipc_data_h indata,
 			*outdata = NULL;
 			ERR("pims_ipc_data_put fail");
 			goto DATA_FREE;
+		}
+		if (ret == CONTACTS_ERROR_NONE) {
+			int transaction_ver = ctsvc_get_transaction_ver();
+			if (ctsvc_ipc_marshal_int(transaction_ver, *outdata) != CONTACTS_ERROR_NONE) {
+				pims_ipc_data_destroy(*outdata);
+				*outdata = NULL;
+				ERR("ctsvc_ipc_marshal_int fail");
+				ret = CONTACTS_ERROR_OUT_OF_MEMORY;
+				goto ERROR_RETURN;
+			}
 		}
 	}
 	else {

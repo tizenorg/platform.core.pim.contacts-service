@@ -58,7 +58,7 @@ _CONTACTS_BEGIN_VIEW()
 	_CONTACTS_PROPERTY_STR( display_name_index)		// read only
 	_CONTACTS_PROPERTY_INT( display_contact_id )	// read, write
 	_CONTACTS_PROPERTY_STR( ringtone_path )			// read, write
-	_CONTACTS_PROPERTY_STR( image_thumbnail_path )	// read, write
+	_CONTACTS_PROPERTY_STR( image_thumbnail_path )	// read only
 	_CONTACTS_PROPERTY_STR( vibration )				// read, write
 	_CONTACTS_PROPERTY_STR( status )				// read only
 	_CONTACTS_PROPERTY_BOOL( is_favorite )			// read, write
@@ -376,7 +376,15 @@ _CONTACTS_BEGIN_READ_ONLY_VIEW()
 	_CONTACTS_PROPERTY_INT( address_book_id )
 	_CONTACTS_PROPERTY_INT( type )					// insert/update/delete
 	_CONTACTS_PROPERTY_INT( version )
+	_CONTACTS_PROPERTY_BOOL( image_changed )
 _CONTACTS_END_READ_ONLY_VIEW( _contacts_contact_updated_info )
+
+// my_profile_updated_info : read only
+_CONTACTS_BEGIN_READ_ONLY_VIEW()
+	_CONTACTS_PROPERTY_INT( address_book_id )
+	_CONTACTS_PROPERTY_INT( last_changed_type )
+	_CONTACTS_PROPERTY_INT( version )
+_CONTACTS_END_READ_ONLY_VIEW( _contacts_my_profile_updated_info )
 
 // group_updated_info : read only
 _CONTACTS_BEGIN_READ_ONLY_VIEW()

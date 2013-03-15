@@ -22,6 +22,7 @@
 #include "ctsvc_schema.h"
 #include "ctsvc_sqlite.h"
 #include "ctsvc_db_init.h"
+#include "ctsvc_db_query.h"
 #include "ctsvc_db_plugin_event_helper.h"
 #include "ctsvc_record.h"
 #include "ctsvc_notification.h"
@@ -34,7 +35,6 @@ int ctsvc_db_event_insert(contacts_record_h record, int contact_id, bool is_my_p
 	ctsvc_event_s *event = (ctsvc_event_s *)record;
 
 	// These check should be done in client side
-//	RETVM_IF(event->deleted, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : deleted event record");
 	RETV_IF(event->date <= 0, CONTACTS_ERROR_NONE);
 	RETVM_IF(contact_id <= 0, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : contact_id(%d) is mandatory field to insert event record", event->contact_id);
@@ -97,42 +97,42 @@ int ctsvc_db_event_get_value_from_stmt(cts_stmt stmt, contacts_record_h *record,
 	return CONTACTS_ERROR_NONE;
 }
 
-int ctsvc_db_event_update(contacts_record_h record, int contact_id, bool is_my_profile)
+int ctsvc_db_event_update(contacts_record_h record, bool is_my_profile)
 {
-	int ret;
-	ctsvc_event_s *event = (ctsvc_event_s*)record;
+	int id;
+	int ret = CONTACTS_ERROR_NONE;
+	char* set = NULL;
+	GSList *bind_text = NULL;
+	GSList *cursor = NULL;
+	ctsvc_event_s *event =  (ctsvc_event_s*)record;
 	char query[CTS_SQL_MAX_LEN] = {0};
-	cts_stmt stmt;
 
 	RETVM_IF(!event->id, CONTACTS_ERROR_INVALID_PARAMETER, "event of contact has no ID.");
+	RETVM_IF(CTSVC_PROPERTY_FLAG_DIRTY != (event->base.property_flag & CTSVC_PROPERTY_FLAG_DIRTY), CONTACTS_ERROR_NONE, "No update");
 
-	snprintf(query, sizeof(query),
-		"UPDATE "CTS_TABLE_DATA" SET contact_id=%d, is_my_profile=%d, data1=%d, data2=?, data3=?, data4=%d, data5=? WHERE id=%d",
-				contact_id, is_my_profile, event->type, event->is_lunar, event->id);
+	snprintf(query, sizeof(query), "SELECT id FROM "CTS_TABLE_DATA" WHERE id = %d", event->id);
+	ret = ctsvc_query_get_first_int_result(query, &id);
+	RETV_IF(ret != CONTACTS_ERROR_NONE, ret);
 
-	stmt = cts_query_prepare(query);
-	RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB, "DB error : cts_query_prepare() Failed");
+	do {
+		if (CONTACTS_ERROR_NONE != (ret = ctsvc_db_create_set_query(record, &set, &bind_text))) break;
+		if (CONTACTS_ERROR_NONE != (ret = ctsvc_db_update_record_with_set_query(set, bind_text, CTS_TABLE_DATA, event->id))) break;
+		if (!is_my_profile)
+			ctsvc_set_event_noti();
+	} while (0);
 
-	if (event->label)
-		cts_stmt_bind_text(stmt, 1, event->label);
-	cts_stmt_bind_int(stmt, 2, event->date);
-	cts_stmt_bind_int(stmt, 3, event->lunar_date);
-
-	ret = cts_stmt_step(stmt);
-	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("cts_stmt_step() Failed(%d)", ret);
-		cts_stmt_finalize(stmt);
-		return ret;
+	CTSVC_RECORD_RESET_PROPERTY_FLAGS((ctsvc_record_s *)record);
+	CONTACTS_FREE(set);
+	if (bind_text) {
+		for (cursor=bind_text;cursor;cursor=cursor->next)
+			CONTACTS_FREE(cursor->data);
+		g_slist_free(bind_text);
 	}
 
-	cts_stmt_finalize(stmt);
-
-	if (!is_my_profile)
-		ctsvc_set_event_noti();
-	return CONTACTS_ERROR_NONE;
+	return ret;
 }
 
-int ctsvc_db_event_delete(int id)
+int ctsvc_db_event_delete(int id, bool is_my_profile)
 {
 	int ret;
 	char query[CTS_SQL_MIN_LEN] = {0};
@@ -143,7 +143,8 @@ int ctsvc_db_event_delete(int id)
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_query_exec() Failed(%d)", ret);
 
-	ctsvc_set_event_noti();
+	if (!is_my_profile)
+		ctsvc_set_event_noti();
 
 	return CONTACTS_ERROR_NONE;
 }

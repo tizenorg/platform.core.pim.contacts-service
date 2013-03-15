@@ -3,6 +3,8 @@
  *
  * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
  *
+ * Contact: Youngjae Shin <yj99.shin@samsung.com>
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,16 +18,38 @@
  * limitations under the License.
  *
  */
+#include <stdio.h>
+#include <stdlib.h>
 
-#ifndef __CTSVC_DB_PLUGIN_NICKNAME_HELPER_H__
-#define __CTSVC_DB_PLUGIN_NICKNAME_HELPER_H__
+int main(int argc, char **argv)
+{
+	FILE *fp;
+	int c;
 
-#include "contacts.h"
-#include "ctsvc_sqlite.h"
+	fp = fopen(argv[1], "r");
+	if (fp == NULL)
+		exit(EXIT_FAILURE);
 
-int ctsvc_db_nickname_insert(contacts_record_h record, int contact_id, bool is_my_profile, int *id);
-int ctsvc_db_nickname_update(contacts_record_h record, bool is_my_profile);
-int ctsvc_db_nickname_delete(int id, bool is_my_profile);
-int ctsvc_db_nickname_get_value_from_stmt(cts_stmt stmt, contacts_record_h *record, int start_count);
+	do{
+		c = fgetc(fp);
+		switch (c)
+		{
+		case '-':
+			if ('-' == (c = fgetc(fp))) {
+				while ('\n' != c && EOF != c)
+					c = fgetc(fp);
+				printf("\n");
+			}
+			else printf("-%c",c);
+			break;
+		case EOF:
+			break;
+		default:
+			printf("%c",c);
+			break;
+		}
+	}while(EOF != c);
 
-#endif // __CTSVC_DB_PLUGIN_NICKNAME_HELPER_H__
+	exit(EXIT_SUCCESS);
+}
+

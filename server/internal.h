@@ -28,6 +28,7 @@
 // Additional Error
 enum {
 	CTSVC_ERR_NO_DB_FILE = -10000,
+	CTSVC_ERR_NO_TABLE,
 };
 
 #define SERVER_DLOG_OUT

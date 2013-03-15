@@ -43,11 +43,23 @@
     }\
 } while (0)
 
+#define CTSVC_RECORD_RESET_PROPERTY_FLAGS(base)do {\
+    if ((base)->properties_flags) \
+    {\
+        free((base)->properties_flags); \
+        (base)->property_max_count = 0;\
+        (base)->properties_flags = NULL;\
+        (base)->property_flag = 0;\
+    }\
+} while (0)
+
+int ctsvc_record_set_property_flag(ctsvc_record_s* _record, int property_id, contacts_property_flag_e flag);
 int ctsvc_record_set_projection_flags( contacts_record_h record, const unsigned int *projection, const unsigned int projection_count, const unsigned int property_max_count);
 int ctsvc_record_set_str( contacts_record_h record, unsigned int property_id, const char* value );
 int ctsvc_record_set_bool( contacts_record_h record, unsigned int property_id, bool value );
 int ctsvc_record_set_int( contacts_record_h record, unsigned int property_id, int value );
 int ctsvc_record_set_lli( contacts_record_h record, unsigned int property_id, long long int value );
 int ctsvc_record_set_double( contacts_record_h record, unsigned int property_id, double value );
+bool ctsvc_record_check_property_flag(const ctsvc_record_s* s_record, unsigned int property_id, contacts_property_flag_e flag);
 
 #endif /* __TIZEN_SOCIAL_CTSVC_RECORD_H__ */

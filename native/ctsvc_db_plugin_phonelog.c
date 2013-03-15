@@ -100,7 +100,7 @@ static int __ctsvc_db_phonelog_get_record( int id, contacts_record_h* out_record
 
 	len = snprintf(query, sizeof(query),
 			"SELECT id, number, person_id, log_type, log_time, data1, data2 "
-				"FROM "CTS_TABLE_PHONELOGS" WHERE id = %d", id);
+			"FROM "CTS_TABLE_PHONELOGS" WHERE id = %d", id);
 
 	stmt = cts_query_prepare(query);
 	RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB, "DB error : cts_query_prepare() Failed");
@@ -127,58 +127,78 @@ static int __ctsvc_db_phonelog_get_record( int id, contacts_record_h* out_record
 
 static int __ctsvc_db_phonelog_update_record( contacts_record_h record )
 {
-	int ret;
-//	cts_stmt stmt;
+	int phonelog_id;
 	char query[CTS_SQL_MIN_LEN] = {0};
 	ctsvc_phonelog_s *phonelog = (ctsvc_phonelog_s *)record;
+	int ret = CONTACTS_ERROR_NONE;
+	char* set = NULL;
+	GSList *bind_text = NULL;
+	GSList *cursor = NULL;
 
 	RETVM_IF(NULL == record, CONTACTS_ERROR_INVALID_PARAMETER, "Invaild parameter : record is null");
 	RETVM_IF(phonelog->id <= 0, CONTACTS_ERROR_INVALID_PARAMETER,
 			"Invalid parameter : The phone_log has ID(%d)", phonelog->id);
 	RETVM_IF(phonelog->log_type != CONTACTS_PLOG_TYPE_VOICE_INCOMMING_SEEN &&
 			phonelog->log_type != CONTACTS_PLOG_TYPE_VIDEO_INCOMMING_SEEN, CONTACTS_ERROR_INVALID_PARAMETER,
-				"Invaild parameter : the type is can not updated(%d)", phonelog->log_type);
+			"Invaild parameter : the type is can not updated(%d)", phonelog->log_type);
+	RETVM_IF(CTSVC_PROPERTY_FLAG_DIRTY != (phonelog->base.property_flag & CTSVC_PROPERTY_FLAG_DIRTY), CONTACTS_ERROR_NONE, "No update");
+
+
+	snprintf(query, sizeof(query),
+			"SELECT id FROM "CTS_TABLE_PHONELOGS" WHERE id = %d", phonelog->id);
+	ret = ctsvc_query_get_first_int_result(query, &phonelog_id);
+	if (ret != CONTACTS_ERROR_NONE) {
+		CTS_ERR("ctsvc_query_get_first_int_result Fail(%d)", ret);
+		return ret;
+	}
 
 	ret = ctsvc_begin_trans();
 	RETVM_IF(ret, ret, "ctsvc_begin_trans() Failed(%d)", ret);
 
-	snprintf(query, sizeof(query),
-		"UPDATE "CTS_TABLE_PHONELOGS" SET log_type = %d WHERE id = %d",
-			phonelog->log_type, phonelog->id);
+	do {
+		if (CONTACTS_ERROR_NONE != (ret = ctsvc_db_create_set_query(record, &set, &bind_text))) break;
+		if (CONTACTS_ERROR_NONE != (ret = ctsvc_db_update_record_with_set_query(set, bind_text, CTS_TABLE_PHONELOGS, phonelog->id))) break;
 
-	ret = ctsvc_query_exec(query);
-	if (CONTACTS_ERROR_NONE != ret ) {
-		CTS_ERR("DB error : ctsvc_query_exec() Failed");
-		ctsvc_end_trans(false);
-		return CONTACTS_ERROR_DB;
-	}
+		if (cts_db_change()) {
+			ctsvc_set_phonelog_noti();
 
-	if (cts_db_change()) {
-		ctsvc_set_phonelog_noti();
-		ctsvc_set_missed_call_noti();
 #ifdef _CONTACTS_IPC_SERVER
-		// add id for subscribe
-		ctsvc_change_subject_add_changed_phone_log_id(CONTACTS_CHANGE_UPDATED, phonelog->id);
+			ctsvc_change_subject_add_changed_phone_log_id(CONTACTS_CHANGE_UPDATED, phonelog->id);
 #endif
+		}
+	} while (0);
+
+	CTSVC_RECORD_RESET_PROPERTY_FLAGS((ctsvc_record_s *)record);
+	CONTACTS_FREE(set);
+	if (bind_text) {
+		for (cursor=bind_text;cursor;cursor=cursor->next)
+			CONTACTS_FREE(cursor->data);
+		g_slist_free(bind_text);
 	}
 
 	ret = ctsvc_end_trans(true);
-	if (ret < CONTACTS_ERROR_NONE)
-	{
-		CTS_ERR("DB error : ctsvc_end_trans() Failed(%d)", ret);
-		return ret;
-	}
-	else
-		return CONTACTS_ERROR_NONE;
+	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "DB error : ctsvc_end_trans() Failed(%d)", ret);
+
+	return CONTACTS_ERROR_NONE;
 }
 
 static int __ctsvc_db_phonelog_delete_record( int id )
 {
 	int ret;
+	int phonelog_id;
 	char query[CTS_SQL_MAX_LEN] = {0};
 
 	ret = ctsvc_begin_trans();
 	RETVM_IF(ret, ret, "ctsvc_begin_trans() Failed(%d)", ret);
+
+	snprintf(query, sizeof(query),
+			"SELECT id FROM "CTS_TABLE_PHONELOGS" WHERE id = %d", id);
+	ret = ctsvc_query_get_first_int_result(query, &phonelog_id);
+	if (ret != CONTACTS_ERROR_NONE) {
+		CTS_ERR("ctsvc_query_get_first_int_result Fail(%d)", ret);
+		ctsvc_end_trans(false);
+		return ret;
+	}
 
 	snprintf(query, sizeof(query), "DELETE FROM %s WHERE id = %d",
 			CTS_TABLE_PHONELOGS, id);
@@ -211,7 +231,7 @@ static int __ctsvc_db_phonelog_get_all_records( int offset, int limit,
 	contacts_list_h list;
 
 	len = snprintf(query, sizeof(query),
-		"SELECT id, number, person_id, log_type, log_time, data1, data2 FROM "CTS_TABLE_PHONELOGS);
+			"SELECT id, number, person_id, log_type, log_time, data1, data2 FROM "CTS_TABLE_PHONELOGS);
 
 	if (0 < limit) {
 		len += snprintf(query+len, sizeof(query)-len, " LIMIT %d", limit);
@@ -243,7 +263,7 @@ static int __ctsvc_db_phonelog_get_all_records( int offset, int limit,
 }
 
 static int __ctsvc_db_phonelog_get_records_with_query( contacts_query_h query, int offset,
-	int limit, contacts_list_h* out_list )
+		int limit, contacts_list_h* out_list )
 {
 	int ret;
 	int i;
@@ -340,19 +360,19 @@ static int __ctsvc_cb_phonelog_increase_outgoing_count(int person_id)
 	char query[CTS_SQL_MIN_LEN] = {0};
 
 	snprintf(query, sizeof(query),
-		"SELECT person_id FROM %s WHERE person_id = %d and usage_type = %d ",
-		CTS_TABLE_CONTACT_STAT, person_id, CONTACTS_USAGE_STAT_TYPE_OUTGOING_CALL);
+			"SELECT person_id FROM %s WHERE person_id = %d and usage_type = %d ",
+			CTS_TABLE_CONTACT_STAT, person_id, CONTACTS_USAGE_STAT_TYPE_OUTGOING_CALL);
 
 	ret = ctsvc_query_get_first_int_result(query, &id);
 	if (CONTACTS_ERROR_NO_DATA == ret) {
 		snprintf(query, sizeof(query),
-			"INSERT INTO %s(person_id, usage_type, times_used) VALUES(%d, %d, 1)",
-			CTS_TABLE_CONTACT_STAT, person_id, CONTACTS_USAGE_STAT_TYPE_OUTGOING_CALL);
+				"INSERT INTO %s(person_id, usage_type, times_used) VALUES(%d, %d, 1)",
+				CTS_TABLE_CONTACT_STAT, person_id, CONTACTS_USAGE_STAT_TYPE_OUTGOING_CALL);
 	}
 	else {
 		snprintf(query, sizeof(query),
-			"UPDATE %s SET times_used = times_used + 1 WHERE person_id = %d and usage_type = %d",
-			CTS_TABLE_CONTACT_STAT, person_id, CONTACTS_USAGE_STAT_TYPE_OUTGOING_CALL);
+				"UPDATE %s SET times_used = times_used + 1 WHERE person_id = %d and usage_type = %d",
+				CTS_TABLE_CONTACT_STAT, person_id, CONTACTS_USAGE_STAT_TYPE_OUTGOING_CALL);
 	}
 
 	ret = ctsvc_query_exec(query);
@@ -386,7 +406,7 @@ static int  __ctsvc_db_phonelog_insert(ctsvc_phonelog_s *phonelog, int *id)
 		if (phonelog->log_type < CONTACTS_PLOG_TYPE_EMAIL_RECEIVED) {
 			ret = ctsvc_clean_number(phonelog->address, clean_num, sizeof(clean_num));
 			if (0 < ret) {
-				ret = ctsvc_normalize_number(clean_num, normal_num, CTSVC_NUMBER_MAX_LEN);
+				ret = ctsvc_normalize_number(clean_num, normal_num, CTSVC_NUMBER_MAX_LEN, CTSVC_MIN_MATCH_NORMALIZED_NUMBER_SIZE);
 				cts_stmt_bind_text(stmt, 2, normal_num);
 			}
 		}
@@ -408,10 +428,6 @@ static int  __ctsvc_db_phonelog_insert(ctsvc_phonelog_s *phonelog, int *id)
 	if (id)
 		*id = cts_db_get_last_insert_id();
 	cts_stmt_finalize(stmt);
-
-	if (CONTACTS_PLOG_TYPE_VOICE_INCOMMING_UNSEEN == phonelog->log_type ||
-			CONTACTS_PLOG_TYPE_VIDEO_INCOMMING_UNSEEN == phonelog->log_type)
-		ctsvc_set_missed_call_noti();
 
 	ctsvc_set_phonelog_noti();
 	return CONTACTS_ERROR_NONE;
@@ -451,7 +467,7 @@ static int __ctsvc_db_phonelog_insert_record( contacts_record_h record, int *id 
 	if(phonelog-> log_type == CONTACTS_PLOG_TYPE_VOICE_INCOMMING_UNSEEN || phonelog-> log_type == CONTACTS_PLOG_TYPE_VIDEO_INCOMMING_UNSEEN) {
 
 		#define PHONE_PACKAGE_NAME		"org.tizen.phone"
-		int call_cnt = 0;
+		unsigned int call_cnt = 0;
 		bool	bBadgeExist = FALSE;
 
 		badge_is_existing(PHONE_PACKAGE_NAME, &bBadgeExist);

@@ -94,7 +94,7 @@ API int contacts_connect_with_flags(unsigned int flags)
 	if (flags & CONTACTS_CONNECT_FLAG_RETRY) {
 		int i;
 		int waiting_time = 500;
-		for (i=0;i<6;i++) {
+		for (i=0;i<7;i++) {
 			usleep(waiting_time * 1000);
 			DBG("retry cnt=%d, ret=%x, %d",(i+1), ret, waiting_time);
 			ret = contacts_connect2();

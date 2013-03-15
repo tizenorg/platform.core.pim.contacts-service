@@ -100,6 +100,7 @@ static int __ctsvc_db_email_insert_record( contacts_record_h record, int *id )
 		return ret;
 	}
 	ctsvc_set_contact_noti();
+	ctsvc_set_person_noti();
 
 	ret = ctsvc_end_trans(true);
 	if (ret < CONTACTS_ERROR_NONE)
@@ -162,14 +163,14 @@ static int __ctsvc_db_email_update_record( contacts_record_h record )
 			"SELECT contact_id FROM "CTSVC_DB_VIEW_CONTACT" WHERE contact_id = %d", email->contact_id);
 	ret = ctsvc_query_get_first_int_result(query, &contact_id);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("No data : contact_id (%d) is not exist", contact_id);
+		CTS_ERR("No data : contact_id (%d) is not exist", email->contact_id);
 		ctsvc_end_trans(false);
-		return CONTACTS_ERROR_INVALID_PARAMETER;
+		return ret;
 	}
 
-	ret = ctsvc_db_email_update(record, email->contact_id, false);
+	ret = ctsvc_db_email_update(record, false);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB error : ctsvc_begin_trans() Failed(%d)", ret);
+		CTS_ERR("update record failed(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
@@ -177,12 +178,12 @@ static int __ctsvc_db_email_update_record( contacts_record_h record )
 	// TODO ; contact display email update
 	ret = ctsvc_db_contact_update_changed_time(email->contact_id);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB error : ctsvc_query_exec() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_db_contact_update_changed_time() Failed(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
+	ctsvc_set_person_noti();
 
-	ctsvc_set_contact_noti();
 	ret = ctsvc_end_trans(true);
 	if (ret < CONTACTS_ERROR_NONE)
 	{
@@ -212,10 +213,10 @@ static int __ctsvc_db_email_delete_record( int id )
 	if( ret != CONTACTS_ERROR_NONE ) {
 		CTS_ERR("The id(%d) is Invalid(%d)", id, ret);
 		ctsvc_end_trans(false);
-		return contact_id;
+		return ret;
 	}
 
-	ret = ctsvc_db_email_delete(id);
+	ret = ctsvc_db_email_delete(id, false);
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("DB error : ctsvc_begin_trans() Failed(%d)", ret);
 		ctsvc_end_trans(false);
@@ -224,12 +225,11 @@ static int __ctsvc_db_email_delete_record( int id )
 
 	ret = ctsvc_db_contact_update_changed_time(contact_id);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB error : ctsvc_query_exec() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_db_contact_update_changed_time() Failed(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
-
-	ctsvc_set_contact_noti();
+	ctsvc_set_person_noti();
 
 	ret = ctsvc_end_trans(true);
 	if (ret < CONTACTS_ERROR_NONE)

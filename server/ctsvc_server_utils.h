@@ -24,7 +24,6 @@ void ctsvc_server_final_configuration(void);
 
 int ctsvc_server_get_default_language(void);
 int ctsvc_server_set_default_language(int lang);
-int ctsvc_server_set_secondary_language(int lang);
 
 void ctsvc_server_trim_memory(void);
 

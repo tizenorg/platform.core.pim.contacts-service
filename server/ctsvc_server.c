@@ -73,6 +73,7 @@ static int __server_main(void)
 
 		if (pims_ipc_svc_register(CTSVC_IPC_GROUP_MODULE, CTSVC_IPC_SERVER_GROUP_ADD_CONTACT, ctsvc_ipc_group_add_contact, NULL) != 0) break;
 		if (pims_ipc_svc_register(CTSVC_IPC_GROUP_MODULE, CTSVC_IPC_SERVER_GROUP_REMOVE_CONTACT, ctsvc_ipc_group_remove_contact, NULL) != 0) break;
+		if (pims_ipc_svc_register(CTSVC_IPC_GROUP_MODULE, CTSVC_IPC_SERVER_GROUP_SET_GROUP_ORDER, ctsvc_ipc_group_set_group_order, NULL) != 0) break;
 
 		if (pims_ipc_svc_register(CTSVC_IPC_PERSON_MODULE, CTSVC_IPC_SERVER_PERSON_LINK_PERSON, ctsvc_ipc_person_link_person, NULL) != 0) break;
 		if (pims_ipc_svc_register(CTSVC_IPC_PERSON_MODULE, CTSVC_IPC_SERVER_PERSON_UNLINK_CONTACT, ctsvc_ipc_person_unlink_contact, NULL) != 0) break;

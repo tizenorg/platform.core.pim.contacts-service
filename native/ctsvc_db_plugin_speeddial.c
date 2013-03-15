@@ -165,6 +165,7 @@ static int __ctsvc_db_speeddial_get_record( int id, contacts_record_h* out_recor
 static int __ctsvc_db_speeddial_update_record( contacts_record_h record )
 {
 	int ret;
+	int speeddial_id;
 	cts_stmt stmt;
 	char query[CTS_SQL_MIN_LEN] = {0};
 	ctsvc_speeddial_s *speeddial = (ctsvc_speeddial_s *)record;
@@ -173,19 +174,26 @@ static int __ctsvc_db_speeddial_update_record( contacts_record_h record )
 				"Invaild parameter : dial number (%d)", speeddial->dial_number);
 	RETVM_IF (speeddial->number_id < 0, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invaild parameter : number id (%d)", speeddial->number_id);
+	ret = ctsvc_begin_trans();
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, CONTACTS_ERROR_DB, "DB error : ctsvc_begin_trans() Fail(%d)", ret);
+
+	snprintf(query, sizeof(query),
+		"SELECT speed_number FROM "CTS_TABLE_SPEEDDIALS" WHERE speed_number = %d", speeddial->dial_number);
+	ret = ctsvc_query_get_first_int_result(query, &speeddial_id);
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("DB error : cts_stmt_step() Failed(%d)", ret);
+		ctsvc_end_trans(false);
+		return ret;
+	}
 
 	snprintf(query, sizeof(query), "UPDATE "CTS_TABLE_SPEEDDIALS" "
 			"SET number_id = %d WHERE speed_number = %d",
 			speeddial->number_id, speeddial->dial_number);
-
 	stmt = cts_query_prepare(query);
-	RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB, "DB error : cts_query_prepare() Failed");
-
-	ret = ctsvc_begin_trans();
-	if (ret) {
-		cts_stmt_finalize(stmt);
-		CTS_ERR("contacts_svc_begin_trans() Failed(%d)", ret);
-		return ret;
+	if (NULL == stmt) {
+		CTS_ERR("DB error : cts_query_prepare() Failed");
+		ctsvc_end_trans(false);
+		return CONTACTS_ERROR_DB;
 	}
 
 	ret = cts_stmt_step(stmt);
@@ -216,20 +224,29 @@ static int __ctsvc_db_speeddial_update_record( contacts_record_h record )
 static int __ctsvc_db_speeddial_delete_record( int id )
 {
 	int ret;
+	int speeddial_id;
 	cts_stmt stmt;
 	char query[CTS_SQL_MIN_LEN] = {0};
 
+	ret = ctsvc_begin_trans();
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, CONTACTS_ERROR_DB, "DB error : ctsvc_begin_trans() Fail(%d)", ret);
+
+	snprintf(query, sizeof(query),
+		"SELECT speed_number FROM "CTS_TABLE_SPEEDDIALS" WHERE speed_number = %d", id);
+	ret = ctsvc_query_get_first_int_result(query, &speeddial_id);
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("DB error : ctsvc_query_get_first_int_result() Fail(%d)", ret);
+		ctsvc_end_trans(false);
+		return ret;
+	}
+
 	snprintf(query, sizeof(query), "DELETE FROM %s WHERE speed_number = %d",
 			CTS_TABLE_SPEEDDIALS, id);
-
 	stmt = cts_query_prepare(query);
-	RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB, "DB error : cts_query_prepare() Failed");
-
-	ret = ctsvc_begin_trans();
-	if (ret) {
-		cts_stmt_finalize(stmt);
-		CTS_ERR("ctsvc_begin_trans() Failed(%d)", ret);
-		return ret;
+	if (NULL == stmt) {
+		CTS_ERR("DB error : cts_query_prepare() Failed");
+		ctsvc_end_trans(false);
+		return CONTACTS_ERROR_DB;
 	}
 
 	ret = cts_stmt_step(stmt);

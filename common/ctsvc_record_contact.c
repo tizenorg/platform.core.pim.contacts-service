@@ -1191,6 +1191,8 @@ static int __ctsvc_contact_destroy(contacts_record_h record, bool delete_child)
 	free(contact->image_thumbnail_path);
 	free(contact->ringtone_path);
 	free(contact->vibration);
+	free(contact->sort_name);
+	free(contact->reverse_sort_name);
 	free(contact->sortkey);
 	free(contact->reverse_sortkey);
 	free(contact->sync_data1);
@@ -3210,6 +3212,7 @@ static int __ctsvc_company_set_str(contacts_record_h record, unsigned int proper
 		FREEandSTRDUP(company->role, str);
 		break;
 	case CTSVC_PROPERTY_COMPANY_LOGO:
+		company->logo_changed = true;
 		FREEandSTRDUP(company->logo, str);
 		break;
 	case CTSVC_PROPERTY_COMPANY_LOCATION:
@@ -3807,6 +3810,8 @@ static int __ctsvc_contact_clone(contacts_record_h record, contacts_record_h *ou
 	out_data->ringtone_path = SAFE_STRDUP(src_data->ringtone_path);
 	out_data->vibration = SAFE_STRDUP(src_data->vibration);
 	out_data->image_thumbnail_path = SAFE_STRDUP(src_data->image_thumbnail_path);
+	out_data->sort_name = SAFE_STRDUP(src_data->sort_name);
+	out_data->reverse_sort_name = SAFE_STRDUP(src_data->reverse_sort_name);
 	out_data->sortkey = SAFE_STRDUP(src_data->sortkey);
 	out_data->reverse_sortkey = SAFE_STRDUP(src_data->reverse_sortkey);
 	out_data->sync_data1 = SAFE_STRDUP(src_data->sync_data1);
@@ -3960,6 +3965,9 @@ static int __ctsvc_company_clone(contacts_record_h record, contacts_record_h *ou
 	out_data->id = src_data->id;
 	out_data->logo_changed= src_data->logo_changed;
 	out_data->contact_id = src_data->contact_id;
+	out_data->is_default = src_data->is_default;
+	out_data->type = src_data->type;
+	out_data->label = SAFE_STRDUP(src_data->label);
 	out_data->name = SAFE_STRDUP(src_data->name);
 	out_data->department = SAFE_STRDUP(src_data->department);
 	out_data->job_title = SAFE_STRDUP(src_data->job_title);
@@ -4014,6 +4022,8 @@ static int __ctsvc_event_clone(contacts_record_h record, contacts_record_h *out_
 	out_data->type = src_data->type;
 	out_data->label = SAFE_STRDUP(src_data->label);
 	out_data->date = src_data->date;
+	out_data->is_lunar = src_data->is_lunar;
+	out_data->lunar_date = src_data->lunar_date;
 
 	CTSVC_RECORD_COPY_BASE(&(out_data->base), &(src_data->base));
 

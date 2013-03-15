@@ -22,11 +22,13 @@
 
 const char* ctsvc_get_display_column(void);
 const char* ctsvc_get_sort_column(void);
+const char* ctsvc_get_sort_name_column(void);
 
 int ctsvc_begin_trans(void);
 int ctsvc_end_trans(bool is_success);
 int ctsvc_get_next_ver(void);
 int ctsvc_get_current_version( int* out_current_version );
+int ctsvc_get_transaction_ver(void);
 
 char* ctsvc_get_image(const char *dir, int index, char *dest, int dest_size);
 int ctsvc_change_image(const char *dir, int index, const char *path, char *image, int image_len);

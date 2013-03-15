@@ -41,6 +41,8 @@ static __thread int transaction_count = 0;
 static __thread int transaction_ver = 0;
 static __thread bool version_up = false;
 
+#define CTS_SECURITY_IMAGE_PERMISSION 0440
+
 #define CTS_COMMIT_TRY_MAX 500000 // For 3second
 int ctsvc_begin_trans(void)
 {
@@ -169,6 +171,18 @@ const char* ctsvc_get_display_column(void)
 		return "reverse_display_name";
 }
 
+const char* ctsvc_get_sort_name_column(void)
+{
+	contacts_name_display_order_e order;
+
+	contacts_setting_get_name_display_order(&order);
+	if (CONTACTS_NAME_DISPLAY_ORDER_FIRSTLAST == order)
+		return "sort_name";
+	else
+		return "reverse_sort_name";
+}
+
+
 const char* ctsvc_get_sort_column(void)
 {
 	contacts_name_display_order_e order;
@@ -231,20 +245,35 @@ static inline bool ctsvc_check_available_image_space(void){
 }
 
 static int image_size = 480;
-static int __ctsvc_resize_and_copy_image(const char *src, const char *dest)
+
+typedef struct {
+	const char *src;
+	const char *dest;
+	int ret;
+}image_info;
+
+static bool __ctsvc_image_util_supported_jpeg_colorspace_cb(image_util_colorspace_e colorspace, void *user_data)
 {
+	image_info *info = (image_info*)user_data;
 	image_util_error_e ret;
 	int width = 0, height = 0;
 	unsigned int size_decode = 0;
 	int resized_width, resized_height;
 	unsigned char * img_target = 0;
 	unsigned char * img_source = 0;
-	const image_util_colorspace_e colorspace = IMAGE_UTIL_COLORSPACE_I420;
+	int dest_fd;
 
+	if (colorspace == IMAGE_UTIL_COLORSPACE_YV12 ) {
+		info->ret = CONTACTS_ERROR_NONE;
+		return true;
+	}
 	// load jpeg sample file
-	CTS_DBG("src : %s, dest : %s", src, dest);
-	ret = image_util_decode_jpeg( src, colorspace, &img_source, &width, &height, &size_decode );
-	RETVM_IF(ret!=IMAGE_UTIL_ERROR_NONE, CONTACTS_ERROR_INTERNAL, "image_util_decode_jpeg failed(%d)", ret);
+	CTS_DBG("colorspace %d src : %s, dest : %s", colorspace, info->src, info->dest);
+	ret = image_util_decode_jpeg( info->src, colorspace, &img_source, &width, &height, &size_decode );
+	if (ret!=IMAGE_UTIL_ERROR_NONE) {
+		info->ret = CONTACTS_ERROR_INTERNAL;
+		return true;
+	}
 
 #if 0
 	if (0>image_size) {
@@ -265,7 +294,8 @@ static int __ctsvc_resize_and_copy_image(const char *src, const char *dest)
 		if (image_size<=0 || width <=0 || height <= 0) {
 			free(img_source);
 			CTS_ERR("image size error(%d)", image_size);
-			return CONTACTS_ERROR_INTERNAL;
+			info->ret = CONTACTS_ERROR_INTERNAL;
+			return false;
 		}
 
 		if (width>height) {
@@ -276,11 +306,18 @@ static int __ctsvc_resize_and_copy_image(const char *src, const char *dest)
 			resized_height = image_size;
 			resized_width = width*image_size/height;
 		}
+
+		if (!resized_height%8)
+			resized_height += 8 - (resized_height%8);
+		if (!resized_width%8)
+			resized_width += 8 - (resized_width%8);
+
 		CTS_DBG("size(%d, %d) -> resize(%d,%d)", width, height, resized_width, resized_height);
 
 		image_util_calculate_buffer_size(resized_width, resized_height, colorspace , &size_decode);
 
 		img_target = malloc( size_decode );
+
 		// do resize
 		ret = image_util_resize( img_target, &resized_width, &resized_height,
 				img_source, width, height, colorspace );
@@ -288,24 +325,73 @@ static int __ctsvc_resize_and_copy_image(const char *src, const char *dest)
 			CTS_ERR("image_util_resize failed(%d)", ret);
 			free( img_target );
 			free( img_source );
-			return CONTACTS_ERROR_INTERNAL;
+			info->ret = CONTACTS_ERROR_INTERNAL;
+			return false;
 		}
 
-		ret = image_util_encode_jpeg(img_target, resized_width, resized_height, colorspace, 100, dest );
+
+		//ret = image_util_encode_jpeg(img_source, width, height, colorspace, 100, info->dest );
+		ret = image_util_encode_jpeg(img_target, resized_width, resized_height, colorspace, 50, info->dest );
 		free( img_target );
 		free( img_source );
-		RETVM_IF(ret!=IMAGE_UTIL_ERROR_NONE, CONTACTS_ERROR_INTERNAL, "image_util_encode_jpeg failed(%d)", ret);
+		if(ret!=IMAGE_UTIL_ERROR_NONE) {
+			CTS_ERR("image_util_encode_jpeg failed(%d)", ret);
+			info->ret = CONTACTS_ERROR_INTERNAL;
+			return false;
+		}
 	}
 	else {
 		resized_width = width;
 		resized_height = height;
 
-		ret = image_util_encode_jpeg(img_source, resized_width, resized_height, colorspace, 100, dest );
+		ret = image_util_encode_jpeg(img_source, resized_width, resized_height, colorspace, 50, info->dest );
 		free( img_source );
-		RETVM_IF(ret!=IMAGE_UTIL_ERROR_NONE, CONTACTS_ERROR_INTERNAL, "image_util_encode_jpeg failed(%d)", ret);
+		if(ret!=IMAGE_UTIL_ERROR_NONE) {
+			CTS_ERR("image_util_encode_jpeg failed(%d)", ret);
+			info->ret = CONTACTS_ERROR_INTERNAL;
+			return false;
+		}
 	}
 
-	return CONTACTS_ERROR_NONE;
+	dest_fd = open(info->dest, O_RDONLY);
+	if (dest_fd < 0) {
+		CTS_ERR("System : Open(dest:%s) Failed(%d)", info->dest, errno);
+		info->ret = CONTACTS_ERROR_SYSTEM;
+		return false;
+	}
+
+	ret = fchown(dest_fd, getuid(), CTS_SECURITY_FILE_GROUP);
+	if (0 != ret) {
+		CTS_ERR("fchown(%s) Failed(%d)", info->dest, errno);
+		info->ret = CONTACTS_ERROR_SYSTEM;
+		close(dest_fd);
+		return false;
+	}
+
+	ret = fchmod(dest_fd, CTS_SECURITY_IMAGE_PERMISSION);
+	if (0 != ret) {
+		CTS_ERR("fchmod(%s) Failed(%d)", info->dest, errno);
+		info->ret = CONTACTS_ERROR_SYSTEM;
+		close(dest_fd);
+		return false;
+	}
+	close(dest_fd);
+
+	info->ret = CONTACTS_ERROR_NONE;
+	return false;
+}
+
+static int __ctsvc_resize_and_copy_image(const char *src, const char *dest)
+{
+	int ret;
+	image_info info = {.src = src, .dest = dest, ret = CONTACTS_ERROR_NONE};
+
+	ret = image_util_foreach_supported_jpeg_colorspace(__ctsvc_image_util_supported_jpeg_colorspace_cb, &info);
+
+	if (ret != IMAGE_UTIL_ERROR_NONE)
+		return CONTACTS_ERROR_INVALID_PARAMETER;
+
+	return info.ret;
 }
 
 #define CTSVC_COPY_SIZE_MAX 4096
@@ -320,8 +406,11 @@ int ctsvc_copy_image(const char *src, const char *dest)
 		return CONTACTS_ERROR_FILE_NO_SPACE;
 
 	ret = __ctsvc_resize_and_copy_image(src, dest);
-	if (CONTACTS_ERROR_NONE == ret)
+	if (CONTACTS_ERROR_NONE == ret) {
 		return ret;
+	}
+	else
+		CTS_ERR("__ctsvc_resize_and_copy_image Failed(%d)", ret);
 
 	src_fd = open(src, O_RDONLY);
 	RETVM_IF(src_fd < 0, CONTACTS_ERROR_SYSTEM, "System : Open(src:%s) Failed(%d)", src, errno);
@@ -354,7 +443,7 @@ int ctsvc_copy_image(const char *src, const char *dest)
 	ret = fchown(dest_fd, getuid(), CTS_SECURITY_FILE_GROUP);
 	if (0 != ret)
 		CTS_ERR("fchown(%s) Failed(%d)", dest, ret);
-	ret = fchmod(dest_fd, CTS_SECURITY_DEFAULT_PERMISSION);
+	ret = fchmod(dest_fd, CTS_SECURITY_IMAGE_PERMISSION);
 	if (0 != ret)
 		CTS_ERR("fchmod(%s) Failed(%d)", dest, ret);
 	close(src_fd);
@@ -425,4 +514,7 @@ int ctsvc_get_current_version( int* out_current_version ){
 	return CONTACTS_ERROR_NONE;
 }
 
-
+int ctsvc_get_transaction_ver(void)
+{
+	return transaction_ver;
+}

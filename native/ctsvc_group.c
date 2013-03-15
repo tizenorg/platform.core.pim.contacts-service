@@ -112,8 +112,7 @@ API int contacts_group_add_contact(int group_id, int contact_id)
 			ret = CONTACTS_ERROR_DB;
 			break;
 		}
-
-		ctsvc_set_contact_noti();
+		ctsvc_set_person_noti();
 
 		ret = ctsvc_end_trans(true);
 		if(ret < CONTACTS_ERROR_NONE )
@@ -190,8 +189,7 @@ API int contacts_group_remove_contact(int group_id, int contact_id)
 			ret = CONTACTS_ERROR_DB;
 			break;
 		}
-
-		ctsvc_set_contact_noti();
+		ctsvc_set_person_noti();
 
 		ret = ctsvc_end_trans(true);
 		if(ret < CONTACTS_ERROR_NONE )
@@ -208,6 +206,83 @@ API int contacts_group_remove_contact(int group_id, int contact_id)
 	ctsvc_end_trans(false);
 
 	return ret;
+}
+
+
+API int contacts_group_set_group_order(int group_id, int previous_group_id, int next_group_id)
+{
+	int ret;
+	double previous_prio = 0.0;
+	double next_prio = 0.0;
+	int previous_addressbook_id = -1, next_addressbook_id = -1, addressbook_id = -1;
+	double prio;
+	cts_stmt stmt;
+	char query[CTS_SQL_MAX_LEN] = {0};
+
+	snprintf(query, sizeof(query), "SELECT group_prio, addressbook_id FROM "CTS_TABLE_GROUPS" WHERE group_id = ?");
+
+	stmt = cts_query_prepare(query);
+	RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB, "cts_query_prepare() Failed");
+
+	cts_stmt_bind_int(stmt, 1, previous_group_id);
+	ret = cts_stmt_step(stmt);
+	if (1 /*CTS_TRUE*/  == ret) {
+		previous_prio = ctsvc_stmt_get_dbl(stmt, 0);
+		previous_addressbook_id = ctsvc_stmt_get_int(stmt, 1);
+	}
+	cts_stmt_reset(stmt);
+	cts_stmt_bind_int(stmt, 1, next_group_id);
+	ret = cts_stmt_step(stmt);
+	if (1 /*CTS_TRUE*/ == ret) {
+		next_prio = ctsvc_stmt_get_dbl(stmt, 0);
+		next_addressbook_id = ctsvc_stmt_get_int(stmt, 1);
+	}
+	cts_stmt_reset(stmt);
+	cts_stmt_bind_int(stmt, 1, group_id);
+	ret = cts_stmt_step(stmt);
+	if (1 /*CTS_TRUE*/ == ret) {
+		addressbook_id = ctsvc_stmt_get_int(stmt, 1);
+	}
+	cts_stmt_finalize(stmt);
+
+	RETVM_IF(0.0 == previous_prio && 0.0 == next_prio, CONTACTS_ERROR_INVALID_PARAMETER,
+			"The indexes for previous and next are invalid.");
+	RETVM_IF(previous_group_id && previous_addressbook_id != addressbook_id , CONTACTS_ERROR_INVALID_PARAMETER,
+				"previous group(%d) and group(%d) are not the same addressbook(%d, %d) groups",
+				previous_group_id, group_id, previous_addressbook_id, addressbook_id);
+	RETVM_IF(next_group_id && next_addressbook_id != addressbook_id , CONTACTS_ERROR_INVALID_PARAMETER,
+				"next group(%d) and group(%d) are not the same addressbook(%d, %d) groups",
+				next_group_id, group_id, next_addressbook_id, addressbook_id);
+
+	if (0.0 == next_prio)
+		prio = previous_prio + 1;
+	else
+		prio = (previous_prio + next_prio) / 2;
+
+	ret = ctsvc_begin_trans();
+	RETVM_IF(ret, ret, "ctsvc_begin_trans() Failed(%d)", ret);
+
+	snprintf(query, sizeof(query),
+			"UPDATE %s SET group_prio = %f WHERE group_id = %d",
+			CTS_TABLE_GROUPS, prio, group_id);
+
+	ret = ctsvc_query_exec(query);
+	if (CONTACTS_ERROR_NONE != ret)	{
+		CTS_ERR("ctsvc_query_exec() Failed(%d)", ret);
+		ctsvc_end_trans(false);
+		return ret;
+	}
+
+	ctsvc_set_group_noti();
+
+	ret = ctsvc_end_trans(true);
+	if (ret < CONTACTS_ERROR_NONE)
+	{
+		CTS_ERR("DB error : ctsvc_end_trans() Failed(%d)", ret);
+		return ret;
+	}
+	else
+		return CONTACTS_ERROR_NONE;
 }
 
 /*

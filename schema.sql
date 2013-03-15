@@ -83,11 +83,14 @@ CREATE TABLE contacts
 	reverse_display_name		TEXT,
 	display_name_source		INTEGER,
 	display_name_language		INTEGER,
+	sort_name			TEXT,
+	reverse_sort_name		TEXT,
 	sortkey				TEXT COLLATE NOCASE,
 	reverse_sortkey			TEXT COLLATE NOCASE,
 	created_ver			INTEGER NOT NULL,
 	changed_ver			INTEGER NOT NULL,
 	changed_time			INTEGER NOT NULL,
+	image_changed_ver	INTEGER NOT NULL,
 	uid				TEXT,
 	ringtone_path			TEXT,
 	vibration			TEXT,
@@ -102,19 +105,20 @@ CREATE INDEX contacts_idx4 ON contacts(display_name_language, reverse_sortkey);
 
 CREATE TRIGGER trg_contacts_del AFTER DELETE ON contacts
 	BEGIN
-		SELECT _CONTACT_DELETE_(old.contact_id, old.image_thumbnail_path, old.image_path);
 		DELETE FROM data WHERE contact_id = old.contact_id AND is_my_profile = 0;
 		DELETE FROM group_relations WHERE old.addressbook_id != -1 AND contact_id = old.contact_id;
 		DELETE FROM activities WHERE contact_id = old.contact_id;
 		DELETE FROM persons WHERE person_id = old.person_id AND link_count = 1;
 		DELETE FROM search_index WHERE contact_id = old.contact_id;
+		DELETE FROM name_lookup WHERE contact_id = old.contact_id;
+		DELETE FROM phone_lookup WHERE contact_id = old.contact_id;
 		UPDATE persons SET dirty=1 WHERE person_id = old.person_id AND link_count > 1;
 	END;
 
 CREATE TRIGGER trg_contacts_del2 AFTER DELETE ON contacts
 	WHEN old.addressbook_id IN (SELECT addressbook_id from addressbooks WHERE addressbook_id = old.addressbook_id)
 	BEGIN
-		INSERT INTO contact_deleteds VALUES(old.contact_id, old.addressbook_id, (SELECT ver FROM cts_version) + 1);
+		INSERT INTO contact_deleteds VALUES(old.contact_id, old.addressbook_id, old.created_ver, (SELECT ver FROM cts_version) + 1);
 	END;
 
 CREATE TRIGGER trg_contacts_update AFTER UPDATE ON contacts
@@ -128,8 +132,9 @@ CREATE TRIGGER trg_contacts_update AFTER UPDATE ON contacts
 CREATE TABLE contact_deleteds
 (
 	contact_id			INTEGER PRIMARY KEY,
-	addressbook_id			INTEGER,
-	deleted_ver			INTEGER
+	addressbook_id		INTEGER NOT NULL,
+	created_ver			INTEGER NOT NULL,
+	deleted_ver			INTEGER NOT NULL
 );
 CREATE INDEX contact_deleteds_idx1 ON contact_deleteds(deleted_ver);
 
@@ -174,6 +179,18 @@ CREATE TRIGGER trg_data_del AFTER DELETE ON data
 		SELECT _DATA_DELETE_(old.id, old.datatype);
 	END;
 
+CREATE TRIGGER trg_data_image_del AFTER DELETE ON data
+	WHEN old.datatype = 13
+		BEGIN
+			SELECT _DATA_IMAGE_DELETE_(old.data3);
+		END;
+
+CREATE TRIGGER trg_data_company_del AFTER DELETE ON data
+	WHEN old.datatype = 6
+		BEGIN
+			SELECT _DATA_COMPANY_DELETE_(old.data8);
+		END;
+
 CREATE TRIGGER trg_data_number_del AFTER DELETE ON data
 	WHEN old.datatype = 8
 		BEGIN
@@ -205,26 +222,34 @@ CREATE TABLE groups
 	ringtone_path			TEXT,
 	vibration			TEXT,
 	image_thumbnail_path		TEXT,
-	member_changed_ver		INTEGER
+	member_changed_ver		INTEGER,
+	group_prio			REAL
 );
 
-INSERT INTO groups(addressbook_id, group_name, system_id, is_read_only, created_ver, changed_ver)
-	VALUES(0, 'family', 'family', 1, 0, 0);
-INSERT INTO groups(addressbook_id, group_name, system_id, is_read_only, created_ver, changed_ver)
-	VALUES(0, 'friends', 'friends',1, 0, 0);
-INSERT INTO groups(addressbook_id, group_name, system_id, is_read_only, created_ver, changed_ver)
-	VALUES(0, 'coworkers', 'coworkers', 1, 0, 0);
+INSERT INTO groups(addressbook_id, group_name, system_id, is_read_only, created_ver, changed_ver, group_prio)
+	VALUES(0, 'coworkers', 'coworkers', 0, 0, 0, 1);
+INSERT INTO groups(addressbook_id, group_name, system_id, is_read_only, created_ver, changed_ver, group_prio)
+	VALUES(0, 'family', 'family', 0, 0, 0, 2);
+INSERT INTO groups(addressbook_id, group_name, system_id, is_read_only, created_ver, changed_ver, group_prio)
+	VALUES(0, 'friends', 'friends',0, 0, 0, 3);
 
 CREATE TRIGGER trg_groups_del AFTER DELETE ON groups
  BEGIN
    DELETE FROM group_relations WHERE group_id = old.group_id;
  END;
 
+CREATE TRIGGER trg_groups_del2 AFTER DELETE ON groups
+	WHEN old.addressbook_id IN (SELECT addressbook_id from addressbooks WHERE addressbook_id = old.addressbook_id)
+	BEGIN
+		INSERT INTO group_deleteds VALUES(old.group_id, old.addressbook_id, old.created_ver, (SELECT ver FROM cts_version) + 1);
+	END;
+
 CREATE TABLE group_deleteds
 (
-	group_id			INTEGER PRIMARY KEY,
-	addressbook_id			INTEGER,
-	deleted_ver			INTEGER
+	group_id				INTEGER PRIMARY KEY,
+	addressbook_id		INTEGER NOT NULL,
+	created_ver			INTEGER NOT NULL,
+	deleted_ver			INTEGER NOT NULL
 );
 
 CREATE INDEX group_deleteds_idx1 ON group_deleteds(deleted_ver);
@@ -354,12 +379,29 @@ CREATE TRIGGER trg_activities_delete AFTER DELETE ON activities
 
 CREATE VIRTUAL TABLE search_index USING FTS4
 (
-	contact_id integer NOT NULL,
+	contact_id INTEGER NOT NULL,
 	data TEXT,
 	name TEXT,
 	number TEXT,
 	UNIQUE(contact_id)
 );
+
+CREATE TABLE name_lookup
+(
+	data_id	INTEGER NOT NULL,
+	contact_id INTEGER NOT NULL,
+	name TEXT,
+	type INTEGER
+);
+
+CREATE TABLE phone_lookup
+(
+	data_id	INTEGER NOT NULL,
+	contact_id INTEGER NOT NULL,
+	number TEXT,
+	min_match TEXT
+);
+
 
 CREATE TABLE my_profiles
 (
@@ -371,12 +413,18 @@ CREATE TABLE my_profiles
 	changed_time			INTEGER NOT NULL,
 	uid				TEXT,
 	image_thumbnail_path		TEXT,
+	deleted				INTEGER DEFAULT 0,
 	UNIQUE(addressbook_id)
 );
 
 CREATE TRIGGER trg_my_profiles_del AFTER DELETE ON my_profiles
 	BEGIN
--- It should be implemented		SELECT _MY_PROFILE_DELETE_(old.my_profile_id);
+		DELETE FROM data WHERE contact_id = old.my_profile_id AND is_my_profile = 1;
+	END;
+
+CREATE TRIGGER trg_my_profile_update AFTER UPDATE ON my_profiles
+	WHEN new.deleted = 1
+	BEGIN
 		DELETE FROM data WHERE contact_id = old.my_profile_id AND is_my_profile = 1;
 	END;
 

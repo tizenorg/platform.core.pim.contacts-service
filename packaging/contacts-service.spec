@@ -1,6 +1,6 @@
 Name:       contacts-service
 Summary:    Contacts Service
-Version: 0.9.24.8
+Version: 0.9.45.3
 Release:    1
 Group:      TO_BE/FILLED_IN
 License:    Apache-2.0
@@ -23,6 +23,7 @@ Requires(post): /usr/bin/sqlite3, /bin/chmod, /bin/chown
 Requires(post): /usr/bin/vconftool
 Requires(post): /sbin/ldconfig
 Requires(postun): /sbin/ldconfig
+Requires: sys-assert
 
 %description
 Contacts Service Library
@@ -49,9 +50,8 @@ New Contacts Service Library (devel)
 
 %build
 cmake . -DCMAKE_INSTALL_PREFIX=%{_prefix}
-
-
 make %{?_smp_mflags}
+
 
 %install
 rm -rf %{buildroot}
@@ -70,15 +70,9 @@ ln -s ../contacts-service.service %{buildroot}%{_libdir}/systemd/user/tizen-midd
 %post -n contacts-service2
 /sbin/ldconfig
 
-# from contacts-service-bin.postinst
-contacts-service-ipcd schema
 chown :6005 /opt/usr/data/contacts-svc
 chown :6005 /opt/usr/dbspace/.contacts-svc.db
 chown :6005 /opt/usr/dbspace/.contacts-svc.db-journal
-if [ -f /usr/lib/rpm-plugins/msm.so ]
-then
-	chsmack -a 'contacts-service::db' /opt/usr/dbspace/.contacts-svc.db*
-fi
 chown :6005 -R /opt/usr/data/contacts-svc/img
 chown :6005 /opt/usr/data/contacts-svc/.CONTACTS_SVC_*_CHANGED
 
@@ -87,14 +81,12 @@ chmod 660 /opt/usr/dbspace/.contacts-svc.db-journal
 chmod 775 /opt/usr/data/contacts-svc
 chmod 770 -R /opt/usr/data/contacts-svc/img/
 chmod 660 /opt/usr/data/contacts-svc/.CONTACTS_SVC_*
-vconftool set -t int file/private/contacts-service/default_lang 1 -g 6005
-vconftool set -t int file/private/contacts-service/secondary_lang 2 -g 6005
-vconftool set -t string db/contacts-svc/secondary_lang en_US -g 6005
+vconftool set -t int file/private/contacts-service/default_lang 100
 
-# from libcontacts-service.postinst
 chown :6016 /opt/usr/data/contacts-svc/.CONTACTS_SVC_RESTRICTION_CHECK
 vconftool set -t int db/contacts-svc/name_sorting_order 0 -g 6005
 vconftool set -t int db/contacts-svc/name_display_order 0 -g 6005
+
 
 %postun -p /sbin/ldconfig
 
@@ -111,6 +103,7 @@ vconftool set -t int db/contacts-svc/name_display_order 0 -g 6005
 %attr(0755,root,root) /etc/rc.d/init.d/contacts-service-ipcd.sh
 %{_libdir}/systemd/user/contacts-service.service
 %{_libdir}/systemd/user/tizen-middleware.target.wants/contacts-service.service
+%config(noreplace) /opt/usr/dbspace/.contacts-svc.db*
 
 
 %files -n contacts-service2-devel

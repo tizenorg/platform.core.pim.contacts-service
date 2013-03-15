@@ -985,10 +985,9 @@ API int contacts_person_unlink_contact(int person_id, int contact_id, int* out_p
 
 	RETVM_IF(person_id <= 0 || contact_id <= 0 , CONTACTS_ERROR_INVALID_PARAMETER,
 		"Invalid parameter : person_id(%d), person_id(%d)", person_id, person_id);
-	RETVM_IF(out_person_id == NULL , CONTACTS_ERROR_INVALID_PARAMETER,
-			"Invalid parameter : out_person_id is NULL");
 
-	*out_person_id = 0;
+	if (out_person_id)
+		*out_person_id = 0;
 
 	ret = ctsvc_begin_trans();
 	RETVM_IF(ret, ret, "ctsvc_begin_trans() Failed(%d)", ret);
@@ -1008,17 +1007,17 @@ API int contacts_person_unlink_contact(int person_id, int contact_id, int* out_p
 		return ret;
 	}
 
-	*out_person_id = ctsvc_db_insert_person(record);
-	if (CONTACTS_ERROR_NONE > *out_person_id) {
-		CTS_ERR("ctsvc_db_insert_person() Failed(%d)", *out_person_id);
+	id = ctsvc_db_insert_person(record);
+	if (CONTACTS_ERROR_NONE > id) {
+		CTS_ERR("ctsvc_db_insert_person() Failed(%d)", id);
 		ctsvc_end_trans(false);
-		return *out_person_id;
+		return id;
 	}
 
 	snprintf(query, sizeof(query),
 			"INSERT INTO %s (person_id, usage_type, times_used) "
 			"SELECT %d, usage_type, times_used FROM %s WHERE person_id = %d",
-			CTS_TABLE_CONTACT_STAT, *out_person_id, CTS_TABLE_CONTACT_STAT, person_id );
+			CTS_TABLE_CONTACT_STAT, id, CTS_TABLE_CONTACT_STAT, person_id );
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("ctsvc_query_exec() Failed(%d)", ret);
@@ -1030,7 +1029,7 @@ API int contacts_person_unlink_contact(int person_id, int contact_id, int* out_p
 
 	snprintf(query, sizeof(query),
 			"UPDATE %s SET person_id = %d WHERE contact_id = %d",
-			CTS_TABLE_CONTACTS, *out_person_id, contact_id);
+			CTS_TABLE_CONTACTS, id, contact_id);
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("ctsvc_query_exec() Failed(%d)", ret);
@@ -1047,7 +1046,7 @@ API int contacts_person_unlink_contact(int person_id, int contact_id, int* out_p
 
 	if (is_favorite && ((ctsvc_contact_s*)record)->is_favorite) {
 		snprintf(query, sizeof(query),
-				"INSERT INTO "CTS_TABLE_FAVORITES" values(%d, %f)", *out_person_id, priority);
+				"INSERT INTO "CTS_TABLE_FAVORITES" values(%d, %f)", id, priority);
 		ret = ctsvc_query_exec(query);
 		if (CONTACTS_ERROR_NONE != ret) {
 			CTS_ERR("ctsvc_query_exec() Failed(%d)", ret);
@@ -1058,6 +1057,8 @@ API int contacts_person_unlink_contact(int person_id, int contact_id, int* out_p
 
 	__ctsvc_update_primary_default_data(person_id);
 
+	if (out_person_id)
+		*out_person_id = id;
 	ctsvc_set_person_noti();
 	ret = ctsvc_end_trans(true);
 	if (ret < CONTACTS_ERROR_NONE)
@@ -1167,7 +1168,7 @@ API int contacts_person_set_favorite_order(int person_id, int front_person_id, i
 		return ret;
 	}
 
-	ctsvc_set_favor_noti();
+	ctsvc_set_person_noti();
 
 	ret = ctsvc_end_trans(true);
 	if (ret < CONTACTS_ERROR_NONE)

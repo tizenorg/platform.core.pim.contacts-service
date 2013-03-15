@@ -20,15 +20,23 @@
 
 #!/bin/sh
 
-echo "###### API Generator #####"
+echo "###### DB Generator #####"
 
 cd build-util
 make
 
-# New server daemon Schema
+# Make DB schema for generating DB file when running contacts server daemon
 echo "static const char *schema_query = \"\\" > ../server/schema.h
 ./DB-schema-gen ../schema.sql >> ../server/schema.h
 echo \"\; >> ../server/schema.h
+
+# Make DB file at builing time
+echo "sqlite3 .contacts-svc.db \"" > DB-schema-create.sh
+./DB-schema-gen2 ../schema.sql >> DB-schema-create.sh
+echo \" >> DB-schema-create.sh
+chmod +x DB-schema-create.sh
+./DB-schema-create.sh
+rm DB-schema-create.sh
 
 
 make clean

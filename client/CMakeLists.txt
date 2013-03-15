@@ -53,6 +53,7 @@ SET(SRCS
 	${CMAKE_SOURCE_DIR}/common/ctsvc_inotify.c
 	${CMAKE_SOURCE_DIR}/common/ctsvc_list.c
 	${CMAKE_SOURCE_DIR}/common/ctsvc_localize.c
+	${CMAKE_SOURCE_DIR}/common/ctsvc_localize_ch.c
 	${CMAKE_SOURCE_DIR}/common/ctsvc_normalize.c
 	${CMAKE_SOURCE_DIR}/common/ctsvc_mutex.c
 	${CMAKE_SOURCE_DIR}/common/ctsvc_query.c

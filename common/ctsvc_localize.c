@@ -42,6 +42,27 @@
 #define CTSVC_HAN_HALF_START (UChar)0xFFA0
 #define CTSVC_HAN_HALF_END (UChar)0xFFDC
 
+/* korean -Hangul Syllables */
+#define CTSVC_HAN_SYLLABLES_START (UChar)0xAC00
+#define CTSVC_HAN_SYLLABLES_END (UChar)0xD7A3
+
+
+/* japanese - katakana */
+#define CTSVC_JAPANESE_KATAKANA_START 	0x30A0
+#define CTSVC_JAPANESE_KATAKANA_END 	0x30FF
+
+/* japanese - katakana phonetic extensions */
+#define CTSVC_JAPANESE_KATAKANA_PHONETIC_EXTENSIONS_START 0x31F0
+#define CTSVC_JAPANESE_KATAKANA_PHONETIC_EXTENSIONS_END 0x31FF
+
+/* japanese - halfwidth and fullwidth forms */
+#define CTSVC_JAPANESE_HALFWIDTH_AND_FULLWIDTH_FORMS_START 0xFF00
+#define CTSVC_JAPANESE_HALFWIDTH_AND_FULLWIDTH_FORMS_END 0xFFEF
+
+/* japanese - hiragana */
+#define CTSVC_JAPANESE_HIRAGANA_START 0x3040
+#define CTSVC_JAPANESE_HIRAGANA_END 0x309F
+
 static const char hangul_compatibility_choseong[] = {
 	0x31, 0x32, 0x34, 0x37, 0x38, 0x39, 0x40, 0x41,
 	0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49,
@@ -49,6 +70,7 @@ static const char hangul_compatibility_choseong[] = {
 	0x71, 0x72, 0x73, 0x74, 0x75, 0x76, 0x77, 0x78,
 	0x79, 0x7A, 0x7B, 0x7C, 0x7D, 0x7E, 0x7F, 0x80,
 	0x81, 0x84, 0x85, 0x86, 0x00};
+
 static const unsigned char hangul_jamo_choseong[] = {
 	0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x1A, 0x06, 0x07,		// to choseong 0x1100~0x115F
 	0x08, 0x21, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,
@@ -61,6 +83,7 @@ static const char hangul_compatibility_jungseong[] = {
 	0x57, 0x58, 0x59, 0x5A, 0x5B, 0x5C, 0x5D, 0x5E,
 	0x5F, 0x60, 0x61, 0x62, 0x63, 0x64, 0x87, 0x88,
 	0x89, 0x8A, 0x8B, 0x8C, 0x8D, 0x8E, 0x00};
+
 static const unsigned char hangul_jamo_jungseong[] = {
 	0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68, 0x69,	// to jungseong 0x1160~0x11A7
 	0x6A, 0x6B, 0x6C, 0x6D, 0x6E, 0x6F, 0x70, 0x71, 0x72,
@@ -71,9 +94,25 @@ static const char hangul_compatibility_jongseong[] = {
 	0x33, 0x35, 0x36, 0x3A, 0x3B, 0x3C, 0x3D, 0x3E,
 	0x3F, 0x67, 0x68, 0x69, 0x6A, 0x6B, 0x6C, 0x6D,
 	0x6F, 0x70, 0x82, 0x83, 0x00};
+
 static const unsigned char hangul_jamo_jongseong[] = {
 	0xAA, 0xAC, 0xAD, 0xB0, 0xB1, 0xB2, 0xB3, 0xB4, 0xB5,	// to jongseong 0x11A8~0x11FF
 	0xC7, 0xC8, 0xCC, 0xCE, 0xD3, 0xD7, 0xD9, 0xDF, 0xF1, 0xF2, 0x00};
+
+static const unsigned char japanese_halfwidth_katakana_to_hiragana[] = { // 0xff66 - 0xff9f
+	0x92, 0x41, 0x43, 0x45, 0x47, 0x49, 0x83, 0x85, 0x87, 0x63,
+	0x00, 0x42, 0x44, 0x46, 0x48, 0x4A, 0x4B, 0x4D, 0x4F, 0x51,
+	0x53, 0x55, 0x57, 0x59, 0x5B, 0x5D, 0x5F, 0x61, 0x64, 0x66,
+	0x68, 0x6A, 0x6B, 0x6C, 0x6D, 0x6E, 0x6F, 0x72, 0x75, 0x78,
+	0x7B, 0x7E, 0x7F, 0x80, 0x81, 0x82, 0x84, 0x86, 0x88, 0x89,
+	0x8A, 0x8B, 0x8C, 0x8D, 0x8F, 0x93};
+
+static const unsigned char japanese_halfwidth_katakana_sonant_to_hiragana[] = { // 0xff76 - 0xff89
+	0x4C, 0x4E, 0x50, 0x52, 0x54, 0x56, 0x58, 0x5A, 0x5C, 0x5E,
+	0x60, 0x62, 0x65, 0x67, 0x69, 0x70, 0x73, 0x76, 0x79, 0x7C};
+
+static const unsigned char japanese_halfwidth_katakana_half_dullness_to_hiragana[] = { // 0xff8a - 0xff8e
+	0x71, 0x74, 0x77, 0x7A, 0x7D};
 
 int ctsvc_check_utf8(char c)
 {
@@ -93,16 +132,42 @@ int ctsvc_check_utf8(char c)
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 }
 
+static inline bool is_chosung(UChar src)
+{
+	int unicode_value1 = 0;
+	int unicode_value2 = 0;
+
+	unicode_value1 = (0xFF00 & (src)) >> 8;
+	unicode_value2 = (0xFF & (src));
+
+	if (unicode_value1 == 0x31
+			&& (unicode_value2 >= 0x30 && unicode_value2 <= 0x4e))
+		return true;
+	return false;
+}
+
 static inline bool is_hangul(UChar src)
 {
 	if ((0x1100 == (src & 0xFF00))       /* korean -Hangul Jamo*/
 			|| CTSVC_COMPARE_BETWEEN(CTSVC_JAMO_A_START, src, CTSVC_JAMO_A_END)
 			|| CTSVC_COMPARE_BETWEEN(CTSVC_JAMO_B_START, src, CTSVC_JAMO_B_END)
 			|| CTSVC_COMPARE_BETWEEN(CTSVC_HAN_C_START, src, CTSVC_HAN_C_END)
-			|| CTSVC_COMPARE_BETWEEN(CTSVC_HAN_HALF_START, src, CTSVC_HAN_HALF_END))
+			|| CTSVC_COMPARE_BETWEEN(CTSVC_HAN_HALF_START, src, CTSVC_HAN_HALF_END)
+			|| CTSVC_COMPARE_BETWEEN(CTSVC_HAN_SYLLABLES_START, src, CTSVC_HAN_SYLLABLES_END))
 		return true;
 	else
 		return FALSE;
+}
+
+static inline bool is_japanese(UChar src)
+{
+	if (CTSVC_COMPARE_BETWEEN(CTSVC_JAPANESE_KATAKANA_START, src, CTSVC_JAPANESE_KATAKANA_END )
+			|| CTSVC_COMPARE_BETWEEN(CTSVC_JAPANESE_KATAKANA_PHONETIC_EXTENSIONS_START, src, CTSVC_JAPANESE_KATAKANA_PHONETIC_EXTENSIONS_END )
+			|| CTSVC_COMPARE_BETWEEN(CTSVC_JAPANESE_HALFWIDTH_AND_FULLWIDTH_FORMS_START, src, CTSVC_JAPANESE_HALFWIDTH_AND_FULLWIDTH_FORMS_END )
+			|| CTSVC_COMPARE_BETWEEN(CTSVC_JAPANESE_HIRAGANA_START, src, CTSVC_JAPANESE_HIRAGANA_END ))
+		return true;
+	else
+		return false;
 }
 
 static inline void hangul_compatibility2jamo(UChar *src)
@@ -151,6 +216,110 @@ static inline void hangul_compatibility2jamo(UChar *src)
 	}
 }
 
+static inline int __ctsvc_convert_japanese_to_hiragana(UChar *src, UChar *dest, int dest_size)
+{
+	int i, j = 0, len = 0;
+
+	len = u_strlen(src);
+
+	for(i = 0; i < len; i++) {
+		int unicode_value1 = 0;
+		int unicode_value2 = 0;
+
+		unicode_value1 = 0x30;
+		unicode_value2 = (0xFF & (src[i]));
+
+		if (CTSVC_COMPARE_BETWEEN(CTSVC_JAPANESE_KATAKANA_START, src[i], CTSVC_JAPANESE_KATAKANA_END)) {
+			if ((unicode_value2 >= 0xa1 && unicode_value2 <= 0xef )
+					|| (unicode_value2 == 0xF2 || unicode_value2 == 0xF3) ) {
+				unicode_value2 -= 0x60;
+				dest[j] = unicode_value1 << 8 | unicode_value2;
+			}
+			else
+				dest[j] = src[i];
+		}
+		else if (CTSVC_COMPARE_BETWEEN(CTSVC_JAPANESE_HALFWIDTH_AND_FULLWIDTH_FORMS_START, src[i], CTSVC_JAPANESE_HALFWIDTH_AND_FULLWIDTH_FORMS_END)) {
+			if (i+1 < len && (0xFF & (src[i+1])) == 0x9E
+					&& unicode_value2 >= 0x76 && unicode_value2 <= 0x89) {
+				unicode_value2 = japanese_halfwidth_katakana_sonant_to_hiragana[unicode_value2 - 0x76];
+				dest[j] = unicode_value1 << 8 | unicode_value2;
+				i++;
+			}
+			else if (i+1 < len && (0xFF & (src[i])) == 0x9F
+					&& unicode_value2 >= 0x8a && unicode_value2 <= 0x8e) {
+				unicode_value2 = japanese_halfwidth_katakana_half_dullness_to_hiragana[unicode_value2 - 0x8a];
+				dest[j] = unicode_value1 << 8 | unicode_value2;
+				i++;
+			}
+			else if (unicode_value2 >= 0x66 && unicode_value2 <= 0x9f) {
+				unicode_value2 = japanese_halfwidth_katakana_to_hiragana[unicode_value2 - 0x66];
+				dest[j] = unicode_value1 << 8 | unicode_value2;
+			}
+			else
+				dest[j] = src[i];
+
+		} else
+			dest[j] = src[i];
+		j++;
+	}
+
+	dest[j] = 0x0;
+
+	return j;
+}
+
+int ctsvc_convert_japanese_to_hiragana(const char *src, char **dest)
+{
+	int ret = CONTACTS_ERROR_NONE;
+	UChar *tmp_result = NULL;
+	UChar *result = NULL;
+	UErrorCode status = 0;
+	int32_t size;
+
+	u_strFromUTF8(NULL, 0, &size, src, strlen(src), &status);
+	if (U_FAILURE(status) && status != U_BUFFER_OVERFLOW_ERROR) {
+		CTS_ERR("u_strFromUTF8 to get the dest length Failed(%s)", u_errorName(status));
+		ret = CONTACTS_ERROR_SYSTEM;
+		goto DATA_FREE;
+	}
+	status = U_ZERO_ERROR;
+	tmp_result = calloc(1, sizeof(UChar) * (size + 1));
+	u_strFromUTF8(tmp_result, size + 1, NULL, src, -1, &status);
+	if (U_FAILURE(status)){
+		CTS_ERR("u_strFromUTF8 Failed(%s)", u_errorName(status));
+		ret = CONTACTS_ERROR_SYSTEM;
+		goto DATA_FREE;
+	}
+	result = calloc(1, sizeof(UChar) * (size + 1));
+
+	__ctsvc_convert_japanese_to_hiragana(tmp_result, result, size + 1 );
+
+	u_strToUTF8(NULL, 0, &size, result, -1, &status);
+	if (U_FAILURE(status) && status != U_BUFFER_OVERFLOW_ERROR) {
+		CTS_ERR("u_strToUTF8 to get the dest length Failed(%s)", u_errorName(status));
+		ret = CONTACTS_ERROR_SYSTEM;
+		goto DATA_FREE;
+	}
+
+	status = U_ZERO_ERROR;
+	*dest = calloc(1, sizeof(char)*(size+1));
+
+	u_strToUTF8(*dest, size + 1, &size, result, -1, &status);
+
+	if (U_FAILURE(status) ) {
+		CTS_ERR("u_strToUTF8 Failed(%s)", u_errorName(status));
+		ret =  CONTACTS_ERROR_SYSTEM;
+		goto DATA_FREE;
+	}
+
+DATA_FREE:
+
+	free(tmp_result);
+	free(result);
+
+	return ret;
+}
+
 int ctsvc_check_language(UChar *word)
 {
 	int type;
@@ -172,8 +341,11 @@ int ctsvc_check_language(UChar *word)
 	else if (is_hangul(word[0])){
 		type = CTSVC_LANG_KOREAN;
 	}
-	else if (0x4E00 <= *word && *word <= 0x9FA5) {
-		type = CTSVC_LANG_ENGLISH;
+	else if (CTSVC_COMPARE_BETWEEN(0x4E00, word[0],  0x9FA5)) {
+		type = CTSVC_LANG_CHINESE;
+	}
+	else if (is_japanese(word[0])) {
+		type = CTSVC_LANG_JAPANESE;
 	}
 
 #if 0		// TODO
@@ -305,6 +477,52 @@ int ctsvc_check_language_type(const char *src)
 	return CONTACTS_ERROR_INVALID_PARAMETER;
 }
 
+int ctsvc_get_name_sort_type(const char *src)
+{
+	UErrorCode status = 0;
+	UChar tmp_result[10];
+	int ret = CTSVC_SORT_OTHERS;
+	int char_len = 0;
+	int language_type;
+	char char_src[10];
+
+
+	char_len = ctsvc_check_utf8(src[0]);
+	RETVM_IF(char_len <= 0, CONTACTS_ERROR_INVALID_PARAMETER, "check_utf8 failed");
+
+	memcpy(char_src, &src[0], char_len);
+	char_src[char_len] = '\0';
+
+	u_strFromUTF8(tmp_result, array_sizeof(tmp_result), NULL, char_src, -1, &status);
+	RETVM_IF(U_FAILURE(status), CONTACTS_ERROR_SYSTEM,
+			"u_strFromUTF8() Failed(%s)", u_errorName(status));
+
+	language_type = ctsvc_check_language(tmp_result);
+
+	switch(language_type)
+	{
+	case CTSVC_LANG_CHINESE:
+		ret = CTSVC_SORT_CJK;
+		break;
+	case CTSVC_LANG_JAPANESE:
+		ret = CTSVC_SORT_JAPANESE;
+		break;
+	case CTSVC_LANG_KOREAN:
+		ret = CTSVC_SORT_KOREAN;
+		break;
+	case CTSVC_LANG_ENGLISH:
+		ret = CTSVC_SORT_WESTERN;
+		break;
+	case CTSVC_LANG_NUMBER:
+		ret = CTSVC_SORT_NUMBER;
+		break;
+	default:
+		ret = CTSVC_SORT_OTHERS;
+	}
+
+	return ret;
+}
+
 void ctsvc_extra_normalize(UChar *word, int32_t word_size)
 {
 	int i;
@@ -313,6 +531,99 @@ void ctsvc_extra_normalize(UChar *word, int32_t word_size)
 			hangul_compatibility2jamo(&word[i]);
 		}
 	}
+}
+
+const char *ctsvc_get_language(int lang)
+{
+	switch(lang)
+	{
+	case CTSVC_LANG_AZERBAIJAN: // az, Azerbaijan
+		return "az";
+	case CTSVC_LANG_ARABIC: // ar, Bahrain - Arabic
+		return "ar";
+	case CTSVC_LANG_BULGARIAN: // bg, Bulgaria - Bulgarian
+		return "bg";
+	case CTSVC_LANG_CATALAN: // ca, Spain - Catalan
+		return "ca";
+	case CTSVC_LANG_CZECH: // cs, Czech Republic - Czech
+		return "cs";
+	case CTSVC_LANG_DANISH: // da, Denmark - Danish
+		return "da";
+	case CTSVC_LANG_GERMAN: // de, Germany - German
+		return "de";
+	case CTSVC_LANG_GREEK: // el, Greece - Greek
+		return "el";
+	case CTSVC_LANG_ENGLISH: // en, en_PH, en_US
+		return "en";
+	case CTSVC_LANG_SPANISH: // es_ES, es_US, El Salvador - Spanish
+		return "es";
+	case CTSVC_LANG_ESTONIAN: // et, Estonia - Estonian
+		return "et";
+	case CTSVC_LANG_BASQUE: // eu, Spain - Basque
+		return "eu";
+	case CTSVC_LANG_FINNISH: // fi, Finland - Finnish
+		return "fi";
+	case CTSVC_LANG_FRENCH: // fr_CA, fr_FR
+		return "fr";
+	case CTSVC_LANG_IRISH: // ga, Ireland - Irish
+		return "ga";
+	case CTSVC_LANG_GALICIAN: // gl, Spain - Galician
+		return "gl";
+	case CTSVC_LANG_HINDI: // hi, India - Hindi
+		return "hi";
+	case CTSVC_LANG_CROATIAN: // hr, Bosnia and Herzegovina - Croatian
+		return "hr";
+	case CTSVC_LANG_HUNGARIAN: // hu, Hungary - Hungarian
+		return "hu";
+	case CTSVC_LANG_ARMENIAN: // hy, Armenia - Armenian
+		return "hy";
+	case CTSVC_LANG_ICELANDIC: // is, Iceland - Icelandic
+		return "is";
+	case CTSVC_LANG_ITALIAN: // it_IT, Italy - Italian
+		return "it";
+	case CTSVC_LANG_JAPANESE: // ja_JP, japan
+		return "ja";
+	case CTSVC_LANG_GEORGIAN: // ka, Georgia - Georgian
+		return "ka";
+	case CTSVC_LANG_KAZAKHSTAN: // kk, Kazakhstan
+		return "kk";
+	case CTSVC_LANG_KOREAN: // ko, ko_KR
+		return "ko";
+	case CTSVC_LANG_LITHUANIAN: // lt, Lithuania - Lithuanian
+		return "lt";
+	case CTSVC_LANG_LATVIAN: // lv, Latvia - Latvian
+		return "lv";
+	case CTSVC_LANG_MACEDONIA: // mk, Macedonia
+		return "mk";
+	case CTSVC_LANG_NORWAY: // nb, Norway
+		return "nb";
+	case CTSVC_LANG_DUTCH: // nl_Nl, Netherlands Dutch
+		return "nl";
+	case CTSVC_LANG_POLISH: // pl, Polish
+		return "pl";
+	case CTSVC_LANG_PORTUGUESE: // pt_BR, pt_PT, Portugal
+		return "pt";
+	case CTSVC_LANG_ROMANIA: // ro, Romania
+		return "ro";
+	case CTSVC_LANG_RUSSIAN: // ru_RU, Russia
+		return "ru";
+	case CTSVC_LANG_SLOVAK: // sk, Slovakia - Slovak
+		return "sk";
+	case CTSVC_LANG_SLOVENIAN: // sl, Slovenia - Slovenian
+		return "sl";
+	case CTSVC_LANG_SERBIAN: // sr, Serbia - Serbian
+		return "sr";
+	case CTSVC_LANG_SWEDISH: // sv, Finland - Swedish
+		return "sv";
+	case CTSVC_LANG_TURKISH: // tr_TR, Turkey - Turkish
+		return "tr";
+	case CTSVC_LANG_UKRAINE: // uk, Ukraine
+		return "uk";
+	case CTSVC_LANG_CHINESE: // zh_CN, zh_HK, zh_SG, zh_TW
+		return "zh";
+	}
+
+	return "";
 }
 
 int ctsvc_get_language_type(const char *system_lang)
@@ -484,7 +795,7 @@ int ctsvc_get_chosung(const char *src, char *dest, int dest_size)
 				(UChar *)result, array_sizeof(result), &status);
 		RETVM_IF(U_FAILURE(status), CONTACTS_ERROR_SYSTEM,
 				"unorm_normalize(%s) Failed(%s)", src, u_errorName(status));
-
+		ctsvc_extra_normalize(result, size);
 		u_strToUTF8(temp, dest_size, &size, result, -1, &status);
 		RETVM_IF(U_FAILURE(status), CONTACTS_ERROR_SYSTEM,
 				"u_strToUTF8() Failed(%s)", u_errorName(status));
@@ -500,3 +811,59 @@ int ctsvc_get_chosung(const char *src, char *dest, int dest_size)
 	return count;
 }
 
+int ctsvc_get_korean_search_pattern(const char *src, char *dest, int dest_size)
+{
+	int32_t size;
+	UErrorCode status = 0;
+	UChar tmp_result[10];
+	UChar result[10];
+	int i=0, j=0, count=0;
+	int char_len = 0;
+	int str_len = strlen(src);
+
+
+	for (i=0;i<str_len;i+=char_len) {
+		char char_src[10];
+		char_len = ctsvc_check_utf8(src[i]);
+		RETVM_IF(char_len <= 0, CONTACTS_ERROR_INVALID_PARAMETER, "check_utf8 failed");
+
+		memcpy(char_src, &src[i], char_len);
+		char_src[char_len] = '\0';
+
+		u_strFromUTF8(tmp_result, array_sizeof(tmp_result), NULL, char_src, -1, &status);
+		RETVM_IF(U_FAILURE(status), CONTACTS_ERROR_SYSTEM,
+				"u_strFromUTF8() Failed(%s)", u_errorName(status));
+
+		if (is_chosung(tmp_result[0]))
+		{
+			hangul_compatibility2jamo(tmp_result);
+
+			u_strToUTF8(&dest[j], dest_size - j, &size, tmp_result, -1, &status);
+			RETVM_IF(U_FAILURE(status), CONTACTS_ERROR_SYSTEM,
+					"u_strToUTF8() Failed(%s)", u_errorName(status));
+			j += size;
+			dest[j] = '*';
+			j++;
+		}
+		else {
+			u_strToUpper(tmp_result, array_sizeof(tmp_result), tmp_result, -1, NULL, &status);
+			RETVM_IF(U_FAILURE(status), CONTACTS_ERROR_SYSTEM,
+					"u_strToUpper() Failed(%s)", u_errorName(status));
+			size = unorm_normalize(tmp_result, -1, UNORM_NFD, 0,
+					(UChar *)result, array_sizeof(result), &status);
+			RETVM_IF(U_FAILURE(status), CONTACTS_ERROR_SYSTEM,
+					"unorm_normalize(%s) Failed(%s)", src, u_errorName(status));
+			ctsvc_extra_normalize(result, size);
+			u_strToUTF8(&dest[j], dest_size - j, &size, result, -1, &status);
+			RETVM_IF(U_FAILURE(status), CONTACTS_ERROR_SYSTEM,
+					"u_strToUTF8() Failed(%s)", u_errorName(status));
+			j += size;
+
+		}
+		count++;
+	}
+
+	dest[j] = '\0';
+
+	return count;
+}

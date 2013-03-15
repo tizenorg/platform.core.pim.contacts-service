@@ -36,7 +36,7 @@ extern "C"
 
 typedef enum
 {
-	CONTACTS_MATCH_EXACTLY,			/**< . */
+	CONTACTS_MATCH_EXACTLY,		/**< case-sensitive */
 	CONTACTS_MATCH_FULLSTRING,		/**< . */
 	CONTACTS_MATCH_CONTAINS,		/**< . */
 	CONTACTS_MATCH_STARTSWITH,		/**< . */

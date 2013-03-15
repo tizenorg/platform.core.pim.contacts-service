@@ -32,8 +32,6 @@
 #include "ctsvc_db_query.h"
 #include "ctsvc_list.h"
 
-#define CTS_LOGO_IMAGE_LOCATION "/opt/usr/data/contacts-svc/img/logo"
-
 static int __ctsvc_db_company_insert_record( contacts_record_h record, int *id );
 static int __ctsvc_db_company_get_record( int id, contacts_record_h* out_record );
 static int __ctsvc_db_company_update_record( contacts_record_h record );
@@ -131,12 +129,11 @@ static int __ctsvc_db_company_insert_record( contacts_record_h record, int *id )
 
 	ret = ctsvc_db_contact_update_changed_time(company->contact_id);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB error : ctsvc_query_exec() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_db_contact_update_changed_time() Failed(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
-
-	ctsvc_set_contact_noti();
+	ctsvc_set_person_noti();
 
 	ret = ctsvc_end_trans(true);
 	if (ret < CONTACTS_ERROR_NONE)
@@ -165,14 +162,14 @@ static int __ctsvc_db_company_update_record( contacts_record_h record )
 			"SELECT contact_id FROM "CTSVC_DB_VIEW_CONTACT" WHERE contact_id = %d", company->contact_id);
 	ret = ctsvc_query_get_first_int_result(query, &contact_id);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("No data : contact_id (%d) is not exist", contact_id);
+		CTS_ERR("No data : contact_id (%d) is not exist", company->contact_id);
 		ctsvc_end_trans(false);
-		return CONTACTS_ERROR_INVALID_PARAMETER;
+		return ret;
 	}
 
 	ret = ctsvc_db_company_update(record, company->contact_id, false);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB error : ctsvc_begin_trans() Failed(%d)", ret);
+		CTS_ERR("Update record Failed(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
@@ -180,12 +177,12 @@ static int __ctsvc_db_company_update_record( contacts_record_h record )
 	// TODO ; contact display company update
 	ret = ctsvc_db_contact_update_changed_time(company->contact_id);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB error : ctsvc_query_exec() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_db_contact_update_changed_time() Failed(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
+	ctsvc_set_person_noti();
 
-	ctsvc_set_contact_noti();
 	ret = ctsvc_end_trans(true);
 	if (ret < CONTACTS_ERROR_NONE)
 	{
@@ -216,10 +213,10 @@ static int __ctsvc_db_company_delete_record( int id )
 	if( ret != CONTACTS_ERROR_NONE ) {
 		CTS_ERR("The id(%d) is Invalid(%d)", id, ret);
 		ctsvc_end_trans(false);
-		return contact_id;
+		return ret;
 	}
 
-	ret = ctsvc_db_company_delete(id);
+	ret = ctsvc_db_company_delete(id, false);
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("DB error : ctsvc_begin_trans() Failed(%d)", ret);
 		ctsvc_end_trans(false);
@@ -228,12 +225,11 @@ static int __ctsvc_db_company_delete_record( int id )
 
 	ret = ctsvc_db_contact_update_changed_time(contact_id);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB error : ctsvc_query_exec() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_db_contact_update_changed_time() Failed(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
-
-	ctsvc_set_contact_noti();
+	ctsvc_set_person_noti();
 
 	ret = ctsvc_end_trans(true);
 	if (ret < CONTACTS_ERROR_NONE)

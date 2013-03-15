@@ -31,8 +31,6 @@
 static TLS bool contact_change = false;
 static TLS bool my_profile_change = false;
 static TLS bool phonelog_change = false;
-static TLS bool missed_change = false;
-static TLS bool favor_change = false;
 static TLS bool speed_change = false;
 static TLS bool addressbook_change = false;
 static TLS bool group_change = false;
@@ -79,24 +77,6 @@ static inline void __ctsvc_noti_publish_phonelog_change(void)
 	if (0 <= fd) {
 		close(fd);
 		phonelog_change = false;
-	}
-}
-
-static inline void __ctsvc_noti_publish_missed_call_change(void)
-{
-	int fd = open(CTSVC_NOTI_MISSED_CALL_CHANGED, O_TRUNC | O_RDWR);
-	if (0 <= fd) {
-		close(fd);
-		missed_change = false;
-	}
-}
-
-static inline void __ctsvc_noti_publish_favor_change(void)
-{
-	int fd = open(CTSVC_NOTI_FAVORITE_CHANGED, O_TRUNC | O_RDWR);
-	if (0 <= fd) {
-		close(fd);
-		favor_change = false;
 	}
 }
 
@@ -303,8 +283,6 @@ void ctsvc_nofitication_cancel(void)
 	contact_change = false;
 	my_profile_change = false;
 	phonelog_change = false;
-	missed_change = false;
-	favor_change = false;
 	speed_change = false;
 	addressbook_change = false;
 	group_change = false;
@@ -341,16 +319,6 @@ void ctsvc_set_my_profile_noti(void)
 void ctsvc_set_phonelog_noti(void)
 {
 	phonelog_change = true;
-}
-
-void ctsvc_set_missed_call_noti(void)
-{
-	missed_change = true;
-}
-
-void ctsvc_set_favor_noti(void)
-{
-	favor_change = true;
 }
 
 void ctsvc_set_speed_noti(void)
@@ -463,8 +431,6 @@ void ctsvc_notification_send()
 	if (contact_change) __ctsvc_noti_publish_contact_change();
 	if (my_profile_change) __ctsvc_noti_publish_my_profile_change();
 	if (phonelog_change) __ctsvc_noti_publish_phonelog_change();
-	if (missed_change) __ctsvc_noti_publish_missed_call_change();
-	if (favor_change) __ctsvc_noti_publish_favor_change();
 	if (speed_change) __ctsvc_noti_publish_speed_change();
 	if (addressbook_change) __ctsvc_noti_publish_addressbook_change();
 	if (group_change) __ctsvc_noti_publish_group_change();

@@ -127,24 +127,54 @@ static const ctsvc_record_plugin_cb_s *__ctsvc_record_get_plugin_cb(int r_type)
 		ASSERT_NOT_REACHED("Invalid parameter: Operation restricted."); \
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 
-static inline bool __ctsvc_record_check_property_flag(const ctsvc_record_s* s_record, unsigned int property_id, contacts_property_flag_e flag)
+bool ctsvc_record_check_property_flag(const ctsvc_record_s* s_record, unsigned int property_id, contacts_property_flag_e flag)
 {
 	int index = property_id & 0x000000FF;
 
-	if ( s_record->properties_flags == NULL)
+	if (CTSVC_RECORD_RESULT == s_record->r_type)
 		return true;
 
+	// Check it when getting value of property
+	// property_flag and properties_flags is set when getting record with query
+	if (CTSVC_PROPERTY_FLAG_PROJECTION == flag) {
+		// all property get.
+		if (NULL == s_record->properties_flags)
+			return true;
+		// Or before inserting record from DB, just get after setting.
+		// properties_flags is not NULL when just setting dirty
+		if (0 == (CTSVC_PROPERTY_FLAG_PROJECTION & s_record->property_flag))
+			return true;
+	}
+
+	// Check it when updating record
+	if (CTSVC_PROPERTY_FLAG_DIRTY == flag) {
+		// all property is clean
+		if (NULL == s_record->properties_flags)
+			return false;
+	}
 	return ( s_record->properties_flags[index] & flag) ? true : false;
 }
 
-static inline contacts_property_flag_e __ctsvc_record_get_property_flag(const ctsvc_record_s* s_record, unsigned int index)
+int ctsvc_record_set_property_flag(ctsvc_record_s* _record, int property_id, contacts_property_flag_e flag)
 {
-	return s_record->properties_flags[index] & 0x0000000F;
-}
+	int index = property_id & 0x000000FF;
 
-static inline void __ctsvc_record_set_property_flag(ctsvc_record_s* _record, unsigned int index, contacts_property_flag_e flag)
-{
+	if (CTSVC_RECORD_RESULT == _record->r_type)
+		return CONTACTS_ERROR_NONE;
+
+	if (NULL == _record->properties_flags) {
+		unsigned int count = 0;
+		ctsvc_view_get_all_property_infos(_record->view_uri, &count);
+		RETVM_IF(count < 0, CONTACTS_ERROR_INVALID_PARAMETER, "ctsvc_view_get_all_property_infos() Failed");
+
+		_record->properties_flags = calloc(count, sizeof(char));
+		_record->property_max_count = count;
+		RETVM_IF(NULL == _record->properties_flags, CONTACTS_ERROR_INTERNAL, "calloc Failed");
+	}
+	_record->property_flag |= flag;
 	_record->properties_flags[index] |= flag;
+
+	return CONTACTS_ERROR_NONE;
 }
 
 #define __CHECK_READ_ONLY_PROPERTY() \
@@ -155,7 +185,7 @@ static inline void __ctsvc_record_set_property_flag(ctsvc_record_s* _record, uns
 	}
 
 #define __CHECK_PROJECTED_PROPERTY() \
-	if( __ctsvc_record_check_property_flag( s_record, property_id, CTSVC_PROPERTY_FLAG_PROJECTION ) ) \
+	if( false == ctsvc_record_check_property_flag( s_record, property_id, CTSVC_PROPERTY_FLAG_PROJECTION ) ) \
 	{ \
 		CTS_ERR("Invalid parameter: Don't try to get un-projected property(0x%0x).", property_id); \
 		return CONTACTS_ERROR_INVALID_PARAMETER; \
@@ -240,7 +270,7 @@ API int contacts_record_get_str( contacts_record_h record, unsigned int property
 	RETV_IF(NULL == record, CONTACTS_ERROR_INVALID_PARAMETER);
 	s_record = (ctsvc_record_s *)record;
 
-//	__CHECK_PROJECTED_PROPERTY();
+	__CHECK_PROJECTED_PROPERTY();
 
 	if (s_record->plugin_cbs && s_record->plugin_cbs->get_str)
 		return s_record->plugin_cbs->get_str(record, property_id, out_str);
@@ -258,7 +288,7 @@ API int contacts_record_get_lli( contacts_record_h record, unsigned int property
 	RETV_IF(NULL == record, CONTACTS_ERROR_INVALID_PARAMETER);
 	s_record = (ctsvc_record_s *)record;
 
-//	__CHECK_PROJECTED_PROPERTY();
+	__CHECK_PROJECTED_PROPERTY();
 
 	if (s_record->plugin_cbs && s_record->plugin_cbs->get_lli)
 		return s_record->plugin_cbs->get_lli(record, property_id, value);
@@ -276,7 +306,7 @@ API int contacts_record_get_double( contacts_record_h record, unsigned int prope
 	RETV_IF(NULL == record, CONTACTS_ERROR_INVALID_PARAMETER);
 	s_record = (ctsvc_record_s *)record;
 
-//	__CHECK_PROJECTED_PROPERTY();
+	__CHECK_PROJECTED_PROPERTY();
 
 	if (s_record->plugin_cbs && s_record->plugin_cbs->get_double)
 		return s_record->plugin_cbs->get_double(record, property_id, value);
@@ -294,7 +324,7 @@ API int contacts_record_get_str_p( contacts_record_h record, unsigned int proper
 	RETV_IF(NULL == record, CONTACTS_ERROR_INVALID_PARAMETER);
 	s_record = (ctsvc_record_s *)record;
 
-//	__CHECK_PROJECTED_PROPERTY();
+	__CHECK_PROJECTED_PROPERTY();
 
 	if (s_record->plugin_cbs && s_record->plugin_cbs->get_str_p)
 		return s_record->plugin_cbs->get_str_p(record, property_id, out_str );
@@ -312,7 +342,7 @@ API int contacts_record_get_int( contacts_record_h record, unsigned int property
 	RETV_IF(NULL == record, CONTACTS_ERROR_INVALID_PARAMETER);
 	s_record = (ctsvc_record_s *)record;
 
-//	__CHECK_PROJECTED_PROPERTY();
+	__CHECK_PROJECTED_PROPERTY();
 
 	if (s_record->plugin_cbs && s_record->plugin_cbs->get_int)
 		return s_record->plugin_cbs->get_int(record, property_id, out_value);
@@ -333,16 +363,22 @@ int ctsvc_record_set_str( contacts_record_h record, unsigned int property_id, co
 {
 	char *str;
 	ctsvc_record_s *s_record;
+	int ret;
 
 	s_record = (ctsvc_record_s *)record;
+	__CHECK_PROJECTED_PROPERTY();
 
 	if (value && *value)
 		str = (char *)value;
 	else
 		str = NULL;
 
-	if (s_record->plugin_cbs && s_record->plugin_cbs->set_str)
-		return s_record->plugin_cbs->set_str(record, property_id, str);
+	if (s_record->plugin_cbs && s_record->plugin_cbs->set_str) {
+		ret = s_record->plugin_cbs->set_str(record, property_id, str);
+		if (CONTACTS_ERROR_NONE == ret)
+			ctsvc_record_set_property_flag(s_record, property_id, CTSVC_PROPERTY_FLAG_DIRTY);
+		return ret;
+	}
 
 	__INVALID_PARAMETER_ERROR_HANDLING();
 }
@@ -357,7 +393,7 @@ API int contacts_record_get_bool( contacts_record_h record, unsigned int propert
 	RETV_IF(NULL == record, CONTACTS_ERROR_INVALID_PARAMETER);
 	s_record = (ctsvc_record_s *)record;
 
-//	__CHECK_PROJECTED_PROPERTY();
+	__CHECK_PROJECTED_PROPERTY();
 
 	if (s_record->plugin_cbs && s_record->plugin_cbs->get_bool)
 		return s_record->plugin_cbs->get_bool(record, property_id, value);
@@ -376,11 +412,17 @@ API int	contacts_record_set_bool( contacts_record_h record, unsigned int propert
 
 int ctsvc_record_set_bool( contacts_record_h record, unsigned int property_id, bool value )
 {
+	int ret;
 	ctsvc_record_s *s_record;
 	s_record = (ctsvc_record_s *)record;
+	__CHECK_PROJECTED_PROPERTY();
 
-	if (s_record->plugin_cbs && s_record->plugin_cbs->set_bool)
-		return s_record->plugin_cbs->set_bool(record, property_id, value);
+	if (s_record->plugin_cbs && s_record->plugin_cbs->set_bool) {
+		ret = s_record->plugin_cbs->set_bool(record, property_id, value);
+		if (CONTACTS_ERROR_NONE == ret)
+			ctsvc_record_set_property_flag(s_record, property_id, CTSVC_PROPERTY_FLAG_DIRTY);
+		return ret;
+	}
 
 	__INVALID_PARAMETER_ERROR_HANDLING();
 }
@@ -396,12 +438,17 @@ API int contacts_record_set_int( contacts_record_h record, unsigned int property
 
 int ctsvc_record_set_int( contacts_record_h record, unsigned int property_id, int value )
 {
+	int ret;
 	ctsvc_record_s *s_record;
 	s_record = (ctsvc_record_s *)record;
+	__CHECK_PROJECTED_PROPERTY();
 
-	if (s_record->plugin_cbs && s_record->plugin_cbs->set_int)
-		return s_record->plugin_cbs->set_int(record, property_id, value);
-
+	if (s_record->plugin_cbs && s_record->plugin_cbs->set_int) {
+		ret = s_record->plugin_cbs->set_int(record, property_id, value);
+		if (CONTACTS_ERROR_NONE == ret)
+			ctsvc_record_set_property_flag(s_record, property_id, CTSVC_PROPERTY_FLAG_DIRTY);
+		return ret;
+	}
 	__INVALID_PARAMETER_ERROR_HANDLING();
 }
 
@@ -417,11 +464,17 @@ API int contacts_record_set_lli( contacts_record_h record, unsigned int property
 
 int ctsvc_record_set_lli( contacts_record_h record, unsigned int property_id, long long int value )
 {
+	int ret;
 	ctsvc_record_s *s_record;
 	s_record = (ctsvc_record_s *)record;
+	__CHECK_PROJECTED_PROPERTY();
 
-	if (s_record->plugin_cbs && s_record->plugin_cbs->set_lli)
-		return s_record->plugin_cbs->set_lli(record, property_id, value);
+	if (s_record->plugin_cbs && s_record->plugin_cbs->set_lli) {
+		ret = s_record->plugin_cbs->set_lli(record, property_id, value);
+		if (CONTACTS_ERROR_NONE == ret)
+			ctsvc_record_set_property_flag(s_record, property_id, CTSVC_PROPERTY_FLAG_DIRTY);
+		return ret;
+	}
 
 	__INVALID_PARAMETER_ERROR_HANDLING();
 }
@@ -437,12 +490,18 @@ API int contacts_record_set_double( contacts_record_h record, unsigned int prope
 
 int ctsvc_record_set_double( contacts_record_h record, unsigned int property_id, double value )
 {
+	int ret;
 	ctsvc_record_s *s_record;
 
 	s_record = (ctsvc_record_s *)record;
+	__CHECK_PROJECTED_PROPERTY();
 
-	if (s_record->plugin_cbs && s_record->plugin_cbs->set_double)
-		return s_record->plugin_cbs->set_double(record, property_id, value);
+	if (s_record->plugin_cbs && s_record->plugin_cbs->set_double) {
+		ret = s_record->plugin_cbs->set_double(record, property_id, value);
+		if (CONTACTS_ERROR_NONE == ret)
+			ctsvc_record_set_property_flag(s_record, property_id, CTSVC_PROPERTY_FLAG_DIRTY);
+		return ret;
+	}
 
 	__INVALID_PARAMETER_ERROR_HANDLING();
 }
@@ -527,10 +586,12 @@ API int contacts_record_clone_child_record_list( contacts_record_h record,
 	__INVALID_PARAMETER_ERROR_HANDLING();
 }
 
-
-int ctsvc_record_set_projection_flags( contacts_record_h record, const unsigned int *projection,
-		const unsigned int projection_count, const unsigned int property_max_count)
+int ctsvc_record_set_projection_flags( contacts_record_h record, const unsigned int *projection, const unsigned int projection_count, const unsigned int property_max_count)
 {
+	int i;
+	unsigned int count;
+	const property_info_s *property_info;
+
 	RETV_IF(record == NULL, CONTACTS_ERROR_INVALID_PARAMETER);
 
 	ctsvc_record_s *_record = (ctsvc_record_s *)record;
@@ -543,15 +604,12 @@ int ctsvc_record_set_projection_flags( contacts_record_h record, const unsigned 
 
 	_record->property_max_count = property_max_count;
 
-	int i;
-	for (i = 0; i < projection_count; i++)
-	{
-		unsigned int index = projection[i] & 0x00000FFF;
-		if( index >= property_max_count ) {
-			ASSERT_NOT_REACHED("Boundary Check failed");
-			return CONTACTS_ERROR_INTERNAL;
-		}
-		__ctsvc_record_set_property_flag(_record, index, CTSVC_PROPERTY_FLAG_PROJECTION);
+	property_info = ctsvc_view_get_all_property_infos(_record->view_uri, &count);
+	if (CTSVC_RECORD_RESULT == _record->r_type)
+		_record->property_flag |= CTSVC_PROPERTY_FLAG_PROJECTION;
+	else {
+		for (i=0;i<projection_count;i++)
+			ctsvc_record_set_property_flag(_record, projection[i], CTSVC_PROPERTY_FLAG_PROJECTION);
 	}
 
 	return CONTACTS_ERROR_NONE;

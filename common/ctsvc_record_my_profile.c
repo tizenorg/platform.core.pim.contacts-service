@@ -164,20 +164,20 @@ static int __ctsvc_my_profile_destroy(contacts_record_h record, bool delete_chil
 
 static int __ctsvc_my_profile_get_int(contacts_record_h record, unsigned int property_id, int *out)
 {
-	ctsvc_contact_s *contact = (ctsvc_contact_s *)record;
+	ctsvc_my_profile_s *my_profile = (ctsvc_my_profile_s *)record;
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_MY_PROFILE_ID:
-		*out = contact->id;
+		*out = my_profile->id;
 		break;
 	case CTSVC_PROPERTY_MY_PROFILE_ADDRESSBOOK_ID:
-		*out = contact->addressbook_id;
+		*out = my_profile->addressbook_id;
 		break;
 	case CTSVC_PROPERTY_MY_PROFILE_CHANGED_TIME:
-		*out = contact->changed_time;
+		*out = my_profile->changed_time;
 		break;
 	default:
-		ASSERT_NOT_REACHED("Invalid parameter : property_id(%d) is not supported in value(contact)", property_id);
+		ASSERT_NOT_REACHED("Invalid parameter : property_id(%d) is not supported in value(my_profile)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
@@ -208,19 +208,19 @@ static int __ctsvc_my_profile_set_int(contacts_record_h record, unsigned int pro
 
 static int __ctsvc_my_profile_get_str_real(contacts_record_h record, unsigned int property_id, char** out_str, bool copy )
 {
-	ctsvc_contact_s *contact = (ctsvc_contact_s*)record;
+	ctsvc_my_profile_s *my_profile = (ctsvc_my_profile_s*)record;
 	switch(property_id) {
 	case CTSVC_PROPERTY_MY_PROFILE_DISPLAY_NAME:
-		*out_str = GET_STR(copy, contact->display_name);
+		*out_str = GET_STR(copy, my_profile->display_name);
 		break;
 	case CTSVC_PROPERTY_MY_PROFILE_IMAGE_THUMBNAIL:
-		*out_str = GET_STR(copy, contact->image_thumbnail_path);
+		*out_str = GET_STR(copy, my_profile->image_thumbnail_path);
 		break;
 	case CTSVC_PROPERTY_MY_PROFILE_UID:
-		*out_str = GET_STR(copy, contact->uid);
+		*out_str = GET_STR(copy, my_profile->uid);
 		break;
 	default :
-		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(contact)", property_id);
+		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(my_profile)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
@@ -534,7 +534,7 @@ static int __ctsvc_my_profile_clone(contacts_record_h record, contacts_record_h 
 	src_data = (ctsvc_my_profile_s*)record;
 	out_data = calloc(1, sizeof(ctsvc_my_profile_s));
 	RETVM_IF(NULL == out_data, CONTACTS_ERROR_OUT_OF_MEMORY,
-			"Out of memeory : calloc(ctsvc_contact_s) Failed(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
+			"Out of memeory : calloc(ctsvc_my_profile_s) Failed(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
 
 	out_data->id = src_data->id;
 	out_data->addressbook_id = src_data->addressbook_id;

@@ -24,9 +24,8 @@
 #include "ctsvc_sqlite.h"
 
 int ctsvc_db_url_insert(contacts_record_h record, int contact_id, bool is_my_profile, int *id);
-int ctsvc_db_url_update(contacts_record_h record, int contact_id, bool is_my_profile);
-int ctsvc_db_url_delete(int id);
-
+int ctsvc_db_url_update(contacts_record_h record, bool is_my_profile);
+int ctsvc_db_url_delete(int id, bool is_my_profile);
 int ctsvc_db_url_get_value_from_stmt(cts_stmt stmt, contacts_record_h *record, int start_count);
 
 #endif // __CTSVC_DB_PLUGIN_URL_HELPER_H__

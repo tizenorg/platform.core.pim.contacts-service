@@ -30,15 +30,13 @@ typedef enum
 
 int ctsvc_db_contact_update_changed_time(int contact_id);
 
-int ctsvc_contact_add_image_file(ctsvc_img_e image_type, int index, char *src_img,
-		char *dest_name, int dest_size);
-int ctsvc_contact_update_image_file(int image_type, int index, char *src_img,
-		char *dest_name, int dest_size);
-int ctsvc_contact_delete_image_file(ctsvc_img_e image_type, int index);
+int ctsvc_contact_add_image_file(ctsvc_img_e image_type, int parent_id, int img_id,
+		char *src_img, char *dest_name, int dest_size);
+int ctsvc_contact_update_image_file(int image_type, int parent_id, int img_id,
+		char *src_img, char *dest_name, int dest_size);
 void ctsvc_make_contact_display_name(ctsvc_contact_s *contact);
 
-void ctsvc_db_contact_delete_callback(sqlite3_context * context,
-		int argc, sqlite3_value ** argv);
+int ctsvc_contact_delete_image_file_with_path(const unsigned char* image_path);
 
 int ctsvc_get_data_info_name(cts_stmt stmt, contacts_list_h name_list);
 int ctsvc_get_data_info_event(cts_stmt stmt, contacts_list_h list);

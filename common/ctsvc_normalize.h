@@ -19,7 +19,7 @@
 #ifndef __TIZEN_SOCIAL_CTSVC_NORMALIZE_H__
 #define __TIZEN_SOCIAL_CTSVC_NORMALIZE_H__
 
-#define VCONFKEY_CONTACTS_SVC_SECONDARY_LANGUAGE "db/contacts-svc/secondary_lang"	// It should be added to vconf-internal-keys
+#define CTSVC_MIN_MATCH_NORMALIZED_NUMBER_SIZE 8
 
 enum LANGTYPE{
 	CTSVC_LANG_NUMBER = 0,
@@ -71,9 +71,9 @@ enum LANGTYPE{
 };
 
 int ctsvc_clean_number(const char *src, char *dest, int dest_size);
-int ctsvc_normalize_number(const char *src, char *dest, int dest_size);
-int ctsvc_normalize_str(const char *src, char *dest, int dest_size);
+int ctsvc_normalize_number(const char *src, char *dest, int dest_size, int min_match);
+int ctsvc_normalize_str(const char *src, char **dest);
 int ctsvc_collation_str(char *src, char **dest);
-int ctsvc_normalize_index(const char *src, char *dest, int dest_size);
+int ctsvc_normalize_index(const char *src, char **dest);
 
 #endif /*  __TIZEN_SOCIAL_CTSVC_NORMALIZE_H__ */

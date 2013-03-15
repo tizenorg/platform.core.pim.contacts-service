@@ -22,6 +22,7 @@
 #include "ctsvc_schema.h"
 #include "ctsvc_sqlite.h"
 #include "ctsvc_db_init.h"
+#include "ctsvc_db_query.h"
 #include "ctsvc_normalize.h"
 #include "ctsvc_db_plugin_number_helper.h"
 #include "ctsvc_record.h"
@@ -36,7 +37,6 @@ int ctsvc_db_number_insert(contacts_record_h record, int contact_id, bool is_my_
 	char normal_num[CTSVC_NUMBER_MAX_LEN] = {0};
 	char clean_num[CTSVC_NUMBER_MAX_LEN] = {0};
 
-//	RETVM_IF(number->deleted, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : deleted number record");
 	RETV_IF(NULL == number->number, CONTACTS_ERROR_NONE);
 	RETVM_IF(contact_id <= 0, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : contact_id(%d) is mandatory field to insert number record ", number->contact_id);
@@ -57,7 +57,7 @@ int ctsvc_db_number_insert(contacts_record_h record, int contact_id, bool is_my_
 	cts_stmt_bind_text(stmt, 2, number->number);
 	ret = ctsvc_clean_number(number->number, clean_num, sizeof(clean_num));
 	if (0 < ret) {
-		ret = ctsvc_normalize_number(clean_num, normal_num, CTSVC_NUMBER_MAX_LEN);
+		ret = ctsvc_normalize_number(clean_num, normal_num, CTSVC_NUMBER_MAX_LEN, CTSVC_MIN_MATCH_NORMALIZED_NUMBER_SIZE);
 		if (CONTACTS_ERROR_NONE == ret)
 			cts_stmt_bind_text(stmt, 3, normal_num);
 	}
@@ -105,52 +105,59 @@ int ctsvc_db_number_get_value_from_stmt(cts_stmt stmt, contacts_record_h *record
 	return CONTACTS_ERROR_NONE;
 }
 
-int ctsvc_db_number_update(contacts_record_h record, int contact_id, bool is_my_profile)
+int ctsvc_db_number_update(contacts_record_h record, bool is_my_profile)
 {
-	int ret;
-	ctsvc_number_s *number = (ctsvc_number_s*)record;
-	char query[CTS_SQL_MAX_LEN] = {0};
-	char normal_num[CTSVC_NUMBER_MAX_LEN] = {0};
+	int id;
+	int ret = CONTACTS_ERROR_NONE;
+	char* set = NULL;
+	GSList *bind_text = NULL;
+	GSList *cursor = NULL;
+	ctsvc_number_s *number = (ctsvc_number_s *)record;
 	char clean_num[CTSVC_NUMBER_MAX_LEN] = {0};
-	cts_stmt stmt;
+	char normal_num[CTSVC_NUMBER_MAX_LEN] = {0};
+	char query[CTS_SQL_MAX_LEN] = {0};
 
 	RETVM_IF(!number->id, CONTACTS_ERROR_INVALID_PARAMETER, "number of contact has no ID.");
+	RETVM_IF(CTSVC_PROPERTY_FLAG_DIRTY != (number->base.property_flag & CTSVC_PROPERTY_FLAG_DIRTY), CONTACTS_ERROR_NONE, "No update");
 
 	snprintf(query, sizeof(query),
-		"UPDATE "CTS_TABLE_DATA" SET contact_id=%d, is_my_profile=%d, data1=%d, data2=?, data3=?, data4=? WHERE id=%d",
-				contact_id, is_my_profile, number->type, number->id);
+			"SELECT id FROM "CTS_TABLE_DATA" WHERE id = %d", number->id);
+	ret = ctsvc_query_get_first_int_result(query, &id);
+	RETV_IF(ret != CONTACTS_ERROR_NONE, ret);
 
-	stmt = cts_query_prepare(query);
-	RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB, "DB error : cts_query_prepare() Failed");
+	do {
+		if (CONTACTS_ERROR_NONE != (ret = ctsvc_db_create_set_query(record, &set, &bind_text))) break;
+		if (ctsvc_record_check_property_flag((ctsvc_record_s *)record, CTSVC_PROPERTY_NUMBER_NUMBER, CTSVC_PROPERTY_FLAG_DIRTY)) {
+			ret = ctsvc_clean_number(number->number, clean_num, sizeof(clean_num));
+			if (0 < ret) {
+				ret = ctsvc_normalize_number(clean_num, normal_num, CTSVC_NUMBER_MAX_LEN, CTSVC_MIN_MATCH_NORMALIZED_NUMBER_SIZE);
+				if (CONTACTS_ERROR_NONE == ret) {
+					char query_set[CTS_SQL_MAX_LEN] = {0};
+					snprintf(query_set, sizeof(query_set), "%s, data4=?", set);
+					free(set);
+					set = strdup(query_set);
+					bind_text = g_slist_append(bind_text, strdup(normal_num));
+				}
+			}
+		}
+		if (CONTACTS_ERROR_NONE != (ret = ctsvc_db_update_record_with_set_query(set, bind_text, CTS_TABLE_DATA, number->id))) break;
 
-	if (number->label)
-		cts_stmt_bind_text(stmt, 1, number->label);
+		if (!is_my_profile)
+			ctsvc_set_number_noti();
+	} while (0);
 
-	if (number->number)
-		cts_stmt_bind_text(stmt, 2, number->number);
-	ret = ctsvc_clean_number(number->number, clean_num, sizeof(clean_num));
-	if (0 < ret) {
-		ret = ctsvc_normalize_number(clean_num, normal_num, CTSVC_NUMBER_MAX_LEN);
-		if (CONTACTS_ERROR_NONE == ret)
-			cts_stmt_bind_text(stmt, 3, normal_num);
+	CTSVC_RECORD_RESET_PROPERTY_FLAGS((ctsvc_record_s *)record);
+	CONTACTS_FREE(set);
+	if (bind_text) {
+		for (cursor=bind_text;cursor;cursor=cursor->next)
+			CONTACTS_FREE(cursor->data);
+		g_slist_free(bind_text);
 	}
 
-	ret = cts_stmt_step(stmt);
-	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("cts_stmt_step() Failed(%d)", ret);
-		cts_stmt_finalize(stmt);
-		return ret;
-	}
-
-	cts_stmt_finalize(stmt);
-
-	if (!is_my_profile)
-		ctsvc_set_number_noti();
-
-	return CONTACTS_ERROR_NONE;
+	return ret;
 }
 
-int ctsvc_db_number_delete(int id)
+int ctsvc_db_number_delete(int id, bool is_my_profile)
 {
 	int ret;
 	char query[CTS_SQL_MIN_LEN] = {0};
@@ -160,7 +167,9 @@ int ctsvc_db_number_delete(int id)
 
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_query_exec() Failed(%d)", ret);
-	ctsvc_set_number_noti();
+
+	if (!is_my_profile)
+		ctsvc_set_number_noti();
 
 	return CONTACTS_ERROR_NONE;
 }

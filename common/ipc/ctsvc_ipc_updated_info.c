@@ -26,6 +26,8 @@ static int __ctsvc_ipc_unmarshal_updated_info(pims_ipc_data_h ipc_data, const ch
 		if (ctsvc_ipc_unmarshal_int(ipc_data,&updated_info_p->id) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_int(ipc_data,&updated_info_p->changed_ver) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_int(ipc_data,&updated_info_p->addressbook_id) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_unmarshal_bool(ipc_data,&updated_info_p->image_changed) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_unmarshal_int(ipc_data,&updated_info_p->last_changed_type) != CONTACTS_ERROR_NONE) break;
 
 		return CONTACTS_ERROR_NONE;
 	} while(0);
@@ -46,6 +48,8 @@ static int __ctsvc_ipc_marshal_updated_info(const contacts_record_h record, pims
 		if (ctsvc_ipc_marshal_int((updated_info_p->id),ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_int((updated_info_p->changed_ver),ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_int((updated_info_p->addressbook_id),ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_bool((updated_info_p->image_changed),ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_int((updated_info_p->last_changed_type),ipc_data) != CONTACTS_ERROR_NONE) break;
 
 		return CONTACTS_ERROR_NONE;
 	} while(0);

@@ -189,65 +189,72 @@ static int __ctsvc_db_addressbook_insert_record( contacts_record_h record, int *
 
 static int __ctsvc_db_addressbook_update_record( contacts_record_h record )
 {
+	int ret = CONTACTS_ERROR_NONE;
+	char* set = NULL;
+	GSList *bind_text = NULL;
+	GSList *cursor = NULL;
 	ctsvc_addressbook_s *addressbook = (ctsvc_addressbook_s *)record;
 
 	RETV_IF(NULL == record, CONTACTS_ERROR_INVALID_PARAMETER);
+	RETVM_IF(CTSVC_PROPERTY_FLAG_DIRTY != (addressbook->base.property_flag & CTSVC_PROPERTY_FLAG_DIRTY), CONTACTS_ERROR_NONE, "No update");
 	RETV_IF(NULL == addressbook->name, CONTACTS_ERROR_INVALID_PARAMETER);
 	RETVM_IF(CTSVC_RECORD_ADDRESSBOOK != addressbook->base.r_type, CONTACTS_ERROR_INVALID_PARAMETER,
 			"Invalid parameter : record is invalid type(%d)", addressbook->base.r_type);
 
-	cts_stmt stmt = NULL;
-	char query[CTS_SQL_MIN_LEN] = {0};
+	ret = ctsvc_begin_trans();
+	RETVM_IF(ret, ret, "ctsvc_begin_trans() Failed(%d)", ret);
 
-	snprintf(query, sizeof(query),
-			"UPDATE %s SET addressbook_name=?, account_id=%d, mode=%d "
-			"WHERE addressbook_id=%d", CTS_TABLE_ADDRESSBOOKS,
-			addressbook->account_id, addressbook->mode, addressbook->id);
-
-	stmt = cts_query_prepare(query);
-	if (NULL == stmt) {
-		CTS_ERR("DB error : cts_query_prepare() Failed");
-		return CONTACTS_ERROR_DB;
-	}
-
-	cts_stmt_bind_text(stmt, 1, addressbook->name);
-
-	/* BEGIN_TRANSACTION */
-	int ret = ctsvc_begin_trans();
-	if( ret < CONTACTS_ERROR_NONE )
-	{
-		CTS_ERR("DB error : ctsvc_begin_trans() Failed(%d)", ret);
-		cts_stmt_finalize(stmt);
-		return ret;
-	}
-
-	/* DOING JOB */
 	do {
+		char query[CTS_SQL_MAX_LEN] = {0};
+		cts_stmt stmt = NULL;
+
+		if (CONTACTS_ERROR_NONE != (ret = ctsvc_db_create_set_query(record, &set, &bind_text))) break;
+		if (NULL == set || '\0' == *set)
+			break;
+
+		snprintf(query, sizeof(query), "UPDATE %s SET %s WHERE addressbook_id = %d", CTS_TABLE_ADDRESSBOOKS, set, addressbook->id);
+		stmt = cts_query_prepare(query);
+		if (NULL == stmt) {
+			CTS_ERR("DB error : cts_query_prepare() Failed");
+			ret = CONTACTS_ERROR_DB;
+			break;
+		}
+		if (bind_text) {
+			int i = 0;
+			for (cursor=bind_text,i=1;cursor;cursor=cursor->next,i++) {
+				const char *text = cursor->data;
+				if (text && *text)
+					cts_stmt_bind_text(stmt, i, text);
+			}
+		}
 		ret = cts_stmt_step(stmt);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("DB error : cts_stmt_step() Failed(%d)", ret);
+			CTS_ERR("cts_stmt_step() Failed(%d)", ret);
 			cts_stmt_finalize(stmt);
 			break;
 		}
 		cts_stmt_finalize(stmt);
 
 		ctsvc_set_addressbook_noti();
+	} while (0);
+	CTSVC_RECORD_RESET_PROPERTY_FLAGS((ctsvc_record_s *)record);
+	CONTACTS_FREE(set);
 
-		ret = ctsvc_end_trans(true);
-		if(ret < CONTACTS_ERROR_NONE )
-		{
-			CTS_ERR("DB error : ctsvc_end_trans() Failed(%d)", ret);
-			return ret;
-		}
+	if (bind_text) {
+		for (cursor=bind_text;cursor;cursor=cursor->next)
+			CONTACTS_FREE(cursor->data);
+		g_slist_free(bind_text);
+	}
 
-		return CONTACTS_ERROR_NONE;
+	if (CONTACTS_ERROR_NONE != ret) {
+		ctsvc_end_trans(false);
+		return ret;
+	}
 
-	} while(0);
+	ret = ctsvc_end_trans(true);
+	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "DB error : ctsvc_end_trans() Failed(%d)", ret);
 
-	/* ROLLBACK TRANSACTION */
-	ctsvc_end_trans(false);
-
-	return ret;
+	return CONTACTS_ERROR_NONE;
 }
 
 static inline int __ctsvc_db_addressbook_reset_internal_addressbook(void)
@@ -313,6 +320,7 @@ static inline int __ctsvc_db_addressbook_reset_internal_addressbook(void)
 
 		ctsvc_set_contact_noti();
 		ctsvc_set_my_profile_noti();
+		// person noti will set in ctsvc_person_do_garbage_collection : ctsvc_set_person_noti();
 		ctsvc_set_group_noti();
 		ret = ctsvc_end_trans(true);
 		if (ret < CONTACTS_ERROR_NONE) {
@@ -356,6 +364,7 @@ static int __ctsvc_db_addressbook_delete_record( int addressbook_id )
 		if (0 < ret) {
 			ctsvc_set_my_profile_noti();
 			ctsvc_set_contact_noti();
+			// person noti will set in ctsvc_person_do_garbage_collection : ctsvc_set_person_noti();
 			ctsvc_set_group_noti();
 			ctsvc_set_addressbook_noti();
 		}
@@ -458,14 +467,13 @@ static int __ctsvc_db_addressbook_get_records_with_query( contacts_query_h query
 		addressbook = (ctsvc_addressbook_s*)record;
 		if (0 == s_query->projection_count)
 			field_count = s_query->property_count;
-		else
-		{
+		else {
 			field_count = s_query->projection_count;
+			ret = ctsvc_record_set_projection_flags(record, s_query->projection,
+					s_query->projection_count, s_query->property_count);
 
-			if( CONTACTS_ERROR_NONE != ctsvc_record_set_projection_flags(record, s_query->projection, s_query->projection_count, s_query->property_count) )
-			{
+			if (CONTACTS_ERROR_NONE != ret)
 				ASSERT_NOT_REACHED("To set projection is failed.\n");
-			}
 		}
 
 		for(i=0;i<field_count;i++) {

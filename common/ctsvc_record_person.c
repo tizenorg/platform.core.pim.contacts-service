@@ -98,7 +98,6 @@ static int __ctsvc_person_clone(contacts_record_h record, contacts_record_h *out
 			 "Out of memeory : calloc(ctsvc_person_s) Failed(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
 
 	out_data->name_contact_id_changed = src_data->name_contact_id_changed;
-	out_data->image_thumbnail_changed = src_data->image_thumbnail_changed;
 	out_data->ringtone_changed = src_data->ringtone_changed;
 	out_data->vibration_changed = src_data->vibration_changed;
 	out_data->is_favorite_changed = src_data->is_favorite_changed;
@@ -240,10 +239,6 @@ static int __ctsvc_person_set_int(contacts_record_h record, unsigned int propert
 	case CTSVC_PROPERTY_PERSON_ACCOUNT_ID3:
 		person->account_id3 = value;
 		break;
-/*
-		ASSERT_NOT_REACHED("The field(0x%0x) is a read-only value (person)", property_id);
-		return CONTACTS_ERROR_INVALID_PARAMETER;
-*/
 	default:
 		ASSERT_NOT_REACHED("This field(0x%0x) is not supported in value(person)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
@@ -262,17 +257,12 @@ static int __ctsvc_person_set_str(contacts_record_h record, unsigned int propert
 	case CTSVC_PROPERTY_PERSON_DISPLAY_NAME_INDEX:
 		FREEandSTRDUP( person->display_name_index, str);
 		break;
-/*
-		ASSERT_NOT_REACHED("The field(%d) is a read-only value (contact)", property_id);
-		return CONTACTS_ERROR_INVALID_PARAMETER;
-*/
+	case CTSVC_PROPERTY_PERSON_IMAGE_THUMBNAIL:
+		FREEandSTRDUP(person->image_thumbnail_path, str);
+		break;
 	case CTSVC_PROPERTY_PERSON_RINGTONE:
 		FREEandSTRDUP(person->ringtone_path, str);
 		person->ringtone_changed = true;
-		break;
-	case CTSVC_PROPERTY_PERSON_IMAGE_THUMBNAIL:
-		FREEandSTRDUP(person->image_thumbnail_path, str);
-		person->image_thumbnail_changed = true;
 		break;
 	case CTSVC_PROPERTY_PERSON_VIBRATION:
 		FREEandSTRDUP(person->vibration, str);

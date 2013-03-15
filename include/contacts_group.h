@@ -71,6 +71,24 @@ API int contacts_group_add_contact(int group_id, int contact_id);
 API int contacts_group_remove_contact(int group_id, int contact_id);
 
 /**
+ * @brief	Sets a group place between a previous group and a next group.
+ *
+ * @param[in]	group_id				The group ID to move
+ * @param[in]	previous_group_id		The previous group ID
+ * @param[in]	next_group_id			The back group ID
+ *
+ * @return  0 on success, otherwise a negative error value.
+ * @retval  #CONTACTS_ERROR_NONE	Successful
+ * @retval  #CONTACTS_ERROR_DB	Database operation failure
+ *
+ * @pre     This function requires an open connection to contacts service by contacts_connect2().
+ *
+ * @see  contacts_connect2()
+ */
+API int contacts_group_set_group_order(int group_id, int previous_group_id, int next_group_id);
+
+
+/**
  * @}
  */
 

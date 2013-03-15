@@ -254,6 +254,12 @@ API int contacts_db_insert_records( contacts_list_h record_list, int **ids, unsi
 /**
  * @brief   Inserts multiple records as batch operation to the contacts database.
  *
+ * @remarks     @The purpose of async API is for UI not to create thread.
+ * If you have to display progress during DB operation, you can use this API.
+ * The callback function will be called in main loop.
+ * Do not use this API in thread.
+ * During executint this API, you can not call the other DB operation API.
+ *
  * @param[in]   record_list			The record list handle
  * @param[in]   callback			The callback function to invoke which lets you know result of batch operation
  * @param[in]   user_data			The user data to be passed to the callback function
@@ -578,6 +584,23 @@ API int contacts_db_get_count( const char* view_uri, int *count);
  * @see contacts_connect2()
  */
 API int contacts_db_get_count_with_query( contacts_query_h query, int *count);
+
+/**
+ * @brief   Gets the last change contacts database version on current connection.
+ *
+ * @param[out]  last_change_version    The contacts database version on current connection
+ *
+ * @return  0 on success, otherwise a negative error value.
+ * @retval  #CONTACTS_ERROR_NONE                Successful
+ * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ * @retval  #CONTACTS_ERROR_DB_FAILED           Database operation failure
+ *
+ * @pre     This function requires an open connection to the contacts service by contacts_connect2().
+ *
+ * @see contacts_connect2()
+ * @see contacts_db_get_current_version()
+ */
+API int contacts_db_get_last_change_version(int* last_change_version);
 
 /**
  * @}

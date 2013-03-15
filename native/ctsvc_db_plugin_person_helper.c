@@ -303,6 +303,7 @@ static inline int __ctsvc_db_update_person_default(int person_id, int datatype)
 	int ret, data_id;
 	cts_stmt stmt = NULL;
 	char query[CTS_SQL_MIN_LEN] = {0};
+	char *temp = NULL;
 
 	snprintf(query, sizeof(query),
 		"SELECT D.id FROM "CTS_TABLE_CONTACTS" C, "CTS_TABLE_DATA" D "
@@ -314,7 +315,7 @@ static inline int __ctsvc_db_update_person_default(int person_id, int datatype)
 	ret = ctsvc_query_get_first_int_result(query, &data_id);
 	if (CONTACTS_ERROR_NO_DATA == ret ) {
 		snprintf(query, sizeof(query),
-			"SELECT D.id FROM "CTS_TABLE_CONTACTS" C, "CTS_TABLE_DATA" D "
+			"SELECT D.id, D.data3 FROM "CTS_TABLE_CONTACTS" C, "CTS_TABLE_DATA" D "
 			"ON C.contact_id = D.contact_id AND C.deleted = 0 "
 			"WHERE C.person_id=%d AND D.datatype=%d AND D.is_default=1 AND D.is_my_profile = 0 ORDER BY D.id",
 			person_id, datatype);
@@ -326,8 +327,7 @@ static inline int __ctsvc_db_update_person_default(int person_id, int datatype)
 			return CONTACTS_ERROR_DB;
 		}
 
-		if ((ret = cts_stmt_step(stmt)))
-		{
+		if ((ret = cts_stmt_step(stmt))) {
 			data_id = ctsvc_stmt_get_int(stmt, 0);
 
 			snprintf(query, sizeof(query),
@@ -341,64 +341,94 @@ static inline int __ctsvc_db_update_person_default(int person_id, int datatype)
 				cts_stmt_finalize(stmt);
 				return ret;
 			}
+			temp = ctsvc_stmt_get_text(stmt, 1);
 		}
 		cts_stmt_finalize(stmt);
+
+		if (CTSVC_DATA_IMAGE == datatype) {
+			if (temp) {
+				snprintf(query, sizeof(query),
+						"UPDATE "CTS_TABLE_PERSONS" SET image_thumbnail_path=? WHERE person_id=%d", person_id);
+				stmt = cts_query_prepare(query);
+				cts_stmt_bind_text(stmt, 1, temp);
+				ret = cts_stmt_step(stmt);
+				cts_stmt_finalize(stmt);
+				if (CONTACTS_ERROR_NONE != ret) {
+					CTS_ERR("cts_query_exec(%s) Failed(%d)", query, ret);
+					return ret;
+				}
+			}
+		}
 	}
 
 	return CONTACTS_ERROR_NONE;
 }
 
+static bool __ctsvc_get_has_column(int person_id, const char *culumn)
+{
+	int ret;
+	int contact_count = 0;
+	char query[CTS_SQL_MIN_LEN] = {0};
+
+	snprintf(query, sizeof(query),
+				"SELECT count(contact_id) FROM "CTS_TABLE_CONTACTS" "
+				"WHERE person_id=%d AND %s=1 AND deleted = 0",
+				person_id, culumn);
+
+	ret = ctsvc_query_get_first_int_result(query, &contact_count);
+	RETV_IF(CONTACTS_ERROR_NONE != ret, false);
+
+	if (contact_count)
+		return true;
+	return false;
+}
+
+static int __ctsvc_get_thumbnail_contact_id(int person_id)
+{
+	int ret;
+	int contact_id = 0;
+	char query[CTS_SQL_MIN_LEN] = {0};
+
+	snprintf(query, sizeof(query),
+			"SELECT D.contact_id FROM "CTS_TABLE_CONTACTS" C, "CTS_TABLE_DATA" D "
+			"ON C.contact_id = D.contact_id AND C.deleted = 0 "
+			"WHERE C.person_id=%d AND D.datatype=%d AND is_primary_default=1 AND D.is_my_profile = 0",
+			person_id, CTSVC_DATA_IMAGE);
+	ret = ctsvc_query_get_first_int_result(query, &contact_id);
+	RETV_IF(CONTACTS_ERROR_NONE != ret, -1);
+	return contact_id;
+}
+
+
 int ctsvc_db_update_person(contacts_record_h record)
 {
-	int ret, i=1, contact_count=0, len=0;
+	int ret, i=1, len=0;
 	cts_stmt stmt = NULL;
 	char query[CTS_SQL_MIN_LEN] = {0};
 	ctsvc_contact_s *contact = (ctsvc_contact_s*)record;
 	bool has_phonenumber=false, has_email=false;
+	int thumbnail_contact_id = 0;
 
 	ret = ctsvc_begin_trans();
 	RETVM_IF(ret, ret, "ctsvc_begin_trans() Failed(%d)", ret);
 
-	snprintf(query, sizeof(query),
-				"SELECT count(contact_id) FROM "CTS_TABLE_CONTACTS" "
-				"WHERE person_id=%d AND has_phonenumber=1 AND deleted = 0",
-				contact->person_id);
+	__ctsvc_db_update_person_default(contact->person_id, CTSVC_DATA_NUMBER);
+	__ctsvc_db_update_person_default(contact->person_id, CTSVC_DATA_EMAIL);
+	__ctsvc_db_update_person_default(contact->person_id, CTSVC_DATA_IMAGE);
 
-	ret = ctsvc_query_get_first_int_result(query, &contact_count);
-	if (CONTACTS_ERROR_NONE != ret ) {
-		CTS_ERR("No Contacts : person_id (%d)", contact->person_id);
-		ctsvc_end_trans(false);
-		return CONTACTS_ERROR_NO_DATA;
-	}
-
-	if(contact_count)
-		has_phonenumber = true;
-
-	snprintf(query, sizeof(query),
-				"SELECT count(contact_id) FROM "CTS_TABLE_CONTACTS" "
-				"WHERE person_id=%d AND has_email=1 AND deleted = 0",
-				contact->person_id);
-
-	ret = ctsvc_query_get_first_int_result(query, &contact_count);
-	if (CONTACTS_ERROR_NONE != ret ) {
-		CTS_ERR("No Contacts : person_id (%d)", contact->person_id);
-		ctsvc_end_trans(false);
-		return CONTACTS_ERROR_NO_DATA;
-	}
-
-	if(contact_count)
-		has_email = true;
+	has_phonenumber = __ctsvc_get_has_column(contact->person_id, "has_phonenumber");
+	has_email = __ctsvc_get_has_column(contact->person_id, "has_email");
+	thumbnail_contact_id = __ctsvc_get_thumbnail_contact_id(contact->person_id);
 
 	len = snprintf(query, sizeof(query),
 			"UPDATE "CTS_TABLE_PERSONS" SET changed_ver=%d, has_phonenumber=%d, has_email=%d ",
 			ctsvc_get_next_ver(), has_phonenumber, has_email);
 
-
 	if (contact->ringtone_changed)
 		len += snprintf(query+len, sizeof(query)-len, ", ringtone_path=?");
 	if (contact->vibration_changed)
 		len += snprintf(query+len, sizeof(query)-len, ", vibration=?");
-	if (contact->image_thumbnail_changed)
+	if (contact->image_thumbnail_changed && (contact->id == thumbnail_contact_id || thumbnail_contact_id == -1))
 		len += snprintf(query+len, sizeof(query)-len, ", image_thumbnail_path=?");
 
 	snprintf(query+len, sizeof(query)-len,
@@ -411,12 +441,21 @@ int ctsvc_db_update_person(contacts_record_h record)
 		return CONTACTS_ERROR_DB;
 	}
 
-	if (contact->ringtone_changed)
-		cts_stmt_bind_text(stmt, i++, SAFE_STR(contact->ringtone_path));
-	if (contact->vibration_changed)
-		cts_stmt_bind_text(stmt, i++, SAFE_STR(contact->vibration));
-	if (contact->image_thumbnail_changed)
-		cts_stmt_bind_text(stmt, i++, SAFE_STR(contact->image_thumbnail_path));
+	if (contact->ringtone_changed) {
+		if (contact->ringtone_path)
+			cts_stmt_bind_text(stmt, i, contact->ringtone_path);
+		i++;
+	}
+	if (contact->vibration_changed) {
+		if (contact->vibration)
+			cts_stmt_bind_text(stmt, i, contact->vibration);
+		i++;
+	}
+	if (contact->image_thumbnail_changed && (contact->id == thumbnail_contact_id || thumbnail_contact_id == -1)) {
+		if (contact->image_thumbnail_path)
+			cts_stmt_bind_text(stmt, i, contact->image_thumbnail_path);
+		i++;
+	}
 
 	ret = cts_stmt_step(stmt);
 	if (CONTACTS_ERROR_NONE != ret) {
@@ -427,12 +466,8 @@ int ctsvc_db_update_person(contacts_record_h record)
 	}
 
 	cts_stmt_finalize(stmt);
-
-	__ctsvc_db_update_person_default(contact->person_id, CTSVC_DATA_NUMBER);
-	__ctsvc_db_update_person_default(contact->person_id, CTSVC_DATA_EMAIL);
-	__ctsvc_db_update_person_default(contact->person_id, CTSVC_DATA_IMAGE);
-
 	ctsvc_set_person_noti();
+
 #ifdef _CONTACTS_IPC_SERVER
 	ctsvc_change_subject_add_changed_person_id(CONTACTS_CHANGE_UPDATED, contact->person_id);
 #endif
@@ -450,9 +485,7 @@ int ctsvc_db_update_person(contacts_record_h record)
 void ctsvc_db_normalize_str_callback(sqlite3_context * context,
 		int argc, sqlite3_value ** argv)
 {
-	int ret;
 	const char *display_name;
-	char dest[CTS_SQL_MAX_LEN] = {0};
 
 	if (argc < 1) {
 		sqlite3_result_null(context);
@@ -461,17 +494,21 @@ void ctsvc_db_normalize_str_callback(sqlite3_context * context,
 
 	display_name = (const char *)sqlite3_value_text(argv[0]);
 	if (display_name) {
-		ret = ctsvc_normalize_index(display_name, dest, sizeof(dest));
+		int ret;
+		char *dest = NULL;
+		ret = ctsvc_normalize_index(display_name, &dest);
 		if (ret < CONTACTS_ERROR_NONE) {
 			CTS_ERR("ctsvc_normalize_index() Failed(%d)", ret);
 			sqlite3_result_null(context);
 			return;
 		}
 		CTS_VERBOSE("normalize index : %s, %s", display_name, dest);
+		sqlite3_result_text(context, dest, strlen(dest), SQLITE_TRANSIENT);
+		free(dest);
+		return;
 	}
 
-
-	sqlite3_result_text(context, dest, strlen(dest), SQLITE_STATIC);
+	sqlite3_result_null(context);
 	return;
 }
 
