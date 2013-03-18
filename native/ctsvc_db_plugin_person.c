@@ -119,60 +119,6 @@ static int __ctsvc_db_person_get_record( int id, contacts_record_h* out_record )
 	return CONTACTS_ERROR_NONE;
 }
 
-static inline int __ctsvc_db_person_set_favorite(int person_id, bool set)
-{
-	int ret;
-	double prio = 0.0;
-	cts_stmt stmt = NULL;
-	char query[CTS_SQL_MIN_LEN] = {0};
-
-	if (set) {
-		snprintf(query, sizeof(query),
-			"SELECT MAX(favorite_prio) FROM "CTS_TABLE_FAVORITES);
-
-		stmt = cts_query_prepare(query);
-		RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB, "cts_query_prepare() Failed");
-
-		ret = cts_stmt_step(stmt);
-		if (1 /*CTS_TRUE*/ == ret) {
-			prio = ctsvc_stmt_get_dbl(stmt, 0);
-		}
-		else if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("cts_stmt_step() Failed(%d)", ret);
-			cts_stmt_finalize(stmt);
-			return ret;
-		}
-		cts_stmt_finalize(stmt);
-
-		prio = prio + 1.0;
-		snprintf(query, sizeof(query),
-			"INSERT OR REPLACE INTO "CTS_TABLE_FAVORITES" values(%d, %f)", person_id, prio);
-	}
-	else {
-		snprintf(query, sizeof(query),
-			"DELETE FROM "CTS_TABLE_FAVORITES" WHERE person_id = %d", person_id);
-	}
-
-	ret = ctsvc_query_exec(query);
-	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("cts_query_exec() Failed(%d)", ret);
-		return ret;
-	}
-
-	ret = cts_db_change();
-
-	snprintf(query, sizeof(query),
-			"UPDATE "CTS_TABLE_CONTACTS" SET is_favorite = %d "
-				"WHERE person_id=%d AND deleted = 0", set?1:0, person_id);
-	ret = ctsvc_query_exec(query);
-	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("cts_query_exec() Failed(%d)", ret);
-		return ret;
-	}
-
-	return CONTACTS_ERROR_NONE;
-}
-
 static int __ctsvc_db_person_update_record( contacts_record_h record )
 {
 	int ret, i, len;
@@ -241,13 +187,14 @@ static int __ctsvc_db_person_update_record( contacts_record_h record )
 	int index_favorite = CTSVC_PROPERTY_PERSON_IS_FAVORITE & 0x000000FF;
 	if (person->base.properties_flags &&
 			CTSVC_PROPERTY_FLAG_DIRTY == person->base.properties_flags[index_favorite]) {
-		ret = __ctsvc_db_person_set_favorite(person->person_id, person->is_favorite);
+		ret = ctsvc_db_person_set_favorite(person->person_id, person->is_favorite, true);
 		if (CONTACTS_ERROR_NONE != ret) {
 			CTS_ERR("cts_stmt_step() Failed(%d)", ret);
 			ctsvc_end_trans(false);
 			return ret;
 		}
 		person->base.properties_flags[index_favorite] = 0;
+		ctsvc_set_contact_noti();
 	}
 
 	do {
@@ -374,6 +321,7 @@ static int __ctsvc_db_person_delete_record( int id )
 	int ret, rel_changed;
 	int person_id;
 	char query[CTS_SQL_MAX_LEN] = {0};
+	int version;
 
 	ret = ctsvc_begin_trans();
 	RETVM_IF(ret, ret, "DB error : ctsvc_begin_trans() Failed(%d)", ret);
@@ -387,13 +335,14 @@ static int __ctsvc_db_person_delete_record( int id )
 		return ret;
 	}
 
+	version = ctsvc_get_next_ver();
 	snprintf(query, sizeof(query),
 			"UPDATE "CTS_TABLE_GROUPS" SET member_changed_ver=%d "
 				"WHERE group_id IN (SELECT distinct group_id "
 									"FROM "CTS_TABLE_CONTACTS" C, "CTS_TABLE_GROUP_RELATIONS" R "
 									"ON C.contact_id=R.contact_id AND R.deleted = 0 AND C.deleted = 0 "
 									"WHERE person_id = %d)",
-				ctsvc_get_next_ver(), id);
+				version, id);
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("ctsvc_query_exec() Failed(%d)", ret);
@@ -404,7 +353,9 @@ static int __ctsvc_db_person_delete_record( int id )
 	rel_changed = cts_db_change();
 
 	// images are deleted by db trigger callback function in ctsvc_db_contact_delete_callback
-	snprintf(query, sizeof(query), "DELETE FROM "CTS_TABLE_CONTACTS" WHERE person_id = %d", id);
+	snprintf(query, sizeof(query),
+			"UPDATE "CTS_TABLE_CONTACTS" SET deleted = 1, person_id = 0, changed_ver=%d WHERE person_id = %d",
+			version, id);
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("ctsvc_query_exec() Failed(%d)", ret);

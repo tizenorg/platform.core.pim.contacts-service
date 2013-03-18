@@ -265,104 +265,6 @@ static inline int __ctsvc_safe_strcmp(char *s1, char *s2)
 		return strcmp(s1, s2);
 }
 
-static inline void __ctsvc_update_my_profile_display_name(ctsvc_my_profile_s *my_profile)
-{
-	char *temp_display_name = NULL;
-	char display[CTSVC_MY_PROFILE_DISPLAY_NAME_MAX_LEN] = {0};
-	GList *cur;
-	int len=0;
-
-	ctsvc_name_s *name = NULL;
-	if ( my_profile->name->count > 0 && my_profile->name->records != NULL && my_profile->name->records->data != NULL )
-	{
-		name = (ctsvc_name_s *)my_profile->name->records->data;
-	}
-
-	if ( name && ( name->first || name->last) ) {
-		if (name->first && name->last){
-			snprintf(display, sizeof(display), "%s %s",name->first,name->last);
-			temp_display_name = strdup(display);
-		}
-		else if (name->first)
-			temp_display_name = strdup(name->first);
-		else
-			temp_display_name = strdup(name->last);
-
-		if (0 != __ctsvc_safe_strcmp(my_profile->display_name, temp_display_name)) {
-			// make display name
-			if(name->first)
-				len += snprintf(display + len, sizeof(display) - len, "%s", name->first);
-
-			if(name->addition) {
-				if (*display)
-					len += snprintf(display + len, sizeof(display) - len, " ");
-				len += snprintf(display + len, sizeof(display) - len, "%s", name->addition);
-			}
-
-			if(name->last) {
-				if (*display)
-					len += snprintf(display + len, sizeof(display) - len, " ");
-				len += snprintf(display + len, sizeof(display) - len, "%s", name->last);
-			}
-
-			if(name->suffix) {
-				if (*display)
-					len += snprintf(display + len, sizeof(display) - len, " ");
-				len += snprintf(display + len, sizeof(display) - len, "%s", name->suffix);
-			}
-			my_profile->display_name = strdup(display);
-		}
-		free(temp_display_name);
-	}
-	else {
-		if (my_profile->company && my_profile->company->records) {
-			for (cur=my_profile->company->records;cur;cur=cur->next) {
-				ctsvc_company_s *company = (ctsvc_company_s *)cur->data;
-				if (company && company->name) {
-					if (__ctsvc_safe_strcmp(my_profile->display_name, company->name)) {
-						my_profile->display_name = SAFE_STRDUP(company->name);
-						break;
-					}
-				}
-			}
-		}
-		else if (my_profile->nicknames && my_profile->nicknames->records) {
-			for (cur=my_profile->nicknames->records;cur;cur=cur->next) {
-				ctsvc_nickname_s *nickname = (ctsvc_nickname_s *)cur->data;
-				if (nickname && nickname->nickname) {
-					if (__ctsvc_safe_strcmp(my_profile->display_name, nickname->nickname)) {
-						my_profile->display_name = SAFE_STRDUP(nickname->nickname);
-						break;
-					}
-				}
-			}
-		}
-		else if (my_profile->numbers && my_profile->numbers->records) {
-			for (cur=my_profile->numbers->records;cur;cur=cur->next) {
-				ctsvc_number_s *number = (ctsvc_number_s *)cur->data;
-				if (number && number->number) {
-					if (__ctsvc_safe_strcmp(my_profile->display_name, number->number)) {
-						my_profile->display_name = SAFE_STRDUP(number->number);
-						break;
-					}
-				}
-			}
-		}
-		else if (my_profile->emails && my_profile->emails->records) {
-			for (cur=my_profile->emails->records;cur;cur=cur->next) {
-				ctsvc_email_s *email = (ctsvc_email_s*)cur->data;
-				if (email && email->email_addr) {
-					if (__ctsvc_safe_strcmp(my_profile->display_name, email->email_addr)) {
-						my_profile->display_name = SAFE_STRDUP(email->email_addr);
-						break;
-					}
-				}
-			}
-		}
-	}
-	return;
-}
-
 static inline int __ctsvc_my_profile_update_data(ctsvc_my_profile_s *my_profile)
 {
 	int ret;
@@ -491,6 +393,153 @@ static void __ctsvc_my_profile_check_default_data(ctsvc_my_profile_s *my_profile
 	ctsvc_contact_check_default_image((contacts_list_h)my_profile->images);
 }
 
+static void __ctsvc_make_my_profile_display_name(ctsvc_my_profile_s *my_profile)
+{
+	char *display = NULL;
+	GList *cur;
+	int len, display_len;
+
+	ctsvc_name_s *name = NULL;
+
+	free(my_profile->display_name);
+	my_profile->display_name = NULL;
+
+	free(my_profile->reverse_display_name);
+	my_profile->reverse_display_name = NULL;
+
+	if (my_profile->name->count > 0 && my_profile->name->records != NULL && my_profile->name->records->data != NULL) {
+		name = (ctsvc_name_s *)my_profile->name->records->data;
+	}
+
+	if (name && (name->first || name->last)) {
+		// make display name
+		display_len = SAFE_STRLEN(name->prefix)
+						+ SAFE_STRLEN(name->first)
+						+ SAFE_STRLEN(name->addition)
+						+ SAFE_STRLEN(name->last)
+						+ SAFE_STRLEN(name->suffix) + 5;
+		display = calloc(1, display_len);
+		len=0;
+
+		if (name->prefix)
+			len += snprintf(display + len, display_len - len, "%s", name->prefix);
+
+		if (name->first) {
+			if (*display)
+				len += snprintf(display + len, display_len - len, " ");
+			len += snprintf(display + len, display_len - len, "%s", name->first);
+		}
+
+		if (name->addition) {
+			if (*display)
+				len += snprintf(display + len, display_len - len, " ");
+			len += snprintf(display + len, display_len - len, "%s", name->addition);
+		}
+
+		if (name->last) {
+			if (*display)
+				len += snprintf(display + len, display_len - len, " ");
+			len += snprintf(display + len, display_len - len, "%s", name->last);
+		}
+
+		if (name->suffix) {
+			if (*display)
+				len += snprintf(display + len, display_len - len, " ");
+			len += snprintf(display + len, display_len - len, "%s", name->suffix);
+		}
+
+		my_profile->display_name = display;
+
+		// make reverse_display_name
+		display = calloc(1, display_len);
+		len = 0;
+
+		if (name->prefix)
+			len += snprintf(display + len, display_len - len, "%s", name->prefix);
+
+		if (name->last) {
+			if (*display)
+				len += snprintf(display + len, display_len - len, " ");
+
+			len += snprintf(display + len, display_len - len, "%s", name->last);
+
+			if(name->first || name->addition)
+				len += snprintf(display + len, display_len - len, ",");
+		}
+
+		if (name->first) {
+			if (*display)
+				len += snprintf(display + len, display_len - len, " ");
+			len += snprintf(display + len, display_len - len, "%s", name->first);
+		}
+
+		if (name->addition) {
+			if (*display)
+				len += snprintf(display + len, display_len - len, " ");
+			len += snprintf(display + len, display_len - len, "%s", name->addition);
+		}
+
+		if (name->suffix) {
+			if (*display)
+				len += snprintf(display + len, display_len - len, " ");
+			len += snprintf(display + len, display_len - len, "%s", name->suffix);
+		}
+
+		my_profile->reverse_display_name = display;
+	}
+	else {
+		if (my_profile->company && my_profile->company->records) {
+			for (cur=my_profile->company->records;cur;cur=cur->next) {
+				ctsvc_company_s *company = (ctsvc_company_s *)cur->data;
+				if (company && company->name) {
+					my_profile->display_name_changed = true;
+					my_profile->display_name = SAFE_STRDUP(company->name);
+					break;
+				}
+			}
+		}
+
+		if (!my_profile->display_name_changed && my_profile->nicknames && my_profile->nicknames->records) {
+			for (cur=my_profile->nicknames->records;cur;cur=cur->next) {
+				ctsvc_nickname_s *nickname = (ctsvc_nickname_s *)cur->data;
+				if (nickname && nickname->nickname) {
+					my_profile->display_name_changed = true;
+					my_profile->display_name = SAFE_STRDUP(nickname->nickname);
+					break;
+				}
+			}
+		}
+
+		if (!my_profile->display_name_changed && my_profile->numbers && my_profile->numbers->records) {
+			for (cur=my_profile->numbers->records;cur;cur=cur->next) {
+				ctsvc_number_s *number = (ctsvc_number_s *)cur->data;
+				if (number && number->number) {
+					my_profile->display_name_changed = true;
+					my_profile->display_name = SAFE_STRDUP(number->number);
+					break;
+				}
+			}
+		}
+
+		if (!my_profile->display_name_changed && my_profile->emails && my_profile->emails->records) {
+			for (cur=my_profile->emails->records;cur;cur=cur->next) {
+				ctsvc_email_s *email = (ctsvc_email_s *)cur->data;
+				if (email && email->email_addr) {
+					my_profile->display_name_changed = true;
+					my_profile->display_name = SAFE_STRDUP(email->email_addr);
+					break;
+				}
+			}
+		}
+
+		if (my_profile->display_name_changed) {
+			my_profile->reverse_display_name = SAFE_STRDUP(my_profile->display_name);
+		}
+	}
+	return;
+}
+
+
 static int __ctsvc_db_my_profile_update_record( contacts_record_h record )
 {
 	int ret, len;
@@ -511,7 +560,7 @@ static int __ctsvc_db_my_profile_update_record( contacts_record_h record )
 		return ret;
 	}
 
-	__ctsvc_update_my_profile_display_name(my_profile);
+	__ctsvc_make_my_profile_display_name(my_profile);
 	__ctsvc_my_profile_check_default_data(my_profile);
 
 	//update data
@@ -564,7 +613,7 @@ static int __ctsvc_db_my_profile_update_record( contacts_record_h record )
 
 	len = snprintf(query, sizeof(query),
 			"UPDATE "CTS_TABLE_MY_PROFILES" SET changed_ver=%d, changed_time=%d, "
-				"display_name=?, uid=?, image_thumbnail_path=?",
+				"display_name=?, reverse_display_name=?, uid=?, image_thumbnail_path=?",
 				ctsvc_get_next_ver(), (int)time(NULL));
 	snprintf(query+len, sizeof(query)-len, " WHERE my_profile_id=%d", my_profile->id);
 
@@ -576,10 +625,11 @@ static int __ctsvc_db_my_profile_update_record( contacts_record_h record )
 	}
 
 	cts_stmt_bind_text(stmt, 1, my_profile->display_name);
+	cts_stmt_bind_text(stmt, 2, my_profile->reverse_display_name);
 	if (my_profile->uid)
-		cts_stmt_bind_text(stmt, 2, my_profile->uid);
+		cts_stmt_bind_text(stmt, 3, my_profile->uid);
 	if (my_profile->image_thumbnail_path)
-		cts_stmt_bind_text(stmt, 3, my_profile->image_thumbnail_path);
+		cts_stmt_bind_text(stmt, 4, my_profile->image_thumbnail_path);
 
 	ret = cts_stmt_step(stmt);
 	if (CONTACTS_ERROR_NONE != ret) {
@@ -909,89 +959,6 @@ static int __ctsvc_my_profile_insert_data(ctsvc_my_profile_s *contact)
 	return CONTACTS_ERROR_NONE;
 }
 
-void __ctsvc_make_my_profile_display_name(ctsvc_my_profile_s *my_profile)
-{
-	char display[CTS_SQL_MAX_LEN]={0};
-	GList *cur;
-	int len;
-
-	ctsvc_name_s *name = NULL;
-
-	if ( my_profile->name->count > 0 && my_profile->name->records != NULL && my_profile->name->records->data != NULL ) {
-		name = (ctsvc_name_s *)my_profile->name->records->data;
-	}
-
-	if ( name && ( name->first || name->last) ) {
-
-		// make display name
-		len=0;
-		if(name->first)
-			len += snprintf(display + len, sizeof(display) - len, "%s", name->first);
-
-		if(name->addition) {
-			if (*display)
-				len += snprintf(display + len, sizeof(display) - len, " ");
-			len += snprintf(display + len, sizeof(display) - len, "%s", name->addition);
-		}
-
-		if(name->last) {
-			if (*display)
-				len += snprintf(display + len, sizeof(display) - len, " ");
-			len += snprintf(display + len, sizeof(display) - len, "%s", name->last);
-		}
-
-		if(name->suffix) {
-			if (*display)
-				len += snprintf(display + len, sizeof(display) - len, " ");
-			len += snprintf(display + len, sizeof(display) - len, "%s", name->suffix);
-		}
-
-		my_profile->display_name = strdup(display);
-	}
-	else {
-		if (my_profile->company && my_profile->company->records) {
-			for (cur=my_profile->company->records;cur;cur=cur->next) {
-				ctsvc_company_s *company = (ctsvc_company_s *)cur->data;
-				if (company && company->name) {
-					my_profile->display_name = SAFE_STRDUP(company->name);
-					break;
-				}
-			}
-		}
-
-		if (NULL == my_profile->display_name && my_profile->nicknames->records) {
-			for (cur=my_profile->nicknames->records;cur;cur=cur->next) {
-				ctsvc_nickname_s *nickname = (ctsvc_nickname_s *)cur->data;
-				if (nickname && nickname->nickname) {
-					my_profile->display_name = SAFE_STRDUP(nickname->nickname);
-					break;
-				}
-			}
-		}
-
-		if (NULL == my_profile->display_name && my_profile->numbers->records) {
-			for (cur=my_profile->numbers->records;cur;cur=cur->next) {
-				ctsvc_number_s *number = (ctsvc_number_s *)cur->data;
-				if (number && number->number) {
-					my_profile->display_name = SAFE_STRDUP(number->number);
-					break;
-				}
-			}
-		}
-
-		if (NULL == my_profile->display_name && my_profile->emails->records) {
-			for (cur=my_profile->emails->records;cur;cur=cur->next) {
-				ctsvc_email_s *email = (ctsvc_email_s *)cur->data;
-				if (email && email->email_addr) {
-					my_profile->display_name = SAFE_STRDUP(email->email_addr);
-					break;
-				}
-			}
-		}
-	}
-	return;
-}
-
 static int __ctsvc_db_my_profile_insert_record( contacts_record_h record, int *id)
 {
 	CTS_FN_CALL;
@@ -1073,8 +1040,8 @@ static int __ctsvc_db_my_profile_insert_record( contacts_record_h record, int *i
 	snprintf(query, sizeof(query),
 		"INSERT INTO "CTS_TABLE_MY_PROFILES"(my_profile_id, addressbook_id, "
 			"created_ver, changed_ver, changed_time, "
-			"display_name, uid, image_thumbnail_path) "
-			"VALUES(%d, %d, %d, %d, %d, ?, ?, ?)",
+			"display_name, reverse_display_name, uid, image_thumbnail_path) "
+			"VALUES(%d, %d, %d, %d, %d, ?, ?, ?, ?)",
 			my_profile->id, my_profile->addressbook_id, version, version, (int)time(NULL));
 
 	stmt = cts_query_prepare(query);
@@ -1086,10 +1053,12 @@ static int __ctsvc_db_my_profile_insert_record( contacts_record_h record, int *i
 
 	if (my_profile->display_name)
 		cts_stmt_bind_text(stmt, 1, my_profile->display_name);
+	if (my_profile->reverse_display_name)
+		cts_stmt_bind_text(stmt, 2, my_profile->reverse_display_name);
 	if (my_profile->uid)
-		cts_stmt_bind_text(stmt, 2, my_profile->uid);
+		cts_stmt_bind_text(stmt, 3, my_profile->uid);
 	if (my_profile->image_thumbnail_path)
-		cts_stmt_bind_text(stmt, 3, my_profile->image_thumbnail_path);
+		cts_stmt_bind_text(stmt, 4, my_profile->image_thumbnail_path);
 
 	ret = cts_stmt_step(stmt);
 	if (CONTACTS_ERROR_NONE != ret) {

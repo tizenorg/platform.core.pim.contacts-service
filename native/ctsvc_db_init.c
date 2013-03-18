@@ -28,7 +28,6 @@
 #include "ctsvc_sqlite.h"
 #include "ctsvc_db_init.h"
 #include "ctsvc_utils.h"
-#include "ctsvc_restriction.h"
 #include "ctsvc_view.h"
 #include "ctsvc_notification.h"
 
@@ -843,11 +842,6 @@ int ctsvc_db_init()
 		CTS_ERR("ctsvc_db_open() Failed(%d)", ret);
 		return ret;
 	}
-	ret = ctsvc_restriction_init();
-	if (ret != CONTACTS_ERROR_NONE) {
-		CTS_ERR("ctsvc_restriction_init() Failed(%d)", ret);
-		return ret;
-	}
 
 #ifdef _CONTACTS_IPC_SERVER
 	ret = __ctsvc_db_create_views();
@@ -868,7 +862,6 @@ int ctsvc_db_deinit()
 		CTS_ERR("ctsvc_db_close() Failed(%d)", ret);
 		return ret;
 	}
-	ctsvc_restriction_deinit();
 	return CONTACTS_ERROR_NONE;
 }
 

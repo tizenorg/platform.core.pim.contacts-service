@@ -82,31 +82,6 @@ API int contacts_connect2()
 	return CONTACTS_ERROR_NONE;
 }
 
-API int contacts_connect_with_flags(unsigned int flags)
-{
-	CTS_FN_CALL;
-	int ret = CONTACTS_ERROR_NONE;
-
-	ret = contacts_connect2();
-	if (ret == CONTACTS_ERROR_NONE)
-		return ret;
-
-	if (flags & CONTACTS_CONNECT_FLAG_RETRY) {
-		int i;
-		int waiting_time = 500;
-		for (i=0;i<7;i++) {
-			usleep(waiting_time * 1000);
-			DBG("retry cnt=%d, ret=%x, %d",(i+1), ret, waiting_time);
-			ret = contacts_connect2();
-			if (ret == CONTACTS_ERROR_NONE)
-				break;
-			waiting_time *= 2;
-		}
-	}
-
-	return ret;
-}
-
 API int contacts_disconnect2()
 {
 	if (1 == thread_connection)
@@ -139,6 +114,34 @@ API int contacts_disconnect2()
 
 
 	return CONTACTS_ERROR_NONE;
+}
+
+#ifdef _CONTACTS_NATIVE
+API int contacts_connect_with_flags(unsigned int flags)
+{
+	CTS_FN_CALL;
+	int ret = CONTACTS_ERROR_NONE;
+
+	ret = contacts_connect2();
+	if (ret == CONTACTS_ERROR_NONE)
+		return ret;
+
+	if (flags & CONTACTS_CONNECT_FLAG_RETRY) {
+		int i;
+		int waiting_time = 500;
+		for (i=0;i<9;i++) {
+			usleep(waiting_time * 1000);
+			DBG("retry cnt=%d, ret=%x, %d",(i+1), ret, waiting_time);
+			ret = contacts_connect2();
+			if (ret == CONTACTS_ERROR_NONE)
+				break;
+			if (6 < i)
+				waiting_time += 30000;
+			else
+				waiting_time *= 2;
+		}
+	}
+	return ret;
 }
 
 API int contacts_connect_on_thread()
@@ -193,3 +196,5 @@ API int contacts_disconnect_on_thread()
 
 	return CONTACTS_ERROR_NONE;
 }
+#endif
+

@@ -194,8 +194,7 @@ const char* ctsvc_get_sort_column(void)
 		return "display_name_language, reverse_sortkey";
 }
 
-// This function is for MY profile and group image.
-char* ctsvc_get_image(const char *dir, int index, char *dest, int dest_size)
+static char* __ctsvc_get_image(const char *dir, int index, char *dest, int dest_size)
 {
 	DIR *dp;
 	char *ret_val;
@@ -452,12 +451,13 @@ int ctsvc_copy_image(const char *src, const char *dest)
 	return CONTACTS_ERROR_NONE;
 }
 
+// This function is for group image.
 int ctsvc_change_image(const char *dir, int index, const char *path, char *image, int image_len)
 {
 	int ret;
 	char dest[CTSVC_IMG_FULL_PATH_SIZE_MAX] = {0};
 
-	if (ctsvc_get_image(dir, index, dest, sizeof(dest))) {
+	if (__ctsvc_get_image(dir, index, dest, sizeof(dest))) {
 		if (path && 0 == strcmp(dest, path))
 			return CONTACTS_ERROR_NONE;
 		ret = unlink(dest);

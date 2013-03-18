@@ -209,6 +209,60 @@ inline static const char* __cts_get_image_filename(const char* src)
 	return src+pos;
 }
 
+int ctsvc_db_person_set_favorite(int person_id, bool set, bool propagate)
+{
+	int ret;
+	double prio = 0.0;
+	cts_stmt stmt = NULL;
+	char query[CTS_SQL_MIN_LEN] = {0};
+
+	if (set) {
+		snprintf(query, sizeof(query),
+			"SELECT MAX(favorite_prio) FROM "CTS_TABLE_FAVORITES);
+
+		stmt = cts_query_prepare(query);
+		RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB, "cts_query_prepare() Failed");
+
+		ret = cts_stmt_step(stmt);
+		if (1 /*CTS_TRUE*/ == ret) {
+			prio = ctsvc_stmt_get_dbl(stmt, 0);
+		}
+		else if (CONTACTS_ERROR_NONE != ret) {
+			CTS_ERR("cts_stmt_step() Failed(%d)", ret);
+			cts_stmt_finalize(stmt);
+			return ret;
+		}
+		cts_stmt_finalize(stmt);
+
+		prio = prio + 1.0;
+		snprintf(query, sizeof(query),
+			"INSERT OR REPLACE INTO "CTS_TABLE_FAVORITES" values(%d, %f)", person_id, prio);
+	}
+	else {
+		snprintf(query, sizeof(query),
+			"DELETE FROM "CTS_TABLE_FAVORITES" WHERE person_id = %d", person_id);
+	}
+
+	ret = ctsvc_query_exec(query);
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("cts_query_exec() Failed(%d)", ret);
+		return ret;
+	}
+
+	if (propagate) {
+		snprintf(query, sizeof(query),
+				"UPDATE "CTS_TABLE_CONTACTS" SET is_favorite = %d "
+					"WHERE person_id=%d AND deleted = 0", set?1:0, person_id);
+		ret = ctsvc_query_exec(query);
+		if (CONTACTS_ERROR_NONE != ret) {
+			CTS_ERR("cts_query_exec() Failed(%d)", ret);
+			return ret;
+		}
+	}
+
+	return CONTACTS_ERROR_NONE;
+}
+
 int ctsvc_db_insert_person(contacts_record_h record)
 {
 	int ret, index;
@@ -240,8 +294,7 @@ int ctsvc_db_insert_person(contacts_record_h record)
 
 	if (1 == cts_stmt_step(stmt))
 		status = SAFE_STRDUP(ctsvc_stmt_get_text(stmt, 0));
-
-	sqlite3_finalize(stmt);
+	cts_stmt_finalize(stmt);
 
 	version = ctsvc_get_next_ver();
 	snprintf(query, sizeof(query),
@@ -287,6 +340,15 @@ int ctsvc_db_insert_person(contacts_record_h record)
 		CTS_ERR("cts_query_exec(%s) Failed(%d)", query, ret);
 		free(status);
 		return ret;
+	}
+
+	// set favorite
+	if (contact->is_favorite) {
+		ret = ctsvc_db_person_set_favorite(index, contact->is_favorite, false);
+		if (CONTACTS_ERROR_NONE != ret) {
+			CTS_ERR("cts_stmt_step() Failed(%d)", ret);
+			return ret;
+		}
 	}
 
 	free(status);
@@ -399,7 +461,6 @@ static int __ctsvc_get_thumbnail_contact_id(int person_id)
 	return contact_id;
 }
 
-
 int ctsvc_db_update_person(contacts_record_h record)
 {
 	int ret, i=1, len=0;
@@ -408,6 +469,7 @@ int ctsvc_db_update_person(contacts_record_h record)
 	ctsvc_contact_s *contact = (ctsvc_contact_s*)record;
 	bool has_phonenumber=false, has_email=false;
 	int thumbnail_contact_id = 0;
+	int person_id = 0;
 
 	ret = ctsvc_begin_trans();
 	RETVM_IF(ret, ret, "ctsvc_begin_trans() Failed(%d)", ret);
@@ -464,8 +526,44 @@ int ctsvc_db_update_person(contacts_record_h record)
 		ctsvc_end_trans(false);
 		return ret;
 	}
-
 	cts_stmt_finalize(stmt);
+
+	// update favorite
+	snprintf(query, sizeof(query),
+			"SELECT person_id FROM "CTS_TABLE_FAVORITES" WHERE person_id =%d ", contact->person_id);
+	ret = ctsvc_query_get_first_int_result(query, &person_id);
+	if (CONTACTS_ERROR_NO_DATA == ret && contact->is_favorite) {
+		ret = ctsvc_db_person_set_favorite(contact->person_id, true, false);
+		if (CONTACTS_ERROR_NONE != ret) {
+			CTS_ERR("ctsvc_db_person_set_favorite() Failed(%d)", ret);
+			ctsvc_end_trans(false);
+			return ret;
+		}
+	}
+	else if (CONTACTS_ERROR_NONE == ret && !contact->is_favorite) {
+		snprintf(query, sizeof(query),
+			"SELECT person_id FROM "CTS_TABLE_CONTACTS" WHERE person_id =%d AND is_favorite = 1", contact->person_id);
+		ret = ctsvc_query_get_first_int_result(query, &person_id);
+		if (CONTACTS_ERROR_NO_DATA == ret) {
+			ret = ctsvc_db_person_set_favorite(contact->person_id, false, false);
+			if (CONTACTS_ERROR_NONE != ret) {
+				CTS_ERR("ctsvc_db_person_set_favorite() Failed(%d)", ret);
+				ctsvc_end_trans(false);
+				return ret;
+			}
+		}
+		else if (CONTACTS_ERROR_NONE != ret) {
+			CTS_ERR("ctsvc_query_get_first_int_result() Failed(%d)", ret);
+			ctsvc_end_trans(false);
+			return ret;
+		}
+	}
+	else if (ret < CONTACTS_ERROR_NONE && CONTACTS_ERROR_NO_DATA != ret) {
+		CTS_ERR("ctsvc_query_get_first_int_result() Failed(%d)", ret);
+		ctsvc_end_trans(false);
+		return ret;
+	}
+
 	ctsvc_set_person_noti();
 
 #ifdef _CONTACTS_IPC_SERVER

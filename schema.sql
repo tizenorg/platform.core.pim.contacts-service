@@ -76,7 +76,6 @@ CREATE TABLE contacts
 	addressbook_id			INTEGER NOT NULL DEFAULT 0,
 	has_phonenumber		INTEGER,
 	has_email			INTEGER,
-	is_restricted			INTEGER DEFAULT 0,
 	is_favorite			INTEGER DEFAULT 0,
 	deleted				INTEGER DEFAULT 0,
 	display_name			TEXT,
@@ -103,6 +102,11 @@ CREATE INDEX contacts_idx2 ON contacts(person_id);
 CREATE INDEX contacts_idx3 ON contacts(display_name_language, sortkey);
 CREATE INDEX contacts_idx4 ON contacts(display_name_language, reverse_sortkey);
 
+-- There are three case of deleting contact logically
+--   Case 1 : delete contact
+--   Case 2 : delete addressbook
+--   Case 3 : delete person
+-- In all Case, the deleted contacts(deleted=1) are really deleted in the background.
 CREATE TRIGGER trg_contacts_del AFTER DELETE ON contacts
 	BEGIN
 		DELETE FROM data WHERE contact_id = old.contact_id AND is_my_profile = 0;
@@ -115,11 +119,19 @@ CREATE TRIGGER trg_contacts_del AFTER DELETE ON contacts
 		UPDATE persons SET dirty=1 WHERE person_id = old.person_id AND link_count > 1;
 	END;
 
+-- It is triggered during really deleting contact in the background (deleted = 1).
+-- Deleted version(changed_ver) is already set when updating deleted field as 1.
 CREATE TRIGGER trg_contacts_del2 AFTER DELETE ON contacts
-	WHEN old.addressbook_id IN (SELECT addressbook_id from addressbooks WHERE addressbook_id = old.addressbook_id)
+	WHEN old.addressbook_id = (SELECT addressbook_id from addressbooks WHERE addressbook_id = old.addressbook_id) AND old.deleted = 1
 	BEGIN
-		INSERT INTO contact_deleteds VALUES(old.contact_id, old.addressbook_id, old.created_ver, (SELECT ver FROM cts_version) + 1);
+		INSERT INTO contact_deleteds VALUES(old.contact_id, old.addressbook_id, old.created_ver, old.changed_ver);
 	END;
+
+-- CREATE TRIGGER trg_contacts_del3 AFTER DELETE ON contacts
+--	WHEN old.addressbook_id = (SELECT addressbook_id from addressbooks WHERE addressbook_id = old.addressbook_id) AND old.deleted = 0
+--	BEGIN
+--		INSERT INTO contact_deleteds VALUES(old.contact_id, old.addressbook_id, old.created_ver, (SELECT ver FROM cts_version) + 1);
+--	END;
 
 CREATE TRIGGER trg_contacts_update AFTER UPDATE ON contacts
 	WHEN new.deleted = 1
@@ -408,6 +420,7 @@ CREATE TABLE my_profiles
 	my_profile_id			INTEGER PRIMARY KEY AUTOINCREMENT,
 	addressbook_id			INTEGER NOT NULL DEFAULT 0,
 	display_name			TEXT,
+	reverse_display_name		TEXT,
 	created_ver			INTEGER NOT NULL,
 	changed_ver			INTEGER NOT NULL,
 	changed_time			INTEGER NOT NULL,

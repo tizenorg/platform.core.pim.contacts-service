@@ -326,7 +326,6 @@ int ctsvc_normalize_number(const char *src, char *dest, int dest_size, int min_m
 		CTS_ERR("__ctsvc_normalize_number(src) failed(%d)", src, ret);
 		return ret;
 	}
-
 	return CONTACTS_ERROR_NONE;
 }
 
@@ -392,6 +391,7 @@ static inline int __ctsvc_collation_str(const char *src, char **dest)
 	u_strFromUTF8(tmp_result, size + 1, NULL, src, -1, &status);
 	if (U_FAILURE(status)){
 		CTS_ERR("u_strFromUTF8 Failed(%s)", u_errorName(status));
+		free(tmp_result);
 		ucol_close(collator);
 		return CONTACTS_ERROR_SYSTEM;
 	}
@@ -401,7 +401,7 @@ static inline int __ctsvc_collation_str(const char *src, char **dest)
 	size = ucol_getSortKey(collator, tmp_result, -1, (uint8_t *)*dest, size + 1);
 
 	ucol_close(collator);
-
+	free(tmp_result);
 	return CONTACTS_ERROR_NONE;
 }
 

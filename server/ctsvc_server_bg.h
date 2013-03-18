@@ -21,7 +21,7 @@
 #define __CTSVC_SERVER_BG_H__
 
 void ctsvc_server_bg_delete_start();
-int ctsvc_server_bg_add_cb();
-int ctsvc_server_bg_remove_cb();
+void ctsvc_server_bg_add_cb();
+void ctsvc_server_bg_remove_cb();
 
 #endif /* __CTSVC_SERVER_BG_H__ */

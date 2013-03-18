@@ -31,7 +31,6 @@
 #include "ctsvc_record.h"
 #include "ctsvc_utils.h"
 #include "ctsvc_normalize.h"
-#include "ctsvc_restriction.h"
 #include "ctsvc_db_init.h"
 #include "ctsvc_view.h"
 #include "ctsvc_inotify.h"
@@ -1647,31 +1646,39 @@ static int __ctsvc_db_get_contact_changes(const char* view_uri, int addressbook_
 
 	if (0 <= addressbook_id) {
 		snprintf(query, sizeof(query),
-			"SELECT %d, contact_id, changed_ver, created_ver, addressbook_id, image_changed_ver FROM %s "
-			"WHERE changed_ver > %d AND addressbook_id = %d AND deleted = 0 "
+			"SELECT %d, contact_id, changed_ver, created_ver, addressbook_id, image_changed_ver "
+					"FROM "CTS_TABLE_CONTACTS" "
+					"WHERE changed_ver > %d AND addressbook_id = %d AND deleted = 0 "
 			"UNION "
-			"SELECT %d, contact_id, deleted_ver, -1, addressbook_id, 0 FROM %s "
-			"WHERE deleted_ver > %d AND created_ver <= %d AND addressbook_id = %d "
+			"SELECT %d, contact_id, deleted_ver, -1, addressbook_id, 0 "
+					"FROM "CTS_TABLE_DELETEDS" "
+					"WHERE deleted_ver > %d AND created_ver <= %d AND addressbook_id = %d "
 			"UNION "
-			"SELECT %d, contact_id, changed_ver, -1, addressbook_id, 0 FROM %s "
-			"WHERE changed_ver > %d AND addressbook_id = %d AND deleted = 1",
-			CONTACTS_CHANGE_UPDATED, CTS_TABLE_CONTACTS, version, addressbook_id,
-			CONTACTS_CHANGE_DELETED, CTS_TABLE_DELETEDS, version, version, addressbook_id,
-			CONTACTS_CHANGE_DELETED, CTS_TABLE_CONTACTS, version, addressbook_id);
+			"SELECT %d, contact_id, changed_ver, -1, addressbook_id, 0 "
+					"FROM "CTS_TABLE_CONTACTS" "
+					"WHERE changed_ver > %d AND created_ver <= %d AND addressbook_id = %d AND deleted = 1 "
+						"AND addressbook_id = (SELECT addressbook_id FROM "CTS_TABLE_ADDRESSBOOKS" WHERE addressbook_id = %d)",
+			CONTACTS_CHANGE_UPDATED, version, addressbook_id,
+			CONTACTS_CHANGE_DELETED, version, version, addressbook_id,
+			CONTACTS_CHANGE_DELETED, version, version, addressbook_id, addressbook_id);
 	}
 	else {
 		snprintf(query, sizeof(query),
-			"SELECT %d, contact_id, changed_ver, created_ver, addressbook_id, image_changed_ver FROM %s "
-			"WHERE changed_ver > %d AND deleted = 0 "
+			"SELECT %d, contact_id, changed_ver, created_ver, addressbook_id, image_changed_ver "
+					"FROM "CTS_TABLE_CONTACTS" "
+					"WHERE changed_ver > %d AND deleted = 0 "
 			"UNION "
-			"SELECT %d, contact_id, deleted_ver, -1, addressbook_id, 0 FROM %s "
-			"WHERE deleted_ver > %d AND created_ver <= %d "
+			"SELECT %d, contact_id, deleted_ver, -1, addressbook_id, 0 "
+					"FROM "CTS_TABLE_DELETEDS" "
+					"WHERE deleted_ver > %d AND created_ver <= %d "
 			"UNION "
-			"SELECT %d, contact_id, changed_ver, -1, addressbook_id, 0 FROM %s "
-			"WHERE changed_ver > %d AND deleted = 1",
-			CONTACTS_CHANGE_UPDATED, CTS_TABLE_CONTACTS, version,
-			CONTACTS_CHANGE_DELETED, CTS_TABLE_DELETEDS, version, version,
-			CONTACTS_CHANGE_DELETED, CTS_TABLE_CONTACTS, version);
+			"SELECT %d, contact_id, changed_ver, -1, "CTS_TABLE_CONTACTS".addressbook_id, 0 "
+					"FROM "CTS_TABLE_CONTACTS",  "CTS_TABLE_ADDRESSBOOKS" "
+					"WHERE changed_ver > %d AND created_ver <= %d AND deleted = 1 "
+						"AND "CTS_TABLE_CONTACTS".addressbook_id = "CTS_TABLE_ADDRESSBOOKS".addressbook_id",
+			CONTACTS_CHANGE_UPDATED, version,
+			CONTACTS_CHANGE_DELETED, version, version,
+			CONTACTS_CHANGE_DELETED, version ,version);
 	}
 
 	stmt = cts_query_prepare(query);

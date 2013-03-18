@@ -262,7 +262,6 @@ typedef struct {
 	bool image_thumbnail_changed;
 	bool ringtone_changed;
 	bool vibration_changed;
-	bool is_restricted;
 	bool is_favorite;
 	int changed_time;
 	bool has_phonenumber;
@@ -502,7 +501,6 @@ typedef struct {
 	bool image_thumbnail_changed;
 	bool ringtone_changed;
 	bool vibration_changed;
-	bool is_restricted;
 	bool is_favorite;
 	int id;
 	int person_id;
@@ -545,10 +543,12 @@ typedef struct {
 
 typedef struct {
 	ctsvc_record_s base;
+	bool display_name_changed;
 	int id;
 	int addressbook_id;
 	int changed_time;
 	char *display_name;
+	char *reverse_display_name;
 	char *uid;
 	char *image_thumbnail_path;
 	ctsvc_list_s* name;

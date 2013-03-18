@@ -1,6 +1,6 @@
 Name:       contacts-service
 Summary:    Contacts Service
-Version: 0.9.45.3
+Version: 0.9.52.1
 Release:    1
 Group:      TO_BE/FILLED_IN
 License:    Apache-2.0
@@ -83,9 +83,9 @@ chmod 770 -R /opt/usr/data/contacts-svc/img/
 chmod 660 /opt/usr/data/contacts-svc/.CONTACTS_SVC_*
 vconftool set -t int file/private/contacts-service/default_lang 100
 
-chown :6016 /opt/usr/data/contacts-svc/.CONTACTS_SVC_RESTRICTION_CHECK
 vconftool set -t int db/contacts-svc/name_sorting_order 0 -g 6005
 vconftool set -t int db/contacts-svc/name_display_order 0 -g 6005
+vconftool set -t int db/contacts-svc/phonenumber_min_match_digit 8 -g 6005
 
 
 %postun -p /sbin/ldconfig

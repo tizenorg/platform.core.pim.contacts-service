@@ -81,7 +81,7 @@ int ctsvc_db_image_insert(contacts_record_h record, int contact_id, bool is_my_p
 				"Invalid parameter : id(%d), This record is already inserted", image->id);
 
 	image_id = cts_db_get_next_id(CTS_TABLE_DATA);
-	ret = ctsvc_contact_add_image_file(CTSVC_IMG_NORMAL, contact_id, image_id, image->path, image_path, sizeof(image_path));
+	ret = ctsvc_contact_add_image_file(contact_id, image_id, image->path, image_path, sizeof(image_path));
 
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("ctsvc_contact_add_image_file(NORMAL) Failed(%d)", ret);
@@ -139,7 +139,7 @@ int ctsvc_db_image_update(contacts_record_h record, int contact_id, bool is_my_p
 	if (image->is_changed) {
 		char image_path[CTS_SQL_MAX_LEN] = {0};
 
-		ret = ctsvc_contact_update_image_file(CTSVC_IMG_NORMAL, contact_id, image->id, image->path, image_path, sizeof(image_path));
+		ret = ctsvc_contact_update_image_file(contact_id, image->id, image->path, image_path, sizeof(image_path));
 		RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_contact_update_image_file() Failed(%d)", ret);
 
 		if (*image_path) {

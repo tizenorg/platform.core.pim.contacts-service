@@ -492,7 +492,8 @@ int ctsvc_person_aggregate(int person_id)
 	int link_count;
 	int id = 0;
 	int account_ids[DISPLAY_ACCOUNT_MAX] = {0};
-	char addressbook_ids[100] = {0};
+	char *addressbook_ids = NULL;
+	int addressbooks_len = 100;
 	int name_contact_id = 0;
 	int person_name_contact_id = 0;
 	int display_name_source_type = CONTACTS_DISPLAY_NAME_SOURCE_TYPE_INVALID;
@@ -599,6 +600,8 @@ int ctsvc_person_aggregate(int person_id)
 		char *contact_image_thumbnail_path = NULL;
 		char *contact_vibration = NULL;
 		bool is_favorite = false;
+		char addr[10] = {0};
+		int addr_len = 0;
 
 		contact_id = ctsvc_stmt_get_int(stmt, i++);
 		addressbook_id = ctsvc_stmt_get_int(stmt, i++);
@@ -635,9 +638,17 @@ int ctsvc_person_aggregate(int person_id)
 				name_contact_id = person_name_contact_id;
 		}
 
-		len += snprintf(addressbook_ids + len, sizeof(addressbook_ids)-len, "%d ", addressbook_id );
+		addr_len = snprintf(addr, sizeof(addr), "%d ", addressbook_id);
+		if (NULL == addressbook_ids)
+			addressbook_ids = calloc(addressbooks_len, sizeof(char));
+		else if (addressbooks_len <= strlen(addressbook_ids)+addr_len) {
+			addressbooks_len *= 2;
+			addressbook_ids = realloc(addressbook_ids, addressbooks_len);
+		}
 
-		if (contact_image_thumbnail_path && *contact_image_thumbnail_path) {
+		len += snprintf(addressbook_ids + len, addressbooks_len -len, "%d ", addressbook_id );
+
+		if (!image_thumbnail_path && contact_image_thumbnail_path && *contact_image_thumbnail_path) {
 			temp = __cts_get_image_filename(contact_image_thumbnail_path);
 			image_thumbnail_path = SAFE_STRDUP(temp);
 			// update data table : is_primary_default
@@ -673,27 +684,29 @@ int ctsvc_person_aggregate(int person_id)
 	stmt = cts_query_prepare(query);
 	if (NULL == stmt) {
 		ERR("DB error : cts_query_prepare() Failed");
+		free(addressbook_ids);
 		free(image_thumbnail_path);
 		free(ringtone_path);
 		free(vibration);
 		return CONTACTS_ERROR_DB;
 	}
 
-	cts_stmt_bind_text(stmt, 1, addressbook_ids);
-
-	if(ringtone_path)
+	if (addressbook_ids)
+		cts_stmt_bind_text(stmt, 1, addressbook_ids);
+	if (ringtone_path)
 		cts_stmt_bind_text(stmt, 2, ringtone_path);
-	if(vibration)
+	if (vibration)
 		cts_stmt_bind_text(stmt, 3, vibration);
-	if(status)
+	if (status)
 		cts_stmt_bind_text(stmt, 4, status);
-	if(image_thumbnail_path)
+	if (image_thumbnail_path)
 		cts_stmt_bind_text(stmt, 5, image_thumbnail_path);
 
 	ret = cts_stmt_step(stmt);
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("cts_stmt_step() Failed(%d)", ret);
 		cts_stmt_finalize(stmt);
+		free(addressbook_ids);
 		free(image_thumbnail_path);
 		free(ringtone_path);
 		free(vibration);
@@ -702,6 +715,7 @@ int ctsvc_person_aggregate(int person_id)
 
 	cts_stmt_finalize(stmt);
 
+	free(addressbook_ids);
 	free(image_thumbnail_path);
 	free(ringtone_path);
 	free(vibration);

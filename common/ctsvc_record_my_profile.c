@@ -126,6 +126,7 @@ static int __ctsvc_my_profile_destroy(contacts_record_h record, bool delete_chil
 	free(my_profile->base.properties_flags);
 
 	free(my_profile->display_name);
+	free(my_profile->reverse_display_name);
 	free(my_profile->uid);
 	free(my_profile->image_thumbnail_path);
 
@@ -541,6 +542,7 @@ static int __ctsvc_my_profile_clone(contacts_record_h record, contacts_record_h 
 	out_data->changed_time = src_data->changed_time;
 
 	out_data->display_name = SAFE_STRDUP(src_data->display_name);
+	out_data->reverse_display_name = SAFE_STRDUP(src_data->reverse_display_name);
 	out_data->uid = SAFE_STRDUP(src_data->uid);
 	out_data->image_thumbnail_path = SAFE_STRDUP(src_data->image_thumbnail_path);
 

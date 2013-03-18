@@ -23,19 +23,15 @@
 #include "ctsvc_struct.h"
 #include "ctsvc_sqlite.h"
 
-typedef enum
-{
-	CTSVC_IMG_NORMAL, /**< . */
-} ctsvc_img_e;
-
 int ctsvc_db_contact_update_changed_time(int contact_id);
 
-int ctsvc_contact_add_image_file(ctsvc_img_e image_type, int parent_id, int img_id,
+int ctsvc_contact_add_image_file(int parent_id, int img_id,
 		char *src_img, char *dest_name, int dest_size);
-int ctsvc_contact_update_image_file(int image_type, int parent_id, int img_id,
+int ctsvc_contact_update_image_file(int parent_id, int img_id,
 		char *src_img, char *dest_name, int dest_size);
 void ctsvc_make_contact_display_name(ctsvc_contact_s *contact);
 
+int ctsvc_db_contact_delete(int contact_id);
 int ctsvc_contact_delete_image_file_with_path(const unsigned char* image_path);
 
 int ctsvc_get_data_info_name(cts_stmt stmt, contacts_list_h name_list);

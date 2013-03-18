@@ -165,7 +165,7 @@ int ctsvc_record_set_property_flag(ctsvc_record_s* _record, int property_id, con
 	if (NULL == _record->properties_flags) {
 		unsigned int count = 0;
 		ctsvc_view_get_all_property_infos(_record->view_uri, &count);
-		RETVM_IF(count < 0, CONTACTS_ERROR_INVALID_PARAMETER, "ctsvc_view_get_all_property_infos() Failed");
+		RETVM_IF(count <= 0, CONTACTS_ERROR_INVALID_PARAMETER, "ctsvc_view_get_all_property_infos() Failed");
 
 		_record->properties_flags = calloc(count, sizeof(char));
 		_record->property_max_count = count;
@@ -589,8 +589,6 @@ API int contacts_record_clone_child_record_list( contacts_record_h record,
 int ctsvc_record_set_projection_flags( contacts_record_h record, const unsigned int *projection, const unsigned int projection_count, const unsigned int property_max_count)
 {
 	int i;
-	unsigned int count;
-	const property_info_s *property_info;
 
 	RETV_IF(record == NULL, CONTACTS_ERROR_INVALID_PARAMETER);
 
@@ -604,7 +602,6 @@ int ctsvc_record_set_projection_flags( contacts_record_h record, const unsigned 
 
 	_record->property_max_count = property_max_count;
 
-	property_info = ctsvc_view_get_all_property_infos(_record->view_uri, &count);
 	if (CTSVC_RECORD_RESULT == _record->r_type)
 		_record->property_flag |= CTSVC_PROPERTY_FLAG_PROJECTION;
 	else {

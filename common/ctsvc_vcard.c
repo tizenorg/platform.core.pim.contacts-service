@@ -1873,7 +1873,6 @@ static char* __ctsvc_vcard_get_val(int ver, char *src, char **dest)
 			return NULL;
 		case '\r':
 		case ' ':
-		case ':':
 			src++;
 			break;
 		default:
@@ -2082,13 +2081,17 @@ static inline int __ctsvc_vcard_get_nickname(ctsvc_list_s *nickname_list, char *
 {
 	int ret;
 	char *temp;
+	char *start;
 	const char *separator = ",";
 	contacts_record_h nickname;
+
+	start = __ctsvc_get_content_value(val);
+	RETV_IF(NULL == start, CONTACTS_ERROR_NO_DATA);
 
 	ret = contacts_record_create(_contacts_nickname._uri, &nickname);
 	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create is failed(%d)", ret);
 
-	temp = strtok(val, separator);
+	temp = strtok(start, separator);
 	while (temp) {
 		if ('\0' == *temp) continue;
 

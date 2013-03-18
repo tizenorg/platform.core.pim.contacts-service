@@ -59,6 +59,10 @@
 #define CTSVC_JAPANESE_HALFWIDTH_AND_FULLWIDTH_FORMS_START 0xFF00
 #define CTSVC_JAPANESE_HALFWIDTH_AND_FULLWIDTH_FORMS_END 0xFFEF
 
+/* japanese - halfwidth and fullwidth forms */
+#define CTSVC_ASCII_HALFWIDTH_AND_FULLWIDTH_FORMS_START 0xFF01
+#define CTSVC_ASCII_HALFWIDTH_AND_FULLWIDTH_FORMS_END 0xFF5E
+
 /* japanese - hiragana */
 #define CTSVC_JAPANESE_HIRAGANA_START 0x3040
 #define CTSVC_JAPANESE_HIRAGANA_END 0x309F
@@ -226,19 +230,21 @@ static inline int __ctsvc_convert_japanese_to_hiragana(UChar *src, UChar *dest, 
 		int unicode_value1 = 0;
 		int unicode_value2 = 0;
 
-		unicode_value1 = 0x30;
 		unicode_value2 = (0xFF & (src[i]));
 
 		if (CTSVC_COMPARE_BETWEEN(CTSVC_JAPANESE_KATAKANA_START, src[i], CTSVC_JAPANESE_KATAKANA_END)) {
+			unicode_value1 = 0x30;
 			if ((unicode_value2 >= 0xa1 && unicode_value2 <= 0xef )
 					|| (unicode_value2 == 0xF2 || unicode_value2 == 0xF3) ) {
 				unicode_value2 -= 0x60;
 				dest[j] = unicode_value1 << 8 | unicode_value2;
 			}
-			else
+			else {
 				dest[j] = src[i];
+			}
 		}
 		else if (CTSVC_COMPARE_BETWEEN(CTSVC_JAPANESE_HALFWIDTH_AND_FULLWIDTH_FORMS_START, src[i], CTSVC_JAPANESE_HALFWIDTH_AND_FULLWIDTH_FORMS_END)) {
+			unicode_value1 = 0x30;
 			if (i+1 < len && (0xFF & (src[i+1])) == 0x9E
 					&& unicode_value2 >= 0x76 && unicode_value2 <= 0x89) {
 				unicode_value2 = japanese_halfwidth_katakana_sonant_to_hiragana[unicode_value2 - 0x76];
@@ -255,11 +261,17 @@ static inline int __ctsvc_convert_japanese_to_hiragana(UChar *src, UChar *dest, 
 				unicode_value2 = japanese_halfwidth_katakana_to_hiragana[unicode_value2 - 0x66];
 				dest[j] = unicode_value1 << 8 | unicode_value2;
 			}
-			else
+			else {
 				dest[j] = src[i];
-
-		} else
+			}
+		}
+		else if (CTSVC_COMPARE_BETWEEN(CTSVC_ASCII_HALFWIDTH_AND_FULLWIDTH_FORMS_START, src[i], CTSVC_ASCII_HALFWIDTH_AND_FULLWIDTH_FORMS_END)) {
+			unicode_value1 = 0x00;
+			unicode_value2 = unicode_value2 - 0x20;
+			dest[j] = unicode_value1 << 8 | unicode_value2;
+		} else {
 			dest[j] = src[i];
+		}
 		j++;
 	}
 
@@ -290,6 +302,7 @@ int ctsvc_convert_japanese_to_hiragana(const char *src, char **dest)
 		ret = CONTACTS_ERROR_SYSTEM;
 		goto DATA_FREE;
 	}
+
 	result = calloc(1, sizeof(UChar) * (size + 1));
 
 	__ctsvc_convert_japanese_to_hiragana(tmp_result, result, size + 1 );
@@ -313,7 +326,6 @@ int ctsvc_convert_japanese_to_hiragana(const char *src, char **dest)
 	}
 
 DATA_FREE:
-
 	free(tmp_result);
 	free(result);
 
@@ -335,7 +347,8 @@ int ctsvc_check_language(UChar *word)
 	if (CTSVC_COMPARE_BETWEEN('0', word[0], '9')) {
 		type = CTSVC_LANG_NUMBER;
 	}
-	else if (CTSVC_COMPARE_BETWEEN(0x41, word[0], 0x7A)) {  /* english */
+	else if (CTSVC_COMPARE_BETWEEN(0x41, word[0], 0x7A)  /* english */
+		|| CTSVC_COMPARE_BETWEEN(0x0300, word[0], 0x036f)) { /* diacritical marks */
 		type = CTSVC_LANG_ENGLISH;
 	}
 	else if (is_hangul(word[0])){

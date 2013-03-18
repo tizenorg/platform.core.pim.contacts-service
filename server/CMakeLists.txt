@@ -134,7 +134,6 @@ SET(SRCS
 
 	${CMAKE_SOURCE_DIR}/native/ctsvc_person.c
 	${CMAKE_SOURCE_DIR}/native/ctsvc_phonelog.c
-	${CMAKE_SOURCE_DIR}/native/ctsvc_restriction.c
 	${CMAKE_SOURCE_DIR}/native/ctsvc_service.c
 	${CMAKE_SOURCE_DIR}/native/ctsvc_sqlite.c
 	${CMAKE_SOURCE_DIR}/native/ctsvc_utils.c

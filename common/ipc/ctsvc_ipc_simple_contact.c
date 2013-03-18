@@ -20,7 +20,6 @@ static int __ctsvc_ipc_unmarshal_simple_contact(pims_ipc_data_h ipc_data, const 
 
 	ctsvc_simple_contact_s* pcontact = (ctsvc_simple_contact_s*) record;
 	do {
-		if (ctsvc_ipc_unmarshal_bool(ipc_data, &pcontact->is_restricted) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_bool(ipc_data, &pcontact->is_favorite) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_int(ipc_data, &pcontact->changed_time) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_bool(ipc_data, &pcontact->has_phonenumber) != CONTACTS_ERROR_NONE) break;
@@ -48,7 +47,6 @@ static int __ctsvc_ipc_marshal_simple_contact(const contacts_record_h record, pi
 	RETV_IF(ipc_data==NULL,CONTACTS_ERROR_NO_DATA);
 	RETV_IF(pcontact==NULL,CONTACTS_ERROR_NO_DATA);
 	do {
-		if (ctsvc_ipc_marshal_bool((pcontact->is_restricted),ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_bool((pcontact->is_favorite),ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_int((pcontact->changed_time),ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_bool((pcontact->has_phonenumber),ipc_data) != CONTACTS_ERROR_NONE) break;

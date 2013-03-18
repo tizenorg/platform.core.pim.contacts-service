@@ -54,14 +54,14 @@
 
 //#include "ctsvc_db_plugin_grouprelation_helper.h"
 
+#include "ctsvc_person.h"
 #include "ctsvc_group.h"
 
-#define CTSVC_MY_IMAGE_LOCATION "/opt/usr/data/contacts-svc/img/my"
-
-int ctsvc_contact_add_image_file(ctsvc_img_e image_type, int parent_id, int img_id,
+int ctsvc_contact_add_image_file(int parent_id, int img_id,
 		char *src_img, char *dest_name, int dest_size)
 {
 	int ret;
+	int version;
 	char *ext;
 	char dest[CTSVC_IMG_FULL_PATH_SIZE_MAX] = {0};
 
@@ -71,28 +71,17 @@ int ctsvc_contact_add_image_file(ctsvc_img_e image_type, int parent_id, int img_
 	if (NULL == ext || strchr(ext, '/'))
 		ext = "";
 
-	snprintf(dest, sizeof(dest), "%s/%d_%d-%d%s", CTS_IMG_FULL_LOCATION, parent_id, img_id, image_type, ext);
+	version = ctsvc_get_next_ver();
+	snprintf(dest, sizeof(dest), "%s/%d_%d-%d%s", CTS_IMG_FULL_LOCATION, parent_id, img_id, version, ext);
 
 	ret = ctsvc_copy_image(src_img, dest);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "cts_copy_file() Failed(%d)", ret);
 
-	snprintf(dest_name, dest_size, "%d_%d-%d%s", parent_id, img_id, image_type, ext);
+	snprintf(dest_name, dest_size, "%d_%d-%d%s", parent_id, img_id, version, ext);
 	return CONTACTS_ERROR_NONE;
 }
 
-static inline const char* __ctsvc_get_image_column_name(ctsvc_img_e image_type)
-{
-	switch(image_type)
-	{
-	case CTSVC_IMG_NORMAL:
-		return "image_thumbnail_path";
-	default:
-		CTS_ERR("Invalid parameter : The image_type(%d) is not supported", image_type);
-		return NULL;
-	}
-}
-
-static int __ctsvc_contact_delete_image_file(ctsvc_img_e image_type, int image_id)
+static int __ctsvc_contact_delete_image_file(int image_id)
 {
 	int ret;
 	cts_stmt stmt;
@@ -125,7 +114,7 @@ static int __ctsvc_contact_delete_image_file(ctsvc_img_e image_type, int image_i
 	return CONTACTS_ERROR_NONE;
 }
 
-int ctsvc_contact_update_image_file(int image_type, int parent_id, int img_id,
+int ctsvc_contact_update_image_file(int parent_id, int img_id,
 		char *src_img, char *dest_name, int dest_size)
 {
 	int ret;
@@ -134,12 +123,12 @@ int ctsvc_contact_update_image_file(int image_type, int parent_id, int img_id,
 		return CONTACTS_ERROR_NONE;
 	}
 
-	ret = __ctsvc_contact_delete_image_file(image_type, img_id);
+	ret = __ctsvc_contact_delete_image_file(img_id);
 	WARN_IF(CONTACTS_ERROR_NONE != ret && CONTACTS_ERROR_NO_DATA != ret,
 			"__ctsvc_contact_delete_image_file() Failed(%d)", ret);
 
 	if (src_img) {
-		ret = ctsvc_contact_add_image_file(image_type, parent_id, img_id, src_img, dest_name, dest_size);
+		ret = ctsvc_contact_add_image_file(parent_id, img_id, src_img, dest_name, dest_size);
 		RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_contact_add_image_file() Failed(%d)", ret);
 	}
 
@@ -177,6 +166,94 @@ int ctsvc_contact_delete_image_file_with_path(const unsigned char* image_path)
 	return CONTACTS_ERROR_NONE;
 }
 
+int ctsvc_db_contact_delete(int contact_id)
+{
+	CTS_FN_CALL;
+	int ret, rel_changed;
+	int addressbook_id;
+	int person_id;
+	int link_count = 0;
+	char query[CTS_SQL_MAX_LEN] = {0};
+	cts_stmt stmt = NULL;
+	int version;
+
+	ret = ctsvc_begin_trans();
+	RETVM_IF(ret, ret, "DB error : ctsvc_begin_trans() Failed(%d)", ret);
+
+	snprintf(query, sizeof(query),
+		"SELECT addressbook_id, person_id "
+		"FROM "CTS_TABLE_CONTACTS" WHERE contact_id = %d AND deleted = 0", contact_id);
+
+	stmt = cts_query_prepare(query);
+	if (NULL == stmt) {
+		CTS_ERR("DB error : cts_query_prepare() Failed");
+		ctsvc_end_trans(false);
+		return CONTACTS_ERROR_DB;
+	}
+
+	ret = cts_stmt_step(stmt);
+	if (1 != ret) {
+		CTS_ERR("DB error : cts_stmt_step() Failed(%d)", ret);
+		cts_stmt_finalize(stmt);
+		ctsvc_end_trans(false);
+		if (CONTACTS_ERROR_NONE == ret)
+			return CONTACTS_ERROR_NO_DATA;
+		else
+			return ret;
+	}
+
+	addressbook_id = ctsvc_stmt_get_int(stmt, 0);
+	person_id = ctsvc_stmt_get_int(stmt, 1);
+	CTS_DBG("addressbook_id : %d, person_id : %d", addressbook_id, person_id);
+	cts_stmt_finalize(stmt);
+
+	version = ctsvc_get_next_ver();
+	snprintf(query, sizeof(query),
+			"UPDATE %s SET member_changed_ver=%d "
+				"WHERE group_id IN (SELECT group_id FROM %s WHERE contact_id = %d AND deleted = 0) ",
+				CTS_TABLE_GROUPS, version, CTS_TABLE_GROUP_RELATIONS, contact_id);
+	ret = ctsvc_query_exec(query);
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("ctsvc_query_exec() Failed(%d)", ret);
+		ctsvc_end_trans(false);
+		return ret;
+	}
+
+	rel_changed = cts_db_change();
+	snprintf(query, sizeof(query),
+			"UPDATE %s SET deleted = 1, person_id = 0, changed_ver=%d WHERE contact_id = %d",
+			CTS_TABLE_CONTACTS, version, contact_id);
+	ret = ctsvc_query_exec(query);
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("ctsvc_query_exec() Failed(%d)", ret);
+		ctsvc_end_trans(false);
+		return ret;
+	}
+
+	snprintf(query, sizeof(query), "SELECT link_count FROM "CTS_TABLE_PERSONS" WHERE person_id = %d", person_id);
+	ret = ctsvc_query_get_first_int_result(query, &link_count);
+	WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_query_get_first_int_result() Failed(%d)", ret);
+	// set dirty bit to person by trigger : person will be aggregated in ctsvc_person_aggregate
+
+	if (1 < link_count)
+		ctsvc_person_aggregate(person_id);
+	else
+		ctsvc_set_person_noti();
+
+	ctsvc_set_contact_noti();
+	if (rel_changed > 0)
+		ctsvc_set_group_rel_noti();
+
+	ret = ctsvc_end_trans(true);
+	if (ret < CONTACTS_ERROR_NONE)
+	{
+		CTS_ERR("DB error : ctsvc_end_trans() Failed(%d)", ret);
+		return ret;
+	}
+	else
+		return CONTACTS_ERROR_NONE;
+}
+
 void ctsvc_make_contact_display_name(ctsvc_contact_s *contact)
 {
 	char *display = NULL;
@@ -186,6 +263,12 @@ void ctsvc_make_contact_display_name(ctsvc_contact_s *contact)
 	int ret, len, display_len, temp_len = 0;
 
 	ctsvc_name_s *name = NULL;
+
+	free(contact->display_name);
+	contact->display_name = NULL;
+
+	free(contact->reverse_display_name);
+	contact->reverse_display_name = NULL;
 
 	contact->display_name_language = CTSVC_SORT_OTHERS;
 
@@ -1212,7 +1295,7 @@ int ctsvc_contact_update_data_number(contacts_list_h number_list,
 			}
 			else
 				ret = ctsvc_db_number_insert(record, contact_id, is_my_profile, NULL);
-			if (CONTACTS_ERROR_DB == ret){
+			if (CONTACTS_ERROR_DB == ret) {
 				CTS_ERR("DB error : return (%d)", ret);
 				break;
 			}

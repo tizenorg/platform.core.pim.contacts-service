@@ -29,6 +29,7 @@ static int __ctsvc_ipc_unmarshal_my_profile(pims_ipc_data_h ipc_data, const char
 		if (ctsvc_ipc_unmarshal_int(ipc_data, &pmy_profile->changed_time) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_int(ipc_data, &pmy_profile->addressbook_id) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_string(ipc_data, &pmy_profile->display_name) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_unmarshal_string(ipc_data, &pmy_profile->reverse_display_name) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_string(ipc_data, &pmy_profile->uid) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_string(ipc_data, &pmy_profile->image_thumbnail_path) != CONTACTS_ERROR_NONE) break;
 
@@ -65,6 +66,7 @@ static int __ctsvc_ipc_marshal_my_profile(const contacts_record_h record, pims_i
 		if (ctsvc_ipc_marshal_int((pcontact->changed_time),ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_int((pcontact->addressbook_id),ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_string((pcontact->display_name),ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_string((pcontact->reverse_display_name),ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_string((pcontact->uid),ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_string((pcontact->image_thumbnail_path),ipc_data) != CONTACTS_ERROR_NONE) break;
 

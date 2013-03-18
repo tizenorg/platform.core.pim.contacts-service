@@ -208,11 +208,13 @@ cts_stmt cts_query_prepare(char *query) {
 			CTS_ERR("DB error : sqlite3_prepare_v2() Failed(%d, %s)", ret, sqlite3_errmsg(ctsvc_db));
 
 		if (ret == SQLITE_BUSY || ret == SQLITE_LOCKED) {
-			usleep(50*1000); // 50 ms
 			gettimeofday(&now, NULL);
 			timersub(&now, &from, &diff);
 			retry = (diff.tv_sec < 1)? true:false; // retry it during 1 second
-		}
+			if (retry)
+				usleep(50*1000); // 50 ms
+		} else
+			retry = false;
 	}while(retry);
 
 	return stmt;
@@ -250,11 +252,14 @@ int cts_stmt_step(cts_stmt stmt) {
 			CTS_ERR("DB error : sqlite3_step() Failed(%d, %s)", ret, sqlite3_errmsg(ctsvc_db));
 
 		if (ret == SQLITE_BUSY || ret == SQLITE_LOCKED) {
-			usleep(50*1000); // 50 ms
 			gettimeofday(&now, NULL);
 			timersub(&now, &from, &diff);
 			retry = (diff.tv_sec < 1)? true:false; // retry it during 1 second
+			if (retry)
+				usleep(50*1000); // 50 ms
 		}
+		else
+			retry = false;
 	}while(retry);
 
 	switch (ret) {

@@ -3799,10 +3799,10 @@ static int __ctsvc_contact_clone(contacts_record_h record, contacts_record_h *ou
 	out_data->addressbook_id = src_data->addressbook_id;
 	out_data->changed_time = src_data->changed_time;
 	out_data->display_source_type = src_data->display_source_type;
+	out_data->display_name_language = src_data->display_name_language;
 	out_data->has_phonenumber = src_data->has_phonenumber;
 	out_data->has_email = src_data->has_email;
 	out_data->is_favorite = src_data->is_favorite;
-	out_data->is_restricted = src_data->is_restricted;
 
 	out_data->display_name = SAFE_STRDUP(src_data->display_name);
 	out_data->reverse_display_name = SAFE_STRDUP(src_data->reverse_display_name);
@@ -4294,6 +4294,7 @@ static int __ctsvc_simple_contact_clone(contacts_record_h record, contacts_recor
 	out_data->vibration_changed = src_data->vibration_changed;
 	out_data->image_thumbnail_changed = src_data->image_thumbnail_changed;
 	out_data->ringtone_changed = src_data->ringtone_changed;
+	out_data->display_name_changed = src_data->display_name_changed;
 
 	out_data->contact_id = src_data->contact_id;
 	out_data->person_id = src_data->person_id;
@@ -4303,7 +4304,6 @@ static int __ctsvc_simple_contact_clone(contacts_record_h record, contacts_recor
 	out_data->has_phonenumber = src_data->has_phonenumber;
 	out_data->has_email = src_data->has_email;
 	out_data->is_favorite = src_data->is_favorite;
-	//	out_data->is_restricted = src_data->is_restricted;
 
 	out_data->display_name = SAFE_STRDUP(src_data->display_name);
 	out_data->uid = SAFE_STRDUP(src_data->uid);

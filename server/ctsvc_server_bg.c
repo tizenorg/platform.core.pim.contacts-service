@@ -366,18 +366,31 @@ void ctsvc_server_bg_delete_start()
 	g_cond_signal(&__ctsvc_server_bg_delete_cond);
 }
 
-void __ctsvc_server_addressbook_deleted_cb(const char *view_uri, void *data)
+static void __ctsvc_server_addressbook_deleted_cb(const char *view_uri, void *data)
 {
 	ctsvc_server_bg_delete_start();
 }
 
-int ctsvc_server_bg_add_cb()
+static void __ctsvc_server_contact_deleted_cb(const char *view_uri, void *data)
 {
-	return contacts_db_add_changed_cb(_contacts_address_book._uri, __ctsvc_server_addressbook_deleted_cb, NULL);
+	ctsvc_server_bg_delete_start();
 }
 
-int ctsvc_server_bg_remove_cb()
+void ctsvc_server_bg_add_cb()
 {
-	return contacts_db_remove_changed_cb(_contacts_address_book._uri, __ctsvc_server_addressbook_deleted_cb, NULL);
+	int ret;
+	ret = contacts_db_add_changed_cb(_contacts_address_book._uri, __ctsvc_server_addressbook_deleted_cb, NULL);
+	SERVER_DBG("call contacts_db_add_changed_cb (_contacts_address_book)  : return (%d)", ret);
+	ret = contacts_db_add_changed_cb(_contacts_contact._uri, __ctsvc_server_contact_deleted_cb, NULL);
+	SERVER_DBG("call contacts_db_add_changed_cb (_contacts_contact): return (%d)", ret);
+}
+
+void ctsvc_server_bg_remove_cb()
+{
+	int ret;
+	ret = contacts_db_remove_changed_cb(_contacts_address_book._uri, __ctsvc_server_addressbook_deleted_cb, NULL);
+	SERVER_DBG("call contacts_db_remove_changed_cb (_contacts_address_book): return (%d)", ret);
+	ret = contacts_db_remove_changed_cb(_contacts_contact._uri, __ctsvc_server_contact_deleted_cb, NULL);
+	SERVER_DBG("call contacts_db_remove_changed_cb (_contacts_contact) : return (%d)", ret);
 }
 

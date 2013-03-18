@@ -59,8 +59,6 @@
 #define CTS_TABLE_ACTIVITIES "activities"
 #define CTS_TABLE_ACTIVITY_PHOTOS "activity_photos"
 
-#define CTS_TABLE_RESTRICTED_DATA_VIEW "restricted_data"
-
 // DB views /////////////////////////////////////////////////////////////////////
 #define CTSVC_DB_VIEW_PERSON					"view_person"
 #define CTSVC_DB_VIEW_CONTACT					"view_contact"

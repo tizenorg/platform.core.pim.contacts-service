@@ -59,7 +59,6 @@ typedef struct {
 	unsigned int (*get_index_max)(void *);
 	unsigned int (*get_text_max)(void *);
 	unsigned int (*get_unused_count)(void *);
-	void (*increase_used_count)(void *);
 	void (*set)(void *,int ,int ,int );
 }sim_file_s;
 
@@ -80,11 +79,6 @@ static inline unsigned int get_unused_count(void *this)
 static inline unsigned int get_text_max(void *this)
 {
 	return ((sim_file_s*)this)->text_max;
-}
-
-static inline void increase_used_count(void *this)
-{
-	((sim_file_s*)this)->used_count++;
 }
 
 static inline void set(void *this,int index,int text,int used_count)
@@ -131,7 +125,6 @@ static void __ctsvc_server_init_sim_file(void)
 		gfile_record[i].get_unused_count = get_unused_count;
 		gfile_record[i].get_text_max = get_text_max;
 		gfile_record[i].set = set;
-		gfile_record[i].increase_used_count = increase_used_count;
 		gfile_record[i].index_max = 0;
 		gfile_record[i].text_max = 0;
 		gfile_record[i].used_count = 0;
