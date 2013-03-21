@@ -1,6 +1,6 @@
 Name:       contacts-service
 Summary:    Contacts Service
-Version: 0.9.52.1
+Version: 0.9.55
 Release:    1
 Group:      TO_BE/FILLED_IN
 License:    Apache-2.0
@@ -18,6 +18,7 @@ BuildRequires:  pkgconfig(icu-i18n)
 BuildRequires:  pkgconfig(capi-base-common)
 BuildRequires:  pkgconfig(capi-media-image-util)
 BuildRequires:  pkgconfig(pims-ipc)
+BuildRequires:  pkgconfig(accounts-svc)
 BuildRequires:  pkgconfig(badge)
 Requires(post): /usr/bin/sqlite3, /bin/chmod, /bin/chown
 Requires(post): /usr/bin/vconftool

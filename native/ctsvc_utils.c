@@ -306,9 +306,9 @@ static bool __ctsvc_image_util_supported_jpeg_colorspace_cb(image_util_colorspac
 			resized_width = width*image_size/height;
 		}
 
-		if (!resized_height%8)
+		if (resized_height%8)
 			resized_height += 8 - (resized_height%8);
-		if (!resized_width%8)
+		if (resized_width%8)
 			resized_width += 8 - (resized_width%8);
 
 		CTS_DBG("size(%d, %d) -> resize(%d,%d)", width, height, resized_width, resized_height);

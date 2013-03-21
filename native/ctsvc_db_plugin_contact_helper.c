@@ -17,6 +17,7 @@
  *
  */
 #include <sys/types.h>
+#include <sys/syscall.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <vconf.h>
@@ -277,8 +278,7 @@ void ctsvc_make_contact_display_name(ctsvc_contact_s *contact)
 		name = (ctsvc_name_s *)contact->name->records->data;
 	}
 
-	if ( name && ( name->first || name->last) ) {
-
+	if ( name && ( name->first || name->last || name->prefix || name->addition || name->suffix) ) {
 		// make display name
 		display_len = SAFE_STRLEN(name->prefix)
 						+ SAFE_STRLEN(name->first)

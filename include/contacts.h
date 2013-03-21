@@ -686,7 +686,7 @@
  * <tr><td>string</td><td> ringtone_path </td><td>read, write</td><td> </td></tr>
  * <tr><td>string</td><td> image_path </td><td>read, write</td><td> </td></tr>
  * <tr><td>string</td><td> vibration </td><td>read, write</td><td> </td></tr>
- * <tr><td>string</td><td> system_id </td><td>read, write</td><td> </td></tr>
+ * <tr><td>string</td><td> extra_data </td><td>read, write</td><td> </td></tr>
  * <tr><td>boolean</td><td> is_read_only </td><td>read only</td><td> </td></tr>
  * </table>
  *
@@ -1180,7 +1180,6 @@
  * <tr><td>boolean</td><td> has_email </td><td></td><td> </td></tr>
  * <tr><td>integer</td><td> address_book_id </td><td></td><td> </td></tr>
  * <tr><td>integer</td><td> group_id </td><td>*</td><td> </td></tr>
- * <tr><td>string</td><td> group_name </td><td></td><td> </td></tr>
  * </table>
  *
  * @section CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_person_phone_log _contacts_person_phone_log view

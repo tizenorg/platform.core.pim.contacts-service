@@ -27,7 +27,7 @@ static int __ctsvc_ipc_unmarshal_group(pims_ipc_data_h ipc_data, const char* vie
 		if (ctsvc_ipc_unmarshal_int(ipc_data, &group_p->addressbook_id) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_bool(ipc_data, &group_p->is_read_only) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_string(ipc_data, &group_p->name) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_unmarshal_string(ipc_data, &group_p->system_id) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_unmarshal_string(ipc_data, &group_p->extra_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_string(ipc_data, &group_p->ringtone_path) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_string(ipc_data, &group_p->vibration) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_string(ipc_data, &group_p->image_thumbnail_path) != CONTACTS_ERROR_NONE) break;
@@ -52,7 +52,7 @@ static int __ctsvc_ipc_marshal_group(const contacts_record_h record, pims_ipc_da
 		if (ctsvc_ipc_marshal_int((group_p->addressbook_id),ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_bool((group_p->is_read_only),ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_string((group_p->name),ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_string((group_p->system_id),ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_string((group_p->extra_data),ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_string((group_p->ringtone_path),ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_string((group_p->vibration),ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_string((group_p->image_thumbnail_path),ipc_data) != CONTACTS_ERROR_NONE) break;

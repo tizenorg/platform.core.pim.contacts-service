@@ -88,7 +88,7 @@ static int __ctsvc_db_group_insert_record( contacts_record_h record, int *id )
 
 	snprintf(query, sizeof(query),
 			"INSERT INTO "CTS_TABLE_GROUPS"(group_id, addressbook_id, group_name, created_ver, changed_ver, ringtone_path, "
-						"vibration, image_thumbnail_path, system_id, is_read_only, group_prio) "
+						"vibration, image_thumbnail_path, extra_data, is_read_only, group_prio) "
 			"VALUES(%d, %d, ?, ?, ?, ?, ?, ?, ?, %d, %lf)",
 			group->id, group->addressbook_id, group->is_read_only, group_prio);
 
@@ -125,8 +125,8 @@ static int __ctsvc_db_group_insert_record( contacts_record_h record, int *id )
 		cts_stmt_bind_text(stmt, 6, group->image_thumbnail_path);
 	}
 
-	if (group->system_id)
-		cts_stmt_bind_text(stmt, 7, group->system_id);
+	if (group->extra_data)
+		cts_stmt_bind_text(stmt, 7, group->extra_data);
 
 	ret = cts_stmt_step(stmt);
 	if (CONTACTS_ERROR_NONE != ret) {
@@ -317,7 +317,7 @@ static int __ctsvc_db_group_value_set(cts_stmt stmt, contacts_record_h *record)
 	temp = ctsvc_stmt_get_text(stmt, i++);
 	group->name = SAFE_STRDUP(temp);
 	temp = ctsvc_stmt_get_text(stmt, i++);
-	group->system_id = SAFE_STRDUP(temp);
+	group->extra_data = SAFE_STRDUP(temp);
 	group->is_read_only = ctsvc_stmt_get_int(stmt, i++);
 	temp = ctsvc_stmt_get_text(stmt, i++);
 	group->ringtone_path = SAFE_STRDUP(temp);
@@ -344,7 +344,7 @@ static int __ctsvc_db_group_get_record( int id, contacts_record_h *out_record )
 	*out_record = NULL;
 
 	len = snprintf(query, sizeof(query),
-			"SELECT group_id, addressbook_id, group_name, system_id, is_read_only, "
+			"SELECT group_id, addressbook_id, group_name, extra_data, is_read_only, "
 				"ringtone_path, vibration, image_thumbnail_path "
 				"FROM "CTS_TABLE_GROUPS" WHERE group_id = %d", id);
 
@@ -379,7 +379,7 @@ static int __ctsvc_db_group_get_all_records( int offset, int limit, contacts_lis
 	contacts_list_h list;
 
 	len = snprintf(query, sizeof(query),
-			"SELECT group_id, addressbook_id, group_name, system_id, is_read_only, "
+			"SELECT group_id, addressbook_id, group_name, extra_data, is_read_only, "
 				"ringtone_path, vibration, image_thumbnail_path "
 				"FROM "CTS_TABLE_GROUPS" ORDER BY addressbook_id, group_prio");
 
@@ -489,9 +489,9 @@ static int __ctsvc_db_group_get_records_with_query( contacts_query_h query,
 				temp = ctsvc_stmt_get_text(stmt, i);
 				group->vibration = SAFE_STRDUP(temp);
 				break;
-			case CTSVC_PROPERTY_GROUP_SYSTEM_ID:
+			case CTSVC_PROPERTY_GROUP_EXTRA_DATA:
 				temp = ctsvc_stmt_get_text(stmt, i);
-				group->system_id = SAFE_STRDUP(temp);
+				group->extra_data = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_GROUP_IS_READ_ONLY:
 				group->is_read_only = ctsvc_stmt_get_int(stmt, i);

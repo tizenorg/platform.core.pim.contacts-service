@@ -17,6 +17,7 @@
  *
  */
 #include <sys/types.h>
+#include <sys/syscall.h>
 #include <fcntl.h>
 #include <unistd.h>
 
@@ -1169,6 +1170,11 @@ static int __ctsvc_db_contact_update_record( contacts_record_h record )
 
 		version = ctsvc_get_next_ver();
 
+		if (CTSVC_PROPERTY_FLAG_DIRTY != (contact->base.property_flag & CTSVC_PROPERTY_FLAG_DIRTY)) {
+			CTS_ERR("No update");
+			ret = CONTACTS_ERROR_NONE;
+			break;
+		}
 		if (CONTACTS_ERROR_NONE != (ret = ctsvc_db_create_set_query(record, &set, &bind_text))) break;
 		if (set && *set)
 			len = snprintf(query_set, sizeof(query_set), "%s, ", set);

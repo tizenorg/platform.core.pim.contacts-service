@@ -25,6 +25,8 @@
 #include <sys/un.h>
 #include <unistd.h>
 
+#include <account.h>
+
 #include "contacts.h"
 #include "ctsvc_internal.h"
 #include "ctsvc_socket.h"
@@ -33,17 +35,14 @@
 #include "ctsvc_db_init.h"
 #include "ctsvc_setting.h"
 
-#ifndef _CONTACTS_IPC_CLIENT
 static int ctsvc_connection = 0;
 static __thread int thread_connection = 0;
-#endif
 
 API int contacts_connect2()
 {
 	CTS_FN_CALL;
 	int ret;
 
-#ifndef _CONTACTS_IPC_CLIENT
 	ctsvc_mutex_lock(CTS_MUTEX_CONNECTION);
 	if (0 == ctsvc_connection) {
 		ret = ctsvc_socket_init();
@@ -62,13 +61,15 @@ API int contacts_connect2()
 		ctsvc_db_plugin_init();
 		ctsvc_view_uri_init();
 		ctsvc_register_vconf();
+		ret = account_connect();
+		if (ACCOUNT_ERROR_NONE != ret)
+			CTS_ERR("account_connect Failed(%d)", ret);
 	}
 	else
 		CTS_DBG("System : Contacts service has been already connected");
 
 	ctsvc_connection++;
 	ctsvc_mutex_unlock(CTS_MUTEX_CONNECTION);
-#endif
 
 	if (0 == thread_connection) {
 		ret = ctsvc_db_init();
@@ -92,7 +93,6 @@ API int contacts_disconnect2()
 	}
 	thread_connection--;
 
-#ifndef _CONTACTS_IPC_CLIENT
 	ctsvc_mutex_lock(CTS_MUTEX_CONNECTION);
 	if (1 == ctsvc_connection) {
 		ctsvc_socket_final();
@@ -100,6 +100,7 @@ API int contacts_disconnect2()
 		ctsvc_deregister_vconf();
 		ctsvc_view_uri_deinit();
 		ctsvc_db_plugin_deinit();
+		account_disconnect();
 	}
 	else if (1 < ctsvc_connection)
 		CTS_DBG("System : connection count is %d", ctsvc_connection);
@@ -110,8 +111,6 @@ API int contacts_disconnect2()
 	}
 	ctsvc_connection--;
 	ctsvc_mutex_unlock(CTS_MUTEX_CONNECTION);
-#endif
-
 
 	return CONTACTS_ERROR_NONE;
 }

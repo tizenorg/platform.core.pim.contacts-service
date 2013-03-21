@@ -139,7 +139,6 @@ int ctsvc_db_plugin_init()
 		int count = sizeof(__db_tables) /sizeof(db_table_info_s);
 		for (i=0;i<count;i++)
 			g_hash_table_insert(__ctsvc_db_view_hash_table, __db_tables[i].view_uri, GINT_TO_POINTER(&(__db_tables[i])));
-
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -735,11 +734,10 @@ static int __ctsvc_db_create_views()
 	snprintf(query, sizeof(query),
 		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_PERSON_GROUP" AS "
 			"SELECT * FROM "CTSVC_DB_VIEW_PERSON_CONTACT" "
-			"LEFT JOIN (SELECT group_relations.group_id, "
-						"group_name, "
+			"LEFT JOIN (SELECT group_id, "
 						"contact_id contact_id_in_group "
-					"FROM "CTS_TABLE_GROUP_RELATIONS", "CTS_TABLE_GROUPS" "
-					"ON group_relations.group_id = groups.group_id AND deleted = 0) temp_group "
+					"FROM "CTS_TABLE_GROUP_RELATIONS" "
+					"WHERE deleted = 0) temp_group "
 			"ON temp_group.contact_id_in_group = "CTSVC_DB_VIEW_PERSON_CONTACT".contact_id");
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Failed(%d)", ret);
@@ -862,6 +860,7 @@ int ctsvc_db_deinit()
 		CTS_ERR("ctsvc_db_close() Failed(%d)", ret);
 		return ret;
 	}
+
 	return CONTACTS_ERROR_NONE;
 }
 

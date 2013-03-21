@@ -21,12 +21,15 @@
 #include <stdlib.h>
 #include <unistd.h>	//sleep
 
+#include <account.h>
+
 #include "contacts.h"
 #include "internal.h"
 #include "ctsvc_schema.h"
 #include "ctsvc_sqlite.h"
 #include "ctsvc_server_bg.h"
 #include "ctsvc_utils.h"
+#include "ctsvc_db_plugin_addressbook_helper.h"
 
 #define CTSVC_SERVER_BG_DELETE_COUNT 50
 #define CTSVC_SERVER_BG_DELETE_STEP_TIME 1
@@ -49,6 +52,8 @@ typedef struct {
 GThread *__ctsvc_server_bg_delete_thread = NULL;
 GCond __ctsvc_server_bg_delete_cond;
 GMutex __ctsvc_server_bg_delete_mutex;
+
+account_subscribe_h account = NULL;
 
 static int __ctsvc_server_bg_contact_delete_step1(__ctsvc_delete_data_s* data)
 {
@@ -376,6 +381,14 @@ static void __ctsvc_server_contact_deleted_cb(const char *view_uri, void *data)
 	ctsvc_server_bg_delete_start();
 }
 
+static bool __ctsvc_server_account_delete_cb(const char* event_type, int account_id, void* user_data)
+{
+	SERVER_FN_CALL;
+	if (strcmp(event_type, ACCOUNT_NOTI_NAME_DELETE) == 0)
+		ctsvc_addressbook_delete(account_id);
+	return true;
+}
+
 void ctsvc_server_bg_add_cb()
 {
 	int ret;
@@ -383,6 +396,16 @@ void ctsvc_server_bg_add_cb()
 	SERVER_DBG("call contacts_db_add_changed_cb (_contacts_address_book)  : return (%d)", ret);
 	ret = contacts_db_add_changed_cb(_contacts_contact._uri, __ctsvc_server_contact_deleted_cb, NULL);
 	SERVER_DBG("call contacts_db_add_changed_cb (_contacts_contact): return (%d)", ret);
+
+	ret = account_subscribe_create(&account);
+	if (ACCOUNT_ERROR_NONE == ret) {
+		ret = account_subscribe_notification(account, __ctsvc_server_account_delete_cb, NULL);
+		if (ACCOUNT_ERROR_NONE != ret) {
+			SERVER_DBG("account_subscribe_notification Failed (%d)", ret);
+		}
+	}
+	else
+		SERVER_DBG("account_subscribe_create Failed (%d)", ret);
 }
 
 void ctsvc_server_bg_remove_cb()
@@ -392,5 +415,10 @@ void ctsvc_server_bg_remove_cb()
 	SERVER_DBG("call contacts_db_remove_changed_cb (_contacts_address_book): return (%d)", ret);
 	ret = contacts_db_remove_changed_cb(_contacts_contact._uri, __ctsvc_server_contact_deleted_cb, NULL);
 	SERVER_DBG("call contacts_db_remove_changed_cb (_contacts_contact) : return (%d)", ret);
+
+	if (account) {
+		account_unsubscribe_notification(account);		// unsubscirbe & destroy
+		account = NULL;
+	}
 }
 

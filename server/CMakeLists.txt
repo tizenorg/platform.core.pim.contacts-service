@@ -68,13 +68,19 @@ SET(SRCS
 	${CMAKE_SOURCE_DIR}/common/ctsvc_view.c
 
 	${CMAKE_SOURCE_DIR}/native/ctsvc_activity.c
+
 	${CMAKE_SOURCE_DIR}/native/ctsvc_db_init.c
 	${CMAKE_SOURCE_DIR}/native/ctsvc_db_plugin_activity.c
+
 	${CMAKE_SOURCE_DIR}/native/ctsvc_db_plugin_address_helper.c
 	${CMAKE_SOURCE_DIR}/native/ctsvc_db_plugin_address.c
+
 	${CMAKE_SOURCE_DIR}/native/ctsvc_db_plugin_addressbook.c
+	${CMAKE_SOURCE_DIR}/native/ctsvc_db_plugin_addressbook_helper.c
+
 	${CMAKE_SOURCE_DIR}/native/ctsvc_db_plugin_company_helper.c
 	${CMAKE_SOURCE_DIR}/native/ctsvc_db_plugin_company.c
+
 	${CMAKE_SOURCE_DIR}/native/ctsvc_db_plugin_contact_helper.c
 	${CMAKE_SOURCE_DIR}/native/ctsvc_db_plugin_contact.c
 	${CMAKE_SOURCE_DIR}/native/ctsvc_db_plugin_my_profile.c
@@ -153,7 +159,7 @@ SET(SRCS
 )
 
 INCLUDE(FindPkgConfig)
-pkg_check_modules(ctsvc_server_pkgs REQUIRED glib-2.0 pims-ipc gobject-2.0 tapi dlog capi-media-image-util badge)
+pkg_check_modules(ctsvc_server_pkgs REQUIRED glib-2.0 pims-ipc gobject-2.0 tapi dlog capi-media-image-util accounts-svc badge)
 
 FOREACH(flag ${ctsvc_server_pkgs_CFLAGS})
 	SET(EXTRA_CFLAGS "${EXTRA_CFLAGS} ${flag}")

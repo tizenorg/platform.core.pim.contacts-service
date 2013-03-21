@@ -47,7 +47,8 @@ _CONTACTS_BEGIN_VIEW()
 	_CONTACTS_PROPERTY_STR( ringtone_path )			// read, write
 	_CONTACTS_PROPERTY_STR( image_path )			// read, write
 	_CONTACTS_PROPERTY_STR( vibration )				// read, write
-	_CONTACTS_PROPERTY_STR( system_id )				// read, write, string
+	_CONTACTS_PROPERTY_STR( system_id )				// read, write, string, It should be removed
+	_CONTACTS_PROPERTY_STR( extra_data )				// read, write, string
 	_CONTACTS_PROPERTY_BOOL( is_read_only )			// read only
 _CONTACTS_END_VIEW( _contacts_group )
 
@@ -80,7 +81,7 @@ _CONTACTS_BEGIN_VIEW()
 	_CONTACTS_PROPERTY_INT( address_book_id )		// read, write-once
 	_CONTACTS_PROPERTY_STR( ringtone_path )			// read, write
 	_CONTACTS_PROPERTY_STR( image_thumbnail_path )	// read, write
-	_CONTACTS_PROPERTY_BOOL( is_favorite )			// read only
+	_CONTACTS_PROPERTY_BOOL( is_favorite )			// read, write
 	_CONTACTS_PROPERTY_BOOL( has_phonenumber )		// read only
 	_CONTACTS_PROPERTY_BOOL( has_email )			// read only
 	_CONTACTS_PROPERTY_INT( person_id )				// read only
@@ -97,7 +98,7 @@ _CONTACTS_BEGIN_VIEW()
 	_CONTACTS_PROPERTY_INT( address_book_id )		// read, write once
 	_CONTACTS_PROPERTY_STR( ringtone_path )			// read, write
 	_CONTACTS_PROPERTY_STR( image_thumbnail_path )	// read, write
-	_CONTACTS_PROPERTY_BOOL( is_favorite )			// read only
+	_CONTACTS_PROPERTY_BOOL( is_favorite )			// read, write
 	_CONTACTS_PROPERTY_BOOL( has_phonenumber )		// read only
 	_CONTACTS_PROPERTY_BOOL( has_email )			// read only
 	_CONTACTS_PROPERTY_INT( person_id )				// read only

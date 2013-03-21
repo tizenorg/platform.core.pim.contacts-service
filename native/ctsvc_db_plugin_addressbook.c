@@ -16,6 +16,7 @@
  * limitations under the License.
  *
  */
+#include <account.h>
 
 #include "contacts.h"
 #include "ctsvc_internal.h"
@@ -78,7 +79,6 @@ static int __ctsvc_db_addressbook_value_set(cts_stmt stmt, contacts_record_h *re
 	return CONTACTS_ERROR_NONE;
 }
 
-
 static int __ctsvc_db_addressbook_get_record( int id, contacts_record_h* out_record )
 {
 	int ret;
@@ -92,8 +92,7 @@ static int __ctsvc_db_addressbook_get_record( int id, contacts_record_h* out_rec
 
 	len = snprintf(query, sizeof(query),
 				"SELECT addressbook_id, addressbook_name, account_id, mode, last_sync_ver "
-				 "FROM "CTS_TABLE_ADDRESSBOOKS" WHERE addressbook_id = %d",
-				 id);
+				"FROM "CTS_TABLE_ADDRESSBOOKS" WHERE addressbook_id = %d", id);
 
 	stmt = cts_query_prepare(query);
 	RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB, "DB error : cts_query_prepare() Failed");
@@ -121,6 +120,9 @@ static int __ctsvc_db_addressbook_get_record( int id, contacts_record_h* out_rec
 
 static int __ctsvc_db_addressbook_insert_record( contacts_record_h record, int *id )
 {
+	int ret;
+	cts_stmt stmt = NULL;
+	char query[CTS_SQL_MAX_LEN] = {0};
 	ctsvc_addressbook_s *addressbook = (ctsvc_addressbook_s*)record;
 
 	RETV_IF(NULL == record, CONTACTS_ERROR_INVALID_PARAMETER);
@@ -128,8 +130,45 @@ static int __ctsvc_db_addressbook_insert_record( contacts_record_h record, int *
 	RETVM_IF(CTSVC_RECORD_ADDRESSBOOK != addressbook->base.r_type, CONTACTS_ERROR_INVALID_PARAMETER,
 			"Invalid parameter : record is invalid type(%d)", addressbook->base.r_type);
 
-	cts_stmt stmt = NULL;
-	char query[CTS_SQL_MAX_LEN] = {0};
+	ret = ctsvc_begin_trans();
+	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "DB error : ctsvc_begin_trans() Failed(%d)", ret);
+
+	// Can not insert addressbook which has same account_id
+	int addresbook_id;
+	account_h account;
+	snprintf(query, sizeof(query),
+		"SELECT addressbook_id FROM "CTS_TABLE_ADDRESSBOOKS" WHERE account_id = %d",
+		addressbook->account_id);
+	ret = ctsvc_query_get_first_int_result(query, &addresbook_id);
+	if (CONTACTS_ERROR_NO_DATA != ret) {
+		ctsvc_end_trans(false);
+		if (CONTACTS_ERROR_NONE == ret) {
+			CTS_ERR("One addressbook which has account_id(%d) already exists", addressbook->account_id);
+			return CONTACTS_ERROR_INVALID_PARAMETER;
+		}
+		else {
+			CTS_ERR("DB error : ctsvc_query_get_first_int_result() Failed (%d)", ret);
+			return ret;
+		}
+	}
+
+	if (0 < addressbook->account_id) {
+		// check account_id validation
+		ret = account_create(&account);
+		if (ACCOUNT_ERROR_NONE != ret) {
+			CTS_ERR("account_create() Failed(%d)", ret);
+			ctsvc_end_trans(false);
+			return CONTACTS_ERROR_SYSTEM;
+		}
+		ret = account_query_account_by_account_id(addressbook->account_id, &account);
+		if (ACCOUNT_ERROR_NONE != ret) {
+			CTS_ERR("account_query_account_by_account_id Faild(%d) : account_id(%d)", ret, addressbook->account_id);
+			account_destroy(account);
+			ctsvc_end_trans(false);
+			return CONTACTS_ERROR_INVALID_PARAMETER;
+		}
+		account_destroy(account);
+	}
 
 	snprintf(query, sizeof(query),
 			"INSERT INTO %s(addressbook_name, account_id, mode) "
@@ -139,19 +178,11 @@ static int __ctsvc_db_addressbook_insert_record( contacts_record_h record, int *
 	stmt = cts_query_prepare(query);
 	if (NULL == stmt) {
 		CTS_ERR("DB error : cts_query_prepare() Failed");
+		ctsvc_end_trans(false);
 		return CONTACTS_ERROR_DB;
 	}
 
 	cts_stmt_bind_text(stmt, 1, addressbook->name);
-
-	/* BEGIN_TRANSACTION */
-	int ret = ctsvc_begin_trans();
-	if( ret < CONTACTS_ERROR_NONE )
-	{
-		CTS_ERR("DB error : ctsvc_begin_trans() Failed(%d)", ret);
-		cts_stmt_finalize(stmt);
-		return ret;
-	}
 
 	/* DOING JOB */
 	do {

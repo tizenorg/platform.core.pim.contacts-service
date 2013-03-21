@@ -84,7 +84,7 @@ static int __ctsvc_group_destroy(contacts_record_h record, bool delete_child)
 	free(group->ringtone_path);
 	free(group->vibration);
 	free(group->image_thumbnail_path);
-	free(group->system_id);
+	free(group->extra_data);
 	free(group);
 
 	return CONTACTS_ERROR_NONE;
@@ -105,7 +105,7 @@ static int __ctsvc_group_clone(contacts_record_h record, contacts_record_h *out_
 	out_data->is_read_only = src_data->is_read_only;
 	out_data->image_thumbnail_changed = src_data->image_thumbnail_changed;
 	out_data->name = SAFE_STRDUP(src_data->name);
-	out_data->system_id = SAFE_STRDUP(src_data->system_id);
+	out_data->extra_data = SAFE_STRDUP(src_data->extra_data);
 	out_data->vibration = SAFE_STRDUP(src_data->vibration);
 	out_data->ringtone_path = SAFE_STRDUP(src_data->ringtone_path);
 	out_data->image_thumbnail_path = SAFE_STRDUP(src_data->image_thumbnail_path);
@@ -151,8 +151,8 @@ static int __ctsvc_group_get_str_real(contacts_record_h record, unsigned int pro
 	case CTSVC_PROPERTY_GROUP_VIBRATION:
 		*out_str = GET_STR(copy, group->vibration);
 		break;
-	case CTSVC_PROPERTY_GROUP_SYSTEM_ID:
-		*out_str = GET_STR(copy, group->system_id);
+	case CTSVC_PROPERTY_GROUP_EXTRA_DATA:
+		*out_str = GET_STR(copy, group->extra_data);
 		break;
 	default :
 		ASSERT_NOT_REACHED("Invalid parameter : property_id(%d) is not supported in value(group)", property_id);
@@ -213,8 +213,8 @@ static int __ctsvc_group_set_str(contacts_record_h record, unsigned int property
 	case CTSVC_PROPERTY_GROUP_VIBRATION:
 		FREEandSTRDUP(group->vibration, str);
 		break;
-	case CTSVC_PROPERTY_GROUP_SYSTEM_ID:
-		FREEandSTRDUP(group->system_id, str);
+	case CTSVC_PROPERTY_GROUP_EXTRA_DATA:
+		FREEandSTRDUP(group->extra_data, str);
 		break;
 	default :
 		ASSERT_NOT_REACHED("Invalid parameter : property_id(%d) is not supported in value(group)", property_id);

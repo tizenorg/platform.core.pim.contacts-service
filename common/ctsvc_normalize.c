@@ -81,8 +81,8 @@ static inline bool __ctsvc_check_dirty_number(char digit)
 		case ',':
 		case '.':
 		case ';':
+		case '+':
 			return false;
-		case '+': //only first position
 		default:
 			return true;
 	}
@@ -95,9 +95,6 @@ int ctsvc_clean_number(const char *src, char *dest, int dest_size)
 	if (NULL == src)
 		CTS_ERR("The parameter(src) is NULL");
 	else {
-		if ('+' == src[s_pos])
-			dest[d_pos++] = src[s_pos++];
-
 		while (src[s_pos] != 0)
 		{
 			if (d_pos >= dest_size-2) break;

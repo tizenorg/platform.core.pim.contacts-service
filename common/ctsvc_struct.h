@@ -225,7 +225,7 @@ typedef struct {
 	int addressbook_id;
 	bool is_read_only;
 	char *name;
-	char *system_id;
+	char *extra_data;
 	char *ringtone_path;
 	char *vibration;
 	char *image_thumbnail_path;

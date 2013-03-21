@@ -227,7 +227,7 @@ CREATE TABLE groups
 	group_id			INTEGER PRIMARY KEY AUTOINCREMENT,
 	addressbook_id			INTEGER,
 	group_name			TEXT,
-	system_id			TEXT,
+	extra_data			TEXT,
 	is_read_only			INTEGER DEFAULT 0,
 	created_ver			INTEGER NOT NULL,
 	changed_ver			INTEGER NOT NULL,
@@ -238,11 +238,11 @@ CREATE TABLE groups
 	group_prio			REAL
 );
 
-INSERT INTO groups(addressbook_id, group_name, system_id, is_read_only, created_ver, changed_ver, group_prio)
+INSERT INTO groups(addressbook_id, group_name, extra_data, is_read_only, created_ver, changed_ver, group_prio)
 	VALUES(0, 'coworkers', 'coworkers', 0, 0, 0, 1);
-INSERT INTO groups(addressbook_id, group_name, system_id, is_read_only, created_ver, changed_ver, group_prio)
+INSERT INTO groups(addressbook_id, group_name, extra_data, is_read_only, created_ver, changed_ver, group_prio)
 	VALUES(0, 'family', 'family', 0, 0, 0, 2);
-INSERT INTO groups(addressbook_id, group_name, system_id, is_read_only, created_ver, changed_ver, group_prio)
+INSERT INTO groups(addressbook_id, group_name, extra_data, is_read_only, created_ver, changed_ver, group_prio)
 	VALUES(0, 'friends', 'friends',0, 0, 0, 3);
 
 CREATE TRIGGER trg_groups_del AFTER DELETE ON groups
