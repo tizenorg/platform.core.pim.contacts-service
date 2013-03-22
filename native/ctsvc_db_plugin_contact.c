@@ -1071,7 +1071,7 @@ static int __ctsvc_db_contact_update_record( contacts_record_h record )
 {
 	int ret, len = 0;
 	int rel_changed = 0;
-	int count;
+	int id;
 	int version;
 	char *set = NULL;
 	char query[CTS_SQL_MAX_LEN] = {0};
@@ -1083,9 +1083,9 @@ static int __ctsvc_db_contact_update_record( contacts_record_h record )
 	RETVM_IF(ret, ret, "ctsvc_begin_trans() Failed(%d)", ret);
 
 	snprintf(query, sizeof(query),
-		"SELECT count(contact_id) FROM "CTS_TABLE_CONTACTS" "
+		"SELECT contact_id FROM "CTS_TABLE_CONTACTS" "
 		"WHERE contact_id = %d AND deleted = 0", contact->id);
-	ret = ctsvc_query_get_first_int_result(query, &count);
+	ret = ctsvc_query_get_first_int_result(query, &id);
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("The index(%d) is Invalid. %d Record(s) is(are) found", contact->id, ret);
 		ctsvc_end_trans(false);

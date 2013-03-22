@@ -543,7 +543,7 @@ static void __ctsvc_make_my_profile_display_name(ctsvc_my_profile_s *my_profile)
 static int __ctsvc_db_my_profile_update_record( contacts_record_h record )
 {
 	int ret, len;
-	int count;
+	int id;
 	char query[CTS_SQL_MAX_LEN] = {0};
 	ctsvc_my_profile_s *my_profile = (ctsvc_my_profile_s*)record;
 	cts_stmt stmt;
@@ -552,8 +552,8 @@ static int __ctsvc_db_my_profile_update_record( contacts_record_h record )
 	RETVM_IF(ret, ret, "ctsvc_begin_trans() Failed(%d)", ret);
 
 	snprintf(query, sizeof(query),
-		"SELECT count(my_profile_id) FROM "CTSVC_DB_VIEW_MY_PROFILE" WHERE my_profile_id = %d", my_profile->id);
-	ret = ctsvc_query_get_first_int_result(query, &count);
+		"SELECT my_profile_id FROM "CTSVC_DB_VIEW_MY_PROFILE" WHERE my_profile_id = %d", my_profile->id);
+	ret = ctsvc_query_get_first_int_result(query, &id);
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("The index(%d) is Invalid. %d Record(s) is(are) found", my_profile->id, ret);
 		ctsvc_end_trans(false);

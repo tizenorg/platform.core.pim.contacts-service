@@ -133,7 +133,7 @@ int ctsvc_db_address_update(contacts_record_h record, bool is_my_profile)
 	char* set = NULL;
 	GSList *bind_text = NULL;
 	GSList *cursor = NULL;
-	ctsvc_address_s *address =  (ctsvc_address_s*)record;
+	ctsvc_address_s *address = (ctsvc_address_s*)record;
 	char query[CTS_SQL_MAX_LEN] = {0};
 
 	RETVM_IF(address->id <= 0, CONTACTS_ERROR_INVALID_PARAMETER,

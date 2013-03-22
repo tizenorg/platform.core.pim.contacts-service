@@ -231,7 +231,7 @@ static int __ctsvc_group_get_bool(contacts_record_h record, unsigned int propert
 		*value = group->is_read_only;
 		break;
 	default:
-		ASSERT_NOT_REACHED("Invalid parameter : property_id(%d) is not supported in value(company)", property_id);
+		ASSERT_NOT_REACHED("Invalid parameter : property_id(%d) is not supported in value(group)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;

@@ -239,11 +239,11 @@ CREATE TABLE groups
 );
 
 INSERT INTO groups(addressbook_id, group_name, extra_data, is_read_only, created_ver, changed_ver, group_prio)
-	VALUES(0, 'coworkers', 'coworkers', 0, 0, 0, 1);
+	VALUES(0, 'Co-workers', 'coworkers', 0, 0, 0, 1);
 INSERT INTO groups(addressbook_id, group_name, extra_data, is_read_only, created_ver, changed_ver, group_prio)
-	VALUES(0, 'family', 'family', 0, 0, 0, 2);
+	VALUES(0, 'Family', 'family', 0, 0, 0, 2);
 INSERT INTO groups(addressbook_id, group_name, extra_data, is_read_only, created_ver, changed_ver, group_prio)
-	VALUES(0, 'friends', 'friends',0, 0, 0, 3);
+	VALUES(0, 'Friends', 'friends',0, 0, 0, 3);
 
 CREATE TRIGGER trg_groups_del AFTER DELETE ON groups
  BEGIN

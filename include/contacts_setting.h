@@ -74,6 +74,49 @@ API int contacts_setting_get_name_display_order(contacts_name_display_order_e *n
  */
 API int contacts_setting_set_name_display_order(contacts_name_display_order_e name_display_order);
 
+
+/**
+ * @brief  Enumerations of name display order
+ */
+typedef enum
+{
+	CONTACTS_NAME_SORTING_ORDER_FIRSTLAST,	 /**< Contacts are first sorted based on the first name  */
+	CONTACTS_NAME_SORTING_ORDER_LASTFIRST	 /**< Contacts are first sorted based on the last name  */
+} contacts_name_sorting_order_e;
+
+
+/**
+ * @brief	Gets the contacts name sorting order in which contacts are returned.
+ *
+ * @param[out]	name_sorting_order    The name sorting order
+ *
+ * @return  0 on success, otherwise a negative error value.
+ * @retval  #CONTACTS_ERROR_NONE				Successful
+ * @retval	#CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ * @retval  #CONTACTS_ERROR_DB					Database operation failure
+ *
+ * @pre     This function requires an open connection to the contacts service by contacts_connect2().
+ *
+ * @see contacts_connect2()
+ */
+API int contacts_setting_get_name_sorting_order(contacts_name_sorting_order_e *name_sort_order);
+
+/**
+ * @brief	Sets the contacts name sorting order in which contacts are returned.
+ *
+ * @param[in]	name_sorting_order    The name sorting order
+ *
+ * @return  0 on success, otherwise a negative error value.
+ * @retval  #CONTACTS_ERROR_NONE				Successful
+ * @retval	#CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ * @retval  #CONTACTS_ERROR_DB					Database operation failure
+ *
+ * @pre     This function requires an open connection to the contacts service by contacts_connect2().
+ *
+ * @see contacts_connect2()
+ */
+API int contacts_setting_set_name_sorting_order(contacts_name_sorting_order_e name_sorting_order);
+
 /**
  * @}
  */

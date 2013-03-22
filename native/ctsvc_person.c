@@ -1060,7 +1060,7 @@ API int contacts_person_unlink_contact(int person_id, int contact_id, int* out_p
 
 	if (is_favorite && ((ctsvc_contact_s*)record)->is_favorite) {
 		snprintf(query, sizeof(query),
-				"INSERT INTO "CTS_TABLE_FAVORITES" values(%d, %f)", id, priority);
+				"INSERT OR REPLACE INTO "CTS_TABLE_FAVORITES" values(%d, %f)", id, priority);
 		ret = ctsvc_query_exec(query);
 		if (CONTACTS_ERROR_NONE != ret) {
 			CTS_ERR("ctsvc_query_exec() Failed(%d)", ret);

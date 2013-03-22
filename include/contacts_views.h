@@ -127,7 +127,7 @@ _CONTACTS_BEGIN_VIEW()
 	_CONTACTS_PROPERTY_INT( id )					// read only
 	_CONTACTS_PROPERTY_STR( display_name )			// read only
 	_CONTACTS_PROPERTY_INT( address_book_id )		// read, write once
-	_CONTACTS_PROPERTY_STR( image_thumbnail_path )	// read, write
+	_CONTACTS_PROPERTY_STR( image_thumbnail_path )	// read only
 	_CONTACTS_PROPERTY_STR( uid )					// read, write
 	_CONTACTS_PROPERTY_INT( changed_time )			// read only
 	_CONTACTS_PROPERTY_CHILD_SINGLE( name )					// read, write

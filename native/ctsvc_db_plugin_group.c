@@ -36,7 +36,6 @@ static int __ctsvc_db_group_update_record( contacts_record_h record );
 static int __ctsvc_db_group_delete_record( int id );
 static int __ctsvc_db_group_get_all_records( int offset, int limit, contacts_list_h* out_list );
 static int __ctsvc_db_group_get_records_with_query( contacts_query_h query, int offset, int limit, contacts_list_h* out_list );
-static double __ctsvc_db_group_get_next_group_prio(void);
 //static int __ctsvc_db_group_insert_records(const contacts_list_h in_list, int **ids);
 //static int __ctsvc_db_group_update_records(const contacts_list_h in_list);
 //static int __ctsvc_db_group_delete_records( int ids[], int count);
@@ -58,6 +57,26 @@ ctsvc_db_plugin_info_s ctsvc_db_plugin_group = {
 	.replace_records = NULL,
 };
 
+static double __ctsvc_db_group_get_next_group_prio(void)
+{
+	int ret;
+	double prio = 0.0;
+	cts_stmt stmt;
+	char query[CTS_SQL_MAX_LEN] = {0};
+
+	snprintf(query, sizeof(query), "SELECT MAX(group_prio) FROM "CTS_TABLE_GROUPS" ");
+
+	stmt = cts_query_prepare(query);
+	RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB, "cts_query_prepare() Failed");
+
+	ret = cts_stmt_step(stmt);
+	if (1 /*CTS_TRUE*/  == ret)
+		prio = ctsvc_stmt_get_dbl(stmt, 0);
+	cts_stmt_finalize(stmt);
+
+	return prio + 1.0;
+}
+
 static int __ctsvc_db_group_insert_record( contacts_record_h record, int *id )
 {
 	int ret;
@@ -77,7 +96,6 @@ static int __ctsvc_db_group_insert_record( contacts_record_h record, int *id )
 	ret = ctsvc_begin_trans();
 	if( ret < CONTACTS_ERROR_NONE ) {
 		CTS_ERR("DB error : ctsvc_begin_trans() Failed(%d)", ret);
-		ctsvc_end_trans(false);
 		return ret;
 	}
 
@@ -156,8 +174,10 @@ static int __ctsvc_db_group_update_record( contacts_record_h record )
 	char* set = NULL;
 	GSList *bind_text = NULL;
 	GSList *cursor = NULL;
-	ctsvc_group_s *group =  (ctsvc_group_s*)record;
+	ctsvc_group_s *group = (ctsvc_group_s*)record;
 	char query[CTS_SQL_MAX_LEN] = {0};
+	cts_stmt stmt = NULL;
+	bool is_read_only = false;
 
 	RETV_IF(NULL == record, CONTACTS_ERROR_INVALID_PARAMETER);
 	RETVM_IF(CTSVC_RECORD_GROUP != group->base.r_type, CONTACTS_ERROR_INVALID_PARAMETER,
@@ -166,13 +186,41 @@ static int __ctsvc_db_group_update_record( contacts_record_h record )
 	RETVM_IF(NULL == group->name, CONTACTS_ERROR_INVALID_PARAMETER,
 			"Invalid parameter : The name of group is empty.");
 
+	ret = ctsvc_begin_trans();
+	RETVM_IF(ret, ret, "ctsvc_begin_trans() Failed(%d)", ret);
+
 	snprintf(query, sizeof(query),
-			"SELECT addressbook_id FROM %s WHERE group_id = %d",
+			"SELECT addressbook_id, is_read_only FROM %s WHERE group_id = %d",
 			CTS_TABLE_GROUPS, group->id);
-	ret = ctsvc_query_get_first_int_result(query, &addressbook_id);
-	if ( ret < CONTACTS_ERROR_NONE) {
-		CTS_ERR("DB error : The group record(%d) is Invalid(%d)", group->id, ret);
-		return ret;
+	stmt = cts_query_prepare(query);
+	if (NULL == stmt) {
+		CTS_ERR("DB error : cts_query_prepare() Failed");
+		ctsvc_end_trans(false);
+		return CONTACTS_ERROR_DB;
+	}
+
+	ret = cts_stmt_step(stmt);
+	if (1 != ret) {
+		CTS_ERR("DB error : cts_stmt_step() Failed(%d)", ret);
+		cts_stmt_finalize(stmt);
+		ctsvc_end_trans(false);
+		if (CONTACTS_ERROR_NONE == ret) {
+			CTS_ERR("DB error : The group record(%d) is Invalid(%d)", group->id, ret);
+			return CONTACTS_ERROR_NO_DATA;
+		}
+		else
+			return ret;
+	}
+
+	addressbook_id = ctsvc_stmt_get_int(stmt, 0);
+	is_read_only = ctsvc_stmt_get_int(stmt, 1);
+	CTS_DBG("addressbook_id : %d, person_id : %d", addressbook_id, person_id);
+	cts_stmt_finalize(stmt);
+
+	if (is_read_only && ctsvc_record_check_property_flag((ctsvc_record_s *)record, _contacts_group.name, CTSVC_PROPERTY_FLAG_DIRTY)) {
+		CTS_ERR("Can not change the group name. It is a read-only group (group_id : %d)", group->id);
+		ctsvc_end_trans(false);
+		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 
 	if (group->image_thumbnail_changed) {
@@ -184,9 +232,6 @@ static int __ctsvc_db_group_update_record( contacts_record_h record )
 		}
 		group->image_thumbnail_changed = false;
 	}
-
-	ret = ctsvc_begin_trans();
-	RETVM_IF(ret, ret, "ctsvc_begin_trans() Failed(%d)", ret);
 
 	do {
 		char query[CTS_SQL_MAX_LEN] = {0};
@@ -510,25 +555,6 @@ static int __ctsvc_db_group_get_records_with_query( contacts_query_h query,
 	return CONTACTS_ERROR_NONE;
 }
 
-double __ctsvc_db_group_get_next_group_prio(void)
-{
-	int ret;
-	double prio = 0.0;
-	cts_stmt stmt;
-	char query[CTS_SQL_MAX_LEN] = {0};
-
-	snprintf(query, sizeof(query), "SELECT MAX(group_prio) FROM "CTS_TABLE_GROUPS" ");
-
-	stmt = cts_query_prepare(query);
-	RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB, "cts_query_prepare() Failed");
-
-	ret = cts_stmt_step(stmt);
-	if (1 /*CTS_TRUE*/  == ret)
-		prio = ctsvc_stmt_get_dbl(stmt, 0);
-	cts_stmt_finalize(stmt);
-
-	return prio + 1.0;
-}
 //static int __ctsvc_db_group_insert_records(const contacts_list_h in_list, int **ids) { return CONTACTS_ERROR_NONE; }
 //static int __ctsvc_db_group_update_records(const contacts_list_h in_list) { return CONTACTS_ERROR_NONE; }
 //static int __ctsvc_db_group_delete_records( int ids[], int count) { return CONTACTS_ERROR_NONE; }

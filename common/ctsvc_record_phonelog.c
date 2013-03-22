@@ -97,7 +97,7 @@ static int __ctsvc_phonelog_clone(contacts_record_h record, contacts_record_h *o
     RETVM_IF(NULL == out_data, CONTACTS_ERROR_OUT_OF_MEMORY,
 			 "Out of memeory : calloc(ctsvc_phonelog_s) Failed(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
 
-    out_data->id = src_data->id;
+	out_data->id = src_data->id;
 	out_data->address = SAFE_STRDUP(src_data->address);
 	out_data->person_id = src_data->person_id;
 	out_data->log_time = src_data->log_time;

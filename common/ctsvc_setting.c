@@ -32,10 +32,12 @@
 #include "ctsvc_localize.h"
 
 static int name_display_order = -1;
+static int name_sorting_order = -1;
 static int primary_sort = -1;
 static int secondary_sort = -1;
 
 static const char *CTSVC_VCONF_DISPLAY_ORDER = VCONFKEY_CONTACTS_SVC_NAME_DISPLAY_ORDER;
+static const char *CTSVC_VCONF_SORTING_ORDER = VCONFKEY_CONTACTS_SVC_NAME_SORTING_ORDER;
 
 const char* ctsvc_get_default_language_vconfkey(void)
 {
@@ -47,7 +49,7 @@ API int contacts_setting_get_name_display_order(contacts_name_display_order_e *o
 	int ret;
 	if (name_display_order < 0)
 	{
-		ret = vconf_get_int(VCONFKEY_CONTACTS_SVC_NAME_DISPLAY_ORDER, &name_display_order);
+		ret = vconf_get_int(CTSVC_VCONF_DISPLAY_ORDER, &name_display_order);
 		RETVM_IF(ret<0, CONTACTS_ERROR_SYSTEM, "System : vconf_get_int() Failed(%d)", ret);
 	}
 
@@ -62,21 +64,55 @@ API int contacts_setting_set_name_display_order(contacts_name_display_order_e or
 	RETVM_IF(CONTACTS_NAME_DISPLAY_ORDER_FIRSTLAST != order && CONTACTS_NAME_DISPLAY_ORDER_LASTFIRST != order,
 			CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : The parameter(order:%d) is Invalid", name_display_order);
 
-	ret = vconf_set_int(VCONFKEY_CONTACTS_SVC_NAME_DISPLAY_ORDER, order);
-	RETVM_IF(ret<0, CONTACTS_ERROR_SYSTEM, "System : vconf_set_int(%s) Failed(%d)", VCONFKEY_CONTACTS_SVC_NAME_DISPLAY_ORDER, ret);
+	ret = vconf_set_int(CTSVC_VCONF_DISPLAY_ORDER, order);
+	RETVM_IF(ret<0, CONTACTS_ERROR_SYSTEM, "System : vconf_set_int(%s) Failed(%d)", CTSVC_VCONF_DISPLAY_ORDER, ret);
 
 	name_display_order = order;
 
 	return CONTACTS_ERROR_NONE;
 }
 
-static void ctsvc_vconf_diplay_order_cb(keynode_t *key, void *data)
+API int contacts_setting_get_name_sorting_order(contacts_name_sorting_order_e *order)
+{
+	int ret;
+	if (name_sorting_order < 0)
+	{
+		ret = vconf_get_int(CTSVC_VCONF_SORTING_ORDER, &name_sorting_order);
+		RETVM_IF(ret<0, CONTACTS_ERROR_SYSTEM, "System : vconf_get_int() Failed(%d)", ret);
+	}
+
+	*order = name_sorting_order;
+
+	return CONTACTS_ERROR_NONE;
+}
+
+API int contacts_setting_set_name_sorting_order(contacts_name_sorting_order_e order)
+{
+	int ret;
+	RETVM_IF(CONTACTS_NAME_SORTING_ORDER_FIRSTLAST != order && CONTACTS_NAME_SORTING_ORDER_LASTFIRST != order,
+			CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : The parameter(order:%d) is Invalid", name_sorting_order);
+
+	ret = vconf_set_int(CTSVC_VCONF_SORTING_ORDER, order);
+	RETVM_IF(ret<0, CONTACTS_ERROR_SYSTEM, "System : vconf_set_int(%s) Failed(%d)", CTSVC_VCONF_SORTING_ORDER, ret);
+
+	name_sorting_order = order;
+
+	return CONTACTS_ERROR_NONE;
+}
+
+static void ctsvc_vconf_display_order_cb(keynode_t *key, void *data)
 {
 	name_display_order = vconf_keynode_get_int(key);
 }
 
+static void ctsvc_vconf_sorting_order_cb(keynode_t *key, void *data)
+{
+	name_sorting_order = vconf_keynode_get_int(key);
+}
+
 static void ctsvc_vconf_language_cb(keynode_t *key, void *data)
 {
+
 	primary_sort = vconf_keynode_get_int(key);
 	{
 		if (primary_sort==CTSVC_SORT_KOREAN)
@@ -98,6 +134,12 @@ int ctsvc_register_vconf(void)
 		name_display_order = CONTACTS_NAME_DISPLAY_ORDER_FIRSTLAST;
 	}
 
+	ret = vconf_get_int(CTSVC_VCONF_SORTING_ORDER, &name_sorting_order);
+	if (ret < 0) {
+		CTS_ERR("vconf_get_int() Failed(%d)", ret);
+		name_sorting_order = CONTACTS_NAME_SORTING_ORDER_FIRSTLAST;
+	}
+
 	ret = vconf_get_int(ctsvc_get_default_language_vconfkey(), &primary_sort);
 	WARN_IF(ret < 0, "vconf_get_int() Failed(%d)", ret);
 
@@ -111,9 +153,13 @@ int ctsvc_register_vconf(void)
 	}
 
 	ret = vconf_notify_key_changed(CTSVC_VCONF_DISPLAY_ORDER,
-			ctsvc_vconf_diplay_order_cb, NULL);
+			ctsvc_vconf_display_order_cb, NULL);
 	RETVM_IF(ret<0, CONTACTS_ERROR_SYSTEM, "vconf_notify_key_changed(%s) Failed(%d)",
 			CTSVC_VCONF_DISPLAY_ORDER, ret);
+	ret = vconf_notify_key_changed(CTSVC_VCONF_SORTING_ORDER,
+			ctsvc_vconf_sorting_order_cb, NULL);
+	RETVM_IF(ret<0, CONTACTS_ERROR_SYSTEM, "vconf_notify_key_changed(%s) Failed(%d)",
+			CTSVC_VCONF_SORTING_ORDER, ret);
 	ret = vconf_notify_key_changed(ctsvc_get_default_language_vconfkey(),
 			ctsvc_vconf_language_cb, NULL);
 	RETVM_IF(ret<0, CONTACTS_ERROR_SYSTEM, "vconf_notify_key_changed(%s) Failed(%d)",
@@ -126,8 +172,11 @@ void ctsvc_deregister_vconf(void)
 {
 	int ret;
 
-	ret = vconf_ignore_key_changed(CTSVC_VCONF_DISPLAY_ORDER, ctsvc_vconf_diplay_order_cb);
+	ret = vconf_ignore_key_changed(CTSVC_VCONF_DISPLAY_ORDER, ctsvc_vconf_display_order_cb);
 	RETM_IF(ret<0,"vconf_ignore_key_changed(%s) Failed(%d)",CTSVC_VCONF_DISPLAY_ORDER,ret);
+	ret = vconf_ignore_key_changed(CTSVC_VCONF_SORTING_ORDER, ctsvc_vconf_sorting_order_cb);
+	RETM_IF(ret<0,"vconf_ignore_key_changed(%s) Failed(%d)",CTSVC_VCONF_SORTING_ORDER,ret);
+
 	ret = vconf_ignore_key_changed(ctsvc_get_default_language_vconfkey(), ctsvc_vconf_language_cb);
 	RETM_IF(ret<0,"vconf_ignore_key_changed(%s) Failed(%d)", ctsvc_get_default_language_vconfkey(),ret);
 }

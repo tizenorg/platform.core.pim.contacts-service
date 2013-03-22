@@ -318,6 +318,9 @@ int ctsvc_normalize_number(const char *src, char *dest, int dest_size, int min_m
 {
 	int ret;
 
+	RETV_IF(NULL == src, CONTACTS_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == dest, CONTACTS_ERROR_INVALID_PARAMETER);
+
 	ret = __ctsvc_normalize_number(src, dest, dest_size, min_match);
 	if (ret != CONTACTS_ERROR_NONE) {
 		CTS_ERR("__ctsvc_normalize_number(src) failed(%d)", src, ret);

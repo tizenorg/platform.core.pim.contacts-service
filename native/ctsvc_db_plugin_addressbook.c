@@ -135,7 +135,7 @@ static int __ctsvc_db_addressbook_insert_record( contacts_record_h record, int *
 
 	// Can not insert addressbook which has same account_id
 	int addresbook_id;
-	account_h account;
+	account_h account = NULL;
 	snprintf(query, sizeof(query),
 		"SELECT addressbook_id FROM "CTS_TABLE_ADDRESSBOOKS" WHERE account_id = %d",
 		addressbook->account_id);

@@ -925,7 +925,7 @@ static int __ctsvc_db_append_search_query(const char *keyword, char *query, int 
 static int __ctsvc_db_search_records_exec(const char *view_uri, const property_info_s* properties,
 		int ids_count, const char *projection, const char *keyword, int offset,	int limit, contacts_list_h* out_list )
 {
-	char query[CTS_SQL_MAX_LEN] = {0};
+	char query[CTS_SQL_MAX_LEN*8] = {0}; // temporarily extend
 	const char *table;
 	int len;
 	int ret;
@@ -1089,7 +1089,7 @@ static int __ctsvc_db_search_records(const char* view_uri, const char *keyword,
 static inline int __ctsvc_db_search_records_with_query_exec(ctsvc_query_s *s_query, const char *projection,
 	const char *condition, GSList *bind, const char *keyword, int offset, int limit, contacts_list_h * out_list )
 {
-	char query[CTS_SQL_MAX_LEN] = {0};
+	char query[CTS_SQL_MAX_LEN*8] = {0}; // temporarily extend
 	int len;
 	int ret;
 	int i;

@@ -76,7 +76,7 @@
 
 	#define CTS_DBG(fmt, arg...)
 	#define CTS_WARN(fmt, arg...)
-	#define CTS_ERR(fmt, arg...) ERR(IPC_ROLE" "fmt, ##arg)
+	#define CTS_ERR(fmt, arg...) ERR(fmt, ##arg)
 	#define CTS_INFO(fmt, arg...)
 	#define CTS_VERBOSE(fmt, arg...)
 

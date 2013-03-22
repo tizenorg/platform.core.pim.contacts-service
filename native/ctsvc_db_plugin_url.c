@@ -88,15 +88,6 @@ static int __ctsvc_db_url_insert_record( contacts_record_h record, int *id )
 		return ret;
 	}
 
-	snprintf(query, sizeof(query),
-			"SELECT contact_id FROM "CTSVC_DB_VIEW_CONTACT" WHERE contact_id = %d", url->contact_id);
-	ret = ctsvc_query_get_first_int_result(query, &contact_id);
-	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("No data : contact_id (%d) is not exist", contact_id);
-		ctsvc_end_trans(false);
-		return CONTACTS_ERROR_INVALID_PARAMETER;
-	}
-
 	ret = ctsvc_db_contact_update_changed_time(url->contact_id);
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("DB error : ctsvc_db_contact_update_changed_time() Failed(%d)", ret);
