@@ -478,6 +478,15 @@ _CONTACTS_BEGIN_READ_ONLY_VIEW()
 	_CONTACTS_PROPERTY_PROJECTION_STR( message_alert )
 _CONTACTS_END_READ_ONLY_VIEW( _contacts_person_email )
 
+// person_address
+_CONTACTS_BEGIN_READ_ONLY_VIEW()
+	_CONTACTS_PROPERTY_INT( person_id )
+	_CONTACTS_PROPERTY_BOOL( is_default )
+	_CONTACTS_PROPERTY_STR( street )
+	_CONTACTS_PROPERTY_INT( type )
+	_CONTACTS_PROPERTY_STR( label )
+_CONTACTS_END_READ_ONLY_VIEW( _contacts_person_address )
+
 // person_group : read only
 _CONTACTS_BEGIN_READ_ONLY_VIEW()
 	_CONTACTS_PROPERTY_INT( person_id )
