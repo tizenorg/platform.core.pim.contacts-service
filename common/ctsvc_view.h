@@ -61,6 +61,7 @@
 #define CTSVC_VIEW_URI_READ_ONLY_PERSON_CONTACT					"tizen.contacts_view.person/simple_contact"
 #define CTSVC_VIEW_URI_READ_ONLY_PERSON_NUMBER					"tizen.contacts_view.person/simple_contact/number"
 #define CTSVC_VIEW_URI_READ_ONLY_PERSON_EMAIL					"tizen.contacts_view.person/simple_contact/email"
+#define CTSVC_VIEW_URI_READ_ONLY_PERSON_ADDRESS					"tizen.contacts_view.person/simple_contact/address"
 
 #define CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP					"tizen.contacts_view.person/simple_contact/group"
 #define CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP_ASSIGNED		"tizen.contacts_view.person/simple_contact/group_assigned"
@@ -186,6 +187,12 @@ typedef enum {
 	// person-stat
 	CTSVC_PROPERTY_PERSON_USAGE_TYPE = (CTSVC_PROPERTY_PERSON | CTSVC_VIEW_DATA_TYPE_INT) +100,
 	CTSVC_PROPERTY_PERSON_TIMES_USED = (CTSVC_PROPERTY_PERSON | CTSVC_VIEW_DATA_TYPE_INT) +101,
+
+	// person address
+	CTSVC_PROPERTY_PERSON_ADDRESS_IS_DEFAULT = (CTSVC_PROPERTY_PERSON | CTSVC_VIEW_DATA_TYPE_INT | CTSVC_READ_ONLY_PROPERTY ) + 1,
+	CTSVC_PROPERTY_PERSON_ADDRESS_STREET = (CTSVC_PROPERTY_PERSON | CTSVC_VIEW_DATA_TYPE_STR | CTSVC_READ_ONLY_PROPERTY ) + 2,
+	CTSVC_PROPERTY_PERSON_ADDRESS_TYPE = (CTSVC_PROPERTY_PERSON | CTSVC_VIEW_DATA_TYPE_INT | CTSVC_READ_ONLY_PROPERTY ) + 3,
+	CTSVC_PROPERTY_PERSON_ADDRESS_LABEL = (CTSVC_PROPERTY_PERSON | CTSVC_VIEW_DATA_TYPE_STR | CTSVC_READ_ONLY_PROPERTY ) + 4,
 
 	// simple contact : read only
 	// contact
