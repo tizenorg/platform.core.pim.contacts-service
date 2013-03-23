@@ -477,6 +477,15 @@ API const _contacts_person_address_property_ids _contacts_person_address = {
 	.label                  = CTSVC_PROPERTY_PERSON_ADDRESS_LABEL,
 };
 
+API const _contacts_person_company_property_ids _contacts_person_company = {
+	._uri			= CTSVC_VIEW_URI_READ_ONLY_PERSON_COMPANY,
+	.person_id		= CTSVC_PROPERTY_PERSON_ID,
+	.is_default		= CTSVC_PROPERTY_PERSON_COMPANY_IS_DEFAULT,
+	.name			= CTSVC_PROPERTY_PERSON_COMPANY_NAME,
+	.department		= CTSVC_PROPERTY_PERSON_COMPANY_DEPARTMENT,
+	.job_title              = CTSVC_PROPERTY_PERSON_COMPANY_JOB_TITLE,
+};
+
 API const _contacts_person_usage_property_ids _contacts_person_usage = {
 	._uri					= CTSVC_VIEW_URI_READ_ONLY_PERSON_USAGE,
 	.person_id				= CTSVC_PROPERTY_PERSON_ID,
@@ -764,6 +773,14 @@ const property_info_s __property_person_address[] = {
 	{CTSVC_PROPERTY_PERSON_ADDRESS_STREET, CTSVC_SEARCH_PROPERTY_ALL, "street"},
 	{CTSVC_PROPERTY_PERSON_ADDRESS_TYPE, CTSVC_SEARCH_PROPERTY_ALL,	"type"},
 	{CTSVC_PROPERTY_PERSON_ADDRESS_LABEL, CTSVC_SEARCH_PROPERTY_ALL, "label"},
+};
+
+const property_info_s __property_person_company[] = {
+	{CTSVC_PROPERTY_PERSON_ID, CTSVC_SEARCH_PROPERTY_ALL,	"person_id"},
+	{CTSVC_PROPERTY_PERSON_COMPANY_IS_DEFAULT, CTSVC_SEARCH_PROPERTY_ALL,	"is_default"},
+	{CTSVC_PROPERTY_PERSON_COMPANY_NAME, CTSVC_SEARCH_PROPERTY_ALL,	"company_name"},
+	{CTSVC_PROPERTY_PERSON_COMPANY_DEPARTMENT, CTSVC_SEARCH_PROPERTY_ALL, "department"},
+	{CTSVC_PROPERTY_PERSON_COMPANY_JOB_TITLE, CTSVC_SEARCH_PROPERTY_ALL, "job_title"},
 };
 
 const property_info_s __property_url[] = {
@@ -1280,6 +1297,7 @@ static const view_uri_info_s __tables[] = {
 	{CTSVC_VIEW_URI_READ_ONLY_PERSON_NUMBER,		CTSVC_RECORD_RESULT, PTR_COUNT(__property_person_number)},
 	{CTSVC_VIEW_URI_READ_ONLY_PERSON_EMAIL,		CTSVC_RECORD_RESULT, PTR_COUNT(__property_person_email)},
 	{CTSVC_VIEW_URI_READ_ONLY_PERSON_ADDRESS, 	CTSVC_RECORD_RESULT, PTR_COUNT(__property_person_address)},
+	{CTSVC_VIEW_URI_READ_ONLY_PERSON_COMPANY, 	CTSVC_RECORD_RESULT, PTR_COUNT(__property_person_company)},
 	{CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP,		CTSVC_RECORD_RESULT, PTR_COUNT(__property_person_grouprel)},
 	{CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP_ASSIGNED,		CTSVC_RECORD_RESULT, PTR_COUNT(__property_person_group_assigned)},
 	{CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP_NOT_ASSIGNED,		CTSVC_RECORD_RESULT, PTR_COUNT(__property_person_group_not_assigned)},
