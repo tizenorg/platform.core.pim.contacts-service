@@ -487,6 +487,16 @@ _CONTACTS_BEGIN_READ_ONLY_VIEW()
 	_CONTACTS_PROPERTY_STR( label )
 _CONTACTS_END_READ_ONLY_VIEW( _contacts_person_address )
 
+
+// person_company
+_CONTACTS_BEGIN_READ_ONLY_VIEW()
+	_CONTACTS_PROPERTY_INT( person_id )
+	_CONTACTS_PROPERTY_BOOL( is_default )
+	_CONTACTS_PROPERTY_STR( name )
+	_CONTACTS_PROPERTY_STR( department )
+	_CONTACTS_PROPERTY_STR( job_title )
+_CONTACTS_END_READ_ONLY_VIEW( _contacts_person_company )
+
 // person_group : read only
 _CONTACTS_BEGIN_READ_ONLY_VIEW()
 	_CONTACTS_PROPERTY_INT( person_id )
