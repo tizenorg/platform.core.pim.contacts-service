@@ -505,6 +505,12 @@ _CONTACTS_BEGIN_READ_ONLY_VIEW()
 	_CONTACTS_PROPERTY_INT( type )
 _CONTACTS_END_READ_ONLY_VIEW( _contacts_person_url )
 
+// person_nickname
+_CONTACTS_BEGIN_READ_ONLY_VIEW()
+	_CONTACTS_PROPERTY_INT( person_id )
+	_CONTACTS_PROPERTY_STR( name )
+_CONTACTS_END_READ_ONLY_VIEW( _contacts_person_nickname )
+
 // person_group : read only
 _CONTACTS_BEGIN_READ_ONLY_VIEW()
 	_CONTACTS_PROPERTY_INT( person_id )
