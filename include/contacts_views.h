@@ -511,6 +511,15 @@ _CONTACTS_BEGIN_READ_ONLY_VIEW()
 	_CONTACTS_PROPERTY_STR( name )
 _CONTACTS_END_READ_ONLY_VIEW( _contacts_person_nickname )
 
+// person messenger
+_CONTACTS_BEGIN_READ_ONLY_VIEW()
+	_CONTACTS_PROPERTY_INT( person_id )
+	_CONTACTS_PROPERTY_INT( id )
+	_CONTACTS_PROPERTY_STR( im_id )
+	_CONTACTS_PROPERTY_STR( label )
+	_CONTACTS_PROPERTY_INT( type )
+_CONTACTS_END_READ_ONLY_VIEW( _contacts_person_messenger )
+
 // person_group : read only
 _CONTACTS_BEGIN_READ_ONLY_VIEW()
 	_CONTACTS_PROPERTY_INT( person_id )

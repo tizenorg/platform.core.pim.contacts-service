@@ -500,6 +500,15 @@ API const _contacts_person_nickname_property_ids _contacts_person_nickname = {
 	.name		        = CTSVC_PROPERTY_PERSON_NICKNAME_NAME,
 };
 
+API const _contacts_person_messenger_property_ids _contacts_person_messenger = {
+	._uri			= CTSVC_VIEW_URI_READ_ONLY_PERSON_MESSENGER,
+	.person_id		= CTSVC_PROPERTY_PERSON_ID,
+	.id		        = CTSVC_PROPERTY_PERSON_MESSENGER_ID,
+	.im_id		        = CTSVC_PROPERTY_PERSON_MESSENGER_IM_ID,
+	.label		        = CTSVC_PROPERTY_PERSON_MESSENGER_LABEL,
+	.type		        = CTSVC_PROPERTY_PERSON_MESSENGER_TYPE,
+};
+
 API const _contacts_person_usage_property_ids _contacts_person_usage = {
 	._uri					= CTSVC_VIEW_URI_READ_ONLY_PERSON_USAGE,
 	.person_id				= CTSVC_PROPERTY_PERSON_ID,
@@ -807,6 +816,14 @@ const property_info_s __property_person_url[] = {
 const property_info_s __property_person_nickname[] = {
 	{CTSVC_PROPERTY_PERSON_ID, CTSVC_SEARCH_PROPERTY_ALL, "person_id"},
 	{CTSVC_PROPERTY_PERSON_NICKNAME_NAME, CTSVC_SEARCH_PROPERTY_ALL, "name"},
+};
+
+const property_info_s __property_person_messenger[] = {
+	{CTSVC_PROPERTY_PERSON_ID, CTSVC_SEARCH_PROPERTY_ALL, "person_id"},
+	{CTSVC_PROPERTY_PERSON_MESSENGER_ID, CTSVC_SEARCH_PROPERTY_ALL,	"id"},
+	{CTSVC_PROPERTY_PERSON_MESSENGER_IM_ID, CTSVC_SEARCH_PROPERTY_ALL,"im_id"},
+	{CTSVC_PROPERTY_PERSON_MESSENGER_LABEL, CTSVC_SEARCH_PROPERTY_ALL,"label"},
+	{CTSVC_PROPERTY_PERSON_MESSENGER_TYPE, CTSVC_SEARCH_PROPERTY_ALL, "type"},
 };
 
 const property_info_s __property_url[] = {
@@ -1326,6 +1343,7 @@ static const view_uri_info_s __tables[] = {
 	{CTSVC_VIEW_URI_READ_ONLY_PERSON_COMPANY, 	CTSVC_RECORD_RESULT, PTR_COUNT(__property_person_company)},
 	{CTSVC_VIEW_URI_READ_ONLY_PERSON_URL, 	CTSVC_RECORD_RESULT, PTR_COUNT(__property_person_url)},
 	{CTSVC_VIEW_URI_READ_ONLY_PERSON_NICKNAME, 	CTSVC_RECORD_RESULT, PTR_COUNT(__property_person_nickname)},
+	{CTSVC_VIEW_URI_READ_ONLY_PERSON_MESSENGER, 	CTSVC_RECORD_RESULT, PTR_COUNT(__property_person_messenger)},
 	{CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP,		CTSVC_RECORD_RESULT, PTR_COUNT(__property_person_grouprel)},
 	{CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP_ASSIGNED,		CTSVC_RECORD_RESULT, PTR_COUNT(__property_person_group_assigned)},
 	{CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP_NOT_ASSIGNED,		CTSVC_RECORD_RESULT, PTR_COUNT(__property_person_group_not_assigned)},

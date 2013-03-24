@@ -65,6 +65,7 @@
 #define CTSVC_VIEW_URI_READ_ONLY_PERSON_COMPANY					"tizen.contacts_view.person/simple_contact/company"
 #define CTSVC_VIEW_URI_READ_ONLY_PERSON_URL					"tizen.contacts_view.person/simple_contact/url"
 #define CTSVC_VIEW_URI_READ_ONLY_PERSON_NICKNAME				"tizen.contacts_view.person/simple_contact/nickname"
+#define CTSVC_VIEW_URI_READ_ONLY_PERSON_MESSENGER				"tizen.contacts_view.person/simple_contact/messenger"
 
 #define CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP					"tizen.contacts_view.person/simple_contact/group"
 #define CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP_ASSIGNED		"tizen.contacts_view.person/simple_contact/group_assigned"
@@ -210,6 +211,12 @@ typedef enum {
 
 	// person nickname
 	CTSVC_PROPERTY_PERSON_NICKNAME_NAME = (CTSVC_PROPERTY_PERSON | CTSVC_VIEW_DATA_TYPE_STR | CTSVC_READ_ONLY_PROPERTY ) + 1,
+
+	// person messenger
+	CTSVC_PROPERTY_PERSON_MESSENGER_ID = (CTSVC_PROPERTY_PERSON | CTSVC_VIEW_DATA_TYPE_INT | CTSVC_READ_ONLY_PROPERTY ) + 1,
+	CTSVC_PROPERTY_PERSON_MESSENGER_IM_ID = (CTSVC_PROPERTY_PERSON | CTSVC_VIEW_DATA_TYPE_STR | CTSVC_READ_ONLY_PROPERTY ) + 2,
+	CTSVC_PROPERTY_PERSON_MESSENGER_LABEL = (CTSVC_PROPERTY_PERSON | CTSVC_VIEW_DATA_TYPE_STR | CTSVC_READ_ONLY_PROPERTY ) + 3,
+	CTSVC_PROPERTY_PERSON_MESSENGER_TYPE = (CTSVC_PROPERTY_PERSON | CTSVC_VIEW_DATA_TYPE_INT | CTSVC_READ_ONLY_PROPERTY ) + 4,
 
 	// simple contact : read only
 	// contact
