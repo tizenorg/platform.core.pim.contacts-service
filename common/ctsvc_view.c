@@ -494,6 +494,12 @@ API const _contacts_person_url_property_ids _contacts_person_url = {
 	.type			= CTSVC_PROPERTY_PERSON_URL_TYPE,
 };
 
+API const _contacts_person_nickname_property_ids _contacts_person_nickname = {
+	._uri			= CTSVC_VIEW_URI_READ_ONLY_PERSON_NICKNAME,
+	.person_id		= CTSVC_PROPERTY_PERSON_ID,
+	.name		        = CTSVC_PROPERTY_PERSON_NICKNAME_NAME,
+};
+
 API const _contacts_person_usage_property_ids _contacts_person_usage = {
 	._uri					= CTSVC_VIEW_URI_READ_ONLY_PERSON_USAGE,
 	.person_id				= CTSVC_PROPERTY_PERSON_ID,
@@ -796,6 +802,11 @@ const property_info_s __property_person_url[] = {
 	{CTSVC_PROPERTY_PERSON_URL_URL, CTSVC_SEARCH_PROPERTY_ALL, "url"},
 	{CTSVC_PROPERTY_PERSON_URL_LABEL, CTSVC_SEARCH_PROPERTY_ALL, "label"},
 	{CTSVC_PROPERTY_PERSON_URL_TYPE, CTSVC_SEARCH_PROPERTY_ALL, "type"},
+};
+
+const property_info_s __property_person_nickname[] = {
+	{CTSVC_PROPERTY_PERSON_ID, CTSVC_SEARCH_PROPERTY_ALL, "person_id"},
+	{CTSVC_PROPERTY_PERSON_NICKNAME_NAME, CTSVC_SEARCH_PROPERTY_ALL, "name"},
 };
 
 const property_info_s __property_url[] = {
@@ -1314,6 +1325,7 @@ static const view_uri_info_s __tables[] = {
 	{CTSVC_VIEW_URI_READ_ONLY_PERSON_ADDRESS, 	CTSVC_RECORD_RESULT, PTR_COUNT(__property_person_address)},
 	{CTSVC_VIEW_URI_READ_ONLY_PERSON_COMPANY, 	CTSVC_RECORD_RESULT, PTR_COUNT(__property_person_company)},
 	{CTSVC_VIEW_URI_READ_ONLY_PERSON_URL, 	CTSVC_RECORD_RESULT, PTR_COUNT(__property_person_url)},
+	{CTSVC_VIEW_URI_READ_ONLY_PERSON_NICKNAME, 	CTSVC_RECORD_RESULT, PTR_COUNT(__property_person_nickname)},
 	{CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP,		CTSVC_RECORD_RESULT, PTR_COUNT(__property_person_grouprel)},
 	{CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP_ASSIGNED,		CTSVC_RECORD_RESULT, PTR_COUNT(__property_person_group_assigned)},
 	{CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP_NOT_ASSIGNED,		CTSVC_RECORD_RESULT, PTR_COUNT(__property_person_group_not_assigned)},

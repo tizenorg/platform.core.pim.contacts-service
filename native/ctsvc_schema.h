@@ -93,6 +93,7 @@
 #define CTSVC_DB_VIEW_PERSON_ADDRESS		"view_person_contact_address"
 #define CTSVC_DB_VIEW_PERSON_COMPANY		"view_person_contact_company"
 #define CTSVC_DB_VIEW_PERSON_URL		"view_person_contact_url"
+#define CTSVC_DB_VIEW_PERSON_NICKNAME		"view_person_contact_nickname"
 #define CTSVC_DB_VIEW_PERSON_GROUP			"view_person_contact_group"
 #define CTSVC_DB_VIEW_PERSON_GROUP_ASSIGNED	"view_person_contact_group_assigned"
 #define CTSVC_DB_VIEW_PERSON_GROUP_NOT_ASSIGNED	"view_person_contact_group_not_assigned"
