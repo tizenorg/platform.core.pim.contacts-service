@@ -50,7 +50,7 @@ New Contacts Service Library (devel)
 
 
 %build
-cmake . -DCMAKE_INSTALL_PREFIX=%{_prefix}
+%cmake .
 make %{?_smp_mflags}
 
 
@@ -63,9 +63,10 @@ mkdir -p %{buildroot}%{_sysconfdir}/rc.d/rc5.d/
 ln -s ../init.d/contacts-service-ipcd.sh %{buildroot}%{_sysconfdir}/rc.d/rc3.d/S50contacts-svc-helper
 ln -s ../init.d/contacts-service-ipcd.sh %{buildroot}%{_sysconfdir}/rc.d/rc5.d/S50contacts-svc-helper
 
-mkdir -p %{buildroot}%{_libdir}/systemd/user/tizen-middleware.target.wants
-install -m 0644 %SOURCE1 %{buildroot}%{_libdir}/systemd/user/contacts-service.service
-ln -s ../contacts-service.service %{buildroot}%{_libdir}/systemd/user/tizen-middleware.target.wants/contacts-service.service
+mkdir -p %{buildroot}/usr/lib/systemd/user/tizen-middleware.target.wants
+install -m 0644 %SOURCE1 %{buildroot}/usr/lib/systemd/user/contacts-service.service
+ln -s ../contacts-service.service %{buildroot}/usr/lib/systemd/user/tizen-middleware.target.wants/contacts-service.service
+
 
 
 %post -n contacts-service2
@@ -91,7 +92,6 @@ vconftool set -t int db/contacts-svc/phonenumber_min_match_digit 8 -g 6005
 
 %postun -p /sbin/ldconfig
 
-
 %files -n contacts-service2
 %manifest contacts-service2.manifest
 %defattr(-,root,root,-)
@@ -109,6 +109,8 @@ vconftool set -t int db/contacts-svc/phonenumber_min_match_digit 8 -g 6005
 
 %files -n contacts-service2-devel
 %defattr(-,root,root,-)
+%{_libdir}/libcontacts-service2.so.*
+%{_libdir}/libcontacts-service3.so.*
 %{_libdir}/libcontacts-service2.so
 %{_libdir}/libcontacts-service3.so
 %{_libdir}/pkgconfig/contacts-service2.pc
