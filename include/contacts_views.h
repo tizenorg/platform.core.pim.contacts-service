@@ -566,6 +566,16 @@ _CONTACTS_BEGIN_READ_ONLY_VIEW()
 	_CONTACTS_PROPERTY_STR( label )
 _CONTACTS_END_READ_ONLY_VIEW( _contacts_person_event )
 
+// unknown persons
+_CONTACTS_BEGIN_READ_ONLY_VIEW()
+	_CONTACTS_PROPERTY_INT( id )
+	_CONTACTS_PROPERTY_STR( display_name )
+	_CONTACTS_PROPERTY_STR( image_thumbnail_path )
+	_CONTACTS_PROPERTY_INT( display_contact_id )
+	_CONTACTS_PROPERTY_BOOL( is_favorite )
+	_CONTACTS_PROPERTY_INT( link_count )
+_CONTACTS_END_READ_ONLY_VIEW( _contacts_person_unknown )
+
 // person_group : read only
 _CONTACTS_BEGIN_READ_ONLY_VIEW()
 	_CONTACTS_PROPERTY_INT( person_id )
