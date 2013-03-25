@@ -554,6 +554,16 @@ API const _contacts_person_event_property_ids _contacts_person_event = {
 	.label		= CTSVC_PROPERTY_PERSON_EVENT_LABEL,
 };
 
+API const _contacts_person_unknown_property_ids _contacts_person_unknown = {
+	._uri			= CTSVC_VIEW_URI_READ_ONLY_PERSON_UNKNOWN,
+	.id		        = CTSVC_PROPERTY_PERSON_ID,
+	.display_name	        = CTSVC_PROPERTY_PERSON_UNKNOWN_DISPLAY_NAME,
+	.image_thumbnail_path	= CTSVC_PROPERTY_PERSON_UNKNOWN_IMAGE_THUMBNAIL,
+	.display_contact_id	= CTSVC_PROPERTY_PERSON_UNKNOWN_DISPLAY_CONTACT_ID,
+	.is_favorite = CTSVC_PROPERTY_PERSON_UNKNOWN_IS_FAVORITE,
+	.link_count = CTSVC_PROPERTY_PERSON_UNKNOWN_LINK_COUNT,
+};
+
 API const _contacts_person_usage_property_ids _contacts_person_usage = {
 	._uri					= CTSVC_VIEW_URI_READ_ONLY_PERSON_USAGE,
 	.person_id				= CTSVC_PROPERTY_PERSON_ID,
@@ -877,6 +887,15 @@ const property_info_s __property_person_event[] = {
 	{CTSVC_PROPERTY_PERSON_EVENT_TYPE, CTSVC_SEARCH_PROPERTY_ALL, "type"},
 	{CTSVC_PROPERTY_PERSON_EVENT_DATE, CTSVC_SEARCH_PROPERTY_ALL, "date"},
 	{CTSVC_PROPERTY_PERSON_EVENT_LABEL, CTSVC_SEARCH_PROPERTY_ALL, "label"},
+};
+
+const property_info_s __property_person_unknown[] = {
+	{CTSVC_PROPERTY_PERSON_ID, CTSVC_SEARCH_PROPERTY_ALL, "person_id"},
+	{CTSVC_PROPERTY_PERSON_UNKNOWN_DISPLAY_NAME, CTSVC_SEARCH_PROPERTY_ALL,	"display_name"},
+	{CTSVC_PROPERTY_PERSON_UNKNOWN_IMAGE_THUMBNAIL, CTSVC_SEARCH_PROPERTY_ALL, "image_thumbnail_path"},
+	{CTSVC_PROPERTY_PERSON_UNKNOWN_DISPLAY_CONTACT_ID, CTSVC_SEARCH_PROPERTY_ALL, "name_contact_id"},
+	{CTSVC_PROPERTY_PERSON_UNKNOWN_IS_FAVORITE, CTSVC_SEARCH_PROPERTY_ALL, "is_favorite"},
+	{CTSVC_PROPERTY_PERSON_UNKNOWN_LINK_COUNT, CTSVC_SEARCH_PROPERTY_ALL, "link_count"},
 };
 
 const property_info_s __property_url[] = {
@@ -1399,6 +1418,7 @@ static const view_uri_info_s __tables[] = {
 	{CTSVC_VIEW_URI_READ_ONLY_PERSON_NICKNAME, 	CTSVC_RECORD_RESULT, PTR_COUNT(__property_person_nickname)},
 	{CTSVC_VIEW_URI_READ_ONLY_PERSON_MESSENGER, 	CTSVC_RECORD_RESULT, PTR_COUNT(__property_person_messenger)},
 	{CTSVC_VIEW_URI_READ_ONLY_PERSON_EVENT, 	CTSVC_RECORD_RESULT, PTR_COUNT(__property_person_event)},
+	{CTSVC_VIEW_URI_READ_ONLY_PERSON_UNKNOWN, 	CTSVC_RECORD_RESULT, PTR_COUNT(__property_person_unknown)},
 	{CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP,		CTSVC_RECORD_RESULT, PTR_COUNT(__property_person_grouprel)},
 	{CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP_ASSIGNED,		CTSVC_RECORD_RESULT, PTR_COUNT(__property_person_group_assigned)},
 	{CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP_NOT_ASSIGNED,		CTSVC_RECORD_RESULT, PTR_COUNT(__property_person_group_not_assigned)},
