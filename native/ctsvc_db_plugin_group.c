@@ -214,7 +214,6 @@ static int __ctsvc_db_group_update_record( contacts_record_h record )
 
 	addressbook_id = ctsvc_stmt_get_int(stmt, 0);
 	is_read_only = ctsvc_stmt_get_int(stmt, 1);
-	CTS_DBG("addressbook_id : %d, person_id : %d", addressbook_id, person_id);
 	cts_stmt_finalize(stmt);
 
 	if (is_read_only && ctsvc_record_check_property_flag((ctsvc_record_s *)record, _contacts_group.name, CTSVC_PROPERTY_FLAG_DIRTY)) {
@@ -223,14 +222,13 @@ static int __ctsvc_db_group_update_record( contacts_record_h record )
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 
-	if (group->image_thumbnail_changed) {
+	if (ctsvc_record_check_property_flag((ctsvc_record_s *)group, _contacts_group.image_path, CTSVC_PROPERTY_FLAG_DIRTY)) {
 		char image[CTS_SQL_MAX_LEN] = {0};
 		ret = ctsvc_change_image(CTS_GROUP_IMAGE_LOCATION, group->id, group->image_thumbnail_path, image, sizeof(image));
 		if (*image) {
 			free(group->image_thumbnail_path);
 			group->image_thumbnail_path = strdup(image);
 		}
-		group->image_thumbnail_changed = false;
 	}
 
 	do {

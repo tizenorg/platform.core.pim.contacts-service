@@ -136,7 +136,7 @@ int ctsvc_db_image_update(contacts_record_h record, int contact_id, bool is_my_p
 	ret = ctsvc_query_get_first_int_result(query, &id);
 	RETV_IF(ret != CONTACTS_ERROR_NONE, ret);
 
-	if (image->is_changed) {
+	if (ctsvc_record_check_property_flag((ctsvc_record_s *)record, _contacts_image.path, CTSVC_PROPERTY_FLAG_DIRTY)) {
 		char image_path[CTS_SQL_MAX_LEN] = {0};
 
 		ret = ctsvc_contact_update_image_file(contact_id, image->id, image->path, image_path, sizeof(image_path));
@@ -146,7 +146,6 @@ int ctsvc_db_image_update(contacts_record_h record, int contact_id, bool is_my_p
 			free(image->path);
 			image->path = strdup(image_path);
 		}
-		image->is_changed = false;
 	}
 
 	do {

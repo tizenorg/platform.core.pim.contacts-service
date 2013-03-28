@@ -17,6 +17,7 @@
  *
  */
 #include <stdio.h>
+#include <badge.h>
 
 #include "contacts.h"
 #include "ctsvc_internal.h"
@@ -29,7 +30,6 @@
 #include "ctsvc_db_query.h"
 #include "ctsvc_db_init.h"
 #include "ctsvc_notification.h"
-#include "badge.h"
 
 #ifdef _CONTACTS_IPC_SERVER
 #include "ctsvc_server_change_subject.h"
@@ -143,17 +143,17 @@ static int __ctsvc_db_phonelog_update_record( contacts_record_h record )
 			"Invaild parameter : the type is can not updated(%d)", phonelog->log_type);
 	RETVM_IF(CTSVC_PROPERTY_FLAG_DIRTY != (phonelog->base.property_flag & CTSVC_PROPERTY_FLAG_DIRTY), CONTACTS_ERROR_NONE, "No update");
 
+	ret = ctsvc_begin_trans();
+	RETVM_IF(ret, ret, "ctsvc_begin_trans() Failed(%d)", ret);
 
 	snprintf(query, sizeof(query),
 			"SELECT id FROM "CTS_TABLE_PHONELOGS" WHERE id = %d", phonelog->id);
 	ret = ctsvc_query_get_first_int_result(query, &phonelog_id);
 	if (ret != CONTACTS_ERROR_NONE) {
 		CTS_ERR("ctsvc_query_get_first_int_result Fail(%d)", ret);
+		ctsvc_end_trans(false);
 		return ret;
 	}
-
-	ret = ctsvc_begin_trans();
-	RETVM_IF(ret, ret, "ctsvc_begin_trans() Failed(%d)", ret);
 
 	do {
 		if (CONTACTS_ERROR_NONE != (ret = ctsvc_db_create_set_query(record, &set, &bind_text))) break;

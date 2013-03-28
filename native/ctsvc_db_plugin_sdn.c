@@ -177,12 +177,15 @@ static int __ctsvc_db_sdn_update_record( contacts_record_h record )
 	char* set = NULL;
 	GSList *bind_text = NULL;
 	GSList *cursor = NULL;
-	ctsvc_sdn_s *sdn =  (ctsvc_sdn_s*)record;
+	ctsvc_sdn_s *sdn = (ctsvc_sdn_s*)record;
 	char query[CTS_SQL_MIN_LEN] = {0};
 
 	RETV_IF(NULL == record, CONTACTS_ERROR_INVALID_PARAMETER);
 	RETVM_IF(CTSVC_RECORD_SDN != sdn->base.r_type, CONTACTS_ERROR_INVALID_PARAMETER,
 			"Invalid parameter : record is invalid type(%d)", sdn->base.r_type);
+	RETVM_IF(!sdn->id, CONTACTS_ERROR_INVALID_PARAMETER, "sdn of contact has no ID.");
+	RETV_IF(NULL == sdn->name, CONTACTS_ERROR_INVALID_PARAMETER);
+	RETVM_IF(CTSVC_PROPERTY_FLAG_DIRTY != (sdn->base.property_flag & CTSVC_PROPERTY_FLAG_DIRTY), CONTACTS_ERROR_NONE, "No update");
 
 	ret = ctsvc_begin_trans();
 	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "DB error : ctsvc_begin_trans() Failed(%d)", ret);
@@ -195,10 +198,6 @@ static int __ctsvc_db_sdn_update_record( contacts_record_h record )
 		ctsvc_end_trans(false);
 		return ret;
 	}
-
-	RETVM_IF(!sdn->id, CONTACTS_ERROR_INVALID_PARAMETER, "sdn of contact has no ID.");
-	RETV_IF(NULL == sdn->name, CONTACTS_ERROR_INVALID_PARAMETER);
-	RETVM_IF(CTSVC_PROPERTY_FLAG_DIRTY != (sdn->base.property_flag & CTSVC_PROPERTY_FLAG_DIRTY), CONTACTS_ERROR_NONE, "No update");
 
 	do {
 		if (CONTACTS_ERROR_NONE != (ret = ctsvc_db_create_set_query(record, &set, &bind_text))) break;

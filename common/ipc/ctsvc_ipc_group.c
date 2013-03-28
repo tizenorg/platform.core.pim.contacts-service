@@ -31,7 +31,6 @@ static int __ctsvc_ipc_unmarshal_group(pims_ipc_data_h ipc_data, const char* vie
 		if (ctsvc_ipc_unmarshal_string(ipc_data, &group_p->ringtone_path) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_string(ipc_data, &group_p->vibration) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_string(ipc_data, &group_p->image_thumbnail_path) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_unmarshal_bool(ipc_data, &group_p->image_thumbnail_changed) != CONTACTS_ERROR_NONE) break;
 
 		return CONTACTS_ERROR_NONE;
 
@@ -56,7 +55,6 @@ static int __ctsvc_ipc_marshal_group(const contacts_record_h record, pims_ipc_da
 		if (ctsvc_ipc_marshal_string((group_p->ringtone_path),ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_string((group_p->vibration),ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_string((group_p->image_thumbnail_path),ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_bool((group_p->image_thumbnail_changed),ipc_data) != CONTACTS_ERROR_NONE) break;
 
 		return CONTACTS_ERROR_NONE;
 	} while(0);

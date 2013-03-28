@@ -148,6 +148,8 @@ static int __ctsvc_db_note_update_record( contacts_record_h record )
 	char query[CTS_SQL_MAX_LEN] = {0};
 	ctsvc_note_s *note = (ctsvc_note_s *)record;
 
+	RETVM_IF(NULL == note->note, CONTACTS_ERROR_INVALID_PARAMETER, "note is empty");
+
 	ret = ctsvc_begin_trans();
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("DB error : ctsvc_begin_trans() Failed(%d)", ret);

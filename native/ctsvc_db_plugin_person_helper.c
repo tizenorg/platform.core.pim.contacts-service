@@ -486,11 +486,12 @@ int ctsvc_db_update_person(contacts_record_h record)
 			"UPDATE "CTS_TABLE_PERSONS" SET changed_ver=%d, has_phonenumber=%d, has_email=%d ",
 			ctsvc_get_next_ver(), has_phonenumber, has_email);
 
-	if (contact->ringtone_changed)
+	if (ctsvc_record_check_property_flag((ctsvc_record_s *)record, _contacts_contact.ringtone_path, CTSVC_PROPERTY_FLAG_DIRTY))
 		len += snprintf(query+len, sizeof(query)-len, ", ringtone_path=?");
-	if (contact->vibration_changed)
+	if (ctsvc_record_check_property_flag((ctsvc_record_s *)record, _contacts_contact.vibration, CTSVC_PROPERTY_FLAG_DIRTY))
 		len += snprintf(query+len, sizeof(query)-len, ", vibration=?");
-	if (contact->image_thumbnail_changed && (contact->id == thumbnail_contact_id || thumbnail_contact_id == -1))
+	if (ctsvc_record_check_property_flag((ctsvc_record_s *)record, _contacts_contact.image_thumbnail_path, CTSVC_PROPERTY_FLAG_DIRTY) &&
+			(contact->id == thumbnail_contact_id || thumbnail_contact_id == -1))
 		len += snprintf(query+len, sizeof(query)-len, ", image_thumbnail_path=?");
 
 	snprintf(query+len, sizeof(query)-len,
@@ -503,17 +504,18 @@ int ctsvc_db_update_person(contacts_record_h record)
 		return CONTACTS_ERROR_DB;
 	}
 
-	if (contact->ringtone_changed) {
+	if (ctsvc_record_check_property_flag((ctsvc_record_s *)record, _contacts_contact.ringtone_path, CTSVC_PROPERTY_FLAG_DIRTY)) {
 		if (contact->ringtone_path)
 			cts_stmt_bind_text(stmt, i, contact->ringtone_path);
 		i++;
 	}
-	if (contact->vibration_changed) {
+	if (ctsvc_record_check_property_flag((ctsvc_record_s *)record, _contacts_contact.vibration, CTSVC_PROPERTY_FLAG_DIRTY)) {
 		if (contact->vibration)
 			cts_stmt_bind_text(stmt, i, contact->vibration);
 		i++;
 	}
-	if (contact->image_thumbnail_changed && (contact->id == thumbnail_contact_id || thumbnail_contact_id == -1)) {
+	if (ctsvc_record_check_property_flag((ctsvc_record_s *)record, _contacts_contact.image_thumbnail_path, CTSVC_PROPERTY_FLAG_DIRTY) &&
+			(contact->id == thumbnail_contact_id || thumbnail_contact_id == -1)) {
 		if (contact->image_thumbnail_path)
 			cts_stmt_bind_text(stmt, i, contact->image_thumbnail_path);
 		i++;

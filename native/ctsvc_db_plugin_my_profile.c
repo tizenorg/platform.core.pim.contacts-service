@@ -411,7 +411,7 @@ static void __ctsvc_make_my_profile_display_name(ctsvc_my_profile_s *my_profile)
 		name = (ctsvc_name_s *)my_profile->name->records->data;
 	}
 
-	if (name && (name->first || name->last)) {
+	if (name && (name->first || name->last  || name->prefix || name->addition || name->suffix)) {
 		// make display name
 		display_len = SAFE_STRLEN(name->prefix)
 						+ SAFE_STRLEN(name->first)
@@ -485,6 +485,7 @@ static void __ctsvc_make_my_profile_display_name(ctsvc_my_profile_s *my_profile)
 			len += snprintf(display + len, display_len - len, "%s", name->suffix);
 		}
 
+		ctsvc_record_set_property_flag((ctsvc_record_s *)my_profile, _contacts_my_profile.display_name, CTSVC_PROPERTY_FLAG_DIRTY);
 		my_profile->reverse_display_name = display;
 	}
 	else {
@@ -492,47 +493,50 @@ static void __ctsvc_make_my_profile_display_name(ctsvc_my_profile_s *my_profile)
 			for (cur=my_profile->company->records;cur;cur=cur->next) {
 				ctsvc_company_s *company = (ctsvc_company_s *)cur->data;
 				if (company && company->name) {
-					my_profile->display_name_changed = true;
+					ctsvc_record_set_property_flag((ctsvc_record_s *)my_profile, _contacts_my_profile.display_name, CTSVC_PROPERTY_FLAG_DIRTY);
 					my_profile->display_name = SAFE_STRDUP(company->name);
 					break;
 				}
 			}
 		}
 
-		if (!my_profile->display_name_changed && my_profile->nicknames && my_profile->nicknames->records) {
+		if (!ctsvc_record_check_property_flag((ctsvc_record_s *)my_profile, _contacts_my_profile.display_name, CTSVC_PROPERTY_FLAG_DIRTY) &&
+				my_profile->nicknames && my_profile->nicknames->records) {
 			for (cur=my_profile->nicknames->records;cur;cur=cur->next) {
 				ctsvc_nickname_s *nickname = (ctsvc_nickname_s *)cur->data;
 				if (nickname && nickname->nickname) {
-					my_profile->display_name_changed = true;
+					ctsvc_record_set_property_flag((ctsvc_record_s *)my_profile, _contacts_my_profile.display_name, CTSVC_PROPERTY_FLAG_DIRTY);
 					my_profile->display_name = SAFE_STRDUP(nickname->nickname);
 					break;
 				}
 			}
 		}
 
-		if (!my_profile->display_name_changed && my_profile->numbers && my_profile->numbers->records) {
+		if (!ctsvc_record_check_property_flag((ctsvc_record_s *)my_profile, _contacts_my_profile.display_name, CTSVC_PROPERTY_FLAG_DIRTY) &&
+				my_profile->numbers && my_profile->numbers->records) {
 			for (cur=my_profile->numbers->records;cur;cur=cur->next) {
 				ctsvc_number_s *number = (ctsvc_number_s *)cur->data;
 				if (number && number->number) {
-					my_profile->display_name_changed = true;
+					ctsvc_record_set_property_flag((ctsvc_record_s *)my_profile, _contacts_my_profile.display_name, CTSVC_PROPERTY_FLAG_DIRTY);
 					my_profile->display_name = SAFE_STRDUP(number->number);
 					break;
 				}
 			}
 		}
 
-		if (!my_profile->display_name_changed && my_profile->emails && my_profile->emails->records) {
+		if (!ctsvc_record_check_property_flag((ctsvc_record_s *)my_profile, _contacts_my_profile.display_name, CTSVC_PROPERTY_FLAG_DIRTY) &&
+				my_profile->emails && my_profile->emails->records) {
 			for (cur=my_profile->emails->records;cur;cur=cur->next) {
 				ctsvc_email_s *email = (ctsvc_email_s *)cur->data;
 				if (email && email->email_addr) {
-					my_profile->display_name_changed = true;
+					ctsvc_record_set_property_flag((ctsvc_record_s *)my_profile, _contacts_my_profile.display_name, CTSVC_PROPERTY_FLAG_DIRTY);
 					my_profile->display_name = SAFE_STRDUP(email->email_addr);
 					break;
 				}
 			}
 		}
 
-		if (my_profile->display_name_changed) {
+		if (ctsvc_record_check_property_flag((ctsvc_record_s *)my_profile, _contacts_my_profile.display_name, CTSVC_PROPERTY_FLAG_DIRTY)) {
 			my_profile->reverse_display_name = SAFE_STRDUP(my_profile->display_name);
 		}
 	}
@@ -542,11 +546,13 @@ static void __ctsvc_make_my_profile_display_name(ctsvc_my_profile_s *my_profile)
 
 static int __ctsvc_db_my_profile_update_record( contacts_record_h record )
 {
-	int ret, len;
 	int id;
+	int ret;
+	char *set = NULL;
 	char query[CTS_SQL_MAX_LEN] = {0};
 	ctsvc_my_profile_s *my_profile = (ctsvc_my_profile_s*)record;
-	cts_stmt stmt;
+	GSList *bind_text = NULL;
+	GSList *cursor = NULL;
 
 	ret = ctsvc_begin_trans();
 	RETVM_IF(ret, ret, "ctsvc_begin_trans() Failed(%d)", ret);
@@ -573,83 +579,106 @@ static int __ctsvc_db_my_profile_update_record( contacts_record_h record )
 
 	//////////////////////////////////////////////////////////////////////
 	// this code will be removed.
-	free(my_profile->image_thumbnail_path);
-	my_profile->image_thumbnail_path = NULL;
-
 	if (my_profile->images) {
 		int ret = CONTACTS_ERROR_NONE;
-		contacts_record_h record = NULL;
+		contacts_record_h record_image = NULL;
 		unsigned int count = 0;
-		ctsvc_list_s *list = (ctsvc_list_s*)my_profile->images;
 		ctsvc_image_s *image;
-		GList *cursor;
-
-		for(cursor=list->deleted_records;cursor;cursor=cursor->next) {
-			image = (ctsvc_image_s *)cursor->data;
-			my_profile->image_thumbnail_path = NULL;
-		}
 
 		contacts_list_get_count((contacts_list_h)my_profile->images, &count);
 		if (count) {
 			contacts_list_first((contacts_list_h)my_profile->images);
-			ret = contacts_list_get_current_record_p((contacts_list_h)my_profile->images, &record);
+			ret = contacts_list_get_current_record_p((contacts_list_h)my_profile->images, &record_image);
 
 			if (CONTACTS_ERROR_NONE != ret) {
 				CTS_ERR("contacts_list_get_current_record_p() Failed(%d)", ret);
 				ctsvc_end_trans(false);
 				return CONTACTS_ERROR_DB;
 			}
-			image = (ctsvc_image_s*)record;
 
-			if ( image->path && *image->path && strstr(image->path, CTS_IMG_FULL_LOCATION) != NULL)
-				my_profile->image_thumbnail_path = SAFE_STRDUP( image->path + strlen(CTS_IMG_FULL_LOCATION) + 1);
-			else
-				my_profile->image_thumbnail_path = SAFE_STRDUP(image->path);
+			image = (ctsvc_image_s*)record_image;
+			if ((NULL == my_profile->image_thumbnail_path && NULL != image->path) ||
+					(NULL != my_profile->image_thumbnail_path && NULL == image->path) ||
+					(my_profile->image_thumbnail_path && image->path && 0 != strcmp(my_profile->image_thumbnail_path, image->path))) {
+				ctsvc_record_set_property_flag((ctsvc_record_s *)my_profile, _contacts_my_profile.image_thumbnail_path, CTSVC_PROPERTY_FLAG_DIRTY);
 
+				if ( image->path && *image->path && strstr(image->path, CTS_IMG_FULL_LOCATION) != NULL)
+					my_profile->image_thumbnail_path = SAFE_STRDUP(image->path + strlen(CTS_IMG_FULL_LOCATION) + 1);
+				else
+					my_profile->image_thumbnail_path = SAFE_STRDUP(image->path);
+			}
+		}
+		else if (my_profile->image_thumbnail_path) {
+			free(my_profile->image_thumbnail_path);
+			my_profile->image_thumbnail_path = NULL;
+			ctsvc_record_set_property_flag((ctsvc_record_s *)my_profile, _contacts_my_profile.image_thumbnail_path, CTSVC_PROPERTY_FLAG_DIRTY);
 		}
 	}
 	// this code will be removed.
 	//////////////////////////////////////////////////////////////////////
 
-	len = snprintf(query, sizeof(query),
-			"UPDATE "CTS_TABLE_MY_PROFILES" SET changed_ver=%d, changed_time=%d, "
-				"display_name=?, reverse_display_name=?, uid=?, image_thumbnail_path=?",
-				ctsvc_get_next_ver(), (int)time(NULL));
-	snprintf(query+len, sizeof(query)-len, " WHERE my_profile_id=%d", my_profile->id);
+	do {
+		int len = 0;
+		int version;
+		char query[CTS_SQL_MAX_LEN] = {0};
+		char query_set[CTS_SQL_MIN_LEN] = {0, };
+		cts_stmt stmt = NULL;
 
-	stmt = cts_query_prepare(query);
-	if (NULL == stmt) {
-		CTS_ERR("cts_query_prepare() Failed");
-		ctsvc_end_trans(false);
-		return CONTACTS_ERROR_DB;
-	}
+		version = ctsvc_get_next_ver();
 
-	cts_stmt_bind_text(stmt, 1, my_profile->display_name);
-	cts_stmt_bind_text(stmt, 2, my_profile->reverse_display_name);
-	if (my_profile->uid)
-		cts_stmt_bind_text(stmt, 3, my_profile->uid);
-	if (my_profile->image_thumbnail_path)
-		cts_stmt_bind_text(stmt, 4, my_profile->image_thumbnail_path);
+		ctsvc_db_create_set_query(record, &set, &bind_text);
+		if (set && *set)
+			len = snprintf(query_set, sizeof(query_set), "%s, ", set);
+		len += snprintf(query_set+len, sizeof(query_set)-len, " changed_ver=%d, changed_time=%d", version, (int)time(NULL));
 
-	ret = cts_stmt_step(stmt);
-	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("cts_stmt_step() Failed(%d)", ret);
+		if (ctsvc_record_check_property_flag((ctsvc_record_s *)my_profile, _contacts_my_profile.display_name, CTSVC_PROPERTY_FLAG_DIRTY)) {
+			len += snprintf(query_set+len, sizeof(query_set)-len,
+					", display_name=?, reverse_display_name=?");
+			bind_text = g_slist_append(bind_text, strdup(SAFE_STR(my_profile->display_name)));
+			bind_text = g_slist_append(bind_text, strdup(SAFE_STR(my_profile->reverse_display_name)));
+		}
+
+		snprintf(query, sizeof(query), "UPDATE %s SET %s WHERE my_profile_id = %d", CTS_TABLE_MY_PROFILES, query_set, my_profile->id);
+
+		stmt = cts_query_prepare(query);
+		if (NULL == stmt) {
+			CTS_ERR("DB error : cts_query_prepare() Failed");
+			ret = CONTACTS_ERROR_DB;
+			break;
+		}
+
+		if (bind_text) {
+			int i = 0;
+			for (cursor=bind_text,i=1;cursor;cursor=cursor->next,i++) {
+				const char *text = cursor->data;
+				if (*text)
+					cts_stmt_bind_text(stmt, i, text);
+			}
+		}
+
+		ret = cts_stmt_step(stmt);
+		if (CONTACTS_ERROR_NONE != ret) {
+			CTS_ERR("cts_stmt_step() Failed(%d)", ret);
+			cts_stmt_finalize(stmt);
+			break;
+		}
 		cts_stmt_finalize(stmt);
-		ctsvc_end_trans(false);
-		return ret;
+	} while (0);
+
+	CTSVC_RECORD_RESET_PROPERTY_FLAGS((ctsvc_record_s *)record);
+	CONTACTS_FREE(set);
+	if (bind_text) {
+		for (cursor=bind_text;cursor;cursor=cursor->next)
+			CONTACTS_FREE(cursor->data);
+		g_slist_free(bind_text);
 	}
-	cts_stmt_finalize(stmt);
 
 	ctsvc_set_my_profile_noti();
 
 	ret = ctsvc_end_trans(true);
-	if (ret < CONTACTS_ERROR_NONE)
-	{
-		CTS_ERR("DB error : ctsvc_end_trans() Failed(%d)", ret);
-		return ret;
-	}
-	else
-		return CONTACTS_ERROR_NONE;
+	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "DB error : ctsvc_end_trans() Failed(%d)", ret);
+
+	return CONTACTS_ERROR_NONE;
 }
 
 static int __ctsvc_db_my_profile_get_all_records( int offset, int limit, contacts_list_h* out_list )

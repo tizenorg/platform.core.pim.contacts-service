@@ -220,7 +220,7 @@ static inline void hangul_compatibility2jamo(UChar *src)
 	}
 }
 
-static inline int __ctsvc_convert_japanese_to_hiragana(UChar *src, UChar *dest, int dest_size)
+int ctsvc_convert_japanese_to_hiragana_unicode(UChar *src, UChar *dest, int dest_size)
 {
 	int i, j = 0, len = 0;
 
@@ -305,7 +305,7 @@ int ctsvc_convert_japanese_to_hiragana(const char *src, char **dest)
 
 	result = calloc(1, sizeof(UChar) * (size + 1));
 
-	__ctsvc_convert_japanese_to_hiragana(tmp_result, result, size + 1 );
+	ctsvc_convert_japanese_to_hiragana_unicode(tmp_result, result, size + 1 );
 
 	u_strToUTF8(NULL, 0, &size, result, -1, &status);
 	if (U_FAILURE(status) && status != U_BUFFER_OVERFLOW_ERROR) {

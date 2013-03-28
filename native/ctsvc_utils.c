@@ -144,7 +144,6 @@ int ctsvc_end_trans(bool is_success)
 		return ret;
 	}
 
-
 	ctsvc_notification_send();
 #ifdef _CONTACTS_IPC_SERVER
 	ctsvc_change_subject_publish_changed_info();
@@ -173,10 +172,10 @@ const char* ctsvc_get_display_column(void)
 
 const char* ctsvc_get_sort_name_column(void)
 {
-	contacts_name_display_order_e order;
+	contacts_name_sorting_order_e order;
 
-	contacts_setting_get_name_display_order(&order);
-	if (CONTACTS_NAME_DISPLAY_ORDER_FIRSTLAST == order)
+	contacts_setting_get_name_sorting_order(&order);
+	if (CONTACTS_NAME_SORTING_ORDER_FIRSTLAST == order)
 		return "sort_name";
 	else
 		return "reverse_sort_name";
@@ -185,10 +184,10 @@ const char* ctsvc_get_sort_name_column(void)
 
 const char* ctsvc_get_sort_column(void)
 {
-	contacts_name_display_order_e order;
+	contacts_name_sorting_order_e order;
 
-	contacts_setting_get_name_display_order(&order);
-	if (CONTACTS_NAME_DISPLAY_ORDER_FIRSTLAST == order)
+	contacts_setting_get_name_sorting_order(&order);
+	if (CONTACTS_NAME_SORTING_ORDER_FIRSTLAST == order)
 		return "display_name_language, sortkey";
 	else
 		return "display_name_language, reverse_sortkey";
@@ -262,10 +261,12 @@ static bool __ctsvc_image_util_supported_jpeg_colorspace_cb(image_util_colorspac
 	unsigned char * img_source = 0;
 	int dest_fd;
 
-	if (colorspace == IMAGE_UTIL_COLORSPACE_YV12 ) {
-		info->ret = CONTACTS_ERROR_NONE;
+	// temporary code
+	if (colorspace == IMAGE_UTIL_COLORSPACE_YV12 || colorspace == IMAGE_UTIL_COLORSPACE_I420) {
+		info->ret = CONTACTS_ERROR_INTERNAL;
 		return true;
 	}
+
 	// load jpeg sample file
 	CTS_DBG("colorspace %d src : %s, dest : %s", colorspace, info->src, info->dest);
 	ret = image_util_decode_jpeg( info->src, colorspace, &img_source, &width, &height, &size_decode );
@@ -328,7 +329,6 @@ static bool __ctsvc_image_util_supported_jpeg_colorspace_cb(image_util_colorspac
 			return false;
 		}
 
-
 		//ret = image_util_encode_jpeg(img_source, width, height, colorspace, 100, info->dest );
 		ret = image_util_encode_jpeg(img_target, resized_width, resized_height, colorspace, 50, info->dest );
 		free( img_target );
@@ -383,7 +383,7 @@ static bool __ctsvc_image_util_supported_jpeg_colorspace_cb(image_util_colorspac
 static int __ctsvc_resize_and_copy_image(const char *src, const char *dest)
 {
 	int ret;
-	image_info info = {.src = src, .dest = dest, ret = CONTACTS_ERROR_NONE};
+	image_info info = {.src = src, .dest = dest, ret = CONTACTS_ERROR_INTERNAL};
 
 	ret = image_util_foreach_supported_jpeg_colorspace(__ctsvc_image_util_supported_jpeg_colorspace_cb, &info);
 
@@ -490,6 +490,7 @@ int ctsvc_get_next_ver(void)
 {
 	const char *query;
 	int version;
+	int ret;
 
 	if (0 < transaction_count) {
 		version_up = true;
@@ -497,7 +498,12 @@ int ctsvc_get_next_ver(void)
 	}
 
 	query = "SELECT ver FROM "CTS_TABLE_VERSION;
-	ctsvc_query_get_first_int_result(query, &version);
+	ret = ctsvc_query_get_first_int_result(query, &version);
+
+	// In this case, contacts-service already works abnormally.
+	if (CONTACTS_ERROR_NONE != ret)
+		CTS_ERR("ctsvc_query_get_first_int_result : get version error(%d)", ret);
+
 	return (1 + version);
 }
 

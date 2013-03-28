@@ -156,13 +156,13 @@ static int __ctsvc_db_simple_contact_get_default_image_id(int contact_id)
 static int __ctsvc_db_simple_contact_update_record( contacts_record_h record )
 {
 	int ret;
-	int len;
-	int i;
 	int id;
+	char *set = NULL;
 	char query[CTS_SQL_MAX_LEN] = {0};
 	char image[CTS_SQL_MAX_LEN] = {0};
+	GSList *bind_text = NULL;
+	GSList *cursor = NULL;
 	ctsvc_simple_contact_s *contact = (ctsvc_simple_contact_s*)record;
-	cts_stmt stmt;
 
 	// These check should be done in client side
 	RETVM_IF(NULL == contact, CONTACTS_ERROR_INVALID_PARAMETER,
@@ -186,53 +186,9 @@ static int __ctsvc_db_simple_contact_update_record( contacts_record_h record )
 		return ret;
 	}
 
-	len = snprintf(query, sizeof(query),
-				"UPDATE "CTS_TABLE_CONTACTS" SET changed_ver=%d, changed_time=%d ",
-						ctsvc_get_next_ver(), (int)time(NULL));
-
-	if (contact->uid_changed)
-		len += snprintf(query+len, sizeof(query)-len, ", uid=?");
-
-	if (contact->ringtone_changed)
-		len += snprintf(query+len, sizeof(query)-len, ", ringtone_path=?");
-
-	if (contact->vibration_changed)
-			len += snprintf(query+len, sizeof(query)-len, ", vibration=?");
-
-	if (contact->image_thumbnail_changed)
-		len += snprintf(query+len, sizeof(query)-len, ", image_thumbnail_path=?");
-
-	len += snprintf(query+len, sizeof(query)-len, " WHERE contact_id=%d", contact->contact_id);
-
-	stmt = cts_query_prepare(query);
-	if (NULL == stmt) {
-		CTS_ERR("cts_query_prepare() Failed");
-		ctsvc_end_trans(false);
-		return CONTACTS_ERROR_DB;
-	}
-
-	i = 1;
-	if (contact->uid_changed) {
-		if (contact->uid)
-			cts_stmt_bind_text(stmt, i, contact->uid);
-		i++;
-	}
-
-	if (contact->ringtone_changed) {
-		if (contact->ringtone_path)
-			cts_stmt_bind_text(stmt, i, contact->ringtone_path);
-		i++;
-	}
-
-	if (contact->vibration_changed) {
-		if (contact->vibration)
-			cts_stmt_bind_text(stmt, i, contact->vibration);
-		i++;
-	}
-
 	//////////////////////////////////////////////////////////////////////
 	// This code will be removed
-	if (contact->image_thumbnail_changed) {
+	if (ctsvc_record_check_property_flag((ctsvc_record_s *)contact, _contacts_simple_contact.image_thumbnail_path, CTSVC_PROPERTY_FLAG_DIRTY)) {
 		int img_id;
 		image[0] = '\0';
 		img_id = __ctsvc_db_simple_contact_get_default_image_id(contact->contact_id);
@@ -249,21 +205,61 @@ static int __ctsvc_db_simple_contact_update_record( contacts_record_h record )
 		if (*image) {
 			free(contact->image_thumbnail_path);
 			contact->image_thumbnail_path = strdup(image);
-			if (CONTACTS_ERROR_NONE == ret && contact->image_thumbnail_path)
-				cts_stmt_bind_text(stmt, i, contact->image_thumbnail_path);
 		}
-		i++;
 	}
 	//////////////////////////////////////////////////////////////////////
 
-	ret = cts_stmt_step(stmt);
-	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("cts_stmt_step() Failed(%d)", ret);
+	do {
+		int len = 0;
+		int version;
+		char query_set[CTS_SQL_MIN_LEN] = {0, };
+		cts_stmt stmt = NULL;
+
+		version = ctsvc_get_next_ver();
+
+		if (CONTACTS_ERROR_NONE != (ret = ctsvc_db_create_set_query(record, &set, &bind_text))) break;
+		if (set && *set)
+			len = snprintf(query_set, sizeof(query_set), "%s, ", set);
+
+		len += snprintf(query_set+len, sizeof(query_set)-len, " changed_ver=%d, changed_time=%d", version, (int)time(NULL));
+
+		if (ctsvc_record_check_property_flag((ctsvc_record_s *)contact, _contacts_contact.image_thumbnail_path, CTSVC_PROPERTY_FLAG_DIRTY))
+			len += snprintf(query_set+len, sizeof(query_set)-len, ", image_changed_ver=%d", version);
+
+		snprintf(query, sizeof(query), "UPDATE %s SET %s WHERE contact_id = %d", CTS_TABLE_CONTACTS, query_set, contact->contact_id);
+
+		stmt = cts_query_prepare(query);
+		if (NULL == stmt) {
+			CTS_ERR("DB error : cts_query_prepare() Failed");
+			ret = CONTACTS_ERROR_DB;
+			break;
+		}
+
+		if (bind_text) {
+			int i = 0;
+			for (cursor=bind_text,i=1;cursor;cursor=cursor->next,i++) {
+				const char *text = cursor->data;
+				if (*text)
+					cts_stmt_bind_text(stmt, i, text);
+			}
+		}
+
+		ret = cts_stmt_step(stmt);
+		if (CONTACTS_ERROR_NONE != ret) {
+			CTS_ERR("cts_stmt_step() Failed(%d)", ret);
+			cts_stmt_finalize(stmt);
+			break;
+		}
 		cts_stmt_finalize(stmt);
-		ctsvc_end_trans(false);
-		return ret;
+	} while (0);
+
+	CTSVC_RECORD_RESET_PROPERTY_FLAGS((ctsvc_record_s *)record);
+	CONTACTS_FREE(set);
+	if (bind_text) {
+		for (cursor=bind_text;cursor;cursor=cursor->next)
+			CONTACTS_FREE(cursor->data);
+		g_slist_free(bind_text);
 	}
-	cts_stmt_finalize(stmt);
 
 	ctsvc_set_contact_noti();
 	//ctsvc_update_person(contact);

@@ -86,7 +86,8 @@ static int __ctsvc_db_get_contact_base_info(int id, ctsvc_contact_s *contact)
 	len = snprintf(query, sizeof(query),
 			"SELECT contact_id, addressbook_id, person_id, changed_time, %s, "
 				"display_name_source, image_thumbnail_path, "
-				"ringtone_path, vibration, uid, is_favorite, has_phonenumber, has_email "
+				"ringtone_path, vibration, uid, is_favorite, has_phonenumber, has_email, "
+				"sort_name, reverse_sort_name "
 				"FROM "CTS_TABLE_CONTACTS" WHERE contact_id = %d AND deleted = 0",
 				ctsvc_get_display_column(), id);
 
@@ -124,6 +125,10 @@ static int __ctsvc_db_get_contact_base_info(int id, ctsvc_contact_s *contact)
 	contact->is_favorite = ctsvc_stmt_get_int(stmt, i++);
 	contact->has_phonenumber = ctsvc_stmt_get_int(stmt, i++);
 	contact->has_email = ctsvc_stmt_get_int(stmt, i++);
+	temp = ctsvc_stmt_get_text(stmt, i++);
+	contact->sort_name = SAFE_STRDUP(temp);
+	temp = ctsvc_stmt_get_text(stmt, i++);
+	contact->reverse_sort_name = SAFE_STRDUP(temp);
 #if 0
 	contact->sync_data1 = SAFE_STRDUP(temp);
 	temp = ctsvc_stmt_get_text(stmt, i++);
@@ -515,6 +520,7 @@ static inline void __ctsvc_remove_space(char *src, char *dest, int dest_size)
 
 static inline int __ctsvc_contact_make_search_name(ctsvc_contact_s *contact, char **search_name) {
 	char *name = NULL;
+	char *temp_name = NULL;
 	int buf_size, ret;
 
 	if (contact->display_name) {
@@ -588,10 +594,9 @@ static inline int __ctsvc_contact_make_search_name(ctsvc_contact_s *contact, cha
 			}
 		}
 		else if (CTSVC_LANG_KOREAN == ctsvc_check_language_type(contact->display_name)) {
-			char *temp_name = NULL;
-			char *chosung = calloc(1, strlen(contact->display_name) * 5);
 			int count, i, j;
 			int full_len, chosung_len;
+			char *chosung = calloc(1, strlen(contact->display_name) * 5);
 			int total_len = strlen(contact->display_name);
 
 			count = ctsvc_get_chosung(contact->display_name, chosung, strlen(contact->display_name) * 5 );
@@ -629,7 +634,45 @@ static inline int __ctsvc_contact_make_search_name(ctsvc_contact_s *contact, cha
 
 			free(normalized_display_name);
 		}
+
+		if (contact->name) {
+			contacts_list_h name_list = (contacts_list_h)contact->name;
+			ctsvc_name_s *name_record;
+			contacts_list_first(name_list);
+			char *phonetic = NULL;
+			int temp_len = 0;
+
+			contacts_list_get_current_record_p(name_list, (contacts_record_h*)&name_record);
+			if (NULL != name_record) {
+				buf_size = SAFE_STRLEN(name_record->phonetic_first) + SAFE_STRLEN(name_record->phonetic_last) + SAFE_STRLEN(name_record->phonetic_middle);
+				if (buf_size > 0) {
+					buf_size += 3; // for space and null string
+					phonetic = calloc(1, buf_size);
+					if (name_record->phonetic_first)
+						temp_len += snprintf(phonetic, buf_size, "%s", name_record->phonetic_first);
+					if (name_record->phonetic_middle) {
+						if (temp_len)
+							temp_len += snprintf(phonetic + temp_len, buf_size - temp_len, " ");
+						temp_len += snprintf(phonetic + temp_len, buf_size - temp_len, "%s", name_record->phonetic_middle);
+					}
+					if (name_record->phonetic_last) {
+						if (temp_len)
+							temp_len += snprintf(phonetic + temp_len, buf_size - temp_len, " ");
+						temp_len += snprintf(phonetic + temp_len, buf_size - temp_len, "%s", name_record->phonetic_last);
+					}
+
+					buf_size = SAFE_STRLEN(name) + SAFE_STRLEN(phonetic) + 2;
+					temp_name = calloc(1, buf_size);
+					snprintf(temp_name, buf_size, "%s %s", name, phonetic);
+					free(name);
+					name = temp_name;
+
+					free(phonetic);
+				}
+			}
+		}
 	}
+
 	*search_name = name;
 	return CONTACTS_ERROR_NONE;
 }
@@ -1114,23 +1157,11 @@ static int __ctsvc_db_contact_update_record( contacts_record_h record )
 
 	//////////////////////////////////////////////////////////////////////
 	// this code will be removed.
-	free(contact->image_thumbnail_path);
-	contact->image_thumbnail_path = NULL;
-	contact->image_thumbnail_changed = false;
-
 	if (contact->images) {
 		int ret = CONTACTS_ERROR_NONE;
 		contacts_record_h record_image = NULL;
 		unsigned int count = 0;
-		ctsvc_list_s *list = (ctsvc_list_s*)contact->images;
 		ctsvc_image_s *image;
-		GList *cursor;
-
-		for(cursor = list->deleted_records;cursor;cursor=cursor->next) {
-			image = (ctsvc_image_s *)cursor->data;
-			contact->image_thumbnail_path = NULL;
-			contact->image_thumbnail_changed = true;
-		}
 
 		contacts_list_get_count((contacts_list_h)contact->images, &count);
 		if (count) {
@@ -1143,25 +1174,33 @@ static int __ctsvc_db_contact_update_record( contacts_record_h record )
 				return CONTACTS_ERROR_DB;
 			}
 
-			if (ctsvc_record_check_property_flag((ctsvc_record_s *)record_image, _contacts_image.path, CTSVC_PROPERTY_FLAG_DIRTY))
-				contact->image_thumbnail_changed = true;
-
 			image = (ctsvc_image_s*)record_image;
 
-			if ( image->path && *image->path && strstr(image->path, CTS_IMG_FULL_LOCATION) != NULL)
-				contact->image_thumbnail_path = SAFE_STRDUP( image->path + strlen(CTS_IMG_FULL_LOCATION) + 1);
-			else
-				contact->image_thumbnail_path = SAFE_STRDUP(image->path);
+			if ((NULL == contact->image_thumbnail_path && NULL != image->path) ||
+					(NULL != contact->image_thumbnail_path && NULL == image->path) ||
+					(contact->image_thumbnail_path && image->path && 0 != strcmp(contact->image_thumbnail_path, image->path))) {
+				ctsvc_record_set_property_flag((ctsvc_record_s *)contact, _contacts_contact.image_thumbnail_path, CTSVC_PROPERTY_FLAG_DIRTY);
+
+				if ( image->path && *image->path && strstr(image->path, CTS_IMG_FULL_LOCATION) != NULL)
+					contact->image_thumbnail_path = SAFE_STRDUP(image->path + strlen(CTS_IMG_FULL_LOCATION) + 1);
+				else
+					contact->image_thumbnail_path = SAFE_STRDUP(image->path);
+			}
+		}
+		else if (contact->image_thumbnail_path) {
+			free(contact->image_thumbnail_path);
+			contact->image_thumbnail_path = NULL;
+			if (!ctsvc_record_check_property_flag((ctsvc_record_s *)contact, _contacts_contact.image_thumbnail_path, CTSVC_PROPERTY_FLAG_DIRTY)) {
+				ctsvc_record_set_property_flag((ctsvc_record_s *)contact, _contacts_contact.image_thumbnail_path, CTSVC_PROPERTY_FLAG_DIRTY);
+			}
+			else {
+				int index = _contacts_contact.image_thumbnail_path & 0x000000FF;
+				((ctsvc_record_s *)record)->properties_flags[index] = 0;
+			}
 		}
 	}
 	// this code will be removed.
 	//////////////////////////////////////////////////////////////////////
-
-	if (contact->display_name_changed)
-		ctsvc_record_set_property_flag((ctsvc_record_s *)contact, _contacts_contact.display_name, CTSVC_PROPERTY_FLAG_DIRTY);
-
-	if (contact->image_thumbnail_changed)
-		ctsvc_record_set_property_flag((ctsvc_record_s *)contact, _contacts_contact.image_thumbnail_path, CTSVC_PROPERTY_FLAG_DIRTY);
 
 	do {
 		char query[CTS_SQL_MAX_LEN] = {0};
@@ -1170,27 +1209,25 @@ static int __ctsvc_db_contact_update_record( contacts_record_h record )
 
 		version = ctsvc_get_next_ver();
 
-		if (CTSVC_PROPERTY_FLAG_DIRTY != (contact->base.property_flag & CTSVC_PROPERTY_FLAG_DIRTY)) {
-			CTS_ERR("No update");
-			ret = CONTACTS_ERROR_NONE;
-			break;
-		}
-		if (CONTACTS_ERROR_NONE != (ret = ctsvc_db_create_set_query(record, &set, &bind_text))) break;
+		ctsvc_db_create_set_query(record, &set, &bind_text);
 		if (set && *set)
 			len = snprintf(query_set, sizeof(query_set), "%s, ", set);
 		len += snprintf(query_set+len, sizeof(query_set)-len, " changed_ver=%d, changed_time=%d, has_phonenumber=%d, has_email=%d",
 				version, (int)time(NULL), contact->has_phonenumber, contact->has_email);
-		if (contact->display_name_changed) {
+		if (ctsvc_record_check_property_flag((ctsvc_record_s *)contact, _contacts_contact.display_name, CTSVC_PROPERTY_FLAG_DIRTY)) {
 			len += snprintf(query_set+len, sizeof(query_set)-len,
-					", display_name=?, reverse_display_name=?, display_name_source=%d, display_name_language=%d, sortkey=?, reverse_sortkey=?",
+					", display_name=?, reverse_display_name=?, display_name_source=%d, display_name_language=%d, "
+					"sort_name=?, reverse_sort_name=?, sortkey=?, reverse_sortkey=?",
 					contact->display_source_type, contact->display_name_language);
 			bind_text = g_slist_append(bind_text, strdup(SAFE_STR(contact->display_name)));
 			bind_text = g_slist_append(bind_text, strdup(SAFE_STR(contact->reverse_display_name)));
+			bind_text = g_slist_append(bind_text, strdup(SAFE_STR(contact->sort_name)));
+			bind_text = g_slist_append(bind_text, strdup(SAFE_STR(contact->reverse_sort_name)));
 			bind_text = g_slist_append(bind_text, strdup(SAFE_STR(contact->sortkey)));
 			bind_text = g_slist_append(bind_text, strdup(SAFE_STR(contact->reverse_sortkey)));
 		}
 
-		if (contact->image_thumbnail_changed)
+		if (ctsvc_record_check_property_flag((ctsvc_record_s *)contact, _contacts_contact.image_thumbnail_path, CTSVC_PROPERTY_FLAG_DIRTY))
 			len += snprintf(query_set+len, sizeof(query_set)-len, ", image_changed_ver=%d", version);
 
 		snprintf(query, sizeof(query), "UPDATE %s SET %s WHERE contact_id = %d", CTS_TABLE_CONTACTS, query_set, contact->id);
@@ -1219,16 +1256,15 @@ static int __ctsvc_db_contact_update_record( contacts_record_h record )
 		cts_stmt_finalize(stmt);
 	} while (0);
 
-	CTSVC_RECORD_RESET_PROPERTY_FLAGS((ctsvc_record_s *)record);
-	CONTACTS_FREE(set);
-	if (bind_text) {
-		for (cursor=bind_text;cursor;cursor=cursor->next)
-			CONTACTS_FREE(cursor->data);
-		g_slist_free(bind_text);
-	}
-
 	if (CONTACTS_ERROR_NONE != ret) {
 		ctsvc_end_trans(false);
+		CTSVC_RECORD_RESET_PROPERTY_FLAGS((ctsvc_record_s *)record);
+		CONTACTS_FREE(set);
+		if (bind_text) {
+			for (cursor=bind_text;cursor;cursor=cursor->next)
+				CONTACTS_FREE(cursor->data);
+			g_slist_free(bind_text);
+		}
 		return ret;
 	}
 
@@ -1238,6 +1274,14 @@ static int __ctsvc_db_contact_update_record( contacts_record_h record )
 
 	__ctsvc_update_contact_search_data(contact->id);
 	ctsvc_db_update_person((contacts_record_h)contact);
+
+	CTSVC_RECORD_RESET_PROPERTY_FLAGS((ctsvc_record_s *)record);
+	CONTACTS_FREE(set);
+	if (bind_text) {
+		for (cursor=bind_text;cursor;cursor=cursor->next)
+			CONTACTS_FREE(cursor->data);
+		g_slist_free(bind_text);
+	}
 
 	ret = ctsvc_end_trans(true);
 	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "DB error : ctsvc_end_trans() Failed(%d)", ret);
@@ -2006,42 +2050,46 @@ static int __ctsvc_db_contact_replace_record( contacts_record_h record, int cont
 
 	//////////////////////////////////////////////////////////////////////
 	// this code will be removed.
-	free(contact->image_thumbnail_path);
-	contact->image_thumbnail_path = NULL;
-	contact->image_thumbnail_changed = false;
-
 	if (contact->images) {
 		int ret = CONTACTS_ERROR_NONE;
-		contacts_record_h record = NULL;
+		contacts_record_h record_image = NULL;
 		unsigned int count = 0;
-		ctsvc_list_s *list = (ctsvc_list_s*)contact->images;
 		ctsvc_image_s *image;
-		GList *cursor;
-
-		for(cursor = list->deleted_records;cursor;cursor=cursor->next) {
-			image = (ctsvc_image_s *)cursor->data;
-			contact->image_thumbnail_path = NULL;
-		}
 
 		contacts_list_get_count((contacts_list_h)contact->images, &count);
 		if (count) {
 			contacts_list_first((contacts_list_h)contact->images);
-			ret = contacts_list_get_current_record_p((contacts_list_h)contact->images, &record);
+			ret = contacts_list_get_current_record_p((contacts_list_h)contact->images, &record_image);
 
 			if (CONTACTS_ERROR_NONE != ret) {
 				CTS_ERR("contacts_list_get_current_record_p() Failed(%d)", ret);
 				ctsvc_end_trans(false);
 				return CONTACTS_ERROR_DB;
 			}
-			image = (ctsvc_image_s*)record;
 
-			if ( image->path && *image->path && strstr(image->path, CTS_IMG_FULL_LOCATION) != NULL)
-				contact->image_thumbnail_path = SAFE_STRDUP( image->path + strlen(CTS_IMG_FULL_LOCATION) + 1);
-			else
-				contact->image_thumbnail_path = SAFE_STRDUP(image->path);
+			image = (ctsvc_image_s*)record_image;
+			if ((NULL == contact->image_thumbnail_path && NULL != image->path) ||
+					(NULL != contact->image_thumbnail_path && NULL == image->path) ||
+					(contact->image_thumbnail_path && image->path && 0 != strcmp(contact->image_thumbnail_path, image->path))) {
+				ctsvc_record_set_property_flag((ctsvc_record_s *)contact, _contacts_contact.image_thumbnail_path, CTSVC_PROPERTY_FLAG_DIRTY);
 
+				if ( image->path && *image->path && strstr(image->path, CTS_IMG_FULL_LOCATION) != NULL)
+					contact->image_thumbnail_path = SAFE_STRDUP(image->path + strlen(CTS_IMG_FULL_LOCATION) + 1);
+				else
+					contact->image_thumbnail_path = SAFE_STRDUP(image->path);
+			}
 		}
-		contact->image_thumbnail_changed = true;
+		else if (contact->image_thumbnail_path) {
+			free(contact->image_thumbnail_path);
+			contact->image_thumbnail_path = NULL;
+			if (!ctsvc_record_check_property_flag((ctsvc_record_s *)contact, _contacts_contact.image_thumbnail_path, CTSVC_PROPERTY_FLAG_DIRTY)) {
+				ctsvc_record_set_property_flag((ctsvc_record_s *)contact, _contacts_contact.image_thumbnail_path, CTSVC_PROPERTY_FLAG_DIRTY);
+			}
+			else {
+				int index = _contacts_contact.image_thumbnail_path & 0x000000FF;
+				((ctsvc_record_s *)record)->properties_flags[index] = 0;
+			}
+		}
 	}
 	// this code will be removed.
 	//////////////////////////////////////////////////////////////////////
@@ -2058,7 +2106,7 @@ static int __ctsvc_db_contact_replace_record( contacts_record_h record, int cont
 					contact->has_phonenumber, contact->has_email,
 					contact->display_source_type, contact->display_name_language);
 
-	if (contact->image_thumbnail_changed)
+	if (ctsvc_record_check_property_flag((ctsvc_record_s *)contact, _contacts_contact.image_thumbnail_path, CTSVC_PROPERTY_FLAG_DIRTY))
 		len += snprintf(query+len, sizeof(query)-len, ", image_changed_ver = %d", version);
 
 	len += snprintf(query+len, sizeof(query)-len, " WHERE contact_id=%d", contact->id);

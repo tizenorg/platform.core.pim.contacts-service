@@ -148,6 +148,7 @@ static int __ctsvc_db_relationship_update_record( contacts_record_h record )
 	int contact_id;
 	char query[CTS_SQL_MAX_LEN] = {0};
 	ctsvc_relationship_s *relationship = (ctsvc_relationship_s *)record;
+	RETVM_IF(NULL == relationship->name, CONTACTS_ERROR_INVALID_PARAMETER, "name is empty");
 
 	ret = ctsvc_begin_trans();
 	if (CONTACTS_ERROR_NONE != ret) {

@@ -850,6 +850,24 @@ static bool __ctsvc_compare_unicode_letter(const UChar* haystack, int haystack_l
 
 	switch (haystack_lang)
 	{
+	case CTSVC_LANG_NUMBER:
+	case CTSVC_LANG_OTHERS:
+		{
+			if (haystack_lang == needle_lang)
+			{
+				for(i=0, j=0; i<u_strlen(haystack) && j<u_strlen(needle);) {
+					if(haystack[i] == needle[j])
+						ret = true;
+					else {
+						ret = false;
+						break;
+					}
+					i++;
+					j++;
+				}
+			}
+			return ret;
+		}
 	case CTSVC_LANG_ENGLISH:
 		{
 			switch(needle_lang)
@@ -905,10 +923,32 @@ static bool __ctsvc_compare_unicode_letter(const UChar* haystack, int haystack_l
 				j++;
 			}
 			return ret;
-
 		}
 		break;
 	case CTSVC_LANG_JAPANESE:
+		{
+			if(needle_lang != CTSVC_LANG_JAPANESE)
+				break;
+
+			if (haystack[0] == needle[0])
+				ret = true;
+			else {
+				UChar temp_haystack[2] = {0x00,};
+				UChar temp_needle[2] = {0x00,};
+				UChar hiragana_haystack[2] = {0x00,};
+				UChar hiragana_needle[2] = {0x00,};
+				temp_haystack[0] = haystack[0];
+				temp_needle[0] = needle[0];
+
+				ctsvc_convert_japanese_to_hiragana_unicode(temp_haystack, hiragana_haystack, 2 );
+
+				ctsvc_convert_japanese_to_hiragana_unicode(temp_haystack, hiragana_needle,  2);
+
+				if (hiragana_haystack[0] == hiragana_needle[0])
+					ret = true;
+			}
+			return ret;
+		}
 	case CTSVC_LANG_CHINESE:
 		{
 			if(needle_lang == haystack_lang

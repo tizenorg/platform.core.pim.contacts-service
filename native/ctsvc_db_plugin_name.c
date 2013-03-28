@@ -61,6 +61,7 @@ ctsvc_db_plugin_info_s ctsvc_db_plugin_name = {
 static int __ctsvc_db_name_insert_record( contacts_record_h record, int *id )
 {
 	int ret;
+	int name_id = 0;
 	int contact_id;
 	char query[CTS_SQL_MAX_LEN] = {0};
 	ctsvc_name_s *name = (ctsvc_name_s *)record;
@@ -80,6 +81,15 @@ static int __ctsvc_db_name_insert_record( contacts_record_h record, int *id )
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 
+	snprintf(query, sizeof(query),
+			"SELECT id FROM "CTS_TABLE_DATA" WHERE contact_id = %d AND datatype=%d", name->contact_id, CTSVC_DATA_NAME);
+	ret = ctsvc_query_get_first_int_result(query, &name_id);
+	if (name_id) {
+		CTS_ERR("name_id (%d) is exist", name_id);
+		ctsvc_end_trans(false);
+		return CONTACTS_ERROR_INVALID_PARAMETER;
+	}
+
 	ret = ctsvc_db_name_insert(record, name->contact_id, false, id);
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("DB error : ctsvc_begin_trans() Failed(%d)", ret);
@@ -87,7 +97,8 @@ static int __ctsvc_db_name_insert_record( contacts_record_h record, int *id )
 		return ret;
 	}
 
-	// TODO ; contact name update
+	ctsvc_contact_update_display_name(name->contact_id, CONTACTS_DISPLAY_NAME_SOURCE_TYPE_NAME);
+
 	ret = ctsvc_db_contact_update_changed_time(name->contact_id);
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("DB error : ctsvc_db_contact_update_changed_time() Failed(%d)", ret);
@@ -147,6 +158,10 @@ static int __ctsvc_db_name_update_record( contacts_record_h record )
 	char query[CTS_SQL_MAX_LEN] = {0};
 	ctsvc_name_s *name = (ctsvc_name_s *)record;
 
+	RETVM_IF(NULL == name->first && NULL == name->last && NULL == name->addition &&
+			NULL == name->prefix && NULL == name->suffix && NULL == name->phonetic_first &&
+			NULL == name->phonetic_middle && NULL == name->phonetic_last, CONTACTS_ERROR_INVALID_PARAMETER, "name is empty");
+
 	ret = ctsvc_begin_trans();
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("DB error : ctsvc_begin_trans() Failed(%d)", ret);
@@ -169,7 +184,8 @@ static int __ctsvc_db_name_update_record( contacts_record_h record )
 		return ret;
 	}
 
-	// TODO ; contact display name update
+	ctsvc_contact_update_display_name(name->contact_id, CONTACTS_DISPLAY_NAME_SOURCE_TYPE_NAME);
+
 	ret = ctsvc_db_contact_update_changed_time(name->contact_id);
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("DB error : ctsvc_db_contact_update_changed_time() Failed(%d)", ret);
@@ -218,7 +234,8 @@ static int __ctsvc_db_name_delete_record( int id )
 		return ret;
 	}
 
-	// TODO ; contact name update
+	ctsvc_contact_update_display_name(contact_id, CONTACTS_DISPLAY_NAME_SOURCE_TYPE_NAME);
+
 	ret = ctsvc_db_contact_update_changed_time(contact_id);
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("DB error : ctsvc_db_contact_update_changed_time() Failed(%d)", ret);

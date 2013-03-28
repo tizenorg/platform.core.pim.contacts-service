@@ -5,6 +5,7 @@
 #include <pims-ipc-data.h>
 #include <stdbool.h>
 
+#if 0
 #define CTSVC_IPC_PREPARE() \
 	char __handle_str[1024] = {0, }; \
 	snprintf(__handle_str, sizeof(__handle_str), \
@@ -168,6 +169,8 @@ static inline void pims_ipc_data_get_dup_string(pims_ipc_data_h data, char** res
     unsigned int ipc_dsize = 0;
 	*result = (char*)pims_ipc_data_get_dup(data, &ipc_dsize);
 }
+
+#endif
 
 #endif /*__CTSVC_IPC_MACROS_H__*/
 

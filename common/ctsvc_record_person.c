@@ -97,10 +97,6 @@ static int __ctsvc_person_clone(contacts_record_h record, contacts_record_h *out
     RETVM_IF(NULL == out_data, CONTACTS_ERROR_OUT_OF_MEMORY,
 			 "Out of memeory : calloc(ctsvc_person_s) Failed(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
 
-	out_data->name_contact_id_changed = src_data->name_contact_id_changed;
-	out_data->ringtone_changed = src_data->ringtone_changed;
-	out_data->vibration_changed = src_data->vibration_changed;
-	out_data->is_favorite_changed = src_data->is_favorite_changed;
 	out_data->is_favorite = src_data->is_favorite;
 	out_data->has_phonenumber = src_data->has_phonenumber;
 	out_data->has_email = src_data->has_email;
@@ -222,7 +218,6 @@ static int __ctsvc_person_set_int(contacts_record_h record, unsigned int propert
 	switch(property_id) {
 	case CTSVC_PROPERTY_PERSON_DISPLAY_CONTACT_ID:
 		person->name_contact_id = value;
-		person->name_contact_id_changed = true;
 		break;
 	case CTSVC_PROPERTY_PERSON_ID:
 		person->person_id = value;
@@ -262,11 +257,9 @@ static int __ctsvc_person_set_str(contacts_record_h record, unsigned int propert
 		break;
 	case CTSVC_PROPERTY_PERSON_RINGTONE:
 		FREEandSTRDUP(person->ringtone_path, str);
-		person->ringtone_changed = true;
 		break;
 	case CTSVC_PROPERTY_PERSON_VIBRATION:
 		FREEandSTRDUP(person->vibration, str);
-		person->vibration_changed = true;
 		break;
 	default :
 		ASSERT_NOT_REACHED("This field(%d) is not supported in value(person)", property_id);
@@ -283,7 +276,6 @@ static int __ctsvc_person_set_bool(contacts_record_h record, unsigned int proper
 	case CTSVC_PROPERTY_PERSON_IS_FAVORITE:
 		if (person->is_favorite != value) {
 			person->is_favorite = value;
-			person->is_favorite_changed = true;
 		}
 		break;
 	default:

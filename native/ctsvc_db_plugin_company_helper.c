@@ -278,14 +278,13 @@ int ctsvc_db_company_update(contacts_record_h record, int contact_id, bool is_my
 	RETV_IF(ret != CONTACTS_ERROR_NONE, ret);
 
 
-	if (company->logo_changed) {
+	if (ctsvc_record_check_property_flag((ctsvc_record_s *)company, _contacts_company.logo, CTSVC_PROPERTY_FLAG_DIRTY)) {
 		char dest[CTS_SQL_MAX_LEN] = {0};
 		__ctsvc_company_update_logo_file(contact_id, company->id, company->logo, dest, sizeof(dest));
 		if (*dest) {
 			free(company->logo);
 			company->logo = strdup(dest);
 		}
-		company->logo_changed = false;
 	}
 
 	do {

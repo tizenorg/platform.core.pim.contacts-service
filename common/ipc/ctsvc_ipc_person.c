@@ -23,10 +23,6 @@ static int __ctsvc_ipc_unmarshal_person(pims_ipc_data_h ipc_data, const char* vi
 	ctsvc_person_s*  person_p = (ctsvc_person_s*) record;
 
 	do {
-		if (ctsvc_ipc_unmarshal_bool(ipc_data, &person_p->name_contact_id_changed) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_unmarshal_bool(ipc_data, &person_p->ringtone_changed) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_unmarshal_bool(ipc_data, &person_p->vibration_changed) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_unmarshal_bool(ipc_data, &person_p->is_favorite_changed) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_bool(ipc_data, &person_p->is_favorite) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_bool(ipc_data, &person_p->has_phonenumber) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_bool(ipc_data, &person_p->has_email) != CONTACTS_ERROR_NONE) break;
@@ -59,10 +55,6 @@ static int __ctsvc_ipc_marshal_person(const contacts_record_h record, pims_ipc_d
 	RETV_IF(person_p==NULL,CONTACTS_ERROR_NO_DATA);
 
 	do {
-		if (ctsvc_ipc_marshal_bool((person_p->name_contact_id_changed),ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_bool((person_p->ringtone_changed),ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_bool((person_p->vibration_changed),ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_bool((person_p->is_favorite_changed),ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_bool((person_p->is_favorite),ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_bool((person_p->has_phonenumber),ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_bool((person_p->has_email),ipc_data) != CONTACTS_ERROR_NONE) break;

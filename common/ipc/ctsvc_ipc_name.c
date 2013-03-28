@@ -25,7 +25,6 @@ static int __ctsvc_ipc_unmarshal_name(pims_ipc_data_h ipc_data, const char* view
 
 	do {
 		if (ctsvc_ipc_unmarshal_bool(ipc_data, &name_p->is_default) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_unmarshal_bool(ipc_data, &name_p->is_changed) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_int(ipc_data, &name_p->id) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_int(ipc_data, &name_p->contact_id) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_int(ipc_data, &name_p->language_type) != CONTACTS_ERROR_NONE) break;
@@ -56,7 +55,6 @@ static int __ctsvc_ipc_marshal_name(const contacts_record_h record, pims_ipc_dat
 
 	do {
 		if (ctsvc_ipc_marshal_bool((name_p->is_default),ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_bool((name_p->is_changed),ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_int((name_p->id),ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_int((name_p->contact_id),ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_int((name_p->language_type),ipc_data) != CONTACTS_ERROR_NONE) break;

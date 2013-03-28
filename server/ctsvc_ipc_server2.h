@@ -1,5 +1,5 @@
 /*
- * Calendar Service
+ * Contacts Service
  *
  * Copyright (c) 2000 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
  *

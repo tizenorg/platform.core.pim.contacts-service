@@ -36,6 +36,7 @@
     (dest)->plugin_cbs = (src)->plugin_cbs;\
     (dest)->view_uri = (src)->view_uri;\
     (dest)->property_max_count = (src)->property_max_count;\
+    (dest)->property_flag = (src)->property_flag;\
     if ((src)->properties_flags) \
     {\
         (dest)->properties_flags  = calloc((dest)->property_max_count, sizeof(char));\

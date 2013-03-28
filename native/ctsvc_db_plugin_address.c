@@ -114,6 +114,10 @@ static int __ctsvc_db_address_update_record( contacts_record_h record )
 	char query[CTS_SQL_MAX_LEN] = {0};
 	ctsvc_address_s *address = (ctsvc_address_s*)record;
 
+	RETVM_IF(NULL == address->pobox && NULL == address->postalcode && NULL == address->region &&
+			NULL == address->locality && NULL == address->street && NULL == address->extended &&
+			NULL == address->country, CONTACTS_ERROR_INVALID_PARAMETER, "address is empty");
+
 	ret = ctsvc_begin_trans();
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("DB error : ctsvc_begin_trans() Failed(%d)", ret);

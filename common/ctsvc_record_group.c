@@ -103,7 +103,6 @@ static int __ctsvc_group_clone(contacts_record_h record, contacts_record_h *out_
 	out_data->id = src_data->id;
 	out_data->addressbook_id = src_data->addressbook_id;
 	out_data->is_read_only = src_data->is_read_only;
-	out_data->image_thumbnail_changed = src_data->image_thumbnail_changed;
 	out_data->name = SAFE_STRDUP(src_data->name);
 	out_data->extra_data = SAFE_STRDUP(src_data->extra_data);
 	out_data->vibration = SAFE_STRDUP(src_data->vibration);
@@ -208,7 +207,6 @@ static int __ctsvc_group_set_str(contacts_record_h record, unsigned int property
 		break;
 	case CTSVC_PROPERTY_GROUP_IMAGE:
 		FREEandSTRDUP(group->image_thumbnail_path, str);
-		group->image_thumbnail_changed = true;
 		break;
 	case CTSVC_PROPERTY_GROUP_VIBRATION:
 		FREEandSTRDUP(group->vibration, str);

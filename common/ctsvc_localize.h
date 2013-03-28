@@ -41,6 +41,7 @@ const char *ctsvc_get_language(int lang);
 void ctsvc_extra_normalize(UChar *word, int32_t word_size);
 int ctsvc_get_chosung(const char *src, char *dest, int dest_size);
 int ctsvc_convert_japanese_to_hiragana(const char *src, char **dest);
+int ctsvc_convert_japanese_to_hiragana_unicode(UChar *src, UChar *dest, int dest_size);
 int ctsvc_get_korean_search_pattern(const char *src, char *dest, int dest_size);
 
 #endif // __TIZEN_SOCIAL_CTSVC_LOCALIZE_H__

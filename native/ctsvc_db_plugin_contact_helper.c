@@ -352,7 +352,7 @@ void ctsvc_make_contact_display_name(ctsvc_contact_s *contact)
 			len += snprintf(display + len, display_len - len, "%s", name->suffix);
 		}
 
-		contact->display_name_changed = true;
+		ctsvc_record_set_property_flag((ctsvc_record_s *)contact, _contacts_contact.display_name, CTSVC_PROPERTY_FLAG_DIRTY);
 		contact->reverse_display_name = display;
 		contact->sort_name = SAFE_STRDUP(contact->display_name);
 		contact->reverse_sort_name = SAFE_STRDUP(contact->reverse_display_name);
@@ -363,7 +363,7 @@ void ctsvc_make_contact_display_name(ctsvc_contact_s *contact)
 			for (cur=contact->company->records;cur;cur=cur->next) {
 				ctsvc_company_s *company = (ctsvc_company_s *)cur->data;
 				if (company && company->name) {
-					contact->display_name_changed = true;
+					ctsvc_record_set_property_flag((ctsvc_record_s *)contact, _contacts_contact.display_name, CTSVC_PROPERTY_FLAG_DIRTY);
 					contact->display_name = SAFE_STRDUP(company->name);
 					contact->display_source_type = CONTACTS_DISPLAY_NAME_SOURCE_TYPE_COMPANY;
 					break;
@@ -371,11 +371,12 @@ void ctsvc_make_contact_display_name(ctsvc_contact_s *contact)
 			}
 		}
 
-		if (!contact->display_name_changed && contact->nicknames && contact->nicknames->records) {
+		if (!ctsvc_record_check_property_flag((ctsvc_record_s *)contact, _contacts_contact.display_name, CTSVC_PROPERTY_FLAG_DIRTY) &&
+				contact->nicknames && contact->nicknames->records) {
 			for (cur=contact->nicknames->records;cur;cur=cur->next) {
 				ctsvc_nickname_s *nickname = (ctsvc_nickname_s *)cur->data;
 				if (nickname && nickname->nickname) {
-					contact->display_name_changed = true;
+					ctsvc_record_set_property_flag((ctsvc_record_s *)contact, _contacts_contact.display_name, CTSVC_PROPERTY_FLAG_DIRTY);
 					contact->display_name = SAFE_STRDUP(nickname->nickname);
 					contact->display_source_type = CONTACTS_DISPLAY_NAME_SOURCE_TYPE_NICKNAME;
 					break;
@@ -383,11 +384,12 @@ void ctsvc_make_contact_display_name(ctsvc_contact_s *contact)
 			}
 		}
 
-		if (!contact->display_name_changed && contact->numbers && contact->numbers->records) {
+		if (!ctsvc_record_check_property_flag((ctsvc_record_s *)contact, _contacts_contact.display_name, CTSVC_PROPERTY_FLAG_DIRTY) &&
+				contact->numbers && contact->numbers->records) {
 			for (cur=contact->numbers->records;cur;cur=cur->next) {
 				ctsvc_number_s *number = (ctsvc_number_s *)cur->data;
 				if (number && number->number) {
-					contact->display_name_changed = true;
+					ctsvc_record_set_property_flag((ctsvc_record_s *)contact, _contacts_contact.display_name, CTSVC_PROPERTY_FLAG_DIRTY);
 					contact->display_name = SAFE_STRDUP(number->number);
 					contact->display_source_type = CONTACTS_DISPLAY_NAME_SOURCE_TYPE_NUMBER;
 					break;
@@ -395,11 +397,12 @@ void ctsvc_make_contact_display_name(ctsvc_contact_s *contact)
 			}
 		}
 
-		if (!contact->display_name_changed && contact->emails && contact->emails->records) {
+		if (!ctsvc_record_check_property_flag((ctsvc_record_s *)contact, _contacts_contact.display_name, CTSVC_PROPERTY_FLAG_DIRTY) &&
+				contact->emails && contact->emails->records) {
 			for (cur=contact->emails->records;cur;cur=cur->next) {
 				ctsvc_email_s *email = (ctsvc_email_s *)cur->data;
 				if (email && email->email_addr) {
-					contact->display_name_changed = true;
+					ctsvc_record_set_property_flag((ctsvc_record_s *)contact, _contacts_contact.display_name, CTSVC_PROPERTY_FLAG_DIRTY);
 					contact->display_name = SAFE_STRDUP(email->email_addr);
 					contact->display_source_type = CONTACTS_DISPLAY_NAME_SOURCE_TYPE_EMAIL;
 					break;
@@ -407,14 +410,14 @@ void ctsvc_make_contact_display_name(ctsvc_contact_s *contact)
 			}
 		}
 
-		if (contact->display_name_changed) {
+		if (ctsvc_record_check_property_flag((ctsvc_record_s *)contact, _contacts_contact.display_name, CTSVC_PROPERTY_FLAG_DIRTY)) {
 			contact->reverse_display_name = SAFE_STRDUP(contact->display_name);
 			contact->sort_name = SAFE_STRDUP(contact->display_name);
 			contact->reverse_sort_name = SAFE_STRDUP(contact->display_name);
 		}
 	}
 
-	if (contact->display_name_changed) {
+	if (ctsvc_record_check_property_flag((ctsvc_record_s *)contact, _contacts_contact.display_name, CTSVC_PROPERTY_FLAG_DIRTY)) {
 		ret = ctsvc_get_name_sort_type(contact->display_name);
 		WARN_IF( ret < 0, "ctsvc_check_language_type Failed(%d)", ret);
 
@@ -1153,7 +1156,7 @@ int ctsvc_contact_update_data_image(contacts_list_h image_list, int contact_id, 
 	do {
 		contacts_list_get_current_record_p(image_list, &record);
 		image = (ctsvc_image_s*)record;
-		if (image->is_changed) {
+		if (CTSVC_PROPERTY_FLAG_DIRTY & image->base.property_flag) {
 			if (0 < image->id) {
 				if (image->path)
 					ret = ctsvc_db_image_update(record, contact_id, is_my_profile);
@@ -1697,6 +1700,56 @@ int ctsvc_contact_insert_data_extension(contacts_list_h extension_list, int cont
 		}
 	}while(CONTACTS_ERROR_NONE == contacts_list_next(extension_list));
 
+	return ret;
+}
+
+int ctsvc_contact_update_display_name(int contact_id, contacts_display_name_source_type_e changed_record_type)
+{
+	int ret = CONTACTS_ERROR_NONE;
+	int display_name_type;
+	contacts_record_h record;
+	contacts_db_get_record(_contacts_contact._uri, contact_id, &record);
+	contacts_record_get_int(record, _contacts_contact.display_source_type, &display_name_type);
+
+	if (display_name_type <= changed_record_type) {
+
+		cts_stmt stmt = NULL;
+		char query[CTS_SQL_MAX_LEN] = {0};
+		ctsvc_contact_s *contact = (ctsvc_contact_s *)record;
+		ctsvc_make_contact_display_name(contact);
+
+		snprintf(query, sizeof(query), "UPDATE "CTS_TABLE_CONTACTS" SET "
+				"display_name=?, reverse_display_name=?, display_name_source=%d, display_name_language=%d, "
+				"sort_name=?, reverse_sort_name=?, sortkey=?, reverse_sortkey=? "
+				"WHERE contact_id=%d", contact->display_source_type, contact->display_name_language, contact_id);
+
+		stmt = cts_query_prepare(query);
+		if (NULL == stmt) {
+			ERR("DB error : cts_query_prepare() Failed");
+			contacts_record_destroy(record, true);
+			return CONTACTS_ERROR_DB;
+		}
+
+		if (contact->display_name)
+			cts_stmt_bind_text(stmt, 1, contact->display_name);
+		if (contact->reverse_display_name)
+			cts_stmt_bind_text(stmt, 2, contact->reverse_display_name);
+		if (contact->sort_name)
+			cts_stmt_bind_text(stmt, 3, contact->sort_name);
+		if (contact->reverse_sort_name)
+			cts_stmt_bind_text(stmt, 4, contact->reverse_sort_name);
+		if (contact->sortkey)
+			cts_stmt_bind_text(stmt, 5, contact->sortkey);
+		if (contact->reverse_sortkey)
+			cts_stmt_bind_text(stmt, 6, contact->reverse_sortkey);
+
+		ret = cts_stmt_step(stmt);
+		WARN_IF(CONTACTS_ERROR_NONE != ret, "cts_stmt_step() Failed(%d)", ret);
+
+		cts_stmt_finalize(stmt);
+	}
+
+	contacts_record_destroy(record, true);
 	return ret;
 }
 

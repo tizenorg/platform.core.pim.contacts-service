@@ -88,6 +88,8 @@ static int __ctsvc_db_nickname_insert_record( contacts_record_h record, int *id 
 		return ret;
 	}
 
+	ctsvc_contact_update_display_name(nickname->contact_id, CONTACTS_DISPLAY_NAME_SOURCE_TYPE_NICKNAME);
+
 	ret = ctsvc_db_contact_update_changed_time(nickname->contact_id);
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("DB error : ctsvc_db_contact_update_changed_time() Failed(%d)", ret);
@@ -146,6 +148,7 @@ static int __ctsvc_db_nickname_update_record( contacts_record_h record )
 	int contact_id;
 	char query[CTS_SQL_MAX_LEN] = {0};
 	ctsvc_nickname_s *nickname = (ctsvc_nickname_s *)record;
+	RETVM_IF(NULL == nickname->nickname, CONTACTS_ERROR_INVALID_PARAMETER, "nickname is empty");
 
 	ret = ctsvc_begin_trans();
 	if (CONTACTS_ERROR_NONE != ret) {
@@ -168,6 +171,8 @@ static int __ctsvc_db_nickname_update_record( contacts_record_h record )
 		ctsvc_end_trans(false);
 		return ret;
 	}
+
+	ctsvc_contact_update_display_name(nickname->contact_id, CONTACTS_DISPLAY_NAME_SOURCE_TYPE_NICKNAME);
 
 	ret = ctsvc_db_contact_update_changed_time(nickname->contact_id);
 	if (CONTACTS_ERROR_NONE != ret) {
@@ -216,6 +221,8 @@ static int __ctsvc_db_nickname_delete_record( int id )
 		ctsvc_end_trans(false);
 		return ret;
 	}
+
+	ctsvc_contact_update_display_name(contact_id, CONTACTS_DISPLAY_NAME_SOURCE_TYPE_NICKNAME);
 
 	ret = ctsvc_db_contact_update_changed_time(contact_id);
 	if (CONTACTS_ERROR_NONE != ret) {

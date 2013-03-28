@@ -67,7 +67,6 @@ int ctsvc_addressbook_delete(int account_id)
 		return ret;
 	}
 
-	ctsvc_end_trans(true);
-	return CONTACTS_ERROR_NONE;
+	return ctsvc_end_trans(true);
 }
 

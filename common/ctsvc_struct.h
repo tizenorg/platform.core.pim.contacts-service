@@ -220,7 +220,6 @@ typedef struct {
 
 typedef struct {
 	ctsvc_record_s base;
-	bool image_thumbnail_changed;
 	int id;
 	int addressbook_id;
 	bool is_read_only;
@@ -233,10 +232,6 @@ typedef struct {
 
 typedef struct {
 	ctsvc_record_s base;
-	bool name_contact_id_changed;
-	bool ringtone_changed;
-	bool vibration_changed;
-	bool is_favorite_changed;
 	bool is_favorite;
 	bool has_phonenumber;
 	bool has_email;
@@ -257,11 +252,6 @@ typedef struct {
 
 typedef struct {
 	ctsvc_record_s base;
-	bool display_name_changed;
-	bool uid_changed;
-	bool image_thumbnail_changed;
-	bool ringtone_changed;
-	bool vibration_changed;
 	bool is_favorite;
 	int changed_time;
 	bool has_phonenumber;
@@ -280,7 +270,6 @@ typedef struct {
 typedef struct {
 	ctsvc_record_s base;
 	bool is_default;
-	bool is_changed;
 	int id;
 	int contact_id;
 	int language_type;
@@ -406,7 +395,6 @@ typedef struct {
 
 typedef struct {
 	ctsvc_record_s base;
-	bool is_changed;
 	bool is_default;
 	int id;
 	int contact_id;
@@ -446,7 +434,6 @@ typedef struct {
 
 typedef struct {
 	ctsvc_record_s base;
-	bool logo_changed;
 	int id;
 	int contact_id;
 	bool is_default;
@@ -496,11 +483,6 @@ typedef struct {
 
 typedef struct {
 	ctsvc_record_s base;
-	bool display_name_changed;
-	bool uid_changed;
-	bool image_thumbnail_changed;
-	bool ringtone_changed;
-	bool vibration_changed;
 	bool is_favorite;
 	int id;
 	int person_id;
@@ -543,7 +525,6 @@ typedef struct {
 
 typedef struct {
 	ctsvc_record_s base;
-	bool display_name_changed;
 	int id;
 	int addressbook_id;
 	int changed_time;

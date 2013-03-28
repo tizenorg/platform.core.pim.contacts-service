@@ -877,6 +877,7 @@ static int __ctsvc_company_destroy(contacts_record_h record, bool delete_child)
 	company->base.plugin_cbs = NULL;	// help to find double destroy bug (refer to the contacts_record_destroy)
 	free(company->base.properties_flags);
 
+	free(company->label);
 	free(company->name);
 	free(company->department);
 	free(company->job_title);
@@ -2123,7 +2124,6 @@ static int __ctsvc_image_set_int(contacts_record_h record, unsigned int property
 		image->contact_id = value;
 		break;
 	case CTSVC_PROPERTY_IMAGE_TYPE:
-		image->is_changed = true;
 		image->type = value;
 		break;
 	default:
@@ -3085,7 +3085,6 @@ static int __ctsvc_contact_set_str(contacts_record_h record, unsigned int proper
 	switch(property_id) {
 	case CTSVC_PROPERTY_CONTACT_DISPLAY_NAME:
 		FREEandSTRDUP(contact->display_name, str);
-		contact->display_name_changed = true;
 		break;
 /*
 		CTS_ERR("Invalid parameter : property_id(%d) is a read-only value (contact)", property_id);
@@ -3093,19 +3092,15 @@ static int __ctsvc_contact_set_str(contacts_record_h record, unsigned int proper
 */
 	case CTSVC_PROPERTY_CONTACT_RINGTONE:
 		FREEandSTRDUP(contact->ringtone_path, str);
-		contact->ringtone_changed = true;
 		break;
 	case CTSVC_PROPERTY_CONTACT_IMAGE_THUMBNAIL:
 		FREEandSTRDUP(contact->image_thumbnail_path, str);
-		contact->image_thumbnail_changed = true;
 		break;
 	case CTSVC_PROPERTY_CONTACT_UID:
 		FREEandSTRDUP(contact->uid, str);
-		contact->uid_changed = true;
 		break;
 	case CTSVC_PROPERTY_CONTACT_VIBRATION:
 		FREEandSTRDUP(contact->vibration, str);
-		contact->vibration_changed = true;
 		break;
 	default :
 		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(contact)", property_id);
@@ -3122,7 +3117,6 @@ static int __ctsvc_simple_contact_set_str(contacts_record_h record, unsigned int
 	switch(property_id) {
 	case CTSVC_PROPERTY_CONTACT_DISPLAY_NAME:
 		FREEandSTRDUP(contact->display_name, str);
-		contact->display_name_changed = true;
 		break;
 /*
 		CTS_ERR("Invalid parameter : property_id(%d) is a read-only value (contact)", property_id);
@@ -3130,19 +3124,15 @@ static int __ctsvc_simple_contact_set_str(contacts_record_h record, unsigned int
 */
 	case CTSVC_PROPERTY_CONTACT_RINGTONE:
 		FREEandSTRDUP(contact->ringtone_path, str);
-		contact->ringtone_changed = true;
 		break;
 	case CTSVC_PROPERTY_CONTACT_IMAGE_THUMBNAIL:
 		FREEandSTRDUP(contact->image_thumbnail_path, str);
-		contact->image_thumbnail_changed = true;
 		break;
 	case CTSVC_PROPERTY_CONTACT_UID:
 		FREEandSTRDUP(contact->uid, str);
-		contact->uid_changed = true;
 		break;
 	case CTSVC_PROPERTY_CONTACT_VIBRATION:
 		FREEandSTRDUP(contact->vibration, str);
-		contact->vibration_changed = true;
 		break;
 	default :
 		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(simple_contact)", property_id);
@@ -3184,7 +3174,6 @@ static int __ctsvc_name_set_str(contacts_record_h record, unsigned int property_
 		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(name)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
-	name->is_changed = true;
 	return CONTACTS_ERROR_NONE;
 }
 
@@ -3212,7 +3201,6 @@ static int __ctsvc_company_set_str(contacts_record_h record, unsigned int proper
 		FREEandSTRDUP(company->role, str);
 		break;
 	case CTSVC_PROPERTY_COMPANY_LOGO:
-		company->logo_changed = true;
 		FREEandSTRDUP(company->logo, str);
 		break;
 	case CTSVC_PROPERTY_COMPANY_LOCATION:
@@ -3508,11 +3496,9 @@ static int __ctsvc_image_set_str(contacts_record_h record, unsigned int property
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_IMAGE_LABEL:
-		image->is_changed = true;
 		FREEandSTRDUP(image->label, str);
 		break;
 	case CTSVC_PROPERTY_IMAGE_PATH:
-		image->is_changed = true;
 		FREEandSTRDUP(image->path, str);
 		break;
 	default :
@@ -3788,12 +3774,6 @@ static int __ctsvc_contact_clone(contacts_record_h record, contacts_record_h *ou
 	RETVM_IF(NULL == out_data, CONTACTS_ERROR_OUT_OF_MEMORY,
 			"Out of memeory : calloc(ctsvc_contact_s) Failed(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
 
-	out_data->display_name_changed = src_data->display_name_changed;
-	out_data->uid_changed = src_data->uid_changed;
-	out_data->vibration_changed = src_data->vibration_changed;
-	out_data->image_thumbnail_changed = src_data->image_thumbnail_changed;
-	out_data->ringtone_changed = src_data->ringtone_changed;
-
 	out_data->id = src_data->id;
 	out_data->person_id = src_data->person_id;
 	out_data->addressbook_id = src_data->addressbook_id;
@@ -3963,7 +3943,6 @@ static int __ctsvc_company_clone(contacts_record_h record, contacts_record_h *ou
 			"Out of memeory : calloc(ctsvc_company_s) Failed(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
 
 	out_data->id = src_data->id;
-	out_data->logo_changed= src_data->logo_changed;
 	out_data->contact_id = src_data->contact_id;
 	out_data->is_default = src_data->is_default;
 	out_data->type = src_data->type;
@@ -4117,7 +4096,6 @@ static int __ctsvc_name_clone(contacts_record_h record, contacts_record_h *out_r
 			"Out of memeory : calloc(ctsvc_name_s) Failed(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
 
 	out_data->is_default = src_data->is_default;
-	out_data->is_changed = src_data->is_changed;
 	out_data->id = src_data->id;
 	out_data->contact_id= src_data->contact_id;
 	out_data->language_type = src_data->language_type;
@@ -4266,7 +4244,6 @@ static int __ctsvc_image_clone(contacts_record_h record, contacts_record_h *out_
 	RETVM_IF(NULL == out_data, CONTACTS_ERROR_OUT_OF_MEMORY,
 			"Out of memeory : calloc(ctsvc_image_s) Failed(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
 
-	out_data->is_changed = src_data->is_changed;
 	out_data->is_default = src_data->is_default;
 	out_data->id = src_data->id;
 	out_data->contact_id = src_data->contact_id;
@@ -4289,12 +4266,6 @@ static int __ctsvc_simple_contact_clone(contacts_record_h record, contacts_recor
 	out_data = calloc(1, sizeof(ctsvc_simple_contact_s));
 	RETVM_IF(NULL == out_data, CONTACTS_ERROR_OUT_OF_MEMORY,
 			"Out of memeory : calloc(ctsvc_simple_contact_s) Failed(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
-
-	out_data->uid_changed = src_data->uid_changed;
-	out_data->vibration_changed = src_data->vibration_changed;
-	out_data->image_thumbnail_changed = src_data->image_thumbnail_changed;
-	out_data->ringtone_changed = src_data->ringtone_changed;
-	out_data->display_name_changed = src_data->display_name_changed;
 
 	out_data->contact_id = src_data->contact_id;
 	out_data->person_id = src_data->person_id;

@@ -127,6 +127,8 @@ static int __ctsvc_db_company_insert_record( contacts_record_h record, int *id )
 		return ret;
 	}
 
+	ctsvc_contact_update_display_name(company->contact_id, CONTACTS_DISPLAY_NAME_SOURCE_TYPE_COMPANY);
+
 	ret = ctsvc_db_contact_update_changed_time(company->contact_id);
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("DB error : ctsvc_db_contact_update_changed_time() Failed(%d)", ret);
@@ -152,6 +154,11 @@ static int __ctsvc_db_company_update_record( contacts_record_h record )
 	char query[CTS_SQL_MAX_LEN] = {0};
 	ctsvc_company_s *company = (ctsvc_company_s *)record;
 
+	RETVM_IF(NULL == company->name && NULL == company->department &&	NULL == company->job_title &&
+			NULL == company->role && NULL == company->assistant_name && NULL == company->logo &&
+			NULL == company->location &&	NULL == company->description &&	NULL == company->phonetic_name,
+			CONTACTS_ERROR_INVALID_PARAMETER, "company is empty");
+
 	ret = ctsvc_begin_trans();
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("DB error : ctsvc_begin_trans() Failed(%d)", ret);
@@ -174,7 +181,8 @@ static int __ctsvc_db_company_update_record( contacts_record_h record )
 		return ret;
 	}
 
-	// TODO ; contact display company update
+	ctsvc_contact_update_display_name(company->contact_id, CONTACTS_DISPLAY_NAME_SOURCE_TYPE_COMPANY);
+
 	ret = ctsvc_db_contact_update_changed_time(company->contact_id);
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("DB error : ctsvc_db_contact_update_changed_time() Failed(%d)", ret);
@@ -222,6 +230,8 @@ static int __ctsvc_db_company_delete_record( int id )
 		ctsvc_end_trans(false);
 		return ret;
 	}
+
+	ctsvc_contact_update_display_name(contact_id, CONTACTS_DISPLAY_NAME_SOURCE_TYPE_COMPANY);
 
 	ret = ctsvc_db_contact_update_changed_time(contact_id);
 	if (CONTACTS_ERROR_NONE != ret) {

@@ -214,7 +214,6 @@ int ctsvc_db_name_insert(contacts_record_h record, int contact_id, bool is_my_pr
 
 
 	// update search index table
-	name->is_changed = false;
 	return CONTACTS_ERROR_NONE;
 }
 
@@ -272,7 +271,6 @@ int ctsvc_db_name_update(contacts_record_h record, bool is_my_profile)
 	char *temp_normal_last = NULL;
 	char query[CTS_SQL_MIN_LEN] = {0};
 
-	RETV_IF(false == name->is_changed, CONTACTS_ERROR_NONE);
 	RETVM_IF(!name->id, CONTACTS_ERROR_INVALID_PARAMETER, "name of contact has no ID.");
 	RETVM_IF(CTSVC_PROPERTY_FLAG_DIRTY != (name->base.property_flag & CTSVC_PROPERTY_FLAG_DIRTY), CONTACTS_ERROR_NONE, "No update");
 
@@ -356,8 +354,6 @@ int ctsvc_db_name_update(contacts_record_h record, bool is_my_profile)
 			CONTACTS_FREE(cursor->data);
 		g_slist_free(bind_text);
 	}
-
-	name->is_changed = false;
 
 	return CONTACTS_ERROR_NONE;
 }

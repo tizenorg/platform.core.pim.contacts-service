@@ -146,6 +146,7 @@ static int __ctsvc_db_url_update_record( contacts_record_h record )
 	int contact_id;
 	char query[CTS_SQL_MAX_LEN] = {0};
 	ctsvc_url_s *url = (ctsvc_url_s *)record;
+	RETVM_IF(NULL == url->url, CONTACTS_ERROR_INVALID_PARAMETER, "url is empty");
 
 	ret = ctsvc_begin_trans();
 	if (CONTACTS_ERROR_NONE != ret) {

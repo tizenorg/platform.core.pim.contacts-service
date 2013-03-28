@@ -152,6 +152,11 @@ static int __ctsvc_db_extension_update_record( contacts_record_h record )
 	char query[CTS_SQL_MAX_LEN] = {0};
 	ctsvc_extension_s *extension = (ctsvc_extension_s *)record;
 
+	RETVM_IF(NULL == extension->data2 && NULL == extension->data3 && NULL == extension->data4 &&
+			NULL == extension->data5 && NULL == extension->data6 && NULL == extension->data7 &&
+			NULL == extension->data8 && NULL == extension->data9 && NULL == extension->data10 &&
+			NULL == extension->data11 && NULL == extension->data12, CONTACTS_ERROR_INVALID_PARAMETER, "extension is empty");
+
 	ret = ctsvc_begin_trans();
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("DB error : ctsvc_begin_trans() Failed(%d)", ret);

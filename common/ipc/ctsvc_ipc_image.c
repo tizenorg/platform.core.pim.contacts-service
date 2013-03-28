@@ -24,7 +24,6 @@ static int __ctsvc_ipc_unmarshal_image(pims_ipc_data_h ipc_data, const char* vie
 	ctsvc_image_s* image_p = (ctsvc_image_s*) record;
 
 	do {
-		if (ctsvc_ipc_unmarshal_bool(ipc_data, &image_p->is_changed) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_int(ipc_data, &image_p->id) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_int(ipc_data, &image_p->contact_id) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_int(ipc_data, &image_p->type) != CONTACTS_ERROR_NONE) break;
@@ -46,7 +45,6 @@ static int __ctsvc_ipc_marshal_image(const contacts_record_h record, pims_ipc_da
 	RETV_IF(image_p==NULL,CONTACTS_ERROR_NO_DATA);
 
 	do {
-		if (ctsvc_ipc_marshal_bool((image_p->is_changed),ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_int((image_p->id),ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_int((image_p->contact_id),ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_int((image_p->type),ipc_data) != CONTACTS_ERROR_NONE) break;
