@@ -102,8 +102,8 @@ vconftool set -t int db/contacts-svc/phonenumber_min_match_digit 8 -g 6005
 /opt/usr/data/contacts-svc/.CONTACTS_SVC_*
 /opt/usr/data/contacts-svc/img/*
 %attr(0755,root,root) /etc/rc.d/init.d/contacts-service-ipcd.sh
-%{_libdir}/systemd/user/contacts-service.service
-%{_libdir}/systemd/user/tizen-middleware.target.wants/contacts-service.service
+/usr/lib/systemd/user/contacts-service.service
+/usr/lib/systemd/user/tizen-middleware.target.wants/contacts-service.service
 %config(noreplace) /opt/usr/dbspace/.contacts-svc.db*
 
 
