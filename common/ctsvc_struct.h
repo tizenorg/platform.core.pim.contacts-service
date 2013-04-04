@@ -244,9 +244,6 @@ typedef struct {
 	char *vibration;
 	char *status;
 	int link_count;
-	int account_id1;
-	int account_id2;
-	int account_id3;
 	char *addressbook_ids;
 }ctsvc_person_s;
 
@@ -377,11 +374,12 @@ typedef struct {
 	char *uid;
 	char *text;
 	int  order;
-	char *appsvc_operation;
-	char *data1;
-	char *data2;
-	char *data3;
-	char *data4;
+	char *service_operation;
+	char *mime;
+	char *app_id;
+	char *uri;
+	char *category;
+	char *extra_data;
 }ctsvc_profile_s;
 
 typedef struct {
@@ -418,6 +416,8 @@ typedef struct {
 	char *status;
 	int timestamp;
 	ctsvc_list_s* photos;
+	char *service_operation;
+	char *uri;
 	char *sync_data1;
 	char *sync_data2;
 	char *sync_data3;

@@ -64,8 +64,8 @@ static int __ctsvc_db_profile_insert_record( contacts_record_h record, int *id )
 	char query[CTS_SQL_MAX_LEN] = {0};
 	ctsvc_profile_s *profile = (ctsvc_profile_s *)record;
 
-	RETVM_IF(NULL == profile->appsvc_operation, CONTACTS_ERROR_INVALID_PARAMETER,
-			"Invalid parameter : profile uid is NULL");
+	RETVM_IF(NULL == profile->text, CONTACTS_ERROR_INVALID_PARAMETER,
+			"Invalid parameter : profile text is NULL");
 
 	ret = ctsvc_begin_trans();
 	if (CONTACTS_ERROR_NONE != ret) {
@@ -148,7 +148,7 @@ static int __ctsvc_db_profile_update_record( contacts_record_h record )
 	int contact_id;
 	char query[CTS_SQL_MAX_LEN] = {0};
 	ctsvc_profile_s *profile = (ctsvc_profile_s *)record;
-	RETVM_IF(NULL == profile->appsvc_operation, CONTACTS_ERROR_INVALID_PARAMETER, "appsvc_operation is empty");
+	RETVM_IF(NULL == profile->text, CONTACTS_ERROR_INVALID_PARAMETER, "profile text is empty");
 
 	ret = ctsvc_begin_trans();
 	if (CONTACTS_ERROR_NONE != ret) {
@@ -248,7 +248,7 @@ static int __ctsvc_db_profile_get_all_records( int offset, int limit, contacts_l
 
 	len = snprintf(query, sizeof(query),
 			"SELECT id, data.contact_id, is_default, data1, data2, "
-				"data3, data4, data5, data6, data7, data8, data9, data10 "
+				"data3, data4, data5, data6, data7, data8, data9, data10, data11 "
 				"FROM "CTS_TABLE_DATA", "CTSVC_DB_VIEW_CONTACT" "
 				"ON "CTS_TABLE_DATA".contact_id = "CTSVC_DB_VIEW_CONTACT".contact_id "
 				"WHERE datatype = %d AND is_my_profile=0 ",
@@ -353,25 +353,29 @@ static int __ctsvc_db_profile_get_records_with_query( contacts_query_h query, in
 			case CTSVC_PROPERTY_PROFILE_ORDER:
 				profile->order = ctsvc_stmt_get_int(stmt, i);
 				break;
-			case CTSVC_PROPERTY_PROFILE_APPSVC_OPERATION:
+			case CTSVC_PROPERTY_PROFILE_SERVICE_OPERATION:
 				temp = ctsvc_stmt_get_text(stmt, i);
-				profile->appsvc_operation = SAFE_STRDUP(temp);
+				profile->service_operation = SAFE_STRDUP(temp);
 				break;
-			case CTSVC_PROPERTY_PROFILE_DATA1:
+			case CTSVC_PROPERTY_PROFILE_MIME:
 				temp = ctsvc_stmt_get_text(stmt, i);
-				profile->data1 = SAFE_STRDUP(temp);
+				profile->mime = SAFE_STRDUP(temp);
 				break;
-			case CTSVC_PROPERTY_PROFILE_DATA2:
+			case CTSVC_PROPERTY_PROFILE_APP_ID:
 				temp = ctsvc_stmt_get_text(stmt, i);
-				profile->data2 = SAFE_STRDUP(temp);
+				profile->app_id = SAFE_STRDUP(temp);
 				break;
-			case CTSVC_PROPERTY_PROFILE_DATA3:
+			case CTSVC_PROPERTY_PROFILE_URI:
 				temp = ctsvc_stmt_get_text(stmt, i);
-				profile->data3 = SAFE_STRDUP(temp);
+				profile->uri = SAFE_STRDUP(temp);
 				break;
-			case CTSVC_PROPERTY_PROFILE_DATA4:
+			case CTSVC_PROPERTY_PROFILE_CATEGORY:
 				temp = ctsvc_stmt_get_text(stmt, i);
-				profile->data4 = SAFE_STRDUP(temp);
+				profile->category = SAFE_STRDUP(temp);
+				break;
+			case CTSVC_PROPERTY_PROFILE_EXTRA_DATA:
+				temp = ctsvc_stmt_get_text(stmt, i);
+				profile->extra_data = SAFE_STRDUP(temp);
 				break;
 			default:
 				break;

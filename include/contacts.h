@@ -648,9 +648,6 @@
  * <tr><td>boolean</td><td> is_favorite </td><td>read, write</td><td> </td></tr>
  * <tr><td>double</td><td> favorite_priority </td><td> filter only </td><td> The priority of favorite contacts. You can not set the value but you can use it as sorting key. </td></tr>
  * <tr><td>integer</td><td> link_count </td><td>read, write</td><td> </td></tr>
- * <tr><td>integer</td><td> account_id1 </td><td>read, write</td><td> </td></tr>
- * <tr><td>integer</td><td> account_id2 </td><td>read, write</td><td> </td></tr>
- * <tr><td>integer</td><td> account_id3 </td><td>read, write</td><td> </td></tr>
  * <tr><td>integer</td><td> addressbook_ids </td><td>read, write</td><td> </td></tr>
  * <tr><td>boolean</td><td> has_phonenumber </td><td>read only</td><td> </td></tr>
  * <tr><td>boolean</td><td> has_email </td><td>read only</td><td> </td></tr>
@@ -957,11 +954,12 @@
  * <tr><td>string</td><td> uid </td><td>read, write</td><td> </td></tr>
  * <tr><td>string</td><td> text </td><td>read, write</td><td> </td></tr>
  * <tr><td>integer</td><td> order </td><td>read, write</td><td> </td></tr>
- * <tr><td>string</td><td> appsvc_operation </td><td>read, write</td><td> </td></tr>
- * <tr><td>string</td><td> data1 </td><td>read, write</td><td> </td></tr>
- * <tr><td>string</td><td> data2 </td><td>read, write</td><td> </td></tr>
- * <tr><td>string</td><td> data3 </td><td>read, write</td><td> </td></tr>
- * <tr><td>string</td><td> data4 </td><td>read, write</td><td> </td></tr>
+ * <tr><td>string</td><td> service_operation </td><td>read, write</td><td> </td></tr>
+ * <tr><td>string</td><td> mime </td><td>read, write</td><td>  </td> </tr>
+ * <tr><td>string</td><td> app_id </td><td>read, write</td><td> </td>  </tr>
+ * <tr><td>string</td><td> uri </td><td>read, write</td><td> </td ></tr>
+ * <tr><td>string</td><td> catagory </td><td>read, write</td><td></td></tr>
+ * <tr><td>string</td><td> extra_data </td><td>read, write</td><td> </td></tr>
  * </table>
  *
  * @section CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_activity _contacts_activity view
@@ -978,6 +976,8 @@
  * <tr><td>string</td><td> source_name </td><td>read, write</td><td> </td></tr>
  * <tr><td>int</td><td> timestamp </td><td>read, write</td><td> </td></tr>
  * <tr><td>string</td><td> status </td><td>read, write</td><td> </td></tr>
+ * <tr><td>string</td><td> service_operation </td><td></td><td> </td></tr>
+ * <tr><td>string</td><td> uri </td><td></td><td> </td></tr>
  * <tr><td>string</td><td> sync_data1 </td><td>read, write</td><td> </td></tr>
  * <tr><td>string</td><td> sync_data2 </td><td>read, write</td><td> </td></tr>
  * <tr><td>string</td><td> sync_data3 </td><td>read, write</td><td> </td></tr>
@@ -1172,9 +1172,6 @@
  * <tr><td>string</td><td> status </td><td></td><td> </td></tr>
  * <tr><td>boolean</td><td> is_favorite </td><td></td><td> </td></tr>
  * <tr><td>integer</td><td> link_count </td><td></td><td> </td></tr>
- * <tr><td>integer</td><td> account_id1 </td><td></td><td> </td></tr>
- * <tr><td>integer</td><td> account_id2 </td><td></td><td> </td></tr>
- * <tr><td>integer</td><td> account_id3 </td><td></td><td> </td></tr>
  * <tr><td>integer</td><td> addressbook_ids </td><td></td><td> </td></tr>
  * <tr><td>boolean</td><td> has_phonenumber </td><td></td><td> </td></tr>
  * <tr><td>boolean</td><td> has_email </td><td></td><td> </td></tr>
@@ -1312,6 +1309,8 @@
  * <tr><td>string</td><td> source_name </td><td></td><td> </td></tr>
  * <tr><td>string</td><td> status </td><td></td><td> </td></tr>
  * <tr><td>integer</td><td> timestamp </td><td></td><td> </td></tr>
+ * <tr><td>string</td><td> service_operation </td><td></td><td> </td></tr>
+ * <tr><td>string</td><td> uri </td><td></td><td> </td></tr>
  * <tr><td>string</td><td> sync_data1 </td><td></td><td> </td></tr>
  * <tr><td>string</td><td> sync_data2 </td><td></td><td> </td></tr>
  * <tr><td>string</td><td> sync_data3 </td><td></td><td> </td></tr>

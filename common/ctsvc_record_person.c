@@ -103,9 +103,6 @@ static int __ctsvc_person_clone(contacts_record_h record, contacts_record_h *out
 	out_data->person_id = src_data->person_id;
 	out_data->name_contact_id = src_data->name_contact_id;
 	out_data->link_count = src_data->link_count;
-	out_data->account_id1 = src_data->account_id1;
-	out_data->account_id2 = src_data->account_id2;
-	out_data->account_id3 = src_data->account_id3;
 	out_data->addressbook_ids = SAFE_STRDUP(src_data->addressbook_ids);
 	out_data->display_name = SAFE_STRDUP(src_data->display_name);
 	out_data->display_name_index = SAFE_STRDUP(src_data->display_name_index);
@@ -132,15 +129,6 @@ static int __ctsvc_person_get_int(contacts_record_h record, unsigned int propert
 		break;
 	case CTSVC_PROPERTY_PERSON_LINK_COUNT:
 		*out = person->link_count;
-		break;
-	case CTSVC_PROPERTY_PERSON_ACCOUNT_ID1:
-		*out = person->account_id1;
-		break;
-	case CTSVC_PROPERTY_PERSON_ACCOUNT_ID2:
-		*out = person->account_id2;
-		break;
-	case CTSVC_PROPERTY_PERSON_ACCOUNT_ID3:
-		*out = person->account_id3;
 		break;
 	default:
 		ASSERT_NOT_REACHED("This field(%d) is not supported in value(person)", property_id);
@@ -224,15 +212,6 @@ static int __ctsvc_person_set_int(contacts_record_h record, unsigned int propert
 		break;
 	case CTSVC_PROPERTY_PERSON_LINK_COUNT:
 		person->link_count = value;
-		break;
-	case CTSVC_PROPERTY_PERSON_ACCOUNT_ID1:
-		person->account_id1 = value;
-		break;
-	case CTSVC_PROPERTY_PERSON_ACCOUNT_ID2:
-		person->account_id2 = value;
-		break;
-	case CTSVC_PROPERTY_PERSON_ACCOUNT_ID3:
-		person->account_id3 = value;
 		break;
 	default:
 		ASSERT_NOT_REACHED("This field(0x%0x) is not supported in value(person)", property_id);

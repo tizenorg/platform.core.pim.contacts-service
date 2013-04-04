@@ -35,6 +35,7 @@
 #include "ctsvc_view.h"
 #include "ctsvc_inotify.h"
 #include "ctsvc_localize.h"
+#include "ctsvc_setting.h"
 
 #include "ctsvc_db_plugin_person_helper.h"
 
@@ -265,7 +266,7 @@ static inline int __ctsvc_db_create_str_condition(ctsvc_composite_filter_s *com_
 	if (filter->value.s) {
 		if (filter->property_id == CTSVC_PROPERTY_NUMBER_NUMBER_FILTER) {
 			char dest[strlen(filter->value.s)+1];
-			ret = ctsvc_normalize_number(filter->value.s, dest, sizeof(dest), CTSVC_MIN_MATCH_NORMALIZED_NUMBER_SIZE);
+			ret = ctsvc_normalize_number(filter->value.s, dest, sizeof(dest), ctsvc_get_phonenumber_min_match_digit());
 			if (CONTACTS_ERROR_NONE == ret)
 				*bind_text = g_slist_append(*bind_text, strdup(dest));
 			else

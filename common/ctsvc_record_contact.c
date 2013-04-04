@@ -951,6 +951,8 @@ static int __ctsvc_activity_destroy(contacts_record_h record, bool delete_child)
 
 	free(activity->source_name);
 	free(activity->status);
+	free(activity->service_operation);
+	free(activity->uri);
 	free(activity->sync_data1);
 	free(activity->sync_data2);
 	free(activity->sync_data3);
@@ -1050,11 +1052,12 @@ static int __ctsvc_profile_destroy(contacts_record_h record, bool delete_child)
 	free(profile->label);
 	free(profile->uid);
 	free(profile->text);
-	free(profile->appsvc_operation);
-	free(profile->data1);
-	free(profile->data2);
-	free(profile->data3);
-	free(profile->data4);
+	free(profile->service_operation);
+	free(profile->mime);
+	free(profile->app_id);
+	free(profile->uri);
+	free(profile->category);
+	free(profile->extra_data);
 	free(profile);
 
 	return CONTACTS_ERROR_NONE;
@@ -2867,6 +2870,12 @@ static int __ctsvc_activity_get_str_real(contacts_record_h record, unsigned int 
 	case CTSVC_PROPERTY_ACTIVITY_STATUS:
 		*out_str = GET_STR(copy, activity->status);
 		break;
+	case CTSVC_PROPERTY_ACTIVITY_SERVICE_OPERATION:
+		*out_str = GET_STR(copy, activity->service_operation);
+		break;
+	case CTSVC_PROPERTY_ACTIVITY_URI:
+		*out_str = GET_STR(copy, activity->uri);
+		break;
 	case CTSVC_PROPERTY_ACTIVITY_SYNC_DATA1:
 		*out_str = GET_STR(copy, activity->sync_data1);
 		break;
@@ -2935,20 +2944,23 @@ static int __ctsvc_profile_get_str_real(contacts_record_h record, unsigned int p
 	case CTSVC_PROPERTY_PROFILE_TEXT:
 		*out_str = GET_STR(copy, profile->text);
 		break;
-	case CTSVC_PROPERTY_PROFILE_APPSVC_OPERATION:
-		*out_str = GET_STR(copy, profile->appsvc_operation);
+	case CTSVC_PROPERTY_PROFILE_SERVICE_OPERATION:
+		*out_str = GET_STR(copy, profile->service_operation);
 		break;
-	case CTSVC_PROPERTY_PROFILE_DATA1:
-		*out_str = GET_STR(copy, profile->data1);
+	case CTSVC_PROPERTY_PROFILE_MIME:
+		*out_str = GET_STR(copy, profile->mime);
 		break;
-	case CTSVC_PROPERTY_PROFILE_DATA2:
-		*out_str = GET_STR(copy, profile->data2);
+	case CTSVC_PROPERTY_PROFILE_APP_ID:
+		*out_str = GET_STR(copy, profile->app_id);
 		break;
-	case CTSVC_PROPERTY_PROFILE_DATA3:
-		*out_str = GET_STR(copy, profile->data3);
+	case CTSVC_PROPERTY_PROFILE_URI:
+		*out_str = GET_STR(copy, profile->uri);
 		break;
-	case CTSVC_PROPERTY_PROFILE_DATA4:
-		*out_str = GET_STR(copy, profile->data4);
+	case CTSVC_PROPERTY_PROFILE_CATEGORY:
+		*out_str = GET_STR(copy, profile->category);
+		break;
+	case CTSVC_PROPERTY_PROFILE_EXTRA_DATA:
+		*out_str = GET_STR(copy, profile->extra_data);
 		break;
 	default :
 		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(profile)", property_id);
@@ -3402,6 +3414,12 @@ static int __ctsvc_activity_set_str(contacts_record_h record, unsigned int prope
 	case CTSVC_PROPERTY_ACTIVITY_STATUS:
 		FREEandSTRDUP(activity->status, str);
 		break;
+	case CTSVC_PROPERTY_ACTIVITY_SERVICE_OPERATION:
+		FREEandSTRDUP(activity->service_operation, str);
+		break;
+	case CTSVC_PROPERTY_ACTIVITY_URI:
+		FREEandSTRDUP(activity->uri, str);
+		break;
 	case CTSVC_PROPERTY_ACTIVITY_SYNC_DATA1:
 		FREEandSTRDUP(activity->sync_data1, str);
 		break;
@@ -3450,20 +3468,23 @@ static int __ctsvc_profile_set_str(contacts_record_h record, unsigned int proper
 	case CTSVC_PROPERTY_PROFILE_TEXT:
 		FREEandSTRDUP(profile->text, str);
 		break;
-	case CTSVC_PROPERTY_PROFILE_APPSVC_OPERATION:
-		FREEandSTRDUP(profile->appsvc_operation, str);
+	case CTSVC_PROPERTY_PROFILE_SERVICE_OPERATION:
+		FREEandSTRDUP(profile->service_operation, str);
 		break;
-	case CTSVC_PROPERTY_PROFILE_DATA1:
-		FREEandSTRDUP(profile->data1, str);
+	case CTSVC_PROPERTY_PROFILE_MIME:
+		FREEandSTRDUP(profile->mime, str);
 		break;
-	case CTSVC_PROPERTY_PROFILE_DATA2:
-		FREEandSTRDUP(profile->data2, str);
+	case CTSVC_PROPERTY_PROFILE_APP_ID:
+		FREEandSTRDUP(profile->app_id, str);
 		break;
-	case CTSVC_PROPERTY_PROFILE_DATA3:
-		FREEandSTRDUP(profile->data3, str);
+	case CTSVC_PROPERTY_PROFILE_URI:
+		FREEandSTRDUP(profile->uri, str);
 		break;
-	case CTSVC_PROPERTY_PROFILE_DATA4:
-		FREEandSTRDUP(profile->data4, str);
+	case CTSVC_PROPERTY_PROFILE_CATEGORY:
+		FREEandSTRDUP(profile->category, str);
+		break;
+	case CTSVC_PROPERTY_PROFILE_EXTRA_DATA:
+		FREEandSTRDUP(profile->extra_data, str);
 		break;
 	default :
 		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(profile)", property_id);
@@ -3867,6 +3888,8 @@ static int __ctsvc_activity_clone(contacts_record_h record, contacts_record_h *o
 	out_data->timestamp = src_data->timestamp;
 	out_data->source_name = SAFE_STRDUP(src_data->source_name);
 	out_data->status = SAFE_STRDUP(src_data->status);
+	out_data->service_operation = SAFE_STRDUP(src_data->service_operation);
+	out_data->uri = SAFE_STRDUP(src_data->uri);
 	out_data->sync_data1 = SAFE_STRDUP(src_data->sync_data1);
 	out_data->sync_data2 = SAFE_STRDUP(src_data->sync_data2);
 	out_data->sync_data3 = SAFE_STRDUP(src_data->sync_data3);
@@ -4199,11 +4222,12 @@ static int __ctsvc_profile_clone(contacts_record_h record, contacts_record_h *ou
 	out_data->label = SAFE_STRDUP(src_data->label);
 	out_data->uid = SAFE_STRDUP(src_data->uid);
 	out_data->text = SAFE_STRDUP(src_data->text);
-	out_data->appsvc_operation = SAFE_STRDUP(src_data->appsvc_operation);
-	out_data->data1 = SAFE_STRDUP(src_data->data1);
-	out_data->data2 = SAFE_STRDUP(src_data->data2);
-	out_data->data3 = SAFE_STRDUP(src_data->data3);
-	out_data->data4 = SAFE_STRDUP(src_data->data4);
+	out_data->service_operation = SAFE_STRDUP(src_data->service_operation);
+	out_data->mime = SAFE_STRDUP(src_data->mime);
+	out_data->app_id = SAFE_STRDUP(src_data->app_id);
+	out_data->uri = SAFE_STRDUP(src_data->uri);
+	out_data->category = SAFE_STRDUP(src_data->category);
+	out_data->extra_data = SAFE_STRDUP(src_data->extra_data);
 
 	CTSVC_RECORD_COPY_BASE(&(out_data->base), &(src_data->base));
 

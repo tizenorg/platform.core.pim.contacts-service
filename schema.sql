@@ -364,6 +364,8 @@ CREATE TABLE activities
 	source_name			TEXT,
 	status				TEXT,
 	timestamp			INTEGER,
+	service_operation	TEXT,
+	uri					TEXT,
 	sync_data1			TEXT,
 	sync_data2			TEXT,
 	sync_data3			TEXT,

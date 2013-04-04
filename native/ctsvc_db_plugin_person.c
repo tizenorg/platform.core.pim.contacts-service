@@ -85,9 +85,6 @@ static int __ctsvc_db_person_get_record( int id, contacts_record_h* out_record )
 				"persons.vibration, "
 				"status, "
 				"link_count, "
-				"account_id1, "
-				"account_id2, "
-				"account_id3, "
 				"addressbook_ids, "
 				"persons.has_phonenumber, "
 				"persons.has_email, "
@@ -416,9 +413,6 @@ static int __ctsvc_db_person_get_all_records( int offset, int limit, contacts_li
 					"vibration, "
 					"status, "
 					"link_count, "
-					"account_id1, "
-					"account_id2, "
-					"account_id3, "
 					"addressbook_ids, "
 					"has_phonenumber, "
 					"has_email, "
@@ -547,15 +541,6 @@ static int __ctsvc_db_person_get_records_with_query( contacts_query_h query, int
 				break;
 			case CTSVC_PROPERTY_PERSON_LINK_COUNT:
 				person->link_count = ctsvc_stmt_get_int(stmt, i);
-				break;
-			case CTSVC_PROPERTY_PERSON_ACCOUNT_ID1:
-				person->account_id1 = ctsvc_stmt_get_int(stmt, i);
-				break;
-			case CTSVC_PROPERTY_PERSON_ACCOUNT_ID2:
-				person->account_id2 = ctsvc_stmt_get_int(stmt, i);
-				break;
-			case CTSVC_PROPERTY_PERSON_ACCOUNT_ID3:
-				person->account_id3 = ctsvc_stmt_get_int(stmt, i);
 				break;
 			case CTSVC_PROPERTY_PERSON_ADDRESSBOOK_IDS:
 				temp = ctsvc_stmt_get_text(stmt, i);

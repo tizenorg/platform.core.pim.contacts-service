@@ -65,9 +65,6 @@ _CONTACTS_BEGIN_VIEW()
 	_CONTACTS_PROPERTY_BOOL( is_favorite )			// read, write
 	_CONTACTS_PROPERTY_DOUBLE( favorite_priority )	// read only
 	_CONTACTS_PROPERTY_INT( link_count )			// read only
-	_CONTACTS_PROPERTY_INT( account_id1 )			// read only
-	_CONTACTS_PROPERTY_INT( account_id2 )			// read only
-	_CONTACTS_PROPERTY_INT( account_id3 )			// read only
 	_CONTACTS_PROPERTY_STR( addressbook_ids )			// read only
 	_CONTACTS_PROPERTY_BOOL( has_phonenumber )		// read only
 	_CONTACTS_PROPERTY_BOOL( has_email )			// read only
@@ -318,11 +315,12 @@ _CONTACTS_BEGIN_VIEW()
 	_CONTACTS_PROPERTY_STR( uid )					// read, write
 	_CONTACTS_PROPERTY_STR( text )					// read, write
 	_CONTACTS_PROPERTY_INT( order )					// read, write
-	_CONTACTS_PROPERTY_STR( appsvc_operation )		// read, write
-	_CONTACTS_PROPERTY_STR( data1 )					// read, write
-	_CONTACTS_PROPERTY_STR( data2 )					// read, write
-	_CONTACTS_PROPERTY_STR( data3 )					// read, write
-	_CONTACTS_PROPERTY_STR( data4 )					// read, write
+	_CONTACTS_PROPERTY_STR( service_operation )		// read, write
+	_CONTACTS_PROPERTY_STR( mime )				// read, write
+	_CONTACTS_PROPERTY_STR( app_id )				// read, write
+	_CONTACTS_PROPERTY_STR( uri )					// read, write
+	_CONTACTS_PROPERTY_STR( category )			// read, write
+	_CONTACTS_PROPERTY_STR( extra_data )			// read, write
 	_CONTACTS_PROPERTY_INT( contact_id )			// read, write once
 _CONTACTS_END_VIEW( _contacts_profile )
 
@@ -341,6 +339,8 @@ _CONTACTS_BEGIN_VIEW()
 	_CONTACTS_PROPERTY_STR( source_name )			// read, write
 	_CONTACTS_PROPERTY_STR( status )				// read, write
 	_CONTACTS_PROPERTY_INT( timestamp )				// read, write
+	_CONTACTS_PROPERTY_STR( service_operation )		// read, write
+	_CONTACTS_PROPERTY_STR( uri )					// read, write
 	_CONTACTS_PROPERTY_STR( sync_data1 )			// read, write
 	_CONTACTS_PROPERTY_STR( sync_data2 )			// read, write
 	_CONTACTS_PROPERTY_STR( sync_data3 )			// read, write
@@ -425,9 +425,6 @@ _CONTACTS_BEGIN_READ_ONLY_VIEW()
 	_CONTACTS_PROPERTY_PROJECTION_STR( status )
 	_CONTACTS_PROPERTY_BOOL( is_favorite )
 	_CONTACTS_PROPERTY_PROJECTION_INT( link_count )
-	_CONTACTS_PROPERTY_PROJECTION_INT( account_id1 )
-	_CONTACTS_PROPERTY_PROJECTION_INT( account_id2 )
-	_CONTACTS_PROPERTY_PROJECTION_INT( account_id3 )
 	_CONTACTS_PROPERTY_PROJECTION_STR( addressbook_ids )
 	_CONTACTS_PROPERTY_BOOL( has_phonenumber )
 	_CONTACTS_PROPERTY_BOOL( has_email )
@@ -488,9 +485,6 @@ _CONTACTS_BEGIN_READ_ONLY_VIEW()
 	_CONTACTS_PROPERTY_PROJECTION_STR( status )
 	_CONTACTS_PROPERTY_BOOL( is_favorite )
 	_CONTACTS_PROPERTY_PROJECTION_INT( link_count )
-	_CONTACTS_PROPERTY_PROJECTION_INT( account_id1 )
-	_CONTACTS_PROPERTY_PROJECTION_INT( account_id2 )
-	_CONTACTS_PROPERTY_PROJECTION_INT( account_id3 )
 	_CONTACTS_PROPERTY_PROJECTION_STR( addressbook_ids )
 	_CONTACTS_PROPERTY_BOOL( has_phonenumber )
 	_CONTACTS_PROPERTY_BOOL( has_email )
@@ -591,6 +585,8 @@ _CONTACTS_BEGIN_READ_ONLY_VIEW()
 	_CONTACTS_PROPERTY_STR( source_name )
 	_CONTACTS_PROPERTY_PROJECTION_STR( status )
 	_CONTACTS_PROPERTY_INT( timestamp )
+	_CONTACTS_PROPERTY_STR( service_operation )
+	_CONTACTS_PROPERTY_STR( uri )
 	_CONTACTS_PROPERTY_PROJECTION_STR( sync_data1 )
 	_CONTACTS_PROPERTY_PROJECTION_STR( sync_data2 )
 	_CONTACTS_PROPERTY_PROJECTION_STR( sync_data3 )

@@ -34,9 +34,21 @@
 #include "ctsvc_vcard.h"
 
 #define SMART_STRDUP(src) (src && *src)?strdup(src):NULL
-#define CTSVC_VCARD_FILE_MAX_SIZE 1024*1024
-#define CTSVC_VCARD_PHOTO_MAX_SIZE 1024*100
+#define CTSVC_VCARD_PHOTO_MAX_SIZE 1024*1024
 #define CTSVC_VCARD_IMAGE_LOCATION "/opt/usr/data/contacts-svc/img/vcard"
+
+#define CTSVC_VCARD_APPEND_STR(buf, buf_size, len, str) do { \
+	if ((len = __ctsvc_vcard_append_str(buf, buf_size, len, str)) < 0) { \
+		ERR("__ctsvc_vcard_append_str() Failed"); \
+		return CONTACTS_ERROR_INTERNAL; \
+	} \
+} while (0)
+
+#define CTSVC_VCARD_APPEND_CONTENT(buf, buf_size, len, content) do { \
+	CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ":"); \
+	CTSVC_VCARD_APPEND_STR(buf, buf_size, len, content); \
+	CTSVC_VCARD_APPEND_STR(buf, buf_size, len, CTSVC_CRLF); \
+} while (0)
 
 enum {
 	CTSVC_VCARD_VER_NONE,
@@ -161,19 +173,62 @@ static void __ctsvc_vcard_initial(void)
 	}
 };
 
+
+static int __ctsvc_vcard_append_str(char **buf, int *buf_size, int len, const char *str)
+{
+	int len_temp = 0;
+	char *tmp = NULL;
+	const char *safe_str = SAFE_STR(str);
+	int str_len = 0;
+	bool need_realloc = false;
+
+	str_len = strlen(safe_str);
+	while ((*buf_size-len) < (str_len+1)) {
+		*buf_size = *buf_size * 2;
+		need_realloc = true;
+	}
+
+	if (need_realloc) {
+		if (NULL == (tmp = realloc(*buf, *buf_size))) {
+			free(*buf);
+			return -1;
+		}
+		else
+			*buf = tmp;
+	}
+
+	len_temp = snprintf(*buf+len, *buf_size-len+1, "%s", safe_str);
+	len += len_temp;
+	return len;
+}
+
 #define CTS_VCARD_FOLDING_LIMIT 75
 
-static inline int __ctsvc_vcard_add_folding(char *src)
+static inline int __ctsvc_vcard_add_folding(char **buf, int *buf_size, int buf_len)
 {
+	char *buf_copy = NULL;
 	int len, result_len;
-	char result[CTSVC_VCARD_FILE_MAX_SIZE] = {0};
 	char *r;
 	const char *s;
 
-	s = src;
-	r = result;
+	buf_copy = calloc(1, *buf_size);
+
+	s = *buf;
+	r = buf_copy;
 	len = result_len = 0;
+
 	while (*s) {
+		if (*buf_size < result_len + 5) {
+			char *tmp = NULL;
+			*buf_size = *buf_size + 1000;
+			if (NULL == (tmp = realloc(buf_copy, *buf_size))) {
+				free(buf_copy);
+				return -1;
+			}
+			else
+				buf_copy = tmp;
+		}
+
 		if ('\r' == *s)
 			len--;
 		else if ('\n' == *s)
@@ -195,19 +250,15 @@ static inline int __ctsvc_vcard_add_folding(char *src)
 		s++;
 		len++;
 		result_len++;
-		RETVM_IF(sizeof(result) - 5 < result_len, CONTACTS_ERROR_INVALID_PARAMETER,
-				"src is too long\n(%s)", src);
 	}
 	*r = '\0';
-
-	memcpy(src, result, result_len+1);
-	return CONTACTS_ERROR_NONE;
+	free(*buf);
+	*buf = buf_copy;
+	return result_len;
 }
 
-static inline int __ctsvc_vcard_append_name(ctsvc_list_s *names,
-		char *dest, int dest_size)
+static inline int __ctsvc_vcard_append_name(ctsvc_list_s *names, char **buf, int *buf_size, int len)
 {
-	int ret_len;
 	char display[1024] = {0};
 	GList *cursor = names->records;
 	ctsvc_name_s *name;
@@ -216,28 +267,18 @@ static inline int __ctsvc_vcard_append_name(ctsvc_list_s *names,
 
 	name = (ctsvc_name_s *)cursor->data;
 
-	ret_len = snprintf(dest, dest_size, "%s", content_name[CTSVC_VCARD_VALUE_N]);
-	RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
-
-	ret_len += snprintf(dest+ret_len, dest_size-ret_len, ":%s",
-			SAFE_STR(name->last));
-	RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
-
-	ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";%s",
-			SAFE_STR(name->first));
-	RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
-
-	ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";%s",
-			SAFE_STR(name->addition));
-	RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
-
-	ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";%s",
-			SAFE_STR(name->prefix));
-	RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
-
-	ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";%s%s",
-			SAFE_STR(name->suffix), CTSVC_CRLF);
-	RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
+	CTSVC_VCARD_APPEND_STR(buf, buf_size, len, content_name[CTSVC_VCARD_VALUE_N]);
+	CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ":");
+	CTSVC_VCARD_APPEND_STR(buf, buf_size, len, name->last);
+	CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";");
+	CTSVC_VCARD_APPEND_STR(buf, buf_size, len, name->first);
+	CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";");
+	CTSVC_VCARD_APPEND_STR(buf, buf_size, len, name->addition);
+	CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";");
+	CTSVC_VCARD_APPEND_STR(buf, buf_size, len, name->prefix);
+	CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";");
+	CTSVC_VCARD_APPEND_STR(buf, buf_size, len, name->suffix);
+	CTSVC_VCARD_APPEND_STR(buf, buf_size, len, CTSVC_CRLF);
 
 	if (name->first && name->last) {
 		contacts_name_display_order_e order;
@@ -263,30 +304,26 @@ static inline int __ctsvc_vcard_append_name(ctsvc_list_s *names,
 	else
 		snprintf(display, sizeof(display), "%s%s", SAFE_STR(name->first), SAFE_STR(name->last));
 
-	ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s:%s%s",
-			content_name[CTSVC_VCARD_VALUE_FN],
-			display, CTSVC_CRLF);
-	RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
+	CTSVC_VCARD_APPEND_STR(buf, buf_size, len, content_name[CTSVC_VCARD_VALUE_FN]);
+	CTSVC_VCARD_APPEND_CONTENT(buf, buf_size, len, display);
 
 	if (name->phonetic_first) {
-		ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s:%s%s",
-				content_name[CTSVC_VCARD_VALUE_PHONETIC_FIRST_NAME], name->phonetic_first, CTSVC_CRLF);
-		RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
+		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, content_name[CTSVC_VCARD_VALUE_PHONETIC_FIRST_NAME]);
+		CTSVC_VCARD_APPEND_CONTENT(buf, buf_size, len, name->phonetic_first);
 	}
 
 	if (name->phonetic_middle) {
-		ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s:%s%s",
-				content_name[CTSVC_VCARD_VALUE_PHONETIC_MIDDLE_NAME], name->phonetic_middle, CTSVC_CRLF);
-		RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
+		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, content_name[CTSVC_VCARD_VALUE_PHONETIC_MIDDLE_NAME]);
+		CTSVC_VCARD_APPEND_CONTENT(buf, buf_size, len, name->phonetic_middle);
 	}
+
 
 	if (name->phonetic_last) {
-		ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s:%s%s",
-				content_name[CTSVC_VCARD_VALUE_PHONETIC_LAST_NAME], name->phonetic_last, CTSVC_CRLF);
-		RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
+		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, content_name[CTSVC_VCARD_VALUE_PHONETIC_LAST_NAME]);
+		CTSVC_VCARD_APPEND_CONTENT(buf, buf_size, len, name->phonetic_last);
 	}
 
-	return ret_len;
+	return len;
 }
 
 static inline const char* __ctsvc_get_img_suffix(int type)
@@ -350,12 +387,12 @@ static inline const char* __ctsvc_get_image_type_str(int type)
 	}
 }
 
-static inline int __ctsvc_vcard_put_company_logo(const char *path, char *dest, int dest_size)
+static inline int __ctsvc_vcard_put_company_logo(const char *path, char **buf, int *buf_size, int len)
 {
 	int ret, fd, type;
 	gsize read_len;
 	char *suffix;
-	gchar *buf;
+	gchar *buf_image;
 	guchar image[CTSVC_VCARD_PHOTO_MAX_SIZE] = {0};
 
 	suffix = strrchr(path, '.');
@@ -380,126 +417,106 @@ static inline int __ctsvc_vcard_put_company_logo(const char *path, char *dest, i
 	close(fd);
 	RETVM_IF(ret < 0, CONTACTS_ERROR_SYSTEM, "System : read() Failed(%d)", errno);
 
-	ret = 0;
-	buf = g_base64_encode(image, read_len);
-	if (buf) {
-		ret = snprintf(dest, dest_size, "%s;ENCODING=BASE64;TYPE=%s:%s%s%s",
-				content_name[CTSVC_VCARD_VALUE_LOGO],
-				__ctsvc_get_image_type_str(type), buf, CTSVC_CRLF, CTSVC_CRLF);
-		g_free(buf);
+	buf_image = g_base64_encode(image, read_len);
+	if (buf_image) {
+		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, content_name[CTSVC_VCARD_VALUE_LOGO]);
+		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";ENCODING=BASE64;TYPE=");
+		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, __ctsvc_get_image_type_str(type));
+		CTSVC_VCARD_APPEND_CONTENT(buf, buf_size, len, buf_image);
+		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, CTSVC_CRLF);
+		g_free(buf_image);
+	}
+	return len;
+}
+
+static inline int __ctsvc_vcard_put_company_type(int type, char *label, char **buf, int* buf_size, int len)
+{
+	if (type == CONTACTS_COMPANY_TYPE_WORK) {
+		CTSVC_VCARD_APPEND_STR(buf,buf_size,len,";TYPE=WORK");
 	}
 
-	return ret;
+	else if (type == CONTACTS_COMPANY_TYPE_CUSTOM) {
+		CTSVC_VCARD_APPEND_STR(buf,buf_size,len,"TYPE=X-");
+		CTSVC_VCARD_APPEND_STR(buf,buf_size,len, label);
+	}
+	return len;
 }
 
-static inline int __ctsvc_vcard_put_company_type(int type, char *label, char *dest, int dest_size)
+static inline int __ctsvc_vcard_append_company(ctsvc_list_s *company_list, char **buf, int *buf_size, int len)
 {
-	int ret_len = 0;
-	if (type == CONTACTS_COMPANY_TYPE_WORK)
-		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "WORK");
-	else if (type == CONTACTS_COMPANY_TYPE_CUSTOM)
-		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=X-%s", label);
-	return ret_len;
-}
-
-static inline int __ctsvc_vcard_append_company(ctsvc_list_s *company_list,
-		char *dest, int dest_size)
-{
-	int ret_len = 0;
 	GList *cursor;
 	ctsvc_company_s *company;
 
 	for (cursor=company_list->records;cursor;cursor=cursor->next) {
 		company = (ctsvc_company_s *)cursor->data;
 
-		ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s",
-				content_name[CTSVC_VCARD_VALUE_ORG]);
-		RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
+		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, content_name[CTSVC_VCARD_VALUE_ORG]);
 
-		ret_len += __ctsvc_vcard_put_company_type(company->type, SAFE_STR(company->label), dest+ret_len, dest_size-ret_len);
-		RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
+		len = __ctsvc_vcard_put_company_type(company->type, SAFE_STR(company->label), buf, buf_size, len);
+		RETV_IF(len < 0, CONTACTS_ERROR_INTERNAL);
 
-		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ":%s", SAFE_STR(company->name));
-		RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
+		CTSVC_VCARD_APPEND_STR(buf,buf_size,len,":");
+		CTSVC_VCARD_APPEND_STR(buf,buf_size,len,company->name);
 
 		if (company->department) {
-			ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";%s",
-					company->department);
-			RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
+			CTSVC_VCARD_APPEND_STR(buf,buf_size,len,";");
+			CTSVC_VCARD_APPEND_STR(buf,buf_size,len,company->department);
 		}
-
-		ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s", CTSVC_CRLF);
-		RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
+		CTSVC_VCARD_APPEND_STR(buf,buf_size,len,CTSVC_CRLF);
 
 		if (company->job_title) {
-			ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s:%s%s",
-					content_name[CTSVC_VCARD_VALUE_TITLE],
-					company->job_title, CTSVC_CRLF);
-			RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
+			CTSVC_VCARD_APPEND_STR(buf,buf_size,len,content_name[CTSVC_VCARD_VALUE_TITLE]);
+			CTSVC_VCARD_APPEND_CONTENT(buf, buf_size, len, company->job_title);
 		}
 
 		if (company->role) {
-			ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s:%s%s",
-					content_name[CTSVC_VCARD_VALUE_ROLE],
-					company->role, CTSVC_CRLF);
-			RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
+			CTSVC_VCARD_APPEND_STR(buf,buf_size,len,content_name[CTSVC_VCARD_VALUE_ROLE]);
+			CTSVC_VCARD_APPEND_CONTENT(buf, buf_size, len, company->role);
 		}
 
 		if (company->location) {
-			ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s:%s%s",
-					content_name[CTSVC_VCARD_VALUE_X_TIZEN_COMPANY_LOCATION],
-					company->location, CTSVC_CRLF);
-			RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
+			CTSVC_VCARD_APPEND_STR(buf,buf_size,len,content_name[CTSVC_VCARD_VALUE_X_TIZEN_COMPANY_LOCATION]);
+			CTSVC_VCARD_APPEND_CONTENT(buf, buf_size, len, company->location);
 		}
 
 		if (company->description) {
-			ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s:%s%s",
-					content_name[CTSVC_VCARD_VALUE_X_TIZEN_COMPANY_DESCRIPTION],
-					company->description, CTSVC_CRLF);
-			RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
+			CTSVC_VCARD_APPEND_STR(buf,buf_size,len,content_name[CTSVC_VCARD_VALUE_X_TIZEN_COMPANY_DESCRIPTION]);
+			CTSVC_VCARD_APPEND_CONTENT(buf, buf_size, len, company->description);
 		}
 
 		if (company->phonetic_name) {
-			ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s:%s%s",
-					content_name[CTSVC_VCARD_VALUE_X_TIZEN_COMPANY_PHONETIC_NAME],
-					company->phonetic_name, CTSVC_CRLF);
-			RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
+			CTSVC_VCARD_APPEND_STR(buf,buf_size,len,content_name[CTSVC_VCARD_VALUE_X_TIZEN_COMPANY_PHONETIC_NAME]);
+			CTSVC_VCARD_APPEND_CONTENT(buf, buf_size, len, company->phonetic_name);
 		}
 
 		if (company->assistant_name) {
-			ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s:%s%s",
-					content_name[CTSVC_VCARD_VALUE_X_TIZEN_COMPANY_ASSISTANT_NAME],
-					company->assistant_name, CTSVC_CRLF);
-			RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
+			CTSVC_VCARD_APPEND_STR(buf,buf_size,len,content_name[CTSVC_VCARD_VALUE_X_TIZEN_COMPANY_ASSISTANT_NAME]);
+			CTSVC_VCARD_APPEND_CONTENT(buf, buf_size, len, company->assistant_name);
 		}
 
 		if (company->logo) {
-			ret_len += __ctsvc_vcard_put_company_logo(company->logo, dest+ret_len, dest_size-ret_len);
-			RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
+			len = __ctsvc_vcard_put_company_logo(company->logo, buf, buf_size, len);
+			RETV_IF(len < 0, CONTACTS_ERROR_INTERNAL);
 		}
 	}
 
-	return ret_len;
+	return len;
 }
 
-static inline int __ctsvc_vcard_append_note(ctsvc_list_s *note_list,
-		char *dest, int dest_size)
+static inline int __ctsvc_vcard_append_note(ctsvc_list_s *note_list, char **buf, int *buf_size, int len)
 {
-	int ret_len = 0;
 	GList *cursor;
 	ctsvc_note_s *note;
 
 	for (cursor=note_list->records;cursor;cursor=cursor->next) {
 		note = (ctsvc_note_s *)cursor->data;
 		if (note->note) {
-			ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s:%s%s",
-					content_name[CTSVC_VCARD_VALUE_NOTE],
-					SAFE_STR(note->note), CTSVC_CRLF);
-			RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
+			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, content_name[CTSVC_VCARD_VALUE_NOTE]);
+			CTSVC_VCARD_APPEND_CONTENT(buf, buf_size, len, note->note);
 		}
 	}
 
-	return ret_len;
+	return len;
 }
 
 static inline int __ctsvc_vcard_2_put_postal_type(int type, char *dest, int dest_size)
@@ -522,82 +539,75 @@ static inline int __ctsvc_vcard_2_put_postal_type(int type, char *dest, int dest
 	return ret_len;
 }
 
-static inline int __ctsvc_vcard_put_postal_type(int type, char *label, char *dest, int dest_size)
+static inline int __ctsvc_vcard_put_postal_type(int type, char *label, char **buf, int *buf_size, int len)
 {
-	int ret_len = 0;
-
+	char *type_str = NULL;
 	if (type == CONTACTS_ADDRESS_TYPE_DOM)
-		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "DOM");
-	if (type == CONTACTS_ADDRESS_TYPE_INTL)
-		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "INTL");
-	if (type == CONTACTS_ADDRESS_TYPE_HOME)
-		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "HOME");
-	if (type == CONTACTS_ADDRESS_TYPE_WORK)
-		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "WORK");
-	if (type == CONTACTS_ADDRESS_TYPE_POSTAL)
-		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "POSTAL");
-	if (type == CONTACTS_ADDRESS_TYPE_PARCEL)
-		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "PARCEL");
-	if (type == CONTACTS_ADDRESS_TYPE_CUSTOM)
-		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=X-%s", label);
+		type_str = "DOM";
+	else if (type == CONTACTS_ADDRESS_TYPE_INTL)
+		type_str = "INTL";
+	else if (type == CONTACTS_ADDRESS_TYPE_HOME)
+		type_str = "HOME";
+	else if (type == CONTACTS_ADDRESS_TYPE_WORK)
+		type_str = "WORK";
+	else if (type == CONTACTS_ADDRESS_TYPE_POSTAL)
+		type_str = "POSTAL";
+	else if (type == CONTACTS_ADDRESS_TYPE_PARCEL)
+		type_str = "PARCEL";
 
-	return ret_len;
+	if (type == CONTACTS_ADDRESS_TYPE_CUSTOM) {
+		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";TYPE=X-");
+		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, "label");
+		return len;
+	}
+
+	if (type_str) {
+		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";TYPE=");
+		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, type_str);
+	}
+	return len;
 }
 
-static inline int __ctsvc_vcard_append_postals(ctsvc_list_s *address_list,
-		char *dest, int dest_size)
+static inline int __ctsvc_vcard_append_postals(ctsvc_list_s *address_list, char **buf, int* buf_size, int len)
 {
-	int ret_len = 0;
 	GList *cursor;
 	ctsvc_address_s *address;
 
 	for (cursor = address_list->records;cursor;cursor=cursor->next) {
 		address = cursor->data;
 		if (address) {
-			ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s",
-					content_name[CTSVC_VCARD_VALUE_ADR]);
-			RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
+			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, content_name[CTSVC_VCARD_VALUE_ADR]);
 
-			ret_len += __ctsvc_vcard_put_postal_type(address->type, SAFE_STR(address->label), dest+ret_len,
-					dest_size-ret_len);
-			RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
+			len = __ctsvc_vcard_put_postal_type(address->type, SAFE_STR(address->label), buf, buf_size, len);
+			RETV_IF(len < 0, CONTACTS_ERROR_INTERNAL);
 
 			if (address->is_default) {
-				ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";%s", "PREF");
-				RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
+				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";PREF");
 			}
-			ret_len += snprintf(dest+ret_len, dest_size-ret_len, ":%s",
-					SAFE_STR(address->pobox));
-			RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
-			ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";%s",
-					SAFE_STR(address->extended));
-			RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
-			ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";%s",
-					SAFE_STR(address->street));
-			RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
-			ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";%s",
-					SAFE_STR(address->locality));
-			RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
-			ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";%s",
-					SAFE_STR(address->region));
-			RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
-			ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";%s",
-					SAFE_STR(address->postalcode));
-			RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
-			ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";%s%s",
-					SAFE_STR(address->country), CTSVC_CRLF);
-			RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
+			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ":");
+			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, address->pobox);
+			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";");
+			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, address->extended);
+			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";");
+			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, address->street);
+			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";");
+			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, address->locality);
+			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";");
+			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, address->region);
+			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";");
+			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, address->postalcode);
+			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";");
+			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, address->country);
+			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, CTSVC_CRLF);
 		}
 	}
 
-	return ret_len;
+	return len;
 }
 
-static inline int __ctsvc_vcard_append_nicknames(ctsvc_list_s *nickname_list,
-		char *dest, int dest_size)
+static inline int __ctsvc_vcard_append_nicknames(ctsvc_list_s *nickname_list, char **buf, int* buf_size, int len)
 {
 	bool first;
-	int ret_len = 0;
 	GList *cursor;
 	ctsvc_nickname_s *nickname;
 
@@ -606,24 +616,21 @@ static inline int __ctsvc_vcard_append_nicknames(ctsvc_list_s *nickname_list,
 		nickname = cursor->data;
 		if (nickname->nickname && *nickname->nickname) {
 			if (first) {
-				ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s:",
-					content_name[CTSVC_VCARD_VALUE_NICKNAME]);
-				ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s", nickname->nickname);
+				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, content_name[CTSVC_VCARD_VALUE_NICKNAME]);
+				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ":");
+				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, nickname->nickname);
 				first = false;
 			}
 			else {
-				ret_len += snprintf(dest+ret_len, dest_size-ret_len, ",%s", nickname->nickname);
+				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ",");
+				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, nickname->nickname);
 			}
-			RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
 		}
 	}
+	if (!first)
+		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, CTSVC_CRLF);
 
-	if (ret_len > 0) {
-		ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s", CTSVC_CRLF);
-		RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
-	}
-
-	return ret_len;
+	return len;
 }
 
 static inline int __ctsvc_vcard_2_put_number_type(int type, char *dest, int dest_size)
@@ -661,69 +668,66 @@ static inline int __ctsvc_vcard_2_put_number_type(int type, char *dest, int dest
 	return ret_len;
 }
 
-static inline int __ctsvc_vcard_put_number_type(int type, char *label, char *dest, int dest_size)
+static inline int __ctsvc_vcard_put_number_type(int type, char *label, char **buf, int *buf_size, int len)
 {
-	int ret_len = 0;
 	if (type & CONTACTS_NUMBER_TYPE_HOME)
-		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "HOME");
+		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";TYPE=HOME");
 	if (type & CONTACTS_NUMBER_TYPE_MSG)
-		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "MSG");
+		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";TYPE=MSG");
 	if (type & CONTACTS_NUMBER_TYPE_WORK)
-		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "WORK");
+		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";TYPE=WORK");
 	if (type & CONTACTS_NUMBER_TYPE_VOICE)
-		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "VOICE");
+		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";TYPE=VOICE");
 	if (type & CONTACTS_NUMBER_TYPE_FAX)
-		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "FAX");
+		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";TYPE=FAX");
 	if (type & CONTACTS_NUMBER_TYPE_CELL)
-		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "CELL");
+		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";TYPE=CELL");
 	if (type & CONTACTS_NUMBER_TYPE_VIDEO)
-		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "VIDEO");
+		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";TYPE=VIDEO");
 	if (type & CONTACTS_NUMBER_TYPE_PAGER)
-		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "PAGER");
+		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";TYPE=PAGER");
 	if (type & CONTACTS_NUMBER_TYPE_BBS)
-		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "BBS");
+		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";TYPE=BBS");
 	if (type & CONTACTS_NUMBER_TYPE_MODEM)
-		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "MODEM");
+		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";TYPE=MODEM");
 	if (type & CONTACTS_NUMBER_TYPE_CAR)
-		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "CAR");
+		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";TYPE=CAR");
 	if (type & CONTACTS_NUMBER_TYPE_ISDN)
-		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "ISDN");
+		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";TYPE=ISDN");
 	if (type & CONTACTS_NUMBER_TYPE_PCS)
-		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "PCS");
+		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";TYPE=PCS");
 	if (type & CONTACTS_NUMBER_TYPE_ASSISTANT)
-		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "X-ASSISTANT");
-	if (type == CONTACTS_NUMBER_TYPE_CUSTOM)
-		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=X-%s", label);
-	return ret_len;
+		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";TYPE=X-ASSISTANT");
+	if (type == CONTACTS_NUMBER_TYPE_CUSTOM) {
+		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";TYPE=X-");
+		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, label);
+		return len;
+	}
+	return len;
 }
 
 
-static inline int __ctsvc_vcard_append_numbers(ctsvc_list_s *number_list,
-		char *dest, int dest_size)
+static inline int __ctsvc_vcard_append_numbers(ctsvc_list_s *number_list, char **buf, int* buf_size, int len)
 {
-	int ret_len = 0;
 	GList *cursor;
 	ctsvc_number_s *number;
 
 	for (cursor=number_list->records;cursor;cursor=cursor->next) {
 		number = cursor->data;
 		if (number->number) {
-			ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s",
-					content_name[CTSVC_VCARD_VALUE_TEL]);
-			RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
+			CTSVC_VCARD_APPEND_STR(buf,buf_size,len,content_name[CTSVC_VCARD_VALUE_TEL]);
 
-			ret_len += __ctsvc_vcard_put_number_type(number->type, SAFE_STR(number->label), dest+ret_len, dest_size-ret_len);
+			len = __ctsvc_vcard_put_number_type(number->type, SAFE_STR(number->label), buf, buf_size, len);
+			RETV_IF(len < 0, CONTACTS_ERROR_INTERNAL);
+
 			if (number->is_default) {
-				ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";%s", "PREF");
-				RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
+				CTSVC_VCARD_APPEND_STR(buf,buf_size,len,";PREF");
 			}
-			ret_len += snprintf(dest+ret_len, dest_size-ret_len, ":%s%s",
-					number->number, CTSVC_CRLF);
-			RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
+			CTSVC_VCARD_APPEND_CONTENT(buf, buf_size, len, number->number);
 		}
 	}
 
-	return ret_len;
+	return len;
 }
 
 static inline int __ctsvc_vcard_2_put_email_type(int type, char *dest, int dest_size)
@@ -738,260 +742,269 @@ static inline int __ctsvc_vcard_2_put_email_type(int type, char *dest, int dest_
 	return ret_len;
 }
 
-static inline int __ctsvc_vcard_put_email_type(int type, char *label, char *dest, int dest_size)
+static inline int __ctsvc_vcard_put_email_type(int type, char *label, char **buf, int *buf_size, int len)
 {
-	int ret_len = 0;
-
+	char *type_str = NULL;
 	if (CONTACTS_EMAIL_TYPE_HOME == type)
-		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "HOME");
+		type_str = "HOME";
 	else if (CONTACTS_EMAIL_TYPE_WORK == type)
-		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "WORK");
+		type_str = "WORK";
 	else if (CONTACTS_EMAIL_TYPE_MOBILE == type)
-		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "CELL");
-	else if (CONTACTS_EMAIL_TYPE_CUSTOM == type)
-		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=X-%s", label);
+		type_str = "CELL";
+	else if (CONTACTS_EMAIL_TYPE_CUSTOM == type) {
+		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";TYPE=X-");
+		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, label);
+		return len;
+	}
 
-	return ret_len;
+	if (type_str) {
+		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";TYPE=");
+		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, type_str);
+	}
+	return len;
 }
 
-static inline int __ctsvc_vcard_append_emails(ctsvc_list_s *email_list,
-		char *dest, int dest_size)
+static inline int __ctsvc_vcard_append_emails(ctsvc_list_s *email_list, char **buf, int *buf_size, int len)
 {
-	int ret_len = 0;
 	GList *cursor;
 	ctsvc_email_s *email;
 
 	for (cursor=email_list->records;cursor;cursor=cursor->next) {
 		email = cursor->data;
 		if (email->email_addr) {
-			ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s",
-					content_name[CTSVC_VCARD_VALUE_EMAIL]);
-			RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
+			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, content_name[CTSVC_VCARD_VALUE_EMAIL]);
 
-			ret_len += __ctsvc_vcard_put_email_type(email->type, SAFE_STR(email->label), dest+ret_len, dest_size-ret_len);
-			RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
+			len = __ctsvc_vcard_put_email_type(email->type, SAFE_STR(email->label), buf, buf_size, len);
+			RETV_IF(len < 0, CONTACTS_ERROR_INTERNAL);
 
 			if (email->is_default) {
-				ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";%s", "PREF");
-				RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
+				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";PREF");
 			}
-
-			ret_len += snprintf(dest+ret_len, dest_size-ret_len, ":%s%s",
-					email->email_addr, CTSVC_CRLF);
-			RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
+			CTSVC_VCARD_APPEND_CONTENT(buf, buf_size, len, email->email_addr);
 		}
 	}
-
-	return ret_len;
+	return len;
 }
 
-static inline int __ctsvc_vcard_put_url_type(int type, char *label, char *dest, int dest_size)
+static inline int __ctsvc_vcard_put_url_type(int type, char *label, char **buf, int *buf_size, int len)
 {
-	int ret_len = 0;
+	char *type_str = NULL;
 
 	if (CONTACTS_URL_TYPE_HOME == type)
-		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "HOME");
+		type_str = "HOME";
 	else if (CONTACTS_URL_TYPE_WORK == type)
-		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "WORK");
-	else if (CONTACTS_URL_TYPE_CUSTOM == type)
-		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=X-%s", label);
-
-	return ret_len;
+		type_str = "WORK";
+	else if (CONTACTS_URL_TYPE_CUSTOM == type) {
+		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";TYPE=X-");
+		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, label);
+		return len;
+	}
+	if (type_str) {
+		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";TYPE=");
+		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, type_str);
+	}
+	return len;
 }
 
-static inline int __ctsvc_vcard_append_webs(ctsvc_list_s *url_list,
-		char *dest, int dest_size)
+static inline int __ctsvc_vcard_append_webs(ctsvc_list_s *url_list, char **buf, int *buf_size, int len)
 {
-	int ret_len = 0;
 	GList *cursor;
 	ctsvc_url_s *url;
 
 	for (cursor=url_list->records;cursor;cursor=cursor->next) {
 		url = cursor->data;
 
-		ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s",
-				content_name[CTSVC_VCARD_VALUE_URL]);
-		RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
+		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, content_name[CTSVC_VCARD_VALUE_URL]);
 
-		ret_len += __ctsvc_vcard_put_url_type(url->type, SAFE_STR(url->label), dest+ret_len, dest_size-ret_len);
-		RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
+		len = __ctsvc_vcard_put_url_type(url->type, SAFE_STR(url->label), buf, buf_size, len);
+		RETV_IF(len < 0, CONTACTS_ERROR_INTERNAL);
 
-		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ":%s%s",
-				url->url, CTSVC_CRLF);
-		RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
+		CTSVC_VCARD_APPEND_CONTENT(buf, buf_size, len, url->url);
 	}
 
-	return ret_len;
+	return len;
 }
 
-static inline int __ctsvc_vcard_append_events(ctsvc_list_s *event_list,
-		char *dest, int dest_size)
+#define VCARD_INIT_LENGTH 1024
+#define VCARD_ITEM_LENGTH 1024
+
+static inline int __ctsvc_vcard_append_events(ctsvc_list_s *event_list, char **buf, int *buf_size, int len)
 {
-	int ret_len = 0;
 	GList *cursor;
 	ctsvc_event_s *data;
+	char event[VCARD_ITEM_LENGTH] = {0};
 
 	for (cursor=event_list->records;cursor;cursor=cursor->next) {
 		data = cursor->data;
 		if (!data->date) continue;
 
+		event[0] = '\0';
 		if (CONTACTS_EVENT_TYPE_BIRTH == data->type) {
-			ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s:%d-%02d-%02d%s",
+			snprintf(event, sizeof(event), "%s:%d-%02d-%02d%s",
 					content_name[CTSVC_VCARD_VALUE_BDAY],
 					data->date/10000, (data->date%10000)/100, data->date%100,
 					CTSVC_CRLF);
-			RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
 		}
 		else if (CONTACTS_EVENT_TYPE_ANNIVERSARY == data->type) {
-			ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s;TYPE=ANNIVERSARY:%d-%02d-%02d%s",
+			snprintf(event, sizeof(event), "%s;TYPE=ANNIVERSARY:%d-%02d-%02d%s",
 					content_name[CTSVC_VCARD_VALUE_X_TIZEN_EVENT],
 					data->date/10000, (data->date%10000)/100, data->date%100,
 					CTSVC_CRLF);
-			RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
 		}
 		else if (CONTACTS_EVENT_TYPE_CUSTOM == data->type) {
-			ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s;X-%s:%d-%02d-%02d%s",
+			snprintf(event, sizeof(event), "%s;X-%s:%d-%02d-%02d%s",
 					content_name[CTSVC_VCARD_VALUE_X_TIZEN_EVENT],
 					SAFE_STR(data->label),
 					data->date/10000, (data->date%10000)/100, data->date%100,
 					CTSVC_CRLF);
-			RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
 		}
 		else {
-			ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s:%d-%02d-%02d%s",
+			snprintf(event, sizeof(event), "%s:%d-%02d-%02d%s",
 					content_name[CTSVC_VCARD_VALUE_X_TIZEN_EVENT],
 					data->date/10000, (data->date%10000)/100, data->date%100,
 					CTSVC_CRLF);
-			RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
 		}
+		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, event);
 	}
 
-	return ret_len;
+	return len;
 }
 
-static inline int __ctsvc_vcard_append_messengers(ctsvc_list_s *messenger_list, char *dest, int dest_size)
+static inline int __ctsvc_vcard_append_messengers(ctsvc_list_s *messenger_list, char **buf, int *buf_size, int len)
 {
-	int ret_len = 0;
 	GList *cursor;
 	ctsvc_messenger_s *messenger;
+	const char *content_name_messenger = NULL;
+	const char *content_name_x_type = NULL;
 
 	for (cursor=messenger_list->records;cursor;cursor=cursor->next) {
 		messenger = cursor->data;
+
+		content_name_messenger = NULL;
+		content_name_x_type = NULL;
+
 		if (messenger->im_id && *messenger->im_id) {
 			switch (messenger->type) {
 			case CONTACTS_MESSENGER_TYPE_WLM:
-				ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s:%s%s",
-						content_name[CTSVC_VCARD_VALUE_X_MSN], messenger->im_id, CTSVC_CRLF);
+				content_name_messenger = content_name[CTSVC_VCARD_VALUE_X_MSN];
 				break;
 			case CONTACTS_MESSENGER_TYPE_YAHOO:
-				ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s:%s%s",
-						content_name[CTSVC_VCARD_VALUE_X_YAHOO], messenger->im_id, CTSVC_CRLF);
+				content_name_messenger = content_name[CTSVC_VCARD_VALUE_X_YAHOO];
 				break;
 			case CONTACTS_MESSENGER_TYPE_ICQ:
-				ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s:%s%s",
-						content_name[CTSVC_VCARD_VALUE_X_ICQ], messenger->im_id, CTSVC_CRLF);
+				content_name_messenger = content_name[CTSVC_VCARD_VALUE_X_ICQ];
 				break;
 			case CONTACTS_MESSENGER_TYPE_AIM:
-				ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s:%s%s",
-						content_name[CTSVC_VCARD_VALUE_X_AIM], messenger->im_id, CTSVC_CRLF);
+				content_name_messenger = content_name[CTSVC_VCARD_VALUE_X_AIM];
 				break;
 			case CONTACTS_MESSENGER_TYPE_JABBER:
-				ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s:%s%s",
-						content_name[CTSVC_VCARD_VALUE_X_JABBER], messenger->im_id, CTSVC_CRLF);
+				content_name_messenger = content_name[CTSVC_VCARD_VALUE_X_JABBER];
 				break;
 			case CONTACTS_MESSENGER_TYPE_SKYPE:
-				ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s:%s%s",
-						content_name[CTSVC_VCARD_VALUE_X_SKYPE_USERNAME], messenger->im_id, CTSVC_CRLF);
+				content_name_messenger = content_name[CTSVC_VCARD_VALUE_X_SKYPE_USERNAME];
 				break;
 			case CONTACTS_MESSENGER_TYPE_QQ:
-				ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s:%s%s",
-						content_name[CTSVC_VCARD_VALUE_X_QQ], messenger->im_id, CTSVC_CRLF);
+				content_name_messenger = content_name[CTSVC_VCARD_VALUE_X_QQ];
 				break;
 			case CONTACTS_MESSENGER_TYPE_GOOGLE:
-				ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s:%s%s",
-						content_name[CTSVC_VCARD_VALUE_X_GOOGLE_TALK], messenger->im_id, CTSVC_CRLF);
+				content_name_messenger = content_name[CTSVC_VCARD_VALUE_X_GOOGLE_TALK];
 				break;
 			case CONTACTS_MESSENGER_TYPE_FACEBOOK:
-				ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s;TYPE=FACEBOOK:%s%s",
-						content_name[CTSVC_VCARD_VALUE_X_TIZEN_MESSENGER], messenger->im_id, CTSVC_CRLF);
+				content_name_x_type = "FACEBOOK";
 				break;
 			case CONTACTS_MESSENGER_TYPE_IRC:
-				ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s;TYPE=IRC:%s%s",
-						content_name[CTSVC_VCARD_VALUE_X_TIZEN_MESSENGER], messenger->im_id, CTSVC_CRLF);
+				content_name_x_type = "IRC";
 				break;
 			case CONTACTS_MESSENGER_TYPE_CUSTOM:
-				ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s;TYPE=X-%s:%s%s",
-						content_name[CTSVC_VCARD_VALUE_X_TIZEN_MESSENGER], SAFE_STR(messenger->label), messenger->im_id, CTSVC_CRLF);
+				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, content_name[CTSVC_VCARD_VALUE_X_TIZEN_MESSENGER]);
+				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";TYPE=X-");
+				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, messenger->label);
+				CTSVC_VCARD_APPEND_CONTENT(buf, buf_size, len, messenger->im_id);
 				break;
 			default:
-				ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s:%s%s",
-						content_name[CTSVC_VCARD_VALUE_X_TIZEN_MESSENGER], messenger->im_id, CTSVC_CRLF);
+				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, content_name[CTSVC_VCARD_VALUE_X_TIZEN_MESSENGER]);
+				CTSVC_VCARD_APPEND_CONTENT(buf, buf_size, len, messenger->im_id);
 				break;
 			}
-			RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
+
+			if (content_name_messenger) {
+				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, content_name_messenger);
+				CTSVC_VCARD_APPEND_CONTENT(buf, buf_size, len, messenger->im_id);
+			}
+			else if(content_name_x_type) {
+				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, content_name[CTSVC_VCARD_VALUE_X_TIZEN_MESSENGER]);
+				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";TYPE=");
+				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, content_name_x_type);
+				CTSVC_VCARD_APPEND_CONTENT(buf, buf_size, len, messenger->im_id);
+			}
 		}
 	}
-	return ret_len;
+	return len;
 }
 
-static inline int __ctsvc_vcard_put_relationship_type(int type, char *label, char *dest, int dest_size)
+static inline int __ctsvc_vcard_put_relationship_type(int type, char *label, char **buf, int* buf_size, int len)
 {
-	int ret_len = 0;
+	const char *type_str = NULL;
+
 	switch (type) {
 	case CONTACTS_RELATIONSHIP_TYPE_ASSISTANT:
-		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "ASSISTANT");
+		type_str = "ASSISTANT";
 		break;
 	case CONTACTS_RELATIONSHIP_TYPE_BROTHER:
-		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "BROTHER");
+		type_str = "BROTHER";
 		break;
 	case CONTACTS_RELATIONSHIP_TYPE_CHILD:
-		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "CHILD");
+		type_str = "CHILD";
 		break;
 	case CONTACTS_RELATIONSHIP_TYPE_DOMESTIC_PARTNER:
-		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "DOMESTIC_PARTNER");
+		type_str = "DOMESTIC_PARTNER";
 		break;
 	case CONTACTS_RELATIONSHIP_TYPE_FATHER:
-		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "FATHER");
+		type_str = "FATHER";
 		break;
 	case CONTACTS_RELATIONSHIP_TYPE_FRIEND:
-		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "FRIEND");
+		type_str = "FRIEND";
 		break;
 	case CONTACTS_RELATIONSHIP_TYPE_MANAGER:
-		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "MANAGER");
+		type_str = "MANAGER";
 		break;
 	case CONTACTS_RELATIONSHIP_TYPE_MOTHER:
-		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "MOTHER");
+		type_str = "MOTHER";
 		break;
 	case CONTACTS_RELATIONSHIP_TYPE_PARENT:
-		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "PARENT");
+		type_str = "PARENT";
 		break;
 	case CONTACTS_RELATIONSHIP_TYPE_PARTNER:
-		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "PARTNER");
+		type_str = "PARTNER";
 		break;
 	case CONTACTS_RELATIONSHIP_TYPE_REFERRED_BY:
-		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "REFERRED_BY");
+		type_str = "REFERRED_BY";
 		break;
 	case CONTACTS_RELATIONSHIP_TYPE_RELATIVE:
-		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "RELATIVE");
+		type_str = "RELATIVE";
 		break;
 	case CONTACTS_RELATIONSHIP_TYPE_SISTER:
-		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "SISTER");
+		type_str = "SISTER";
 		break;
 	case CONTACTS_RELATIONSHIP_TYPE_SPOUSE:
-		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=%s", "SPOUSE");
+		type_str = "SPOUSE";
 		break;
 	case CONTACTS_RELATIONSHIP_TYPE_CUSTOM:
-		ret_len += snprintf(dest+ret_len, dest_size-ret_len, ";TYPE=X-%s", label);
-		break;
+		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";TYPE=X-");
+		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, label);
+		return len;
 	}
-	return ret_len;
+
+	if (type_str) {
+		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";TYPE=");
+		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, type_str);
+	}
+
+	return len;
 }
 
-
-
-static inline int __ctsvc_vcard_append_relationships(ctsvc_list_s *relationship_list, char *dest, int dest_size)
+static inline int __ctsvc_vcard_append_relationships(ctsvc_list_s *relationship_list, char **buf, int *buf_size, int len)
 {
-	int ret_len = 0;
 	GList *cursor;
 	ctsvc_relationship_s *relationship;
 
@@ -999,26 +1012,23 @@ static inline int __ctsvc_vcard_append_relationships(ctsvc_list_s *relationship_
 		relationship = cursor->data;
 
 		if (relationship->name) {
-			ret_len += snprintf(dest+ret_len, dest_size-ret_len, "X-TIZEN-RELATIONSHIP");
-			RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
+			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, "X-TIZEN-RELATIONSHIP");
 
-			ret_len += __ctsvc_vcard_put_relationship_type(relationship->type, SAFE_STR(relationship->label), dest+ret_len, dest_size-ret_len);
-			RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
-
-			ret_len += snprintf(dest+ret_len, dest_size-ret_len, ":%s%s", relationship->name, CTSVC_CRLF);
-			RETV_IF(dest_size <= ret_len, CONTACTS_ERROR_INTERNAL);
+			len = __ctsvc_vcard_put_relationship_type(relationship->type, SAFE_STR(relationship->label), buf, buf_size, len);
+			RETV_IF(len < 0, CONTACTS_ERROR_INTERNAL);
+			CTSVC_VCARD_APPEND_CONTENT(buf, buf_size, len, relationship->name);
 		}
 	}
 
-	return ret_len;
+	return len;
 }
 
-static inline int __ctsvc_vcard_put_photo(ctsvc_list_s *image_list, char *dest, int dest_size)
+static inline int __ctsvc_vcard_put_photo(ctsvc_list_s *image_list, char **buf, int *buf_size, int len)
 {
 	int ret = 0, fd, type;
 	gsize read_len;
 	char *suffix;
-	gchar *buf;
+	gchar *buf_image;
 	guchar image[CTSVC_VCARD_PHOTO_MAX_SIZE] = {0};
 
 	GList *cursor;
@@ -1051,267 +1061,236 @@ static inline int __ctsvc_vcard_put_photo(ctsvc_list_s *image_list, char *dest, 
 		close(fd);
 		RETVM_IF(ret < 0, CONTACTS_ERROR_SYSTEM, "System : read() Failed(%d)", errno);
 
-		ret = 0;
-		buf = g_base64_encode(image, read_len);
+		buf_image = g_base64_encode(image, read_len);
 
-		if (buf) {
-			ret = snprintf(dest, dest_size, "%s;ENCODING=BASE64;TYPE=%s:%s%s%s",
-					content_name[CTSVC_VCARD_VALUE_PHOTO],
-					__ctsvc_get_image_type_str(type), buf, CTSVC_CRLF, CTSVC_CRLF);
-			g_free(buf);
-			RETV_IF(dest_size <= ret, CONTACTS_ERROR_INTERNAL);
+		if (buf_image) {
+			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, content_name[CTSVC_VCARD_VALUE_PHOTO]);
+			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";ENCODING=BASE64;TYPE=");
+			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, __ctsvc_get_image_type_str(type));
+			CTSVC_VCARD_APPEND_CONTENT(buf, buf_size, len, buf_image);
+			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, CTSVC_CRLF);
+			g_free(buf_image);
 		}
 	}
 
-	return ret;
+	return len;
 }
 
-static inline int __ctsvc_vcard_append_contact(ctsvc_contact_s *contact,
-		char *dest, int dest_size)
+static inline int __ctsvc_vcard_append_contact(ctsvc_contact_s *contact, char **buf, int *buf_size, int len)
 {
-	int ret_len = 0;
-	int ret;
-
 	if (contact->name) {
-		ret = __ctsvc_vcard_append_name(contact->name,
-				dest+ret_len, dest_size-ret_len);
-		RETV_IF(ret < 0, ret);
-		ret_len += ret;
+		len = __ctsvc_vcard_append_name(contact->name, buf, buf_size, len);
+		RETV_IF(len < 0, len);
 	}
 	if (contact->company) {
-		ret = __ctsvc_vcard_append_company(contact->company,
-				dest+ret_len, dest_size-ret_len);
-		RETV_IF(ret < 0, ret);
-		ret_len += ret;
+		len = __ctsvc_vcard_append_company(contact->company, buf, buf_size, len);
+		RETV_IF(len < 0, len);
 	}
 	if (contact->note) {
-		ret = __ctsvc_vcard_append_note(contact->note,
-				dest+ret_len, dest_size-ret_len);
-		RETV_IF(ret < 0, ret);
-		ret_len += ret;
+		len = __ctsvc_vcard_append_note(contact->note, buf, buf_size, len);
+		RETV_IF(len < 0, len);
 	}
 	if (contact->postal_addrs) {
-		ret = __ctsvc_vcard_append_postals(contact->postal_addrs,
-				dest+ret_len, dest_size-ret_len);
-		RETV_IF(ret < 0, ret);
-		ret_len += ret;
+		len = __ctsvc_vcard_append_postals(contact->postal_addrs, buf, buf_size, len);
+		RETV_IF(len < 0, len);
 	}
 	if (contact->numbers) {
-		ret = __ctsvc_vcard_append_numbers(contact->numbers,
-				dest+ret_len, dest_size-ret_len);
-		RETV_IF(ret < 0, ret);
-		ret_len += ret;
+		len = __ctsvc_vcard_append_numbers(contact->numbers, buf, buf_size, len);
+		RETV_IF(len < 0, len);
 	}
 	if (contact->emails) {
-		ret = __ctsvc_vcard_append_emails(contact->emails,
-				dest+ret_len, dest_size-ret_len);
-		RETV_IF(ret < 0, ret);
-		ret_len += ret;
+		len = __ctsvc_vcard_append_emails(contact->emails, buf, buf_size, len);
+		RETV_IF(len < 0, len);
 	}
 	if (contact->nicknames) {
-		ret = __ctsvc_vcard_append_nicknames(contact->nicknames,
-				dest+ret_len, dest_size-ret_len);
-		RETV_IF(ret < 0, ret);
-		ret_len += ret;
+		len = __ctsvc_vcard_append_nicknames(contact->nicknames, buf, buf_size, len);
+		RETV_IF(len < 0, len);
 	}
 	if (contact->urls) {
-		ret = __ctsvc_vcard_append_webs(contact->urls,
-				dest+ret_len, dest_size-ret_len);
-		RETV_IF(ret < 0, ret);
-		ret_len += ret;
+		len = __ctsvc_vcard_append_webs(contact->urls, buf, buf_size, len);
+		RETV_IF(len < 0, len);
 	}
 	if (contact->events) {
-		ret = __ctsvc_vcard_append_events(contact->events,
-				dest+ret_len, dest_size-ret_len);
-		RETV_IF(ret < 0, ret);
-		ret_len += ret;
+		len = __ctsvc_vcard_append_events(contact->events, buf, buf_size, len);
+		RETV_IF(len < 0, len);
 	}
 	if (contact->images) {
-		ret = __ctsvc_vcard_put_photo(contact->images,
-				dest+ret_len, dest_size-ret_len);
-		RETV_IF(ret < 0, ret);
-		ret_len += ret;
+		len = __ctsvc_vcard_put_photo(contact->images, buf, buf_size, len);
+		RETV_IF(len < 0, len);
 	}
 	if (contact->messengers) {
-		ret = __ctsvc_vcard_append_messengers(contact->messengers, dest+ret_len, dest_size-ret_len);
-		RETV_IF(ret < 0, ret);
-		ret_len += ret;
+		len = __ctsvc_vcard_append_messengers(contact->messengers, buf, buf_size, len);
+		RETV_IF(len < 0, len);
 	}
 	if (contact->relationships) {
-		ret = __ctsvc_vcard_append_relationships(contact->relationships, dest+ret_len, dest_size-ret_len);
-		RETV_IF(ret < 0, ret);
-		ret_len += ret;
+		len = __ctsvc_vcard_append_relationships(contact->relationships, buf, buf_size, len);
+		RETV_IF(len < 0, len);
 	}
-	if (contact->uid)
-		ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s:%s%s",
-				content_name[CTSVC_VCARD_VALUE_UID],
-				contact->uid, CTSVC_CRLF);
+
+	if (contact->uid) {
+		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, content_name[CTSVC_VCARD_VALUE_UID]);
+		CTSVC_VCARD_APPEND_CONTENT(buf, buf_size, len, contact->uid);
+	}
+
 	if (contact->changed_time) {
 		struct tm ts;
 		gmtime_r((time_t *)&contact->changed_time, &ts);
-		ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s:%04d-%02d-%02dT%02d:%02d:%02dZ%s",
+		char temp[VCARD_ITEM_LENGTH] = {0};
+		snprintf(temp, sizeof(temp), "%s:%04d-%02d-%02dT%02d:%02d:%02dZ%s",
 				content_name[CTSVC_VCARD_VALUE_REV],
 				1900+ts.tm_year, 1+ts.tm_mon, ts.tm_mday,
 				ts.tm_hour, ts.tm_min, ts.tm_sec,
 				CTSVC_CRLF);
+
+		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, temp);
 	}
 #if 0
 	ctsvc_list_s* profile;
 #endif
-	return ret_len;
+	return len;
 }
 
-static inline int __ctsvc_vcard_append_my_profile(ctsvc_my_profile_s *my_profile, char *dest, int dest_size)
+static inline int __ctsvc_vcard_append_my_profile(ctsvc_my_profile_s *my_profile, char **buf, int *buf_size, int len)
 {
-	int ret_len = 0;
-	int ret;
-
 	if (my_profile->name) {
-		ret = __ctsvc_vcard_append_name(my_profile->name,
-				dest+ret_len, dest_size-ret_len);
-		RETV_IF(ret < 0, ret);
-		ret_len += ret;
+		len = __ctsvc_vcard_append_name(my_profile->name, buf, buf_size, len);
+		RETV_IF(len < 0, len);
 	}
 	if (my_profile->company) {
-		ret = __ctsvc_vcard_append_company(my_profile->company,
-				dest+ret_len, dest_size-ret_len);
-		RETV_IF(ret < 0, ret);
-		ret_len += ret;
+		len = __ctsvc_vcard_append_company(my_profile->company, buf, buf_size, len);
+		RETV_IF(len < 0, len);
 	}
 	if (my_profile->note) {
-		ret = __ctsvc_vcard_append_note(my_profile->note,
-				dest+ret_len, dest_size-ret_len);
-		RETV_IF(ret < 0, ret);
-		ret_len += ret;
+		len = __ctsvc_vcard_append_note(my_profile->note, buf, buf_size, len);
+		RETV_IF(len < 0, len);
 	}
 	if (my_profile->postal_addrs) {
-		ret = __ctsvc_vcard_append_postals(my_profile->postal_addrs,
-				dest+ret_len, dest_size-ret_len);
-		RETV_IF(ret < 0, ret);
-		ret_len += ret;
+		len = __ctsvc_vcard_append_postals(my_profile->postal_addrs, buf, buf_size, len);
+		RETV_IF(len < 0, len);
 	}
 	if (my_profile->numbers) {
-		ret = __ctsvc_vcard_append_numbers(my_profile->numbers,
-				dest+ret_len, dest_size-ret_len);
-		RETV_IF(ret < 0, ret);
-		ret_len += ret;
+		len = __ctsvc_vcard_append_numbers(my_profile->numbers, buf, buf_size, len);
+		RETV_IF(len < 0, len);
 	}
 	if (my_profile->emails) {
-		ret = __ctsvc_vcard_append_emails(my_profile->emails,
-				dest+ret_len, dest_size-ret_len);
-		RETV_IF(ret < 0, ret);
-		ret_len += ret;
+		len = __ctsvc_vcard_append_emails(my_profile->emails, buf, buf_size, len);
+		RETV_IF(len < 0, len);
 	}
 	if (my_profile->nicknames) {
-		ret = __ctsvc_vcard_append_nicknames(my_profile->nicknames,
-				dest+ret_len, dest_size-ret_len);
-		RETV_IF(ret < 0, ret);
-		ret_len += ret;
+		len = __ctsvc_vcard_append_nicknames(my_profile->nicknames, buf, buf_size, len);
+		RETV_IF(len < 0, len);
 	}
 	if (my_profile->urls) {
-		ret = __ctsvc_vcard_append_webs(my_profile->urls,
-				dest+ret_len, dest_size-ret_len);
-		RETV_IF(ret < 0, ret);
-		ret_len += ret;
+		len = __ctsvc_vcard_append_webs(my_profile->urls, buf, buf_size, len);
+		RETV_IF(len < 0, len);
 	}
 	if (my_profile->events) {
-		ret = __ctsvc_vcard_append_events(my_profile->events,
-				dest+ret_len, dest_size-ret_len);
-		RETV_IF(ret < 0, ret);
-		ret_len += ret;
+		len = __ctsvc_vcard_append_events(my_profile->events, buf, buf_size, len);
+		RETV_IF(len < 0, len);
 	}
 	if (my_profile->images) {
-		ret = __ctsvc_vcard_put_photo(my_profile->images,
-				dest+ret_len, dest_size-ret_len);
-		RETV_IF(ret < 0, ret);
-		ret_len += ret;
+		len = __ctsvc_vcard_put_photo(my_profile->images, buf, buf_size, len);
+		RETV_IF(len < 0, len);
 	}
 	if (my_profile->messengers) {
-		ret = __ctsvc_vcard_append_messengers(my_profile->messengers, dest+ret_len, dest_size-ret_len);
-		RETV_IF(ret < 0, ret);
-		ret_len += ret;
+		len = __ctsvc_vcard_append_messengers(my_profile->messengers, buf, buf_size, len);
+		RETV_IF(len < 0, len);
 	}
 	if (my_profile->relationships) {
-		ret = __ctsvc_vcard_append_relationships(my_profile->relationships, dest+ret_len, dest_size-ret_len);
-		RETV_IF(ret < 0, ret);
-		ret_len += ret;
+		len = __ctsvc_vcard_append_relationships(my_profile->relationships, buf, buf_size, len);
+		RETV_IF(len < 0, len);
 	}
-	if (my_profile->uid)
-		ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s:%s%s",
-				content_name[CTSVC_VCARD_VALUE_UID],
-				my_profile->uid, CTSVC_CRLF);
+
+	if (my_profile->uid) {
+		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, content_name[CTSVC_VCARD_VALUE_UID]);
+		CTSVC_VCARD_APPEND_CONTENT(buf, buf_size, len, my_profile->uid);
+	}
+
 	if (my_profile->changed_time) {
 		struct tm ts;
 		gmtime_r((time_t *)&my_profile->changed_time, &ts);
-		ret_len += snprintf(dest+ret_len, dest_size-ret_len, "%s:%04d-%02d-%02dT%02d:%02d:%02dZ%s",
+		char temp[VCARD_ITEM_LENGTH] = {0};
+		snprintf(temp, sizeof(temp), "%s:%04d-%02d-%02dT%02d:%02d:%02dZ%s",
 				content_name[CTSVC_VCARD_VALUE_REV],
 				1900+ts.tm_year, 1+ts.tm_mon, ts.tm_mday,
 				ts.tm_hour, ts.tm_min, ts.tm_sec,
 				CTSVC_CRLF);
+
+		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, temp);
 	}
+
 #if 0
 		ctsvc_list_s* profile;
 #endif
-		return ret_len;
-
+	return len;
 }
 
 static int __ctsvc_vcard_make(ctsvc_contact_s *contact, char **vcard_stream)
 {
-	int ret_len, ret;
-	char result[CTSVC_VCARD_FILE_MAX_SIZE] = {0};
+	char *buf = NULL;
+	int buf_size = VCARD_INIT_LENGTH;
+	int len = 0;
 
 	__ctsvc_vcard_initial();
 
-	ret_len = snprintf(result, sizeof(result), "%s%s", "BEGIN:VCARD", CTSVC_CRLF);
-	ret_len += snprintf(result+ret_len, sizeof(result)-ret_len,
-			"%s%s%s", "VERSION:", "3.0", CTSVC_CRLF);
+	buf = calloc(1, buf_size);
+	CTSVC_VCARD_APPEND_STR(&buf, &buf_size, len, "BEGIN:VCARD");
+	CTSVC_VCARD_APPEND_STR(&buf, &buf_size, len, CTSVC_CRLF);
 
-	ret = __ctsvc_vcard_append_contact(contact,
-			result+ret_len, sizeof(result)-ret_len);
-	RETVM_IF(ret < 0, CONTACTS_ERROR_INTERNAL,
-					"This contact has too many information");
-	ret_len += ret;
-	RETVM_IF(sizeof(result)-ret_len <= 0, CONTACTS_ERROR_INTERNAL,
-			"This contact has too many information");
+	CTSVC_VCARD_APPEND_STR(&buf, &buf_size, len, "VERSION:3.0");
+	CTSVC_VCARD_APPEND_STR(&buf, &buf_size, len, CTSVC_CRLF);
 
-	ret_len += snprintf(result+ret_len, sizeof(result)-ret_len,
-			"%s%s", "END:VCARD", CTSVC_CRLF);
+	len = __ctsvc_vcard_append_contact(contact, &buf, &buf_size, len);
+	if (len < 0) {
+		free(buf);
+		return CONTACTS_ERROR_INTERNAL;
+	}
 
-	ret = __ctsvc_vcard_add_folding(result);
-	RETV_IF (CONTACTS_ERROR_NONE != ret, ret);
 
-	*vcard_stream = strdup(result);
+	CTSVC_VCARD_APPEND_STR(&buf, &buf_size, len, "END:VCARD");
+	CTSVC_VCARD_APPEND_STR(&buf, &buf_size, len, CTSVC_CRLF);
+
+	len = __ctsvc_vcard_add_folding(&buf, &buf_size, len);
+	if (len < 0) {
+		free(buf);
+		return CONTACTS_ERROR_INTERNAL;
+	}
+	*vcard_stream = buf;
 
 	return CONTACTS_ERROR_NONE;
 }
 
 static int __ctsvc_vcard_make_from_my_profile(ctsvc_my_profile_s *my_profile, char **vcard_stream)
 {
-	int ret_len, ret;
-	char result[CTSVC_VCARD_FILE_MAX_SIZE] = {0};
+	char *buf = NULL;
+	int buf_size = VCARD_INIT_LENGTH;
+	int len = 0;
 
 	__ctsvc_vcard_initial();
 
-	ret_len = snprintf(result, sizeof(result), "%s%s", "BEGIN:VCARD", CTSVC_CRLF);
-	ret_len += snprintf(result+ret_len, sizeof(result)-ret_len,
-			"%s%s%s", "VERSION:", "3.0", CTSVC_CRLF);
+	buf = calloc(1, buf_size);
+	CTSVC_VCARD_APPEND_STR(&buf, &buf_size, len, "BEGIN:VCARD");
+	CTSVC_VCARD_APPEND_STR(&buf, &buf_size, len, CTSVC_CRLF);
 
-	ret = __ctsvc_vcard_append_my_profile(my_profile,
-			result+ret_len, sizeof(result)-ret_len);
-	RETVM_IF(ret < 0, CONTACTS_ERROR_INTERNAL,
-					"This contact has too many information");
-	ret_len += ret;
-	RETVM_IF(sizeof(result)-ret_len <= 0, CONTACTS_ERROR_INTERNAL,
-			"This contact has too many information");
+	CTSVC_VCARD_APPEND_STR(&buf, &buf_size, len, "VERSION:3.0");
+	CTSVC_VCARD_APPEND_STR(&buf, &buf_size, len, CTSVC_CRLF);
 
-	ret_len += snprintf(result+ret_len, sizeof(result)-ret_len,
-			"%s%s", "END:VCARD", CTSVC_CRLF);
+	len = __ctsvc_vcard_append_my_profile(my_profile, &buf, &buf_size, len);
+	if (len < 0) {
+		free(buf);
+		return CONTACTS_ERROR_INTERNAL;
+	}
 
-	ret = __ctsvc_vcard_add_folding(result);
-	RETV_IF (CONTACTS_ERROR_NONE != ret, ret);
+	CTSVC_VCARD_APPEND_STR(&buf, &buf_size, len, "END:VCARD");
+	CTSVC_VCARD_APPEND_STR(&buf, &buf_size, len, CTSVC_CRLF);
 
-	*vcard_stream = strdup(result);
+	len = __ctsvc_vcard_add_folding(&buf, &buf_size, len);
+	if (len < 0) {
+		free(buf);
+		return CONTACTS_ERROR_INTERNAL;
+	}
+
+	*vcard_stream = buf;
 
 	return CONTACTS_ERROR_NONE;
 }
@@ -1350,11 +1329,9 @@ API int contacts_vcard_make_from_my_profile(contacts_record_h record, char **vca
 }
 
 
-static int __ctsvc_vcard_append_person(ctsvc_person_s *person, ctsvc_list_s *list_contacts, char *dest, int dest_size)
+static int __ctsvc_vcard_append_person(ctsvc_person_s *person, ctsvc_list_s *list_contacts, char **buf, int *buf_size, int len)
 {
 	int ret;
-	int ret_len = 0;
-	int total_len = 0;
 	int changed_time = 0;
 	ctsvc_contact_s *contact;
 	ctsvc_simple_contact_s *simple_contact;
@@ -1364,10 +1341,8 @@ static int __ctsvc_vcard_append_person(ctsvc_person_s *person, ctsvc_list_s *lis
 		simple_contact = (ctsvc_simple_contact_s *)cursor->data;
 		ret = contacts_db_get_record(_contacts_contact._uri, simple_contact->contact_id, (contacts_record_h *)&contact);
 		if (CONTACTS_ERROR_NONE == ret && contact && contact->id == person->name_contact_id && contact->name) {
-			ret_len = __ctsvc_vcard_append_name(contact->name, dest+total_len, dest_size-total_len);
-			RETVM_IF(ret_len < 0, CONTACTS_ERROR_INTERNAL, "This person has too many information");
-			total_len += ret_len;
-			break;
+			len = __ctsvc_vcard_append_name(contact->name, buf, buf_size, len);
+			RETV_IF(len < 0, len);
 		}
 	}
 
@@ -1375,90 +1350,84 @@ static int __ctsvc_vcard_append_person(ctsvc_person_s *person, ctsvc_list_s *lis
 		simple_contact = (ctsvc_simple_contact_s *)cursor->data;
 		ret = contacts_db_get_record(_contacts_contact._uri, simple_contact->contact_id, (contacts_record_h *)&contact);
 		if (CONTACTS_ERROR_NONE == ret && contact && contact->company && contact->company->cursor) {
-			ret_len = __ctsvc_vcard_append_company(contact->company, dest+total_len, dest_size-total_len);
-			RETVM_IF(ret_len < 0, CONTACTS_ERROR_INTERNAL, "This person has too many information");
-			total_len += ret_len;
+			len = __ctsvc_vcard_append_company(contact->company, buf, buf_size, len);
+			RETV_IF(len < 0, len);
 		}
 	}
+
 	for(cursor=list_contacts->records;cursor;cursor=cursor->next) {
 		simple_contact = (ctsvc_simple_contact_s *)cursor->data;
 		ret = contacts_db_get_record(_contacts_contact._uri, simple_contact->contact_id, (contacts_record_h *)&contact);
 		if (CONTACTS_ERROR_NONE == ret && contact && contact->note && contact->note->cursor) {
-			ret_len = __ctsvc_vcard_append_note(contact->note, dest+total_len, dest_size-total_len);
-			RETVM_IF(ret_len < 0, CONTACTS_ERROR_INTERNAL, "This person has too many information");
-			total_len += ret_len;
+			len = __ctsvc_vcard_append_note(contact->note, buf, buf_size, len);
+			RETV_IF(len < 0, len);
 		}
 	}
 	for(cursor=list_contacts->records;cursor;cursor=cursor->next) {
 		simple_contact = (ctsvc_simple_contact_s *)cursor->data;
 		ret = contacts_db_get_record(_contacts_contact._uri, simple_contact->contact_id, (contacts_record_h *)&contact);
 		if (CONTACTS_ERROR_NONE == ret && contact && contact->postal_addrs && contact->postal_addrs->cursor) {
-			ret_len = __ctsvc_vcard_append_postals(contact->postal_addrs, dest+total_len, dest_size-total_len);
-			RETVM_IF(ret_len < 0, CONTACTS_ERROR_INTERNAL, "This person has too many information");
-			total_len += ret_len;
+			len = __ctsvc_vcard_append_postals(contact->postal_addrs, buf, buf_size, len);
+			RETV_IF(len < 0, len);
 		}
 	}
 	for(cursor=list_contacts->records;cursor;cursor=cursor->next) {
 		simple_contact = (ctsvc_simple_contact_s *)cursor->data;
 		ret = contacts_db_get_record(_contacts_contact._uri, simple_contact->contact_id, (contacts_record_h *)&contact);
 		if (CONTACTS_ERROR_NONE == ret && contact && contact->numbers && contact->numbers->cursor) {
-			ret_len = __ctsvc_vcard_append_numbers(contact->numbers, dest+total_len, dest_size-total_len);
-			RETVM_IF(ret_len < 0, CONTACTS_ERROR_INTERNAL, "This person has too many information");
-			total_len += ret_len;
+			len = __ctsvc_vcard_append_numbers(contact->numbers, buf, buf_size, len);
+			RETV_IF(len < 0, len);
 		}
 	}
+
 	for(cursor=list_contacts->records;cursor;cursor=cursor->next) {
 		simple_contact = (ctsvc_simple_contact_s *)cursor->data;
 		ret = contacts_db_get_record(_contacts_contact._uri, simple_contact->contact_id, (contacts_record_h *)&contact);
 		if (CONTACTS_ERROR_NONE == ret && contact && contact->emails && contact->emails->cursor) {
-			ret_len = __ctsvc_vcard_append_emails(contact->emails, dest+total_len, dest_size-total_len);
-			RETVM_IF(ret_len < 0, CONTACTS_ERROR_INTERNAL, "This person has too many information");
-			total_len += ret_len;
+			len = __ctsvc_vcard_append_emails(contact->emails, buf, buf_size, len);
+			RETV_IF(len < 0, len);
 		}
 	}
+
 	for(cursor=list_contacts->records;cursor;cursor=cursor->next) {
 		simple_contact = (ctsvc_simple_contact_s *)cursor->data;
 		ret = contacts_db_get_record(_contacts_contact._uri, simple_contact->contact_id, (contacts_record_h *)&contact);
 		if (CONTACTS_ERROR_NONE == ret && contact && contact->nicknames && contact->nicknames->cursor) {
-			ret_len = __ctsvc_vcard_append_nicknames(contact->nicknames, dest+total_len, dest_size-total_len);
-			RETVM_IF(ret_len < 0, CONTACTS_ERROR_INTERNAL, "This person has too many information");
-			total_len += ret_len;
+			len = __ctsvc_vcard_append_nicknames(contact->nicknames, buf, buf_size, len);
+			RETV_IF(len < 0, len);
 		}
 	}
 	for(cursor=list_contacts->records;cursor;cursor=cursor->next) {
 		simple_contact = (ctsvc_simple_contact_s *)cursor->data;
 		ret = contacts_db_get_record(_contacts_contact._uri, simple_contact->contact_id, (contacts_record_h *)&contact);
 		if (CONTACTS_ERROR_NONE == ret && contact && contact->urls && contact->urls->cursor) {
-			ret_len = __ctsvc_vcard_append_webs(contact->urls, dest+total_len, dest_size-total_len);
-			RETVM_IF(ret_len < 0, CONTACTS_ERROR_INTERNAL, "This person has too many information");
-			total_len += ret_len;
+			len = __ctsvc_vcard_append_webs(contact->urls, buf, buf_size, len);
+			RETV_IF(len < 0, len);
 		}
 	}
+
 	for(cursor=list_contacts->records;cursor;cursor=cursor->next) {
 		simple_contact = (ctsvc_simple_contact_s *)cursor->data;
 		ret = contacts_db_get_record(_contacts_contact._uri, simple_contact->contact_id, (contacts_record_h *)&contact);
 		if (CONTACTS_ERROR_NONE == ret && contact && contact->events && contact->events->cursor) {
-			ret_len = __ctsvc_vcard_append_events(contact->events, dest+total_len, dest_size-total_len);
-			RETVM_IF(ret_len < 0, CONTACTS_ERROR_INTERNAL, "This person has too many information");
-			total_len += ret_len;
+			len = __ctsvc_vcard_append_events(contact->events, buf, buf_size, len);
+			RETV_IF(len < 0, len);
 		}
 	}
 	for(cursor=list_contacts->records;cursor;cursor=cursor->next) {
 		simple_contact = (ctsvc_simple_contact_s *)cursor->data;
 		ret = contacts_db_get_record(_contacts_contact._uri, simple_contact->contact_id, (contacts_record_h *)&contact);
 		if (CONTACTS_ERROR_NONE == ret && contact && contact->images && contact->images->cursor) {
-			ret_len = __ctsvc_vcard_put_photo(contact->images, dest+total_len, dest_size-total_len);
-			RETVM_IF(ret_len < 0, CONTACTS_ERROR_INTERNAL, "This person has too many information");
-			total_len += ret_len;
+			len = __ctsvc_vcard_put_photo(contact->images, buf, buf_size, len);
+			RETV_IF(len < 0, len);
 		}
 	}
 	for(cursor=list_contacts->records;cursor;cursor=cursor->next) {
 		simple_contact = (ctsvc_simple_contact_s *)cursor->data;
 		ret = contacts_db_get_record(_contacts_contact._uri, simple_contact->contact_id, (contacts_record_h *)&contact);
 		if (CONTACTS_ERROR_NONE == ret && contact && contact->messengers && contact->messengers->cursor) {
-			ret_len = __ctsvc_vcard_append_messengers(contact->messengers, dest+total_len, dest_size-total_len);
-			RETVM_IF(ret_len < 0, CONTACTS_ERROR_INTERNAL, "This person has too many information");
-			total_len += ret_len;
+			len = __ctsvc_vcard_append_messengers(contact->messengers, buf, buf_size, len);
+			RETV_IF(len < 0, len);
 		}
 	}
 
@@ -1466,9 +1435,8 @@ static int __ctsvc_vcard_append_person(ctsvc_person_s *person, ctsvc_list_s *lis
 		simple_contact = (ctsvc_simple_contact_s *)cursor->data;
 		ret = contacts_db_get_record(_contacts_contact._uri, simple_contact->contact_id, (contacts_record_h *)&contact);
 		if (CONTACTS_ERROR_NONE == ret && contact && contact->relationships && contact->relationships->cursor) {
-			ret_len = __ctsvc_vcard_append_relationships(contact->relationships, dest+total_len, dest_size-total_len);
-			RETVM_IF(ret_len < 0, CONTACTS_ERROR_INTERNAL, "This person has too many information");
-			total_len += ret_len;
+			len = __ctsvc_vcard_append_relationships(contact->relationships, buf, buf_size, len);
+			RETV_IF(len < 0, len);
 		}
 	}
 
@@ -1476,9 +1444,8 @@ static int __ctsvc_vcard_append_person(ctsvc_person_s *person, ctsvc_list_s *lis
 		simple_contact = (ctsvc_simple_contact_s *)cursor->data;
 		ret = contacts_db_get_record(_contacts_contact._uri, simple_contact->contact_id, (contacts_record_h *)&contact);
 		if (CONTACTS_ERROR_NONE == ret && contact && contact->uid) {
-			ret_len = snprintf(dest+total_len, dest_size-total_len, "%s:%s%s", content_name[CTSVC_VCARD_VALUE_UID], contact->uid, CTSVC_CRLF);
-			RETVM_IF(ret_len < 0, CONTACTS_ERROR_INTERNAL, "This person has too many information");
-			total_len += ret_len;
+			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, content_name[CTSVC_VCARD_VALUE_UID]);
+			CTSVC_VCARD_APPEND_CONTENT(buf, buf_size, len, contact->uid);
 		}
 	}
 	for(cursor=list_contacts->records;cursor;cursor=cursor->next) {
@@ -1487,67 +1454,61 @@ static int __ctsvc_vcard_append_person(ctsvc_person_s *person, ctsvc_list_s *lis
 		if (CONTACTS_ERROR_NONE == ret && contact && changed_time < contact->changed_time)
 			changed_time = contact->changed_time;
 	}
+
 	if (changed_time) {
 		struct tm ts;
 		gmtime_r((time_t *)&changed_time, &ts);
-		ret_len = snprintf(dest+total_len, dest_size-total_len, "%s:%04d-%02d-%02dT%02d:%02d:%02dZ%s",
+		char temp[VCARD_ITEM_LENGTH] = {0};
+		snprintf(temp, sizeof(temp), "%s:%04d-%02d-%02dT%02d:%02d:%02dZ%s",
 				content_name[CTSVC_VCARD_VALUE_REV],
 				1900+ts.tm_year, 1+ts.tm_mon, ts.tm_mday,
 				ts.tm_hour, ts.tm_min, ts.tm_sec,
 				CTSVC_CRLF);
-		RETVM_IF(ret_len < 0, CONTACTS_ERROR_INTERNAL, "This person has too many information");
-		total_len += ret_len;
+
+		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, temp);
 	}
 #if 0
 	ctsvc_list_s* profile;
 #endif
-	return total_len;
+	return len;
 }
 
 static int __ctsvc_vcard_make_from_person(ctsvc_person_s *person, ctsvc_list_s *list_contacts,
 		char **vcard_stream)
 {
-	int ret_len, ret;
-	char *result = NULL;
+	int ret;
+	char *buf = NULL;
+	int buf_size = VCARD_INIT_LENGTH;
+	int len = 0;
 
 	RETV_IF(NULL == vcard_stream, CONTACTS_ERROR_INVALID_PARAMETER);
 	*vcard_stream = NULL;
 
-	result = calloc(1, CTSVC_VCARD_FILE_MAX_SIZE);
-	RETVM_IF(NULL == result, CONTACTS_ERROR_OUT_OF_MEMORY, "Out of memory : calloc() Failed()");
-
 	__ctsvc_vcard_initial();
 
-	ret_len = snprintf(result, CTSVC_VCARD_FILE_MAX_SIZE, "%s%s", "BEGIN:VCARD", CTSVC_CRLF);
-	ret_len += snprintf(result+ret_len, CTSVC_VCARD_FILE_MAX_SIZE-ret_len, "%s%s%s", "VERSION:", "3.0", CTSVC_CRLF);
-	ret = __ctsvc_vcard_append_person(person, list_contacts, result+ret_len, CTSVC_VCARD_FILE_MAX_SIZE-ret_len);
-	if (ret < 0) {
-		free(result);
-		return ret;
-	}
+	buf = calloc(1, buf_size);
+	CTSVC_VCARD_APPEND_STR(&buf, &buf_size, len, "BEGIN:VCARD");
+	CTSVC_VCARD_APPEND_STR(&buf, &buf_size, len, CTSVC_CRLF);
 
-	ret_len += ret;
-	if (CTSVC_VCARD_FILE_MAX_SIZE-ret_len <= 0) {
-		CTS_ERR("This person has too many information");
-		free(result);
+	CTSVC_VCARD_APPEND_STR(&buf, &buf_size, len, "VERSION:3.0");
+	CTSVC_VCARD_APPEND_STR(&buf, &buf_size, len, CTSVC_CRLF);
+
+	len = __ctsvc_vcard_append_person(person, list_contacts, &buf, &buf_size, len);
+	if (len < 0) {
+		free(buf);
 		return CONTACTS_ERROR_INTERNAL;
 	}
 
-	ret_len += snprintf(result+ret_len, CTSVC_VCARD_FILE_MAX_SIZE-ret_len, "%s%s", "END:VCARD", CTSVC_CRLF);
-	if (CTSVC_VCARD_FILE_MAX_SIZE-ret_len <= 0) {
-		CTS_ERR("This person has too many information");
-		free(result);
-		return CONTACTS_ERROR_INTERNAL;
-	}
+	CTSVC_VCARD_APPEND_STR(&buf, &buf_size, len, "END:VCARD");
+	CTSVC_VCARD_APPEND_STR(&buf, &buf_size, len, CTSVC_CRLF);
 
-	ret = __ctsvc_vcard_add_folding(result);
-	if (CONTACTS_ERROR_NONE != ret) {
-		free(result);
+	len = __ctsvc_vcard_add_folding(&buf, &buf_size, len);
+	if (len < 0) {
+		free(buf);
 		return ret;
 	}
 
-	*vcard_stream = strdup(result);
-	free(result);
+	*vcard_stream = buf;
 
 	return CONTACTS_ERROR_NONE;
 }

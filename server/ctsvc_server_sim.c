@@ -49,7 +49,7 @@
 static TapiHandle *ghandle = NULL;
 static TelSimPbType_t gsim_type = TAPI_SIM_PB_UNKNOWNN;
 static void* greturn_data = NULL;
-static int gsim_addressbook_id =0;
+static int gsim_addressbook_id = -1;
 
 typedef struct {
 	unsigned int index_max;

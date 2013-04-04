@@ -92,15 +92,6 @@ int ctsvc_db_person_create_record_from_stmt_with_projection(cts_stmt stmt, unsig
 		case CTSVC_PROPERTY_PERSON_LINK_COUNT:
 			person->link_count = ctsvc_stmt_get_int(stmt, i);
 			break;
-		case CTSVC_PROPERTY_PERSON_ACCOUNT_ID1:
-			person->account_id1 = ctsvc_stmt_get_int(stmt, i);
-			break;
-		case CTSVC_PROPERTY_PERSON_ACCOUNT_ID2:
-			person->account_id2 = ctsvc_stmt_get_int(stmt, i);
-			break;
-		case CTSVC_PROPERTY_PERSON_ACCOUNT_ID3:
-			person->account_id3 = ctsvc_stmt_get_int(stmt, i);
-			break;
 		case CTSVC_PROPERTY_PERSON_ADDRESSBOOK_IDS:
 			temp = ctsvc_stmt_get_text(stmt, i);
 			person->addressbook_ids = SAFE_STRDUP(temp);
@@ -182,9 +173,6 @@ int ctsvc_db_person_create_record_from_stmt(cts_stmt stmt, contacts_record_h *re
 	person->status = SAFE_STRDUP(temp);
 
 	person->link_count = ctsvc_stmt_get_int(stmt, i++);
-	person->account_id1 = ctsvc_stmt_get_int(stmt, i++);
-	person->account_id2 = ctsvc_stmt_get_int(stmt, i++);
-	person->account_id3 = ctsvc_stmt_get_int(stmt, i++);
 	temp = ctsvc_stmt_get_text(stmt, i++);
 	person->addressbook_ids = SAFE_STRDUP(temp);
 
@@ -269,7 +257,7 @@ int ctsvc_db_insert_person(contacts_record_h record)
 	cts_stmt stmt = NULL;
 	char query[CTS_SQL_MIN_LEN] = {0};
 	contacts_record_h addressbook;
-	int account_id, version;
+	int version;
 	ctsvc_contact_s *contact = (ctsvc_contact_s*)record;
 	char *status = NULL;
 
@@ -278,7 +266,6 @@ int ctsvc_db_insert_person(contacts_record_h record)
 	   CTS_ERR("contacts_svc_get_addressbook() Failed\n");
 	   return CONTACTS_ERROR_DB;
 	}
-	contacts_record_get_int(addressbook, _contacts_address_book.account_id, &account_id);
 	contacts_record_destroy(addressbook, true);
 
 	snprintf(query, sizeof(query),
@@ -300,10 +287,10 @@ int ctsvc_db_insert_person(contacts_record_h record)
 	snprintf(query, sizeof(query),
 		"INSERT INTO "CTS_TABLE_PERSONS"(name_contact_id, created_ver, changed_ver, "
 			"has_phonenumber, has_email, ringtone_path, vibration, status, "
-			"image_thumbnail_path, link_count, account_id1, addressbook_ids) "
-			"VALUES(%d, %d, %d, %d, %d, ?, ?, ?, ?, 1, %d, '%d') ",
+			"image_thumbnail_path, link_count, addressbook_ids) "
+			"VALUES(%d, %d, %d, %d, %d, ?, ?, ?, ?, 1, '%d') ",
 			contact->id, version, version,
-			contact->has_phonenumber, contact->has_email, account_id, contact->addressbook_id);
+			contact->has_phonenumber, contact->has_email, contact->addressbook_id);
 
 	stmt = cts_query_prepare(query);
 	if (NULL == stmt) {

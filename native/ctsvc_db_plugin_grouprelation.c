@@ -181,7 +181,7 @@ static int __ctsvc_db_grouprelation_get_records_with_query( contacts_query_h que
 
 			switch(property_id) {
 			case CTSVC_PROPERTY_GROUP_RELATION_CONTACT_ID:
-				group_relation->id = ctsvc_stmt_get_int(stmt, i);
+				group_relation->contact_id = ctsvc_stmt_get_int(stmt, i);
 				break;
 			case CTSVC_PROPERTY_GROUP_RELATION_GROUP_ID:
 				group_relation->group_id = ctsvc_stmt_get_int(stmt, i);

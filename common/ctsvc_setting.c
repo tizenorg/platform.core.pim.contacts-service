@@ -35,9 +35,11 @@ static int name_display_order = -1;
 static int name_sorting_order = -1;
 static int primary_sort = -1;
 static int secondary_sort = -1;
+static int phonenumber_min_match_digit = -1;
 
 static const char *CTSVC_VCONF_DISPLAY_ORDER = VCONFKEY_CONTACTS_SVC_NAME_DISPLAY_ORDER;
 static const char *CTSVC_VCONF_SORTING_ORDER = VCONFKEY_CONTACTS_SVC_NAME_SORTING_ORDER;
+static const char *CTSVC_VCONF_PHONENUMBER_MIN_MATCH_DIGIT = VCONFKEY_CONTACTS_SVC_PHONENUMBER_MIN_MATCH_DIGIT;
 
 const char* ctsvc_get_default_language_vconfkey(void)
 {
@@ -140,6 +142,12 @@ int ctsvc_register_vconf(void)
 		name_sorting_order = CONTACTS_NAME_SORTING_ORDER_FIRSTLAST;
 	}
 
+	ret = vconf_get_int(CTSVC_VCONF_PHONENUMBER_MIN_MATCH_DIGIT, &phonenumber_min_match_digit);
+	if (ret < 0) {
+		CTS_ERR("vconf_get_int() Failed(%d)", ret);
+		phonenumber_min_match_digit = 8;
+	}
+
 	ret = vconf_get_int(ctsvc_get_default_language_vconfkey(), &primary_sort);
 	WARN_IF(ret < 0, "vconf_get_int() Failed(%d)", ret);
 
@@ -203,5 +211,10 @@ int ctsvc_get_default_language(void)
 int ctsvc_get_secondary_language(void)
 {
 	return secondary_sort;
+}
+
+int ctsvc_get_phonenumber_min_match_digit(void)
+{
+	return phonenumber_min_match_digit;
 }
 

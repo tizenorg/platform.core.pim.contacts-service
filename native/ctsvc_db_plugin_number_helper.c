@@ -27,6 +27,7 @@
 #include "ctsvc_db_plugin_number_helper.h"
 #include "ctsvc_record.h"
 #include "ctsvc_notification.h"
+#include "ctsvc_setting.h"
 
 int ctsvc_db_number_insert(contacts_record_h record, int contact_id, bool is_my_profile, int *id)
 {
@@ -57,7 +58,7 @@ int ctsvc_db_number_insert(contacts_record_h record, int contact_id, bool is_my_
 	cts_stmt_bind_text(stmt, 2, number->number);
 	ret = ctsvc_clean_number(number->number, clean_num, sizeof(clean_num));
 	if (0 < ret) {
-		ret = ctsvc_normalize_number(clean_num, normal_num, CTSVC_NUMBER_MAX_LEN, CTSVC_MIN_MATCH_NORMALIZED_NUMBER_SIZE);
+		ret = ctsvc_normalize_number(clean_num, normal_num, CTSVC_NUMBER_MAX_LEN, ctsvc_get_phonenumber_min_match_digit());
 		if (CONTACTS_ERROR_NONE == ret)
 			cts_stmt_bind_text(stmt, 3, normal_num);
 	}
@@ -130,7 +131,7 @@ int ctsvc_db_number_update(contacts_record_h record, bool is_my_profile)
 		if (ctsvc_record_check_property_flag((ctsvc_record_s *)record, CTSVC_PROPERTY_NUMBER_NUMBER, CTSVC_PROPERTY_FLAG_DIRTY)) {
 			ret = ctsvc_clean_number(number->number, clean_num, sizeof(clean_num));
 			if (0 < ret) {
-				ret = ctsvc_normalize_number(clean_num, normal_num, CTSVC_NUMBER_MAX_LEN, CTSVC_MIN_MATCH_NORMALIZED_NUMBER_SIZE);
+				ret = ctsvc_normalize_number(clean_num, normal_num, CTSVC_NUMBER_MAX_LEN, ctsvc_get_phonenumber_min_match_digit());
 				if (CONTACTS_ERROR_NONE == ret) {
 					char query_set[CTS_SQL_MAX_LEN] = {0};
 					snprintf(query_set, sizeof(query_set), "%s, data4=?", set);

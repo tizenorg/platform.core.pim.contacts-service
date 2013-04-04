@@ -22,6 +22,7 @@
 #include <unicode/utypes.h>
 
 enum SORTTYPE{
+	CTSVC_SORT_OTHERS,		// -1??
 	CTSVC_SORT_NUMBER,		// 0
 	CTSVC_SORT_PRIMARY, 	// 1
 	CTSVC_SORT_SECONDARY, 	// 2
@@ -29,7 +30,6 @@ enum SORTTYPE{
 	CTSVC_SORT_KOREAN,		// 4
 	CTSVC_SORT_JAPANESE,	// 5
 	CTSVC_SORT_CJK,			// 6
-	CTSVC_SORT_OTHERS = 100,// 0
 };
 
 int ctsvc_check_utf8(char c);

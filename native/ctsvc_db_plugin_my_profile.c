@@ -626,7 +626,9 @@ static int __ctsvc_db_my_profile_update_record( contacts_record_h record )
 
 		version = ctsvc_get_next_ver();
 
-		ctsvc_db_create_set_query(record, &set, &bind_text);
+		ret = ctsvc_db_create_set_query(record, &set, &bind_text);
+		WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_db_create_set_query() Failed(%d)", ret);
+
 		if (set && *set)
 			len = snprintf(query_set, sizeof(query_set), "%s, ", set);
 		len += snprintf(query_set+len, sizeof(query_set)-len, " changed_ver=%d, changed_time=%d", version, (int)time(NULL));

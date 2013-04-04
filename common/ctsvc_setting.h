@@ -26,6 +26,6 @@ int ctsvc_get_default_language(void);
 int ctsvc_get_secondary_language(void);
 const char *ctsvc_get_default_language_vconfkey(void);
 const char *ctsvc_get_secondary_language_vconfkey(void);
-
+int ctsvc_get_phonenumber_min_match_digit(void);
 #endif /*  __TIZEN_SOCIAL_CTSVC_SETTING_H__ */
 

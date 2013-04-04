@@ -30,6 +30,7 @@
 #include "ctsvc_db_query.h"
 #include "ctsvc_db_init.h"
 #include "ctsvc_notification.h"
+#include "ctsvc_setting.h"
 
 #ifdef _CONTACTS_IPC_SERVER
 #include "ctsvc_server_change_subject.h"
@@ -406,7 +407,7 @@ static int  __ctsvc_db_phonelog_insert(ctsvc_phonelog_s *phonelog, int *id)
 		if (phonelog->log_type < CONTACTS_PLOG_TYPE_EMAIL_RECEIVED) {
 			ret = ctsvc_clean_number(phonelog->address, clean_num, sizeof(clean_num));
 			if (0 < ret) {
-				ret = ctsvc_normalize_number(clean_num, normal_num, CTSVC_NUMBER_MAX_LEN, CTSVC_MIN_MATCH_NORMALIZED_NUMBER_SIZE);
+				ret = ctsvc_normalize_number(clean_num, normal_num, CTSVC_NUMBER_MAX_LEN, ctsvc_get_phonenumber_min_match_digit());
 				cts_stmt_bind_text(stmt, 2, normal_num);
 			}
 		}

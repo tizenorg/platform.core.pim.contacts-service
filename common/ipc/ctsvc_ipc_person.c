@@ -36,9 +36,6 @@ static int __ctsvc_ipc_unmarshal_person(pims_ipc_data_h ipc_data, const char* vi
 		if (ctsvc_ipc_unmarshal_string(ipc_data, &person_p->vibration) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_string(ipc_data, &person_p->status) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_int(ipc_data, &person_p->link_count) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_unmarshal_int(ipc_data, &person_p->account_id1) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_unmarshal_int(ipc_data, &person_p->account_id2) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_unmarshal_int(ipc_data, &person_p->account_id3) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_string(ipc_data, &person_p->addressbook_ids) != CONTACTS_ERROR_NONE) break;
 
 		return CONTACTS_ERROR_NONE;
@@ -68,9 +65,6 @@ static int __ctsvc_ipc_marshal_person(const contacts_record_h record, pims_ipc_d
 		if (ctsvc_ipc_marshal_string((person_p->vibration),ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_string((person_p->status),ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_int((person_p->link_count),ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_int((person_p->account_id1),ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_int((person_p->account_id2),ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_int((person_p->account_id3),ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_string((person_p->addressbook_ids),ipc_data) != CONTACTS_ERROR_NONE) break;
 
 		return CONTACTS_ERROR_NONE;

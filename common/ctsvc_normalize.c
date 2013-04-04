@@ -781,7 +781,7 @@ static bool __ctsvc_compare_pinyin_letter(const char *haystack, int haystack_lan
 	if (haystack_lang != CTSVC_LANG_CHINESE || needle_lang != CTSVC_LANG_ENGLISH)
 		return false;
 
-	for(i=0, k=0; i < strlen(temp_needle); i++)
+	for(i=0, k=0; i < sizeof(temp_needle); i++)
 	{
 		if (isupper(needle[i]))
 			temp_needle[i] = tolower(needle[i]);
@@ -792,6 +792,8 @@ static bool __ctsvc_compare_pinyin_letter(const char *haystack, int haystack_lan
 	for(i=0, j=0; i < strlen(haystack) && j < strlen(temp_needle) ; i+=len)
 	{
 		len = ctsvc_check_utf8(haystack[i]);
+		if (len < 0)
+			return false;
 		memcpy(temp, haystack + i, len );
 		temp[len] = '\0';
 

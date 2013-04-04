@@ -1073,7 +1073,7 @@ int ctsvc_contact_update_data_profile(contacts_list_h profile_list, int contact_
 		contacts_list_get_current_record_p(profile_list, &record);
 		profile = (ctsvc_profile_s*)record;
 		if (0 < profile->id) {
-			if (profile->appsvc_operation)
+			if (profile->text)
 				ret = ctsvc_db_profile_update(record, is_my_profile);
 			else
 				ret = ctsvc_db_profile_delete(profile->id, is_my_profile);

@@ -29,6 +29,8 @@ static int __ctsvc_ipc_unmarshal_activity(pims_ipc_data_h ipc_data, const char* 
 		if (ctsvc_ipc_unmarshal_string(ipc_data, &activity_p->source_name) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_string(ipc_data, &activity_p->status) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_int(ipc_data, &activity_p->timestamp) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_unmarshal_string(ipc_data, &activity_p->service_operation) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_unmarshal_string(ipc_data, &activity_p->uri) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_string(ipc_data, &activity_p->sync_data1) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_string(ipc_data, &activity_p->sync_data2) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_string(ipc_data, &activity_p->sync_data3) != CONTACTS_ERROR_NONE) break;
@@ -56,6 +58,8 @@ static int __ctsvc_ipc_marshal_activity(const contacts_record_h record, pims_ipc
 		if (ctsvc_ipc_marshal_string((activity_p->source_name),ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_string((activity_p->status),ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_int((activity_p->timestamp),ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_string((activity_p->service_operation),ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_string((activity_p->uri),ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_string((activity_p->sync_data1),ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_string((activity_p->sync_data2),ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_string((activity_p->sync_data3),ipc_data) != CONTACTS_ERROR_NONE) break;

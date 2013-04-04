@@ -49,15 +49,17 @@ int ctsvc_db_profile_get_value_from_stmt(cts_stmt stmt, contacts_record_h *recor
 	profile->text = SAFE_STRDUP(temp);
 	profile->order = ctsvc_stmt_get_int(stmt, start_count++);
 	temp = ctsvc_stmt_get_text(stmt, start_count++);
-	profile->appsvc_operation = SAFE_STRDUP(temp);
+	profile->service_operation = SAFE_STRDUP(temp);
 	temp = ctsvc_stmt_get_text(stmt, start_count++);
-	profile->data1 = SAFE_STRDUP(temp);
+	profile->mime = SAFE_STRDUP(temp);
 	temp = ctsvc_stmt_get_text(stmt, start_count++);
-	profile->data2 = SAFE_STRDUP(temp);
+	profile->app_id = SAFE_STRDUP(temp);
 	temp = ctsvc_stmt_get_text(stmt, start_count++);
-	profile->data3 = SAFE_STRDUP(temp);
+	profile->uri = SAFE_STRDUP(temp);
 	temp = ctsvc_stmt_get_text(stmt, start_count++);
-	profile->data4 = SAFE_STRDUP(temp);
+	profile->category = SAFE_STRDUP(temp);
+	temp = ctsvc_stmt_get_text(stmt, start_count++);
+	profile->extra_data = SAFE_STRDUP(temp);
 
 	*record = (contacts_record_h)profile;
 	return CONTACTS_ERROR_NONE;
@@ -72,16 +74,18 @@ static inline int __ctsvc_profile_bind_stmt(cts_stmt stmt, ctsvc_profile_s *prof
 	if (profile->text)
 		cts_stmt_bind_text(stmt, start_cnt+2, profile->text);
 	cts_stmt_bind_int(stmt, start_cnt+3, profile->order);
-	if (profile->appsvc_operation)
-		cts_stmt_bind_text(stmt, start_cnt+4, profile->appsvc_operation);
-	if (profile->data1)
-		cts_stmt_bind_text(stmt, start_cnt+5, profile->data1);
-	if (profile->data2)
-		cts_stmt_bind_text(stmt, start_cnt+6, profile->data2);
-	if (profile->data3)
-		cts_stmt_bind_text(stmt, start_cnt+7, profile->data3);
-	if (profile->data4)
-		cts_stmt_bind_text(stmt, start_cnt+8, profile->data4);
+	if (profile->service_operation)
+		cts_stmt_bind_text(stmt, start_cnt+4, profile->service_operation);
+	if (profile->mime)
+		cts_stmt_bind_text(stmt, start_cnt+5, profile->mime);
+	if (profile->app_id)
+		cts_stmt_bind_text(stmt, start_cnt+6, profile->app_id);
+	if (profile->uri)
+		cts_stmt_bind_text(stmt, start_cnt+7, profile->uri);
+	if (profile->category)
+		cts_stmt_bind_text(stmt, start_cnt+8, profile->category);
+	if (profile->extra_data)
+		cts_stmt_bind_text(stmt, start_cnt+9, profile->extra_data);
 	return CONTACTS_ERROR_NONE;
 }
 
@@ -92,7 +96,7 @@ int ctsvc_db_profile_insert(contacts_record_h record, int contact_id, bool is_my
 	char query[CTS_SQL_MAX_LEN] = {0};
 	ctsvc_profile_s *profile = (ctsvc_profile_s *)record;
 
-	RETV_IF(NULL == profile->appsvc_operation, CONTACTS_ERROR_NONE);
+	RETV_IF(NULL == profile->service_operation, CONTACTS_ERROR_NONE);
 	RETVM_IF(contact_id <= 0, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : contact_id(%d) is mandatory field to insert profile record ", profile->contact_id);
 	RETVM_IF(0 < profile->id, CONTACTS_ERROR_INVALID_PARAMETER,
@@ -100,8 +104,8 @@ int ctsvc_db_profile_insert(contacts_record_h record, int contact_id, bool is_my
 
 	snprintf(query, sizeof(query),
 		"INSERT INTO "CTS_TABLE_DATA"(contact_id, is_my_profile, datatype, data1, data2, data3, data4, data5, "
-				"data6, data7, data8, data9, data10) "
-				"VALUES(%d, %d, %d, %d, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+				"data6, data7, data8, data9, data10, data11) "
+				"VALUES(%d, %d, %d, %d, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 				contact_id, is_my_profile, CTSVC_DATA_PROFILE, profile->type);
 
 	stmt = cts_query_prepare(query);

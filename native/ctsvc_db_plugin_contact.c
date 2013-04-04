@@ -1209,7 +1209,9 @@ static int __ctsvc_db_contact_update_record( contacts_record_h record )
 
 		version = ctsvc_get_next_ver();
 
-		ctsvc_db_create_set_query(record, &set, &bind_text);
+		ret = ctsvc_db_create_set_query(record, &set, &bind_text);
+		WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_db_create_set_query() Failed(%d)", ret);
+
 		if (set && *set)
 			len = snprintf(query_set, sizeof(query_set), "%s, ", set);
 		len += snprintf(query_set+len, sizeof(query_set)-len, " changed_ver=%d, changed_time=%d, has_phonenumber=%d, has_email=%d",
@@ -1740,7 +1742,7 @@ inline static int __ctsvc_find_person_to_link_with_number(const char *normalized
 
 	ret = ctsvc_clean_number(normalized_number, clean_num, sizeof(clean_num));
 	if (0 < ret) {
-		ret = ctsvc_normalize_number(clean_num, normal_num, CTSVC_NUMBER_MAX_LEN, CTSVC_MIN_MATCH_NORMALIZED_NUMBER_SIZE);
+		ret = ctsvc_normalize_number(clean_num, normal_num, CTSVC_NUMBER_MAX_LEN, ctsvc_get_phonenumber_min_match_digit());
 		snprintf(query, sizeof(query),
 				"SELECT C.person_id FROM "CTS_TABLE_CONTACTS" C, "CTS_TABLE_DATA" D "
 				"ON C.contact_id=D.contact_id AND D.datatype=%d AND C.deleted = 0 "
