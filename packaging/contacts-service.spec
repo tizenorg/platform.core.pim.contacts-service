@@ -32,6 +32,7 @@ Contacts Service Library
 %package -n contacts-service2
 Summary:	New Contacts service library
 Group:	Development/Libraries
+Requires: sys-assert
 
 %description -n contacts-service2
 New Contact Serivce Library
