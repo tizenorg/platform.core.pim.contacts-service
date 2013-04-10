@@ -246,8 +246,11 @@ int ctsvc_db_person_set_favorite(int person_id, bool set, bool propagate)
 
 	if (propagate) {
 		snprintf(query, sizeof(query),
-				"UPDATE "CTS_TABLE_CONTACTS" SET is_favorite = %d "
-					"WHERE person_id=%d AND deleted = 0", set?1:0, person_id);
+			 "UPDATE "CTS_TABLE_CONTACTS" SET is_favorite=%d, "
+			 "changed_time=%d, changed_ver=%d WHERE "
+			 "person_id=%d AND deleted = 0",
+			 set ? 1 : 0, (int)time(NULL), ctsvc_get_next_ver(),
+			 person_id);
 		ret = ctsvc_query_exec(query);
 		if (CONTACTS_ERROR_NONE != ret) {
 			CTS_ERR("cts_query_exec() Failed(%d)", ret);
