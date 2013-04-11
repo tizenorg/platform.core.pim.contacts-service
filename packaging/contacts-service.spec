@@ -69,7 +69,6 @@ install -m 0644 %SOURCE1 %{buildroot}/usr/lib/systemd/user/contacts-service.serv
 ln -s ../contacts-service.service %{buildroot}/usr/lib/systemd/user/tizen-middleware.target.wants/contacts-service.service
 
 
-
 %post -n contacts-service2
 /sbin/ldconfig
 
