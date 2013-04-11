@@ -78,11 +78,13 @@ static int __ctsvc_server_bg_contact_delete_step1(__ctsvc_delete_data_s* data)
 			data->contact_ids = g_slist_append(data->contact_ids, GINT_TO_POINTER(id));
 		}
 		cts_stmt_finalize(stmt);
+		if (ret < CONTACTS_ERROR_NONE)
+			return ret;
 	}
 
 	count = g_slist_length(data->contact_ids);
 	if (count <= 0)
-		return CONTACTS_ERROR_DB;
+		return CONTACTS_ERROR_NO_DATA;
 
 	cursor = g_slist_nth(data->contact_ids, 0);
 	if (cursor) {
@@ -246,8 +248,8 @@ static int __ctsvc_server_bg_contact_delete_step4(__ctsvc_delete_data_s* data)
 static bool __ctsvc_server_bg_contact_delete_step(int ret, __ctsvc_delete_data_s* data)
 {
 	if (ret != CONTACTS_ERROR_NONE && ret != CONTACTS_ERROR_NO_DATA) {
-	if(data->contact_ids)
-		g_slist_free(data->contact_ids);
+		if(data->contact_ids)
+			g_slist_free(data->contact_ids);
 		ERR("fail (%d)",ret);
 		return false;
 	}

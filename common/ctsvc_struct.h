@@ -494,6 +494,7 @@ typedef struct {
 	char *reverse_display_name;
 	int display_source_type;
 	int display_name_language;
+	int reverse_display_name_language;
 	char *sort_name;
 	char *reverse_sort_name;
 	char *sortkey;

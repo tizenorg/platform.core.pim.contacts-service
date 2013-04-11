@@ -125,15 +125,6 @@ static inline void __ctsvc_noti_publish_person_change(void)
 	}
 }
 
-static inline void __ctsvc_noti_publish_simple_contact_change(void)
-{
-	int fd = open(CTSVC_NOTI_SIMPLE_CONTACT_CHANGED, O_TRUNC | O_RDWR);
-	if (0 <= fd) {
-		close(fd);
-		contact_change = false;
-	}
-}
-
 static inline void __ctsvc_noti_publish_name_change(void)
 {
 	int fd = open(CTSVC_NOTI_NAME_CHANGED, O_TRUNC | O_RDWR);

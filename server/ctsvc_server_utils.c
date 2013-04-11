@@ -74,7 +74,7 @@ static void ctsvc_server_change_language_cb(keynode_t *key, void *data)
 		break;
 	default:
 		new_primary_sort = CTSVC_SORT_WESTERN;
-			break;
+		break;
 	}
 
 	if (primary_sort ==-1) {

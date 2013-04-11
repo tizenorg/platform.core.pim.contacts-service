@@ -22,6 +22,7 @@
 #include "ctsvc_schema.h"
 #include "ctsvc_sqlite.h"
 #include "ctsvc_db_plugin_person_helper.h"
+#include "ctsvc_localize.h"
 #include "ctsvc_normalize.h"
 #include "ctsvc_db_init.h"
 #include "ctsvc_utils.h"
@@ -573,26 +574,34 @@ void ctsvc_db_normalize_str_callback(sqlite3_context * context,
 		int argc, sqlite3_value ** argv)
 {
 	const char *display_name;
+	int display_name_language = CTSVC_LANG_OTHERS;
 
 	if (argc < 1) {
 		sqlite3_result_null(context);
 		return;
 	}
 
-	display_name = (const char *)sqlite3_value_text(argv[0]);
-	if (display_name) {
-		int ret;
-		char *dest = NULL;
-		ret = ctsvc_normalize_index(display_name, &dest);
-		if (ret < CONTACTS_ERROR_NONE) {
-			CTS_ERR("ctsvc_normalize_index() Failed(%d)", ret);
-			sqlite3_result_null(context);
+	display_name_language = sqlite3_value_int(argv[1]);
+	if (display_name_language == CTSVC_SORT_OTHERS || display_name_language == CTSVC_SORT_NUMBER) {
+		sqlite3_result_text(context, "#", 1, SQLITE_TRANSIENT);
+		return;
+	}
+	else {
+		display_name = (const char *)sqlite3_value_text(argv[0]);
+		if (display_name) {
+			int ret;
+			char *dest = NULL;
+			ret = ctsvc_normalize_index(display_name, &dest);
+			if (ret < CONTACTS_ERROR_NONE) {
+				CTS_ERR("ctsvc_normalize_index() Failed(%d)", ret);
+				sqlite3_result_null(context);
+				return;
+			}
+			CTS_VERBOSE("normalize index : %s, %s", display_name, dest);
+			sqlite3_result_text(context, dest, strlen(dest), SQLITE_TRANSIENT);
+			free(dest);
 			return;
 		}
-		CTS_VERBOSE("normalize index : %s, %s", display_name, dest);
-		sqlite3_result_text(context, dest, strlen(dest), SQLITE_TRANSIENT);
-		free(dest);
-		return;
 	}
 
 	sqlite3_result_null(context);

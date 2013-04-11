@@ -468,9 +468,56 @@ API int contacts_db_remove_changed_cb( const char* view_uri, contacts_db_changed
 
 #ifndef _CONTACTS_NATIVE
 
+/**
+ * @brief       Called when designated view changes.
+ *
+ * @param[in]   view_uri	The view uri, now support only _contacts_person and _contacts_phone_log
+ * @param[in]   changes	It includes changes information ("type:id," string is repeated. You should parse it)
+ * @param[in]   user_data	The user data passed from the callback registration function
+ *
+ * @see contacts_db_add_changed_cb_with_info()
+ */
+
 typedef void (*contacts_db_change_cb_with_info)(const char* view_uri, char *changes, void* user_data);
 
+/**
+ * @brief       Registers a callback function.
+ *
+ * @param[in]   view_uri	The view URI of record to subscribe to changing notifications
+ * @param[in]   callback	The callback function to register
+ * @param[in]	user_data	The user data to be passed to the callback function
+ *
+ * @return  0 on success, otherwise a negative error value.
+ * @retval	#CONTACTS_ERROR_NONE                Successful
+ * @retval	#CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ *
+ * @pre		This function requires an open connection to the contacts service by contacts_connect2().
+ *
+ * @see contacts_connect2()
+ * @see contacts_db_changed_cb_with_info()
+ * @see contacts_db_remove_changed_cb_with_info()
+ */
+
 API int contacts_db_add_changed_cb_with_info(const char* view_uri, contacts_db_change_cb_with_info callback, void* user_data);
+
+/**
+ * @brief       Unregisters a callback function.
+ *
+ * @param[in]   view_uri	The view URI of record to subscribe to changing notifications
+ * @param[in]   callback	The callback function to register
+ * @param[in]	user_data	The user data to be passed to the callback function
+ *
+ * @return  0 on success, otherwise a negative error value.
+ * @retval	#CONTACTS_ERROR_NONE                Successful
+ * @retval	#CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ *
+ * @pre		This function requires an open connection to the contacts service by contacts_connect2().
+ *
+ * @see contacts_connect2()
+ * @see contacts_db_changed_cb_with_info()
+ * @see contacts_db_add_changed_cb_with_info()
+ */
+
 API int contacts_db_remove_changed_cb_with_info(const char* view_uri, contacts_db_change_cb_with_info callback, void* user_data);
 #endif
 

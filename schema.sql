@@ -34,9 +34,6 @@ CREATE TABLE persons
 	image_thumbnail_path		TEXT,
 	image_path			TEXT,
 	link_count			INTEGER,
-	account_id1			INTEGER,
-	account_id2			INTEGER,
-	account_id3			INTEGER,
 	addressbook_ids			TEXT,
 	dirty				INTEGER,
 	status				TEXT
@@ -82,6 +79,7 @@ CREATE TABLE contacts
 	reverse_display_name		TEXT,
 	display_name_source		INTEGER,
 	display_name_language		INTEGER,
+	reverse_display_name_language		INTEGER,
 	sort_name			TEXT,
 	reverse_sort_name		TEXT,
 	sortkey				TEXT COLLATE NOCASE,
@@ -100,7 +98,7 @@ CREATE TABLE contacts
 CREATE INDEX contacts_idx1 ON contacts(changed_ver);
 CREATE INDEX contacts_idx2 ON contacts(person_id);
 CREATE INDEX contacts_idx3 ON contacts(display_name_language, sortkey);
-CREATE INDEX contacts_idx4 ON contacts(display_name_language, reverse_sortkey);
+CREATE INDEX contacts_idx4 ON contacts(reverse_display_name_language, reverse_sortkey);
 
 -- There are three case of deleting contact logically
 --   Case 1 : delete contact

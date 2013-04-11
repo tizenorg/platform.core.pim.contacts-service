@@ -72,7 +72,7 @@ int ctsvc_db_open(void) {
 					ctsvc_db_data_company_delete_callback, NULL, NULL);
 		RETVM_IF(SQLITE_OK != ret, CONTACTS_ERROR_DB,
 						"sqlite3_create_function() Failed(%d)", ret);
-		ret = sqlite3_create_function(ctsvc_db, "_NORMALIZE_INDEX_", 1, SQLITE_UTF8, NULL,
+		ret = sqlite3_create_function(ctsvc_db, "_NORMALIZE_INDEX_", 2, SQLITE_UTF8, NULL,
 					ctsvc_db_normalize_str_callback, NULL, NULL);
 		RETVM_IF(SQLITE_OK != ret, CONTACTS_ERROR_DB,
 						"sqlite3_create_function() Failed(%d)", ret);

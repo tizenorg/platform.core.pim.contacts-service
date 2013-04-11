@@ -272,6 +272,7 @@ void ctsvc_make_contact_display_name(ctsvc_contact_s *contact)
 	contact->reverse_display_name = NULL;
 
 	contact->display_name_language = CTSVC_SORT_OTHERS;
+	contact->reverse_display_name_language = CTSVC_SORT_OTHERS;
 
 	if ( contact->name->count > 0 && contact->name->records != NULL && contact->name->records->data != NULL )
 	{
@@ -317,6 +318,7 @@ void ctsvc_make_contact_display_name(ctsvc_contact_s *contact)
 
 		contact->display_name = display;
 
+		display_len += 1; // ","
 		// make reverse_display_name
 		display = calloc(1, display_len);
 		len = 0;
@@ -447,7 +449,6 @@ void ctsvc_make_contact_display_name(ctsvc_contact_s *contact)
 			if (phonetic && ctsvc_get_name_sort_type(phonetic) == CTSVC_SORT_JAPANESE) {
 				ret = CTSVC_SORT_JAPANESE;
 				FREEandSTRDUP(contact->sort_name, phonetic);
-				FREEandSTRDUP(contact->reverse_sort_name, phonetic);
 			}
 			else {
 				{
@@ -456,18 +457,17 @@ void ctsvc_make_contact_display_name(ctsvc_contact_s *contact)
 
 					if (ctsvc_convert_chinese_to_pinyin(contact->display_name, &pinyinname, &size) == CONTACTS_ERROR_NONE) {
 						FREEandSTRDUP(contact->sort_name, pinyinname[0].pinyin_name);
-						FREEandSTRDUP(contact->reverse_sort_name, pinyinname[0].pinyin_name);
 						free(pinyinname);
 					}
 					ret = CTSVC_SORT_WESTERN;
 				}
 			}
 			free(phonetic);
+			phonetic = NULL;
 			break;
 		case CTSVC_SORT_JAPANESE:
 			{
 				ctsvc_convert_japanese_to_hiragana(contact->display_name, &contact->sort_name);
-				ctsvc_convert_japanese_to_hiragana(contact->reverse_display_name, &contact->reverse_sort_name);
 				break;
 			}
 		}
@@ -478,6 +478,63 @@ void ctsvc_make_contact_display_name(ctsvc_contact_s *contact)
 			contact->display_name_language = CTSVC_SORT_SECONDARY;
 		else
 			contact->display_name_language = ret;
+
+		// check reverse sort_name, reverser_display_name_language
+		ret = ctsvc_get_name_sort_type(contact->reverse_display_name);
+		WARN_IF( ret < 0, "ctsvc_check_language_type Failed(%d)", ret);
+		switch (ret)
+		{
+		case CTSVC_SORT_CJK:
+			if (contact->display_source_type == CONTACTS_DISPLAY_NAME_SOURCE_TYPE_NAME) {
+				len = SAFE_STRLEN(name->phonetic_first) + SAFE_STRLEN(name->phonetic_last) + SAFE_STRLEN(name->phonetic_middle);
+				if (len > 0) {
+					len += 3; // for space and null string
+					phonetic = calloc(1, len);
+					if (name->phonetic_last)
+						temp_len += snprintf(phonetic, len, "%s", name->phonetic_last);
+					if (name->phonetic_middle) {
+						if (temp_len)
+							temp_len += snprintf(phonetic + temp_len, len - temp_len, " ");
+						temp_len += snprintf(phonetic + temp_len, len - temp_len, "%s", name->phonetic_middle);
+					}
+					if (name->phonetic_first) {
+						if (temp_len)
+							temp_len += snprintf(phonetic + temp_len, len - temp_len, " ");
+						temp_len += snprintf(phonetic + temp_len, len - temp_len, "%s", name->phonetic_first);
+					}
+				}
+			}
+
+			if (phonetic && ctsvc_get_name_sort_type(phonetic) == CTSVC_SORT_JAPANESE) {
+				ret = CTSVC_SORT_JAPANESE;
+				FREEandSTRDUP(contact->reverse_sort_name, phonetic);
+			}
+			else {
+				pinyin_name_s *pinyinname = NULL;
+				int size;
+
+				if (ctsvc_convert_chinese_to_pinyin(contact->reverse_display_name, &pinyinname, &size) == CONTACTS_ERROR_NONE) {
+					FREEandSTRDUP(contact->reverse_sort_name, pinyinname[0].pinyin_name);
+					free(pinyinname);
+				}
+				ret = CTSVC_SORT_WESTERN;
+			}
+			free(phonetic);
+			phonetic = NULL;
+			break;
+		case CTSVC_SORT_JAPANESE:
+			{
+				ctsvc_convert_japanese_to_hiragana(contact->reverse_display_name, &contact->reverse_sort_name);
+				break;
+			}
+		}
+
+		if (ctsvc_get_default_language() == ret)
+			contact->reverse_display_name_language = CTSVC_SORT_PRIMARY;
+		else if (ctsvc_get_secondary_language() == ret)
+			contact->reverse_display_name_language = CTSVC_SORT_SECONDARY;
+		else
+			contact->reverse_display_name_language = ret;
 
 		ret = ctsvc_collation_str(contact->sort_name, &sortkey);
 		if (CONTACTS_ERROR_NONE == ret)
@@ -1719,9 +1776,11 @@ int ctsvc_contact_update_display_name(int contact_id, contacts_display_name_sour
 		ctsvc_make_contact_display_name(contact);
 
 		snprintf(query, sizeof(query), "UPDATE "CTS_TABLE_CONTACTS" SET "
-				"display_name=?, reverse_display_name=?, display_name_source=%d, display_name_language=%d, "
+				"display_name=?, reverse_display_name=?, display_name_source=%d, "
+				"display_name_language=%d, reverse_display_name_language=%d, "
 				"sort_name=?, reverse_sort_name=?, sortkey=?, reverse_sortkey=? "
-				"WHERE contact_id=%d", contact->display_source_type, contact->display_name_language, contact_id);
+				"WHERE contact_id=%d", contact->display_source_type,
+				contact->display_name_language, contact->reverse_display_name_language, contact_id);
 
 		stmt = cts_query_prepare(query);
 		if (NULL == stmt) {

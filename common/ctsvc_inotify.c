@@ -84,7 +84,6 @@ static inline void __ctsvc_inotify_handle_callback(GSList *noti_list, int wd, ui
 				CTS_DBG("%s", noti->view_uri);
 				noti->cb(noti->view_uri, noti->cb_data);
 			}
-
 		}
 	}
 }
@@ -200,11 +199,10 @@ static inline const char* __ctsvc_noti_get_file_path(const char *view_uri)
 	case CTSVC_RECORD_PERSON:
 		return CTSVC_NOTI_PERSON_CHANGED;
 	case CTSVC_RECORD_CONTACT:
+	case CTSVC_RECORD_SIMPLE_CONTACT:
 		return CTSVC_NOTI_CONTACT_CHANGED;
 	case CTSVC_RECORD_MY_PROFILE:
 		return CTSVC_NOTI_MY_PROFILE_CHANGED;
-	case CTSVC_RECORD_SIMPLE_CONTACT:
-		return CTSVC_NOTI_SIMPLE_CONTACT_CHANGED;
 	case CTSVC_RECORD_NAME:
 		return CTSVC_NOTI_NAME_CHANGED;
 	case CTSVC_RECORD_COMPANY:

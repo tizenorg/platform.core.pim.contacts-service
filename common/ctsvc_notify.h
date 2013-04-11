@@ -23,7 +23,6 @@
 #define CTSVC_NOTI_ADDRESSBOOK_CHANGED  "/opt/usr/data/contacts-svc/.CONTACTS_SVC_AB_CHANGED"
 #define CTSVC_NOTI_GROUP_CHANGED  "/opt/usr/data/contacts-svc/.CONTACTS_SVC_GROUP_CHANGED"
 #define CTSVC_NOTI_PERSON_CHANGED  "/opt/usr/data/contacts-svc/.CONTACTS_SVC_PERSON_CHANGED"
-#define CTSVC_NOTI_SIMPLE_CONTACT_CHANGED  "/opt/usr/data/contacts-svc/.CONTACTS_SVC_SIMPLE_CONTACT_CHANGED"
 #define CTSVC_NOTI_CONTACT_CHANGED  "/opt/usr/data/contacts-svc/.CONTACTS_SVC_DB_CHANGED"
 #define CTSVC_NOTI_MY_PROFILE_CHANGED  "/opt/usr/data/contacts-svc/.CONTACTS_SVC_MY_PROFILE_CHANGED"
 #define CTSVC_NOTI_NAME_CHANGED  "/opt/usr/data/contacts-svc/.CONTACTS_SVC_NAME_CHANGED"

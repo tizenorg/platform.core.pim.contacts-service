@@ -597,7 +597,7 @@ int ctsvc_db_make_get_records_query_stmt(ctsvc_query_s *s_query, int offset, int
 	ret = __ctsvc_db_create_projection(s_query->properties, s_query->property_count,
 								s_query->projection, s_query->projection_count, &projection);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("__ctsvc_db_create_projection is failed(%s)", ret);
+		CTS_ERR("__ctsvc_db_create_projection is failed(%d)", ret);
 		return ret;
 	}
 
@@ -822,7 +822,7 @@ static int __ctsvc_db_get_all_records( const char* view_uri, int offset, int lim
 
 	const property_info_s *p = ctsvc_view_get_all_property_infos(view_uri, &count);
 	ret = __ctsvc_db_create_projection(p, count, NULL, 0, &projection);
-	RETVM_IF (CONTACTS_ERROR_NONE != ret, ret, "__ctsvc_db_create_projection is failed(%s)", ret);
+	RETVM_IF (CONTACTS_ERROR_NONE != ret, ret, "__ctsvc_db_create_projection is failed(%d)", ret);
 
 	ret = __ctsvc_db_get_all_records_exec(view_uri, p, count, projection, offset, limit, out_list);
 	free(projection);
@@ -956,7 +956,7 @@ static int __ctsvc_db_search_records_exec(const char *view_uri, const property_i
 								projection, table);
 			len += __ctsvc_db_append_search_query(keyword, query + len, sizeof(query) - len);
 			len += snprintf(query + len, sizeof(query) - len, " GROUP BY person_id_in_contact) temp_contacts "
-							"ON %s.person_id = temp_contacts.person_id_in_contact",	 table);
+							"ON %s.person_id = temp_contacts.person_id_in_contact", table);
 		}
 /*
 		len += snprintf(query+len, sizeof(query)-len, "FROM %s, %s "
@@ -1469,7 +1469,7 @@ static int __ctsvc_db_update_records( contacts_list_h list)
 			ctsvc_end_trans(false);
 			return ret;
 		}
-	}while(CONTACTS_ERROR_NONE	== contacts_list_next(list));
+	}while(CONTACTS_ERROR_NONE == contacts_list_next(list));
 	ret = ctsvc_end_trans(true);
 	if (ret < CONTACTS_ERROR_NONE)
 	{
@@ -1596,7 +1596,7 @@ static int __ctsvc_db_get_count_with_query( contacts_query_h query, int *out_cou
 	ret = __ctsvc_db_create_projection(query_s->properties, query_s->property_count,
 								query_s->projection, query_s->projection_count, &projection);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("__ctsvc_db_create_projection is failed(%s)", ret);
+		CTS_ERR("__ctsvc_db_create_projection is failed(%d)", ret);
 		for (cursor=bind_text;cursor;cursor=cursor->next)
 			free(cursor->data);
 		g_slist_free(bind_text);

@@ -959,7 +959,7 @@
  * <tr><td>string</td><td> app_id </td><td>read, write</td><td> </td>  </tr>
  * <tr><td>string</td><td> uri </td><td>read, write</td><td> </td ></tr>
  * <tr><td>string</td><td> catagory </td><td>read, write</td><td></td></tr>
- * <tr><td>string</td><td> extra_data </td><td>read, write</td><td> </td></tr>
+ * <tr><td>string</td><td> extra_data </td><td>read, write</td><td> It includes "key:value" pair. You should parse it.</td></tr>
  * </table>
  *
  * @section CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_activity _contacts_activity view

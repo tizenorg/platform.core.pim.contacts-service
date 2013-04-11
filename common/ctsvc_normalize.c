@@ -653,15 +653,17 @@ API int contacts_utils_get_index_characters(char **index_string)
 	RETV_IF(NULL == index_string, CONTACTS_ERROR_INVALID_PARAMETER);
 	char temp[5];
 
+	sprintf(list, "#");
+	strcat(list, ":");
+
 	i = 0;
-	sprintf(list, "%d", i);
+	sprintf(temp, "%d", i);
+	strcat(list, temp);
 	for (i=1;i<10;i++) {
 		sprintf(temp, ";%d", i);
 		strcat(list, temp);
 	}
-
 	strcat(list, ":");
-
 
 	sort_first = ctsvc_get_default_language();
 	switch(sort_first)
@@ -718,9 +720,6 @@ API int contacts_utils_get_index_characters(char **index_string)
 		}
 	}
 	free(second_list);
-
-	strcat(list, ":");
-	strcat(list, "#");
 
 	*index_string = strdup(list);
 	return CONTACTS_ERROR_NONE;
@@ -975,7 +974,7 @@ static bool __ctsvc_compare_unicode_letter(const UChar* haystack, int haystack_l
  * @return a position of the beginning of the substring, Negative value(#cts_error) on error or difference.
  * @par example
  * @code
-	ret = contacts_strstr(str1, str2, &len);
+	ret = contacts_utils_strstr(str1, str2, &len);
 	if(CONTACTS_ERROR_NONE == ret) {
 		snprintf(first, ret+1, "%s", item_data->display);
 		snprintf(middle, len+1, "%s", item_data->display + ret);
@@ -984,8 +983,6 @@ static bool __ctsvc_compare_unicode_letter(const UChar* haystack, int haystack_l
 		printf("str1 doesn't has str2");
  * @endcode
  */
-
-
 API int contacts_utils_strstr(const char *haystack,
 		const char *needle, int *len)
 {

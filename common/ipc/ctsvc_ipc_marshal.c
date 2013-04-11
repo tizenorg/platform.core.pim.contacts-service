@@ -474,29 +474,35 @@ static int __ctsvc_ipc_marshal_attribute_filter(const ctsvc_attribute_filter_s* 
 int ctsvc_ipc_unmarshal_record(const pims_ipc_data_h ipc_data, contacts_record_h* precord)
 {
 	int ret = CONTACTS_ERROR_NONE;
-
 	ctsvc_record_s common = {0,};
 	ctsvc_record_s *precord_common = NULL;
+	ctsvc_ipc_marshal_record_plugin_cb_s *plugin_cb;
 
-	if (ctsvc_ipc_unmarshal_record_common(ipc_data, &common) != CONTACTS_ERROR_NONE)
-	{
+	RETVM_IF( NULL == precord || NULL == ipc_data, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter");
+
+	if (ctsvc_ipc_unmarshal_record_common(ipc_data, &common) != CONTACTS_ERROR_NONE) {
 		CTS_ERR("ctsvc_ipc_unmarshal_common fail");
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 
-	RETVM_IF( NULL == precord || NULL == ipc_data, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter");
+	plugin_cb = __ctsvc_ipc_marshal_get_plugin_cb(common.r_type);
+	if (NULL == plugin_cb || NULL == plugin_cb->unmarshal_record) {
+		CTS_ERR("Invalid parameter");
+		free(common.properties_flags);
+		return CONTACTS_ERROR_INVALID_PARAMETER;
+	}
 
 	ret = contacts_record_create(common.view_uri, precord);
-	RETVM_IF(ret != CONTACTS_ERROR_NONE, ret, "create activity record fail");
+	if (ret != CONTACTS_ERROR_NONE) {
+		CTS_ERR("create activity record fail");
+		free(common.properties_flags);
+		return ret;
+	}
 
 	precord_common = (ctsvc_record_s *)(*precord);
 	precord_common->property_max_count = common.property_max_count;
 	precord_common->properties_flags = common.properties_flags;
 	precord_common->property_flag = common.property_flag;
-
-	ctsvc_ipc_marshal_record_plugin_cb_s *plugin_cb = __ctsvc_ipc_marshal_get_plugin_cb(common.r_type);
-
-	RETVM_IF(NULL == plugin_cb || NULL == plugin_cb->unmarshal_record, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter");
 
 	ret = plugin_cb->unmarshal_record(ipc_data, common.view_uri, *precord);
 	if( CONTACTS_ERROR_NONE != ret )

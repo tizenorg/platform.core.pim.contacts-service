@@ -87,7 +87,6 @@ static int __server_main(void)
 
 		/*
 			if (pims_ipc_svc_register(CTSVC_IPC_SIM_MODULE, CTSVC_IPC_SERVER_SIM_IMPORT_ALL_CONTACTS, ctsvc_ipc_sim_import_all_contacts, NULL) != 0) break;
-			if (pims_ipc_svc_register(CTSVC_IPC_SIM_MODULE, CTSVC_IPC_SERVER_SIM_EXPORT_PERSON, ctsvc_ipc_sim_export_person, NULL) != 0) break;
 		 */
 		if (pims_ipc_svc_register(CTSVC_IPC_SIM_MODULE, CTSVC_IPC_SERVER_SIM_INSERT_CONTACT, ctsvc_ipc_sim_insert_contact, NULL) != 0) break;
 		if (pims_ipc_svc_register(CTSVC_IPC_SIM_MODULE, CTSVC_IPC_SERVER_SIM_UPDATE_CONTACT, ctsvc_ipc_sim_update_contact, NULL) != 0) break;

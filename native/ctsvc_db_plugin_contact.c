@@ -1218,9 +1218,10 @@ static int __ctsvc_db_contact_update_record( contacts_record_h record )
 				version, (int)time(NULL), contact->has_phonenumber, contact->has_email);
 		if (ctsvc_record_check_property_flag((ctsvc_record_s *)contact, _contacts_contact.display_name, CTSVC_PROPERTY_FLAG_DIRTY)) {
 			len += snprintf(query_set+len, sizeof(query_set)-len,
-					", display_name=?, reverse_display_name=?, display_name_source=%d, display_name_language=%d, "
+					", display_name=?, reverse_display_name=?, display_name_source=%d, "
+					"display_name_language=%d, reverse_display_name_language=%d, "
 					"sort_name=?, reverse_sort_name=?, sortkey=?, reverse_sortkey=?",
-					contact->display_source_type, contact->display_name_language);
+					contact->display_source_type, contact->display_name_language, contact->reverse_display_name_language);
 			bind_text = g_slist_append(bind_text, strdup(SAFE_STR(contact->display_name)));
 			bind_text = g_slist_append(bind_text, strdup(SAFE_STR(contact->reverse_display_name)));
 			bind_text = g_slist_append(bind_text, strdup(SAFE_STR(contact->sort_name)));
@@ -1915,14 +1916,15 @@ static int __ctsvc_db_contact_insert_record( contacts_record_h record, int *id)
 	snprintf(query, sizeof(query),
 		"INSERT INTO "CTS_TABLE_CONTACTS"(contact_id, person_id, addressbook_id, is_favorite, "
 			"created_ver, changed_ver, changed_time, image_changed_ver, has_phonenumber, has_email, "
-			"display_name, reverse_display_name, display_name_source, display_name_language, "
+			"display_name, reverse_display_name, display_name_source, "
+			"display_name_language, reverse_display_name_language, "
 			"sort_name, reverse_sort_name, "
 			"sortkey, reverse_sortkey, "
 			"uid, ringtone_path, vibration, image_thumbnail_path) "
-			"VALUES(%d, %d, %d, %d, %d, %d, %d, %d, %d, %d, ?, ?, %d, %d, ?, ?, ?, ?, ?, ?, ?, ?)",
+			"VALUES(%d, %d, %d, %d, %d, %d, %d, %d, %d, %d, ?, ?, %d, %d, %d, ?, ?, ?, ?, ?, ?, ?, ?)",
 			contact->id, contact->person_id, contact->addressbook_id, contact->is_favorite,
 			version, version, (int)time(NULL), (NULL !=contact->image_thumbnail_path)?version:0, contact->has_phonenumber, contact->has_email,
-			contact->display_source_type, contact->display_name_language);
+			contact->display_source_type, contact->display_name_language, contact->reverse_display_name_language);
 
 	stmt = cts_query_prepare(query);
 	if (NULL == stmt) {
@@ -2100,13 +2102,15 @@ static int __ctsvc_db_contact_replace_record( contacts_record_h record, int cont
 	len = snprintf(query, sizeof(query),
 			"UPDATE "CTS_TABLE_CONTACTS" SET changed_ver=%d, changed_time=%d, "
 					"has_phonenumber=%d, has_email=%d , display_name=?, "
-					"reverse_display_name=?, display_name_source=%d, display_name_language=%d, "
+					"reverse_display_name=?, display_name_source=%d, "
+					"display_name_language=%d, reverse_display_name_language=%d, "
 					"sort_name=?, reverse_sort_name=?, "
 					"sortkey=?, reverse_sortkey=?, uid=?, ringtone_path=?, vibration=?, "
 					"image_thumbnail_path=?",
 					version, (int)time(NULL),
 					contact->has_phonenumber, contact->has_email,
-					contact->display_source_type, contact->display_name_language);
+					contact->display_source_type,
+					contact->display_name_language, contact->reverse_display_name_language);
 
 	if (ctsvc_record_check_property_flag((ctsvc_record_s *)contact, _contacts_contact.image_thumbnail_path, CTSVC_PROPERTY_FLAG_DIRTY))
 		len += snprintf(query+len, sizeof(query)-len, ", image_changed_ver = %d", version);

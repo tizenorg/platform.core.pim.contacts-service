@@ -35,6 +35,7 @@ static int __ctsvc_ipc_unmarshal_contact(pims_ipc_data_h ipc_data, const char* v
 		if (ctsvc_ipc_unmarshal_string(ipc_data, &pcontact->reverse_display_name) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_int(ipc_data, &pcontact->display_source_type) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_int(ipc_data, &pcontact->display_name_language) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_unmarshal_int(ipc_data, &pcontact->reverse_display_name_language) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_string(ipc_data, &pcontact->sort_name) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_string(ipc_data, &pcontact->reverse_sort_name) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_string(ipc_data, &pcontact->sortkey) != CONTACTS_ERROR_NONE) break;
@@ -89,6 +90,7 @@ static int __ctsvc_ipc_marshal_contact(const contacts_record_h record, pims_ipc_
 		if (ctsvc_ipc_marshal_string((pcontact->reverse_display_name),ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_int((pcontact->display_source_type),ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_int((pcontact->display_name_language),ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_int((pcontact->reverse_display_name_language),ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_string((pcontact->sort_name),ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_string((pcontact->reverse_sort_name),ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_string((pcontact->sortkey),ipc_data) != CONTACTS_ERROR_NONE) break;

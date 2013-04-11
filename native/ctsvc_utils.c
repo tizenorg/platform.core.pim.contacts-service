@@ -176,11 +176,10 @@ const char* ctsvc_get_sort_name_column(void)
 
 	contacts_setting_get_name_sorting_order(&order);
 	if (CONTACTS_NAME_SORTING_ORDER_FIRSTLAST == order)
-		return "sort_name";
+		return "sort_name, display_name_language";
 	else
-		return "reverse_sort_name";
+		return "reverse_sort_name, reverse_display_name_language";
 }
-
 
 const char* ctsvc_get_sort_column(void)
 {
@@ -190,7 +189,7 @@ const char* ctsvc_get_sort_column(void)
 	if (CONTACTS_NAME_SORTING_ORDER_FIRSTLAST == order)
 		return "display_name_language, sortkey";
 	else
-		return "display_name_language, reverse_sortkey";
+		return "reverse_display_name_language, reverse_sortkey";
 }
 
 static char* __ctsvc_get_image(const char *dir, int index, char *dest, int dest_size)
@@ -458,8 +457,11 @@ int ctsvc_change_image(const char *dir, int index, const char *path, char *image
 	char dest[CTSVC_IMG_FULL_PATH_SIZE_MAX] = {0};
 
 	if (__ctsvc_get_image(dir, index, dest, sizeof(dest))) {
-		if (path && 0 == strcmp(dest, path))
+		if (path && 0 == strcmp(dest, path)) {
+			if (image)
+				snprintf(image, image_len, "%s", path);
 			return CONTACTS_ERROR_NONE;
+		}
 		ret = unlink(dest);
 		RETVM_IF(ret < 0, CONTACTS_ERROR_SYSTEM, "System : unlink(%s) Failed(%d)", dest, errno);
 	}

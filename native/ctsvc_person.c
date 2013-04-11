@@ -30,8 +30,6 @@
 #include "ctsvc_server_change_subject.h"
 #endif
 
-#define DISPLAY_ACCOUNT_MAX 3
-
 enum {
 	CTSVC_GET_PERSON_DEFAULT_NUMBER_VALUE,
 	CTSVC_GET_PERSON_DEFAULT_EMAIL_VALUE,
@@ -491,7 +489,6 @@ int ctsvc_person_aggregate(int person_id)
 	int version;
 	int link_count;
 	int id = 0;
-	int account_ids[DISPLAY_ACCOUNT_MAX] = {0};
 	char *addressbook_ids = NULL;
 	int addressbooks_len = 100;
 	int name_contact_id = 0;
@@ -572,12 +569,11 @@ int ctsvc_person_aggregate(int person_id)
 
 	snprintf(query, sizeof(query),
 			"SELECT contact_id, contacts.addressbook_id, %s, display_name_source, "
-				"image_thumbnail_path, ringtone_path, vibration, account_id, is_favorite "
-			"FROM %s, %s "
-			"ON contacts.addressbook_id = addressbooks.addressbook_id AND contacts.deleted = 0 "
-			"WHERE person_id = %d "
+				"image_thumbnail_path, ringtone_path, vibration, is_favorite "
+			"FROM %s "
+			"WHERE person_id = %d AND contacts.deleted = 0 "
 			"ORDER BY contact_id",
-			ctsvc_get_display_column(), CTS_TABLE_CONTACTS, CTS_TABLE_ADDRESSBOOKS, person_id);
+			ctsvc_get_display_column(), CTS_TABLE_CONTACTS, person_id);
 	stmt = cts_query_prepare(query);
 	if (NULL == stmt) {
 		ERR("DB error : cts_query_prepare() Failed");
@@ -591,7 +587,6 @@ int ctsvc_person_aggregate(int person_id)
 	while ((ret = cts_stmt_step(stmt))) {
 		const char *temp_str;
 		int i = 0;
-		int account_id;
 		int contact_id;
 		int addressbook_id;
 		int contact_display_name_source_type = CONTACTS_DISPLAY_NAME_SOURCE_TYPE_INVALID;
@@ -615,29 +610,18 @@ int ctsvc_person_aggregate(int person_id)
 		contact_ringtone_path = SAFE_STRDUP(temp);
 		temp = ctsvc_stmt_get_text(stmt, i++);
 		contact_vibration = SAFE_STRDUP(temp);
-		account_id = ctsvc_stmt_get_int(stmt, i++);
 		is_favorite = ctsvc_stmt_get_int(stmt, i++);
 
 		link_count++;
 
-		for( i=0; i<DISPLAY_ACCOUNT_MAX; i++) {
-			if (0 == account_ids[i]){
-				account_ids[i] = account_id;
-				break;
-			}
-			else if (account_ids[i] == account_id) {
-				break;
-			}
-		}
 		if (contact_display_name_source_type > display_name_source_type) {
 			display_name_source_type = contact_display_name_source_type;
 			name_contact_id = contact_id;
 		}
 		else if (contact_display_name_source_type == display_name_source_type){
-			if (name_contact_id != person_name_contact_id)
+			if (name_contact_id != person_name_contact_id && person_name_contact_id != 0)
 				name_contact_id = person_name_contact_id;
 		}
-
 		addr_len = snprintf(addr, sizeof(addr), "%d ", addressbook_id);
 		if (NULL == addressbook_ids)
 			addressbook_ids = calloc(addressbooks_len, sizeof(char));
@@ -675,11 +659,10 @@ int ctsvc_person_aggregate(int person_id)
 											"WHERE person_id = %d AND has_phonenumber = 1 AND deleted = 0), "
 			"has_email = EXISTS(SELECT contact_id FROM "CTS_TABLE_CONTACTS" "
 									"WHERE person_id = %d AND has_email = 1 AND deleted = 0), "
-			"link_count = %d, account_id1 = %d, account_id2 = %d, account_id3 = %d, "
-			"addressbook_ids = ?, ringtone_path=?, vibration=?, status=?, image_thumbnail_path=? "
+			"link_count = %d, addressbook_ids = ?, ringtone_path=?, vibration=?, status=?, image_thumbnail_path=? "
 			"WHERE person_id = %d ",
 			name_contact_id, version, person_id,
-			person_id, link_count, account_ids[0], account_ids[1], account_ids[2], person_id);
+			person_id, link_count, person_id);
 
 	stmt = cts_query_prepare(query);
 	if (NULL == stmt) {

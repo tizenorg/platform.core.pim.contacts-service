@@ -190,7 +190,6 @@ static int __ctsvc_vcard_append_str(char **buf, int *buf_size, int len, const ch
 
 	if (need_realloc) {
 		if (NULL == (tmp = realloc(*buf, *buf_size))) {
-			free(*buf);
 			return -1;
 		}
 		else
@@ -1225,6 +1224,23 @@ static inline int __ctsvc_vcard_append_my_profile(ctsvc_my_profile_s *my_profile
 	return len;
 }
 
+static inline int __ctsvc_vcard_append_start_vcard_3_0(char **buf, int *buf_size, int len)
+{
+	CTSVC_VCARD_APPEND_STR(buf, buf_size, len, "BEGIN:VCARD");
+	CTSVC_VCARD_APPEND_STR(buf, buf_size, len, CTSVC_CRLF);
+	CTSVC_VCARD_APPEND_STR(buf, buf_size, len, "VERSION:3.0");
+	CTSVC_VCARD_APPEND_STR(buf, buf_size, len, CTSVC_CRLF);
+	return len;
+}
+
+static inline int __ctsvc_vcard_append_end_vcard(char **buf, int *buf_size, int len)
+{
+	CTSVC_VCARD_APPEND_STR(buf, buf_size, len, "END:VCARD");
+	CTSVC_VCARD_APPEND_STR(buf, buf_size, len, CTSVC_CRLF);
+	return len;
+}
+
+
 static int __ctsvc_vcard_make(ctsvc_contact_s *contact, char **vcard_stream)
 {
 	char *buf = NULL;
@@ -1234,11 +1250,12 @@ static int __ctsvc_vcard_make(ctsvc_contact_s *contact, char **vcard_stream)
 	__ctsvc_vcard_initial();
 
 	buf = calloc(1, buf_size);
-	CTSVC_VCARD_APPEND_STR(&buf, &buf_size, len, "BEGIN:VCARD");
-	CTSVC_VCARD_APPEND_STR(&buf, &buf_size, len, CTSVC_CRLF);
 
-	CTSVC_VCARD_APPEND_STR(&buf, &buf_size, len, "VERSION:3.0");
-	CTSVC_VCARD_APPEND_STR(&buf, &buf_size, len, CTSVC_CRLF);
+	len = __ctsvc_vcard_append_start_vcard_3_0(&buf, &buf_size, len);
+	if (len < 0) {
+		free(buf);
+		return CONTACTS_ERROR_INTERNAL;
+	}
 
 	len = __ctsvc_vcard_append_contact(contact, &buf, &buf_size, len);
 	if (len < 0) {
@@ -1247,8 +1264,11 @@ static int __ctsvc_vcard_make(ctsvc_contact_s *contact, char **vcard_stream)
 	}
 
 
-	CTSVC_VCARD_APPEND_STR(&buf, &buf_size, len, "END:VCARD");
-	CTSVC_VCARD_APPEND_STR(&buf, &buf_size, len, CTSVC_CRLF);
+	len = __ctsvc_vcard_append_end_vcard(&buf, &buf_size, len);
+	if (len < 0) {
+		free(buf);
+		return CONTACTS_ERROR_INTERNAL;
+	}
 
 	len = __ctsvc_vcard_add_folding(&buf, &buf_size, len);
 	if (len < 0) {
@@ -1269,11 +1289,11 @@ static int __ctsvc_vcard_make_from_my_profile(ctsvc_my_profile_s *my_profile, ch
 	__ctsvc_vcard_initial();
 
 	buf = calloc(1, buf_size);
-	CTSVC_VCARD_APPEND_STR(&buf, &buf_size, len, "BEGIN:VCARD");
-	CTSVC_VCARD_APPEND_STR(&buf, &buf_size, len, CTSVC_CRLF);
-
-	CTSVC_VCARD_APPEND_STR(&buf, &buf_size, len, "VERSION:3.0");
-	CTSVC_VCARD_APPEND_STR(&buf, &buf_size, len, CTSVC_CRLF);
+	len = __ctsvc_vcard_append_start_vcard_3_0(&buf, &buf_size, len);
+	if (len < 0) {
+		free(buf);
+		return CONTACTS_ERROR_INTERNAL;
+	}
 
 	len = __ctsvc_vcard_append_my_profile(my_profile, &buf, &buf_size, len);
 	if (len < 0) {
@@ -1281,8 +1301,11 @@ static int __ctsvc_vcard_make_from_my_profile(ctsvc_my_profile_s *my_profile, ch
 		return CONTACTS_ERROR_INTERNAL;
 	}
 
-	CTSVC_VCARD_APPEND_STR(&buf, &buf_size, len, "END:VCARD");
-	CTSVC_VCARD_APPEND_STR(&buf, &buf_size, len, CTSVC_CRLF);
+	len = __ctsvc_vcard_append_end_vcard(&buf, &buf_size, len);
+	if (len < 0) {
+		free(buf);
+		return CONTACTS_ERROR_INTERNAL;
+	}
 
 	len = __ctsvc_vcard_add_folding(&buf, &buf_size, len);
 	if (len < 0) {
@@ -1476,7 +1499,7 @@ static int __ctsvc_vcard_append_person(ctsvc_person_s *person, ctsvc_list_s *lis
 static int __ctsvc_vcard_make_from_person(ctsvc_person_s *person, ctsvc_list_s *list_contacts,
 		char **vcard_stream)
 {
-	int ret;
+	int ret = CONTACTS_ERROR_NONE;
 	char *buf = NULL;
 	int buf_size = VCARD_INIT_LENGTH;
 	int len = 0;
@@ -1487,25 +1510,27 @@ static int __ctsvc_vcard_make_from_person(ctsvc_person_s *person, ctsvc_list_s *
 	__ctsvc_vcard_initial();
 
 	buf = calloc(1, buf_size);
-	CTSVC_VCARD_APPEND_STR(&buf, &buf_size, len, "BEGIN:VCARD");
-	CTSVC_VCARD_APPEND_STR(&buf, &buf_size, len, CTSVC_CRLF);
-
-	CTSVC_VCARD_APPEND_STR(&buf, &buf_size, len, "VERSION:3.0");
-	CTSVC_VCARD_APPEND_STR(&buf, &buf_size, len, CTSVC_CRLF);
+	len = __ctsvc_vcard_append_start_vcard_3_0(&buf, &buf_size, len);
+	if (len < 0) {
+		free(buf);
+		return CONTACTS_ERROR_INTERNAL;
+	}
 
 	len = __ctsvc_vcard_append_person(person, list_contacts, &buf, &buf_size, len);
 	if (len < 0) {
 		free(buf);
 		return CONTACTS_ERROR_INTERNAL;
 	}
-
-	CTSVC_VCARD_APPEND_STR(&buf, &buf_size, len, "END:VCARD");
-	CTSVC_VCARD_APPEND_STR(&buf, &buf_size, len, CTSVC_CRLF);
+	len = __ctsvc_vcard_append_end_vcard(&buf, &buf_size, len);
+	if (len < 0) {
+		free(buf);
+		return CONTACTS_ERROR_INTERNAL;
+	}
 
 	len = __ctsvc_vcard_add_folding(&buf, &buf_size, len);
 	if (len < 0) {
 		free(buf);
-		return ret;
+		return CONTACTS_ERROR_INTERNAL;
 	}
 
 	*vcard_stream = buf;
@@ -2040,27 +2065,33 @@ static inline int __ctsvc_vcard_get_phonetic_last_name(ctsvc_list_s *name_list, 
 
 static inline int __ctsvc_vcard_get_nickname(ctsvc_list_s *nickname_list, char *val)
 {
-	int ret;
+	int ret = CONTACTS_ERROR_NONE;
 	char *temp;
 	char *start;
 	const char *separator = ",";
-	contacts_record_h nickname;
 
 	start = __ctsvc_get_content_value(val);
 	RETV_IF(NULL == start, CONTACTS_ERROR_NO_DATA);
-
-	ret = contacts_record_create(_contacts_nickname._uri, &nickname);
-	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create is failed(%d)", ret);
 
 	temp = strtok(start, separator);
 	while (temp) {
 		if ('\0' == *temp) continue;
 
-		contacts_record_create(_contacts_nickname._uri, &nickname);
-		if (nickname) {
-			contacts_record_set_str(nickname, _contacts_nickname.name, temp);
-			contacts_list_add((contacts_list_h)nickname_list, nickname);
+		contacts_record_h nickname = NULL;
+		ret = contacts_record_create(_contacts_nickname._uri, &nickname);
+		if (ret < CONTACTS_ERROR_NONE) {
+			GList *cursor = NULL;
+			CTS_ERR("contacts_record_create is failed(%d)", ret);
+			for(cursor = nickname_list->records;cursor;cursor=cursor->next)
+				contacts_record_destroy((contacts_record_h)(cursor->data), true);
+			g_list_free(nickname_list->records);
+			nickname_list->records = NULL;
+			nickname_list->cursor = NULL;
+			nickname_list->count = 0;
+			return ret;
 		}
+		contacts_record_set_str(nickname, _contacts_nickname.name, temp);
+		contacts_list_add((contacts_list_h)nickname_list, nickname);
 
 		temp = strtok(NULL, separator);
 	}

@@ -96,7 +96,7 @@ int ctsvc_db_profile_insert(contacts_record_h record, int contact_id, bool is_my
 	char query[CTS_SQL_MAX_LEN] = {0};
 	ctsvc_profile_s *profile = (ctsvc_profile_s *)record;
 
-	RETV_IF(NULL == profile->service_operation, CONTACTS_ERROR_NONE);
+	RETV_IF(NULL == profile->text, CONTACTS_ERROR_NONE);
 	RETVM_IF(contact_id <= 0, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : contact_id(%d) is mandatory field to insert profile record ", profile->contact_id);
 	RETVM_IF(0 < profile->id, CONTACTS_ERROR_INVALID_PARAMETER,

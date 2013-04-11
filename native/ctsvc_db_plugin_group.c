@@ -227,7 +227,10 @@ static int __ctsvc_db_group_update_record( contacts_record_h record )
 		ret = ctsvc_change_image(CTS_GROUP_IMAGE_LOCATION, group->id, group->image_thumbnail_path, image, sizeof(image));
 		if (*image) {
 			free(group->image_thumbnail_path);
-			group->image_thumbnail_path = strdup(image);
+			if (strstr(image, CTS_GROUP_IMAGE_LOCATION) != NULL)
+				group->image_thumbnail_path = strdup(image + strlen(CTS_GROUP_IMAGE_LOCATION) + 1);
+			else
+				group->image_thumbnail_path = strdup(image);
 		}
 	}
 

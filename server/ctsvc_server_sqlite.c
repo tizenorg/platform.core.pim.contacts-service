@@ -197,6 +197,50 @@ int ctsvc_server_update_default_language(int prev_sort_primary, int prev_sort_se
 		return CONTACTS_ERROR_DB;
 	}
 
+	snprintf(query, sizeof(query), "UPDATE %s SET reverse_display_name_language=%d WHERE reverse_display_name_language = %d" ,
+				CTS_TABLE_CONTACTS, prev_sort_primary, CTSVC_SORT_PRIMARY);
+		ret = sqlite3_exec(db, query, NULL, NULL, &errmsg);
+		if (SQLITE_OK != ret) {
+			ERR("sqlite3_exec(%s) Failed(%d, %s)", query, ret, errmsg);
+			sqlite3_free(errmsg);
+			ctsvc_server_end_trans(false);
+			ctsvc_server_db_close();
+			return CONTACTS_ERROR_DB;
+		}
+
+		snprintf(query, sizeof(query), "UPDATE %s SET reverse_display_name_language=%d WHERE reverse_display_name_language = %d"	,
+				CTS_TABLE_CONTACTS, prev_sort_secondary, CTSVC_SORT_SECONDARY);
+		ret = sqlite3_exec(db, query, NULL, NULL, &errmsg);
+		if (SQLITE_OK != ret) {
+			ERR("sqlite3_exec(%s) Failed(%d, %s)", query, ret, errmsg);
+			sqlite3_free(errmsg);
+			ctsvc_server_end_trans(false);
+			ctsvc_server_db_close();
+			return CONTACTS_ERROR_DB;
+		}
+
+		snprintf(query, sizeof(query), "UPDATE %s SET reverse_display_name_language=%d WHERE reverse_display_name_language = %d",
+					CTS_TABLE_CONTACTS, CTSVC_SORT_PRIMARY, new_sort_primary);
+		ret = sqlite3_exec(db, query, NULL, NULL, &errmsg);
+		if (SQLITE_OK != ret) {
+			ERR("sqlite3_exec(%s) Failed(%d, %s)", query, ret, errmsg);
+			sqlite3_free(errmsg);
+			ctsvc_server_end_trans(false);
+			ctsvc_server_db_close();
+			return CONTACTS_ERROR_DB;
+		}
+
+		snprintf(query, sizeof(query), "UPDATE %s SET reverse_display_name_language=%d WHERE reverse_display_name_language = %d" ,
+				CTS_TABLE_CONTACTS, CTSVC_SORT_SECONDARY, new_sort_secondary);
+		ret = sqlite3_exec(db, query, NULL, NULL, &errmsg);
+		if (SQLITE_OK != ret) {
+			ERR("sqlite3_exec(%s) Failed(%d, %s)", query, ret, errmsg);
+			sqlite3_free(errmsg);
+			ctsvc_server_end_trans(false);
+			ctsvc_server_db_close();
+			return CONTACTS_ERROR_DB;
+		}
+
 	ret = ctsvc_server_set_default_language(new_sort_primary);
 	if (CONTACTS_ERROR_NONE != ret) {
 		ctsvc_server_end_trans(false);

@@ -232,7 +232,6 @@ static int __ctsvc_db_person_update_record( contacts_record_h record )
 		cts_stmt_finalize(stmt);
 	} while (0);
 
-
 	if (CONTACTS_ERROR_NONE != ret) {
 		ctsvc_end_trans(false);
 		CTSVC_RECORD_RESET_PROPERTY_FLAGS((ctsvc_record_s *)record);

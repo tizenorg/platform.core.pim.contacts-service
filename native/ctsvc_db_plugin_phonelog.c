@@ -463,30 +463,37 @@ static int __ctsvc_db_phonelog_insert_record( contacts_record_h record, int *id 
 	ctsvc_change_subject_add_changed_phone_log_id(CONTACTS_CHANGE_INSERTED, *id);
 #endif
 	ret = ctsvc_end_trans(true);
-
-	// set missed call Badge number to Apptray
-	if(phonelog-> log_type == CONTACTS_PLOG_TYPE_VOICE_INCOMMING_UNSEEN || phonelog-> log_type == CONTACTS_PLOG_TYPE_VIDEO_INCOMMING_UNSEEN) {
-
-		#define PHONE_PACKAGE_NAME		"org.tizen.phone"
-		unsigned int call_cnt = 0;
-		bool	bBadgeExist = FALSE;
-
-		badge_is_existing(PHONE_PACKAGE_NAME, &bBadgeExist);
-		if(bBadgeExist == FALSE)
-			badge_create(PHONE_PACKAGE_NAME, PHONE_PACKAGE_NAME);
-
-		badge_get_count(PHONE_PACKAGE_NAME, &call_cnt);
-		call_cnt++;
-		badge_set_count(PHONE_PACKAGE_NAME, call_cnt);
-	}
-
-
 	if (ret < CONTACTS_ERROR_NONE)
 	{
 		CTS_ERR("DB error : ctsvc_end_trans() Failed(%d)", ret);
 		return ret;
 	}
 	else
+	{
+		// set missed call Badge number to Apptray
+		if(phonelog-> log_type == CONTACTS_PLOG_TYPE_VOICE_INCOMMING_UNSEEN || phonelog-> log_type == CONTACTS_PLOG_TYPE_VIDEO_INCOMMING_UNSEEN) {
+
+		#define PHONE_PACKAGE_NAME		"org.tizen.phone"
+			unsigned int call_cnt = 0;
+			bool	bBadgeExist = FALSE;
+
+			badge_is_existing(PHONE_PACKAGE_NAME, &bBadgeExist);
+			if(bBadgeExist == FALSE)
+			{
+				badge_error_e err = BADGE_ERROR_NONE;
+				err = badge_create(PHONE_PACKAGE_NAME, PHONE_PACKAGE_NAME);
+				if(err != BADGE_ERROR_NONE)
+				{
+					CTS_ERR("Fail to badge_create : %d", err);
+					return CONTACTS_ERROR_NONE; // ignore badge error
+				}
+			}
+
+			badge_get_count(PHONE_PACKAGE_NAME, &call_cnt);
+			call_cnt++;
+			badge_set_count(PHONE_PACKAGE_NAME, call_cnt);
+		}
 		return CONTACTS_ERROR_NONE;
+	}
 }
 
