@@ -200,6 +200,11 @@ typedef enum {
 	CONTACTS_ADDRESS_BOOK_MODE_READONLY, /**< .*/
 }contacts_address_book_mode_e;
 
+typedef enum{
+	CONTACTS_CONTACT_LINK_MODE_NONE,				/**< Auto link immediatly */
+	CONTACTS_CONTACT_LINK_MODE_IGNORE_ONCE,		/**< Do not auto link when the contact is inserted */
+}contacts_contact_link_mode_e;
+
 typedef enum {
 	CONTACTS_RELATIONSHIP_TYPE_OTHER, /**< .*/
 	CONTACTS_RELATIONSHIP_TYPE_ASSISTANT, /**< .*/

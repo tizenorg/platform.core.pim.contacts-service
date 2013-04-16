@@ -102,6 +102,7 @@ _CONTACTS_BEGIN_VIEW()
 	_CONTACTS_PROPERTY_STR( uid )					// read, write
 	_CONTACTS_PROPERTY_STR( vibration )				// read, write
 	_CONTACTS_PROPERTY_INT( changed_time )			// read only
+	_CONTACTS_PROPERTY_INT( link_mode )			// read, write
 	_CONTACTS_PROPERTY_CHILD_SINGLE( name )					// read, write
 	_CONTACTS_PROPERTY_CHILD_SINGLE( image )				// read, write
 	_CONTACTS_PROPERTY_CHILD_MULTIPLE( company )				// read, write

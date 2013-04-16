@@ -28,6 +28,7 @@ static int __ctsvc_ipc_unmarshal_contact(pims_ipc_data_h ipc_data, const char* v
 		if (ctsvc_ipc_unmarshal_int(ipc_data, &pcontact->id) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_int(ipc_data, &pcontact->person_id) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_int(ipc_data, &pcontact->changed_time) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_unmarshal_int(ipc_data, &pcontact->link_mode) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_int(ipc_data, &pcontact->addressbook_id) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_bool(ipc_data, &pcontact->has_phonenumber) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_bool(ipc_data, &pcontact->has_email) != CONTACTS_ERROR_NONE) break;
@@ -83,6 +84,7 @@ static int __ctsvc_ipc_marshal_contact(const contacts_record_h record, pims_ipc_
 		if (ctsvc_ipc_marshal_int((pcontact->id),ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_int((pcontact->person_id),ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_int((pcontact->changed_time),ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_int((pcontact->link_mode),ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_int((pcontact->addressbook_id),ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_bool((pcontact->has_phonenumber),ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_bool((pcontact->has_email),ipc_data) != CONTACTS_ERROR_NONE) break;

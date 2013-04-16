@@ -975,6 +975,7 @@ API int contacts_person_unlink_contact(int person_id, int contact_id, int* out_p
 {
 	int ret;
 	int id;
+	int link_count = 0;
 	char query[CTS_SQL_MIN_LEN] = {0};
 	contacts_record_h record = NULL;
 	bool is_favorite = false;
@@ -990,11 +991,17 @@ API int contacts_person_unlink_contact(int person_id, int contact_id, int* out_p
 	RETVM_IF(ret, ret, "ctsvc_begin_trans() Failed(%d)", ret);
 
 	snprintf(query, sizeof(query),
-			"SELECT person_id FROM "CTS_TABLE_PERSONS" WHERE person_id=%d", person_id);
-	ret = ctsvc_query_get_first_int_result(query, &id);
+			"SELECT link_count FROM "CTS_TABLE_PERSONS" WHERE person_id=%d", person_id);
+	ret = ctsvc_query_get_first_int_result(query, &link_count);
 	if (CONTACTS_ERROR_NONE != ret) {
 		ctsvc_end_trans(false);
 		return ret;
+	}
+
+	if (link_count == 1) {
+		CTS_ERR("This person(%d) has one contact(%d)", person_id, contact_id);
+		ctsvc_end_trans(false);
+		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 
 	ret = contacts_db_get_record(_contacts_contact._uri, contact_id, &record);
@@ -1209,7 +1216,7 @@ API int contacts_person_set_default_property(contacts_person_property_e property
 	}
 
 #ifdef _CONTACTS_IPC_SERVER
-	ctsvc_change_subject_add_changed_person_id(CONTACTS_CHANGE_UPDATED, id);
+	ctsvc_change_subject_add_changed_person_id(CONTACTS_CHANGE_UPDATED, person_id);
 #endif
 	ctsvc_set_person_noti();
 	ret = ctsvc_end_trans(true);
@@ -1222,6 +1229,9 @@ API int contacts_person_get_default_property(contacts_person_property_e property
 {
 	int ret = CONTACTS_ERROR_NONE;
 	char query[CTS_SQL_MAX_LEN] = {0};
+
+	RETVM_IF(person_id <= 0 || id == NULL, CONTACTS_ERROR_INVALID_PARAMETER,"id should be greater than 0");
+	*id = 0;
 
 	switch(property) {
 	case CONTACTS_PERSON_PROPERTY_NAME_CONTACT:

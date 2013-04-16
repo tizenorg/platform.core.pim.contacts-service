@@ -84,7 +84,7 @@ static int __ctsvc_db_get_contact_base_info(int id, ctsvc_contact_s *contact)
 	char full_path[CTSVC_IMG_FULL_PATH_SIZE_MAX] = {0};
 
 	len = snprintf(query, sizeof(query),
-			"SELECT contact_id, addressbook_id, person_id, changed_time, %s, "
+			"SELECT contact_id, addressbook_id, person_id, changed_time, link_mode, %s, "
 				"display_name_source, image_thumbnail_path, "
 				"ringtone_path, vibration, uid, is_favorite, has_phonenumber, has_email, "
 				"sort_name, reverse_sort_name "
@@ -106,6 +106,7 @@ static int __ctsvc_db_get_contact_base_info(int id, ctsvc_contact_s *contact)
 	contact->addressbook_id = ctsvc_stmt_get_int(stmt, i++);
 	contact->person_id = ctsvc_stmt_get_int(stmt, i++);
 	contact->changed_time = ctsvc_stmt_get_int(stmt, i++);
+	contact->link_mode = ctsvc_stmt_get_int(stmt, i++);
 	temp = ctsvc_stmt_get_text(stmt, i++);
 	contact->display_name = SAFE_STRDUP(temp);
 	contact->display_source_type = ctsvc_stmt_get_int(stmt, i++);
@@ -949,6 +950,7 @@ static inline int __ctsvc_contact_refresh_lookup_data(int contact_id)
 	if (contact->name) {
 		contacts_list_h name_list = (contacts_list_h)contact->name;
 		ctsvc_name_s *name_record;
+		cts_stmt stmt = NULL;
 		char *temp_name = NULL;
 		contacts_list_first(name_list);
 		len = 0;
@@ -971,15 +973,29 @@ static inline int __ctsvc_contact_refresh_lookup_data(int contact_id)
 
 				ctsvc_normalize_str(temp_name, &normalized_name);
 				snprintf(query, sizeof(query), "INSERT INTO %s(data_id, contact_id, name, type) "
-								"VALUES(%d, %d, '%s', %d)",	CTS_TABLE_NAME_LOOKUP, name_record->id,
-								contact_id, normalized_name, 0);
+								"VALUES(%d, %d, ?, %d)",	CTS_TABLE_NAME_LOOKUP, name_record->id,
+								contact_id, 0);
 
-				ret = ctsvc_query_exec(query);
+				stmt = cts_query_prepare(query);
+				if (NULL == stmt) {
+					CTS_ERR("cts_query_prepare() Failed");
+					free(temp_name);
+					free(normalized_name);
+					return CONTACTS_ERROR_DB;
+				}
+
+				if (normalized_name)
+					cts_stmt_bind_text(stmt, 1, normalized_name);
+
+				ret = cts_stmt_step(stmt);
+
 				free(temp_name);
 				free(normalized_name);
 
+				cts_stmt_finalize(stmt);
+
 				if (CONTACTS_ERROR_NONE != ret) {
-					CTS_ERR("ctsvc_query_exec() Failed(%d)", ret);
+					CTS_ERR("cts_stmt_step() Failed(%d)", ret);
 					contacts_record_destroy((contacts_record_h)contact, true);
 					return CONTACTS_ERROR_DB;
 				}
@@ -989,23 +1005,38 @@ static inline int __ctsvc_contact_refresh_lookup_data(int contact_id)
 
 	if (contact->numbers) {
 		contacts_list_h number_list = (contacts_list_h)contact->numbers;
+		cts_stmt stmt = NULL;
 		ctsvc_number_s *number_record;
 		contacts_list_first(number_list);
 		len = 0;
 		do {
 			contacts_list_get_current_record_p(number_list, (contacts_record_h*)&number_record);
 			if (NULL != number_record) {
-				char normalized_number[CTSVC_NUMBER_MAX_LEN];
+				char normalized_number[CTSVC_NUMBER_MAX_LEN] = {0};
 
 				ctsvc_normalize_number(number_record->number, normalized_number, CTSVC_NUMBER_MAX_LEN, CTSVC_NUMBER_MAX_LEN -1);
 				snprintf(query, sizeof(query), "INSERT INTO %s(data_id, contact_id, number, min_match) "
-								"VALUES(%d, %d, '%s', '%s')",	CTS_TABLE_PHONE_LOOKUP, number_record->id,
-								contact_id, normalized_number, number_record->lookup);
+								"VALUES(%d, %d, ?, ?)",	CTS_TABLE_PHONE_LOOKUP, number_record->id,
+								contact_id);
 
-				ret = ctsvc_query_exec(query);
+				stmt = cts_query_prepare(query);
+				if (NULL == stmt) {
+					CTS_ERR("cts_query_prepare() Failed");
+					return CONTACTS_ERROR_DB;
+				}
+
+				if (*normalized_number)
+					cts_stmt_bind_text(stmt, 1, normalized_number);
+
+				if (number_record->lookup)
+					cts_stmt_bind_text(stmt, 2, number_record->lookup);
+
+				ret = cts_stmt_step(stmt);
+
+				cts_stmt_finalize(stmt);
 
 				if (CONTACTS_ERROR_NONE != ret) {
-					CTS_ERR("ctsvc_query_exec() Failed(%d)", ret);
+					CTS_ERR("cts_stmt_step() Failed(%d)", ret);
 					contacts_record_destroy((contacts_record_h)contact, true);
 					return CONTACTS_ERROR_DB;
 				}
@@ -1015,6 +1046,7 @@ static inline int __ctsvc_contact_refresh_lookup_data(int contact_id)
 
 	if (contact->nicknames) {
 		contacts_list_h nickname_list = (contacts_list_h)contact->nicknames;
+		cts_stmt stmt = NULL;
 		ctsvc_nickname_s *nickname;
 		contacts_list_first(nickname_list);
 		do {
@@ -1023,14 +1055,27 @@ static inline int __ctsvc_contact_refresh_lookup_data(int contact_id)
 				char *normalized_nickname = NULL;
 				ctsvc_normalize_str(nickname->nickname, &normalized_nickname);
 				snprintf(query, sizeof(query), "INSERT INTO %s(data_id, contact_id, name, type) "
-								"VALUES(%d, %d, '%s', %d)",	CTS_TABLE_NAME_LOOKUP, nickname->id,
-								contact_id, normalized_nickname, 0);
+								"VALUES(%d, %d, ?, %d)",	CTS_TABLE_NAME_LOOKUP, nickname->id,
+								contact_id,  0);
 
-				ret = ctsvc_query_exec(query);
+				stmt = cts_query_prepare(query);
+				if (NULL == stmt) {
+					CTS_ERR("cts_query_prepare() Failed");
+					free(normalized_nickname);
+					return CONTACTS_ERROR_DB;
+				}
+
+				if (*normalized_nickname)
+					cts_stmt_bind_text(stmt, 1, normalized_nickname);
+
+				ret = cts_stmt_step(stmt);
+
 				free(normalized_nickname);
 
+				cts_stmt_finalize(stmt);
+
 				if (CONTACTS_ERROR_NONE != ret) {
-					CTS_ERR("ctsvc_query_exec() Failed(%d)", ret);
+					CTS_ERR("cts_stmt_step() Failed(%d)", ret);
 					contacts_record_destroy((contacts_record_h)contact, true);
 					return CONTACTS_ERROR_DB;
 				}
@@ -1456,6 +1501,9 @@ static int __ctsvc_db_contact_get_records_with_query( contacts_query_h query, in
 			case CTSVC_PROPERTY_CONTACT_CHANGED_TIME:
 				contact->changed_time = ctsvc_stmt_get_int(stmt, i);
 				break;
+			case CTSVC_PROPERTY_CONTACT_LINK_MODE:
+				contact->link_mode = ctsvc_stmt_get_int(stmt, i);
+				break;
 			default:
 				break;
 			}
@@ -1827,6 +1875,9 @@ static int __ctsvc_db_contact_insert_record( contacts_record_h record, int *id)
 	RETVM_IF(0 < contact->id, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : id(%d), This record is already inserted", contact->id);
 
+	if (contact->link_mode == CONTACTS_CONTACT_LINK_MODE_IGNORE_ONCE)
+		auto_link_enabled = false;
+
 	ret = ctsvc_begin_trans();
 	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "ctsvc_begin_trans() Failed(%d)", ret);
 
@@ -1841,7 +1892,6 @@ static int __ctsvc_db_contact_insert_record( contacts_record_h record, int *id)
 		*id = ret;
 
 	ctsvc_make_contact_display_name(contact);
-
 	__ctsvc_contact_check_default_data(contact);
 
 	//Insert Data
@@ -1915,15 +1965,17 @@ static int __ctsvc_db_contact_insert_record( contacts_record_h record, int *id)
 
 	snprintf(query, sizeof(query),
 		"INSERT INTO "CTS_TABLE_CONTACTS"(contact_id, person_id, addressbook_id, is_favorite, "
-			"created_ver, changed_ver, changed_time, image_changed_ver, has_phonenumber, has_email, "
+			"created_ver, changed_ver, changed_time, link_mode, "
+			"image_changed_ver, has_phonenumber, has_email, "
 			"display_name, reverse_display_name, display_name_source, "
 			"display_name_language, reverse_display_name_language, "
 			"sort_name, reverse_sort_name, "
 			"sortkey, reverse_sortkey, "
 			"uid, ringtone_path, vibration, image_thumbnail_path) "
-			"VALUES(%d, %d, %d, %d, %d, %d, %d, %d, %d, %d, ?, ?, %d, %d, %d, ?, ?, ?, ?, ?, ?, ?, ?)",
+			"VALUES(%d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, ?, ?, %d, %d, %d, ?, ?, ?, ?, ?, ?, ?, ?)",
 			contact->id, contact->person_id, contact->addressbook_id, contact->is_favorite,
-			version, version, (int)time(NULL), (NULL !=contact->image_thumbnail_path)?version:0, contact->has_phonenumber, contact->has_email,
+			version, version, (int)time(NULL), contact->link_mode,
+			(NULL !=contact->image_thumbnail_path)?version:0, contact->has_phonenumber, contact->has_email,
 			contact->display_source_type, contact->display_name_language, contact->reverse_display_name_language);
 
 	stmt = cts_query_prepare(query);

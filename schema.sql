@@ -87,6 +87,7 @@ CREATE TABLE contacts
 	created_ver			INTEGER NOT NULL,
 	changed_ver			INTEGER NOT NULL,
 	changed_time			INTEGER NOT NULL,
+	link_mode		INTEGER NOT NULL,
 	image_changed_ver	INTEGER NOT NULL,
 	uid				TEXT,
 	ringtone_path			TEXT,

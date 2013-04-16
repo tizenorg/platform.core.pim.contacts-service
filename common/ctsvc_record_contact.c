@@ -1259,6 +1259,9 @@ static int __ctsvc_contact_get_int(contacts_record_h record, unsigned int proper
 	case CTSVC_PROPERTY_CONTACT_CHANGED_TIME:
 		*out = contact->changed_time;
 		break;
+	case CTSVC_PROPERTY_CONTACT_LINK_MODE:
+		*out = contact->link_mode;
+		break;
 	default:
 		ASSERT_NOT_REACHED("Invalid parameter : property_id(%d) is not supported in value(contact)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
@@ -1673,6 +1676,9 @@ static int __ctsvc_contact_set_int(contacts_record_h record, unsigned int proper
 		RETVM_IF(contact->id > 0, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (contact)", property_id);
 		contact->addressbook_id = value;
+		break;
+	case CTSVC_PROPERTY_CONTACT_LINK_MODE:
+		contact->link_mode = value;
 		break;
 	default:
 		CTS_ERR("Invalid parameter : property_id(%d) is not supported in valuecontact)", property_id);
@@ -3799,6 +3805,7 @@ static int __ctsvc_contact_clone(contacts_record_h record, contacts_record_h *ou
 	out_data->person_id = src_data->person_id;
 	out_data->addressbook_id = src_data->addressbook_id;
 	out_data->changed_time = src_data->changed_time;
+	out_data->link_mode = src_data->link_mode;
 	out_data->display_source_type = src_data->display_source_type;
 	out_data->display_name_language = src_data->display_name_language;
 	out_data->reverse_display_name_language = src_data->reverse_display_name_language;

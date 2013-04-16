@@ -262,7 +262,7 @@ static inline int __ctsvc_vcard_append_name(ctsvc_list_s *names, char **buf, int
 	GList *cursor = names->records;
 	ctsvc_name_s *name;
 
-	RETV_IF(NULL == cursor, 0);
+	RETV_IF(NULL == cursor, len);
 
 	name = (ctsvc_name_s *)cursor->data;
 
@@ -395,10 +395,10 @@ static inline int __ctsvc_vcard_put_company_logo(const char *path, char **buf, i
 	guchar image[CTSVC_VCARD_PHOTO_MAX_SIZE] = {0};
 
 	suffix = strrchr(path, '.');
-	RETVM_IF(NULL == suffix, 0, "Image Type(%s) is invalid", path);
+	RETVM_IF(NULL == suffix, len, "Image Type(%s) is invalid", path);
 
 	type = __ctsvc_vcard_get_image_type(suffix);
-	RETVM_IF(CTSVC_VCARD_IMG_NONE == type, 0, "Invalid parameter : Image Type(%s) is invalid", path);
+	RETVM_IF(CTSVC_VCARD_IMG_NONE == type, len, "Invalid parameter : Image Type(%s) is invalid", path);
 
 	fd = open(path, O_RDONLY);
 	RETVM_IF(fd < 0, CONTACTS_ERROR_SYSTEM, "System : Open(%s) Failed(%d)", path, errno);
@@ -1042,7 +1042,7 @@ static inline int __ctsvc_vcard_put_photo(ctsvc_list_s *image_list, char **buf, 
 				"Invalid parameter : Image Type(%s) is invalid", data->path);
 
 		type = __ctsvc_vcard_get_image_type(suffix);
-		RETVM_IF(CTSVC_VCARD_IMG_NONE == type, 0, "Invalid parameter : Image Type(%s) is invalid", data->path);
+		RETVM_IF(CTSVC_VCARD_IMG_NONE == type, len, "Invalid parameter : Image Type(%s) is invalid", data->path);
 
 		fd = open(data->path, O_RDONLY);
 		RETVM_IF(fd < 0, CONTACTS_ERROR_SYSTEM, "System : Open(%s) Failed(%d)", data->path, errno);
@@ -1499,7 +1499,6 @@ static int __ctsvc_vcard_append_person(ctsvc_person_s *person, ctsvc_list_s *lis
 static int __ctsvc_vcard_make_from_person(ctsvc_person_s *person, ctsvc_list_s *list_contacts,
 		char **vcard_stream)
 {
-	int ret = CONTACTS_ERROR_NONE;
 	char *buf = NULL;
 	int buf_size = VCARD_INIT_LENGTH;
 	int len = 0;

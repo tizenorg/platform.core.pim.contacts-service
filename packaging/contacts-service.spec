@@ -1,6 +1,6 @@
 Name:       contacts-service
 Summary:    Contacts Service
-Version: 0.9.64
+Version: 0.9.66
 Release:    1
 Group:      TO_BE/FILLED_IN
 License:    Apache-2.0

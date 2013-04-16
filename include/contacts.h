@@ -558,6 +558,7 @@
  * <tr><td>string</td><td>uid</td><td>read, write</td><td></td></tr>
  * <tr><td>string</td><td>vibration</td><td>read, write</td><td></td></tr>
  * <tr><td>integer</td><td>changed_time</td><td>read only</td><td></td></tr>
+ * <tr><td>integer</td><td>link_mode</td><td>read, write</td><td></td></tr>
  * <tr><td>record</td><td>name</td><td>read, write</td><td></td></tr>
  * <tr><td>record</td><td>company</td><td>read, write</td><td></td></tr>
  * <tr><td>record</td><td>note</td><td>read, write</td><td></td></tr>

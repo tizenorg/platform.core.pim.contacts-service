@@ -221,6 +221,7 @@ API int	contacts_db_get_record( const char* view_uri, int id, contacts_record_h*
 	RETVM_IF(view_uri==NULL,CONTACTS_ERROR_INVALID_PARAMETER,"view_uri is NULL");
 	RETVM_IF(id<0,CONTACTS_ERROR_INVALID_PARAMETER,"id<0");
 	RETVM_IF(out_record==NULL,CONTACTS_ERROR_INVALID_PARAMETER,"record is NULL");
+	*out_record = NULL;
 
 	// make indata
 	indata = pims_ipc_data_create(0);
@@ -248,7 +249,6 @@ API int	contacts_db_get_record( const char* view_uri, int id, contacts_record_h*
 	{
 		CTS_ERR("ctsvc_ipc_call failed");
 		pims_ipc_data_destroy(indata);
-		*out_record = NULL;
 		return CONTACTS_ERROR_IPC;
 	}
 
@@ -450,6 +450,7 @@ API int contacts_db_get_all_records( const char* view_uri, int offset, int limit
 
 	RETVM_IF(out_list==NULL,CONTACTS_ERROR_INVALID_PARAMETER,"list is NULL");
 	RETVM_IF(view_uri==NULL,CONTACTS_ERROR_INVALID_PARAMETER,"view_uri is NULL");
+	*out_list = NULL;
 
 	// make indata
 	indata = pims_ipc_data_create(0);
@@ -484,7 +485,6 @@ API int contacts_db_get_all_records( const char* view_uri, int offset, int limit
 	{
 		CTS_ERR("ctsvc_ipc_call failed");
 		pims_ipc_data_destroy(indata);
-		*out_list = NULL;
 		return CONTACTS_ERROR_IPC;
 	}
 
@@ -517,6 +517,7 @@ API int contacts_db_get_records_with_query( contacts_query_h query, int offset, 
 
 	RETVM_IF(query==NULL,CONTACTS_ERROR_INVALID_PARAMETER,"query is NULL");
 	RETVM_IF(out_list==NULL,CONTACTS_ERROR_INVALID_PARAMETER,"list is NULL");
+	*out_list = NULL;
 
 	// make indata
 	indata = pims_ipc_data_create(0);
@@ -550,7 +551,6 @@ API int contacts_db_get_records_with_query( contacts_query_h query, int offset, 
 	{
 		CTS_ERR("ctsvc_ipc_call failed");
 		pims_ipc_data_destroy(indata);
-		*out_list = NULL;
 		return CONTACTS_ERROR_IPC;
 	}
 
@@ -585,6 +585,7 @@ API int contacts_db_get_count( const char* view_uri, int *out_count )
 
 	RETVM_IF(view_uri==NULL,CONTACTS_ERROR_INVALID_PARAMETER,"view_uri is NULL");
 	RETVM_IF(out_count==NULL,CONTACTS_ERROR_INVALID_PARAMETER,"count pointer is NULL");
+	*out_count = 0;
 
 	// make indata
 	indata = pims_ipc_data_create(0);
@@ -638,6 +639,8 @@ API int contacts_db_get_count_with_query( contacts_query_h query, int *out_count
 	pims_ipc_data_h outdata = NULL;
 
 	RETVM_IF(query==NULL,CONTACTS_ERROR_INVALID_PARAMETER,"record is NULL");
+	RETVM_IF(out_count==NULL,CONTACTS_ERROR_INVALID_PARAMETER,"count pointer is NULL");
+	*out_count = 0;
 
 	// make indata
 	indata = pims_ipc_data_create(0);
@@ -1175,7 +1178,7 @@ API int contacts_db_get_changes_by_version(const char* view_uri, int addressbook
 	RETVM_IF(view_uri==NULL,CONTACTS_ERROR_INVALID_PARAMETER,"view_uri is NULL");
 	RETVM_IF(record_list==NULL,CONTACTS_ERROR_INVALID_PARAMETER,"record_list is NULL");
 	RETVM_IF(current_contacts_db_version==NULL,CONTACTS_ERROR_INVALID_PARAMETER,"current_contacts_db_version is NULL");
-
+	*record_list = NULL;
 
 	// make indata
 	indata = pims_ipc_data_create(0);
@@ -1209,7 +1212,6 @@ API int contacts_db_get_changes_by_version(const char* view_uri, int addressbook
 	{
 		CTS_ERR("ctsvc_ipc_call failed");
 		pims_ipc_data_destroy(indata);
-		*record_list = NULL;
 		return CONTACTS_ERROR_IPC;
 	}
 
@@ -1246,6 +1248,7 @@ API int contacts_db_get_current_version(int* contacts_db_version)
 	pims_ipc_data_h outdata = NULL;
 
 	RETVM_IF(contacts_db_version==NULL,CONTACTS_ERROR_INVALID_PARAMETER,"contacts_db_version is null");
+	*contacts_db_version = 0;
 
 	// ipc call
 	if (ctsvc_ipc_call(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_GET_CURRENT_VERSION, NULL, &outdata) != 0)
@@ -1278,6 +1281,7 @@ API int contacts_db_search_records(const char* view_uri, const char *keyword,
 
 	RETVM_IF(out_list == NULL, CONTACTS_ERROR_INVALID_PARAMETER, "list is NULL");
 	RETVM_IF(ctsvc_get_ipc_handle() == NULL, CONTACTS_ERROR_IPC, "contacts not connected");
+	*out_list = NULL;
 
 	// make indata
 	indata = pims_ipc_data_create(0);
@@ -1317,7 +1321,6 @@ API int contacts_db_search_records(const char* view_uri, const char *keyword,
 	{
 		CTS_ERR("ctsvc_ipc_call failed");
 		pims_ipc_data_destroy(indata);
-		*out_list = NULL;
 		return CONTACTS_ERROR_IPC;
 	}
 
@@ -1353,6 +1356,7 @@ API int contacts_db_search_records_with_query(contacts_query_h query, const char
 	RETVM_IF(query==NULL, CONTACTS_ERROR_INVALID_PARAMETER, "query is NULL");
 	RETVM_IF(out_list==NULL, CONTACTS_ERROR_INVALID_PARAMETER, "list is NULL");
 	RETVM_IF(ctsvc_get_ipc_handle() == NULL, CONTACTS_ERROR_IPC, "contacts not connected");
+	*out_list = NULL;
 
 	// make indata
 	indata = pims_ipc_data_create(0);
@@ -1392,7 +1396,6 @@ API int contacts_db_search_records_with_query(contacts_query_h query, const char
 	{
 		CTS_ERR("ctsvc_ipc_call failed");
 		pims_ipc_data_destroy(indata);
-		*out_list = NULL;
 		return CONTACTS_ERROR_IPC;
 	}
 

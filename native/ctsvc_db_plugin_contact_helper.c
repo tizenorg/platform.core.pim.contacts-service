@@ -480,6 +480,7 @@ void ctsvc_make_contact_display_name(ctsvc_contact_s *contact)
 			contact->display_name_language = ret;
 
 		// check reverse sort_name, reverser_display_name_language
+		temp_len = 0;
 		ret = ctsvc_get_name_sort_type(contact->reverse_display_name);
 		WARN_IF( ret < 0, "ctsvc_check_language_type Failed(%d)", ret);
 		switch (ret)

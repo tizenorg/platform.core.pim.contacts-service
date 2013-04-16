@@ -911,11 +911,17 @@ static int __ctsvc_db_append_search_query(const char *keyword, char *query, int 
 								hiragana, hiragana, hiragana);
 			free(hiragana);
 		}
-		else {
+		else if (CONTACTS_ERROR_NONE <= ret) {
 			ret = snprintf(query, size,
 					"(SELECT contact_id FROM %s WHERE %s MATCH 'name:%s* OR number:%s* OR  data:%s*') ",
 					CTS_TABLE_SEARCH_INDEX, CTS_TABLE_SEARCH_INDEX,
 					normalized_name, keyword, keyword);
+		}
+		else {
+			ret = snprintf(query, size,
+					"(SELECT contact_id FROM %s WHERE %s MATCH 'name:%s* OR number:%s* OR  data:%s*') ",
+					CTS_TABLE_SEARCH_INDEX, CTS_TABLE_SEARCH_INDEX,
+					keyword, keyword, keyword);
 		}
 		free(normalized_name);
 	}
@@ -924,7 +930,7 @@ static int __ctsvc_db_append_search_query(const char *keyword, char *query, int 
 }
 
 static int __ctsvc_db_search_records_exec(const char *view_uri, const property_info_s* properties,
-		int ids_count, const char *projection, const char *keyword, int offset,	int limit, contacts_list_h* out_list )
+		int ids_count, const char *projection, const char *keyword, int offset, int limit, contacts_list_h* out_list )
 {
 	char query[CTS_SQL_MAX_LEN*8] = {0}; // temporarily extend
 	const char *table;
@@ -940,52 +946,30 @@ static int __ctsvc_db_search_records_exec(const char *view_uri, const property_i
 	ret = ctsvc_db_get_table_name(view_uri, &table);
 	RETVM_IF (CONTACTS_ERROR_NONE != ret, ret, "Invalid parameter : view uri (%s)", view_uri);
 
-	if (CONTACTS_ERROR_NONE <= ret) {
-		if (0 == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_CONTACT)
-				|| 0 == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP)) {
-			len = snprintf(query, sizeof(query), "SELECT %s FROM %s "
-						"WHERE contact_id IN ",
-						projection, table);
-			len += __ctsvc_db_append_search_query(keyword, query + len, sizeof(query) - len);
-		}
-		else {		// CTSVC_VIEW_URI_PERSON
-			len = snprintf(query, sizeof(query), "SELECT %s FROM %s, "
-						"(SELECT person_id person_id_in_contact "
-								"FROM "CTS_TABLE_CONTACTS " "
-								"WHERE deleted = 0 AND contact_id IN ",
-								projection, table);
-			len += __ctsvc_db_append_search_query(keyword, query + len, sizeof(query) - len);
-			len += snprintf(query + len, sizeof(query) - len, " GROUP BY person_id_in_contact) temp_contacts "
-							"ON %s.person_id = temp_contacts.person_id_in_contact", table);
-		}
+	if (0 == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_CONTACT)
+			|| 0 == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP)) {
+		len = snprintf(query, sizeof(query), "SELECT %s FROM %s "
+					"WHERE contact_id IN ",
+					projection, table);
+		len += __ctsvc_db_append_search_query(keyword, query + len, sizeof(query) - len);
+	}
+	else {		// CTSVC_VIEW_URI_PERSON
+		len = snprintf(query, sizeof(query), "SELECT %s FROM %s, "
+					"(SELECT person_id person_id_in_contact "
+							"FROM "CTS_TABLE_CONTACTS " "
+							"WHERE deleted = 0 AND contact_id IN ",
+							projection, table);
+		len += __ctsvc_db_append_search_query(keyword, query + len, sizeof(query) - len);
+		len += snprintf(query + len, sizeof(query) - len, " GROUP BY person_id_in_contact) temp_contacts "
+						"ON %s.person_id = temp_contacts.person_id_in_contact", table);
+	}
 /*
-		len += snprintf(query+len, sizeof(query)-len, "FROM %s, %s "
-						"LEFT JOIN (SELECT contact_id, person_id person_id_in_contact FROM %s) temp_contacts "
-						"ON %s.person_id = temp_contacts.person_id_in_contact AND "
-						"temp_contacts.contact_id = %s.contact_id",
-						table, CTS_TABLE_SEARCH_INDEX, CTS_TABLE_CONTACTS, table, CTS_TABLE_SEARCH_INDEX);
+	len += snprintf(query+len, sizeof(query)-len, "FROM %s, %s "
+					"LEFT JOIN (SELECT contact_id, person_id person_id_in_contact FROM %s) temp_contacts "
+					"ON %s.person_id = temp_contacts.person_id_in_contact AND "
+					"temp_contacts.contact_id = %s.contact_id",
+					table, CTS_TABLE_SEARCH_INDEX, CTS_TABLE_CONTACTS, table, CTS_TABLE_SEARCH_INDEX);
 */
-
-	}
-	else {
-		if (0 == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_CONTACT)
-				|| 0 == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP)) {
-			len = snprintf(query, sizeof(query), "SELECT %s FROM %s "
-						"WHERE contact_id IN ",
-						projection, table);
-			len += __ctsvc_db_append_search_query(keyword, query + len, sizeof(query) - len);
-		}
-		else {		// CTSVC_VIEW_URI_PERSON
-			len = snprintf(query, sizeof(query),
-						"SELECT %s FROM %s, "
-							"(SELECT contact_id, person_id person_id_in_contact FROM "CTS_TABLE_CONTACTS") temp_contacts "
-						"ON %s.person_id = temp_contacts.person_id_in_contact "
-							"AND temp_contacts.deleted = 0 "
-						"WHERE temp_contacts.contact_id IN ",
-						projection, table, table);
-			len += __ctsvc_db_append_search_query(keyword, query + len, sizeof(query) - len);
-		}
-	}
 
 	if (__ctsvc_db_view_has_display_name(view_uri, properties, ids_count)) {
 		sortkey = ctsvc_get_sort_column();

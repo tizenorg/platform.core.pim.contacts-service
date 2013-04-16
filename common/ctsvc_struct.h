@@ -488,6 +488,7 @@ typedef struct {
 	int person_id;
 	int changed_time;
 	int addressbook_id;
+	int link_mode;
 	bool has_phonenumber;
 	bool has_email;
 	char *display_name;
