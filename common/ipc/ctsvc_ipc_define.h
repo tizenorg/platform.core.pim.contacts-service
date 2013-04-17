@@ -33,6 +33,7 @@
 #define CTSVC_IPC_PERSON_MODULE               "ctsvc_ipc_person_module"
 #define CTSVC_IPC_PHONELOG_MODULE               "ctsvc_ipc_phonelog_module"
 #define CTSVC_IPC_SIM_MODULE               "ctsvc_ipc_sim_module"
+#define CTSVC_IPC_SETTING_MODULE               "ctsvc_ipc_setting_module"
 
 
 #define CTSVC_IPC_SERVER_CONNECT                      "connect"
@@ -73,10 +74,11 @@
 #define CTSVC_IPC_SERVER_PHONELOG_RESET_STATISTICS    "phonelog_reset_statistics"
 #define CTSVC_IPC_SERVER_PHONELOG_DELETE    "phonelog_delete"
 
+#define CTSVC_IPC_SERVER_SETTING_GET_NAME_DISPLAY_ORDER "setting_get_name_display_order"
+#define CTSVC_IPC_SERVER_SETTING_SET_NAME_DISPLAY_ORDER "setting_set_name_display_order"
+#define CTSVC_IPC_SERVER_SETTING_GET_NAME_SORTING_ORDER "setting_get_name_sorting_order"
+#define CTSVC_IPC_SERVER_SETTING_SET_NAME_SORTING_ORDER "setting_set_name_sorting_order"
+
 #define CTSVC_IPC_SERVER_SIM_IMPORT_ALL_CONTACTS		"sim_import_all_contacts"
-#define CTSVC_IPC_SERVER_SIM_EXPORT_PERSON				"sim_export_person"
-#define CTSVC_IPC_SERVER_SIM_INSERT_CONTACT				"sim_insert_contact"
-#define CTSVC_IPC_SERVER_SIM_UPDATE_CONTACT				"sim_update_contact"
-#define CTSVC_IPC_SERVER_SIM_DELETE_CONTACT				"sim_delete_contact"
 
 #endif /*__CTSVC_IPC_DEFINE_H__ */

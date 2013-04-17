@@ -130,15 +130,6 @@ static int __ctsvc_db_get_contact_base_info(int id, ctsvc_contact_s *contact)
 	contact->sort_name = SAFE_STRDUP(temp);
 	temp = ctsvc_stmt_get_text(stmt, i++);
 	contact->reverse_sort_name = SAFE_STRDUP(temp);
-#if 0
-	contact->sync_data1 = SAFE_STRDUP(temp);
-	temp = ctsvc_stmt_get_text(stmt, i++);
-	contact->sync_data1 = SAFE_STRDUP(temp);
-	temp = ctsvc_stmt_get_text(stmt, i++);
-	contact->sync_data1 = SAFE_STRDUP(temp);
-	temp = ctsvc_stmt_get_text(stmt, i++);
-	contact->sync_data1 = SAFE_STRDUP(temp);
-#endif
 	cts_stmt_finalize(stmt);
 
 	return CONTACTS_ERROR_NONE;

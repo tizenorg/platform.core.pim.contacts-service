@@ -369,8 +369,6 @@ typedef struct {
 	ctsvc_record_s base;
 	int id;
 	int contact_id;
-	int type;
-	char *label;
 	char *uid;
 	char *text;
 	int  order;
@@ -504,10 +502,6 @@ typedef struct {
 	char *image_thumbnail_path;
 	char *ringtone_path;
 	char *vibration;
-	char *sync_data1;
-	char *sync_data2;
-	char *sync_data3;
-	char *sync_data4;
 	ctsvc_list_s* name;
 	ctsvc_list_s* note;
 	ctsvc_list_s* company;

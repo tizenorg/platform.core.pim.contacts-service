@@ -41,8 +41,7 @@ API const _contacts_group_property_ids _contacts_group = {
 	.ringtone_path	= CTSVC_PROPERTY_GROUP_RINGTONE,
 	.image_path		= CTSVC_PROPERTY_GROUP_IMAGE,
 	.vibration		= CTSVC_PROPERTY_GROUP_VIBRATION,
-	.system_id		= CTSVC_PROPERTY_GROUP_EXTRA_DATA,
-	.extra_data 		= CTSVC_PROPERTY_GROUP_EXTRA_DATA,
+	.extra_data		= CTSVC_PROPERTY_GROUP_EXTRA_DATA,
 	.is_read_only	= CTSVC_PROPERTY_GROUP_IS_READ_ONLY
 };
 
@@ -243,8 +242,6 @@ API const _contacts_note_property_ids _contacts_note = {
 API const _contacts_profile_property_ids _contacts_profile = {
 	._uri			= CTSVC_VIEW_URI_PROFILE,
 	.id			= CTSVC_PROPERTY_PROFILE_ID,
-	.type		= CTSVC_PROPERTY_PROFILE_TYPE,
-	.label		= CTSVC_PROPERTY_PROFILE_LABEL,
 	.uid			= CTSVC_PROPERTY_PROFILE_UID,
 	.text			= CTSVC_PROPERTY_PROFILE_TEXT,
 	.order		= CTSVC_PROPERTY_PROFILE_ORDER,
@@ -779,8 +776,6 @@ const property_info_s __property_note[] = {
 const property_info_s __property_profile[] = {
 	{CTSVC_PROPERTY_PROFILE_ID,					CTSVC_SEARCH_PROPERTY_ALL,	"id"},
 	{CTSVC_PROPERTY_PROFILE_CONTACT_ID,			CTSVC_SEARCH_PROPERTY_ALL,	"contact_id"},
-	{CTSVC_PROPERTY_PROFILE_TYPE,					CTSVC_SEARCH_PROPERTY_ALL,	"data1"},
-	{CTSVC_PROPERTY_PROFILE_LABEL,				CTSVC_SEARCH_PROPERTY_ALL,	"data2"},
 	{CTSVC_PROPERTY_PROFILE_UID,					CTSVC_SEARCH_PROPERTY_ALL,	"data3"},
 	{CTSVC_PROPERTY_PROFILE_TEXT,					CTSVC_SEARCH_PROPERTY_ALL,	"data4"},
 	{CTSVC_PROPERTY_PROFILE_ORDER,				CTSVC_SEARCH_PROPERTY_ALL,	"data5"},

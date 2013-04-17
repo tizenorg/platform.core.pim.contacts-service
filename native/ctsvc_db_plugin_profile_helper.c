@@ -41,8 +41,7 @@ int ctsvc_db_profile_get_value_from_stmt(cts_stmt stmt, contacts_record_h *recor
 	profile->contact_id = ctsvc_stmt_get_int(stmt, start_count++);
 	start_count++;
 	start_count++;
-	temp = ctsvc_stmt_get_text(stmt, start_count++);
-	profile->label = SAFE_STRDUP(temp);
+	start_count++;
 	temp = ctsvc_stmt_get_text(stmt, start_count++);
 	profile->uid = SAFE_STRDUP(temp);
 	temp = ctsvc_stmt_get_text(stmt, start_count++);
@@ -67,25 +66,23 @@ int ctsvc_db_profile_get_value_from_stmt(cts_stmt stmt, contacts_record_h *recor
 
 static inline int __ctsvc_profile_bind_stmt(cts_stmt stmt, ctsvc_profile_s *profile, int start_cnt)
 {
-	if (profile->label)
-		cts_stmt_bind_text(stmt, start_cnt, profile->label);
 	if (profile->uid)
-		cts_stmt_bind_text(stmt, start_cnt+1, profile->uid);
+		cts_stmt_bind_text(stmt, start_cnt, profile->uid);
 	if (profile->text)
-		cts_stmt_bind_text(stmt, start_cnt+2, profile->text);
-	cts_stmt_bind_int(stmt, start_cnt+3, profile->order);
+		cts_stmt_bind_text(stmt, start_cnt+1, profile->text);
+	cts_stmt_bind_int(stmt, start_cnt+2, profile->order);
 	if (profile->service_operation)
-		cts_stmt_bind_text(stmt, start_cnt+4, profile->service_operation);
+		cts_stmt_bind_text(stmt, start_cnt+3, profile->service_operation);
 	if (profile->mime)
-		cts_stmt_bind_text(stmt, start_cnt+5, profile->mime);
+		cts_stmt_bind_text(stmt, start_cnt+4, profile->mime);
 	if (profile->app_id)
-		cts_stmt_bind_text(stmt, start_cnt+6, profile->app_id);
+		cts_stmt_bind_text(stmt, start_cnt+5, profile->app_id);
 	if (profile->uri)
-		cts_stmt_bind_text(stmt, start_cnt+7, profile->uri);
+		cts_stmt_bind_text(stmt, start_cnt+6, profile->uri);
 	if (profile->category)
-		cts_stmt_bind_text(stmt, start_cnt+8, profile->category);
+		cts_stmt_bind_text(stmt, start_cnt+7, profile->category);
 	if (profile->extra_data)
-		cts_stmt_bind_text(stmt, start_cnt+9, profile->extra_data);
+		cts_stmt_bind_text(stmt, start_cnt+8, profile->extra_data);
 	return CONTACTS_ERROR_NONE;
 }
 
@@ -103,10 +100,10 @@ int ctsvc_db_profile_insert(contacts_record_h record, int contact_id, bool is_my
 				"Invalid parameter : id(%d), This record is already inserted", profile->id);
 
 	snprintf(query, sizeof(query),
-		"INSERT INTO "CTS_TABLE_DATA"(contact_id, is_my_profile, datatype, data1, data2, data3, data4, data5, "
+		"INSERT INTO "CTS_TABLE_DATA"(contact_id, is_my_profile, datatype, data3, data4, data5, "
 				"data6, data7, data8, data9, data10, data11) "
-				"VALUES(%d, %d, %d, %d, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-				contact_id, is_my_profile, CTSVC_DATA_PROFILE, profile->type);
+				"VALUES(%d, %d, %d, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+				contact_id, is_my_profile, CTSVC_DATA_PROFILE);
 
 	stmt = cts_query_prepare(query);
 	RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB, "DB error : cts_query_prepare() Failed");

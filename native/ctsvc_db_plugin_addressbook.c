@@ -163,11 +163,13 @@ static int __ctsvc_db_addressbook_insert_record( contacts_record_h record, int *
 		ret = account_query_account_by_account_id(addressbook->account_id, &account);
 		if (ACCOUNT_ERROR_NONE != ret) {
 			CTS_ERR("account_query_account_by_account_id Faild(%d) : account_id(%d)", ret, addressbook->account_id);
-			account_destroy(account);
+			ret = account_destroy(account);
+			WARN_IF(ret != ACCOUNT_ERROR_NONE, "account_destroy Fail(%d)", ret);
 			ctsvc_end_trans(false);
 			return CONTACTS_ERROR_INVALID_PARAMETER;
 		}
-		account_destroy(account);
+		ret = account_destroy(account);
+		WARN_IF(ret != ACCOUNT_ERROR_NONE, "account_destroy Fail(%d)", ret);
 	}
 
 	snprintf(query, sizeof(query),

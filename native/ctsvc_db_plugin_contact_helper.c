@@ -31,7 +31,7 @@
 #include "ctsvc_utils.h"
 #include "ctsvc_record.h"
 #include "ctsvc_normalize.h"
-#include "ctsvc_setting.h"
+#include "ctsvc_common_setting.h"
 #include "ctsvc_localize.h"
 #include "ctsvc_localize_ch.h"
 #include "ctsvc_notification.h"
@@ -420,7 +420,9 @@ void ctsvc_make_contact_display_name(ctsvc_contact_s *contact)
 	}
 
 	if (ctsvc_record_check_property_flag((ctsvc_record_s *)contact, _contacts_contact.display_name, CTSVC_PROPERTY_FLAG_DIRTY)) {
-		ret = ctsvc_get_name_sort_type(contact->display_name);
+		ret = CTSVC_SORT_OTHERS;
+		if (contact->display_name)
+			ret = ctsvc_get_name_sort_type(contact->display_name);
 		WARN_IF( ret < 0, "ctsvc_check_language_type Failed(%d)", ret);
 
 		switch (ret)
@@ -481,7 +483,9 @@ void ctsvc_make_contact_display_name(ctsvc_contact_s *contact)
 
 		// check reverse sort_name, reverser_display_name_language
 		temp_len = 0;
-		ret = ctsvc_get_name_sort_type(contact->reverse_display_name);
+		ret = CTSVC_SORT_OTHERS;
+		if (contact->reverse_display_name)
+			ret = ctsvc_get_name_sort_type(contact->reverse_display_name);
 		WARN_IF( ret < 0, "ctsvc_check_language_type Failed(%d)", ret);
 		switch (ret)
 		{
@@ -1766,7 +1770,8 @@ int ctsvc_contact_update_display_name(int contact_id, contacts_display_name_sour
 	int ret = CONTACTS_ERROR_NONE;
 	int display_name_type;
 	contacts_record_h record;
-	contacts_db_get_record(_contacts_contact._uri, contact_id, &record);
+	ret = contacts_db_get_record(_contacts_contact._uri, contact_id, &record);
+	RETVM_IF(ret != CONTACTS_ERROR_NONE, ret, "contacts_db_get_record Fail(%d)", ret);
 	contacts_record_get_int(record, _contacts_contact.display_source_type, &display_name_type);
 
 	if (display_name_type <= changed_record_type) {

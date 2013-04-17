@@ -31,9 +31,7 @@
 #include "ctsvc_normalize.h"
 #include "ctsvc_localize.h"
 #include "ctsvc_localize_ch.h"
-#include "ctsvc_setting.h"
-
-
+#include "ctsvc_common_setting.h"
 
 #define CTSVC_NORMALIZED_MAX_LEN 1024
 

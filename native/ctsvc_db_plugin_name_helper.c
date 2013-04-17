@@ -26,7 +26,7 @@
 #include "ctsvc_db_query.h"
 #include "ctsvc_db_plugin_name_helper.h"
 #include "ctsvc_record.h"
-#include "ctsvc_setting.h"
+#include "ctsvc_common_setting.h"
 #include "ctsvc_notification.h"
 
 enum{

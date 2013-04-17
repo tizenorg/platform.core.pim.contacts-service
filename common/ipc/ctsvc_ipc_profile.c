@@ -1,4 +1,21 @@
-#include "ctsvc_ipc_macros.h"
+/*
+ * Contacts Service
+ *
+ * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
 
 #include "ctsvc_internal.h"
 #include "ctsvc_ipc_marshal.h"
@@ -25,8 +42,6 @@ static int __ctsvc_ipc_unmarshal_profile(pims_ipc_data_h ipc_data, const char* v
 	do {
 		if (ctsvc_ipc_unmarshal_int(ipc_data, &profile_p->id) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_int(ipc_data, &profile_p->contact_id) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_unmarshal_int(ipc_data, &profile_p->type) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_unmarshal_string(ipc_data, &profile_p->label) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_string(ipc_data, &profile_p->uid) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_string(ipc_data, &profile_p->text) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_int(ipc_data, &profile_p->order) != CONTACTS_ERROR_NONE) break;
@@ -53,8 +68,6 @@ static int __ctsvc_ipc_marshal_profile(const contacts_record_h record, pims_ipc_
 	do {
 		if (ctsvc_ipc_marshal_int((profile_p->id),ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_int((profile_p->contact_id),ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_int((profile_p->type),ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_string((profile_p->label),ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_string((profile_p->uid),ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_string((profile_p->text),ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_int((profile_p->order),ipc_data) != CONTACTS_ERROR_NONE) break;

@@ -950,8 +950,6 @@
  * <tr><td>string</td><td>_uri</td><td>read only</td><td> </td></tr>
  * <tr><td>integer</td><td> id </td><td>read only</td><td> </td></tr>
  * <tr><td>integer</td><td> contact_id </td><td>read, write once</td><td> </td></tr>
- * <tr><td>integer</td><td> type </td><td>read, write</td><td> </td></tr>
- * <tr><td>string</td><td> label </td><td>read, write</td><td> </td></tr>
  * <tr><td>string</td><td> uid </td><td>read, write</td><td> </td></tr>
  * <tr><td>string</td><td> text </td><td>read, write</td><td> </td></tr>
  * <tr><td>integer</td><td> order </td><td>read, write</td><td> </td></tr>

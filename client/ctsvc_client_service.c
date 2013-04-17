@@ -31,7 +31,7 @@
 #include "ctsvc_socket.h"
 #include "ctsvc_mutex.h"
 #include "ctsvc_inotify.h"
-#include "ctsvc_setting.h"
+#include "ctsvc_common_setting.h"
 #include "ctsvc_client_ipc.h"
 
 static int ctsvc_connection = 0;
@@ -97,7 +97,7 @@ API int contacts_connect2()
 		}
 
 		ctsvc_view_uri_init();
-		ctsvc_register_vconf();
+		ctsvc_register_common_vconf();
 		ctsvc_ipc_create_for_change_subscription();
 	}
 	else
@@ -129,8 +129,7 @@ API int contacts_disconnect2()
 		ctsvc_view_uri_deinit();
 		ctsvc_inotify_close();
 		ctsvc_socket_final();
-		ctsvc_deregister_vconf();
-
+		ctsvc_deregister_common_vconf();
 	}
 	else if (1 < ctsvc_connection)
 		CTS_DBG("System : connection count is %d", ctsvc_connection);

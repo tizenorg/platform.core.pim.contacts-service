@@ -47,7 +47,6 @@ _CONTACTS_BEGIN_VIEW()
 	_CONTACTS_PROPERTY_STR( ringtone_path )			// read, write
 	_CONTACTS_PROPERTY_STR( image_path )			// read, write
 	_CONTACTS_PROPERTY_STR( vibration )				// read, write
-	_CONTACTS_PROPERTY_STR( system_id )				// read, write, string, It should be removed
 	_CONTACTS_PROPERTY_STR( extra_data )				// read, write, string
 	_CONTACTS_PROPERTY_BOOL( is_read_only )			// read only
 _CONTACTS_END_VIEW( _contacts_group )
@@ -311,8 +310,6 @@ _CONTACTS_END_VIEW( _contacts_sdn )
 // contact_profile
 _CONTACTS_BEGIN_VIEW()
 	_CONTACTS_PROPERTY_INT( id )					// read only
-	_CONTACTS_PROPERTY_INT( type )					// read, write
-	_CONTACTS_PROPERTY_STR( label )					// read, write
 	_CONTACTS_PROPERTY_STR( uid )					// read, write
 	_CONTACTS_PROPERTY_STR( text )					// read, write
 	_CONTACTS_PROPERTY_INT( order )					// read, write

@@ -24,8 +24,8 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <errno.h>
-#include <contacts.h>
 
+#include "contacts.h"
 #include "internal.h"
 #include "ctsvc_struct.h"
 #include "ctsvc_schema.h"

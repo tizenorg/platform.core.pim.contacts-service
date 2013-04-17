@@ -476,11 +476,11 @@ static int __ctsvc_db_phonelog_insert_record( contacts_record_h record, int *id 
 		#define PHONE_PACKAGE_NAME		"org.tizen.phone"
 			unsigned int call_cnt = 0;
 			bool	bBadgeExist = FALSE;
+			badge_error_e err;
 
-			badge_is_existing(PHONE_PACKAGE_NAME, &bBadgeExist);
-			if(bBadgeExist == FALSE)
+			err = badge_is_existing(PHONE_PACKAGE_NAME, &bBadgeExist);
+			if(err == BADGE_ERROR_NONE && bBadgeExist == FALSE)
 			{
-				badge_error_e err = BADGE_ERROR_NONE;
 				err = badge_create(PHONE_PACKAGE_NAME, PHONE_PACKAGE_NAME);
 				if(err != BADGE_ERROR_NONE)
 				{

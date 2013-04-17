@@ -672,11 +672,13 @@ static void __ctsvc_server_sim_initialize_cb(TapiHandle *handle, int result, voi
 int ctsvc_server_sim_initialize(void)
 {
 	SERVER_FN_CALL;
+	int ret;
 	__ctsvc_server_get_tapi_handle();
 	__ctsvc_server_set_sim_type();
-	contacts_connect2();
+	ret = contacts_connect2();
+	h_retvm_if(ret != CONTACTS_ERROR_NONE, ret, "contacts_connect2 fail : %d", ret);
 
-	int ret = TAPI_API_SUCCESS;
+	ret = TAPI_API_SUCCESS;
 	TelSimPbType_t sim_type;
 	TapiHandle *sim_handle;
 

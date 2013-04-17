@@ -1,5 +1,21 @@
-#include "ctsvc_ipc_macros.h"
-
+/*
+ * Contacts Service
+ *
+ * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
 
 #include "ctsvc_internal.h"
 #include "ctsvc_ipc_marshal.h"
@@ -45,10 +61,6 @@ static int __ctsvc_ipc_unmarshal_contact(pims_ipc_data_h ipc_data, const char* v
 		if (ctsvc_ipc_unmarshal_string(ipc_data, &pcontact->image_thumbnail_path) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_string(ipc_data, &pcontact->ringtone_path) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_string(ipc_data, &pcontact->vibration) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_unmarshal_string(ipc_data, &pcontact->sync_data1) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_unmarshal_string(ipc_data, &pcontact->sync_data2) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_unmarshal_string(ipc_data, &pcontact->sync_data3) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_unmarshal_string(ipc_data, &pcontact->sync_data4) != CONTACTS_ERROR_NONE) break;
 
 		if (ctsvc_ipc_unmarshal_list(ipc_data, (contacts_list_h*)&pcontact->name) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_list(ipc_data, (contacts_list_h*)&pcontact->note) != CONTACTS_ERROR_NONE) break;
@@ -101,10 +113,6 @@ static int __ctsvc_ipc_marshal_contact(const contacts_record_h record, pims_ipc_
 		if (ctsvc_ipc_marshal_string((pcontact->image_thumbnail_path),ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_string((pcontact->ringtone_path),ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_string((pcontact->vibration),ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_string((pcontact->sync_data1),ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_string((pcontact->sync_data2),ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_string((pcontact->sync_data3),ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_string((pcontact->sync_data4),ipc_data) != CONTACTS_ERROR_NONE) break;
 
 		if (ctsvc_ipc_marshal_list( (contacts_list_h)pcontact->name, ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_list( (contacts_list_h)pcontact->note, ipc_data) != CONTACTS_ERROR_NONE) break;

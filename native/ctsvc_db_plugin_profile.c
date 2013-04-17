@@ -335,13 +335,6 @@ static int __ctsvc_db_profile_get_records_with_query( contacts_query_h query, in
 			case CTSVC_PROPERTY_PROFILE_CONTACT_ID:
 				profile->contact_id = ctsvc_stmt_get_int(stmt, i);
 				break;
-			case CTSVC_PROPERTY_PROFILE_TYPE:
-				profile->type = ctsvc_stmt_get_int(stmt, i);
-				break;
-			case CTSVC_PROPERTY_PROFILE_LABEL:
-				temp = ctsvc_stmt_get_text(stmt, i);
-				profile->label = SAFE_STRDUP(temp);
-				break;
 			case CTSVC_PROPERTY_PROFILE_UID:
 				temp = ctsvc_stmt_get_text(stmt, i);
 				profile->uid = SAFE_STRDUP(temp);

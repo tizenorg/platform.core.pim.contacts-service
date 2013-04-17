@@ -87,10 +87,11 @@ static int __server_main(void)
 
 		/*
 			if (pims_ipc_svc_register(CTSVC_IPC_SIM_MODULE, CTSVC_IPC_SERVER_SIM_IMPORT_ALL_CONTACTS, ctsvc_ipc_sim_import_all_contacts, NULL) != 0) break;
-		 */
-		if (pims_ipc_svc_register(CTSVC_IPC_SIM_MODULE, CTSVC_IPC_SERVER_SIM_INSERT_CONTACT, ctsvc_ipc_sim_insert_contact, NULL) != 0) break;
-		if (pims_ipc_svc_register(CTSVC_IPC_SIM_MODULE, CTSVC_IPC_SERVER_SIM_UPDATE_CONTACT, ctsvc_ipc_sim_update_contact, NULL) != 0) break;
-		if (pims_ipc_svc_register(CTSVC_IPC_SIM_MODULE, CTSVC_IPC_SERVER_SIM_DELETE_CONTACT, ctsvc_ipc_sim_delete_contact, NULL) != 0) break;
+		*/
+		if (pims_ipc_svc_register(CTSVC_IPC_SETTING_MODULE, CTSVC_IPC_SERVER_SETTING_GET_NAME_DISPLAY_ORDER, ctsvc_ipc_setting_get_name_display_order, NULL) != 0) break;
+		if (pims_ipc_svc_register(CTSVC_IPC_SETTING_MODULE, CTSVC_IPC_SERVER_SETTING_SET_NAME_DISPLAY_ORDER, ctsvc_ipc_setting_set_name_display_order, NULL) != 0) break;
+		if (pims_ipc_svc_register(CTSVC_IPC_SETTING_MODULE, CTSVC_IPC_SERVER_SETTING_GET_NAME_SORTING_ORDER, ctsvc_ipc_setting_get_name_sorting_order, NULL) != 0) break;
+		if (pims_ipc_svc_register(CTSVC_IPC_SETTING_MODULE, CTSVC_IPC_SERVER_SETTING_SET_NAME_SORTING_ORDER, ctsvc_ipc_setting_set_name_sorting_order, NULL) != 0) break;
 
 		pims_ipc_svc_init_for_publish(CTSVC_IPC_SOCKET_PATH_FOR_CHANGE_SUBSCRIPTION, CTS_SECURITY_FILE_GROUP, 0660);
 

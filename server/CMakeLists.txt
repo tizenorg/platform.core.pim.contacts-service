@@ -61,7 +61,7 @@ SET(SRCS
 	${CMAKE_SOURCE_DIR}/common/ctsvc_record_sdn.c
 	${CMAKE_SOURCE_DIR}/common/ctsvc_record_speeddial.c
 	${CMAKE_SOURCE_DIR}/common/ctsvc_record_updated_info.c
-	${CMAKE_SOURCE_DIR}/common/ctsvc_setting.c
+	${CMAKE_SOURCE_DIR}/common/ctsvc_common_setting.c
 	${CMAKE_SOURCE_DIR}/common/ctsvc_sim.c
 	${CMAKE_SOURCE_DIR}/common/ctsvc_socket.c
 	${CMAKE_SOURCE_DIR}/common/ctsvc_vcard.c
@@ -144,6 +144,7 @@ SET(SRCS
 	${CMAKE_SOURCE_DIR}/native/ctsvc_sqlite.c
 	${CMAKE_SOURCE_DIR}/native/ctsvc_utils.c
 	${CMAKE_SOURCE_DIR}/native/ctsvc_notification.c
+	${CMAKE_SOURCE_DIR}/native/ctsvc_setting.c
 
 	ctsvc_ipc_server.c
 	ctsvc_ipc_server2.c

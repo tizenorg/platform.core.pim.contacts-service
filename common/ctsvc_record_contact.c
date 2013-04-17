@@ -1049,7 +1049,6 @@ static int __ctsvc_profile_destroy(contacts_record_h record, bool delete_child)
 	profile->base.plugin_cbs = NULL;	// help to find double destroy bug (refer to the contacts_record_destroy)
 	free(profile->base.properties_flags);
 
-	free(profile->label);
 	free(profile->uid);
 	free(profile->text);
 	free(profile->service_operation);
@@ -1199,10 +1198,6 @@ static int __ctsvc_contact_destroy(contacts_record_h record, bool delete_child)
 	free(contact->reverse_sort_name);
 	free(contact->sortkey);
 	free(contact->reverse_sortkey);
-	free(contact->sync_data1);
-	free(contact->sync_data2);
-	free(contact->sync_data3);
-	free(contact->sync_data4);
 
 	contacts_list_destroy((contacts_list_h)contact->name, delete_child);
 
@@ -1573,9 +1568,6 @@ static int __ctsvc_profile_get_int(contacts_record_h record, unsigned int proper
 		break;
 	case CTSVC_PROPERTY_PROFILE_CONTACT_ID:
 		*out = profile->contact_id;
-		break;
-	case CTSVC_PROPERTY_PROFILE_TYPE:
-		*out = profile->type;
 		break;
 	case CTSVC_PROPERTY_PROFILE_ORDER:
 		*out = profile->order;
@@ -2074,9 +2066,6 @@ static int __ctsvc_profile_set_int(contacts_record_h record, unsigned int proper
 		RETVM_IF(profile->id > 0, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (profile)", property_id);
 		profile->contact_id = value;
-		break;
-	case CTSVC_PROPERTY_PROFILE_TYPE:
-		profile->type = value;
 		break;
 	case CTSVC_PROPERTY_PROFILE_ORDER:
 		profile->order = value;
@@ -2941,9 +2930,6 @@ static int __ctsvc_profile_get_str_real(contacts_record_h record, unsigned int p
 	ctsvc_profile_s *profile = (ctsvc_profile_s *)record;
 
 	switch(property_id) {
-	case CTSVC_PROPERTY_PROFILE_LABEL:
-		*out_str = GET_STR(copy, profile->label);
-		break;
 	case CTSVC_PROPERTY_PROFILE_UID:
 		*out_str = GET_STR(copy, profile->uid);
 		break;
@@ -3465,9 +3451,6 @@ static int __ctsvc_profile_set_str(contacts_record_h record, unsigned int proper
 	ctsvc_profile_s *profile = (ctsvc_profile_s *)record;
 
 	switch(property_id) {
-	case CTSVC_PROPERTY_PROFILE_LABEL:
-		FREEandSTRDUP(profile->label, str);
-		break;
 	case CTSVC_PROPERTY_PROFILE_UID:
 		FREEandSTRDUP(profile->uid, str);
 		break;
@@ -3823,10 +3806,6 @@ static int __ctsvc_contact_clone(contacts_record_h record, contacts_record_h *ou
 	out_data->reverse_sort_name = SAFE_STRDUP(src_data->reverse_sort_name);
 	out_data->sortkey = SAFE_STRDUP(src_data->sortkey);
 	out_data->reverse_sortkey = SAFE_STRDUP(src_data->reverse_sortkey);
-	out_data->sync_data1 = SAFE_STRDUP(src_data->sync_data1);
-	out_data->sync_data2 = SAFE_STRDUP(src_data->sync_data2);
-	out_data->sync_data3 = SAFE_STRDUP(src_data->sync_data3);
-	out_data->sync_data4 = SAFE_STRDUP(src_data->sync_data4);
 
 	ctsvc_list_clone((contacts_list_h)src_data->name, (contacts_list_h*)&out_data->name);
 	out_data->name->l_type = CTSVC_RECORD_NAME;
@@ -4225,9 +4204,7 @@ static int __ctsvc_profile_clone(contacts_record_h record, contacts_record_h *ou
 
 	out_data->id = src_data->id;
 	out_data->contact_id = src_data->contact_id;
-	out_data->type = src_data->type;
 	out_data->order = src_data->order;
-	out_data->label = SAFE_STRDUP(src_data->label);
 	out_data->uid = SAFE_STRDUP(src_data->uid);
 	out_data->text = SAFE_STRDUP(src_data->text);
 	out_data->service_operation = SAFE_STRDUP(src_data->service_operation);
