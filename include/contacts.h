@@ -977,10 +977,6 @@
  * <tr><td>string</td><td> status </td><td>read, write</td><td> </td></tr>
  * <tr><td>string</td><td> service_operation </td><td></td><td> </td></tr>
  * <tr><td>string</td><td> uri </td><td></td><td> </td></tr>
- * <tr><td>string</td><td> sync_data1 </td><td>read, write</td><td> </td></tr>
- * <tr><td>string</td><td> sync_data2 </td><td>read, write</td><td> </td></tr>
- * <tr><td>string</td><td> sync_data3 </td><td>read, write</td><td> </td></tr>
- * <tr><td>string</td><td> sync_data4 </td><td>read, write</td><td> </td></tr>
  * <tr><td>string</td><td> photo </td><td>read, write</td><td> </td></tr>
  * </table>
  *
@@ -1310,10 +1306,6 @@
  * <tr><td>integer</td><td> timestamp </td><td></td><td> </td></tr>
  * <tr><td>string</td><td> service_operation </td><td></td><td> </td></tr>
  * <tr><td>string</td><td> uri </td><td></td><td> </td></tr>
- * <tr><td>string</td><td> sync_data1 </td><td></td><td> </td></tr>
- * <tr><td>string</td><td> sync_data2 </td><td></td><td> </td></tr>
- * <tr><td>string</td><td> sync_data3 </td><td></td><td> </td></tr>
- * <tr><td>string</td><td> sync_data4 </td><td></td><td> </td></tr>
  * </table>
  *
  * @section CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_phone_log_number _contacts_phone_log_number view

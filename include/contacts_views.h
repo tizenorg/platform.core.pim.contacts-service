@@ -339,10 +339,6 @@ _CONTACTS_BEGIN_VIEW()
 	_CONTACTS_PROPERTY_INT( timestamp )				// read, write
 	_CONTACTS_PROPERTY_STR( service_operation )		// read, write
 	_CONTACTS_PROPERTY_STR( uri )					// read, write
-	_CONTACTS_PROPERTY_STR( sync_data1 )			// read, write
-	_CONTACTS_PROPERTY_STR( sync_data2 )			// read, write
-	_CONTACTS_PROPERTY_STR( sync_data3 )			// read, write
-	_CONTACTS_PROPERTY_STR( sync_data4 )			// read, write
 	_CONTACTS_PROPERTY_CHILD_MULTIPLE(photo)		// read, write
 _CONTACTS_END_VIEW( _contacts_activity )
 
@@ -585,10 +581,6 @@ _CONTACTS_BEGIN_READ_ONLY_VIEW()
 	_CONTACTS_PROPERTY_INT( timestamp )
 	_CONTACTS_PROPERTY_STR( service_operation )
 	_CONTACTS_PROPERTY_STR( uri )
-	_CONTACTS_PROPERTY_PROJECTION_STR( sync_data1 )
-	_CONTACTS_PROPERTY_PROJECTION_STR( sync_data2 )
-	_CONTACTS_PROPERTY_PROJECTION_STR( sync_data3 )
-	_CONTACTS_PROPERTY_PROJECTION_STR( sync_data4 )
 _CONTACTS_END_READ_ONLY_VIEW( _contacts_contact_activity )
 
 // phone_log number list : read only

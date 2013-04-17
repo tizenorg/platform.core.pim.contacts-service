@@ -953,10 +953,6 @@ static int __ctsvc_activity_destroy(contacts_record_h record, bool delete_child)
 	free(activity->status);
 	free(activity->service_operation);
 	free(activity->uri);
-	free(activity->sync_data1);
-	free(activity->sync_data2);
-	free(activity->sync_data3);
-	free(activity->sync_data4);
 	contacts_list_destroy((contacts_list_h)activity->photos, delete_child);
 	free(activity);
 
@@ -2871,18 +2867,6 @@ static int __ctsvc_activity_get_str_real(contacts_record_h record, unsigned int 
 	case CTSVC_PROPERTY_ACTIVITY_URI:
 		*out_str = GET_STR(copy, activity->uri);
 		break;
-	case CTSVC_PROPERTY_ACTIVITY_SYNC_DATA1:
-		*out_str = GET_STR(copy, activity->sync_data1);
-		break;
-	case CTSVC_PROPERTY_ACTIVITY_SYNC_DATA2:
-		*out_str = GET_STR(copy, activity->sync_data2);
-		break;
-	case CTSVC_PROPERTY_ACTIVITY_SYNC_DATA3:
-		*out_str = GET_STR(copy, activity->sync_data3);
-		break;
-	case CTSVC_PROPERTY_ACTIVITY_SYNC_DATA4:
-		*out_str = GET_STR(copy, activity->sync_data4);
-		break;
 	default :
 		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(activity)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
@@ -3412,18 +3396,6 @@ static int __ctsvc_activity_set_str(contacts_record_h record, unsigned int prope
 	case CTSVC_PROPERTY_ACTIVITY_URI:
 		FREEandSTRDUP(activity->uri, str);
 		break;
-	case CTSVC_PROPERTY_ACTIVITY_SYNC_DATA1:
-		FREEandSTRDUP(activity->sync_data1, str);
-		break;
-	case CTSVC_PROPERTY_ACTIVITY_SYNC_DATA2:
-		FREEandSTRDUP(activity->sync_data2, str);
-		break;
-	case CTSVC_PROPERTY_ACTIVITY_SYNC_DATA3:
-		FREEandSTRDUP(activity->sync_data3, str);
-		break;
-	case CTSVC_PROPERTY_ACTIVITY_SYNC_DATA4:
-		FREEandSTRDUP(activity->sync_data4, str);
-		break;
 	default :
 		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(activity)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
@@ -3877,10 +3849,6 @@ static int __ctsvc_activity_clone(contacts_record_h record, contacts_record_h *o
 	out_data->status = SAFE_STRDUP(src_data->status);
 	out_data->service_operation = SAFE_STRDUP(src_data->service_operation);
 	out_data->uri = SAFE_STRDUP(src_data->uri);
-	out_data->sync_data1 = SAFE_STRDUP(src_data->sync_data1);
-	out_data->sync_data2 = SAFE_STRDUP(src_data->sync_data2);
-	out_data->sync_data3 = SAFE_STRDUP(src_data->sync_data3);
-	out_data->sync_data4 = SAFE_STRDUP(src_data->sync_data4);
 
 	ctsvc_list_clone((contacts_list_h)src_data->photos, (contacts_list_h*)&out_data->photos);
 	out_data->photos->l_type = CTSVC_RECORD_ACTIVITY_PHOTO;

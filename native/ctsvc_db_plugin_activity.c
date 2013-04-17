@@ -117,9 +117,8 @@ static int __ctsvc_db_activity_insert_record( contacts_record_h record, int *id 
 
 	snprintf(query, sizeof(query), "INSERT INTO "CTS_TABLE_ACTIVITIES"("
 			"contact_id, source_name, status, timestamp, "
-			"service_operation, uri, "
-			"sync_data1, sync_data2, sync_data3, sync_data4) "
-			"VALUES(%d, ?, ?, %d, ?, ?, ?, ?, ?, ?)",
+			"service_operation, uri) "
+			"VALUES(%d, ?, ?, %d, ?, ?)",
 			activity->contact_id, activity->timestamp);
 
 	stmt = cts_query_prepare(query);
@@ -137,14 +136,6 @@ static int __ctsvc_db_activity_insert_record( contacts_record_h record, int *id 
 		cts_stmt_bind_text(stmt, 3, activity->service_operation);
 	if (activity->uri)
 		cts_stmt_bind_text(stmt, 4, activity->uri);
-	if (activity->sync_data1)
-		cts_stmt_bind_text(stmt, 5, activity->sync_data1);
-	if (activity->sync_data2)
-		cts_stmt_bind_text(stmt, 6, activity->sync_data2);
-	if (activity->sync_data3)
-		cts_stmt_bind_text(stmt, 7, activity->sync_data3);
-	if (activity->sync_data4)
-		cts_stmt_bind_text(stmt, 8, activity->sync_data4);
 
 	ret = cts_stmt_step(stmt);
 	if (CONTACTS_ERROR_NONE != ret) {
@@ -230,13 +221,6 @@ static int __ctsvc_db_activity_value_set(cts_stmt stmt, contacts_record_h *recor
 	temp = ctsvc_stmt_get_text(stmt, i++);
 	activity->uri = SAFE_STRDUP(temp);
 	temp = ctsvc_stmt_get_text(stmt, i++);
-	activity->sync_data1 = SAFE_STRDUP(temp);
-	temp = ctsvc_stmt_get_text(stmt, i++);
-	activity->sync_data2 = SAFE_STRDUP(temp);
-	temp = ctsvc_stmt_get_text(stmt, i++);
-	activity->sync_data3 = SAFE_STRDUP(temp);
-	temp = ctsvc_stmt_get_text(stmt, i++);
-	activity->sync_data4 = SAFE_STRDUP(temp);
 
 	return CONTACTS_ERROR_NONE;
 }
@@ -284,8 +268,7 @@ static int __ctsvc_db_activity_get_record( int id, contacts_record_h* out_record
 	contacts_record_h record;
 
 	snprintf(query, sizeof(query), "SELECT id, contact_id, source_name, status, "
-					"timestamp, service_operation, uri, "
-					"sync_data1, sync_data2, sync_data3, sync_data4 "
+					"timestamp, service_operation, uri "
 					"FROM "CTSVC_DB_VIEW_ACTIVITY" WHERE id = %d", id);
 
 	stmt = cts_query_prepare(query);
@@ -493,22 +476,6 @@ static int __ctsvc_db_activity_get_records_with_query( contacts_query_h query, i
 			case CTSVC_PROPERTY_ACTIVITY_URI:
 				temp = ctsvc_stmt_get_text(stmt, i);
 				activity->uri = SAFE_STRDUP(temp);
-				break;
-			case CTSVC_PROPERTY_ACTIVITY_SYNC_DATA1:
-				temp = ctsvc_stmt_get_text(stmt, i);
-				activity->sync_data1 = SAFE_STRDUP(temp);
-				break;
-			case CTSVC_PROPERTY_ACTIVITY_SYNC_DATA2:
-				temp = ctsvc_stmt_get_text(stmt, i);
-				activity->sync_data2 = SAFE_STRDUP(temp);
-				break;
-			case CTSVC_PROPERTY_ACTIVITY_SYNC_DATA3:
-				temp = ctsvc_stmt_get_text(stmt, i);
-				activity->sync_data3 = SAFE_STRDUP(temp);
-				break;
-			case CTSVC_PROPERTY_ACTIVITY_SYNC_DATA4:
-				temp = ctsvc_stmt_get_text(stmt, i);
-				activity->sync_data4 = SAFE_STRDUP(temp);
 				break;
 			default:
 				break;

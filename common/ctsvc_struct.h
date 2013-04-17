@@ -416,10 +416,6 @@ typedef struct {
 	ctsvc_list_s* photos;
 	char *service_operation;
 	char *uri;
-	char *sync_data1;
-	char *sync_data2;
-	char *sync_data3;
-	char *sync_data4;
 }ctsvc_activity_s;
 
 typedef struct {

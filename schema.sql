@@ -364,11 +364,7 @@ CREATE TABLE activities
 	status				TEXT,
 	timestamp			INTEGER,
 	service_operation	TEXT,
-	uri					TEXT,
-	sync_data1			TEXT,
-	sync_data2			TEXT,
-	sync_data3			TEXT,
-	sync_data4			TEXT
+	uri					TEXT
 );
 
 CREATE TABLE activity_photos
