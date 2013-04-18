@@ -31,12 +31,11 @@
 #include "ctsvc_normalize.h"
 #include "ctsvc_localize.h"
 #include "ctsvc_localize_ch.h"
-#include "ctsvc_common_setting.h"
 
 #define CTSVC_NORMALIZED_MAX_LEN 1024
 
 #define CTSVC_COMBINING_DIACRITICAL_MARKS_START 0x0300
-#define CTSVC_COMBINING_DIACRITICAL_MARKS_END 	0x036f
+#define CTSVC_COMBINING_DIACRITICAL_MARKS_END	0x036f
 
 typedef struct {
 	UChar letter;
@@ -591,136 +590,6 @@ int ctsvc_normalize_index(const char *src, char **dest)
 		__ctsvc_convert_japanese_group_letter(*dest);
 	}
 	return ret;
-}
-
-static int __ctsvc_get_language_index(const char *locale, char ***index, int *count)
-{
-	ULocaleData* uld;
-	USet *indexChars;
-	UErrorCode error = U_ZERO_ERROR;
-	int32_t itemCount;
-	int32_t j;
-	char **temp;
-
-	uld = ulocdata_open(locale, &error);
-	indexChars = uset_openEmpty();
-
-	ulocdata_getExemplarSet(uld, indexChars, 0, ULOCDATA_ES_INDEX, &error);
-	ulocdata_close(uld);
-	CTS_VERBOSE("locale : %s\n", locale);
-
-	if (U_FAILURE(error))
-		return 0;
-
-	if (error == U_USING_DEFAULT_WARNING)
-		uset_clear(indexChars);
-
-	itemCount = uset_size(indexChars);
-	CTS_VERBOSE("Size of USet : %d\n", itemCount);
-
-	temp = (char **)calloc(itemCount, sizeof(char*));
-	for (j = 0; j < itemCount; j++){
-		UChar ch[2] = {0};
-		char dest[10];
-		int size;
-		ch[0] = uset_charAt(indexChars, j);
-		u_strToUTF8(dest, sizeof(dest)-1, &size, ch, -1, &error);
-		CTS_VERBOSE("[%d] len : %d, %s\n", j+1, size, dest);
-		temp[j] = strdup(dest);
-	}
-	*count = (int)itemCount;
-	*index = (char **)temp;
-	uset_clear(indexChars);
-	return 0;
-}
-
-API int contacts_utils_get_index_characters(char **index_string)
-{
-	const char *first;
-	const char *second;
-	int lang_first = CTSVC_LANG_ENGLISH;
-	int lang_second = CTSVC_LANG_KOREAN;
-	int sort_first, sort_second;
-	char **first_list = NULL;
-	char **second_list = NULL;
-	char list[1024] = {0,};
-	int i;
-	int first_len = 0;
-	int second_len = 0;
-
-	RETV_IF(NULL == index_string, CONTACTS_ERROR_INVALID_PARAMETER);
-	char temp[5];
-
-	sprintf(list, "#");
-	strcat(list, ":");
-
-	i = 0;
-	sprintf(temp, "%d", i);
-	strcat(list, temp);
-	for (i=1;i<10;i++) {
-		sprintf(temp, ";%d", i);
-		strcat(list, temp);
-	}
-	strcat(list, ":");
-
-	sort_first = ctsvc_get_default_language();
-	switch(sort_first)
-	{
-	case CTSVC_SORT_WESTERN:
-		lang_first = CTSVC_LANG_ENGLISH;
-		break;
-	case CTSVC_SORT_KOREAN:
-		lang_first = CTSVC_LANG_KOREAN;
-		break;
-	case CTSVC_SORT_JAPANESE:
-		lang_first = CTSVC_LANG_JAPANESE;
-		break;
-	default:
-		CTS_ERR("The default language is not valid");
-	}
-
-	first = ctsvc_get_language(lang_first);
-	__ctsvc_get_language_index(first, &first_list, &first_len);
-	for (i=0;i<first_len;i++) {
-		strcat(list, first_list[i]);
-		if (i != (first_len-1))
-			strcat(list, ";");
-		free(first_list[i]);
-	}
-	free(first_list);
-
-	sort_second = ctsvc_get_secondary_language();
-	switch(sort_second)
-	{
-	case CTSVC_SORT_WESTERN:
-		lang_second = CTSVC_LANG_ENGLISH;
-		break;
-	case CTSVC_SORT_KOREAN:
-		lang_second = CTSVC_LANG_KOREAN;
-		break;
-	case CTSVC_SORT_JAPANESE:
-		lang_second = CTSVC_LANG_JAPANESE;
-		break;
-	default:
-		CTS_ERR("The default language is not valid");
-	}
-	second = ctsvc_get_language(lang_second);
-	if (lang_first != lang_second)
-		__ctsvc_get_language_index(second, &second_list, &second_len);
-
-	if (0 < second_len) {
-		strcat(list, ":");
-		for (i=0;i<second_len;i++) {
-			strcat(list, second_list[i]);
-			if (i != (second_len-1))
-				strcat(list, ";");
-			free(second_list[i]);
-		}
-	}
-	free(second_list);
-
-	*index_string = strdup(list);
-	return CONTACTS_ERROR_NONE;
 }
 
 ////// contacts_normalized_strstr API should be separated from contacts-service /////////////////////////////////////////////////////////////

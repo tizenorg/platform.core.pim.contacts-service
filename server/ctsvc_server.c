@@ -93,6 +93,8 @@ static int __server_main(void)
 		if (pims_ipc_svc_register(CTSVC_IPC_SETTING_MODULE, CTSVC_IPC_SERVER_SETTING_GET_NAME_SORTING_ORDER, ctsvc_ipc_setting_get_name_sorting_order, NULL) != 0) break;
 		if (pims_ipc_svc_register(CTSVC_IPC_SETTING_MODULE, CTSVC_IPC_SERVER_SETTING_SET_NAME_SORTING_ORDER, ctsvc_ipc_setting_set_name_sorting_order, NULL) != 0) break;
 
+		if (pims_ipc_svc_register(CTSVC_IPC_UTILS_MODULE, CTSVC_IPC_SERVER_UTILS_GET_INDEX_CHARACTERS, ctsvc_ipc_utils_get_index_characters, NULL) != 0) break;
+
 		pims_ipc_svc_init_for_publish(CTSVC_IPC_SOCKET_PATH_FOR_CHANGE_SUBSCRIPTION, CTS_SECURITY_FILE_GROUP, 0660);
 
 		ret = contacts_connect2();

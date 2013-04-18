@@ -34,7 +34,6 @@
 #include "ctsvc_inotify.h"
 #include "ctsvc_db_init.h"
 #include "ctsvc_setting.h"
-#include "ctsvc_common_setting.h"
 
 static int ctsvc_connection = 0;
 static __thread int thread_connection = 0;
@@ -62,7 +61,6 @@ API int contacts_connect2()
 		ctsvc_db_plugin_init();
 		ctsvc_view_uri_init();
 		ctsvc_register_vconf();
-		ctsvc_register_common_vconf();
 		ret = account_connect();
 		if (ACCOUNT_ERROR_NONE != ret)
 			CTS_ERR("account_connect Failed(%d)", ret);
@@ -101,7 +99,6 @@ API int contacts_disconnect2()
 		ctsvc_socket_final();
 		ctsvc_inotify_close();
 		ctsvc_deregister_vconf();
-		ctsvc_deregister_common_vconf();
 		ctsvc_view_uri_deinit();
 		ctsvc_db_plugin_deinit();
 		ret = account_disconnect();

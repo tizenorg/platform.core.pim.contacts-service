@@ -44,4 +44,6 @@ void ctsvc_ipc_setting_set_name_display_order(pims_ipc_h ipc, pims_ipc_data_h in
 void ctsvc_ipc_setting_get_name_sorting_order(pims_ipc_h ipc, pims_ipc_data_h indata, pims_ipc_data_h *outdata, void *userdata);
 void ctsvc_ipc_setting_set_name_sorting_order(pims_ipc_h ipc, pims_ipc_data_h indata, pims_ipc_data_h *outdata, void *userdata);
 
+void ctsvc_ipc_utils_get_index_characters(pims_ipc_h ipc, pims_ipc_data_h indata, pims_ipc_data_h *outdata, void *userdata);
+
 #endif /*__CTSVC_IPC_SERVER2_H__*/

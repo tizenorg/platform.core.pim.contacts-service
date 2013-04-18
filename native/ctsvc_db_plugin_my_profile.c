@@ -206,8 +206,8 @@ static int __ctsvc_db_my_profile_get_record( int id, contacts_record_h* out_reco
 	}
 
 	ret = __ctsvc_db_my_profile_get_data(id, my_profile);
-	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_get_data_info Failed(%d)", ret);
+	if (CONTACTS_ERROR_NONE != ret && CONTACTS_ERROR_NO_DATA != ret) {
+		CTS_ERR("__ctsvc_db_my_profile_get_data Failed(%d)", ret);
 		contacts_record_destroy(record, true);
 		return ret;
 	}
@@ -836,8 +836,8 @@ static int __ctsvc_db_my_profile_get_records_with_query( contacts_query_h query,
 			}
 		}
 		ret = __ctsvc_db_my_profile_get_data(my_profile_id, my_profile);
-		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("ctsvc_get_data_info Failed(%d)", ret);
+		if (CONTACTS_ERROR_NONE != ret && CONTACTS_ERROR_NO_DATA != ret) {
+			CTS_ERR("__ctsvc_db_my_profile_get_data Failed(%d)", ret);
 			cts_stmt_finalize(stmt);
 			contacts_list_destroy(list, true);
 			return ret;

@@ -16,6 +16,7 @@ SET(SRCS
 	ctsvc_client_ipc.c
 	ctsvc_client_noti.c
 	ctsvc_client_setting.c
+	ctsvc_client_utils.c
 
 	${CMAKE_SOURCE_DIR}/common/ipc/ctsvc_ipc_marshal.c
 	${CMAKE_SOURCE_DIR}/common/ipc/ctsvc_ipc_addressbook.c
@@ -69,7 +70,6 @@ SET(SRCS
 	${CMAKE_SOURCE_DIR}/common/ctsvc_record_sdn.c
 	${CMAKE_SOURCE_DIR}/common/ctsvc_record_speeddial.c
 	${CMAKE_SOURCE_DIR}/common/ctsvc_record_updated_info.c
-	${CMAKE_SOURCE_DIR}/common/ctsvc_common_setting.c
 	${CMAKE_SOURCE_DIR}/common/ctsvc_sim.c
 	${CMAKE_SOURCE_DIR}/common/ctsvc_socket.c
 	${CMAKE_SOURCE_DIR}/common/ctsvc_vcard.c

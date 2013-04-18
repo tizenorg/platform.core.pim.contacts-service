@@ -994,3 +994,41 @@ ERROR_RETURN:
 	return;
 }
 
+void ctsvc_ipc_utils_get_index_characters(pims_ipc_h ipc, pims_ipc_data_h indata,
+		pims_ipc_data_h *outdata, void *userdata)
+{
+	int ret = CONTACTS_ERROR_NONE;
+	char *indexs = NULL;
+
+	ret = contacts_utils_get_index_characters(&indexs);
+
+	if (outdata) {
+		*outdata = pims_ipc_data_create(0);
+		if (!*outdata) {
+			ERR("pims_ipc_data_create fail");
+			free(indexs);
+			return;
+		}
+		if (pims_ipc_data_put(*outdata, (void*)&ret, sizeof(int)) != 0) {
+			pims_ipc_data_destroy(*outdata);
+			*outdata = NULL;
+			ERR("pims_ipc_data_put fail (return value)");
+			free(indexs);
+			return;
+		}
+		ret = ctsvc_ipc_marshal_string(indexs, *outdata);
+		if (ret != CONTACTS_ERROR_NONE) {
+			CTS_ERR("ctsvc_ipc_marshal_string fail");
+			pims_ipc_data_destroy(*outdata);
+			free(indexs);
+			return;
+		}
+	}
+	else {
+		ERR("outdata is NULL");
+	}
+
+	free(indexs);
+	return;
+}
+

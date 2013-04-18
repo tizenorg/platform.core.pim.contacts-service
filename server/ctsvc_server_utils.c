@@ -23,7 +23,6 @@
 
 #include "internal.h"
 #include "ctsvc_setting.h"
-#include "ctsvc_common_setting.h"
 #include "ctsvc_server_utils.h"
 #include "ctsvc_server_sim.h"
 #include "ctsvc_server_sqlite.h"

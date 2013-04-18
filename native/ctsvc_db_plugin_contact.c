@@ -270,7 +270,7 @@ static int __ctsvc_db_contact_get_record( int id, contacts_record_h* out_record 
 	}
 
 	ret = __ctsvc_db_get_data(id, contact);
-	if (CONTACTS_ERROR_NONE != ret) {
+	if (CONTACTS_ERROR_NONE != ret && CONTACTS_ERROR_NO_DATA != ret) {
 		CTS_ERR("ctsvc_get_data_info Failed(%d)", ret);
 		contacts_record_destroy(record, true);
 		return ret;
@@ -1500,7 +1500,7 @@ static int __ctsvc_db_contact_get_records_with_query( contacts_query_h query, in
 			}
 		}
 		ret = __ctsvc_db_get_data(contact_id, contact);
-		if (CONTACTS_ERROR_NONE != ret) {
+		if (CONTACTS_ERROR_NONE != ret && CONTACTS_ERROR_NO_DATA != ret) {
 			CTS_ERR("ctsvc_get_data_info Failed(%d)", ret);
 			cts_stmt_finalize(stmt);
 			contacts_list_destroy(list, true);

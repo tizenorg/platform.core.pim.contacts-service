@@ -31,7 +31,7 @@
 #include "ctsvc_utils.h"
 #include "ctsvc_record.h"
 #include "ctsvc_normalize.h"
-#include "ctsvc_common_setting.h"
+#include "ctsvc_setting.h"
 #include "ctsvc_localize.h"
 #include "ctsvc_localize_ch.h"
 #include "ctsvc_notification.h"
