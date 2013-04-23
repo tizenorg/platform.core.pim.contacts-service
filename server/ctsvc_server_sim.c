@@ -273,7 +273,7 @@ static inline int __ctsvc_server_insert_db_num(contacts_record_h *record, char *
 	h_retvm_if(ret < CONTACTS_ERROR_NONE,ret, "contacts_record_destroy() Failed(%d)", ret);
 	ret = contacts_record_set_str(*record, _contacts_number.number, number);
 	h_retvm_if(ret < CONTACTS_ERROR_NONE,ret, "contacts_record_set_str() Failed(%d)", ret);
-	ret = contacts_record_set_int(*record, _contacts_number.type, CONTACTS_NUMBER_TYPE_CELL);
+	ret = contacts_record_set_int(*record, _contacts_number.type, CONTACTS_NUMBER_TYPE_OTHER);
 	h_retvm_if(ret < CONTACTS_ERROR_NONE,ret, "contacts_record_set_int() Failed(%d)", ret);
 	return ret;
 }
@@ -288,7 +288,7 @@ static inline int __ctsvc_server_insert_db_email(contacts_record_h *record, char
 	h_retvm_if(ret < CONTACTS_ERROR_NONE,ret, "contacts_record_destroy() Failed(%d)", ret);
 	ret = contacts_record_set_str(*record, _contacts_email.email, email);
 	h_retvm_if(ret < CONTACTS_ERROR_NONE,ret, "contacts_record_set_str() Failed(%d)", ret);
-	ret = contacts_record_set_int(*record, _contacts_email.type,CONTACTS_EMAIL_TYPE_HOME);
+	ret = contacts_record_set_int(*record, _contacts_email.type,CONTACTS_EMAIL_TYPE_OTHER);
 	h_retvm_if(ret < CONTACTS_ERROR_NONE,ret, "contacts_record_set_int() Failed(%d)", ret);
 	return ret;
 }
@@ -333,14 +333,10 @@ static int __ctsvc_server_insert_contact_to_db(sim_contact_s *record,int* contac
 	}
 	SERVER_DBG("insert record -> nick name %s", record->nickname);
 */
-	if (record->number) {
-		contacts_record_create(_contacts_number._uri, &number);
-		if (number) {
-			contacts_record_set_str(number, _contacts_number.number, (char *)record->number);
-			contacts_record_set_int(number, _contacts_number.type, CONTACTS_NUMBER_TYPE_CELL);
-			contacts_record_add_child_record(contact, _contacts_contact.number, number);
-		}
-	}
+
+	ret = __ctsvc_server_insert_db_num(&number, (char *)record->number);
+	if (CONTACTS_ERROR_NONE == ret)
+		contacts_record_add_child_record(contact, _contacts_contact.number, number);
 	SERVER_DBG("insert record ->number %s", record->number);
 
 /*	ret = __ctsvc_server_insert_db_num(&number, (char *)record->anr1);

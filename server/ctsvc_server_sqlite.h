@@ -23,8 +23,7 @@
 
 int ctsvc_server_db_open(sqlite3 **db);
 int ctsvc_server_db_close(void);
-int ctsvc_server_update_default_language(int prev_sort_primary, int prev_sort_secondary, int new_sort_primary, int new_sort_secondary);
-int ctsvc_server_update_secondary_language(int prev_lang, int new_lang);
+int ctsvc_server_update_sort(int prev_sort_primary, int prev_sort_secondary, int new_sort_primary, int new_sort_secondary);
 int ctsvc_server_insert_sdn_contact(const char *name, const char *number);
 int ctsvc_server_delete_sdn_contact(void);
 int ctsvc_server_update_collation();

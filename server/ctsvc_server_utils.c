@@ -33,26 +33,13 @@ static const char *CTSVC_SERVER_VCONF_TAPI_SIM_PB_INIT = VCONFKEY_TELEPHONY_SIM_
 static const char *CTSVC_SERVER_VCONF_SYSTEM_LANGUAGE = VCONFKEY_LANGSET;
 
 
-static int primary_sort = -1;
 static int system_language = -1;
-static int secondary_sort = -1;
 
-inline int ctsvc_server_set_default_language(int lang)
+inline int ctsvc_server_set_default_sort(int sort)
 {
-	int ret = vconf_set_int(ctsvc_get_default_language_vconfkey(), lang);
+	int ret = vconf_set_int(ctsvc_get_default_sort_vconfkey(), sort);
 	h_retvm_if(ret<0, CONTACTS_ERROR_INTERNAL, "vconf_set_int() Failed(%d)", ret);
-
-	primary_sort = lang;
-
-	{
-		if (primary_sort==CTSVC_SORT_KOREAN)
-			secondary_sort = CTSVC_SORT_WESTERN;
-		else if (primary_sort==CTSVC_SORT_WESTERN)
-			secondary_sort = CTSVC_SORT_KOREAN;
-		else
-			secondary_sort = CTSVC_SORT_WESTERN;
-	}
-	DBG("primary %d second %d", primary_sort, secondary_sort);
+	ctscts_set_sort_memory(sort);
 	return CONTACTS_ERROR_NONE;
 }
 
@@ -60,39 +47,31 @@ static void ctsvc_server_change_language_cb(keynode_t *key, void *data)
 {
 	int ret = -1;
 	int new_primary_sort, new_secondary_sort;
+	int old_primary_sort, old_secondary_sort;
 	const char *langset;
+
+	old_primary_sort = ctsvc_get_primary_sort();
+	if (old_primary_sort < 0) {
+		h_retm_if(ret<0, "ctsvc_get_primary_sort() Fail(%d)", ret);
+	}
+	old_secondary_sort = ctsvc_get_secondary_sort();
+	if (old_secondary_sort < 0) {
+		h_retm_if(ret<0, "ctsvc_get_secondary_sort() Fail(%d)", ret);
+	}
 
 	langset = vconf_keynode_get_str(key);
 	system_language = ctsvc_get_language_type(langset);
-	switch(system_language)
-	{
-	case CTSVC_LANG_KOREAN:
-		new_primary_sort = CTSVC_SORT_KOREAN;
-		break;
-	case CTSVC_LANG_JAPANESE:
-		new_primary_sort = CTSVC_SORT_JAPANESE;
-		break;
-	default:
-		new_primary_sort = CTSVC_SORT_WESTERN;
-		break;
-	}
+	new_primary_sort = ctsvc_get_sort_type_from_language(system_language);
 
-	if (primary_sort ==-1) {
-		ret = vconf_get_int(ctsvc_get_default_language_vconfkey(), &primary_sort);
-		h_retm_if(ret<0, "vconf_get_int() Failed(%d)", ret);
-	}
+	if (new_primary_sort==CTSVC_SORT_KOREAN)
+		new_secondary_sort = CTSVC_SORT_WESTERN;
+	else if (new_primary_sort==CTSVC_SORT_WESTERN)
+		new_secondary_sort = CTSVC_SORT_KOREAN;
+	else
+		new_secondary_sort = CTSVC_SORT_WESTERN;
 
-	{
-		if (new_primary_sort==CTSVC_SORT_KOREAN)
-			new_secondary_sort = CTSVC_SORT_WESTERN;
-		else if (new_primary_sort==CTSVC_SORT_WESTERN)
-			new_secondary_sort = CTSVC_SORT_KOREAN;
-		else
-			new_secondary_sort = CTSVC_SORT_WESTERN;
-	}
-
-	if (new_primary_sort != primary_sort)
-		ret = ctsvc_server_update_default_language(primary_sort, secondary_sort, new_primary_sort, new_secondary_sort);
+	if (new_primary_sort != old_primary_sort)
+		ret = ctsvc_server_update_sort(old_primary_sort, old_secondary_sort, new_primary_sort, new_secondary_sort);
 }
 
 static void ctsvc_server_update_collation_cb(keynode_t *key, void *data)
@@ -134,24 +113,12 @@ int ctsvc_server_init_configuration(void)
 	h_warn_if(NULL == langset, "vconf_get_str(%s) return NULL", CTSVC_SERVER_VCONF_SYSTEM_LANGUAGE);
 	system_language = ctsvc_get_language_type(langset);
 
-	ret = vconf_get_int(ctsvc_get_default_language_vconfkey(), &sort_type);
+	ret = vconf_get_int(ctsvc_get_default_sort_vconfkey(), &sort_type);
 	if (ret < 0 || sort_type == CTSVC_SORT_OTHERS) {
-		ERR("vconf_get_int(%s) Failed(%d)", ctsvc_get_default_language_vconfkey() ,ret);
-
-		switch(system_language)
-		{
-		case CTSVC_LANG_KOREAN:
-			sort_type = CTSVC_SORT_KOREAN;
-			break;
-		case CTSVC_LANG_JAPANESE:
-			sort_type = CTSVC_SORT_JAPANESE;
-			break;
-		default:
-			sort_type = CTSVC_SORT_WESTERN;
-		}
+		ERR("vconf_get_int(%s) Failed(%d)", ctsvc_get_default_sort_vconfkey() ,ret);
+		sort_type = ctsvc_get_sort_type_from_language(system_language);
 	}
-
-	ctsvc_server_set_default_language(sort_type);
+	ctsvc_server_set_default_sort(sort_type);
 
 	ret = vconf_notify_key_changed(CTSVC_SERVER_VCONF_SYSTEM_LANGUAGE,
 			ctsvc_server_change_language_cb, NULL);

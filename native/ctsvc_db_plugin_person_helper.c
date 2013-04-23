@@ -257,17 +257,9 @@ int ctsvc_db_insert_person(contacts_record_h record)
 	int ret, index;
 	cts_stmt stmt = NULL;
 	char query[CTS_SQL_MIN_LEN] = {0};
-	contacts_record_h addressbook;
 	int version;
 	ctsvc_contact_s *contact = (ctsvc_contact_s*)record;
 	char *status = NULL;
-
-	ret = contacts_db_get_record(_contacts_address_book._uri, contact->addressbook_id, &addressbook);
-	if(CONTACTS_ERROR_NONE != ret) {
-	   CTS_ERR("contacts_svc_get_addressbook() Failed\n");
-	   return CONTACTS_ERROR_DB;
-	}
-	contacts_record_destroy(addressbook, true);
 
 	snprintf(query, sizeof(query),
 		"SELECT status FROM %s "
@@ -276,7 +268,7 @@ int ctsvc_db_insert_person(contacts_record_h record)
 		CTS_TABLE_ACTIVITIES, contact->id);
 	stmt = cts_query_prepare(query);
 	if (NULL == stmt) {
-		CTS_ERR("cts_query_prepare() Failed(%d)", ret);
+		CTS_ERR("DB error : cts_query_prepare() Failed()");
 		return CONTACTS_ERROR_DB;
 	}
 
@@ -295,7 +287,7 @@ int ctsvc_db_insert_person(contacts_record_h record)
 
 	stmt = cts_query_prepare(query);
 	if (NULL == stmt) {
-		CTS_ERR("cts_query_prepare() Failed(%d)", ret);
+		CTS_ERR("DB error : cts_query_prepare() Failed()");
 		free(status);
 		return CONTACTS_ERROR_DB;
 	}
@@ -325,7 +317,7 @@ int ctsvc_db_insert_person(contacts_record_h record)
 
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("cts_query_exec(%s) Failed(%d)", query, ret);
+		CTS_ERR("cts_query_exec Failed(%d)", ret);
 		free(status);
 		return ret;
 	}
@@ -387,7 +379,7 @@ static inline int __ctsvc_db_update_person_default(int person_id, int datatype)
 			CTS_DBG("%s", query);
 			ret = ctsvc_query_exec(query);
 			if (CONTACTS_ERROR_NONE != ret) {
-				CTS_ERR("cts_query_exec(%s) Failed(%d)", query, ret);
+				CTS_ERR("cts_query_exec Failed(%d)", ret);
 				cts_stmt_finalize(stmt);
 				return ret;
 			}
@@ -404,7 +396,7 @@ static inline int __ctsvc_db_update_person_default(int person_id, int datatype)
 				ret = cts_stmt_step(stmt);
 				cts_stmt_finalize(stmt);
 				if (CONTACTS_ERROR_NONE != ret) {
-					CTS_ERR("cts_query_exec(%s) Failed(%d)", query, ret);
+					CTS_ERR("cts_query_exec Failed(%d)", ret);
 					return ret;
 				}
 			}

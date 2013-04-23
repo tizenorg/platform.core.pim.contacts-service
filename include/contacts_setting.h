@@ -99,7 +99,7 @@ typedef enum
  *
  * @see contacts_connect2()
  */
-API int contacts_setting_get_name_sorting_order(contacts_name_sorting_order_e *name_sort_order);
+API int contacts_setting_get_name_sorting_order(contacts_name_sorting_order_e *name_sorting_order);
 
 /**
  * @brief	Sets the contacts name sorting order in which contacts are returned.

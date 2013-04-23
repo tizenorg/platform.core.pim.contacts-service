@@ -220,7 +220,6 @@ static int __ctsvc_db_activity_value_set(cts_stmt stmt, contacts_record_h *recor
 	activity->service_operation = SAFE_STRDUP(temp);
 	temp = ctsvc_stmt_get_text(stmt, i++);
 	activity->uri = SAFE_STRDUP(temp);
-	temp = ctsvc_stmt_get_text(stmt, i++);
 
 	return CONTACTS_ERROR_NONE;
 }

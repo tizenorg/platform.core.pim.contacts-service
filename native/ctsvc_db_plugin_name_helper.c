@@ -174,9 +174,9 @@ int ctsvc_db_name_insert(contacts_record_h record, int contact_id, bool is_my_pr
 		}
 
 
-		if (ctsvc_get_default_language() == ret)
+		if (ctsvc_get_primary_sort() == ret)
 			name->language_type = CTSVC_LANG_DEFAULT;
-		else if (ctsvc_get_secondary_language() == ret)
+		else if (ctsvc_get_secondary_sort() == ret)
 			name->language_type = CTSVC_LANG_SECONDARY;
 		else
 			name->language_type = ret;
@@ -315,9 +315,9 @@ int ctsvc_db_name_update(contacts_record_h record, bool is_my_profile)
 		break;
 	}
 
-	if (ctsvc_get_default_language() == ret)
+	if (ctsvc_get_primary_sort() == ret)
 		name->language_type = CTSVC_LANG_DEFAULT;
-	else if (ctsvc_get_secondary_language() == ret)
+	else if (ctsvc_get_secondary_sort() == ret)
 			name->language_type = CTSVC_LANG_SECONDARY;
 	else
 		name->language_type = ret;

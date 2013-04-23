@@ -915,14 +915,16 @@ int ctsvc_ipc_unmarshal_query(const pims_ipc_data_h ipc_data, contacts_query_h *
 	}
 	else
 	{
-		contacts_filter_h filter;
-		if (contacts_filter_create(que->view_uri,&filter) != CONTACTS_ERROR_NONE)
-		{
-			CTS_ERR("contacts_filter_create fail");
+		ctsvc_composite_filter_s *filter = NULL;
+		filter = (ctsvc_composite_filter_s *)calloc(1, sizeof(ctsvc_composite_filter_s));
+		if (NULL == filter) {
+			CTS_ERR("calloc fail");
 			ret = CONTACTS_ERROR_OUT_OF_MEMORY;
 			goto ERROR_RETURN;
 		}
-		que->filter = (ctsvc_composite_filter_s*)filter;
+		filter->filter_type = CTSVC_FILTER_COMPOSITE;
+		filter->properties = (property_info_s *)ctsvc_view_get_all_property_infos(que->view_uri, &filter->property_count);
+		que->filter = filter;
 
 		// for filter_type
 		if (ctsvc_ipc_unmarshal_unsigned_int(ipc_data, &count) != CONTACTS_ERROR_NONE)

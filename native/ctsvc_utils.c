@@ -23,7 +23,8 @@
 #include <sys/stat.h>
 #include <sys/vfs.h>
 #include <image_util.h>
-
+#include <vconf.h>
+#include <vconf-keys.h>
 #include <unicode/ulocdata.h>
 #include <unicode/uset.h>
 #include <unicode/ustring.h>
@@ -579,9 +580,8 @@ API int contacts_utils_get_index_characters(char **index_string)
 {
 	const char *first;
 	const char *second;
-	int lang_first = CTSVC_LANG_ENGLISH;
-	int lang_second = CTSVC_LANG_KOREAN;
-	int sort_first, sort_second;
+	int lang_first;
+	int lang_second = 0;
 	char **first_list = NULL;
 	char **second_list = NULL;
 	char list[1024] = {0,};
@@ -604,23 +604,14 @@ API int contacts_utils_get_index_characters(char **index_string)
 	}
 	strcat(list, ":");
 
-	sort_first = ctsvc_get_default_language();
-	switch(sort_first)
-	{
-	case CTSVC_SORT_WESTERN:
+	first = vconf_get_str(VCONFKEY_LANGSET);
+	if (NULL == first) {
+		CTS_ERR("vconf_get_str(%s) Fail", VCONFKEY_LANGSET);
 		lang_first = CTSVC_LANG_ENGLISH;
-		break;
-	case CTSVC_SORT_KOREAN:
-		lang_first = CTSVC_LANG_KOREAN;
-		break;
-	case CTSVC_SORT_JAPANESE:
-		lang_first = CTSVC_LANG_JAPANESE;
-		break;
-	default:
-		CTS_ERR("The default language is not valid");
+		first = ctsvc_get_language_locale(lang_first);
 	}
-
-	first = ctsvc_get_language(lang_first);
+	else
+		lang_first = ctsvc_get_language_type(first);
 	__ctsvc_get_language_index(first, &first_list, &first_len);
 	for (i=0;i<first_len;i++) {
 		strcat(list, first_list[i]);
@@ -630,24 +621,13 @@ API int contacts_utils_get_index_characters(char **index_string)
 	}
 	free(first_list);
 
-	sort_second = ctsvc_get_secondary_language();
-	switch(sort_second)
-	{
-	case CTSVC_SORT_WESTERN:
+	if (lang_first != CTSVC_LANG_ENGLISH)
 		lang_second = CTSVC_LANG_ENGLISH;
-		break;
-	case CTSVC_SORT_KOREAN:
-		lang_second = CTSVC_LANG_KOREAN;
-		break;
-	case CTSVC_SORT_JAPANESE:
-		lang_second = CTSVC_LANG_JAPANESE;
-		break;
-	default:
-		CTS_ERR("The default language is not valid");
-	}
-	second = ctsvc_get_language(lang_second);
-	if (lang_first != lang_second)
+
+	if (lang_second > 0) {
+		second = ctsvc_get_language_locale(lang_second);
 		__ctsvc_get_language_index(second, &second_list, &second_len);
+	}
 
 	if (0 < second_len) {
 		strcat(list, ":");

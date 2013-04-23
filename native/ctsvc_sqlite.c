@@ -210,7 +210,7 @@ cts_stmt cts_query_prepare(char *query) {
 		if (ret == SQLITE_BUSY || ret == SQLITE_LOCKED) {
 			gettimeofday(&now, NULL);
 			timersub(&now, &from, &diff);
-			retry = (diff.tv_sec < 1)? true:false; // retry it during 1 second
+			retry = (diff.tv_sec < 2)? true:false; // retry it during 2 second
 			if (retry)
 				usleep(50*1000); // 50 ms
 		} else

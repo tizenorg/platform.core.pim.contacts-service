@@ -136,12 +136,12 @@ static int __ctsvc_db_phonelog_update_record( contacts_record_h record )
 	GSList *bind_text = NULL;
 	GSList *cursor = NULL;
 
-	RETVM_IF(NULL == record, CONTACTS_ERROR_INVALID_PARAMETER, "Invaild parameter : record is null");
+	RETVM_IF(NULL == record, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : record is null");
 	RETVM_IF(phonelog->id <= 0, CONTACTS_ERROR_INVALID_PARAMETER,
 			"Invalid parameter : The phone_log has ID(%d)", phonelog->id);
 	RETVM_IF(phonelog->log_type != CONTACTS_PLOG_TYPE_VOICE_INCOMMING_SEEN &&
 			phonelog->log_type != CONTACTS_PLOG_TYPE_VIDEO_INCOMMING_SEEN, CONTACTS_ERROR_INVALID_PARAMETER,
-			"Invaild parameter : the type is can not updated(%d)", phonelog->log_type);
+			"Invalid parameter : the type is can not updated(%d)", phonelog->log_type);
 	RETVM_IF(CTSVC_PROPERTY_FLAG_DIRTY != (phonelog->base.property_flag & CTSVC_PROPERTY_FLAG_DIRTY), CONTACTS_ERROR_NONE, "No update");
 
 	ret = ctsvc_begin_trans();
@@ -439,7 +439,7 @@ static int __ctsvc_db_phonelog_insert_record( contacts_record_h record, int *id 
 	int ret;
 	ctsvc_phonelog_s *phonelog = (ctsvc_phonelog_s *)record;
 
-	RETVM_IF(NULL == record, CONTACTS_ERROR_INVALID_PARAMETER, "Invaild parameter : record is null");
+	RETVM_IF(NULL == record, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : record is null");
 	RETVM_IF(phonelog->id, CONTACTS_ERROR_INVALID_PARAMETER,
 			"Invalid parameter : The phone_log has ID(%d)", phonelog->id);
 

@@ -1056,7 +1056,7 @@ static inline int __ctsvc_contact_refresh_lookup_data(int contact_id)
 					return CONTACTS_ERROR_DB;
 				}
 
-				if (*normalized_nickname)
+				if (normalized_nickname && *normalized_nickname)
 					cts_stmt_bind_text(stmt, 1, normalized_nickname);
 
 				ret = cts_stmt_step(stmt);

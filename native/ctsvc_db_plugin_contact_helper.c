@@ -474,9 +474,9 @@ void ctsvc_make_contact_display_name(ctsvc_contact_s *contact)
 			}
 		}
 
-		if (ctsvc_get_default_language() == ret)
+		if (ctsvc_get_primary_sort() == ret)
 			contact->display_name_language = CTSVC_SORT_PRIMARY;
-		else if (ctsvc_get_secondary_language() == ret)
+		else if (ctsvc_get_secondary_sort() == ret)
 			contact->display_name_language = CTSVC_SORT_SECONDARY;
 		else
 			contact->display_name_language = ret;
@@ -534,9 +534,9 @@ void ctsvc_make_contact_display_name(ctsvc_contact_s *contact)
 			}
 		}
 
-		if (ctsvc_get_default_language() == ret)
+		if (ctsvc_get_primary_sort() == ret)
 			contact->reverse_display_name_language = CTSVC_SORT_PRIMARY;
-		else if (ctsvc_get_secondary_language() == ret)
+		else if (ctsvc_get_secondary_sort() == ret)
 			contact->reverse_display_name_language = CTSVC_SORT_SECONDARY;
 		else
 			contact->reverse_display_name_language = ret;

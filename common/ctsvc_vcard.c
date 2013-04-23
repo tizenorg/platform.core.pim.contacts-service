@@ -32,6 +32,7 @@
 #include "ctsvc_internal.h"
 #include "ctsvc_list.h"
 #include "ctsvc_vcard.h"
+#include "ctsvc_localize.h"
 
 #define SMART_STRDUP(src) (src && *src)?strdup(src):NULL
 #define CTSVC_VCARD_PHOTO_MAX_SIZE 1024*1024
@@ -480,6 +481,24 @@ static inline int __ctsvc_vcard_put_company_logo(const char *path, char **buf, i
 	return len;
 }
 
+static bool __ctsvc_vcard_is_valid_custom_label(char *label)
+{
+	char *src = label;
+	RETV_IF(NULL == label || '\0' == *label, false);
+
+	while (*src) {
+		char c = src[0];
+		RETV_IF(1 != ctsvc_check_utf8(c), false);
+		if (('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') ||
+				('0' <= c && c <= '9') || c == '-') {
+			src++;
+			continue;
+		}
+		return false;
+	}
+	return true;
+}
+
 static inline int __ctsvc_vcard_put_company_type(int type, char *label, char **buf, int* buf_size, int len)
 {
 	if (type == CONTACTS_COMPANY_TYPE_WORK) {
@@ -487,8 +506,10 @@ static inline int __ctsvc_vcard_put_company_type(int type, char *label, char **b
 	}
 
 	else if (type == CONTACTS_COMPANY_TYPE_CUSTOM) {
-		CTSVC_VCARD_APPEND_STR(buf,buf_size,len,"TYPE=X-");
-		CTSVC_VCARD_APPEND_STR(buf,buf_size,len, label);
+		if (__ctsvc_vcard_is_valid_custom_label(label)) {
+			CTSVC_VCARD_APPEND_STR(buf,buf_size,len,";TYPE=X-");
+			CTSVC_VCARD_APPEND_STR(buf,buf_size,len, label);
+		}
 	}
 	return len;
 }
@@ -623,8 +644,10 @@ static inline int __ctsvc_vcard_put_postal_type(int type, char *label, char **bu
 		type_str = "PARCEL";
 
 	if (type == CONTACTS_ADDRESS_TYPE_CUSTOM) {
-		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";TYPE=X-");
-		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, "label");
+		if (__ctsvc_vcard_is_valid_custom_label(label)) {
+			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";TYPE=X-");
+			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, "label");
+		}
 		return len;
 	}
 
@@ -796,8 +819,10 @@ static inline int __ctsvc_vcard_put_number_type(int type, char *label, char **bu
 	if (type & CONTACTS_NUMBER_TYPE_ASSISTANT)
 		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";TYPE=X-ASSISTANT");
 	if (type == CONTACTS_NUMBER_TYPE_CUSTOM) {
-		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";TYPE=X-");
-		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, label);
+		if (__ctsvc_vcard_is_valid_custom_label(label)) {
+			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";TYPE=X-");
+			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, label);
+		}
 		return len;
 	}
 	return len;
@@ -849,8 +874,10 @@ static inline int __ctsvc_vcard_put_email_type(int type, char *label, char **buf
 	else if (CONTACTS_EMAIL_TYPE_MOBILE == type)
 		type_str = "CELL";
 	else if (CONTACTS_EMAIL_TYPE_CUSTOM == type) {
-		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";TYPE=X-");
-		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, label);
+		if (__ctsvc_vcard_is_valid_custom_label(label)) {
+			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";TYPE=X-");
+			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, label);
+		}
 		return len;
 	}
 
@@ -892,8 +919,10 @@ static inline int __ctsvc_vcard_put_url_type(int type, char *label, char **buf, 
 	else if (CONTACTS_URL_TYPE_WORK == type)
 		type_str = "WORK";
 	else if (CONTACTS_URL_TYPE_CUSTOM == type) {
-		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";TYPE=X-");
-		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, label);
+		if (__ctsvc_vcard_is_valid_custom_label(label)) {
+			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";TYPE=X-");
+			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, label);
+		}
 		return len;
 	}
 	if (type_str) {
@@ -949,11 +978,19 @@ static inline int __ctsvc_vcard_append_events(ctsvc_list_s *event_list, char **b
 					CTSVC_CRLF);
 		}
 		else if (CONTACTS_EVENT_TYPE_CUSTOM == data->type) {
-			snprintf(event, sizeof(event), "%s;X-%s:%d-%02d-%02d%s",
-					content_name[CTSVC_VCARD_VALUE_X_TIZEN_EVENT],
-					SAFE_STR(data->label),
-					data->date/10000, (data->date%10000)/100, data->date%100,
-					CTSVC_CRLF);
+			if (__ctsvc_vcard_is_valid_custom_label(data->label)) {
+				snprintf(event, sizeof(event), "%s;TYPE=X-%s:%d-%02d-%02d%s",
+						content_name[CTSVC_VCARD_VALUE_X_TIZEN_EVENT],
+						SAFE_STR(data->label),
+						data->date/10000, (data->date%10000)/100, data->date%100,
+						CTSVC_CRLF);
+			}
+			else {
+				snprintf(event, sizeof(event), "%s:%d-%02d-%02d%s",
+						content_name[CTSVC_VCARD_VALUE_X_TIZEN_EVENT],
+						data->date/10000, (data->date%10000)/100, data->date%100,
+						CTSVC_CRLF);
+			}
 		}
 		else {
 			snprintf(event, sizeof(event), "%s:%d-%02d-%02d%s",
@@ -1014,8 +1051,10 @@ static inline int __ctsvc_vcard_append_messengers(ctsvc_list_s *messenger_list, 
 				break;
 			case CONTACTS_MESSENGER_TYPE_CUSTOM:
 				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, content_name[CTSVC_VCARD_VALUE_X_TIZEN_MESSENGER]);
-				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";TYPE=X-");
-				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, messenger->label);
+				if (__ctsvc_vcard_is_valid_custom_label(messenger->label)) {
+					CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";TYPE=X-");
+					CTSVC_VCARD_APPEND_STR(buf, buf_size, len, messenger->label);
+				}
 				CTSVC_VCARD_APPEND_CONTENT(buf, buf_size, len, messenger->im_id);
 				break;
 			default:
@@ -1087,8 +1126,10 @@ static inline int __ctsvc_vcard_put_relationship_type(int type, char *label, cha
 		type_str = "SPOUSE";
 		break;
 	case CONTACTS_RELATIONSHIP_TYPE_CUSTOM:
-		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";TYPE=X-");
-		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, label);
+		if (__ctsvc_vcard_is_valid_custom_label(label)) {
+			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";TYPE=X-");
+			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, label);
+		}
 		return len;
 	}
 

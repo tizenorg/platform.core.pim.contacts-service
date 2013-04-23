@@ -139,7 +139,7 @@ int ctsvc_server_end_trans(bool success)
 	return CONTACTS_ERROR_NONE;
 }
 
-int ctsvc_server_update_default_language(int prev_sort_primary, int prev_sort_secondary, int new_sort_primary, int new_sort_secondary)
+int ctsvc_server_update_sort(int prev_sort_primary, int prev_sort_secondary, int new_sort_primary, int new_sort_secondary)
 {
 	SERVER_FN_CALL;
 	int ret;
@@ -199,49 +199,49 @@ int ctsvc_server_update_default_language(int prev_sort_primary, int prev_sort_se
 
 	snprintf(query, sizeof(query), "UPDATE %s SET reverse_display_name_language=%d WHERE reverse_display_name_language = %d" ,
 				CTS_TABLE_CONTACTS, prev_sort_primary, CTSVC_SORT_PRIMARY);
-		ret = sqlite3_exec(db, query, NULL, NULL, &errmsg);
-		if (SQLITE_OK != ret) {
-			ERR("sqlite3_exec(%s) Failed(%d, %s)", query, ret, errmsg);
-			sqlite3_free(errmsg);
-			ctsvc_server_end_trans(false);
-			ctsvc_server_db_close();
-			return CONTACTS_ERROR_DB;
-		}
+	ret = sqlite3_exec(db, query, NULL, NULL, &errmsg);
+	if (SQLITE_OK != ret) {
+		ERR("sqlite3_exec(%s) Failed(%d, %s)", query, ret, errmsg);
+		sqlite3_free(errmsg);
+		ctsvc_server_end_trans(false);
+		ctsvc_server_db_close();
+		return CONTACTS_ERROR_DB;
+	}
 
-		snprintf(query, sizeof(query), "UPDATE %s SET reverse_display_name_language=%d WHERE reverse_display_name_language = %d"	,
-				CTS_TABLE_CONTACTS, prev_sort_secondary, CTSVC_SORT_SECONDARY);
-		ret = sqlite3_exec(db, query, NULL, NULL, &errmsg);
-		if (SQLITE_OK != ret) {
-			ERR("sqlite3_exec(%s) Failed(%d, %s)", query, ret, errmsg);
-			sqlite3_free(errmsg);
-			ctsvc_server_end_trans(false);
-			ctsvc_server_db_close();
-			return CONTACTS_ERROR_DB;
-		}
+	snprintf(query, sizeof(query), "UPDATE %s SET reverse_display_name_language=%d WHERE reverse_display_name_language = %d"	,
+			CTS_TABLE_CONTACTS, prev_sort_secondary, CTSVC_SORT_SECONDARY);
+	ret = sqlite3_exec(db, query, NULL, NULL, &errmsg);
+	if (SQLITE_OK != ret) {
+		ERR("sqlite3_exec(%s) Failed(%d, %s)", query, ret, errmsg);
+		sqlite3_free(errmsg);
+		ctsvc_server_end_trans(false);
+		ctsvc_server_db_close();
+		return CONTACTS_ERROR_DB;
+	}
 
-		snprintf(query, sizeof(query), "UPDATE %s SET reverse_display_name_language=%d WHERE reverse_display_name_language = %d",
-					CTS_TABLE_CONTACTS, CTSVC_SORT_PRIMARY, new_sort_primary);
-		ret = sqlite3_exec(db, query, NULL, NULL, &errmsg);
-		if (SQLITE_OK != ret) {
-			ERR("sqlite3_exec(%s) Failed(%d, %s)", query, ret, errmsg);
-			sqlite3_free(errmsg);
-			ctsvc_server_end_trans(false);
-			ctsvc_server_db_close();
-			return CONTACTS_ERROR_DB;
-		}
+	snprintf(query, sizeof(query), "UPDATE %s SET reverse_display_name_language=%d WHERE reverse_display_name_language = %d",
+				CTS_TABLE_CONTACTS, CTSVC_SORT_PRIMARY, new_sort_primary);
+	ret = sqlite3_exec(db, query, NULL, NULL, &errmsg);
+	if (SQLITE_OK != ret) {
+		ERR("sqlite3_exec(%s) Failed(%d, %s)", query, ret, errmsg);
+		sqlite3_free(errmsg);
+		ctsvc_server_end_trans(false);
+		ctsvc_server_db_close();
+		return CONTACTS_ERROR_DB;
+	}
 
-		snprintf(query, sizeof(query), "UPDATE %s SET reverse_display_name_language=%d WHERE reverse_display_name_language = %d" ,
-				CTS_TABLE_CONTACTS, CTSVC_SORT_SECONDARY, new_sort_secondary);
-		ret = sqlite3_exec(db, query, NULL, NULL, &errmsg);
-		if (SQLITE_OK != ret) {
-			ERR("sqlite3_exec(%s) Failed(%d, %s)", query, ret, errmsg);
-			sqlite3_free(errmsg);
-			ctsvc_server_end_trans(false);
-			ctsvc_server_db_close();
-			return CONTACTS_ERROR_DB;
-		}
+	snprintf(query, sizeof(query), "UPDATE %s SET reverse_display_name_language=%d WHERE reverse_display_name_language = %d" ,
+			CTS_TABLE_CONTACTS, CTSVC_SORT_SECONDARY, new_sort_secondary);
+	ret = sqlite3_exec(db, query, NULL, NULL, &errmsg);
+	if (SQLITE_OK != ret) {
+		ERR("sqlite3_exec(%s) Failed(%d, %s)", query, ret, errmsg);
+		sqlite3_free(errmsg);
+		ctsvc_server_end_trans(false);
+		ctsvc_server_db_close();
+		return CONTACTS_ERROR_DB;
+	}
 
-	ret = ctsvc_server_set_default_language(new_sort_primary);
+	ret = ctsvc_server_set_default_sort(new_sort_primary);
 	if (CONTACTS_ERROR_NONE != ret) {
 		ctsvc_server_end_trans(false);
 		ctsvc_server_db_close();
@@ -254,49 +254,6 @@ int ctsvc_server_update_default_language(int prev_sort_primary, int prev_sort_se
 		if (0 <= fd)
 			close(fd);
 	}
-	ctsvc_server_db_close();
-
-	return ret;
-}
-
-int ctsvc_server_update_secondary_language(int prev_lang, int new_lang)
-{
-	int ret;
-	sqlite3* db = NULL;
-	char *errmsg = NULL;
-	char query[CTS_SQL_MIN_LEN] = {0};
-
-	ret = ctsvc_server_db_open(&db);
-	h_retvm_if(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_server_db_open() Failed(%d)", ret);
-
-	ret = ctsvc_server_begin_trans();
-	h_retvm_if(ret, ret, "ctsvc_server_begin_trans() Failed(%d)", ret);
-
-	snprintf(query, sizeof(query), "UPDATE %s SET display_name_language=%d WHERE display_name_language=%d",
-			CTS_TABLE_CONTACTS, prev_lang, CTSVC_LANG_SECONDARY);
-
-	ret = sqlite3_exec(db, query, NULL, NULL, &errmsg);
-	if (SQLITE_OK != ret) {
-		ERR("sqlite3_exec(%s) Failed(%d, %s)", query, ret, errmsg);
-		sqlite3_free(errmsg);
-		ctsvc_server_end_trans(false);
-		ctsvc_server_db_close();
-		return CONTACTS_ERROR_DB;
-	}
-
-	snprintf(query, sizeof(query), "UPDATE %s SET display_name_language=%d WHERE display_name_language=%d",
-			CTS_TABLE_CONTACTS, CTSVC_LANG_SECONDARY, new_lang);
-
-	ret = sqlite3_exec(db, query, NULL, NULL, &errmsg);
-	if (SQLITE_OK != ret) {
-		ERR("sqlite3_exec(%s) Failed(%d, %s)", query, ret, errmsg);
-		sqlite3_free(errmsg);
-		ctsvc_server_end_trans(false);
-		ctsvc_server_db_close();
-		return CONTACTS_ERROR_DB;
-	}
-
-	ret = ctsvc_server_end_trans(true);
 	ctsvc_server_db_close();
 
 	return ret;

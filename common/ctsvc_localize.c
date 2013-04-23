@@ -344,105 +344,145 @@ int ctsvc_check_language(UChar *word)
 
 	CTS_VERBOSE("0x%x%x", unicode_value1, unicode_value2);
 
-	if (CTSVC_COMPARE_BETWEEN('0', word[0], '9')) {
+	if (u_isdigit(word[0])) {
 		type = CTSVC_LANG_NUMBER;
 	}
-	else if (CTSVC_COMPARE_BETWEEN(0x41, word[0], 0x7A)  /* english */
-		|| CTSVC_COMPARE_BETWEEN(0x0300, word[0], 0x036f)) { /* diacritical marks */
-		type = CTSVC_LANG_ENGLISH;
-	}
-	else if (is_hangul(word[0])){
-		type = CTSVC_LANG_KOREAN;
-	}
-	else if (CTSVC_COMPARE_BETWEEN(0x4E00, word[0],  0x9FA5)) {
-		type = CTSVC_LANG_CHINESE;
-	}
-	else if (is_japanese(word[0])) {
-		type = CTSVC_LANG_JAPANESE;
-	}
+	else if (u_isalpha(word[0])) {
+		// refer to the uchar.h
+		// #define U_GC_L_MASK  (U_GC_LU_MASK|U_GC_LL_MASK|U_GC_LT_MASK|U_GC_LM_MASK|U_GC_LO_MASK)
+		// U_GC_LU_MASK : U_UPPERCASE_LETTER
+		// U_GC_LL_MASK : U_LOWERCASE_LETTER
+		// U_GC_LT_MASK : U_TITLECASE_LETTER
+		// U_GC_LM_MASK : U_MODIFIER_LETTER
+		// U_GC_LO_MASK : U_OTHER_LETTER
 
-#if 0		// TODO
-	else if ()
-		type = CTSVC_LANG_CHINESE;
-	else if ()
-		type = CTSVC_LANG_JAPANESE;
-	else if ()
-		type = CTSVC_LANG_FRENCH;
-	else if ()
-		type = CTSVC_LANG_GERMAN;
-	else if ()
-		type = CTSVC_LANG_ITALIAN;
-	else if ()
-		type = CTSVC_LANG_RUSSIAN;
-	else if ()
-		type = CTSVC_LANG_DUTCH;
-	else if ()
-		type = CTSVC_LANG_PORTUGUESE;
-	else if ()
-		type = CTSVC_LANG_TURKISH;
-	else if ()
-		type = CTSVC_LANG_GREEK;
-	else if ()
-		type = CTSVC_LANG_SPANISH;
-	else if ()
-		type = CTSVC_LANG_DANISH;
-	else if ()
-		type = CTSVC_LANG_AZERBAIJAN;
-	else if ()
-		type = CTSVC_LANG_ARABIC;
-	else if ()
-		type = CTSVC_LANG_BULGARIAN;
-	else if ()
-		type = CTSVC_LANG_CATALAN;
-	else if ()
-		type = CTSVC_LANG_CZECH;
-	else if ()
-		type = CTSVC_LANG_ESTONIAN;
-	else if ()
-		type = CTSVC_LANG_BASQUE;
-	else if ()
-		type = CTSVC_LANG_FINNISH;
-	else if ()
-		type = CTSVC_LANG_IRISH;
-	else if ()
-		type = CTSVC_LANG_GALICIAN;
-	else if ()
-		type = CTSVC_LANG_HINDI;
-	else if ()
-		type = CTSVC_LANG_CROATIAN;
-	else if ()
-		type = CTSVC_LANG_HUNGARIAN;
-	else if ()
-		type = CTSVC_LANG_ARMENIAN;
-	else if ()
-		type = CTSVC_LANG_ICELANDIC;
-	else if ()
-		type = CTSVC_LANG_GEORGIAN;
-	else if ()
-		type = CTSVC_LANG_KAZAKHSTAN;
-	else if ()
-		type = CTSVC_LANG_LITHUANIAN;
-	else if ()
-		type = CTSVC_LANG_LATVIAN;
-	else if ()
-		type = CTSVC_LANG_MACEDONIA;
-	else if ()
-		type = CTSVC_LANG_NORWAY;
-	else if ()
-		type = CTSVC_LANG_POLISH;
-	else if ()
-		type = CTSVC_LANG_ROMANIA;
-	else if ()
-		type = CTSVC_LANG_SLOVAK;
-	else if ()
-		type = CTSVC_LANG_SLOVENIAN;
-	else if ()
-		type = CTSVC_LANG_SERBIAN;
-	else if ()
-		type = CTSVC_LANG_SWEDISH;
-	else if ()
-		type = CTSVC_LANG_UKRAINE;
-#endif
+		UBlockCode code = ublock_getCode(word[0]);
+		CTS_VERBOSE("Character unicode block is %d", code);
+
+		switch (code){
+		//english
+		case UBLOCK_BASIC_LATIN:							// = 1, /*[0000]*/
+		case UBLOCK_LATIN_1_SUPPLEMENT:					// =2, /*[0080]*/
+		case UBLOCK_LATIN_EXTENDED_A:						// =3, /*[0100]*/
+		case UBLOCK_LATIN_EXTENDED_B:						// =4, /*[0180]*/
+		case UBLOCK_LATIN_EXTENDED_ADDITIONAL:			// =38, /*[1E00]*/
+			type = CTSVC_LANG_ENGLISH;
+			// type = CTSVC_LANG_CATALAN;	// ca, Spain - Catalan
+			// type = CTSVC_LANG_GERMAN:	 // de, Germany - German
+			// type = CTSVC_LANG_BASQUE:	// eu, Spain - Basque
+			// type = CTSVC_LANG_DUTCH;		// nl_Nl, Netherlands Dutch
+			// type = CTSVC_LANG_FRENCH; 	// fr_CA, fr_FR
+			// type = CTSVC_LANG_ITALIAN: 	// it_IT, Italy - Italian
+			// type = CTSVC_LANG_PORTUGUESE:	 // pt_BR, pt_PT, Portugal
+			// type = CTSVC_LANG_SPANISH: // es_ES, es_US, El Salvador - Spanish
+			// type =  CTSVC_LANG_NORWAY: // nb, Norway
+			// type = CTSVC_LANG_DANISH: // da, Denmark - Danish
+			// type = CTSVC_LANG_AZERBAIJAN: // az, Azerbaijan
+			// type = CTSVC_LANG_ROMANIA: // ro, Romania
+			// type = CTSVC_LANG_CZECH: // cs, Czech Republic - Czech
+			// type = CTSVC_LANG_ESTONIAN: // et, Estonia - Estonian
+			// type = CTSVC_LANG_FINNISH: // fi, Finland - Finnish
+			// type = CTSVC_LANG_IRISH: // ga, Ireland - Irish
+			// type = CTSVC_LANG_GALICIAN: // gl, Spain - Galician
+			// type = CTSVC_LANG_HUNGARIAN: // hu, Hungary - Hungarian
+			// type = CTSVC_LANG_SWEDISH: // sv, Finland - Swedish
+			// type = CTSVC_LANG_SLOVENIAN: // sl, Slovenia - Slovenian
+			// type = CTSVC_LANG_SLOVAK: // sk, Slovakia - Slovak
+			// type = CTSVC_LANG_LITHUANIAN: // lt, Lithuania - Lithuanian
+			// type = CTSVC_LANG_POLISH: // pl, Polish
+			// type = CTSVC_LANG_LATVIAN: // lv, Latvia - Latvian
+			// type = CTSVC_LANG_CROATIAN: // hr, Bosnia and Herzegovina - Croatian
+			// type = CTSVC_LANG_ICELANDIC: // is, Iceland - Icelandic
+			break;
+
+		//korean
+		case UBLOCK_HANGUL_JAMO:						// =30, /*[1100]*/
+		case UBLOCK_HANGUL_COMPATIBILITY_JAMO:		// =65, /*[3130]*/
+		case UBLOCK_HANGUL_SYLLABLES:				// =74, /*[AC00]*/
+		case UBLOCK_HANGUL_JAMO_EXTENDED_A:		// = 180, /*[A960]*/
+		case UBLOCK_HANGUL_JAMO_EXTENDED_B:		// = 185, /*[D7B0]*/
+			type = CTSVC_LANG_KOREAN;
+			break;
+
+		// chainese
+		case UBLOCK_CJK_RADICALS_SUPPLEMENT:			 //=58, /*[2E80]*/
+		case UBLOCK_CJK_SYMBOLS_AND_PUNCTUATION:		 //=61, /*[3000]*/
+		case UBLOCK_ENCLOSED_CJK_LETTERS_AND_MONTHS:  //=68, /*[3200]*/
+		case UBLOCK_CJK_STROKES:							 // =130, /*[31C0]*/
+		case UBLOCK_CJK_COMPATIBILITY:						 // =69, /*[3300]*/
+		case UBLOCK_CJK_UNIFIED_IDEOGRAPHS_EXTENSION_A: //=70, /*[3400]*/
+		case UBLOCK_CJK_UNIFIED_IDEOGRAPHS:				 //=71, /*[4E00]*/
+		case UBLOCK_CJK_COMPATIBILITY_IDEOGRAPHS:		 //=79, /*[F900]*/
+		case UBLOCK_CJK_COMPATIBILITY_FORMS:				 //=83, /*[FE30]*/
+		case UBLOCK_CJK_UNIFIED_IDEOGRAPHS_EXTENSION_B :       // =94, /*[20000]*/
+		case UBLOCK_CJK_COMPATIBILITY_IDEOGRAPHS_SUPPLEMENT:         // =95, /*[2F800]*/
+		case UBLOCK_CJK_UNIFIED_IDEOGRAPHS_EXTENSION_C:         // =197, /*[2A700]*/
+		case UBLOCK_CJK_UNIFIED_IDEOGRAPHS_EXTENSION_D:         // =209, /*[2B740]*/
+			type = CTSVC_LANG_CHINESE;
+			break;
+
+		// japanese
+		case UBLOCK_HIRAGANA:								// =62, /*[3040]*/
+		case UBLOCK_KATAKANA:								// =63, /*[30A0]*/
+		case UBLOCK_KATAKANA_PHONETIC_EXTENSIONS:		// =107, /*[31F0]*/
+		case UBLOCK_JAVANESE:								// =181, /*[A980]*/
+			type = CTSVC_LANG_JAPANESE;
+			break;
+
+		case UBLOCK_GREEK:						// =8, /*[0370]*/
+		case UBLOCK_GREEK_EXTENDED:				// =39, /*[1F00]*/
+			type = CTSVC_LANG_GREEK;
+			break;
+
+		case UBLOCK_CYRILLIC:								// =9, /*[0400]*/
+		case UBLOCK_CYRILLIC_EXTENDED_A:					// = 158, /*[2DE0]*/
+		case UBLOCK_CYRILLIC_EXTENDED_B:					// = 160, /*[A640]*/
+		case UBLOCK_CYRILLIC_SUPPLEMENTARY:				// = 97, UBLOCK_CYRILLIC_SUPPLEMENT = UBLOCK_CYRILLIC_SUPPLEMENTARY, /*[0500]*/
+			type = CTSVC_LANG_RUSSIAN;
+			// type = CTSVC_LANG_BULGARIAN: // bg, Bulgaria - Bulgarian
+			// type = CTSVC_LANG_MACEDONIA: // mk, Macedonia
+			// type = CTSVC_LANG_KAZAKHSTAN: // kk, Kazakhstan
+			// type = CTSVC_LANG_SERBIAN: // sr, Serbia - Serbian
+			// type = CTSVC_LANG_UKRAINE: // uk, Ukraine
+			break;
+
+		case UBLOCK_ARMENIAN:						//=10, /*[0530]*/
+			type = CTSVC_LANG_ARMENIAN;
+			break;
+		case UBLOCK_ARABIC:						//=12, /*[0600]*/
+			type = CTSVC_LANG_ARABIC;
+			break;
+		case UBLOCK_DEVANAGARI:					// =15, /*[0900]*/
+		case UBLOCK_DEVANAGARI_EXTENDED:		// = 179, /*[A8E0]*/:
+			type = CTSVC_LANG_HINDI;
+			break;
+		case UBLOCK_GEORGIAN:						//=29, /*[10A0]*/
+		case UBLOCK_GEORGIAN_SUPPLEMENT:		// = 135, /*[2D00]*/
+			type = CTSVC_LANG_GEORGIAN;
+			break;
+		case UBLOCK_OLD_TURKIC:					// = 191, /*[10C00]*/
+			type = CTSVC_LANG_TURKISH;
+			break;
+		case UBLOCK_HALFWIDTH_AND_FULLWIDTH_FORMS:		// =87, /*[FF00]*/	// hangul : FFA0 ~ FFDC
+		{
+			if (CTSVC_COMPARE_BETWEEN((UChar)0xFF21, word[0], (UChar)0xFF3A)
+				|| CTSVC_COMPARE_BETWEEN((UChar)0xFF41, word[0], (UChar)0xFF5A))
+				type = CTSVC_LANG_ENGLISH;
+			else if (CTSVC_COMPARE_BETWEEN((UChar)0xFF10, word[0], (UChar)0xFF19))
+				type = CTSVC_LANG_NUMBER;
+			else if (CTSVC_COMPARE_BETWEEN((UChar)0xFF65, word[0], (UChar)0xFF9F))
+				type = CTSVC_LANG_JAPANESE;
+			else if (CTSVC_COMPARE_BETWEEN((UChar)0xFFA0, word[0], (UChar)0xFFDC))
+				type = CTSVC_LANG_KOREAN;
+			else
+				type = CTSVC_LANG_OTHERS;
+			break;
+		}
+		default:
+			type = CTSVC_LANG_OTHERS;
+			break;
+		}
+	}
 	else
 		type = CTSVC_LANG_OTHERS;
 
@@ -484,10 +524,47 @@ int ctsvc_check_language_type(const char *src)
 
 		CTS_VERBOSE("0x%x%x", (0xFF00 & (tmp_result[0])) >> 8,  (0xFF & (tmp_result[0])));
 
-		return 	ctsvc_check_language(result);
+		return ctsvc_check_language(result);
 	}
 
 	return CONTACTS_ERROR_INVALID_PARAMETER;
+}
+
+int ctsvc_get_sort_type_from_language(int language)
+{
+	switch(language) {
+	case CTSVC_LANG_CHINESE:
+		return CTSVC_SORT_CJK;
+	case CTSVC_LANG_JAPANESE:
+		return CTSVC_SORT_JAPANESE;
+	case CTSVC_LANG_KOREAN:
+		return CTSVC_SORT_KOREAN;
+	case CTSVC_LANG_ENGLISH:
+		return CTSVC_SORT_WESTERN;
+	case CTSVC_LANG_NUMBER:
+		return CTSVC_SORT_NUMBER;
+	case CTSVC_LANG_RUSSIAN:
+	case CTSVC_LANG_BULGARIAN:
+	case CTSVC_LANG_MACEDONIA:
+	case CTSVC_LANG_KAZAKHSTAN:
+	case CTSVC_LANG_SERBIAN:
+	case CTSVC_LANG_UKRAINE:
+		return CTSVC_SORT_CYRILLIC;
+	case CTSVC_LANG_ARMENIAN:
+		return CTSVC_SORT_ARMENIAN;
+	case CTSVC_LANG_GREEK:
+		return CTSVC_SORT_GREEK;
+	case CTSVC_LANG_ARABIC:
+		return CTSVC_SORT_ARABIC;
+	case CTSVC_LANG_HINDI:
+		return CTSVC_SORT_DEVANAGARI;
+	case CTSVC_LANG_GEORGIAN:
+		return CTSVC_SORT_GEORGIAN;
+	case CTSVC_LANG_TURKISH:
+		return CTSVC_SORT_TURKISH;
+	default:
+		return CTSVC_SORT_WESTERN;
+	}
 }
 
 int ctsvc_get_name_sort_type(const char *src)
@@ -498,7 +575,6 @@ int ctsvc_get_name_sort_type(const char *src)
 	int char_len = 0;
 	int language_type;
 	char char_src[10];
-
 
 	char_len = ctsvc_check_utf8(src[0]);
 	RETVM_IF(char_len <= 0, CONTACTS_ERROR_INVALID_PARAMETER, "check_utf8 failed");
@@ -511,28 +587,7 @@ int ctsvc_get_name_sort_type(const char *src)
 			"u_strFromUTF8() Failed(%s)", u_errorName(status));
 
 	language_type = ctsvc_check_language(tmp_result);
-
-	switch(language_type)
-	{
-	case CTSVC_LANG_CHINESE:
-		ret = CTSVC_SORT_CJK;
-		break;
-	case CTSVC_LANG_JAPANESE:
-		ret = CTSVC_SORT_JAPANESE;
-		break;
-	case CTSVC_LANG_KOREAN:
-		ret = CTSVC_SORT_KOREAN;
-		break;
-	case CTSVC_LANG_ENGLISH:
-		ret = CTSVC_SORT_WESTERN;
-		break;
-	case CTSVC_LANG_NUMBER:
-		ret = CTSVC_SORT_NUMBER;
-		break;
-	default:
-		ret = CTSVC_SORT_OTHERS;
-		break;
-	}
+	ret = ctsvc_get_sort_type_from_language(language_type);
 
 	return ret;
 }
@@ -541,13 +596,21 @@ void ctsvc_extra_normalize(UChar *word, int32_t word_size)
 {
 	int i;
 	for (i=0;i<word_size;i++) {
-		if (is_hangul(word[i])) {
+		// FF00 ~ FF60, FFE0~FFE6 : fullwidth -> halfwidth
+		if (CTSVC_COMPARE_BETWEEN((UChar)0xFF00, word[i], (UChar)0xFF60)) {
+			int unicode_value1 = 0;
+			int unicode_value2 = 0;
+			unicode_value1 = 0x0;
+			unicode_value2 = (0xFF & word[i]) + 0x20;
+			word[i] = unicode_value1 << 8 | unicode_value2;
+		}
+		else if (is_hangul(word[i])) {
 			hangul_compatibility2jamo(&word[i]);
 		}
 	}
 }
 
-const char *ctsvc_get_language(int lang)
+const char *ctsvc_get_language_locale(int lang)
 {
 	switch(lang)
 	{
@@ -642,6 +705,7 @@ const char *ctsvc_get_language(int lang)
 
 int ctsvc_get_language_type(const char *system_lang)
 {
+	// refer to the VCONFKEY_LANGSET
 	int type;
 
 	RETV_IF(NULL == system_lang, CTSVC_LANG_OTHERS);

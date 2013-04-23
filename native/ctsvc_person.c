@@ -584,6 +584,7 @@ int ctsvc_person_aggregate(int person_id)
 	}
 
 	link_count = 0;
+	len = 0;
 	while ((ret = cts_stmt_step(stmt))) {
 		const char *temp_str;
 		int i = 0;
@@ -624,9 +625,9 @@ int ctsvc_person_aggregate(int person_id)
 		}
 		addr_len = snprintf(addr, sizeof(addr), "%d ", addressbook_id);
 		if (NULL == addressbook_ids)
-			addressbook_ids = calloc(addressbooks_len, sizeof(char));
+			addressbook_ids = calloc(addressbooks_len+1, sizeof(char));
 		else if (addressbooks_len <= strlen(addressbook_ids)+addr_len) {
-			addressbooks_len *= 2;
+			addressbooks_len = MAX(addressbooks_len*2, strlen(addressbook_ids)+addr_len+1);
 			addressbook_ids = realloc(addressbook_ids, addressbooks_len);
 		}
 
@@ -831,6 +832,10 @@ API int contacts_person_link_person(int base_person_id, int person_id)
 		ctsvc_end_trans(false);
 		return ret;
 	}
+//#ifdef _CONTACTS_IPC_SERVER
+//	It will be added in ctsvc_db_person_delete_callback
+//	ctsvc_change_subject_add_changed_person_id(CONTACTS_CHANGE_DELETED, person_id);
+//#endif
 
 	if (is_favorite) {
 		snprintf(query, sizeof(query),

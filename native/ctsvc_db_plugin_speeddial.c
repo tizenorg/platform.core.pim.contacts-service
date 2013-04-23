@@ -171,9 +171,9 @@ static int __ctsvc_db_speeddial_update_record( contacts_record_h record )
 	ctsvc_speeddial_s *speeddial = (ctsvc_speeddial_s *)record;
 
 	RETVM_IF (speeddial->dial_number < 0, CONTACTS_ERROR_INVALID_PARAMETER,
-				"Invaild parameter : dial number (%d)", speeddial->dial_number);
+				"Invalid parameter : dial number (%d)", speeddial->dial_number);
 	RETVM_IF (speeddial->number_id < 0, CONTACTS_ERROR_INVALID_PARAMETER,
-				"Invaild parameter : number id (%d)", speeddial->number_id);
+				"Invalid parameter : number id (%d)", speeddial->number_id);
 	ret = ctsvc_begin_trans();
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, CONTACTS_ERROR_DB, "DB error : ctsvc_begin_trans() Fail(%d)", ret);
 
