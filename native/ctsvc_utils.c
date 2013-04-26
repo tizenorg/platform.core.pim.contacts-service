@@ -50,6 +50,7 @@ static __thread int transaction_ver = 0;
 static __thread bool version_up = false;
 
 #define CTS_SECURITY_IMAGE_PERMISSION 0440
+#define CTS_IMAGE_ENCODE_QUALITY	90
 
 #define CTS_COMMIT_TRY_MAX 500000 // For 3second
 int ctsvc_begin_trans(void)
@@ -337,7 +338,7 @@ static bool __ctsvc_image_util_supported_jpeg_colorspace_cb(image_util_colorspac
 		}
 
 		//ret = image_util_encode_jpeg(img_source, width, height, colorspace, 100, info->dest );
-		ret = image_util_encode_jpeg(img_target, resized_width, resized_height, colorspace, 50, info->dest );
+		ret = image_util_encode_jpeg(img_target, resized_width, resized_height, colorspace, CTS_IMAGE_ENCODE_QUALITY, info->dest );
 		free( img_target );
 		free( img_source );
 		if(ret!=IMAGE_UTIL_ERROR_NONE) {
@@ -350,7 +351,7 @@ static bool __ctsvc_image_util_supported_jpeg_colorspace_cb(image_util_colorspac
 		resized_width = width;
 		resized_height = height;
 
-		ret = image_util_encode_jpeg(img_source, resized_width, resized_height, colorspace, 50, info->dest );
+		ret = image_util_encode_jpeg(img_source, resized_width, resized_height, colorspace, CTS_IMAGE_ENCODE_QUALITY, info->dest );
 		free( img_source );
 		if(ret!=IMAGE_UTIL_ERROR_NONE) {
 			CTS_ERR("image_util_encode_jpeg failed(%d)", ret);

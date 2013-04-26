@@ -267,7 +267,7 @@ int ctsvc_db_company_update(contacts_record_h record, int contact_id, bool is_my
 	GSList *bind_text = NULL;
 	GSList *cursor = NULL;
 	char query[CTS_SQL_MAX_LEN] = {0};
-	ctsvc_company_s *company =  (ctsvc_company_s*)record;
+	ctsvc_company_s *company = (ctsvc_company_s*)record;
 
 	RETVM_IF(!company->id, CONTACTS_ERROR_INVALID_PARAMETER, "company of contact has no ID.");
 	RETVM_IF(CTSVC_PROPERTY_FLAG_DIRTY != (company->base.property_flag & CTSVC_PROPERTY_FLAG_DIRTY), CONTACTS_ERROR_NONE, "No update");
@@ -276,7 +276,6 @@ int ctsvc_db_company_update(contacts_record_h record, int contact_id, bool is_my
 			"SELECT id FROM "CTS_TABLE_DATA" WHERE id = %d", company->id);
 	ret = ctsvc_query_get_first_int_result(query, &id);
 	RETV_IF(ret != CONTACTS_ERROR_NONE, ret);
-
 
 	if (ctsvc_record_check_property_flag((ctsvc_record_s *)company, _contacts_company.logo, CTSVC_PROPERTY_FLAG_DIRTY)) {
 		char dest[CTS_SQL_MAX_LEN] = {0};

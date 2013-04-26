@@ -734,11 +734,13 @@ static int __ctsvc_db_create_views()
 	snprintf(query, sizeof(query),
 		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_PERSON_GROUP" AS "
 			"SELECT * FROM "CTSVC_DB_VIEW_PERSON_CONTACT" "
-			"LEFT JOIN (SELECT group_id, "
-						"contact_id contact_id_in_group "
-					"FROM "CTS_TABLE_GROUP_RELATIONS" "
-					"WHERE deleted = 0) temp_group "
-			"ON temp_group.contact_id_in_group = "CTSVC_DB_VIEW_PERSON_CONTACT".contact_id");
+			"LEFT JOIN (SELECT groups.group_id, "
+						"contact_id contact_id_in_group, "
+						"group_prio "
+					"FROM "CTS_TABLE_GROUP_RELATIONS", "CTS_TABLE_GROUPS" "
+					"WHERE deleted = 0 AND group_relations.group_id = groups.group_id) temp_group "
+			"ON temp_group.contact_id_in_group = "CTSVC_DB_VIEW_PERSON_CONTACT".contact_id "
+			"ORDER BY group_prio");
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Failed(%d)", ret);
 

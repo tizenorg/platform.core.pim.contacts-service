@@ -562,6 +562,8 @@ int ctsvc_get_sort_type_from_language(int language)
 		return CTSVC_SORT_GEORGIAN;
 	case CTSVC_LANG_TURKISH:
 		return CTSVC_SORT_TURKISH;
+	case CTSVC_LANG_OTHERS:
+		return CTSVC_SORT_OTHERS;
 	default:
 		return CTSVC_SORT_WESTERN;
 	}

@@ -26,7 +26,8 @@
 #include <ctype.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include <iconv.h>
+#include <unicode/ucnv.h>
+#include <unicode/ustring.h>
 
 #include "contacts.h"
 #include "ctsvc_internal.h"
@@ -646,7 +647,7 @@ static inline int __ctsvc_vcard_put_postal_type(int type, char *label, char **bu
 	if (type == CONTACTS_ADDRESS_TYPE_CUSTOM) {
 		if (__ctsvc_vcard_is_valid_custom_label(label)) {
 			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";TYPE=X-");
-			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, "label");
+			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, label);
 		}
 		return len;
 	}
@@ -1932,8 +1933,11 @@ static inline char* __ctsvc_vcard_translate_charset(char *src, int len)
 	}
 
 	if (*val) {
-		int src_len, dest_len, i = 0;
-		iconv_t ic;
+		UChar *temp;
+		UConverter *conv;
+		UErrorCode err = U_ZERO_ERROR;
+		int temp_size = 0;
+		int src_len, i = 0;
 		char enc[32] = {0}, *dest;
 
 		while (';' != *val && ':' != *val) {
@@ -1946,42 +1950,25 @@ static inline char* __ctsvc_vcard_translate_charset(char *src, int len)
 		while (':' != *val)
 			val++;
 
-		ic = iconv_open("UTF-8", enc);
-		RETVM_IF(ic == (iconv_t)-1, NULL, "iconv_open(%s) Failed", enc);
-
 		src_len = len - (val - src);
-		dest_len = 2048;
-		dest = malloc(dest_len);
 
-		while (true) {
-			char *in = val;
-			char *out = dest;
-			size_t in_byte = src_len;
-			size_t out_byte = dest_len;
+		temp_size = src_len * sizeof(UChar);
+		temp = malloc(temp_size);
+		conv = ucnv_open(enc, &err);
+		WARN_IF(U_FAILURE(err), "ucnv_open() Failed(%d), enc=%s", err, enc);
+		ucnv_toUChars(conv, temp, temp_size, val, src_len, &err);
+		WARN_IF(U_FAILURE(err), "ucnv_toUChars() Failed(%d)", err);
+		ucnv_close(conv);
 
-			ret = iconv(ic, &in, &in_byte, &out, &out_byte);
+		dest = malloc(temp_size);
+		conv = ucnv_open("UTF-8", &err);
+		ucnv_fromUChars(conv, dest, temp_size, temp, u_strlen(temp), &err);
+		WARN_IF(U_FAILURE(err), "ucnv_fromUChars() Failed(%d)", err);
+		ucnv_close(conv);
+		free(temp);
 
-			if (-1 == ret) {
-				if (E2BIG == errno) {
-					dest_len *= 2;
-					dest = realloc(dest, dest_len);
-					continue;
-				} else {
-					if (dest) {
-						free(dest);
-						dest = NULL;
-					}
-					CTS_ERR("iconv is Failed(errno = %d)", errno);
-					break;
-				}
-			}
-			dest[dest_len-out_byte] = '\0';
-			break;
-		}
-		iconv_close(ic);
 		return dest;
 	}
-
 	return NULL;
 }
 

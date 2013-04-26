@@ -353,7 +353,6 @@ static inline int __ctsvc_db_update_person_default(int person_id, int datatype)
 		"WHERE C.person_id=%d AND D.datatype=%d AND is_primary_default=1 AND D.is_my_profile = 0",
 		person_id, datatype);
 
-	CTS_DBG("%s", query);
 	ret = ctsvc_query_get_first_int_result(query, &data_id);
 	if (CONTACTS_ERROR_NO_DATA == ret ) {
 		snprintf(query, sizeof(query),
@@ -362,7 +361,6 @@ static inline int __ctsvc_db_update_person_default(int person_id, int datatype)
 			"WHERE C.person_id=%d AND D.datatype=%d AND D.is_default=1 AND D.is_my_profile = 0 ORDER BY D.id",
 			person_id, datatype);
 
-		CTS_DBG("%s", query);
 		stmt = cts_query_prepare(query);
 		if (NULL == stmt) {
 			CTS_ERR("cts_query_prepare() Failed");
@@ -376,7 +374,6 @@ static inline int __ctsvc_db_update_person_default(int person_id, int datatype)
 					"UPDATE "CTS_TABLE_DATA" SET is_primary_default=1 WHERE id=%d"
 					,data_id);
 
-			CTS_DBG("%s", query);
 			ret = ctsvc_query_exec(query);
 			if (CONTACTS_ERROR_NONE != ret) {
 				CTS_ERR("cts_query_exec Failed(%d)", ret);

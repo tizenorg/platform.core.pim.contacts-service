@@ -62,6 +62,8 @@ static void ctsvc_server_change_language_cb(keynode_t *key, void *data)
 	langset = vconf_keynode_get_str(key);
 	system_language = ctsvc_get_language_type(langset);
 	new_primary_sort = ctsvc_get_sort_type_from_language(system_language);
+	if (new_primary_sort == CTSVC_SORT_OTHERS)
+		new_primary_sort = CTSVC_SORT_WESTERN;
 
 	if (new_primary_sort==CTSVC_SORT_KOREAN)
 		new_secondary_sort = CTSVC_SORT_WESTERN;
@@ -117,6 +119,8 @@ int ctsvc_server_init_configuration(void)
 	if (ret < 0 || sort_type == CTSVC_SORT_OTHERS) {
 		ERR("vconf_get_int(%s) Failed(%d)", ctsvc_get_default_sort_vconfkey() ,ret);
 		sort_type = ctsvc_get_sort_type_from_language(system_language);
+		if (sort_type == CTSVC_SORT_OTHERS)
+			sort_type = CTSVC_SORT_WESTERN;
 	}
 	ctsvc_server_set_default_sort(sort_type);
 
