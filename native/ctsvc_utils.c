@@ -28,6 +28,7 @@
 #include <unicode/ulocdata.h>
 #include <unicode/uset.h>
 #include <unicode/ustring.h>
+#include <ctype.h>
 
 #include "contacts.h"
 #include "ctsvc_internal.h"
@@ -477,6 +478,7 @@ int ctsvc_change_image(const char *dir, int index, const char *path, char *image
 
 	if (path) {
 		char *ext;
+		char *temp;
 		int len;
 		ext = strrchr(path, '.');
 		if (NULL == ext || strchr(ext, '/'))
@@ -484,6 +486,17 @@ int ctsvc_change_image(const char *dir, int index, const char *path, char *image
 
 		snprintf(dest, sizeof(dest), "%s/%d%s",
 				dir, index, ext);
+
+		ext = strrchr(dest, '.');
+		if (NULL == ext || strchr(ext, '/'))
+			ext = "";
+
+		temp = ext;
+		while (*temp) {
+			*temp = tolower(*temp);
+			temp++;
+		}
+
 		ret = ctsvc_copy_image(path, dest);
 		RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_copy_image() Failed(%d)", ret);
 		len = strlen(dest) - strlen(dir);

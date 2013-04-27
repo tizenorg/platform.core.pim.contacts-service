@@ -22,6 +22,7 @@
 #include <unistd.h>
 #include <vconf.h>
 #include <vconf-keys.h>
+#include <ctype.h>
 
 #include "contacts.h"
 #include "ctsvc_internal.h"
@@ -64,6 +65,7 @@ int ctsvc_contact_add_image_file(int parent_id, int img_id,
 	int ret;
 	int version;
 	char *ext;
+	char *temp;
 	char dest[CTSVC_IMG_FULL_PATH_SIZE_MAX] = {0};
 
 	RETVM_IF(NULL == src_img, CONTACTS_ERROR_INVALID_PARAMETER, "image_thumbnail_path is NULL");
@@ -74,6 +76,16 @@ int ctsvc_contact_add_image_file(int parent_id, int img_id,
 
 	version = ctsvc_get_next_ver();
 	snprintf(dest, sizeof(dest), "%s/%d_%d-%d%s", CTS_IMG_FULL_LOCATION, parent_id, img_id, version, ext);
+
+	ext = strrchr(dest, '.');
+	if (NULL == ext || strchr(ext, '/'))
+		ext = "";
+
+	temp = ext;
+	while (*temp) {
+		*temp = tolower(*temp);
+		temp++;
+	}
 
 	ret = ctsvc_copy_image(src_img, dest);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "cts_copy_file() Failed(%d)", ret);

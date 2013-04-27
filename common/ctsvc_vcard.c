@@ -399,14 +399,14 @@ static inline int __ctsvc_vcard_get_image_type(char *val)
 	char *temp, *result;
 
 	temp = val;
-	while (*temp)
-	{
+	while (*temp) {
 		*temp = tolower(*temp);
 		temp++;
 	}
 
 	result = strstr(val, "jpeg");
 	if (result) return CTSVC_VCARD_IMG_JPEG;
+
 	result = strstr(val, "jpg");
 	if (result) return CTSVC_VCARD_IMG_JPEG;
 
