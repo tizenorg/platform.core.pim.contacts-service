@@ -31,8 +31,6 @@ ctsvc_ipc_marshal_record_plugin_cb_s _ctsvc_ipc_record_my_profile_plugin_cb = {
 	.get_primary_id = __ctsvc_ipc_marshal_my_profile_get_primary_id
 };
 
-
-
 static int __ctsvc_ipc_unmarshal_my_profile(pims_ipc_data_h ipc_data, const char* view_uri, contacts_record_h record)
 {
 	RETV_IF(ipc_data==NULL,CONTACTS_ERROR_NO_DATA);
@@ -49,20 +47,20 @@ static int __ctsvc_ipc_unmarshal_my_profile(pims_ipc_data_h ipc_data, const char
 		if (ctsvc_ipc_unmarshal_string(ipc_data, &pmy_profile->uid) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_string(ipc_data, &pmy_profile->image_thumbnail_path) != CONTACTS_ERROR_NONE) break;
 
-		if (ctsvc_ipc_unmarshal_list(ipc_data, (contacts_list_h*)&pmy_profile->name) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_unmarshal_list(ipc_data, (contacts_list_h*)&pmy_profile->note) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_unmarshal_list(ipc_data, (contacts_list_h*)&pmy_profile->company) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_unmarshal_list(ipc_data, (contacts_list_h*)&pmy_profile->numbers) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_unmarshal_list(ipc_data, (contacts_list_h*)&pmy_profile->emails) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_unmarshal_list(ipc_data, (contacts_list_h*)&pmy_profile->events) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_unmarshal_list(ipc_data, (contacts_list_h*)&pmy_profile->messengers) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_unmarshal_list(ipc_data, (contacts_list_h*)&pmy_profile->postal_addrs) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_unmarshal_list(ipc_data, (contacts_list_h*)&pmy_profile->urls) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_unmarshal_list(ipc_data, (contacts_list_h*)&pmy_profile->nicknames) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_unmarshal_list(ipc_data, (contacts_list_h*)&pmy_profile->profiles) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_unmarshal_list(ipc_data, (contacts_list_h*)&pmy_profile->relationships) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_unmarshal_list(ipc_data, (contacts_list_h*)&pmy_profile->images) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_unmarshal_list(ipc_data, (contacts_list_h*)&pmy_profile->extensions) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_unmarshal_child_list(ipc_data, (contacts_list_h*)&pmy_profile->name) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_unmarshal_child_list(ipc_data, (contacts_list_h*)&pmy_profile->note) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_unmarshal_child_list(ipc_data, (contacts_list_h*)&pmy_profile->company) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_unmarshal_child_list(ipc_data, (contacts_list_h*)&pmy_profile->numbers) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_unmarshal_child_list(ipc_data, (contacts_list_h*)&pmy_profile->emails) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_unmarshal_child_list(ipc_data, (contacts_list_h*)&pmy_profile->events) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_unmarshal_child_list(ipc_data, (contacts_list_h*)&pmy_profile->messengers) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_unmarshal_child_list(ipc_data, (contacts_list_h*)&pmy_profile->postal_addrs) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_unmarshal_child_list(ipc_data, (contacts_list_h*)&pmy_profile->urls) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_unmarshal_child_list(ipc_data, (contacts_list_h*)&pmy_profile->nicknames) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_unmarshal_child_list(ipc_data, (contacts_list_h*)&pmy_profile->profiles) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_unmarshal_child_list(ipc_data, (contacts_list_h*)&pmy_profile->relationships) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_unmarshal_child_list(ipc_data, (contacts_list_h*)&pmy_profile->images) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_unmarshal_child_list(ipc_data, (contacts_list_h*)&pmy_profile->extensions) != CONTACTS_ERROR_NONE) break;
 
 		return CONTACTS_ERROR_NONE;
 	} while(0);

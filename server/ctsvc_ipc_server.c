@@ -1365,7 +1365,7 @@ void ctsvc_ipc_server_db_get_changes_by_version(pims_ipc_h ipc, pims_ipc_data_h 
 			ret = ctsvc_ipc_marshal_list(record_list,*outdata);
 			if (ret != CONTACTS_ERROR_NONE)
 			{
-				ERR("ctsvc_ipc_unmarshal_list fail");
+				ERR("ctsvc_ipc_marshal_list fail");
 				pims_ipc_data_destroy(*outdata);
 				*outdata = NULL;
 				ret = CONTACTS_ERROR_OUT_OF_MEMORY;
@@ -1374,7 +1374,7 @@ void ctsvc_ipc_server_db_get_changes_by_version(pims_ipc_h ipc, pims_ipc_data_h 
 			ret = ctsvc_ipc_marshal_int(current_contacts_db_version,*outdata);
 			if (ret != CONTACTS_ERROR_NONE)
 			{
-				ERR("ctsvc_ipc_unmarshal_int fail");
+				ERR("ctsvc_ipc_marshal_int fail");
 				pims_ipc_data_destroy(*outdata);
 				*outdata = NULL;
 				ret = CONTACTS_ERROR_OUT_OF_MEMORY;

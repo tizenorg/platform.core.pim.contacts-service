@@ -116,7 +116,7 @@ static int __ctsvc_db_my_profile_get_data(int id, ctsvc_my_profile_s *my_profile
 
 	len = snprintf(query, sizeof(query),
 				"SELECT datatype, id, contact_id, is_default, data1, data2, "
-					"data3, data4, data5, data6, data7, data8, data9, data10 "
+					"data3, data4, data5, data6, data7, data8, data9, data10, data11, data12 "
 					"FROM "CTS_TABLE_DATA" WHERE contact_id = %d AND is_my_profile = 1", id);
 
 	stmt = cts_query_prepare(query);

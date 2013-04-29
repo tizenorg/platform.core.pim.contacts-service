@@ -81,6 +81,7 @@ int ctsvc_ipc_marshal_record_common(const ctsvc_record_s* common, pims_ipc_data_
 int ctsvc_ipc_unmarshal_query(const pims_ipc_data_h ipc_data, contacts_query_h *query);
 int ctsvc_ipc_marshal_query(const contacts_query_h query, pims_ipc_data_h ipc_data);
 int ctsvc_ipc_unmarshal_list(const pims_ipc_data_h ipc_data, contacts_list_h *list);
+int ctsvc_ipc_unmarshal_child_list(const pims_ipc_data_h ipc_data, contacts_list_h* list);
 int ctsvc_ipc_marshal_list(const contacts_list_h list, pims_ipc_data_h ipc_data);
 
 #endif /* __ctsvc_ipc_marshal__ */

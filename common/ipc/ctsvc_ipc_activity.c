@@ -49,7 +49,7 @@ static int __ctsvc_ipc_unmarshal_activity(pims_ipc_data_h ipc_data, const char* 
 		if (ctsvc_ipc_unmarshal_string(ipc_data, &activity_p->service_operation) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_string(ipc_data, &activity_p->uri) != CONTACTS_ERROR_NONE) break;
 
-		if (ctsvc_ipc_unmarshal_list(ipc_data, (contacts_list_h*)&activity_p->photos) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_unmarshal_child_list(ipc_data, (contacts_list_h*)&activity_p->photos) != CONTACTS_ERROR_NONE) break;
 
 		return CONTACTS_ERROR_NONE;
 

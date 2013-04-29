@@ -41,8 +41,6 @@
 #include "ctsvc_db_plugin_contact_helper.h"
 #include "ctsvc_db_plugin_person_helper.h"
 
-#define CTSVC_MY_IMAGE_LOCATION "/opt/usr/data/contacts-svc/img/my"
-
 #define CTSVC_CONTACT_INITIAL_DATA_MAX_LEN 128
 
 static int __ctsvc_db_contact_insert_record( contacts_record_h record, int *id );

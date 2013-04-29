@@ -39,8 +39,6 @@
 
 //static GMainLoop *loop;
 
-static int __server_main();
-
 static int __server_main(void)
 {
 	int ret;

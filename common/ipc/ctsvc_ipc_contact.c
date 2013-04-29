@@ -30,8 +30,6 @@ ctsvc_ipc_marshal_record_plugin_cb_s _ctsvc_ipc_record_contact_plugin_cb = {
 	.get_primary_id = __ctsvc_ipc_marshal_contact_get_primary_id
 };
 
-
-
 static int __ctsvc_ipc_unmarshal_contact(pims_ipc_data_h ipc_data, const char* view_uri, contacts_record_h record)
 {
 	RETV_IF(ipc_data==NULL,CONTACTS_ERROR_NO_DATA);
@@ -62,21 +60,21 @@ static int __ctsvc_ipc_unmarshal_contact(pims_ipc_data_h ipc_data, const char* v
 		if (ctsvc_ipc_unmarshal_string(ipc_data, &pcontact->ringtone_path) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_string(ipc_data, &pcontact->vibration) != CONTACTS_ERROR_NONE) break;
 
-		if (ctsvc_ipc_unmarshal_list(ipc_data, (contacts_list_h*)&pcontact->name) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_unmarshal_list(ipc_data, (contacts_list_h*)&pcontact->note) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_unmarshal_list(ipc_data, (contacts_list_h*)&pcontact->company) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_unmarshal_list(ipc_data, (contacts_list_h*)&pcontact->numbers) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_unmarshal_list(ipc_data, (contacts_list_h*)&pcontact->emails) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_unmarshal_list(ipc_data, (contacts_list_h*)&pcontact->grouprelations) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_unmarshal_list(ipc_data, (contacts_list_h*)&pcontact->events) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_unmarshal_list(ipc_data, (contacts_list_h*)&pcontact->messengers) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_unmarshal_list(ipc_data, (contacts_list_h*)&pcontact->postal_addrs) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_unmarshal_list(ipc_data, (contacts_list_h*)&pcontact->urls) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_unmarshal_list(ipc_data, (contacts_list_h*)&pcontact->nicknames) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_unmarshal_list(ipc_data, (contacts_list_h*)&pcontact->profiles) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_unmarshal_list(ipc_data, (contacts_list_h*)&pcontact->relationships) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_unmarshal_list(ipc_data, (contacts_list_h*)&pcontact->images) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_unmarshal_list(ipc_data, (contacts_list_h*)&pcontact->extensions) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_unmarshal_child_list(ipc_data, (contacts_list_h*)&pcontact->name) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_unmarshal_child_list(ipc_data, (contacts_list_h*)&pcontact->note) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_unmarshal_child_list(ipc_data, (contacts_list_h*)&pcontact->company) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_unmarshal_child_list(ipc_data, (contacts_list_h*)&pcontact->numbers) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_unmarshal_child_list(ipc_data, (contacts_list_h*)&pcontact->emails) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_unmarshal_child_list(ipc_data, (contacts_list_h*)&pcontact->grouprelations) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_unmarshal_child_list(ipc_data, (contacts_list_h*)&pcontact->events) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_unmarshal_child_list(ipc_data, (contacts_list_h*)&pcontact->messengers) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_unmarshal_child_list(ipc_data, (contacts_list_h*)&pcontact->postal_addrs) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_unmarshal_child_list(ipc_data, (contacts_list_h*)&pcontact->urls) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_unmarshal_child_list(ipc_data, (contacts_list_h*)&pcontact->nicknames) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_unmarshal_child_list(ipc_data, (contacts_list_h*)&pcontact->profiles) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_unmarshal_child_list(ipc_data, (contacts_list_h*)&pcontact->relationships) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_unmarshal_child_list(ipc_data, (contacts_list_h*)&pcontact->images) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_unmarshal_child_list(ipc_data, (contacts_list_h*)&pcontact->extensions) != CONTACTS_ERROR_NONE) break;
 
 		return CONTACTS_ERROR_NONE;
 	} while(0);
