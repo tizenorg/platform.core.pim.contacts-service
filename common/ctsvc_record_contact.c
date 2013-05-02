@@ -3725,7 +3725,7 @@ static int __ctsvc_image_set_bool(contacts_record_h record, unsigned int propert
 		image->is_default = value;
 		break;
 	default:
-		ERR("Invalid parameter : property_id(0x%x) is not supported in value(image)", property_id);
+		CTS_ERR("Invalid parameter : property_id(0x%x) is not supported in value(image)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;

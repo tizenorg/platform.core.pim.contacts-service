@@ -435,7 +435,7 @@ int ctsvc_db_create_set_query(contacts_record_h record, char **set, GSList **bin
 
 	s_record = (ctsvc_record_s *)record;
 	if (0 == s_record->property_max_count || NULL == s_record->properties_flags) {
-		ERR("record don't have properties");
+		CTS_ERR("record don't have properties");
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 

@@ -672,7 +672,6 @@ static bool __ctsvc_compare_pinyin_letter(const char *haystack, int haystack_lan
 			if (!initial_match &&
 					strlen(pinyinname[k].pinyin_name) <= strlen(temp_needle + j) &&
 					strncmp(pinyinname[k].pinyin_name, temp_needle + j, strlen(pinyinname[k].pinyin_name)) == 0) {
-				DBG("A name matched");
 				match = true;
 				j+=strlen(pinyinname[k].pinyin_name);
 				break;

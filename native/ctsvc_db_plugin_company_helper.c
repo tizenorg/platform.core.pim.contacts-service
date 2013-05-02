@@ -17,8 +17,8 @@
  *
  */
 
-#include <unistd.h>
 #include <ctype.h>
+#include <unistd.h>
 
 #include "contacts.h"
 #include "ctsvc_internal.h"
@@ -36,8 +36,8 @@
 static int __ctsvc_company_add_logo_file(int parent_id, int company_id, char *src_img, char *dest_name, int dest_size)
 {
 	int ret;
-	char *ext;
 	char *temp;
+	char *ext;
 	char dest[CTSVC_IMG_FULL_PATH_SIZE_MAX] = {0};
 
 	RETVM_IF(NULL == src_img, CONTACTS_ERROR_INVALID_PARAMETER, "img_path is NULL");

@@ -20,11 +20,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>     //getuid
 #include <pims-ipc.h>
 #include <pims-ipc-svc.h>
 
-#include "internal.h" // DBG
+#include "ctsvc_internal.h"
 #include "ctsvc_db_init.h"
 #include "ctsvc_schema.h"
 #include "ctsvc_schema_recovery.h"
@@ -36,8 +35,6 @@
 #include "ctsvc_ipc_server.h"
 #include "ctsvc_ipc_server2.h"
 #include "ctsvc_ipc_server_sim.h"
-
-//static GMainLoop *loop;
 
 static int __server_main(void)
 {
@@ -97,7 +94,7 @@ static int __server_main(void)
 
 		ret = contacts_connect2();
 		if (CONTACTS_ERROR_NONE != ret) {
-			SERVER_DBG("contacts_connect2 fail(%d)", ret);
+			CTS_ERR("contacts_connect2 fail(%d)", ret);
 			break;
 		}
 
@@ -105,7 +102,7 @@ static int __server_main(void)
 		ctsvc_server_bg_delete_start();
 
 		ret = ctsvc_server_init_configuration();
-		SERVER_DBG("%d", ret);
+		CTS_DBG("%d", ret);
 
 		pims_ipc_svc_run_main_loop(NULL);
 
@@ -115,7 +112,7 @@ static int __server_main(void)
 
 		ret = contacts_disconnect2();
 		if (CONTACTS_ERROR_NONE != ret)
-			SERVER_DBG("%d", ret);
+			CTS_DBG("%d", ret);
 
 		pims_ipc_svc_deinit_for_publish();
 
@@ -125,20 +122,20 @@ static int __server_main(void)
 
 	} while(0);
 
-	ERR("pims_ipc_svc_register error");
+	CTS_ERR("pims_ipc_svc_register error");
 	return -1;
 }
 
 int main(int argc, char *argv[])
 {
-	SERVER_FN_CALL;
+	CTS_FN_CALL;
 	int ret;
 	ctsvc_server_check_schema();
 	if (2 <= argc && !strcmp(argv[1], "schema"))
 		return CONTACTS_ERROR_NONE;
 
 	ret = ctsvc_server_socket_init();
-	SERVER_DBG("%d", ret);
+	CTS_DBG("%d", ret);
 
 	__server_main();
 

@@ -24,7 +24,7 @@
 #include <account.h>
 
 #include "contacts.h"
-#include "internal.h"
+#include "ctsvc_internal.h"
 #include "ctsvc_schema.h"
 #include "ctsvc_sqlite.h"
 #include "ctsvc_server_bg.h"
@@ -68,7 +68,7 @@ static int __ctsvc_server_bg_contact_delete_step1(__ctsvc_delete_data_s* data)
 		snprintf(query, sizeof(query), "SELECT contact_id FROM "CTS_TABLE_CONTACTS" WHERE deleted = 1");
 		stmt = cts_query_prepare(query);
 		if (NULL == stmt) {
-			ERR("cts_query_prepare() Failed");
+			CTS_ERR("cts_query_prepare() Failed");
 			return CONTACTS_ERROR_DB;
 		}
 
@@ -101,7 +101,7 @@ static int __ctsvc_server_bg_contact_delete_step1(__ctsvc_delete_data_s* data)
 // remove data
 static int __ctsvc_server_bg_contact_delete_step2(__ctsvc_delete_data_s* data)
 {
-    SERVER_FN_CALL;
+    CTS_FN_CALL;
 	int ret;
 	char query[CTS_SQL_MIN_LEN] = {0};
 	GSList *list = NULL;
@@ -116,7 +116,7 @@ static int __ctsvc_server_bg_contact_delete_step2(__ctsvc_delete_data_s* data)
 
 	stmt = cts_query_prepare(query);
 		if (NULL == stmt) {
-		ERR("cts_query_prepare() Failed");
+		CTS_ERR("cts_query_prepare() Failed");
 		return CONTACTS_ERROR_DB;
 	}
 
@@ -132,7 +132,7 @@ static int __ctsvc_server_bg_contact_delete_step2(__ctsvc_delete_data_s* data)
 		return CONTACTS_ERROR_NO_DATA;
 
 	ret = ctsvc_begin_trans();
-	h_retvm_if(CONTACTS_ERROR_NONE != ret, CONTACTS_ERROR_DB, "DB failed" );
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, CONTACTS_ERROR_DB, "DB failed" );
 
 	cursor = g_slist_nth(list, 0);
 	while(cursor) {
@@ -140,9 +140,8 @@ static int __ctsvc_server_bg_contact_delete_step2(__ctsvc_delete_data_s* data)
 		snprintf(query, sizeof(query), "DELETE FROM "CTS_TABLE_DATA" WHERE id = %d", id);
 
 		ret = ctsvc_query_exec(query);
-		SERVER_DBG("%s",query);
 		if (ret != CONTACTS_ERROR_NONE) {
-			ERR("DB failed");
+			CTS_ERR("DB failed");
 			ctsvc_end_trans(false);
 			g_slist_free(list);
 			return CONTACTS_ERROR_DB;
@@ -158,7 +157,7 @@ static int __ctsvc_server_bg_contact_delete_step2(__ctsvc_delete_data_s* data)
 // remove activities
 static int __ctsvc_server_bg_contact_delete_step3(__ctsvc_delete_data_s* data)
 {
-    SERVER_FN_CALL;
+    CTS_FN_CALL;
 
 	int ret;
 	char query[CTS_SQL_MIN_LEN] = {0};
@@ -174,7 +173,7 @@ static int __ctsvc_server_bg_contact_delete_step3(__ctsvc_delete_data_s* data)
 
 	stmt = cts_query_prepare(query);
 		if (NULL == stmt) {
-		ERR("cts_query_prepare() Failed");
+		CTS_ERR("cts_query_prepare() Failed");
 		return CONTACTS_ERROR_DB;
 	}
 
@@ -190,7 +189,7 @@ static int __ctsvc_server_bg_contact_delete_step3(__ctsvc_delete_data_s* data)
 		return CONTACTS_ERROR_NO_DATA;
 
 	ret = ctsvc_begin_trans();
-	h_retvm_if(CONTACTS_ERROR_NONE != ret, CONTACTS_ERROR_DB, "DB failed" );
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, CONTACTS_ERROR_DB, "DB failed" );
 
 	cursor = g_slist_nth(list, 0);
 	while(cursor) {
@@ -198,9 +197,8 @@ static int __ctsvc_server_bg_contact_delete_step3(__ctsvc_delete_data_s* data)
 		snprintf(query, sizeof(query), "DELETE FROM "CTS_TABLE_ACTIVITIES" WHERE id = %d", id);
 
 		ret = ctsvc_query_exec(query);
-		SERVER_DBG("%s",query);
 		if (ret != CONTACTS_ERROR_NONE) {
-			ERR("DB failed");
+			CTS_ERR("DB failed");
 			ctsvc_end_trans(false);
 			g_slist_free(list);
 			return CONTACTS_ERROR_DB;
@@ -219,14 +217,13 @@ static int __ctsvc_server_bg_contact_delete_step4(__ctsvc_delete_data_s* data)
 	char query[CTS_SQL_MIN_LEN] = {0};
 
 	ret = ctsvc_begin_trans();
-	h_retvm_if(CONTACTS_ERROR_NONE != ret, CONTACTS_ERROR_DB, "DB failed" );
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, CONTACTS_ERROR_DB, "DB failed" );
 
 	snprintf(query, sizeof(query), "DELETE FROM "CTS_TABLE_SEARCH_INDEX" WHERE contact_id = %d",
 					data->current_contact_id);
 	ret = ctsvc_query_exec(query);
-	SERVER_DBG("%s",query);
 	if (CONTACTS_ERROR_NONE != ret) {
-		ERR("DB failed");
+		CTS_ERR("DB failed");
 		ctsvc_end_trans(false);
 		return CONTACTS_ERROR_DB;
 	}
@@ -234,9 +231,8 @@ static int __ctsvc_server_bg_contact_delete_step4(__ctsvc_delete_data_s* data)
 	snprintf(query, sizeof(query), "DELETE FROM "CTS_TABLE_CONTACTS" WHERE contact_id = %d",
 					data->current_contact_id);
 	ret = ctsvc_query_exec(query);
-	SERVER_DBG("%s",query);
 	if (CONTACTS_ERROR_NONE != ret) {
-		ERR("DB failed");
+		CTS_ERR("DB failed");
 		ctsvc_end_trans(false);
 		return CONTACTS_ERROR_DB;
 	}
@@ -250,7 +246,7 @@ static bool __ctsvc_server_bg_contact_delete_step(int ret, __ctsvc_delete_data_s
 	if (ret != CONTACTS_ERROR_NONE && ret != CONTACTS_ERROR_NO_DATA) {
 		if(data->contact_ids)
 			g_slist_free(data->contact_ids);
-		ERR("fail (%d)",ret);
+		CTS_ERR("fail (%d)",ret);
 		return false;
 	}
 
@@ -259,7 +255,7 @@ static bool __ctsvc_server_bg_contact_delete_step(int ret, __ctsvc_delete_data_s
 		if (ret == CONTACTS_ERROR_NO_DATA) {
 			if(data->contact_ids)
 				g_slist_free(data->contact_ids);
-			ERR("step_1 no_data");
+			CTS_ERR("step_1 no_data");
 			return false;
 		}
 		data->step = STEP_2;
@@ -285,11 +281,11 @@ static bool __ctsvc_server_bg_contact_delete_step(int ret, __ctsvc_delete_data_s
 
 static bool  __ctsvc_server_db_delete_run(__ctsvc_delete_data_s* data)
 {
-	SERVER_FN_CALL;
+	CTS_FN_CALL;
 	int ret = CONTACTS_ERROR_NONE;
 
 	if(data == NULL) {
-		ERR("data is NULL");
+		CTS_ERR("data is NULL");
 		return false;
 	}
 
@@ -307,7 +303,7 @@ static bool  __ctsvc_server_db_delete_run(__ctsvc_delete_data_s* data)
 			ret = __ctsvc_server_bg_contact_delete_step4(data);
 			break;
 		default:
-			ERR("invalid step");
+			CTS_ERR("invalid step");
 			if(data->contact_ids)
 			g_slist_free(data->contact_ids);
 			return false;
@@ -318,21 +314,21 @@ static bool  __ctsvc_server_db_delete_run(__ctsvc_delete_data_s* data)
 
 static gpointer __ctsvc_server_bg_delete(gpointer user_data)
 {
-	SERVER_FN_CALL;
+	CTS_FN_CALL;
 	int ret;
 	__ctsvc_delete_data_s *callback_data = NULL;
 
 	while(1) {
 		callback_data = calloc(1,sizeof(__ctsvc_delete_data_s));
 		if (callback_data == NULL) {
-			ERR("calloc fail");
+			CTS_ERR("calloc fail");
 			continue;
 		}
 		callback_data->step = STEP_1;
 
 		ret = contacts_connect2();
 		if (CONTACTS_ERROR_NONE != ret) {
-			SERVER_DBG("%d", ret);
+			CTS_ERR("contacts_connect2() fail(%d)", ret);
 			free(callback_data);
 			continue;
 		}
@@ -340,27 +336,27 @@ static gpointer __ctsvc_server_bg_delete(gpointer user_data)
 		while(1) {
 			sleep(CTSVC_SERVER_BG_DELETE_STEP_TIME); // sleep 1 sec.
 			if (__ctsvc_server_db_delete_run(callback_data) == false) {
-				SERVER_DBG("end");
+				CTS_DBG("end");
 				free(callback_data);
 				break;
 			}
 		}
 		ret = contacts_disconnect2();
 		if (CONTACTS_ERROR_NONE != ret)
-			SERVER_DBG("%d", ret);
+			CTS_ERR("contacts_disconnect2 Fail(%d)", ret);
 
 		g_mutex_lock(&__ctsvc_server_bg_delete_mutex);
-		SERVER_DBG("wait");
+		CTS_DBG("wait");
 		g_cond_wait(&__ctsvc_server_bg_delete_cond, &__ctsvc_server_bg_delete_mutex);
 		g_mutex_unlock(&__ctsvc_server_bg_delete_mutex);
 	}
 
-    return NULL;
+	return NULL;
 }
 
 void ctsvc_server_bg_delete_start()
 {
-	SERVER_FN_CALL;
+	CTS_FN_CALL;
 
 	if (__ctsvc_server_bg_delete_thread == NULL) {
 		g_mutex_init(&__ctsvc_server_bg_delete_mutex);
@@ -385,7 +381,7 @@ static void __ctsvc_server_contact_deleted_cb(const char *view_uri, void *data)
 
 static bool __ctsvc_server_account_delete_cb(const char* event_type, int account_id, void* user_data)
 {
-	SERVER_FN_CALL;
+	CTS_FN_CALL;
 	if (strcmp(event_type, ACCOUNT_NOTI_NAME_DELETE) == 0)
 		ctsvc_addressbook_delete(account_id);
 	return true;
@@ -395,28 +391,28 @@ void ctsvc_server_bg_add_cb()
 {
 	int ret;
 	ret = contacts_db_add_changed_cb(_contacts_address_book._uri, __ctsvc_server_addressbook_deleted_cb, NULL);
-	SERVER_DBG("call contacts_db_add_changed_cb (_contacts_address_book)  : return (%d)", ret);
+	CTS_DBG("call contacts_db_add_changed_cb (_contacts_address_book)  : return (%d)", ret);
 	ret = contacts_db_add_changed_cb(_contacts_contact._uri, __ctsvc_server_contact_deleted_cb, NULL);
-	SERVER_DBG("call contacts_db_add_changed_cb (_contacts_contact): return (%d)", ret);
+	CTS_DBG("call contacts_db_add_changed_cb (_contacts_contact): return (%d)", ret);
 
 	ret = account_subscribe_create(&account);
 	if (ACCOUNT_ERROR_NONE == ret) {
 		ret = account_subscribe_notification(account, __ctsvc_server_account_delete_cb, NULL);
 		if (ACCOUNT_ERROR_NONE != ret) {
-			SERVER_DBG("account_subscribe_notification Failed (%d)", ret);
+			CTS_ERR("account_subscribe_notification Failed (%d)", ret);
 		}
 	}
 	else
-		SERVER_DBG("account_subscribe_create Failed (%d)", ret);
+		CTS_ERR("account_subscribe_create Failed (%d)", ret);
 }
 
 void ctsvc_server_bg_remove_cb()
 {
 	int ret;
 	ret = contacts_db_remove_changed_cb(_contacts_address_book._uri, __ctsvc_server_addressbook_deleted_cb, NULL);
-	SERVER_DBG("call contacts_db_remove_changed_cb (_contacts_address_book): return (%d)", ret);
+	CTS_DBG("call contacts_db_remove_changed_cb (_contacts_address_book): return (%d)", ret);
 	ret = contacts_db_remove_changed_cb(_contacts_contact._uri, __ctsvc_server_contact_deleted_cb, NULL);
-	SERVER_DBG("call contacts_db_remove_changed_cb (_contacts_contact) : return (%d)", ret);
+	CTS_DBG("call contacts_db_remove_changed_cb (_contacts_contact) : return (%d)", ret);
 
 	if (account) {
 		account_unsubscribe_notification(account);		// unsubscirbe & destroy

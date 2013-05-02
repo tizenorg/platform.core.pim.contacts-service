@@ -16,13 +16,13 @@
  * limitations under the License.
  *
  */
+#include <ctype.h>
 #include <sys/types.h>
 #include <sys/syscall.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <vconf.h>
 #include <vconf-keys.h>
-#include <ctype.h>
 
 #include "contacts.h"
 #include "ctsvc_internal.h"
@@ -1802,7 +1802,7 @@ int ctsvc_contact_update_display_name(int contact_id, contacts_display_name_sour
 
 		stmt = cts_query_prepare(query);
 		if (NULL == stmt) {
-			ERR("DB error : cts_query_prepare() Failed");
+			CTS_ERR("DB error : cts_query_prepare() Failed");
 			contacts_record_destroy(record, true);
 			return CONTACTS_ERROR_DB;
 		}

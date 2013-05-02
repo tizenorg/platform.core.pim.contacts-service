@@ -43,17 +43,17 @@ static gboolean __ctsvc_publish_changes_with_data(const char *view_uri, char *da
 
 	indata = pims_ipc_data_create(0);
 	if (!indata) {
-		ERR("pims_ipc_data_create error\n");
+		CTS_ERR("pims_ipc_data_create error\n");
 		return false;
 	}
 
 	if (pims_ipc_data_put(indata, data, strlen(data) + 1) != 0) {
-		ERR("pims_ipc_data_put error\n");
+		CTS_ERR("pims_ipc_data_put error\n");
 		return false;
 	}
 
 	if (pims_ipc_svc_publish(CTSVC_IPC_SUBSCRIBE_MODULE, (char*)view_uri, indata) != 0) {
-		ERR("pims_ipc_svc_publish error\n");
+		CTS_ERR("pims_ipc_svc_publish error (%s)\n", view_uri);
 		return false;
 	}
 

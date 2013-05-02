@@ -40,18 +40,26 @@
 #define CTSVC_VCARD_IMAGE_LOCATION "/opt/usr/data/contacts-svc/img/vcard"
 
 #define CTSVC_VCARD_APPEND_STR(buf, buf_size, len, str) do { \
-	if ((len = __ctsvc_vcard_append_str(buf, buf_size, len, str)) < 0) { \
-		ERR("__ctsvc_vcard_append_str() Failed"); \
+	if ((len = __ctsvc_vcard_append_str(buf, buf_size, len, str, false)) < 0) { \
+		CTS_ERR("__ctsvc_vcard_append_str() Failed"); \
 		return CONTACTS_ERROR_INTERNAL; \
 	} \
 } while (0)
 
 #define CTSVC_VCARD_APPEND_ENCODE_STR(buf, buf_size, len, content) do { \
 	if ((len = __ctsvc_vcard_append_encode_str(buf, buf_size, len, content)) < 0) { \
+		CTS_ERR("__ctsvc_vcard_append_encode_str() Failed"); \
+		return CONTACTS_ERROR_INTERNAL; \
+	} \
+} while (0)
+
+#define CTSVC_VCARD_APPEND_CONTENT_STR(buf, buf_size, len, content) do { \
+	if ((len = __ctsvc_vcard_append_str(buf, buf_size, len, content, true)) < 0) { \
 		ERR("__ctsvc_vcard_append_encode_str() Failed"); \
 		return CONTACTS_ERROR_INTERNAL; \
 	} \
 } while (0)
+
 
 #define CTSVC_VCARD_APPEND_CONTENT(buf, buf_size, len, content) do { \
 	if (__ctsvc_need_encode(content)) { \
@@ -60,7 +68,7 @@
 	} \
 	else { \
 		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ":"); \
-		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, content); \
+		CTSVC_VCARD_APPEND_CONTENT_STR(buf, buf_size, len, content); \
 	} \
 	CTSVC_VCARD_APPEND_STR(buf, buf_size, len, CTSVC_CRLF); \
 } while (0)
@@ -196,7 +204,7 @@ static inline bool __ctsvc_need_encode(const char *str)
 	return false;
 }
 
-static int __ctsvc_vcard_append_str(char **buf, int *buf_size, int len, const char *str)
+static int __ctsvc_vcard_append_str(char **buf, int *buf_size, int len, const char *str, bool need_conversion)
 {
 	int len_temp = 0;
 	char *tmp = NULL;
@@ -211,14 +219,45 @@ static int __ctsvc_vcard_append_str(char **buf, int *buf_size, int len, const ch
 	}
 
 	if (need_realloc) {
-		if (NULL == (tmp = realloc(*buf, *buf_size))) {
+		if (NULL == (tmp = realloc(*buf, *buf_size)))
 			return -1;
-		}
 		else
 			*buf = tmp;
 	}
 
-	len_temp = snprintf(*buf+len, *buf_size-len+1, "%s", safe_str);
+	if (need_conversion) {
+		const char *s = safe_str;
+		char *r = (char *)(*buf+len);
+
+		while (*s) {
+			switch (*s) {
+			case ';':
+			case ':':
+			case ',':
+			case '\\':
+				*r = '\\';
+				r++;
+				str_len++;
+				if (*buf_size<str_len+len+1) {
+					*buf_size = *buf_size * 2;
+					if (NULL == (tmp = realloc(*buf, *buf_size)))
+						return -1;
+					else
+						*buf = tmp;
+				}
+				break;
+			default:
+				break;
+			}
+			*r = *s;
+			r++;
+			s++;
+		}
+		len_temp = str_len;
+	}
+	else {
+		len_temp = snprintf(*buf+len, *buf_size-len+1, "%s", safe_str);
+	}
 	len += len_temp;
 	return len;
 }
@@ -233,7 +272,7 @@ static int __ctsvc_vcard_append_encode_str(char **buf, int *buf_size, int len, c
 	str_len = strlen(safe_str);
 
 	encoded_str = g_base64_encode((guchar *)safe_str, str_len);
-	len = __ctsvc_vcard_append_str(buf, buf_size, len, encoded_str);
+	len = __ctsvc_vcard_append_str(buf, buf_size, len, encoded_str, false);
 	g_free(encoded_str);
 	return len;
 }
@@ -328,15 +367,15 @@ static inline int __ctsvc_vcard_append_name(ctsvc_list_s *names, char **buf, int
 	}
 	else {
 		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ":");
-		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, name->last);
+		CTSVC_VCARD_APPEND_CONTENT_STR(buf, buf_size, len, name->last);
 		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";");
-		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, name->first);
+		CTSVC_VCARD_APPEND_CONTENT_STR(buf, buf_size, len, name->first);
 		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";");
-		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, name->addition);
+		CTSVC_VCARD_APPEND_CONTENT_STR(buf, buf_size, len, name->addition);
 		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";");
-		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, name->prefix);
+		CTSVC_VCARD_APPEND_CONTENT_STR(buf, buf_size, len, name->prefix);
 		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";");
-		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, name->suffix);
+		CTSVC_VCARD_APPEND_CONTENT_STR(buf, buf_size, len, name->suffix);
 	}
 
 	CTSVC_VCARD_APPEND_STR(buf, buf_size, len, CTSVC_CRLF);
@@ -545,10 +584,10 @@ static inline int __ctsvc_vcard_append_company(ctsvc_list_s *company_list, char 
 		}
 		else {
 			CTSVC_VCARD_APPEND_STR(buf,buf_size,len,":");
-			CTSVC_VCARD_APPEND_STR(buf,buf_size,len,company->name);
+			CTSVC_VCARD_APPEND_CONTENT_STR(buf,buf_size,len,company->name);
 			if (company->department) {
 				CTSVC_VCARD_APPEND_STR(buf,buf_size,len,";");
-				CTSVC_VCARD_APPEND_STR(buf,buf_size,len,company->department);
+				CTSVC_VCARD_APPEND_CONTENT_STR(buf,buf_size,len,company->department);
 			}
 		}
 		CTSVC_VCARD_APPEND_STR(buf,buf_size,len,CTSVC_CRLF);
@@ -704,19 +743,19 @@ static inline int __ctsvc_vcard_append_postals(ctsvc_list_s *address_list, char 
 			}
 			else {
 				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ":");
-				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, address->pobox);
+				CTSVC_VCARD_APPEND_CONTENT_STR(buf, buf_size, len, address->pobox);
 				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";");
-				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, address->extended);
+				CTSVC_VCARD_APPEND_CONTENT_STR(buf, buf_size, len, address->extended);
 				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";");
-				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, address->street);
+				CTSVC_VCARD_APPEND_CONTENT_STR(buf, buf_size, len, address->street);
 				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";");
-				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, address->locality);
+				CTSVC_VCARD_APPEND_CONTENT_STR(buf, buf_size, len, address->locality);
 				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";");
-				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, address->region);
+				CTSVC_VCARD_APPEND_CONTENT_STR(buf, buf_size, len, address->region);
 				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";");
-				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, address->postalcode);
+				CTSVC_VCARD_APPEND_CONTENT_STR(buf, buf_size, len, address->postalcode);
 				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";");
-				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, address->country);
+				CTSVC_VCARD_APPEND_CONTENT_STR(buf, buf_size, len, address->country);
 			}
 
 			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, CTSVC_CRLF);
@@ -744,7 +783,7 @@ static inline int __ctsvc_vcard_append_nicknames(ctsvc_list_s *nickname_list, ch
 			}
 			else {
 				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ",");
-				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, nickname->nickname);
+				CTSVC_VCARD_APPEND_CONTENT_STR(buf, buf_size, len, nickname->nickname);
 			}
 		}
 	}
@@ -1496,127 +1535,111 @@ API int contacts_vcard_make_from_my_profile(contacts_record_h record, char **vca
 
 static int __ctsvc_vcard_append_person(ctsvc_person_s *person, ctsvc_list_s *list_contacts, char **buf, int *buf_size, int len)
 {
-	int ret;
 	int changed_time = 0;
 	ctsvc_contact_s *contact;
-	ctsvc_simple_contact_s *simple_contact;
 	GList *cursor = NULL;
 
 	for(cursor=list_contacts->records;cursor;cursor=cursor->next) {
-		simple_contact = (ctsvc_simple_contact_s *)cursor->data;
-		ret = contacts_db_get_record(_contacts_contact._uri, simple_contact->contact_id, (contacts_record_h *)&contact);
-		if (CONTACTS_ERROR_NONE == ret && contact && contact->id == person->name_contact_id && contact->name) {
+		contact = (ctsvc_contact_s *)cursor->data;
+		if (contact && contact->id == person->name_contact_id && contact->name) {
 			len = __ctsvc_vcard_append_name(contact->name, buf, buf_size, len);
 			RETV_IF(len < 0, len);
 		}
 	}
 
 	for(cursor=list_contacts->records;cursor;cursor=cursor->next) {
-		simple_contact = (ctsvc_simple_contact_s *)cursor->data;
-		ret = contacts_db_get_record(_contacts_contact._uri, simple_contact->contact_id, (contacts_record_h *)&contact);
-		if (CONTACTS_ERROR_NONE == ret && contact && contact->company && contact->company->cursor) {
+		contact = (ctsvc_contact_s *)cursor->data;
+		if (contact && contact->company && contact->company->cursor) {
 			len = __ctsvc_vcard_append_company(contact->company, buf, buf_size, len);
 			RETV_IF(len < 0, len);
 		}
 	}
 
 	for(cursor=list_contacts->records;cursor;cursor=cursor->next) {
-		simple_contact = (ctsvc_simple_contact_s *)cursor->data;
-		ret = contacts_db_get_record(_contacts_contact._uri, simple_contact->contact_id, (contacts_record_h *)&contact);
-		if (CONTACTS_ERROR_NONE == ret && contact && contact->note && contact->note->cursor) {
+		contact = (ctsvc_contact_s *)cursor->data;
+		if (contact && contact->note && contact->note->cursor) {
 			len = __ctsvc_vcard_append_note(contact->note, buf, buf_size, len);
 			RETV_IF(len < 0, len);
 		}
 	}
 	for(cursor=list_contacts->records;cursor;cursor=cursor->next) {
-		simple_contact = (ctsvc_simple_contact_s *)cursor->data;
-		ret = contacts_db_get_record(_contacts_contact._uri, simple_contact->contact_id, (contacts_record_h *)&contact);
-		if (CONTACTS_ERROR_NONE == ret && contact && contact->postal_addrs && contact->postal_addrs->cursor) {
+		contact = (ctsvc_contact_s *)cursor->data;
+		if (contact && contact->postal_addrs && contact->postal_addrs->cursor) {
 			len = __ctsvc_vcard_append_postals(contact->postal_addrs, buf, buf_size, len);
 			RETV_IF(len < 0, len);
 		}
 	}
 	for(cursor=list_contacts->records;cursor;cursor=cursor->next) {
-		simple_contact = (ctsvc_simple_contact_s *)cursor->data;
-		ret = contacts_db_get_record(_contacts_contact._uri, simple_contact->contact_id, (contacts_record_h *)&contact);
-		if (CONTACTS_ERROR_NONE == ret && contact && contact->numbers && contact->numbers->cursor) {
+		contact = (ctsvc_contact_s *)cursor->data;
+		if (contact && contact->numbers && contact->numbers->cursor) {
 			len = __ctsvc_vcard_append_numbers(contact->numbers, buf, buf_size, len);
 			RETV_IF(len < 0, len);
 		}
 	}
 
 	for(cursor=list_contacts->records;cursor;cursor=cursor->next) {
-		simple_contact = (ctsvc_simple_contact_s *)cursor->data;
-		ret = contacts_db_get_record(_contacts_contact._uri, simple_contact->contact_id, (contacts_record_h *)&contact);
-		if (CONTACTS_ERROR_NONE == ret && contact && contact->emails && contact->emails->cursor) {
+		contact = (ctsvc_contact_s *)cursor->data;
+		if (contact && contact->emails && contact->emails->cursor) {
 			len = __ctsvc_vcard_append_emails(contact->emails, buf, buf_size, len);
 			RETV_IF(len < 0, len);
 		}
 	}
 
 	for(cursor=list_contacts->records;cursor;cursor=cursor->next) {
-		simple_contact = (ctsvc_simple_contact_s *)cursor->data;
-		ret = contacts_db_get_record(_contacts_contact._uri, simple_contact->contact_id, (contacts_record_h *)&contact);
-		if (CONTACTS_ERROR_NONE == ret && contact && contact->nicknames && contact->nicknames->cursor) {
+		contact = (ctsvc_contact_s *)cursor->data;
+		if (contact && contact->nicknames && contact->nicknames->cursor) {
 			len = __ctsvc_vcard_append_nicknames(contact->nicknames, buf, buf_size, len);
 			RETV_IF(len < 0, len);
 		}
 	}
 	for(cursor=list_contacts->records;cursor;cursor=cursor->next) {
-		simple_contact = (ctsvc_simple_contact_s *)cursor->data;
-		ret = contacts_db_get_record(_contacts_contact._uri, simple_contact->contact_id, (contacts_record_h *)&contact);
-		if (CONTACTS_ERROR_NONE == ret && contact && contact->urls && contact->urls->cursor) {
+		contact = (ctsvc_contact_s *)cursor->data;
+		if (contact && contact->urls && contact->urls->cursor) {
 			len = __ctsvc_vcard_append_webs(contact->urls, buf, buf_size, len);
 			RETV_IF(len < 0, len);
 		}
 	}
 
 	for(cursor=list_contacts->records;cursor;cursor=cursor->next) {
-		simple_contact = (ctsvc_simple_contact_s *)cursor->data;
-		ret = contacts_db_get_record(_contacts_contact._uri, simple_contact->contact_id, (contacts_record_h *)&contact);
-		if (CONTACTS_ERROR_NONE == ret && contact && contact->events && contact->events->cursor) {
+		contact = (ctsvc_contact_s *)cursor->data;
+		if (contact && contact->events && contact->events->cursor) {
 			len = __ctsvc_vcard_append_events(contact->events, buf, buf_size, len);
 			RETV_IF(len < 0, len);
 		}
 	}
 	for(cursor=list_contacts->records;cursor;cursor=cursor->next) {
-		simple_contact = (ctsvc_simple_contact_s *)cursor->data;
-		ret = contacts_db_get_record(_contacts_contact._uri, simple_contact->contact_id, (contacts_record_h *)&contact);
-		if (CONTACTS_ERROR_NONE == ret && contact && contact->images && contact->images->cursor) {
+		contact = (ctsvc_contact_s *)cursor->data;
+		if (contact && contact->images && contact->images->cursor) {
 			len = __ctsvc_vcard_put_photo(contact->images, buf, buf_size, len);
 			RETV_IF(len < 0, len);
 		}
 	}
 	for(cursor=list_contacts->records;cursor;cursor=cursor->next) {
-		simple_contact = (ctsvc_simple_contact_s *)cursor->data;
-		ret = contacts_db_get_record(_contacts_contact._uri, simple_contact->contact_id, (contacts_record_h *)&contact);
-		if (CONTACTS_ERROR_NONE == ret && contact && contact->messengers && contact->messengers->cursor) {
+		contact = (ctsvc_contact_s *)cursor->data;
+		if (contact && contact->messengers && contact->messengers->cursor) {
 			len = __ctsvc_vcard_append_messengers(contact->messengers, buf, buf_size, len);
 			RETV_IF(len < 0, len);
 		}
 	}
 
 	for(cursor=list_contacts->records;cursor;cursor=cursor->next) {
-		simple_contact = (ctsvc_simple_contact_s *)cursor->data;
-		ret = contacts_db_get_record(_contacts_contact._uri, simple_contact->contact_id, (contacts_record_h *)&contact);
-		if (CONTACTS_ERROR_NONE == ret && contact && contact->relationships && contact->relationships->cursor) {
+		contact = (ctsvc_contact_s *)cursor->data;
+		if (contact && contact->relationships && contact->relationships->cursor) {
 			len = __ctsvc_vcard_append_relationships(contact->relationships, buf, buf_size, len);
 			RETV_IF(len < 0, len);
 		}
 	}
 
 	for(cursor=list_contacts->records;cursor;cursor=cursor->next) {
-		simple_contact = (ctsvc_simple_contact_s *)cursor->data;
-		ret = contacts_db_get_record(_contacts_contact._uri, simple_contact->contact_id, (contacts_record_h *)&contact);
-		if (CONTACTS_ERROR_NONE == ret && contact && contact->uid) {
+		contact = (ctsvc_contact_s *)cursor->data;
+		if (contact && contact->uid) {
 			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, content_name[CTSVC_VCARD_VALUE_UID]);
 			CTSVC_VCARD_APPEND_CONTENT(buf, buf_size, len, contact->uid);
 		}
 	}
 	for(cursor=list_contacts->records;cursor;cursor=cursor->next) {
-		simple_contact = (ctsvc_simple_contact_s *)cursor->data;
-		ret = contacts_db_get_record(_contacts_contact._uri, simple_contact->contact_id, (contacts_record_h *)&contact);
-		if (CONTACTS_ERROR_NONE == ret && contact && changed_time < contact->changed_time)
+		contact = (ctsvc_contact_s *)cursor->data;
+		if (contact && changed_time < contact->changed_time)
 			changed_time = contact->changed_time;
 	}
 
@@ -1632,6 +1655,7 @@ static int __ctsvc_vcard_append_person(ctsvc_person_s *person, ctsvc_list_s *lis
 
 		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, temp);
 	}
+
 #if 0
 	ctsvc_list_s* profile;
 #endif
@@ -1696,14 +1720,14 @@ API int contacts_vcard_make_from_person(contacts_record_h record, char **vcard_s
 	RETVM_IF(CTSVC_RECORD_PERSON != person->base.r_type, CONTACTS_ERROR_INVALID_PARAMETER,
 		"Invalid parameter : The record is not conatct record (type : %d)", person->base.r_type);
 
-	contacts_filter_create(_contacts_simple_contact._uri, &filter);
-	ret = contacts_filter_add_int(filter, _contacts_simple_contact.person_id, CONTACTS_MATCH_EQUAL, person->person_id);
+	contacts_filter_create(_contacts_contact._uri, &filter);
+	ret = contacts_filter_add_int(filter, _contacts_contact.person_id, CONTACTS_MATCH_EQUAL, person->person_id);
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("Invalid parameter : contacts_filter_add_int is failed", ret);
 		contacts_filter_destroy(filter);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
-	contacts_query_create(_contacts_simple_contact._uri, &query);
+	contacts_query_create(_contacts_contact._uri, &query);
 	contacts_query_set_filter(query, filter);
 	ret = contacts_db_get_records_with_query(query, 0, 0, &list);
 
@@ -1796,11 +1820,13 @@ static inline char* __ctsvc_vcard_pass_unsupported(char *vcard)
 
 static char* __ctsvc_strtok(char *val, char c)
 {
-	while(*val) {
-		if(*val == c) {
+	char *before = NULL;
+	while (*val) {
+		if (*val == c && (NULL == before || *before != '\\')) {
 			*val = '\0';
 			return (val+1);
 		}
+		before = val;
 		val++;
 	}
 	return val;
@@ -2070,6 +2096,43 @@ static inline char* __ctsvc_get_content_value(char *val)
 	return temp;
 }
 
+static char* __ctsvc_vcard_remove_escape_char(char *str)
+{
+	char *s = SAFE_STR(str);
+	char *r = s;
+	while (*s) {
+		if (*s == '\\' && *(s+1)) {
+			char *n = (char*)(s+1);
+			switch (*n) {
+			case 'n':
+			case 'N':
+				*r = '\n';
+				s++;
+				break;
+			case ';':
+			case ':':
+			case ',':
+			case '\\':
+				*r = *n;
+				s++;
+				break;
+			default:
+				*r = *s;
+				break;
+			}
+			r++;
+			s++;
+		}
+		else {
+			*r = *s;
+			r++;
+			s++;
+		}
+	}
+	*r = '\0';
+	return str;
+}
+
 static inline int __ctsvc_vcard_get_display_name(ctsvc_list_s *name_list, char *val)
 {
 	int ret;
@@ -2098,7 +2161,7 @@ static inline int __ctsvc_vcard_get_display_name(ctsvc_list_s *name_list, char *
 	WARN_IF(ret != CONTACTS_ERROR_NONE, "contacts_record_get_str_p is failed(%d)", ret);
 
 	if ((NULL == first_name || '\0' == *first_name) && (NULL == last_name || '\0' == *last_name))
-		contacts_record_set_str(name, _contacts_name.first, temp);
+		contacts_record_set_str(name, _contacts_name.first, __ctsvc_vcard_remove_escape_char(temp));
 
 	return CONTACTS_ERROR_NONE;
 }
@@ -2125,23 +2188,23 @@ static inline int __ctsvc_vcard_get_name(ctsvc_list_s *name_list, char *val)
 	}
 
 	temp = __ctsvc_strtok(start, separator);
-	contacts_record_set_str(name, _contacts_name.last, start);
+	contacts_record_set_str(name, _contacts_name.last, __ctsvc_vcard_remove_escape_char(start));
 
 	start = temp;
 	temp = __ctsvc_strtok(start, separator);
-	contacts_record_set_str(name, _contacts_name.first, start);
+	contacts_record_set_str(name, _contacts_name.first, __ctsvc_vcard_remove_escape_char(start));
 
 	start = temp;
 	temp = __ctsvc_strtok(start, separator);
-	contacts_record_set_str(name, _contacts_name.addition, start);
+	contacts_record_set_str(name, _contacts_name.addition, __ctsvc_vcard_remove_escape_char(start));
 
 	start = temp;
 	temp = __ctsvc_strtok(start, separator);
-	contacts_record_set_str(name, _contacts_name.prefix, start);
+	contacts_record_set_str(name, _contacts_name.prefix, __ctsvc_vcard_remove_escape_char(start));
 
 	start = temp;
 	__ctsvc_strtok(start, separator);
-	contacts_record_set_str(name, _contacts_name.suffix, start);
+	contacts_record_set_str(name, _contacts_name.suffix, __ctsvc_vcard_remove_escape_char(start));
 
 	return CONTACTS_ERROR_NONE;
 }
@@ -2169,11 +2232,11 @@ static inline int __ctsvc_vcard_get_phonetic_name(ctsvc_list_s *name_list, int t
 
 	__ctsvc_strtok(start, separator);
 	if (CTSVC_VCARD_VALUE_PHONETIC_FIRST_NAME == type)
-		contacts_record_set_str(name, _contacts_name.phonetic_first, start);
+		contacts_record_set_str(name, _contacts_name.phonetic_first, __ctsvc_vcard_remove_escape_char(start));
 	else if (CTSVC_VCARD_VALUE_PHONETIC_MIDDLE_NAME == type)
-		contacts_record_set_str(name, _contacts_name.phonetic_middle, start);
+		contacts_record_set_str(name, _contacts_name.phonetic_middle, __ctsvc_vcard_remove_escape_char(start));
 	else if (CTSVC_VCARD_VALUE_PHONETIC_LAST_NAME == type)
-		contacts_record_set_str(name, _contacts_name.phonetic_last, start);
+		contacts_record_set_str(name, _contacts_name.phonetic_last, __ctsvc_vcard_remove_escape_char(start));
 
 	return CONTACTS_ERROR_NONE;
 }
@@ -2200,7 +2263,7 @@ static inline int __ctsvc_vcard_get_phonetic_last_name(ctsvc_list_s *name_list, 
 	}
 
 	__ctsvc_strtok(start, separator);
-	contacts_record_set_str(name, _contacts_name.phonetic_last, start);
+	contacts_record_set_str(name, _contacts_name.phonetic_last, __ctsvc_vcard_remove_escape_char(start));
 
 	return CONTACTS_ERROR_NONE;
 }
@@ -2234,7 +2297,7 @@ static inline int __ctsvc_vcard_get_nickname(ctsvc_list_s *nickname_list, char *
 			nickname_list->count = 0;
 			return ret;
 		}
-		contacts_record_set_str(nickname, _contacts_nickname.name, temp);
+		contacts_record_set_str(nickname, _contacts_nickname.name, __ctsvc_vcard_remove_escape_char(start));
 		contacts_list_add((contacts_list_h)nickname_list, nickname);
 
 		temp = strtok(NULL, separator);
@@ -2297,6 +2360,7 @@ static inline int __ctsvc_vcard_get_photo(contacts_record_h contact, ctsvc_list_
 	contacts_record_set_str(contact, _contacts_contact.image_thumbnail_path, dest);
 
 	return CONTACTS_ERROR_NONE;
+
 }
 
 static inline void __ctsvc_vcard_get_event_type(contacts_record_h event, char *val)
@@ -2337,7 +2401,7 @@ static inline int __ctsvc_vcard_get_event(ctsvc_list_s *event_list, int type, ch
 	temp = __ctsvc_get_content_value(cpy);
 	if (NULL == temp) {
 		free(cpy);
-		ERR("Invalid parameter : vcard(%s)", val);
+		CTS_ERR("Invalid parameter : vcard(%s)", val);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 
@@ -2354,14 +2418,14 @@ static inline int __ctsvc_vcard_get_event(ctsvc_list_s *event_list, int type, ch
 	*dest = '\0';
 	if ('\0' == *val) {
 		free(cpy);
-		ERR("Invalid parameter : val(%d)", val);
+		CTS_ERR("Invalid parameter : val(%d)", val);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 
 	ret = contacts_record_create(_contacts_event._uri, &event);
 	if (ret < CONTACTS_ERROR_NONE) {
 		free(cpy);
-		ERR("contacts_record_create is failed(%d)", ret);
+		CTS_ERR("contacts_record_create is failed(%d)", ret);
 		return ret;
 	}
 
@@ -2426,7 +2490,7 @@ static inline int __ctsvc_vcard_get_company_value(ctsvc_list_s *company_list, in
 	value = __ctsvc_get_content_value(val);
 	RETV_IF(NULL == value, CONTACTS_ERROR_NO_DATA);
 
-	contacts_record_set_str(company, property_id, value);
+	contacts_record_set_str(company, property_id, __ctsvc_vcard_remove_escape_char(value));
 
 	return CONTACTS_ERROR_NONE;
 }
@@ -2436,6 +2500,7 @@ static inline int __ctsvc_vcard_get_company(ctsvc_list_s *company_list, char *va
 {
 	int ret;
 	char *temp, *start;
+	const char separator = ';';
 	contacts_record_h company;
 
 	ret = contacts_record_create(_contacts_company._uri, &company);
@@ -2445,15 +2510,12 @@ static inline int __ctsvc_vcard_get_company(ctsvc_list_s *company_list, char *va
 	start = __ctsvc_get_content_value(val);
 	RETV_IF(NULL == start, CONTACTS_ERROR_NO_DATA);
 
-	temp = strchr(start, ';');
-	if (NULL == temp) {
-		contacts_record_set_str(company, _contacts_company.name, start);
-		return CONTACTS_ERROR_NONE;
-	}
+	temp = __ctsvc_strtok(start, separator);
+	contacts_record_set_str(company, _contacts_company.name, __ctsvc_vcard_remove_escape_char(start));
 
-	*temp = '\0';
-	contacts_record_set_str(company, _contacts_company.name, start);
-	contacts_record_set_str(company, _contacts_company.department, temp+1);
+	temp = __ctsvc_strtok(temp, separator);
+	if (temp)
+		contacts_record_set_str(company, _contacts_company.department, __ctsvc_vcard_remove_escape_char(temp));
 
 	if (val != temp) {
 		*(temp-1) = '\0';
@@ -2533,7 +2595,7 @@ static inline int __ctsvc_vcard_get_note(ctsvc_list_s *note_list, char *val)
 	temp = __ctsvc_get_content_value(val);
 	RETV_IF(NULL == temp, CONTACTS_ERROR_NO_DATA);
 
-	contacts_record_set_str(note, _contacts_note.note, g_strcompress(temp));
+	contacts_record_set_str(note, _contacts_note.note, g_strcompress(__ctsvc_vcard_remove_escape_char(temp)));
 
 	return CONTACTS_ERROR_NONE;
 }
@@ -2649,7 +2711,7 @@ static inline int __ctsvc_vcard_get_url(ctsvc_list_s* url_list, char *val)
 	ret = contacts_record_create(_contacts_url._uri, &url);
 	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create is failed(%d)", ret);
 
-	contacts_record_set_str(url, _contacts_url.url, temp);
+	contacts_record_set_str(url, _contacts_url.url, __ctsvc_vcard_remove_escape_char(temp));
 	if (val != temp) {
 		*(temp-1) = '\0';
 		__ctsvc_vcard_get_url_type(url, val);
@@ -2732,7 +2794,7 @@ static inline int __ctsvc_vcard_get_number(ctsvc_list_s *numbers, char *val)
 	ret = contacts_record_create(_contacts_number._uri, &number);
 	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create is failed(%d)", ret);
 
-	contacts_record_set_str(number, _contacts_number.number, temp);
+	contacts_record_set_str(number, _contacts_number.number, __ctsvc_vcard_remove_escape_char(temp));
 	if (val != temp) {
 		*(temp-1) = '\0';
 		contacts_record_set_bool(number, _contacts_number.is_default, __ctsvc_vcard_get_number_type(number, val));
@@ -2790,7 +2852,7 @@ static inline int __ctsvc_vcard_get_email(ctsvc_list_s* emails, char *val)
 	ret = contacts_record_create(_contacts_email._uri, &email);
 	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create is failed(%d)", ret);
 
-	contacts_record_set_str(email, _contacts_email.email, temp);
+	contacts_record_set_str(email, _contacts_email.email, __ctsvc_vcard_remove_escape_char(temp));
 	if (val != temp) {
 		*(temp-1) = '\0';
 		contacts_record_set_bool(email, _contacts_email.is_default, __ctsvc_vcard_get_email_type(email, val));
@@ -2944,7 +3006,7 @@ static inline int __ctsvc_vcard_get_messenger(ctsvc_list_s* messenger_list, int 
 	ret = contacts_record_create(_contacts_messenger._uri, &messenger);
 	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create is failed(%d)", ret);
 
-	contacts_record_set_str(messenger, _contacts_messenger.im_id, temp);
+	contacts_record_set_str(messenger, _contacts_messenger.im_id, __ctsvc_vcard_remove_escape_char(temp));
 
 	switch (type) {
 	case CTSVC_VCARD_VALUE_X_MSN:
@@ -3049,7 +3111,7 @@ static inline int __ctsvc_vcard_get_relationship(ctsvc_list_s* relationship_list
 	ret = contacts_record_create(_contacts_relationship._uri, &relationship);
 	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create is failed(%d)", ret);
 
-	contacts_record_set_str(relationship, _contacts_relationship.name, temp);
+	contacts_record_set_str(relationship, _contacts_relationship.name, __ctsvc_vcard_remove_escape_char(temp));
 	if (val != temp) {
 		*(temp-1) = '\0';
 		__ctsvc_vcard_get_relationship_type(relationship, val);
@@ -3151,7 +3213,6 @@ static inline int __ctsvc_vcard_get_contact(int ver, char *vcard, contacts_recor
 			free(val);
 			break;
 		case CTSVC_VCARD_VALUE_ADR:
-		case CTSVC_VCARD_VALUE_LABEL:
 			__ctsvc_vcard_get_address(contact->postal_addrs, val);
 			free(val);
 			break;
@@ -3205,7 +3266,7 @@ static inline int __ctsvc_vcard_get_contact(int ver, char *vcard, contacts_recor
 			free(val);
 			break;
 		case CTSVC_VCARD_VALUE_UID:
-			contacts_record_set_str((contacts_record_h)contact, _contacts_contact.uid, val);
+			contacts_record_set_str((contacts_record_h)contact, _contacts_contact.uid, __ctsvc_vcard_remove_escape_char(val));
 			free(val);
 			break;
 		case CTSVC_VCARD_VALUE_URL:

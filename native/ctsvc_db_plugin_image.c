@@ -223,7 +223,7 @@ static int __ctsvc_db_image_insert_record( contacts_record_h record, int *id )
 			"SELECT contact_id, person_id FROM "CTSVC_DB_VIEW_CONTACT" WHERE contact_id = %d", image->contact_id);
 	stmt = cts_query_prepare(query);
 	if (NULL == stmt) {
-		ERR("DB error : cts_query_prepare() Failed");
+		CTS_ERR("DB error : cts_query_prepare() Failed");
 		ctsvc_end_trans(false);
 		return CONTACTS_ERROR_DB;
 	}
@@ -351,7 +351,7 @@ static int __ctsvc_db_image_update_record( contacts_record_h record )
 
 	stmt = cts_query_prepare(query);
 	if (NULL == stmt) {
-		ERR("DB error : cts_query_prepare() Failed");
+		CTS_ERR("DB error : cts_query_prepare() Failed");
 		ctsvc_end_trans(false);
 		return CONTACTS_ERROR_DB;
 	}

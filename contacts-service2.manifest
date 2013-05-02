@@ -10,9 +10,9 @@
 		</request>
 	</define>
 	<assign>
-		<filesystem path="/usr/lib/libcontacts-service2.so.0.9.73.1" label="_"/>
+		<filesystem path="/usr/lib/libcontacts-service2.so.0.9.75.1" label="_"/>
 		<filesystem path="/usr/lib/libcontacts-service2.so.0" label="_"/>
-		<filesystem path="/usr/lib/libcontacts-service3.so.0.9.73.1" label="_"/>
+		<filesystem path="/usr/lib/libcontacts-service3.so.0.9.75.1" label="_"/>
 		<filesystem path="/usr/lib/libcontacts-service3.so.0" label="_"/>
 		<filesystem path="/opt/usr/dbspace/.contacts-svc.db" label="contacts-service::db"/>
 		<filesystem path="/opt/usr/dbspace/.contacts-svc.db-journal" label="contacts-service::db"/>

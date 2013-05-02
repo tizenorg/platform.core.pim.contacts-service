@@ -21,7 +21,7 @@
 #include <vconf.h>
 #include <vconf-keys.h>
 
-#include "internal.h"
+#include "ctsvc_internal.h"
 #include "ctsvc_setting.h"
 #include "ctsvc_server_utils.h"
 #include "ctsvc_server_sim.h"
@@ -38,7 +38,7 @@ static int system_language = -1;
 inline int ctsvc_server_set_default_sort(int sort)
 {
 	int ret = vconf_set_int(ctsvc_get_default_sort_vconfkey(), sort);
-	h_retvm_if(ret<0, CONTACTS_ERROR_INTERNAL, "vconf_set_int() Failed(%d)", ret);
+	RETVM_IF(ret<0, CONTACTS_ERROR_INTERNAL, "vconf_set_int() Failed(%d)", ret);
 	ctscts_set_sort_memory(sort);
 	return CONTACTS_ERROR_NONE;
 }
@@ -52,11 +52,11 @@ static void ctsvc_server_change_language_cb(keynode_t *key, void *data)
 
 	old_primary_sort = ctsvc_get_primary_sort();
 	if (old_primary_sort < 0) {
-		h_retm_if(ret<0, "ctsvc_get_primary_sort() Fail(%d)", ret);
+		RETM_IF(ret<0, "ctsvc_get_primary_sort() Fail(%d)", ret);
 	}
 	old_secondary_sort = ctsvc_get_secondary_sort();
 	if (old_secondary_sort < 0) {
-		h_retm_if(ret<0, "ctsvc_get_secondary_sort() Fail(%d)", ret);
+		RETM_IF(ret<0, "ctsvc_get_secondary_sort() Fail(%d)", ret);
 	}
 
 	langset = vconf_keynode_get_str(key);
@@ -87,7 +87,7 @@ static void ctsvc_server_tapi_sim_complete_cb(keynode_t *key, void *data)
 	init_stat = vconf_keynode_get_int(key);
 	if (VCONFKEY_TELEPHONY_SIM_PB_INIT_COMPLETED == init_stat) {
 		ret = ctsvc_server_sim_initialize();
-		h_warn_if(CONTACTS_ERROR_NONE != ret, "ctsvc_server_sim_initialize() Failed(%d)", ret);
+		WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_server_sim_initialize() Failed(%d)", ret);
 
 		vconf_ignore_key_changed(CTSVC_SERVER_VCONF_TAPI_SIM_PB_INIT, ctsvc_server_tapi_sim_complete_cb);
 	}
@@ -97,10 +97,10 @@ void ctsvc_server_final_configuration(void)
 	int ret = -1;
 
 	ret = vconf_ignore_key_changed(CTSVC_SERVER_VCONF_SYSTEM_LANGUAGE, ctsvc_server_change_language_cb);
-	h_retm_if(ret<0,"vconf_ignore_key_changed(%s) Failed(%d)",CTSVC_SERVER_VCONF_SYSTEM_LANGUAGE,ret);
+	RETM_IF(ret<0,"vconf_ignore_key_changed(%s) Failed(%d)",CTSVC_SERVER_VCONF_SYSTEM_LANGUAGE,ret);
 
 	ret = vconf_ignore_key_changed(VCONFKEY_REGIONFORMAT, ctsvc_server_update_collation_cb);
-	h_retm_if(ret<0,"vconf_ignore_key_changed(%s) Failed(%d)",VCONFKEY_REGIONFORMAT,ret);
+	RETM_IF(ret<0,"vconf_ignore_key_changed(%s) Failed(%d)",VCONFKEY_REGIONFORMAT,ret);
 
 	ctsvc_server_sim_finalize();
 }
@@ -112,12 +112,12 @@ int ctsvc_server_init_configuration(void)
 	int sort_type;
 
 	langset = vconf_get_str(CTSVC_SERVER_VCONF_SYSTEM_LANGUAGE);
-	h_warn_if(NULL == langset, "vconf_get_str(%s) return NULL", CTSVC_SERVER_VCONF_SYSTEM_LANGUAGE);
+	WARN_IF(NULL == langset, "vconf_get_str(%s) return NULL", CTSVC_SERVER_VCONF_SYSTEM_LANGUAGE);
 	system_language = ctsvc_get_language_type(langset);
 
 	ret = vconf_get_int(ctsvc_get_default_sort_vconfkey(), &sort_type);
 	if (ret < 0 || sort_type == CTSVC_SORT_OTHERS) {
-		ERR("vconf_get_int(%s) Failed(%d)", ctsvc_get_default_sort_vconfkey() ,ret);
+		CTS_ERR("vconf_get_int(%s) Failed(%d)", ctsvc_get_default_sort_vconfkey() ,ret);
 		sort_type = ctsvc_get_sort_type_from_language(system_language);
 		if (sort_type == CTSVC_SORT_OTHERS)
 			sort_type = CTSVC_SORT_WESTERN;
@@ -126,23 +126,23 @@ int ctsvc_server_init_configuration(void)
 
 	ret = vconf_notify_key_changed(CTSVC_SERVER_VCONF_SYSTEM_LANGUAGE,
 			ctsvc_server_change_language_cb, NULL);
-	h_retvm_if(ret<0, CONTACTS_ERROR_SYSTEM, "vconf_notify_key_changed(%s) Failed(%d)",
+	RETVM_IF(ret<0, CONTACTS_ERROR_SYSTEM, "vconf_notify_key_changed(%s) Failed(%d)",
 			CTSVC_SERVER_VCONF_SYSTEM_LANGUAGE, ret);
 
 	ret = vconf_notify_key_changed(VCONFKEY_REGIONFORMAT,
 			ctsvc_server_update_collation_cb, NULL);
-	h_retvm_if(ret<0, CONTACTS_ERROR_SYSTEM, "vconf_notify_key_changed(%s) Failed(%d)",
+	RETVM_IF(ret<0, CONTACTS_ERROR_SYSTEM, "vconf_notify_key_changed(%s) Failed(%d)",
 			VCONFKEY_REGIONFORMAT, ret);
 
 	ret = vconf_get_int(CTSVC_SERVER_VCONF_TAPI_SIM_PB_INIT, &sim_stat);
 	if (VCONFKEY_TELEPHONY_SIM_PB_INIT_COMPLETED == sim_stat) {
 		ret = ctsvc_server_sim_initialize();
-		h_warn_if(CONTACTS_ERROR_NONE != ret, "ctsvc_server_sim_initialize() Failed(%d)", ret);
+		WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_server_sim_initialize() Failed(%d)", ret);
 	}
 	else {
 		ret = vconf_notify_key_changed(CTSVC_SERVER_VCONF_TAPI_SIM_PB_INIT,
 				ctsvc_server_tapi_sim_complete_cb, NULL);
-		h_retvm_if(ret<0, CONTACTS_ERROR_SYSTEM, "vconf_notify_key_changed(%s) Failed(%d)",
+		RETVM_IF(ret<0, CONTACTS_ERROR_SYSTEM, "vconf_notify_key_changed(%s) Failed(%d)",
 				CTSVC_SERVER_VCONF_TAPI_SIM_PB_INIT, ret);
 	}
 

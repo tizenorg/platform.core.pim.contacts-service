@@ -1531,7 +1531,6 @@ static int __ctsvc_contact_insert_data(ctsvc_contact_s *contact)
 {
 	int ret;
 
-	DBG("B ctsvc_contact_insert_data_name");
 	//Insert the name
 	if (contact->name) {
 		ret = ctsvc_contact_insert_data_name((contacts_list_h)contact->name, contact->id, false);
@@ -1540,7 +1539,6 @@ static int __ctsvc_contact_insert_data(ctsvc_contact_s *contact)
 			return ret;
 		}
 	}
-	DBG("A ctsvc_contact_insert_data_name");
 
 	//Insert the company
 	if (contact->company) {

@@ -731,7 +731,7 @@ int ctsvc_ipc_unmarshal_record_common(const pims_ipc_data_h ipc_data, ctsvc_reco
 		tmp_properties_flags = (unsigned char*)pims_ipc_data_get(ipc_data, &size);
 		common->properties_flags  = calloc(common->property_max_count, sizeof(char));
 		if (common->properties_flags == NULL) {
-			ERR("calloc fail");
+			CTS_ERR("calloc fail");
 			return CONTACTS_ERROR_OUT_OF_MEMORY;
 		}
 		memcpy(common->properties_flags, tmp_properties_flags, sizeof(char)*common->property_max_count);

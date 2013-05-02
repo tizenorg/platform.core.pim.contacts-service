@@ -150,7 +150,7 @@ static inline int __ctsvc_get_person_default_image_value(int id, contacts_record
 	ret = cts_stmt_step(stmt);
 	if (1 /*CTS_TRUE*/ != ret) {
 		cts_stmt_finalize(stmt);
-		ERR("person(%d) has no default image", id);
+		CTS_ERR("person(%d) has no default image", id);
 		return CONTACTS_ERROR_NO_DATA;
 	}
 
@@ -169,7 +169,7 @@ static inline int __ctsvc_get_person_default_image_value(int id, contacts_record
 		ret = CONTACTS_ERROR_NONE;
 	}
 	else
-		ERR("contacts_record_create() Failed");
+		CTS_ERR("contacts_record_create() Failed");
 
 	cts_stmt_finalize(stmt);
 	return ret;
@@ -549,7 +549,7 @@ int ctsvc_person_aggregate(int person_id)
 		CTS_TABLE_CONTACTS, CTS_TABLE_ACTIVITIES, person->person_id);
 	stmt = cts_query_prepare(query);
 	if (NULL == stmt) {
-		ERR("DB error : cts_query_prepare() Failed");
+		CTS_ERR("DB error : cts_query_prepare() Failed");
 		free(image_thumbnail_path);
 		contacts_record_destroy((contacts_record_h)person, true);
 		return CONTACTS_ERROR_DB;
@@ -576,7 +576,7 @@ int ctsvc_person_aggregate(int person_id)
 			ctsvc_get_display_column(), CTS_TABLE_CONTACTS, person_id);
 	stmt = cts_query_prepare(query);
 	if (NULL == stmt) {
-		ERR("DB error : cts_query_prepare() Failed");
+		CTS_ERR("DB error : cts_query_prepare() Failed");
 		free(image_thumbnail_path);
 		free(ringtone_path);
 		free(vibration);
@@ -667,7 +667,7 @@ int ctsvc_person_aggregate(int person_id)
 
 	stmt = cts_query_prepare(query);
 	if (NULL == stmt) {
-		ERR("DB error : cts_query_prepare() Failed");
+		CTS_ERR("DB error : cts_query_prepare() Failed");
 		free(addressbook_ids);
 		free(image_thumbnail_path);
 		free(ringtone_path);

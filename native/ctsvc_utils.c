@@ -16,6 +16,7 @@
  * limitations under the License.
  *
  */
+#include <ctype.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
@@ -28,7 +29,6 @@
 #include <unicode/ulocdata.h>
 #include <unicode/uset.h>
 #include <unicode/ustring.h>
-#include <ctype.h>
 
 #include "contacts.h"
 #include "ctsvc_internal.h"
