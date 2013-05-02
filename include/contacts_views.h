@@ -520,6 +520,15 @@ _CONTACTS_BEGIN_READ_ONLY_VIEW()
 	_CONTACTS_PROPERTY_INT( type )
 _CONTACTS_END_READ_ONLY_VIEW( _contacts_person_messenger )
 
+// person event
+_CONTACTS_BEGIN_READ_ONLY_VIEW()
+	_CONTACTS_PROPERTY_INT( person_id )
+	_CONTACTS_PROPERTY_INT( id )
+	_CONTACTS_PROPERTY_INT( type )
+	_CONTACTS_PROPERTY_INT( date )
+	_CONTACTS_PROPERTY_STR( label )
+_CONTACTS_END_READ_ONLY_VIEW( _contacts_person_event )
+
 // person_group : read only
 _CONTACTS_BEGIN_READ_ONLY_VIEW()
 	_CONTACTS_PROPERTY_INT( person_id )
