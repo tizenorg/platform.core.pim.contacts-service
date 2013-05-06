@@ -1,6 +1,6 @@
 Name:       contacts-service
 Summary:    Contacts Service
-Version: 0.9.75.1
+Version: 0.9.77.1
 Release:    1
 Group:      TO_BE/FILLED_IN
 License:    Apache-2.0
@@ -96,7 +96,6 @@ vconftool set -t int db/contacts-svc/phonenumber_min_match_digit 8 -g 6005
 %manifest contacts-service2.manifest
 %defattr(-,root,root,-)
 %{_libdir}/libcontacts-service2.so.*
-%{_libdir}/libcontacts-service3.so.*
 %{_bindir}/contacts-service-ipcd*
 /etc/rc.d/rc*.d/S50contacts-svc-helper
 /opt/usr/data/contacts-svc/.CONTACTS_SVC_*
@@ -110,8 +109,6 @@ vconftool set -t int db/contacts-svc/phonenumber_min_match_digit 8 -g 6005
 %files -n contacts-service2-devel
 %defattr(-,root,root,-)
 %{_libdir}/libcontacts-service2.so
-%{_libdir}/libcontacts-service3.so
 %{_libdir}/pkgconfig/contacts-service2.pc
-%{_libdir}/pkgconfig/contacts-service3.pc
 %{_includedir}/contacts-svc/contacts.h
 %{_includedir}/contacts-svc/contacts_*.h

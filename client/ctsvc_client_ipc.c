@@ -1,7 +1,8 @@
 
 
 #include <glib.h>
-//#include <glib-oject.h>
+#include <pims-ipc-data.h>
+
 #include "ctsvc_client_ipc.h"
 
 #include "ctsvc_internal.h"
@@ -14,7 +15,6 @@
 #include "ctsvc_ipc_define.h"
 #include "ctsvc_ipc_marshal.h"
 #include "ctsvc_view.h"
-#include <pims-ipc-data.h>
 #include "ctsvc_mutex.h"
 
 static __thread pims_ipc_h __contacts_ipc = NULL;
@@ -30,11 +30,9 @@ int ctsvc_ipc_connect_on_thread(void)
 	pims_ipc_data_h outdata = NULL;
 
 	// ipc create
-	if (__contacts_ipc == NULL)
-	{
+	if (__contacts_ipc == NULL) {
 		__contacts_ipc = pims_ipc_create(CTSVC_IPC_SOCKET_PATH);
-		if (__contacts_ipc == NULL)
-		{
+		if (__contacts_ipc == NULL) {
 			CTS_ERR("pims_ipc_create() Failed(%d)", CONTACTS_ERROR_IPC_NOT_AVALIABLE);
 			return CONTACTS_ERROR_IPC_NOT_AVALIABLE;
 		}
@@ -146,8 +144,6 @@ bool ctsvc_ipc_is_busy()
 	return ret;
 }
 
-
-
 int ctsvc_ipc_connect(void)
 {
 	int ret = CONTACTS_ERROR_NONE;
@@ -155,34 +151,28 @@ int ctsvc_ipc_connect(void)
 	pims_ipc_data_h outdata = NULL;
 
 	// ipc create
-	if (__contacts_global_ipc == NULL)
-	{
+	if (__contacts_global_ipc == NULL) {
 		__contacts_global_ipc = pims_ipc_create(CTSVC_IPC_SOCKET_PATH);
-		if (__contacts_global_ipc == NULL)
-		{
+		if (__contacts_global_ipc == NULL) {
 			CTS_ERR("[GLOBAL_IPC_CHANNEL] pims_ipc_create() Failed(%d)", CONTACTS_ERROR_IPC_NOT_AVALIABLE);
 			return CONTACTS_ERROR_IPC_NOT_AVALIABLE;
 		}
 	}
-	else
-	{
+	else {
 		CTS_DBG("[GLOBAL_IPC_CHANNEL] contacts already connected");
 		return CONTACTS_ERROR_NONE;
 	}
 
 	// ipc call
-	if (pims_ipc_call(__contacts_global_ipc, CTSVC_IPC_MODULE, CTSVC_IPC_SERVER_CONNECT, indata, &outdata) != 0)
-	{
+	if (pims_ipc_call(__contacts_global_ipc, CTSVC_IPC_MODULE, CTSVC_IPC_SERVER_CONNECT, indata, &outdata) != 0) {
 		CTS_ERR("[GLOBAL_IPC_CHANNEL] pims_ipc_call failed");
 		return CONTACTS_ERROR_IPC;
 	}
 
-	if (outdata)
-	{
+	if (outdata) {
 		// check outdata
 		unsigned int size = 0;
 		ret = *(int*) pims_ipc_data_get(outdata,&size);
-
 		pims_ipc_data_destroy(outdata);
 
 		if (ret == CONTACTS_ERROR_NONE)

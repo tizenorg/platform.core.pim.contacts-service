@@ -131,9 +131,6 @@ enum{
 	CTSVC_VCARD_IMG_TIFF,
 };
 
-static int __ctsvc_tmp_image_id = 0;
-static int __ctsvc_tmp_logo_id = 0;
-
 static const char *content_name[CTSVC_VCARD_VALUE_MAX] = {0};
 const char *CTSVC_CRLF = "\r\n";
 
@@ -2323,7 +2320,7 @@ static inline int __ctsvc_vcard_get_photo(contacts_record_h contact, ctsvc_list_
 	type = __ctsvc_vcard_get_image_type(val);
 
 	ret = snprintf(dest, sizeof(dest), "%s/vcard-image-%d.%s",
-			CTSVC_VCARD_IMAGE_LOCATION, __ctsvc_tmp_image_id++, __ctsvc_get_img_suffix(type));
+			CTSVC_VCARD_IMAGE_LOCATION, (int)time(NULL), __ctsvc_get_img_suffix(type));
 	RETVM_IF(ret<=0, CONTACTS_ERROR_INTERNAL, "Destination file name was not created");
 
 	fd = open(dest, O_WRONLY|O_CREAT|O_TRUNC, 0660);
@@ -2474,18 +2471,37 @@ static inline void __ctsvc_vcard_get_company_type(contacts_record_h company, cha
 	contacts_record_set_int(company, _contacts_company.type, type);
 }
 
+static contacts_record_h __ctsvc_vcard_get_company_empty_record(ctsvc_list_s *company_list, int property_id)
+{
+	contacts_record_h record_temp = NULL;
+	contacts_record_h record = NULL;
+	contacts_list_h list = (contacts_list_h)company_list;
+
+	contacts_list_last(list);
+	while (CONTACTS_ERROR_NONE == contacts_list_get_current_record_p(list, &record_temp)) {
+		char *value = NULL;
+		contacts_record_get_str_p(record_temp, property_id, &value);
+		if (NULL == value) {
+			record = record_temp;
+			break;
+		}
+		contacts_list_prev(list);
+	}
+
+	return record_temp;
+}
+
 static inline int __ctsvc_vcard_get_company_value(ctsvc_list_s *company_list, int property_id, char *val)
 {
-	unsigned int count;
 	char *value;
 	contacts_record_h company;
 
-	contacts_list_get_count((contacts_list_h)company_list, &count);
-	RETVM_IF(count == 0, CONTACTS_ERROR_INVALID_PARAMETER, "list is empty");
-
-	contacts_list_last((contacts_list_h)company_list);
-	contacts_list_get_current_record_p((contacts_list_h)company_list, &company);
-	RETVM_IF(NULL == company, CONTACTS_ERROR_INVALID_PARAMETER, "contacts_list_get_current_record_p() return NULL");
+	company = __ctsvc_vcard_get_company_empty_record(company_list, property_id);
+	if (NULL == company) {
+		int ret = contacts_record_create(_contacts_company._uri, &company);
+		RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create is failed(%d)", ret);
+		contacts_list_add((contacts_list_h)company_list, company);
+	}
 
 	value = __ctsvc_get_content_value(val);
 	RETV_IF(NULL == value, CONTACTS_ERROR_NO_DATA);
@@ -2495,27 +2511,28 @@ static inline int __ctsvc_vcard_get_company_value(ctsvc_list_s *company_list, in
 	return CONTACTS_ERROR_NONE;
 }
 
-
 static inline int __ctsvc_vcard_get_company(ctsvc_list_s *company_list, char *val)
 {
-	int ret;
-	char *temp, *start;
+	char *temp, *start, *depart;
 	const char separator = ';';
 	contacts_record_h company;
 
-	ret = contacts_record_create(_contacts_company._uri, &company);
-	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create is failed(%d)", ret);
-	contacts_list_add((contacts_list_h)company_list, company);
+	company = __ctsvc_vcard_get_company_empty_record(company_list, _contacts_company.name);
+	if (NULL == company) {
+		int ret = contacts_record_create(_contacts_company._uri, &company);
+		RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create is failed(%d)", ret);
+		contacts_list_add((contacts_list_h)company_list, company);
+	}
 
 	start = __ctsvc_get_content_value(val);
 	RETV_IF(NULL == start, CONTACTS_ERROR_NO_DATA);
 
-	temp = __ctsvc_strtok(start, separator);
+	depart = __ctsvc_strtok(start, separator);
 	contacts_record_set_str(company, _contacts_company.name, __ctsvc_vcard_remove_escape_char(start));
 
-	temp = __ctsvc_strtok(temp, separator);
-	if (temp)
-		contacts_record_set_str(company, _contacts_company.department, __ctsvc_vcard_remove_escape_char(temp));
+	temp = __ctsvc_strtok(depart, separator);
+	if (depart)
+		contacts_record_set_str(company, _contacts_company.department, __ctsvc_vcard_remove_escape_char(depart));
 
 	if (val != temp) {
 		*(temp-1) = '\0';
@@ -2528,19 +2545,18 @@ static inline int __ctsvc_vcard_get_company(ctsvc_list_s *company_list, char *va
 static inline int __ctsvc_vcard_get_company_logo(ctsvc_list_s *company_list, char *val)
 {
 	int ret, type, fd;
-	unsigned int count;
 	gsize size;
 	guchar *buf;
 	char dest[CTSVC_IMG_FULL_PATH_SIZE_MAX] = {0};
 	char *temp;
 	contacts_record_h company;
 
-	contacts_list_get_count((contacts_list_h)company_list, &count);
-	RETVM_IF(count == 0, CONTACTS_ERROR_INVALID_PARAMETER, "list is empty");
-
-	contacts_list_last((contacts_list_h)company_list);
-	contacts_list_get_current_record_p((contacts_list_h)company_list, &company);
-	RETVM_IF(NULL == company, CONTACTS_ERROR_INVALID_PARAMETER, "contacts_list_get_current_record_p() return NULL");
+	company = __ctsvc_vcard_get_company_empty_record(company_list, _contacts_company.logo);
+	if (NULL == company) {
+		ret = contacts_record_create(_contacts_company._uri, &company);
+		RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create is failed(%d)", ret);
+		contacts_list_add((contacts_list_h)company_list, company);
+	}
 
 	temp = strchr(val , ':');
 	RETVM_IF(NULL == temp, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : val is invalid(%s)", val);
@@ -2549,7 +2565,7 @@ static inline int __ctsvc_vcard_get_company_logo(ctsvc_list_s *company_list, cha
 	type = __ctsvc_vcard_get_image_type(val);
 
 	ret = snprintf(dest, sizeof(dest), "%s/%d-%d-logo.%s", CTSVC_VCARD_IMAGE_LOCATION,
-			getpid(), __ctsvc_tmp_logo_id++, __ctsvc_get_img_suffix(type));
+			getpid(), (int)time(NULL), __ctsvc_get_img_suffix(type));
 	RETVM_IF(ret<=0, CONTACTS_ERROR_SYSTEM, "Destination file name was not created");
 
 	fd = open(dest, O_WRONLY|O_CREAT|O_TRUNC, 0660);

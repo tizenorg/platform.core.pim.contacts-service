@@ -281,7 +281,7 @@ int ctsvc_inotify_subscribe(const char *view_uri,
 	}
 
 	if (same_noti) {
-//		__ctsvc_inotify_watch(__inoti_fd, path);
+		__ctsvc_inotify_watch(__inoti_fd, path);
 		CTS_ERR("The same callback(%s) is already exist", path);
 		return CONTACTS_ERROR_SYSTEM;
 	}

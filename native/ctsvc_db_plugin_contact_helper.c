@@ -231,8 +231,8 @@ int ctsvc_db_contact_delete(int contact_id)
 		ctsvc_end_trans(false);
 		return ret;
 	}
-
 	rel_changed = cts_db_change();
+
 	snprintf(query, sizeof(query),
 			"UPDATE %s SET deleted = 1, person_id = 0, changed_ver=%d WHERE contact_id = %d",
 			CTS_TABLE_CONTACTS, version, contact_id);

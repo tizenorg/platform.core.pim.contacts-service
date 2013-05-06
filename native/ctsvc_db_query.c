@@ -1157,7 +1157,6 @@ static inline int __ctsvc_db_search_records_with_query_exec(ctsvc_query_s *s_que
 	RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB , "DB error : cts_query_prepare() Failed");
 
 	i = 1;
-
 	len = g_slist_length(bind);
 	for (cursor=bind; cursor;cursor=cursor->next, i++)
 		sqlite3_bind_text(stmt, i, cursor->data, strlen(cursor->data), SQLITE_STATIC);
