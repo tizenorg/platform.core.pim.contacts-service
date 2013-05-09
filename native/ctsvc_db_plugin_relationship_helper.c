@@ -135,7 +135,6 @@ int ctsvc_db_relationship_update(contacts_record_h record, bool is_my_profile)
 	}
 
 	return ret;
-
 }
 
 

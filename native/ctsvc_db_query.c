@@ -1336,6 +1336,7 @@ static int __ctsvc_db_insert_records(contacts_list_h list, int **ids)
 	if (ret < CONTACTS_ERROR_NONE)
 	{
 		CTS_ERR("DB error : ctsvc_end_trans() Failed(%d)", ret);
+		free(id);
 		return ret;
 	}
 
@@ -2300,7 +2301,7 @@ static int __ctsvc_db_replace_records( contacts_list_h list, int ids[], int coun
 			ctsvc_end_trans(false);
 			return ret;
 		}
-	}while(CONTACTS_ERROR_NONE	== contacts_list_next(list));
+	}while(CONTACTS_ERROR_NONE == contacts_list_next(list));
 
 	ret = ctsvc_end_trans(true);
 

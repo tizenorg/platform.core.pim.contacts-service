@@ -100,7 +100,7 @@ int ctsvc_db_email_update(contacts_record_h record, bool is_my_profile)
 	char* set = NULL;
 	GSList *bind_text = NULL;
 	GSList *cursor = NULL;
-	ctsvc_email_s *email =  (ctsvc_email_s*)record;
+	ctsvc_email_s *email = (ctsvc_email_s*)record;
 	char query[CTS_SQL_MAX_LEN] = {0};
 
 	RETVM_IF(!email->id, CONTACTS_ERROR_INVALID_PARAMETER, "email of contact has no ID.");

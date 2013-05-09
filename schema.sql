@@ -100,6 +100,7 @@ CREATE INDEX contacts_idx1 ON contacts(changed_ver);
 CREATE INDEX contacts_idx2 ON contacts(person_id);
 CREATE INDEX contacts_idx3 ON contacts(display_name_language, sortkey);
 CREATE INDEX contacts_idx4 ON contacts(reverse_display_name_language, reverse_sortkey);
+CREATE INDEX contacts_idx5 ON contacts(addressbook_id);
 
 -- There are three case of deleting contact logically
 --   Case 1 : delete contact
@@ -246,6 +247,7 @@ INSERT INTO groups(addressbook_id, group_name, extra_data, is_read_only, created
 
 CREATE TRIGGER trg_groups_del AFTER DELETE ON groups
  BEGIN
+   UPDATE contacts SET changed_ver=((SELECT ver FROM cts_version) + 1) WHERE deleted = 0 AND contact_id IN (SELECT contact_id FROM group_relations WHERE group_id=old.group_id);
    DELETE FROM group_relations WHERE group_id = old.group_id;
  END;
 

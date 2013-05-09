@@ -54,11 +54,11 @@ int ctsvc_server_db_open(sqlite3 **db)
 		RETVM_IF(SQLITE_OK != ret, CONTACTS_ERROR_DB,
 						"sqlite3_create_function() Failed(%d)", ret);
 		ret = sqlite3_create_function(server_db, "_DATA_IMAGE_DELETE_", 1, SQLITE_UTF8, NULL,
-					ctsvc_db_data_image_delete_callback, NULL, NULL);
+					ctsvc_db_image_delete_callback, NULL, NULL);
 		RETVM_IF(SQLITE_OK != ret, CONTACTS_ERROR_DB,
 						"sqlite3_create_function() Failed(%d)", ret);
 		ret = sqlite3_create_function(server_db, "_DATA_COMPANY_DELETE_", 1, SQLITE_UTF8, NULL,
-					ctsvc_db_data_company_delete_callback, NULL, NULL);
+					ctsvc_db_company_delete_callback, NULL, NULL);
 		RETVM_IF(SQLITE_OK != ret, CONTACTS_ERROR_DB,
 						"sqlite3_create_function() Failed(%d)", ret);
 		ret = sqlite3_create_function(server_db, "_PHONE_LOG_DELETE_", 1, SQLITE_UTF8, NULL,

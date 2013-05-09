@@ -65,12 +65,7 @@ static void ctsvc_server_change_language_cb(keynode_t *key, void *data)
 	if (new_primary_sort == CTSVC_SORT_OTHERS)
 		new_primary_sort = CTSVC_SORT_WESTERN;
 
-	if (new_primary_sort==CTSVC_SORT_KOREAN)
-		new_secondary_sort = CTSVC_SORT_WESTERN;
-	else if (new_primary_sort==CTSVC_SORT_WESTERN)
-		new_secondary_sort = CTSVC_SORT_KOREAN;
-	else
-		new_secondary_sort = CTSVC_SORT_WESTERN;
+	new_secondary_sort = CTSVC_SORT_WESTERN;
 
 	if (new_primary_sort != old_primary_sort)
 		ret = ctsvc_server_update_sort(old_primary_sort, old_secondary_sort, new_primary_sort, new_secondary_sort);

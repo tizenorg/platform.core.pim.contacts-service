@@ -182,7 +182,7 @@ int ctsvc_db_image_delete(int id, bool is_my_profile)
 	return CONTACTS_ERROR_NONE;
 }
 
-void ctsvc_db_data_image_delete_callback(sqlite3_context *context, int argc, sqlite3_value ** argv)
+void ctsvc_db_image_delete_callback(sqlite3_context *context, int argc, sqlite3_value ** argv)
 {
 	int ret;
 	const unsigned char* image_path;
@@ -195,7 +195,7 @@ void ctsvc_db_data_image_delete_callback(sqlite3_context *context, int argc, sql
 
 	ret = ctsvc_contact_delete_image_file_with_path(image_path);
 	WARN_IF (CONTACTS_ERROR_NONE != ret && CONTACTS_ERROR_NO_DATA != ret,
-			"ctsvc_contact_delete_image_file_with_path(NORMAL) Failed(%d)", ret);
+			"ctsvc_contact_delete_image_file_with_path Failed(%d)", ret);
 
 	return;
 }

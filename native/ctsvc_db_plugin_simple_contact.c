@@ -164,7 +164,6 @@ static int __ctsvc_db_simple_contact_update_record( contacts_record_h record )
 	GSList *cursor = NULL;
 	ctsvc_simple_contact_s *contact = (ctsvc_simple_contact_s*)record;
 
-	// These check should be done in client side
 	RETVM_IF(NULL == contact, CONTACTS_ERROR_INVALID_PARAMETER,
 					"Invalid parameter : contact is NULL");
 	RETVM_IF(contact->addressbook_id <= 0, CONTACTS_ERROR_INVALID_PARAMETER,
@@ -439,7 +438,6 @@ static int __ctsvc_db_simple_contact_insert_record( contacts_record_h record, in
 	ctsvc_simple_contact_s *contact = (ctsvc_simple_contact_s*)record;
 	cts_stmt stmt;
 
-	// These check should be done in client side
 	RETVM_IF(NULL == contact, CONTACTS_ERROR_INVALID_PARAMETER,
 					"Invalid parameter : contact is NULL");
 	RETVM_IF(contact->addressbook_id < 0, CONTACTS_ERROR_INVALID_PARAMETER,
@@ -467,7 +465,7 @@ static int __ctsvc_db_simple_contact_insert_record( contacts_record_h record, in
 		ret = ctsvc_contact_add_image_file(contact->contact_id, image_id, contact->image_thumbnail_path,
 				image, sizeof(image));
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("ctsvc_contact_add_image_file(NORMAL) Failed(%d)", ret);
+			CTS_ERR("ctsvc_contact_add_image_file Failed(%d)", ret);
 			ctsvc_end_trans(false);
 			return ret;
 		}

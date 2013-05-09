@@ -450,6 +450,8 @@ static void __ctsvc_make_my_profile_display_name(ctsvc_my_profile_s *my_profile)
 
 		my_profile->display_name = display;
 
+
+		display_len += 1; // ","
 		// make reverse_display_name
 		display = calloc(1, display_len);
 		len = 0;

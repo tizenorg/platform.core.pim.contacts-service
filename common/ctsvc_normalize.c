@@ -417,13 +417,14 @@ static int __ctsvc_normalize_str(const char *src, char **dest)
 {
 	int ret;
 	int32_t tmp_size = 100;
+	int32_t upper_size;
 	int32_t size = 100;
 	UErrorCode status = 0;
 	UChar *tmp_result = NULL;
+	UChar *tmp_upper = NULL;
 	UChar *result = NULL;
 
 	tmp_result = calloc(1, sizeof(UChar)*(tmp_size+1));
-	result = calloc(1, sizeof(UChar)*(size+1));
 	u_strFromUTF8(tmp_result, tmp_size + 1, &tmp_size, src, -1, &status);
 
 	if (status == U_BUFFER_OVERFLOW_ERROR) {
@@ -443,21 +444,33 @@ static int __ctsvc_normalize_str(const char *src, char **dest)
 		goto DATA_FREE;
 	}
 
-	u_strToUpper(tmp_result, tmp_size + 1, tmp_result, -1, NULL, &status);
-	if (U_FAILURE(status)) {
+	tmp_upper = calloc(1, sizeof(UChar)*(tmp_size+1));
+	upper_size = u_strToUpper(tmp_upper, tmp_size+1, tmp_result, -1, NULL, &status);
+	if (status == U_BUFFER_OVERFLOW_ERROR) {
+		status = U_ZERO_ERROR;
+		free(tmp_upper);
+		tmp_upper = calloc(1, sizeof(UChar) * (upper_size + 1));
+		u_strFromUTF8(tmp_upper, upper_size + 1, NULL, src, -1, &status);
+		if (U_FAILURE(status)) {
+			CTS_ERR("u_strFromUTF8()Failed(%s)", u_errorName(status));
+			ret = CONTACTS_ERROR_SYSTEM;
+			goto DATA_FREE;
+		}
+	}
+	else if (U_FAILURE(status)) {
 		CTS_ERR("u_strToUpper() Failed(%s)", u_errorName(status));
 		ret = CONTACTS_ERROR_SYSTEM;
 		goto DATA_FREE;
 	}
 
-	size = unorm_normalize(tmp_result, -1, UNORM_NFD, 0,
-			(UChar *)result, size + 1, &status);
-
+	result = calloc(1, sizeof(UChar)*(size+1));
+	size = unorm_normalize(tmp_upper, -1, UNORM_NFD, 0,
+			result, size+1, &status);
 	if (status == U_BUFFER_OVERFLOW_ERROR) {
 		status = U_ZERO_ERROR;
 		free(result);
-		result = calloc(1, sizeof(UChar) * (size + 1));
-		size = unorm_normalize(tmp_result, -1, UNORM_NFD, 0, (UChar *)result, size + 1, &status);
+		result = calloc(1, sizeof(UChar)*(size + 1));
+		unorm_normalize(tmp_upper, -1, UNORM_NFD, 0, result, size+1, &status);
 		if (U_FAILURE(status)) {
 			CTS_ERR("unorm_normalize() Failed(%s)", u_errorName(status));
 			ret = CONTACTS_ERROR_SYSTEM;
@@ -471,7 +484,7 @@ static int __ctsvc_normalize_str(const char *src, char **dest)
 	}
 
 	ret = ctsvc_check_language(result);
-	ctsvc_extra_normalize(result, size);
+	ctsvc_extra_normalize(result, size/sizeof(UChar));
 
 	u_strToUTF8(NULL, 0, &size, result, -1, &status);
 	status = U_ZERO_ERROR;
@@ -482,14 +495,15 @@ static int __ctsvc_normalize_str(const char *src, char **dest)
 		CTS_ERR("u_strToUTF8() Failed(%s)", u_errorName(status));
 		ret = CONTACTS_ERROR_SYSTEM;
 		free(*dest);
+		*dest = NULL;
 		goto DATA_FREE;
 	}
 
 DATA_FREE:
 	free(tmp_result);
+	free(tmp_upper);
 	free(result);
 	return ret;
-
 }
 
 static int __ctsvc_normalize_str_to_unicode(const char *src, int src_size, UChar *dest, int dest_size)
@@ -838,16 +852,6 @@ static bool __ctsvc_compare_unicode_letter(const UChar* haystack, int haystack_l
  * @param[in] needle searching string
  * @param[out] len substring length
  * @return a position of the beginning of the substring, Negative value(#cts_error) on error or difference.
- * @par example
- * @code
-	ret = contacts_utils_strstr(str1, str2, &len);
-	if(CONTACTS_ERROR_NONE == ret) {
-		snprintf(first, ret+1, "%s", item_data->display);
-		snprintf(middle, len+1, "%s", item_data->display + ret);
-		printf("%s -> %s, %s, %s", item_data->display, first, middle, item_data->display + ret + len);
-	} else
-		printf("str1 doesn't has str2");
- * @endcode
  */
 API int contacts_utils_strstr(const char *haystack,
 		const char *needle, int *len)
@@ -945,16 +949,6 @@ API int contacts_utils_strstr(const char *haystack,
  * @param[in] needle searching string
  * @param[out] len substring length
  * @return a position of the beginning of the substring, Negative value(#cts_error) on error or difference.
- * @par example
- * @code
-	ret = contacts_normalized_str(str1, str2, &len);
-	if(CONTACTS_ERROR_NONE == ret) {
-		snprintf(first, ret+1, "%s", item_data->display);
-		snprintf(middle, len+1, "%s", item_data->display + ret);
-		printf("%s -> %s, %s, %s", item_data->display, first, middle, item_data->display + ret + len);
-	} else
-		printf("str1 doesn't has str2");
- * @endcode
  */
 API int contacts_normalized_strstr(const char *haystack,
 		const char *needle, int *len)
@@ -1113,18 +1107,6 @@ API int contacts_normalized_strstr(const char *haystack,
  * @param[out] dest The pointer to get normalized string.
  * @param[out] dest_len the size of dest.
  * @return #CTS_SUCCESS on success, Negative value(#cts_error) on error
- * @par example
- * @code
-	char normalized_str[512];
-	const char *name = "Test"
-
-	ret = contacts_normalize_str(name, normalized_str, sizeof(normalized_str));
-
-	if(CONTACTS_ERROR_NONE != ret)
-		printf("Error : contacts_svc_normalize_str() Failed(%d)", ret);
-	else
-		printf("original string is %s, normalized string is %s", name, normalized_str);
- * @endcode
  */
 API int contacts_normalize_str(const char *src, char *dest, const int dest_len)
 {

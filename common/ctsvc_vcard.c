@@ -63,10 +63,12 @@
 
 #define CTSVC_VCARD_APPEND_CONTENT(buf, buf_size, len, content) do { \
 	if (__ctsvc_need_encode(content)) { \
+		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";CHARSET=UTF-8"); \
 		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";ENCODING=BASE64:"); \
 		CTSVC_VCARD_APPEND_ENCODE_STR(buf, buf_size, len, content); \
 	} \
 	else { \
+		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";CHARSET=UTF-8"); \
 		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ":"); \
 		CTSVC_VCARD_APPEND_CONTENT_STR(buf, buf_size, len, content); \
 	} \
@@ -351,6 +353,7 @@ static inline int __ctsvc_vcard_append_name(ctsvc_list_s *names, char **buf, int
 	CTSVC_VCARD_APPEND_STR(buf, buf_size, len, content_name[CTSVC_VCARD_VALUE_N]);
 
 	if (need_encode) {
+		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";CHARSET=UTF-8");
 		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";ENCODING=BASE64:");
 		CTSVC_VCARD_APPEND_ENCODE_STR(buf, buf_size, len, name->last);
 		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";");
@@ -363,6 +366,7 @@ static inline int __ctsvc_vcard_append_name(ctsvc_list_s *names, char **buf, int
 		CTSVC_VCARD_APPEND_ENCODE_STR(buf, buf_size, len, name->suffix);
 	}
 	else {
+		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";CHARSET=UTF-8");
 		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ":");
 		CTSVC_VCARD_APPEND_CONTENT_STR(buf, buf_size, len, name->last);
 		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";");
@@ -572,6 +576,7 @@ static inline int __ctsvc_vcard_append_company(ctsvc_list_s *company_list, char 
 		} while (0);
 
 		if (need_encode) {
+			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";CHARSET=UTF-8");
 			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";ENCODING=BASE64:");
 			CTSVC_VCARD_APPEND_ENCODE_STR(buf,buf_size,len,company->name);
 			if (company->department) {
@@ -580,6 +585,7 @@ static inline int __ctsvc_vcard_append_company(ctsvc_list_s *company_list, char 
 			}
 		}
 		else {
+			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";CHARSET=UTF-8");
 			CTSVC_VCARD_APPEND_STR(buf,buf_size,len,":");
 			CTSVC_VCARD_APPEND_CONTENT_STR(buf,buf_size,len,company->name);
 			if (company->department) {
@@ -723,6 +729,7 @@ static inline int __ctsvc_vcard_append_postals(ctsvc_list_s *address_list, char 
 			} while (0);
 
 			if (need_encode) {
+				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";CHARSET=UTF-8");
 				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";ENCODING=BASE64:");
 				CTSVC_VCARD_APPEND_ENCODE_STR(buf, buf_size, len, address->pobox);
 				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";");
@@ -739,6 +746,7 @@ static inline int __ctsvc_vcard_append_postals(ctsvc_list_s *address_list, char 
 				CTSVC_VCARD_APPEND_ENCODE_STR(buf, buf_size, len, address->country);
 			}
 			else {
+				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";CHARSET=UTF-8");
 				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ":");
 				CTSVC_VCARD_APPEND_CONTENT_STR(buf, buf_size, len, address->pobox);
 				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";");
@@ -774,6 +782,7 @@ static inline int __ctsvc_vcard_append_nicknames(ctsvc_list_s *nickname_list, ch
 		if (nickname->nickname && *nickname->nickname) {
 			if (first) {
 				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, content_name[CTSVC_VCARD_VALUE_NICKNAME]);
+				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";CHARSET=UTF-8");
 				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ":");
 				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, nickname->nickname);
 				first = false;
@@ -2238,35 +2247,6 @@ static inline int __ctsvc_vcard_get_phonetic_name(ctsvc_list_s *name_list, int t
 	return CONTACTS_ERROR_NONE;
 }
 
-static inline int __ctsvc_vcard_get_phonetic_last_name(ctsvc_list_s *name_list, char *val)
-{
-	int ret;
-	unsigned int count;
-	char *start;
-	const char separator = ';';
-	contacts_record_h name;
-
-	start = __ctsvc_get_content_value(val);
-	RETV_IF(NULL == start, CONTACTS_ERROR_NO_DATA);
-
-	contacts_list_get_count((contacts_list_h)name_list, &count);
-	if (count <= 0) {
-		ret = contacts_record_create(_contacts_name._uri, &name);
-		RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create is failed(%d)", ret);
-		contacts_list_add((contacts_list_h)name_list, name);
-	}
-	else {
-		contacts_list_get_current_record_p((contacts_list_h)name_list, &name);
-	}
-
-	__ctsvc_strtok(start, separator);
-	contacts_record_set_str(name, _contacts_name.phonetic_last, __ctsvc_vcard_remove_escape_char(start));
-
-	return CONTACTS_ERROR_NONE;
-}
-
-
-
 static inline int __ctsvc_vcard_get_nickname(ctsvc_list_s *nickname_list, char *val)
 {
 	int ret = CONTACTS_ERROR_NONE;
@@ -2311,6 +2291,7 @@ static inline int __ctsvc_vcard_get_photo(contacts_record_h contact, ctsvc_list_
 	char *temp;
 	char dest[CTSVC_IMG_FULL_PATH_SIZE_MAX] = {0};
 	contacts_record_h image;
+	struct timeval tv;
 
 	temp = strchr(val , ':');
 	RETVM_IF(NULL == temp, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : val is invalid(%s)", val);
@@ -2319,8 +2300,9 @@ static inline int __ctsvc_vcard_get_photo(contacts_record_h contact, ctsvc_list_
 
 	type = __ctsvc_vcard_get_image_type(val);
 
-	ret = snprintf(dest, sizeof(dest), "%s/vcard-image-%d.%s",
-			CTSVC_VCARD_IMAGE_LOCATION, (int)time(NULL), __ctsvc_get_img_suffix(type));
+	gettimeofday(&tv, NULL);
+	ret = snprintf(dest, sizeof(dest), "%s/vcard-image-%ld%ld.%s",
+			CTSVC_VCARD_IMAGE_LOCATION, tv.tv_sec, tv.tv_usec, __ctsvc_get_img_suffix(type));
 	RETVM_IF(ret<=0, CONTACTS_ERROR_INTERNAL, "Destination file name was not created");
 
 	fd = open(dest, O_WRONLY|O_CREAT|O_TRUNC, 0660);
@@ -2530,9 +2512,10 @@ static inline int __ctsvc_vcard_get_company(ctsvc_list_s *company_list, char *va
 	depart = __ctsvc_strtok(start, separator);
 	contacts_record_set_str(company, _contacts_company.name, __ctsvc_vcard_remove_escape_char(start));
 
-	temp = __ctsvc_strtok(depart, separator);
-	if (depart)
+	if (depart) {
+		temp = __ctsvc_strtok(depart, separator);
 		contacts_record_set_str(company, _contacts_company.department, __ctsvc_vcard_remove_escape_char(depart));
+	}
 
 	if (val != temp) {
 		*(temp-1) = '\0';
@@ -2550,6 +2533,7 @@ static inline int __ctsvc_vcard_get_company_logo(ctsvc_list_s *company_list, cha
 	char dest[CTSVC_IMG_FULL_PATH_SIZE_MAX] = {0};
 	char *temp;
 	contacts_record_h company;
+	struct timeval tv;
 
 	company = __ctsvc_vcard_get_company_empty_record(company_list, _contacts_company.logo);
 	if (NULL == company) {
@@ -2564,8 +2548,9 @@ static inline int __ctsvc_vcard_get_company_logo(ctsvc_list_s *company_list, cha
 	*temp = '\0';
 	type = __ctsvc_vcard_get_image_type(val);
 
-	ret = snprintf(dest, sizeof(dest), "%s/%d-%d-logo.%s", CTSVC_VCARD_IMAGE_LOCATION,
-			getpid(), (int)time(NULL), __ctsvc_get_img_suffix(type));
+	gettimeofday(&tv, NULL);
+	ret = snprintf(dest, sizeof(dest), "%s/%d-%ld%ld-logo.%s", CTSVC_VCARD_IMAGE_LOCATION,
+			getpid(), tv.tv_sec, tv.tv_usec, __ctsvc_get_img_suffix(type));
 	RETVM_IF(ret<=0, CONTACTS_ERROR_SYSTEM, "Destination file name was not created");
 
 	fd = open(dest, O_WRONLY|O_CREAT|O_TRUNC, 0660);

@@ -332,7 +332,7 @@ int ctsvc_db_company_delete(int id, bool is_my_profile)
 	return CONTACTS_ERROR_NONE;
 }
 
-void ctsvc_db_data_company_delete_callback(sqlite3_context *context, int argc, sqlite3_value ** argv)
+void ctsvc_db_company_delete_callback(sqlite3_context *context, int argc, sqlite3_value ** argv)
 {
 	int ret;
 	const unsigned char* logo_path;

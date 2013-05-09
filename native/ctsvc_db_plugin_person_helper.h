@@ -23,6 +23,8 @@
 #include "contacts.h"
 #include "ctsvc_sqlite.h"
 
+#define ADDRESSBOOK_ID_DELIM	" "
+
 int ctsvc_db_insert_person(contacts_record_h contact);
 int ctsvc_db_update_person(contacts_record_h contact);
 int ctsvc_db_person_create_record_from_stmt(cts_stmt stmt, contacts_record_h *record);

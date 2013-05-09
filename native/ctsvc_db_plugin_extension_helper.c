@@ -147,7 +147,7 @@ int ctsvc_db_extension_update(contacts_record_h record)
 	char* set = NULL;
 	GSList *bind_text = NULL;
 	GSList *cursor = NULL;
-	ctsvc_extension_s *extension =	(ctsvc_extension_s*)record;
+	ctsvc_extension_s *extension = (ctsvc_extension_s*)record;
 	char query[CTS_SQL_MAX_LEN] = {0};
 
 	RETVM_IF(!extension->id, CONTACTS_ERROR_INVALID_PARAMETER, "extension of contact has no ID.");

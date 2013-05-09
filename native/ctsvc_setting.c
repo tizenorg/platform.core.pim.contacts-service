@@ -110,13 +110,7 @@ static void ctsvc_vconf_sorting_order_cb(keynode_t *key, void *data)
 void ctscts_set_sort_memory(int sort_type)
 {
 	primary_sort = sort_type;
-
-	if (primary_sort == CTSVC_SORT_KOREAN)
-		secondary_sort = CTSVC_SORT_WESTERN;
-	else if (primary_sort == CTSVC_SORT_WESTERN)
-		secondary_sort = CTSVC_SORT_KOREAN;
-	else
-		secondary_sort = CTSVC_SORT_WESTERN;
+	secondary_sort = CTSVC_SORT_WESTERN;
 }
 
 static void ctsvc_vconf_sort_change_cb(keynode_t *key, void *data)

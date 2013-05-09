@@ -623,7 +623,7 @@ int ctsvc_person_aggregate(int person_id)
 			if (name_contact_id != person_name_contact_id && person_name_contact_id != 0)
 				name_contact_id = person_name_contact_id;
 		}
-		addr_len = snprintf(addr, sizeof(addr), "%d ", addressbook_id);
+		addr_len = snprintf(addr, sizeof(addr), "%d%s", addressbook_id, ADDRESSBOOK_ID_DELIM);
 		if (NULL == addressbook_ids)
 			addressbook_ids = calloc(addressbooks_len+1, sizeof(char));
 		else if (addressbooks_len <= strlen(addressbook_ids)+addr_len) {
@@ -631,7 +631,7 @@ int ctsvc_person_aggregate(int person_id)
 			addressbook_ids = realloc(addressbook_ids, addressbooks_len);
 		}
 
-		len += snprintf(addressbook_ids + len, addressbooks_len -len, "%d ", addressbook_id );
+		len += snprintf(addressbook_ids + len, addressbooks_len -len, "%d%s", addressbook_id, ADDRESSBOOK_ID_DELIM );
 
 		if (!image_thumbnail_path && contact_image_thumbnail_path && *contact_image_thumbnail_path) {
 			temp = __cts_get_image_filename(contact_image_thumbnail_path);

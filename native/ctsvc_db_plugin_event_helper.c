@@ -104,13 +104,14 @@ int ctsvc_db_event_update(contacts_record_h record, bool is_my_profile)
 	char* set = NULL;
 	GSList *bind_text = NULL;
 	GSList *cursor = NULL;
-	ctsvc_event_s *event =  (ctsvc_event_s*)record;
+	ctsvc_event_s *event = (ctsvc_event_s*)record;
 	char query[CTS_SQL_MAX_LEN] = {0};
 
 	RETVM_IF(!event->id, CONTACTS_ERROR_INVALID_PARAMETER, "event of contact has no ID.");
 	RETVM_IF(CTSVC_PROPERTY_FLAG_DIRTY != (event->base.property_flag & CTSVC_PROPERTY_FLAG_DIRTY), CONTACTS_ERROR_NONE, "No update");
 
-	snprintf(query, sizeof(query), "SELECT id FROM "CTS_TABLE_DATA" WHERE id = %d", event->id);
+	snprintf(query, sizeof(query),
+			"SELECT id FROM "CTS_TABLE_DATA" WHERE id = %d", event->id);
 	ret = ctsvc_query_get_first_int_result(query, &id);
 	RETV_IF(ret != CONTACTS_ERROR_NONE, ret);
 

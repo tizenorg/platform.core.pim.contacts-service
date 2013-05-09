@@ -289,28 +289,38 @@ static int __ctsvc_db_group_update_record( contacts_record_h record )
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_db_group_delete_record( int index )
+static int __ctsvc_db_group_delete_record( int id )
 {
 	int ret;
+	int count = 0;
 	int addressbook_id;
-	char  query[CTS_SQL_MAX_LEN] = {0};
+	char query[CTS_SQL_MAX_LEN] = {0};
 
 	ret = ctsvc_begin_trans();
 	RETVM_IF(CONTACTS_ERROR_NONE > ret, ret, "DB error : ctsvc_begin_trans() Failed(%d)", ret);
 
 	snprintf(query, sizeof(query),
 			"SELECT addressbook_id FROM %s WHERE group_id = %d",
-			CTS_TABLE_GROUPS, index);
+			CTS_TABLE_GROUPS, id);
 
 	ret = ctsvc_query_get_first_int_result(query, &addressbook_id);
 	if ( ret < CONTACTS_ERROR_NONE) {
-		CTS_ERR("DB error : The index(%d) is Invalid(%d)", index, addressbook_id);
+		CTS_ERR("DB error : The id(%d) is Invalid(%d)", id, addressbook_id);
+		ctsvc_end_trans(false);
+		return ret;
+	}
+
+	snprintf(query, sizeof(query),
+				"SELECT COUNT(contact_id) FROM "CTS_TABLE_GROUP_RELATIONS" WHERE group_id = %d", id);
+	ret = ctsvc_query_get_first_int_result(query, &count);
+	if ( ret < CONTACTS_ERROR_NONE) {
+		CTS_ERR("DB error : ctsvc_query_get_first_int_result Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
 
 	snprintf(query, sizeof(query), "DELETE FROM %s WHERE group_id=%d AND is_read_only=0",
-			CTS_TABLE_GROUPS, index);
+			CTS_TABLE_GROUPS, id);
 
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
@@ -327,7 +337,7 @@ static int __ctsvc_db_group_delete_record( int index )
 
 	ctsvc_get_next_ver();
 
-	ret = ctsvc_change_image(CTS_GROUP_IMAGE_LOCATION, index, NULL, NULL, 0);
+	ret = ctsvc_change_image(CTS_GROUP_IMAGE_LOCATION, id, NULL, NULL, 0);
 	if (ret < 0) {
 		CTS_ERR("DB error : ctsvc_change_image() Failed(%d)", ret);
 		ctsvc_end_trans(false);
@@ -335,6 +345,11 @@ static int __ctsvc_db_group_delete_record( int index )
 	}
 
 	ctsvc_set_group_noti();
+	if (count > 0) {
+		ctsvc_set_group_rel_noti();
+		ctsvc_set_contact_noti();
+		ctsvc_set_person_noti();
+	}
 
 	ret = ctsvc_end_trans(true);
 	if (ret < CONTACTS_ERROR_NONE) {
