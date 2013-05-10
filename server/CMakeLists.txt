@@ -159,7 +159,7 @@ SET(SRCS
 )
 
 INCLUDE(FindPkgConfig)
-pkg_check_modules(ctsvc_server_pkgs REQUIRED glib-2.0 pims-ipc gobject-2.0 tapi dlog capi-media-image-util accounts-svc badge)
+pkg_check_modules(ctsvc_server_pkgs REQUIRED glib-2.0 pims-ipc gobject-2.0 tapi dlog capi-media-image-util accounts-svc badge libexif)
 
 FOREACH(flag ${ctsvc_server_pkgs_CFLAGS})
 	SET(EXTRA_CFLAGS "${EXTRA_CFLAGS} ${flag}")

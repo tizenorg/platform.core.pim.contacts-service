@@ -29,6 +29,7 @@
 #include <unicode/ulocdata.h>
 #include <unicode/uset.h>
 #include <unicode/ustring.h>
+#include <libexif/exif-data.h>
 
 #include "contacts.h"
 #include "ctsvc_internal.h"
@@ -251,6 +252,29 @@ static inline bool ctsvc_check_available_image_space(void){
 	return false;
 }
 
+static int __ctsvc_get_exif_info(const char *path)
+{
+	ExifData *ed = NULL;
+	ExifEntry *entry;
+
+	ed = exif_data_new_from_file(path);
+	if (ed == NULL) {
+		CTS_ERR("exif_data_new_from_file : ExifData is NULL");
+		return 0;
+	}
+
+	entry = exif_data_get_entry(ed, EXIF_TAG_ORIENTATION);
+	if (entry) {
+		ExifByteOrder mByteOrder = exif_data_get_byte_order(ed);
+		int orientation = (int)exif_get_short(entry->data, mByteOrder);
+		if (orientation >= 0 && orientation <= 8)
+		   return orientation;
+		else
+		   return 0;
+	}
+	return 0;
+}
+
 static int image_size = 480;
 
 typedef struct {
@@ -269,12 +293,42 @@ static bool __ctsvc_image_util_supported_jpeg_colorspace_cb(image_util_colorspac
 	unsigned char * img_target = 0;
 	unsigned char * img_source = 0;
 	int dest_fd;
+	int orientation = 0;
+	image_util_rotation_e rotation;
 
 	// temporary code
 	if (colorspace == IMAGE_UTIL_COLORSPACE_YV12 || colorspace == IMAGE_UTIL_COLORSPACE_I420) {
 		info->ret = CONTACTS_ERROR_INTERNAL;
 		return true;
 	}
+
+	rotation = IMAGE_UTIL_ROTATION_NONE;
+	orientation = __ctsvc_get_exif_info(info->src);
+	switch(orientation) {
+	case 1:
+		rotation = IMAGE_UTIL_ROTATION_NONE;
+		break;
+	case 2:
+		rotation = IMAGE_UTIL_ROTATION_FLIP_HORZ;
+		break;
+	case 3:
+		rotation = IMAGE_UTIL_ROTATION_180;
+		break;
+	case 4:
+		rotation = IMAGE_UTIL_ROTATION_FLIP_VERT;
+		break;
+	case 6:
+		rotation = IMAGE_UTIL_ROTATION_90;
+		break;
+	case 8:
+		rotation = IMAGE_UTIL_ROTATION_270;
+		break;
+	case 5:
+	case 7:
+	case 0:
+	default:
+		break;
+	};
 
 	// load jpeg sample file
 	CTS_DBG("colorspace %d src : %s, dest : %s", colorspace, info->src, info->dest);
@@ -300,6 +354,7 @@ static bool __ctsvc_image_util_supported_jpeg_colorspace_cb(image_util_colorspac
 #endif
 
 	if (width > image_size || height > image_size) {
+		// image resize
 		if (image_size<=0 || width <=0 || height <= 0) {
 			free(img_source);
 			CTS_ERR("image size error(%d)", image_size);
@@ -337,28 +392,34 @@ static bool __ctsvc_image_util_supported_jpeg_colorspace_cb(image_util_colorspac
 			info->ret = CONTACTS_ERROR_INTERNAL;
 			return false;
 		}
-
-		//ret = image_util_encode_jpeg(img_source, width, height, colorspace, 100, info->dest );
-		ret = image_util_encode_jpeg(img_target, resized_width, resized_height, colorspace, CTS_IMAGE_ENCODE_QUALITY, info->dest );
-		free( img_target );
 		free( img_source );
-		if(ret!=IMAGE_UTIL_ERROR_NONE) {
-			CTS_ERR("image_util_encode_jpeg failed(%d)", ret);
-			info->ret = CONTACTS_ERROR_INTERNAL;
-			return false;
-		}
 	}
 	else {
 		resized_width = width;
 		resized_height = height;
+		img_target = img_source;
+	}
 
-		ret = image_util_encode_jpeg(img_source, resized_width, resized_height, colorspace, CTS_IMAGE_ENCODE_QUALITY, info->dest );
-		free( img_source );
-		if(ret!=IMAGE_UTIL_ERROR_NONE) {
-			CTS_ERR("image_util_encode_jpeg failed(%d)", ret);
-			info->ret = CONTACTS_ERROR_INTERNAL;
-			return false;
-		}
+	// image rotation
+	if (IMAGE_UTIL_ROTATION_NONE != rotation) {
+		int rotated_width, rotated_height;
+		unsigned char *img_rotate = 0;
+		img_rotate = malloc( size_decode );
+		image_util_rotate(img_rotate, &rotated_width, &rotated_height,
+					rotation, img_target, resized_width, resized_height, colorspace);
+		resized_width = rotated_width;
+		resized_height = rotated_height;
+		free(img_target);
+		img_target = img_rotate;
+	}
+
+	// image encode
+	ret = image_util_encode_jpeg(img_target, resized_width, resized_height, colorspace, CTS_IMAGE_ENCODE_QUALITY, info->dest );
+	free( img_target );
+	if(ret != IMAGE_UTIL_ERROR_NONE) {
+		CTS_ERR("image_util_encode_jpeg failed(%d)", ret);
+		info->ret = CONTACTS_ERROR_INTERNAL;
+		return false;
 	}
 
 	dest_fd = open(info->dest, O_RDONLY);

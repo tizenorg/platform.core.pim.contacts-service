@@ -6,7 +6,7 @@ SET(NATIVE contacts-service3)
 FILE(GLOB SRCS *.c ../common/*.c)
 
 INCLUDE(FindPkgConfig)
-pkg_check_modules(service_pkgs REQUIRED sqlite3 db-util capi-media-image-util accounts-svc badge)
+pkg_check_modules(service_pkgs REQUIRED sqlite3 db-util capi-media-image-util accounts-svc badge libexif)
 
 FOREACH(flag ${service_pkgs_CFLAGS})
 	SET(EXTRA_CFLAGS "${EXTRA_CFLAGS} ${flag}")
