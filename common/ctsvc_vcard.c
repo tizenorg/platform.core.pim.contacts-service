@@ -35,6 +35,8 @@
 #include "ctsvc_vcard.h"
 #include "ctsvc_localize.h"
 
+#define DEFAULT_ADDRESS_BOOK_ID 0
+
 #define SMART_STRDUP(src) (src && *src)?strdup(src):NULL
 #define CTSVC_VCARD_PHOTO_MAX_SIZE 1024*1024
 #define CTSVC_VCARD_IMAGE_LOCATION "/opt/usr/data/contacts-svc/img/vcard"
@@ -1313,7 +1315,7 @@ static inline int __ctsvc_vcard_append_contact(ctsvc_contact_s *contact, char **
 		RETV_IF(len < 0, len);
 	}
 
-	if (contact->uid) {
+	if (contact->uid && DEFAULT_ADDRESS_BOOK_ID == contact->addressbook_id) {
 		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, content_name[CTSVC_VCARD_VALUE_UID]);
 		CTSVC_VCARD_APPEND_CONTENT(buf, buf_size, len, contact->uid);
 	}
@@ -1387,7 +1389,7 @@ static inline int __ctsvc_vcard_append_my_profile(ctsvc_my_profile_s *my_profile
 		RETV_IF(len < 0, len);
 	}
 
-	if (my_profile->uid) {
+	if (my_profile->uid && DEFAULT_ADDRESS_BOOK_ID == my_profile->addressbook_id) {
 		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, content_name[CTSVC_VCARD_VALUE_UID]);
 		CTSVC_VCARD_APPEND_CONTENT(buf, buf_size, len, my_profile->uid);
 	}
@@ -1638,7 +1640,7 @@ static int __ctsvc_vcard_append_person(ctsvc_person_s *person, ctsvc_list_s *lis
 
 	for(cursor=list_contacts->records;cursor;cursor=cursor->next) {
 		contact = (ctsvc_contact_s *)cursor->data;
-		if (contact && contact->uid) {
+		if (contact && contact->uid && DEFAULT_ADDRESS_BOOK_ID == contact->addressbook_id) {
 			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, content_name[CTSVC_VCARD_VALUE_UID]);
 			CTSVC_VCARD_APPEND_CONTENT(buf, buf_size, len, contact->uid);
 		}

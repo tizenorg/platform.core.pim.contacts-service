@@ -484,7 +484,7 @@ static int __ctsvc_normalize_str(const char *src, char **dest)
 	}
 
 	ret = ctsvc_check_language(result);
-	ctsvc_extra_normalize(result, size/sizeof(UChar));
+	ctsvc_extra_normalize(result, size);
 
 	u_strToUTF8(NULL, 0, &size, result, -1, &status);
 	status = U_ZERO_ERROR;
@@ -823,7 +823,7 @@ static bool __ctsvc_compare_unicode_letter(const UChar* haystack, int haystack_l
 
 				ctsvc_convert_japanese_to_hiragana_unicode(temp_haystack, hiragana_haystack, 2 );
 
-				ctsvc_convert_japanese_to_hiragana_unicode(temp_haystack, hiragana_needle,  2);
+				ctsvc_convert_japanese_to_hiragana_unicode(temp_needle, hiragana_needle,  2);
 
 				if (hiragana_haystack[0] == hiragana_needle[0])
 					ret = true;

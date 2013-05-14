@@ -3,6 +3,10 @@
 		<domain name="contacts-service" />
 		<provide>
 			<label name="contacts-service::db"/>
+			<label name="contacts-service::svc"/>
+			<label name="contacts-service::phonelog"/>
+			<label name="contacts-service::vconf"/>
+			<label name="contacts-service::vconf-private"/>
 		</provide>
 		<request>
 			<smack request="sys-assert::core" type="rwxat"/>
@@ -10,7 +14,7 @@
 		</request>
 	</define>
 	<assign>
-		<filesystem path="/usr/lib/libcontacts-service2.so.0.9.82.2" label="_"/>
+		<filesystem path="/usr/lib/libcontacts-service2.so.0.9.84.1" label="_"/>
 		<filesystem path="/usr/lib/libcontacts-service2.so.0" label="_"/>
 		<filesystem path="/opt/usr/dbspace/.contacts-svc.db" label="contacts-service::db"/>
 		<filesystem path="/opt/usr/dbspace/.contacts-svc.db-journal" label="contacts-service::db"/>

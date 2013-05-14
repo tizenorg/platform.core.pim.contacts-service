@@ -34,7 +34,7 @@
 #include "ctsvc_server_sim.h"
 #include "ctsvc_utils.h"
 
-#define PHONE_ADDRESSBOOK_ID 0
+#define DEFAULT_ADDRESS_BOOK_ID 0
 
 #define CTSVC_TAPI_SIM_PB_MAX 0xFFFF
 #define CTSVC_SIM_DATA_MAX_LENGTH (255+1)
@@ -431,7 +431,7 @@ static void __ctsvc_server_sim_import_read_cb(TapiHandle *handle, int result, vo
 	case TAPI_SIM_PB_ADN:
 	case TAPI_SIM_PB_3GSIM:
 		record = __ctsvc_server_sim_create_contact_record(sim_info);
-		ret = __ctsvc_server_insert_contact_to_db(record, &contact_id,PHONE_ADDRESSBOOK_ID);
+		ret = __ctsvc_server_insert_contact_to_db(record, &contact_id,DEFAULT_ADDRESS_BOOK_ID);
 		ctsvc_server_sim_destroy_contact_record(record);
 		if(ret < CONTACTS_ERROR_NONE || contact_id <= 0) {
 			CTS_ERR("__ctsvc_server_insert_or_update_contact_to_db is fail(%d)",ret);

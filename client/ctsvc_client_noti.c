@@ -47,14 +47,14 @@ static void __ctsvc_subscriber_callback(pims_ipc_h ipc, pims_ipc_data_h data, vo
 	char *str = NULL;
 	subscribe_info_s *info = user_data;
 
-	INFO("(%x) subscribe_callback(%p)", (unsigned int)pthread_self(), ipc);
-	if (data) {
+	if (data)
 		str = (char*)pims_ipc_data_get(data, &size);
-		if (!str) {
-			CTS_ERR("pims_ipc_data_get fail()");
-			return;
-		}
+
+	if (!str) {
+		CTS_ERR("There is no changed data");
+		return;
 	}
+
 	if (info) {
 		GSList *l;
 		for (l = info->callbacks;l;l=l->next) {

@@ -145,7 +145,8 @@ static int __ctsvc_db_get_data(int id, ctsvc_contact_s *contact)
 					"data3, data4, data5, data6, data7, data8, data9, data10, data11, data12 "
 					"FROM "CTS_TABLE_DATA", "CTSVC_DB_VIEW_CONTACT" "
 					"ON "CTS_TABLE_DATA".contact_id = "CTSVC_DB_VIEW_CONTACT".contact_id "
-					"WHERE data.contact_id = %d  AND is_my_profile = 0", id);
+					"WHERE data.contact_id = %d  AND is_my_profile = 0 "
+					"ORDER BY is_default DESC", id);
 
 	stmt = cts_query_prepare(query);
 	RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB, "DB error : cts_query_prepare() Failed");
@@ -1768,7 +1769,7 @@ static inline int __ctsvc_contact_insert_grouprel(int contact_id, contacts_list_
 		return CONTACTS_ERROR_NONE;
 }
 
-inline static int __ctsvc_find_person_to_link_with_number(const char *normalized_number, int *person_id)
+inline static int __ctsvc_find_person_to_link_with_number(const char *normalized_number, int addressbook_id, int *person_id)
 {
 	int ret;
 
@@ -1782,8 +1783,9 @@ inline static int __ctsvc_find_person_to_link_with_number(const char *normalized
 		snprintf(query, sizeof(query),
 				"SELECT C.person_id FROM "CTS_TABLE_CONTACTS" C, "CTS_TABLE_DATA" D "
 				"ON C.contact_id=D.contact_id AND D.datatype=%d AND C.deleted = 0 "
+				"AND C.addressbook_id <> %d "
 				"WHERE D.data4='%s' AND D.is_my_profile = 0",
-				CTSVC_DATA_NUMBER, normal_num);
+				CTSVC_DATA_NUMBER, addressbook_id, normal_num);
 		ret = ctsvc_query_get_first_int_result(query, person_id);
 		CTS_DBG("%s", query);
 		CTS_DBG("result ret(%d) person_id(%d)", ret, *person_id);
@@ -1793,7 +1795,7 @@ inline static int __ctsvc_find_person_to_link_with_number(const char *normalized
 	return CONTACTS_ERROR_INVALID_PARAMETER;
 }
 
-inline static int __ctsvc_find_person_to_link_with_email(const char *email_addr, int *person_id)
+inline static int __ctsvc_find_person_to_link_with_email(const char *email_addr, int addressbook_id, int *person_id)
 {
 	int ret;
 	char query[CTS_SQL_MIN_LEN] = {0};
@@ -1801,8 +1803,9 @@ inline static int __ctsvc_find_person_to_link_with_email(const char *email_addr,
 	snprintf(query, sizeof(query),
 			"SELECT C.person_id FROM "CTS_TABLE_CONTACTS" C, "CTS_TABLE_DATA" D "
 			"ON C.contact_id=D.contact_id AND D.datatype=%d AND C.deleted = 0 "
+			"AND C.addressbook_id <> %d "
 			"WHERE D.data3='%s' AND D.is_my_profile = 0",
-			CTSVC_DATA_EMAIL, email_addr);
+			CTSVC_DATA_EMAIL, addressbook_id, email_addr);
 	ret = ctsvc_query_get_first_int_result(query, person_id);
 	CTS_DBG("%s", query);
 	CTS_DBG("result ret(%d) person_id(%d)", ret, *person_id);
@@ -1811,7 +1814,7 @@ inline static int __ctsvc_find_person_to_link_with_email(const char *email_addr,
 }
 
 
-inline static int __ctsvc_find_person_to_link(contacts_record_h record, int *person_id)
+inline static int __ctsvc_find_person_to_link(contacts_record_h record, int addressbook_id, int *person_id)
 {
 	int ret;
 	ctsvc_contact_s *contact = (ctsvc_contact_s*)record;
@@ -1822,7 +1825,7 @@ inline static int __ctsvc_find_person_to_link(contacts_record_h record, int *per
 	for(cursor = contact->numbers->records;cursor;cursor=cursor->next) {
 		number_data = (ctsvc_number_s *)cursor->data;
 		if (number_data && number_data->number && number_data->number[0]){
-			ret = __ctsvc_find_person_to_link_with_number(number_data->number, person_id);
+			ret = __ctsvc_find_person_to_link_with_number(number_data->number, addressbook_id, person_id);
 
 			if (ret == CONTACTS_ERROR_NONE && *person_id > 0)
 				return ret;
@@ -1832,7 +1835,7 @@ inline static int __ctsvc_find_person_to_link(contacts_record_h record, int *per
 	for(cursor = contact->emails->records;cursor;cursor=cursor->next) {
 		email_data = (ctsvc_email_s *)cursor->data;
 		if (email_data && email_data->email_addr && email_data->email_addr[0]){
-			ret = __ctsvc_find_person_to_link_with_email(email_data->email_addr, person_id);
+			ret = __ctsvc_find_person_to_link_with_email(email_data->email_addr, addressbook_id, person_id);
 
 			if (ret == CONTACTS_ERROR_NONE && *person_id > 0)
 				return ret;
@@ -1922,7 +1925,7 @@ static int __ctsvc_db_contact_insert_record( contacts_record_h record, int *id)
 	version = ctsvc_get_next_ver();
 
 	if (auto_link_enabled) {
-		ret = __ctsvc_find_person_to_link((contacts_record_h)contact, &person_id);
+		ret = __ctsvc_find_person_to_link((contacts_record_h)contact, contact->addressbook_id, &person_id);
 		CTS_DBG("__ctsvc_find_person_to_link return %d , person_id(%d)", ret, person_id);
 		if (ret == CONTACTS_ERROR_NONE && person_id > 0) {
 			contact->person_id = person_id;

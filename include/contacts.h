@@ -558,7 +558,7 @@
  * <tr><td>string</td><td>uid</td><td>read, write</td><td></td></tr>
  * <tr><td>string</td><td>vibration</td><td>read, write</td><td></td></tr>
  * <tr><td>integer</td><td>changed_time</td><td>read only</td><td></td></tr>
- * <tr><td>integer</td><td>link_mode</td><td>read, write</td><td></td></tr>
+ * <tr><td>integer</td><td>link_mode</td><td>read, write</td><td> contacts_contact_link_mode_e </td></tr>
  * <tr><td>record</td><td>name</td><td>read, write</td><td></td></tr>
  * <tr><td>record</td><td>company</td><td>read, write</td><td></td></tr>
  * <tr><td>record</td><td>note</td><td>read, write</td><td></td></tr>
@@ -666,7 +666,7 @@
  * <tr><td>integer</td><td> id </td><td>read only</td><td> </td></tr>
  * <tr><td>integer</td><td> account_id </td><td>read, write once</td><td> </td></tr>
  * <tr><td>string</td><td> name </td><td>read, write</td><td> It can not be NULL. Duplicate names are not allowed. </td></tr>
- * <tr><td>integer</td><td> mode </td><td>read, write</td><td> </td></tr>
+ * <tr><td>integer</td><td> mode </td><td>read, write</td><td> contacts_address_book_mode_e </td></tr>
  * </table>
  *
  * @section CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_group _contacts_group view
@@ -1027,7 +1027,7 @@
  * <tr><td>integer</td><td> person_id </td><td>read, write once </td><td> </td></tr>
  * <tr><td>string</td><td> address </td><td>read, write once </td><td> </td></tr>
  * <tr><td>integer</td><td> log_time </td><td>read, write once</td><td> </td></tr>
- * <tr><td>integer</td><td> log_type </td><td>read, write</td><td> </td></tr>
+ * <tr><td>integer</td><td> log_type </td><td>read, write</td><td>contacts_phone_log_type_e </td></tr>
  * <tr><td>integer</td><td> extra_data1 </td><td>read, write once</td><td> You can set the related integer data(e.g. message_id, email_id) or duration of call.  </td></tr>
  * <tr><td>string</td><td> extra_data2 </td><td>read, write once</td><td> You can set the related string data.  e.g.) short message, subject</td></tr>
  * </table>
@@ -1213,7 +1213,7 @@
  * <tr><td>boolean</td><td> is_favorite </td><td></td><td> </td></tr>
  * <tr><td>boolean</td><td> has_phonenumber </td><td></td>><td> </td></tr>
  * <tr><td>boolean</td><td> has_email </td><td></td><td> </td></tr>
- * <tr><td>integer</td><td> usage_type </td><td></td>*<td> </td></tr>
+ * <tr><td>integer</td><td> usage_type </td><td>*</td><td>contacts_usage_type_e </td></tr>
  * <tr><td>integer</td><td> times_used </td><td></td><td> </td></tr>
  * </table>
  *

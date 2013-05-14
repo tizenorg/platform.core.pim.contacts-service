@@ -385,17 +385,35 @@ static inline int __ctsvc_put_person_default_image(int person_id, int id)
 static inline int __ctsvc_put_person_default_data(int person_id, int id, int datatype)
 {
 	int ret;
-	int is_default;
+	int is_default = 0;
+	int contact_id = 0;
+	int name_contact_id = 0;
 	char query[CTS_SQL_MAX_LEN] = {0};
+	cts_stmt stmt = NULL;
+	contacts_display_name_source_type_e source_type = CONTACTS_DISPLAY_NAME_SOURCE_TYPE_INVALID;
 
 	snprintf(query, sizeof(query),
-			"SELECT D.is_default FROM %s D, %s C "
+			"SELECT D.is_default, D.contact_id FROM %s D, %s C "
 				"ON (D.contact_id=C.contact_id AND C.deleted = 0) "
 				"WHERE D.datatype=%d AND C.person_id=%d AND D.id=%d",
 				CTS_TABLE_DATA, CTS_TABLE_CONTACTS, datatype, person_id, id);
 
-	ret = ctsvc_query_get_first_int_result(query, &is_default);
-	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "ctsvc_query_get_first_int_result() Failed(%d)", ret);
+	stmt = cts_query_prepare(query);
+	if (NULL == stmt) {
+		CTS_ERR("cts_query_prepare Fail(stmt NULL)");
+		return CONTACTS_ERROR_DB;
+	}
+	ret = cts_stmt_step(stmt);
+	if (1 != ret) {
+		CTS_ERR("cts_stmt_step Fail(%d)", ret);
+		cts_stmt_finalize(stmt);
+		return ret;
+	}
+
+	is_default = ctsvc_stmt_get_int(stmt, 0);
+	contact_id = ctsvc_stmt_get_int(stmt, 1);
+
+	cts_stmt_finalize(stmt);
 
 	ret = ctsvc_begin_trans();
 	RETVM_IF(CONTACTS_ERROR_NONE > ret, ret, "DB error : ctsvc_begin_trans() Failed(%d)", ret);
@@ -434,10 +452,51 @@ static inline int __ctsvc_put_person_default_data(int person_id, int id, int dat
 			"UPDATE "CTS_TABLE_DATA" SET is_primary_default=1, is_default=1 WHERE id=%d ", id);
 
 	ret = ctsvc_query_exec(query);
-	if( CONTACTS_ERROR_NONE != ret ) {
+	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR( "ctsvc_query_exec() Failed(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
+	}
+
+	if (datatype == CTSVC_DATA_NUMBER)
+		source_type = CONTACTS_DISPLAY_NAME_SOURCE_TYPE_NUMBER;
+	else if (datatype == CTSVC_DATA_EMAIL)
+		source_type = CONTACTS_DISPLAY_NAME_SOURCE_TYPE_EMAIL;
+
+	if (CONTACTS_DISPLAY_NAME_SOURCE_TYPE_INVALID != source_type)
+		ctsvc_contact_update_display_name(contact_id, source_type);
+
+	snprintf(query, sizeof(query),
+			"SELECT name_contact_id FROM "CTS_TABLE_PERSONS" WHERE person_id = %d", person_id);
+	ret = ctsvc_query_get_first_int_result(query, &name_contact_id);
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR( "ctsvc_query_get_first_int_result() Failed(%d)", ret);
+		ctsvc_end_trans(false);
+		return ret;
+	}
+
+	if (name_contact_id != contact_id) {
+		int org_source_type = CONTACTS_DISPLAY_NAME_SOURCE_TYPE_INVALID;
+		snprintf(query, sizeof(query),
+			"SELECT display_name_source FROM "CTS_TABLE_CONTACTS" WHERE contact_id = %d", name_contact_id);
+		ret = ctsvc_query_get_first_int_result(query, &org_source_type);
+		if (CONTACTS_ERROR_NONE != ret) {
+			CTS_ERR( "ctsvc_query_get_first_int_result() Failed(%d)", ret);
+			ctsvc_end_trans(false);
+			return ret;
+		}
+
+		if (org_source_type <= source_type) {
+			snprintf(query, sizeof(query),
+						"UPDATE %s SET name_contact_id=%d WHERE person_id=%d",
+						CTS_TABLE_PERSONS, contact_id, person_id);
+			ret = ctsvc_query_exec(query);
+			if (CONTACTS_ERROR_NONE != ret) {
+				CTS_ERR( "ctsvc_query_exec() Failed(%d)", ret);
+				ctsvc_end_trans(false);
+				return ret;
+			}
+		}
 	}
 
 	ret = ctsvc_end_trans(true);

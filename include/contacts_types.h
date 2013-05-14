@@ -45,6 +45,7 @@ extern "C"
 
 #define _CONTACTS_PROPERTY_CHILD_SINGLE(property_id_name)	unsigned int property_id_name;
 #define _CONTACTS_PROPERTY_CHILD_MULTIPLE(property_id_name)	unsigned int property_id_name;
+
 #define _CONTACTS_PROPERTY_FILTER_INT(property_id_name)	unsigned int property_id_name;
 #define _CONTACTS_PROPERTY_FILTER_STR(property_id_name)	unsigned int property_id_name;
 #define _CONTACTS_PROPERTY_FILTER_BOOL(property_id_name)	unsigned int property_id_name;
@@ -196,8 +197,8 @@ typedef enum {
 }contacts_display_name_source_type_e;
 
 typedef enum {
-	CONTACTS_ADDRESS_BOOK_MODE_NONE, /**< .*/
-	CONTACTS_ADDRESS_BOOK_MODE_READONLY, /**< .*/
+	CONTACTS_ADDRESS_BOOK_MODE_NONE, /**< All module can read and write contacts of this address_book */
+	CONTACTS_ADDRESS_BOOK_MODE_READONLY, /**< All module can only read contacts of this address_book*/
 }contacts_address_book_mode_e;
 
 typedef enum{

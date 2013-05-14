@@ -252,27 +252,57 @@ static inline bool ctsvc_check_available_image_space(void){
 	return false;
 }
 
-static int __ctsvc_get_exif_info(const char *path)
+static image_util_rotation_e __ctsvc_get_rotation_info(const char *path)
 {
 	ExifData *ed = NULL;
 	ExifEntry *entry;
+	image_util_rotation_e rotation = IMAGE_UTIL_ROTATION_NONE;
+	int orientation = 0;
 
 	ed = exif_data_new_from_file(path);
 	if (ed == NULL) {
 		CTS_ERR("exif_data_new_from_file : ExifData is NULL");
-		return 0;
+		return IMAGE_UTIL_ROTATION_NONE;
 	}
 
 	entry = exif_data_get_entry(ed, EXIF_TAG_ORIENTATION);
 	if (entry) {
 		ExifByteOrder mByteOrder = exif_data_get_byte_order(ed);
-		int orientation = (int)exif_get_short(entry->data, mByteOrder);
-		if (orientation >= 0 && orientation <= 8)
-		   return orientation;
-		else
-		   return 0;
+		orientation = (int)exif_get_short(entry->data, mByteOrder);
+		if (orientation < 0 && orientation > 8)
+			orientation = 0;
 	}
-	return 0;
+
+	if (ed)
+		exif_data_unref(ed);
+
+	switch(orientation) {
+	case 1:	// Top-left
+		rotation = IMAGE_UTIL_ROTATION_NONE;
+		break;
+	case 2:	// Top-right
+		rotation = IMAGE_UTIL_ROTATION_FLIP_HORZ;
+		break;
+	case 3:	// Bottom-right
+		rotation = IMAGE_UTIL_ROTATION_180;
+		break;
+	case 4:	// Bottom-left
+		rotation = IMAGE_UTIL_ROTATION_FLIP_VERT;
+		break;
+	case 6: 	// Right-top
+		rotation = IMAGE_UTIL_ROTATION_90;
+		break;
+	case 8:	// Left-bottom
+		rotation = IMAGE_UTIL_ROTATION_270;
+		break;
+	case 5:	// Left-top
+	case 7:	// Right-bottom
+	case 0:
+	default:
+		break;
+	};
+
+	return rotation;
 }
 
 static int image_size = 480;
@@ -293,7 +323,6 @@ static bool __ctsvc_image_util_supported_jpeg_colorspace_cb(image_util_colorspac
 	unsigned char * img_target = 0;
 	unsigned char * img_source = 0;
 	int dest_fd;
-	int orientation = 0;
 	image_util_rotation_e rotation;
 
 	// temporary code
@@ -302,33 +331,7 @@ static bool __ctsvc_image_util_supported_jpeg_colorspace_cb(image_util_colorspac
 		return true;
 	}
 
-	rotation = IMAGE_UTIL_ROTATION_NONE;
-	orientation = __ctsvc_get_exif_info(info->src);
-	switch(orientation) {
-	case 1:
-		rotation = IMAGE_UTIL_ROTATION_NONE;
-		break;
-	case 2:
-		rotation = IMAGE_UTIL_ROTATION_FLIP_HORZ;
-		break;
-	case 3:
-		rotation = IMAGE_UTIL_ROTATION_180;
-		break;
-	case 4:
-		rotation = IMAGE_UTIL_ROTATION_FLIP_VERT;
-		break;
-	case 6:
-		rotation = IMAGE_UTIL_ROTATION_90;
-		break;
-	case 8:
-		rotation = IMAGE_UTIL_ROTATION_270;
-		break;
-	case 5:
-	case 7:
-	case 0:
-	default:
-		break;
-	};
+	rotation = __ctsvc_get_rotation_info(info->src);
 
 	// load jpeg sample file
 	CTS_DBG("colorspace %d src : %s, dest : %s", colorspace, info->src, info->dest);

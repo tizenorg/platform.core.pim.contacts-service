@@ -145,16 +145,13 @@ int ctsvc_query_get_first_int_result(const char *query, int *result) {
 	ret = sqlite3_step(stmt);
 	if (SQLITE_ROW != ret) {
 		sqlite3_finalize(stmt);
+		CTS_DBG("query : %s", query);
 		if (SQLITE_DONE == ret) {
-			INFO("sqlite3_step() return with SQLITE_DONE (it means NO_DATA) (%s, %d, %s)",
-					query, ret, sqlite3_errmsg(ctsvc_db));
-
+			CTS_INFO("sqlite3_step() return with SQLITE_DONE (it means NO_DATA) (%d, %s)",
+				ret, sqlite3_errmsg(ctsvc_db));
 			return CONTACTS_ERROR_NO_DATA /*CONTACTS_ERR_DB_RECORD_NOT_FOUND*/;
 		}
-
-		CTS_ERR("sqlite3_step() Failed(%s, %d, %s)",
-				query, ret, sqlite3_errmsg(ctsvc_db));
-
+		CTS_ERR("sqlite3_step() Failed(%d, %s)", ret, sqlite3_errmsg(ctsvc_db));
 		return CONTACTS_ERROR_DB;
 	}
 

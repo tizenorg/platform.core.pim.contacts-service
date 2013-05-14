@@ -62,10 +62,11 @@ typedef struct {
 
 int ctsvc_db_init();
 int ctsvc_db_deinit();
-int ctsvc_db_get_table_name(const char *view_uri, const char **out_table);
-ctsvc_db_plugin_info_s* ctsvc_db_get_plugin_info(ctsvc_record_type_e type);
+
 int ctsvc_db_plugin_init();
 int ctsvc_db_plugin_deinit();
 
+int ctsvc_db_get_table_name(const char *view_uri, const char **out_table);
+ctsvc_db_plugin_info_s* ctsvc_db_get_plugin_info(ctsvc_record_type_e type);
 
 #endif // __TIZEN_SOCIAL_CTSVC_DB_INIT_H__
