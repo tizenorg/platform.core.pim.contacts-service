@@ -2,7 +2,7 @@ Name:       contacts-service
 Summary:    Contacts Service
 Version: 0.9.84.2
 Release:    1
-Group:      TO_BE/FILLED_IN
+Group:      System/Libraries
 License:    Apache-2.0
 Source0:    %{name}-%{version}.tar.gz
 Source1:    contacts-service.service
@@ -89,6 +89,9 @@ vconftool set -t int file/private/contacts-service/default_lang 0 -g 6005 -s con
 vconftool set -t int db/contacts-svc/name_sorting_order 0 -g 6005 -s contacts-service::vconf
 vconftool set -t int db/contacts-svc/name_display_order 0 -g 6005 -s contacts-service::vconf
 vconftool set -t int db/contacts-svc/phonenumber_min_match_digit 8 -g 6005 -s contacts-service::vconf
+
+
+%postun -n contacts-service2 -p /sbin/ldconfig
 
 
 %postun -p /sbin/ldconfig
