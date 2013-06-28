@@ -26,7 +26,6 @@ Requires(post): /usr/bin/sqlite3, /bin/chmod, /bin/chown
 Requires(post): /usr/bin/vconftool
 Requires(post): /sbin/ldconfig
 Requires(postun): /sbin/ldconfig
-Requires: sys-assert
 
 %description
 Contacts Service Library
@@ -34,7 +33,6 @@ Contacts Service Library
 %package -n contacts-service2
 Summary:	New Contacts service library
 Group:	Development/Libraries
-Requires: sys-assert
 
 %description -n contacts-service2
 New Contact Serivce Library
