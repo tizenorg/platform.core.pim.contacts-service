@@ -1,3 +1,6 @@
+* Fri Jun 28 2013 Patrick McCarty <patrick.mccarty@linux.intel.com> 1fe9fe2
+- packaging: remove explicit requires on sys-assert
+
 * Tue Jun 18 2013 Baptiste DURAND <baptiste.durand@eurogiciel.fr> accepted/tizen/20130520.101201@e4c45dd
 - Fix spec file according to rpmlint rules
 - Replace manifest with default floor
