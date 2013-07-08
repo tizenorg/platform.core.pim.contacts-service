@@ -1,0 +1,8 @@
+Change-Id: I5bb169cd42970c2bee13f03453f8538ee2c72e65
+Code-Review+2: Ryan Ware <ware@linux.intel.com>
+Verified+1: Ryan Ware <ware@linux.intel.com>
+Submitted-by: Ryan Ware <ware@linux.intel.com>
+Submitted-at: Mon, 08 Jul 2013 10:07:27 -0700
+Reviewed-on: https://review.tizen.org/gerrit/4468
+Project: platform/core/pim/contacts-service
+Branch: refs/heads/tizen
