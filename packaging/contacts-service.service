@@ -4,7 +4,6 @@ Description=Start the Contacts service helper service
 [Service]
 ExecStart=/usr/bin/contacts-service-ipcd
 Nice=5
-OOMScoreAdjust=-100
 Restart=always
 RestartSec=2
 
