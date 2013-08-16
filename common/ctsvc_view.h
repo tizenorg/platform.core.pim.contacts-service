@@ -59,6 +59,10 @@
 #define CTSVC_VIEW_URI_EXTENSION			"tizen.contacts_view.extension"
 
 #define CTSVC_VIEW_URI_READ_ONLY_PERSON_CONTACT					"tizen.contacts_view.person/simple_contact"
+
+#define CTSVC_VIEW_URI_READ_ONLY_PERSON_CONTACT_INCLUDE_UNKNOWN \
+	"tizen.contacts_view.person/simple_contact_unknown"
+
 #define CTSVC_VIEW_URI_READ_ONLY_PERSON_NUMBER					"tizen.contacts_view.person/simple_contact/number"
 #define CTSVC_VIEW_URI_READ_ONLY_PERSON_EMAIL					"tizen.contacts_view.person/simple_contact/email"
 #define CTSVC_VIEW_URI_READ_ONLY_PERSON_ADDRESS					"tizen.contacts_view.person/simple_contact/address"
