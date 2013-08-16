@@ -112,6 +112,7 @@ static const db_table_info_s __db_tables[] = {
 //	{CTSVC_VIEW_URI_GROUPRELS_UPDATED_INFO, NULL},
 
 	{CTSVC_VIEW_URI_READ_ONLY_PERSON_CONTACT, CTSVC_DB_VIEW_PERSON_CONTACT, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_NONE},
+	{CTSVC_VIEW_URI_READ_ONLY_PERSON_CONTACT_INCLUDE_UNKNOWN, CTSVC_DB_VIEW_PERSON_CONTACT_INCLUDE_UNKNOWN, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_NONE},
 	{CTSVC_VIEW_URI_READ_ONLY_PERSON_NUMBER, CTSVC_DB_VIEW_PERSON_NUMBER, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_NONE},
 	{CTSVC_VIEW_URI_READ_ONLY_PERSON_EMAIL, CTSVC_DB_VIEW_PERSON_EMAIL, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_NONE},
 	{CTSVC_VIEW_URI_READ_ONLY_PERSON_ADDRESS, CTSVC_DB_VIEW_PERSON_ADDRESS, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_NONE},
@@ -735,10 +736,31 @@ static int __ctsvc_db_create_views()
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Failed(%d)", ret);
 
+	// CTSVC_DB_VIEW_PERSON_CONTACT_INCLUDE_UNKNOWN
+	snprintf(query, sizeof(query),
+		"CREATE VIEW "
+		 "IF NOT EXISTS"
+		 " "CTSVC_DB_VIEW_PERSON_CONTACT_INCLUDE_UNKNOWN" AS "
+		 "SELECT * FROM "CTSVC_DB_VIEW_PERSON_INCLUDE_UNKNOWN" "
+		 "JOIN (SELECT contact_id, "
+		 "addressbook_id, "
+		 "person_id person_id_in_contact "
+		 "FROM "CTSVC_DB_VIEW_CONTACT_INCLUDE_UNKNOWN") temp_contacts "
+		 "JOIN (SELECT addressbook_id addressbook_id_in_addressbooks,"
+		 " addressbook_name, mode addressbook_mode "
+		 "FROM "CTS_TABLE_ADDRESSBOOKS") temp_addressbooks "
+		 "ON temp_contacts.person_id_in_contact"
+		 " = "CTSVC_DB_VIEW_PERSON_INCLUDE_UNKNOWN".person_id "
+		 "AND addressbook_id = "
+		 "temp_addressbooks.addressbook_id_in_addressbooks");
+	ret = ctsvc_query_exec(query);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret,
+		 "DB error : ctsvc_query_exec() Failed(%d)", ret);
+
 	// CTSVC_DB_VIEW_PERSON_NUMBER
 	snprintf(query, sizeof(query),
 		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_PERSON_NUMBER" AS "
-			"SELECT * FROM "CTSVC_DB_VIEW_PERSON_CONTACT" "
+			"SELECT * FROM "CTSVC_DB_VIEW_PERSON_CONTACT_INCLUDE_UNKNOWN" "
 			"JOIN (SELECT id number_id, "
 								"contact_id, "
 								"data1 type, "
@@ -748,7 +770,7 @@ static int __ctsvc_db_create_views()
 								"data4 minmatch, "
 								"data5 normalized_number "
 					"FROM "CTS_TABLE_DATA" WHERE datatype = %d AND is_my_profile = 0) temp_data "
-			"ON temp_data.contact_id = "CTSVC_DB_VIEW_PERSON_CONTACT".contact_id",
+			"ON temp_data.contact_id = "CTSVC_DB_VIEW_PERSON_CONTACT_INCLUDE_UNKNOWN".contact_id",
 				CTSVC_DATA_NUMBER);
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Failed(%d)", ret);
@@ -756,7 +778,7 @@ static int __ctsvc_db_create_views()
 	// CTSVC_DB_VIEW_PERSON_EMAIL
 	snprintf(query, sizeof(query),
 		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_PERSON_EMAIL" AS "
-			"SELECT * FROM "CTSVC_DB_VIEW_PERSON_CONTACT" "
+			"SELECT * FROM "CTSVC_DB_VIEW_PERSON_CONTACT_INCLUDE_UNKNOWN" "
 			"JOIN (SELECT id email_id, "
 								"contact_id, "
 								"data1 type, "
@@ -764,7 +786,7 @@ static int __ctsvc_db_create_views()
 								"data2 label, "
 								"data3 email "
 					"FROM "CTS_TABLE_DATA" WHERE datatype = %d AND is_my_profile = 0) temp_data "
-			"ON temp_data.contact_id = "CTSVC_DB_VIEW_PERSON_CONTACT".contact_id",
+			"ON temp_data.contact_id = "CTSVC_DB_VIEW_PERSON_CONTACT_INCLUDE_UNKNOWN".contact_id",
 				CTSVC_DATA_EMAIL);
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Failed(%d)", ret);
@@ -832,14 +854,14 @@ static int __ctsvc_db_create_views()
 	// CTSVC_DB_VIEW_PERSON_MESSENGER
 	snprintf(query, sizeof(query),
 		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_PERSON_MESSENGER" AS "
-			"SELECT * FROM "CTSVC_DB_VIEW_PERSON_CONTACT" "
+			"SELECT * FROM "CTSVC_DB_VIEW_PERSON_CONTACT_INCLUDE_UNKNOWN" "
 			"JOIN (SELECT id, "
 								"contact_id, "
 		                                                "data1 type, "
 		                                                "data2 label, "
 		                                                "data3 im_id "
 					"FROM "CTS_TABLE_DATA" WHERE datatype = %d AND is_my_profile = 0) temp_data "
-			"ON temp_data.contact_id = "CTSVC_DB_VIEW_PERSON_CONTACT".contact_id",
+			"ON temp_data.contact_id = "CTSVC_DB_VIEW_PERSON_CONTACT_INCLUDE_UNKNOWN".contact_id",
 				CTSVC_DATA_MESSENGER);
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Failed(%d)", ret);
