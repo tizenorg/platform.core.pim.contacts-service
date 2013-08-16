@@ -90,6 +90,7 @@
 //#define CTSVC_DB_VIEW_CONTACTS_UPDATED_INFO		"view_contacts_changes"
 
 #define CTSVC_DB_VIEW_PERSON_CONTACT			"view_person_contact"
+#define CTSVC_DB_VIEW_PERSON_CONTACT_INCLUDE_UNKNOWN	"view_person_contact_include_unknown"
 #define CTSVC_DB_VIEW_PERSON_NUMBER		"view_person_contact_number"
 #define CTSVC_DB_VIEW_PERSON_EMAIL		"view_person_contact_email"
 #define CTSVC_DB_VIEW_PERSON_ADDRESS		"view_person_contact_address"
