@@ -453,8 +453,6 @@ typedef struct {
 	int log_type;
 	int extra_data1; /* duration, message_id */
 	char *extra_data2; /*short message*/
-	char *display_name;				// new
-	char *image_thumbnail_path;	// new
 }ctsvc_phonelog_s;
 
 typedef struct {

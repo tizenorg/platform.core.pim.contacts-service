@@ -26,8 +26,6 @@
 
 #define CTSVC_SOCKET_PATH "/tmp/.contacts-svc.sock"
 #define CTSVC_SOCKET_MSG_SIZE 1024
-#define CTSVC_SIM_MAX_TEXT_LEN 40
-#define CTSVC_SIM_NUM_EMAIL_MAX_COUNT 4
 
 // for use current contacts-svc-helper daemon
 // Message type
