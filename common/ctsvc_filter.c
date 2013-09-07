@@ -159,8 +159,8 @@ API int contacts_filter_add_str( contacts_filter_h filter, unsigned int property
 	com_filter = (ctsvc_composite_filter_s*)filter;
 	ret = __ctsvc_attribute_filter_create(com_filter, property_id, match, CTSVC_FILTER_STR, &str_filter);
 	RETVM_IF(CONTACTS_ERROR_NONE !=ret, ret,
-		"Invalid parameter : The parameter is not proper (view_uri:, property_id:0x%x, match:%d, match_value :%s",
-		property_id, match, match_value);
+		"Invalid parameter : The parameter is not proper (view_uri:%s, property_id:0x%x, match:%d)",
+		com_filter->view_uri, property_id, match);
 
 	str_filter->value.s = SAFE_STRDUP(match_value);
 	return CONTACTS_ERROR_NONE;
@@ -178,8 +178,8 @@ API int contacts_filter_add_int( contacts_filter_h filter, unsigned int property
 	com_filter = (ctsvc_composite_filter_s*)filter;
 	ret = __ctsvc_attribute_filter_create(com_filter, property_id, match, CTSVC_FILTER_INT, &int_filter);
 	RETVM_IF(CONTACTS_ERROR_NONE !=ret, ret,
-		"Invalid parameter : The parameter is not proper (view_uri:%s, property_id:0x%x, match:%d, match_value :%d",
-		com_filter->view_uri, property_id, match, match_value);
+		"Invalid parameter : The parameter is not proper (view_uri:%s, property_id:0x%x, match:%d)",
+		com_filter->view_uri, property_id, match);
 
 	int_filter->value.i = match_value;
 
@@ -198,8 +198,8 @@ API int contacts_filter_add_lli( contacts_filter_h filter, unsigned int property
 	com_filter = (ctsvc_composite_filter_s*)filter;
 	ret = __ctsvc_attribute_filter_create(com_filter, property_id, match, CTSVC_FILTER_LLI, &lli_filter);
 	RETVM_IF(CONTACTS_ERROR_NONE !=ret, ret,
-		"Invalid parameter : The parameter is not proper (view_uri:, property_id:0x%x, match:%d, match_value :%d",
-		property_id, match, match_value);
+		"Invalid parameter : The parameter is not proper (view_uri:, property_id:0x%x, match:%d)",
+		property_id, match);
 
 	lli_filter->value.l = match_value;
 
@@ -218,8 +218,8 @@ API int contacts_filter_add_double( contacts_filter_h filter, unsigned int prope
 	com_filter = (ctsvc_composite_filter_s*)filter;
 	ret = __ctsvc_attribute_filter_create(com_filter, property_id, match, CTSVC_FILTER_DOUBLE, &double_filter);
 	RETVM_IF(CONTACTS_ERROR_NONE !=ret, ret,
-		"Invalid parameter : The parameter is not proper (view_uri:, property_id:0x%x, match:%d, match_value :%d",
-		property_id, match, match_value);
+		"Invalid parameter : The parameter is not proper (view_uri:, property_id:0x%x, match:%d)",
+		property_id, match);
 
 	double_filter->value.d = match_value;
 
@@ -237,8 +237,8 @@ API int contacts_filter_add_bool( contacts_filter_h filter, unsigned int propert
 	com_filter = (ctsvc_composite_filter_s*)filter;
 	ret = __ctsvc_attribute_filter_create(com_filter, property_id, 0, CTSVC_FILTER_BOOL, &bool_filter);
 	RETVM_IF(CONTACTS_ERROR_NONE !=ret, ret,
-		"Invalid parameter : The parameter is not proper (view_uri:, property_id:%d, match_value :%d",
-		property_id, match_value);
+		"Invalid parameter : The parameter is not proper (view_uri:, property_id:%d)",
+		property_id);
 
 	bool_filter->value.b = match_value;
 
@@ -264,6 +264,7 @@ static int __ctsvc_composite_filter_destroy(ctsvc_composite_filter_s *com_filter
 			free(attr);
 		}
 	}
+	g_slist_free(com_filter->filters);
 	g_slist_free(com_filter->filter_ops);
 
 	free(com_filter->view_uri);
