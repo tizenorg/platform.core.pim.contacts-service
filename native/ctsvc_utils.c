@@ -269,7 +269,7 @@ static image_util_rotation_e __ctsvc_get_rotation_info(const char *path)
 	if (entry) {
 		ExifByteOrder mByteOrder = exif_data_get_byte_order(ed);
 		orientation = (int)exif_get_short(entry->data, mByteOrder);
-		if (orientation < 0 && orientation > 8)
+		if (orientation < 0 || orientation > 8)
 			orientation = 0;
 	}
 
