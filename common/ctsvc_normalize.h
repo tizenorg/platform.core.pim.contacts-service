@@ -74,4 +74,7 @@ int ctsvc_normalize_str(const char *src, char **dest);
 int ctsvc_collation_str(char *src, char **dest);
 int ctsvc_normalize_index(const char *src, char **dest);
 
+bool ctsvc_is_phonenumber(const char* src);
+int ctsvc_get_halfwidth_string(const char *src, char** dest, int* dest_size);
+
 #endif /*  __TIZEN_SOCIAL_CTSVC_NORMALIZE_H__ */

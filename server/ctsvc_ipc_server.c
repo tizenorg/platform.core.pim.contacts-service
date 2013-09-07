@@ -144,7 +144,7 @@ void ctsvc_ipc_server_db_insert_record(pims_ipc_h ipc, pims_ipc_data_h indata, p
 		CTS_ERR("outdata is NULL");
 	}
 	goto DATA_FREE;
-	// goto 주의..
+
 ERROR_RETURN:
 	if (outdata)
 	{
@@ -205,7 +205,6 @@ void ctsvc_ipc_server_db_get_record(pims_ipc_h ipc, pims_ipc_data_h indata, pims
 
 	ret = contacts_db_get_record(view_uri,id,&record);
 
-	// goto 주의..
 ERROR_RETURN:
 	if (outdata)
 	{
@@ -576,7 +575,6 @@ void ctsvc_ipc_server_db_get_all_records(pims_ipc_h ipc, pims_ipc_data_h indata,
 
 	goto DATA_FREE;
 
-	// goto 주의..
 ERROR_RETURN:
 	if (outdata)
 	{
@@ -682,7 +680,6 @@ void ctsvc_ipc_server_db_get_records_with_query(pims_ipc_h ipc, pims_ipc_data_h 
 	}
 	goto DATA_FREE;
 
-	// goto 주의..
 ERROR_RETURN:
 	if (outdata)
 	{
@@ -778,7 +775,6 @@ void ctsvc_ipc_server_db_get_count(pims_ipc_h ipc, pims_ipc_data_h indata, pims_
 	}
 	goto DATA_FREE;
 
-	// goto 주의..
 ERROR_RETURN:
 	if (outdata)
 	{
@@ -865,7 +861,6 @@ void ctsvc_ipc_server_db_get_count_with_query(pims_ipc_h ipc, pims_ipc_data_h in
 	}
 	goto DATA_FREE;
 
-	// goto 주의..
 ERROR_RETURN:
 	if (outdata)
 	{
@@ -1065,7 +1060,6 @@ void ctsvc_ipc_server_db_update_records(pims_ipc_h ipc, pims_ipc_data_h indata,
 	}
 	goto DATA_FREE;
 
-	// goto 주의..
 ERROR_RETURN:
 	if (outdata)
 	{
@@ -1384,7 +1378,6 @@ void ctsvc_ipc_server_db_get_changes_by_version(pims_ipc_h ipc, pims_ipc_data_h 
 	}
 	goto DATA_FREE;
 
-	// goto 주의..
 ERROR_RETURN:
 	if (outdata)
 	{
@@ -1540,7 +1533,6 @@ void ctsvc_ipc_server_db_search_records(pims_ipc_h ipc, pims_ipc_data_h indata, 
 	}
 	goto DATA_FREE;
 
-	// goto 주의..
 ERROR_RETURN:
 	if (outdata)
 	{
@@ -1570,6 +1562,107 @@ DATA_FREE:
 	}
 	CONTACTS_FREE(view_uri);
 	CONTACTS_FREE(keyword);
+	return;
+}
+
+void ctsvc_ipc_server_db_search_records_with_range(pims_ipc_h ipc, pims_ipc_data_h indata, pims_ipc_data_h *outdata, void *userdata)
+{
+	int ret = CONTACTS_ERROR_NONE;
+	char* view_uri = NULL;
+	char* keyword = NULL;
+	int offset = 0;
+	int limit = 0;
+	int range = 0;
+	contacts_list_h list = NULL;
+
+	if (indata) {
+		ret = ctsvc_ipc_unmarshal_string(indata,&view_uri);
+		if (ret != CONTACTS_ERROR_NONE) {
+			CTS_ERR("ctsvc_ipc_unmarshal_record fail");
+			goto ERROR_RETURN;
+		}
+		ret = ctsvc_ipc_unmarshal_string(indata,&keyword);
+		if (ret != CONTACTS_ERROR_NONE) {
+			CTS_ERR("ctsvc_ipc_unmarshal_record fail");
+			goto ERROR_RETURN;
+		}
+		ret = ctsvc_ipc_unmarshal_int(indata,&offset);
+		if (ret != CONTACTS_ERROR_NONE) {
+			CTS_ERR("ctsvc_ipc_unmarshal_int fail");
+			goto ERROR_RETURN;
+		}
+		ret = ctsvc_ipc_unmarshal_int(indata,&limit);
+		if (ret != CONTACTS_ERROR_NONE) {
+			CTS_ERR("ctsvc_ipc_unmarshal_int fail");
+			goto ERROR_RETURN;
+		}
+		ret = ctsvc_ipc_unmarshal_int(indata,&range);
+		if (ret != CONTACTS_ERROR_NONE) {
+			CTS_ERR("ctsvc_ipc_unmarshal_int fail");
+			goto ERROR_RETURN;
+		}
+	}
+	else {
+		CTS_ERR("ctsvc_ipc_server_db_insert_record fail");
+		goto ERROR_RETURN;
+	}
+
+	ret = contacts_db_search_records_with_range(view_uri, keyword, offset,limit,range, &list);
+
+	if (outdata) {
+		*outdata = pims_ipc_data_create(0);
+		if (!*outdata) {
+			CTS_ERR("pims_ipc_data_create fail");
+			goto DATA_FREE;
+		}
+		if (pims_ipc_data_put(*outdata,(void*)&ret,sizeof(int)) != 0) {
+			pims_ipc_data_destroy(*outdata);
+			*outdata = NULL;
+			CTS_ERR("pims_ipc_data_put fail");
+			goto DATA_FREE;
+		}
+
+		if (CONTACTS_ERROR_NO_DATA == ret) {
+			CTS_DBG("no data");
+		}
+		else if(CONTACTS_ERROR_NONE == ret) {
+			ret = ctsvc_ipc_marshal_list(list,*outdata);
+
+			if (ret != CONTACTS_ERROR_NONE) {
+				CTS_ERR("ctsvc_ipc_unmarshal_int fail");
+				goto DATA_FREE;
+			}
+		}
+	}
+	else {
+		CTS_ERR("outdata is NULL");
+	}
+	goto DATA_FREE;
+
+ERROR_RETURN:
+	if (outdata) {
+		*outdata = pims_ipc_data_create(0);
+		if (!*outdata) {
+			CTS_ERR("pims_ipc_data_create fail");
+			goto DATA_FREE;
+		}
+		if (pims_ipc_data_put(*outdata,(void*)&ret,sizeof(int)) != 0) {
+			pims_ipc_data_destroy(*outdata);
+			*outdata = NULL;
+			CTS_ERR("pims_ipc_data_put fail");
+			goto DATA_FREE;
+		}
+	}
+	else {
+		CTS_ERR("outdata is NULL");
+	}
+
+DATA_FREE:
+
+	if (list)
+		contacts_list_destroy(list,true);
+	free(view_uri);
+	free(keyword);
 	return;
 }
 
@@ -1654,7 +1747,6 @@ void ctsvc_ipc_server_db_search_records_with_query(pims_ipc_h ipc, pims_ipc_data
 	}
 	goto DATA_FREE;
 
-	// goto 주의..
 ERROR_RETURN:
 	if (outdata)
 	{

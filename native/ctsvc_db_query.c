@@ -222,12 +222,34 @@ static inline int __ctsvc_db_create_lli_condition(ctsvc_composite_filter_s *com_
 	return CONTACTS_ERROR_NONE;
 }
 
+#define CTSVC_DB_ESCAPE_CHAR	'\\'
+
+static char * __ctsvc_db_get_str_with_escape(char *str, int len, bool with_escape)
+{
+	int i, j = 0;
+	char temp_str[len*2+1];
+
+	if (false == with_escape)
+		return strdup(str);
+
+	for(i=0;i<len;i++) {
+		if (str[i] == '\'' || str[i] == '_' || str[i] == '%' || str[i] == '\\') {
+			temp_str[j++] = CTSVC_DB_ESCAPE_CHAR;
+		}
+		temp_str[j++] = str[i];
+	}
+	temp_str[j] = '\0';
+
+	return strdup(temp_str);
+}
+
 static inline int __ctsvc_db_create_str_condition(ctsvc_composite_filter_s *com_filter,
 		ctsvc_attribute_filter_s *filter, char **condition, GSList **bind_text)
 {
 	int ret;
 	const char *field_name;
 	char out_cond[CTS_SQL_MAX_LEN] = {0};
+	bool with_escape = true;
 
 	*condition = NULL;
 
@@ -242,18 +264,19 @@ static inline int __ctsvc_db_create_str_condition(ctsvc_composite_filter_s *com_
 	switch(filter->match) {
 	case CONTACTS_MATCH_EXACTLY:
 		snprintf(out_cond, sizeof(out_cond), "%s = ?", field_name);
+		with_escape = false;
 		break;
 	case CONTACTS_MATCH_FULLSTRING:
-		snprintf(out_cond, sizeof(out_cond), "%s LIKE ?", field_name);
+		snprintf(out_cond, sizeof(out_cond), "%s LIKE ? ESCAPE '%c'", field_name, CTSVC_DB_ESCAPE_CHAR);
 		break;
 	case CONTACTS_MATCH_CONTAINS:
-		snprintf(out_cond, sizeof(out_cond), "%s LIKE ('%%' || ? || '%%')", field_name);
+		snprintf(out_cond, sizeof(out_cond), "%s LIKE ('%%' || ? || '%%') ESCAPE '%c'", field_name, CTSVC_DB_ESCAPE_CHAR);
 		break;
 	case CONTACTS_MATCH_STARTSWITH:
-		snprintf(out_cond, sizeof(out_cond), "%s LIKE ( ? || '%%')", field_name);
+		snprintf(out_cond, sizeof(out_cond), "%s LIKE ( ? || '%%') ESCAPE '%c'", field_name, CTSVC_DB_ESCAPE_CHAR);
 		break;
 	case CONTACTS_MATCH_ENDSWITH:
-		snprintf(out_cond, sizeof(out_cond), "%s LIKE ('%%' || ?)", field_name);
+		snprintf(out_cond, sizeof(out_cond), "%s LIKE ('%%' || ?) ESCAPE '%c'", field_name, CTSVC_DB_ESCAPE_CHAR);
 		break;
 	case CONTACTS_MATCH_EXISTS:
 		snprintf(out_cond, sizeof(out_cond), "%s IS NOT NULL", field_name);
@@ -268,12 +291,12 @@ static inline int __ctsvc_db_create_str_condition(ctsvc_composite_filter_s *com_
 			char dest[strlen(filter->value.s)+1];
 			ret = ctsvc_normalize_number(filter->value.s, dest, sizeof(dest), ctsvc_get_phonenumber_min_match_digit());
 			if (CONTACTS_ERROR_NONE == ret)
-				*bind_text = g_slist_append(*bind_text, strdup(dest));
+				*bind_text = g_slist_append(*bind_text, __ctsvc_db_get_str_with_escape(dest, strlen(dest), with_escape));
 			else
 				return CONTACTS_ERROR_INVALID_PARAMETER;
 		}
 		else
-			*bind_text = g_slist_append(*bind_text, strdup(filter->value.s));
+			*bind_text = g_slist_append(*bind_text, __ctsvc_db_get_str_with_escape(filter->value.s, strlen(filter->value.s), with_escape));
 	}
 	*condition = strdup(out_cond);
 	return CONTACTS_ERROR_NONE;
@@ -613,7 +636,7 @@ int ctsvc_db_make_get_records_query_stmt(ctsvc_query_s *s_query, int offset, int
 			return ret;
 		}
 		if (condition && *condition)
-			len += snprintf(query+len, sizeof(query)-len, " WHERE %s", condition);
+			len += snprintf(query+len, sizeof(query)-len, " WHERE (%s)", condition);
 	}
 
 	if (__ctsvc_db_view_has_display_name(s_query->view_uri, s_query->properties, s_query->property_count))
@@ -738,7 +761,7 @@ static int __ctsvc_db_get_records_with_query_exec(ctsvc_query_s *query, int offs
 	cts_stmt_finalize(stmt);
 	ctsvc_list_reverse(list);
 
-	*out_list = (contacts_list_h)list;
+	*out_list = list;
 	return CONTACTS_ERROR_NONE;
 }
 
@@ -871,40 +894,87 @@ static char* __ctsvc_db_make_search_keyword(const char *keyword)
 	}
 }
 
-static int __ctsvc_db_append_search_query(const char *keyword, char *query, int size)
+static int __ctsvc_db_append_search_query_range(char *query, int size, int range, char *name, char *number, char *data)
 {
-	bool phonenumber = false;
-	int ret;
-	int len = 0, i;
-
-	len = strlen(keyword);
-	phonenumber = true;
-	for(i=0; i<len; i++) {
-		if (keyword[i] < '0' || keyword[i] > '9') {
-			phonenumber = false;
-			break;
-		}
+	bool first = true;
+	int ret = 0;
+	ret = snprintf(query, size, "'");
+	if (range & CONTACTS_SEARCH_RANGE_NAME) {
+		ret += snprintf(query+ret, size-ret, "name:%s", name);
+		first = false;
 	}
 
-	if (phonenumber) {
-		char normalized_number[CTSVC_NUMBER_MAX_LEN];
-		ctsvc_normalize_number(keyword, normalized_number, CTSVC_NUMBER_MAX_LEN, CTSVC_NUMBER_MAX_LEN -1);
+	if (range & CONTACTS_SEARCH_RANGE_NUMBER) {
+		if (first == false)
+			ret += snprintf(query+ret, size-ret, " OR ");
+		ret += snprintf(query+ret, size-ret, "number:%s", number);
+		first = false;
+	}
 
-		ret =snprintf(query, size,
-				"(SELECT contact_id FROM %s WHERE %s MATCH 'name:%s OR number:%s OR data:%s' "
-					"UNION "
-					"SELECT contact_id FROM %s WHERE number LIKE '%%%s%%') ",
-				CTS_TABLE_SEARCH_INDEX, CTS_TABLE_SEARCH_INDEX,
-				keyword, keyword, keyword, CTS_TABLE_PHONE_LOOKUP, normalized_number );
+	if (range & CONTACTS_SEARCH_RANGE_DATA) {
+		if (first == false)
+			ret += snprintf(query+ret, size-ret, " OR ");
+		ret += snprintf(query+ret, size-ret, "data:%s", data);
+		first = false;
+	}
+
+	ret += snprintf(query+ret, size-ret, "' ");
+	return ret;
+}
+
+static int __ctsvc_db_append_search_query(const char *src, char *query, int size, int range)
+{
+	bool phonenumber = true;
+	int ret;
+	int i = 0;
+	int temp_len = 0;
+
+	if( ctsvc_is_phonenumber(src) == false)
+	{
+		CTS_DBG("src is not phone number %s", src);
+		phonenumber = false;
+	}
+
+	char* keyword = NULL;
+	int keyword_size = 0;
+	bool use_replaced_keyword = true;
+	// full width characters -> half width characters (apply to only FW ASCII & some symbols)
+	if( ctsvc_get_halfwidth_string(src, &keyword, &keyword_size) != CONTACTS_ERROR_NONE )
+	{
+		CTS_ERR("UChar converting error : ctsvc_get_halfwidth_string() Failed - %s", src );
+		keyword = (char*)src;
+		use_replaced_keyword = false;
+	}
+	CTS_DBG("UChar converting success : ctsvc_get_halfwidth_string(%s) -> %s[%d] ", src, keyword, keyword_size );
+
+	char *search_keyword = NULL;
+	search_keyword = __ctsvc_db_make_search_keyword(keyword);
+
+	if (phonenumber) {
+		ret = snprintf(query, size,
+				"(SELECT contact_id FROM %s WHERE %s MATCH ",
+				CTS_TABLE_SEARCH_INDEX, CTS_TABLE_SEARCH_INDEX);
+		ret += __ctsvc_db_append_search_query_range(query+ret, size-ret,
+							range, search_keyword, search_keyword, search_keyword);
+
+		if (range & CONTACTS_SEARCH_RANGE_NUMBER) {
+			char normalized_number[CTSVC_NUMBER_MAX_LEN];
+			int err = ctsvc_normalize_number(keyword, normalized_number, CTSVC_NUMBER_MAX_LEN, CTSVC_NUMBER_MAX_LEN -1);
+			if (0 < err) {
+				ret += snprintf(query+ret, size-ret,
+							"UNION "
+								"SELECT contact_id FROM %s WHERE number LIKE '%%%s%%' ",
+							CTS_TABLE_PHONE_LOOKUP, normalized_number);
+			}
+		}
+		ret += snprintf(query+ret, size-ret, ")");
 	}
 	else {
 		char *normalized_name = NULL;
-		char *search_keyword = NULL;
-		char *saarch_normal_name = NULL;
-		ret = ctsvc_normalize_str(keyword, &normalized_name);
+		char *search_normal_name = NULL;
 
-		search_keyword = __ctsvc_db_make_search_keyword(keyword);
-		saarch_normal_name = __ctsvc_db_make_search_keyword(normalized_name);
+		ret = ctsvc_normalize_str(keyword, &normalized_name);
+		search_normal_name = __ctsvc_db_make_search_keyword(normalized_name);
 
 		if (CTSVC_LANG_KOREAN == ret) {
 			char *chosung = calloc(1, strlen(keyword) * 5);
@@ -916,10 +986,18 @@ static int __ctsvc_db_append_search_query(const char *keyword, char *query, int 
 
 			search_chosung = __ctsvc_db_make_search_keyword(chosung);
 			ret = snprintf(query, size,
-					"(SELECT contact_id FROM %s WHERE %s MATCH 'name:%s OR number:%s OR data:%s' "
+					"(SELECT contact_id FROM %s WHERE %s MATCH ",
+				CTS_TABLE_SEARCH_INDEX, CTS_TABLE_SEARCH_INDEX);
+
+			ret += __ctsvc_db_append_search_query_range(query+ret, size-ret,
+								range, search_chosung, search_keyword, search_keyword);
+
+			if (range & CONTACTS_SEARCH_RANGE_NAME) {
+				ret += snprintf(query+ret, size-ret,
 						"INTERSECT SELECT contact_id FROM %s WHERE name GLOB '*%s*' ",
-					CTS_TABLE_SEARCH_INDEX, CTS_TABLE_SEARCH_INDEX,
-					search_chosung, search_keyword, search_keyword, CTS_TABLE_NAME_LOOKUP, korean_pattern);
+						CTS_TABLE_NAME_LOOKUP, korean_pattern);
+			}
+
 			free(chosung);
 			free(korean_pattern);
 			free(search_chosung);
@@ -932,26 +1010,48 @@ static int __ctsvc_db_append_search_query(const char *keyword, char *query, int 
 			search_hiragana = __ctsvc_db_make_search_keyword(hiragana);
 
 			ret = snprintf(query, size,
-								"(SELECT contact_id FROM %s WHERE %s MATCH 'name:%s OR number:%s OR data:%s' ",
-								CTS_TABLE_SEARCH_INDEX, CTS_TABLE_SEARCH_INDEX,
+								"(SELECT contact_id FROM %s WHERE %s MATCH ",
+								CTS_TABLE_SEARCH_INDEX, CTS_TABLE_SEARCH_INDEX);
+			ret += __ctsvc_db_append_search_query_range(query+ret, size-ret, range,
 								search_hiragana, search_hiragana, search_hiragana);
 			free(hiragana);
 			free(search_hiragana);
 		}
 		else if (CONTACTS_ERROR_NONE <= ret) {
 			ret = snprintf(query, size,
-					"(SELECT contact_id FROM %s WHERE %s MATCH 'name:%s OR number:%s OR data:%s' ",
-					CTS_TABLE_SEARCH_INDEX, CTS_TABLE_SEARCH_INDEX,
-					saarch_normal_name, search_keyword, search_keyword);
+					"(SELECT contact_id FROM %s WHERE %s MATCH ",
+					CTS_TABLE_SEARCH_INDEX, CTS_TABLE_SEARCH_INDEX);
+
+			ret += __ctsvc_db_append_search_query_range(query+ret, size-ret, range,
+								search_normal_name, search_keyword, search_keyword);
 		}
 		else {
 			ret = snprintf(query, size,
-					"(SELECT contact_id FROM %s WHERE %s MATCH 'name:%s OR number:%s OR data:%s' ",
-					CTS_TABLE_SEARCH_INDEX, CTS_TABLE_SEARCH_INDEX,
-					search_keyword, search_keyword, search_keyword);
+					"(SELECT contact_id FROM %s WHERE %s MATCH '",
+					CTS_TABLE_SEARCH_INDEX, CTS_TABLE_SEARCH_INDEX);
+			ret += __ctsvc_db_append_search_query_range(query+ret, size-ret,
+								range, search_keyword, search_keyword, search_keyword);
 		}
 
-		if (strstr(keyword, "@") != NULL) {
+		if (range & CONTACTS_SEARCH_RANGE_NAME) {
+			int j = 0;
+			temp_len = strlen(keyword);
+			char temp_str[temp_len*2+1];
+			for(i=0;i<temp_len;i++) {
+				if (keyword[i] == '\'' || keyword[i] == '_' || keyword[i] == '%' || keyword[i] == '\\') {
+					temp_str[j++] = CTSVC_DB_ESCAPE_CHAR;
+				}
+				temp_str[j++] = keyword[i];
+			}
+			temp_str[j] = '\0';
+			ret += snprintf(query+ret, size-ret,
+							"UNION SELECT contact_id FROM "CTS_TABLE_NAME_LOOKUP" "
+							"WHERE name LIKE '%s%%' ESCAPE '%c'",
+							temp_str, CTSVC_DB_ESCAPE_CHAR);
+		}
+
+		if ((range & CONTACTS_SEARCH_RANGE_DATA) &&
+				 (strstr(keyword, "@") != NULL)) {
 			ret += snprintf(query+ret, size-ret,
 					" UNION "
 						"SELECT contact_id FROM %s WHERE %s MATCH 'data:%s' ) ",
@@ -961,17 +1061,21 @@ static int __ctsvc_db_append_search_query(const char *keyword, char *query, int 
 			ret += snprintf(query+ret, size-ret,") ");
 
 		free(normalized_name);
-		free(search_keyword);
-		free(saarch_normal_name);
+		free(search_normal_name);
 	}
+
+	free(search_keyword);
+
+	if( use_replaced_keyword )
+		free(keyword);
 
 	return ret;
 }
 
 static int __ctsvc_db_search_records_exec(const char *view_uri, const property_info_s* properties,
-		int ids_count, const char *projection, const char *keyword, int offset, int limit, contacts_list_h* out_list )
+		int ids_count, const char *projection, const char *keyword, int offset, int limit, int range, contacts_list_h* out_list )
 {
-	char query[CTS_SQL_MAX_LEN*8] = {0}; // temporarily extend
+	char query[CTS_SQL_MAX_LEN + strlen(keyword)*20];
 	const char *table;
 	int len;
 	int ret;
@@ -981,6 +1085,7 @@ static int __ctsvc_db_search_records_exec(const char *view_uri, const property_i
 	contacts_list_h list = NULL;
 	ctsvc_record_type_e r_type;
 	const char *sortkey;
+	query[0] = '\0';
 
 	ret = ctsvc_db_get_table_name(view_uri, &table);
 	RETVM_IF (CONTACTS_ERROR_NONE != ret, ret, "Invalid parameter : view uri (%s)", view_uri);
@@ -990,7 +1095,7 @@ static int __ctsvc_db_search_records_exec(const char *view_uri, const property_i
 		len = snprintf(query, sizeof(query), "SELECT %s FROM %s "
 					"WHERE contact_id IN ",
 					projection, table);
-		len += __ctsvc_db_append_search_query(keyword, query + len, sizeof(query) - len);
+		len += __ctsvc_db_append_search_query(keyword, query + len, sizeof(query) - len, range);
 	}
 	else {		// CTSVC_VIEW_URI_PERSON
 		len = snprintf(query, sizeof(query), "SELECT %s FROM %s, "
@@ -998,7 +1103,7 @@ static int __ctsvc_db_search_records_exec(const char *view_uri, const property_i
 							"FROM "CTS_TABLE_CONTACTS " "
 							"WHERE deleted = 0 AND contact_id IN ",
 							projection, table);
-		len += __ctsvc_db_append_search_query(keyword, query + len, sizeof(query) - len);
+		len += __ctsvc_db_append_search_query(keyword, query + len, sizeof(query) - len, range);
 		len += snprintf(query + len, sizeof(query) - len, " GROUP BY person_id_in_contact) temp_contacts "
 						"ON %s.person_id = temp_contacts.person_id_in_contact", table);
 	}
@@ -1040,7 +1145,6 @@ static int __ctsvc_db_search_records_exec(const char *view_uri, const property_i
 		if( r_type == CTSVC_RECORD_PERSON )
 		{
 			unsigned int *project = malloc(sizeof(unsigned int)*ids_count);
-			int i;
 			for(i=0;i<ids_count;i++)
 			{
 				project[i] = properties[i].property_id;
@@ -1092,6 +1196,7 @@ static int __ctsvc_db_search_records(const char* view_uri, const char *keyword,
 	char *projection;
 	const property_info_s *p;
 	bool can_keyword_search = false;
+	int range = CONTACTS_SEARCH_RANGE_NAME | CONTACTS_SEARCH_RANGE_NUMBER | CONTACTS_SEARCH_RANGE_DATA;
 
 	RETVM_IF(NULL == keyword, CONTACTS_ERROR_INVALID_PARAMETER,
 			"Invalid parameter : keyword is NULL");
@@ -1104,16 +1209,42 @@ static int __ctsvc_db_search_records(const char* view_uri, const char *keyword,
 	ret = __ctsvc_db_create_projection(p, count, NULL, 0, &projection);
 	RETVM_IF (CONTACTS_ERROR_NONE != ret, ret, "__ctsvc_db_create_projection is failed(%s)", ret);
 
-	__ctsvc_db_search_records_exec(view_uri, p, count, projection, keyword, offset, limit, out_list);
+	ret = __ctsvc_db_search_records_exec(view_uri, p, count, projection, keyword, offset, limit, range, out_list);
 	free(projection);
 
-	return CONTACTS_ERROR_NONE;
+	return ret;
+}
+
+static int __ctsvc_db_search_records_with_range(const char* view_uri, const char *keyword,
+		int offset, int limit, int range, contacts_list_h* out_list)
+{
+	int ret;
+	unsigned int count;
+	char *projection;
+	const property_info_s *p;
+	bool can_keyword_search = false;
+
+	RETVM_IF(NULL == keyword, CONTACTS_ERROR_INVALID_PARAMETER,
+			"Invalid parameter : keyword is NULL");
+
+	can_keyword_search = __ctsvc_db_view_can_keyword_search(view_uri);
+	RETVM_IF(false == can_keyword_search, CONTACTS_ERROR_INVALID_PARAMETER,
+			"Invalid parameter : can not keyword search");
+
+	p = ctsvc_view_get_all_property_infos(view_uri, &count);
+	ret = __ctsvc_db_create_projection(p, count, NULL, 0, &projection);
+	RETVM_IF (CONTACTS_ERROR_NONE != ret, ret, "__ctsvc_db_create_projection is failed(%s)", ret);
+
+	ret = __ctsvc_db_search_records_exec(view_uri, p, count, projection, keyword, offset, limit, range, out_list);
+	free(projection);
+
+	return ret;
 }
 
 static inline int __ctsvc_db_search_records_with_query_exec(ctsvc_query_s *s_query, const char *projection,
 	const char *condition, GSList *bind, const char *keyword, int offset, int limit, contacts_list_h * out_list )
 {
-	char query[CTS_SQL_MAX_LEN*8] = {0}; // temporarily extend
+	char query[CTS_SQL_MAX_LEN + strlen(keyword) *20];
 	int len;
 	int ret;
 	int i;
@@ -1123,6 +1254,8 @@ static inline int __ctsvc_db_search_records_with_query_exec(ctsvc_query_s *s_que
 	contacts_list_h list = NULL;
 	const char *table;
 	const char *sortkey = NULL;
+	int range = CONTACTS_SEARCH_RANGE_NAME | CONTACTS_SEARCH_RANGE_NUMBER | CONTACTS_SEARCH_RANGE_DATA;
+	query[0] = '\0';
 
 	RETV_IF(NULL == projection || '\0' == *projection, CONTACTS_ERROR_INVALID_PARAMETER);
 
@@ -1136,20 +1269,18 @@ static inline int __ctsvc_db_search_records_with_query_exec(ctsvc_query_s *s_que
 
 	if (0 == strcmp(s_query->view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_CONTACT)
 			|| 0 == strcmp(s_query->view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP)) {
-		len += snprintf(query+len, sizeof(query)-len, "FROM %s temp_contacts ", table);
+		len += snprintf(query+len, sizeof(query)-len, "FROM %s WHERE %s.contact_id IN ", table, table);
 	}
 	else {		// CTSVC_VIEW_URI_PERSON
 		len += snprintf(query+len, sizeof(query)-len, "FROM %s, "
-						"(SELECT contact_id, person_id person_id_in_contact FROM %s WHERE deleted = 0) temp_contacts "
-						"ON %s.person_id = temp_contacts.person_id_in_contact "
+						"(SELECT contact_id, person_id person_id_in_contact, addressbook_id FROM %s WHERE deleted = 0) temp_contacts "
+						"ON %s.person_id = temp_contacts.person_id_in_contact WHERE temp_contacts.contact_id IN "
 						, table, CTS_TABLE_CONTACTS, table);
 	}
 /*	len += snprintf(query+len, sizeof(query)-len, "FROM %s, "CTS_TABLE_SEARCH_INDEX" "
 					"ON %s.contact_id = "CTS_TABLE_SEARCH_INDEX".contact_id", table, table);*/
 
-	len += snprintf(query+len, sizeof(query)-len,
-			" WHERE temp_contacts.contact_id IN ");
-	len += __ctsvc_db_append_search_query(keyword, query + len, sizeof(query) - len);
+	len += __ctsvc_db_append_search_query(keyword, query + len, sizeof(query) - len, range);
 
 	if (condition && *condition)
 		len += snprintf(query+len, sizeof(query)-len, " AND (%s)", condition);
@@ -2052,6 +2183,17 @@ API int contacts_db_search_records(const char* view_uri, const char *keyword,
 	RETVM_IF(NULL == view_uri, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter");
 
 	return __ctsvc_db_search_records(view_uri, keyword, offset, limit, out_list);
+}
+
+API int contacts_db_search_records_with_range(const char* view_uri, const char *keyword,
+		int offset, int limit, int range, contacts_list_h* out_list)
+{
+	RETV_IF(NULL == out_list, CONTACTS_ERROR_INVALID_PARAMETER);
+	*out_list = NULL;
+	RETVM_IF(range == 0, CONTACTS_ERROR_INVALID_PARAMETER, "range is 0");
+	RETVM_IF(NULL == view_uri, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter");
+
+	return __ctsvc_db_search_records_with_range(view_uri, keyword, offset, limit, range, out_list);
 }
 
 API int contacts_db_search_records_with_query( contacts_query_h query, const char *keyword,

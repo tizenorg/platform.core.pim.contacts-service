@@ -1346,6 +1346,74 @@ API int contacts_db_search_records(const char* view_uri, const char *keyword,
 	return ret;
 }
 
+API int contacts_db_search_records_with_range(const char* view_uri, const char *keyword,
+		int offset, int limit, int range, contacts_list_h* out_list)
+{
+	int ret = CONTACTS_ERROR_NONE;
+	pims_ipc_data_h indata = NULL;
+	pims_ipc_data_h outdata = NULL;
+
+	RETVM_IF(out_list == NULL, CONTACTS_ERROR_INVALID_PARAMETER, "list is NULL");
+	*out_list = NULL;
+	RETVM_IF(range == 0, CONTACTS_ERROR_INVALID_PARAMETER, "range is 0");
+	RETVM_IF(ctsvc_get_ipc_handle() == NULL, CONTACTS_ERROR_IPC, "contacts not connected");
+
+	indata = pims_ipc_data_create(0);
+	if (indata == NULL) {
+		CTS_ERR("ipc data created fail !");
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
+	}
+
+	ret = ctsvc_ipc_marshal_string(view_uri, indata);
+	if (ret != CONTACTS_ERROR_NONE) {
+		CTS_ERR("marshal fail");
+		goto DATA_FREE;
+	}
+	ret = ctsvc_ipc_marshal_string(keyword, indata);
+	if (ret != CONTACTS_ERROR_NONE) {
+		CTS_ERR("marshal fail");
+		goto DATA_FREE;
+	}
+	ret = ctsvc_ipc_marshal_int(offset, indata);
+	if (ret != CONTACTS_ERROR_NONE) {
+		CTS_ERR("marshal fail");
+		goto DATA_FREE;
+	}
+	ret = ctsvc_ipc_marshal_int(limit, indata);
+	if (ret != CONTACTS_ERROR_NONE) {
+		CTS_ERR("marshal fail");
+		goto DATA_FREE;
+	}
+	ret = ctsvc_ipc_marshal_int(range, indata);
+	if (ret != CONTACTS_ERROR_NONE) {
+		CTS_ERR("marshal fail");
+		goto DATA_FREE;
+	}
+
+	if (ctsvc_ipc_call(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_SEARCH_RECORDS_WITH_RANGE, indata, &outdata) != 0) {
+		CTS_ERR("ctsvc_ipc_call failed");
+		pims_ipc_data_destroy(indata);
+		return CONTACTS_ERROR_IPC;
+	}
+
+	pims_ipc_data_destroy(indata);
+
+	if (outdata) {
+		unsigned int size = 0;
+		ret = *(int*) pims_ipc_data_get(outdata,&size);
+
+		if (ret == CONTACTS_ERROR_NONE)
+			ret = ctsvc_ipc_unmarshal_list(outdata,out_list);
+		pims_ipc_data_destroy(outdata);
+	}
+
+	return ret;
+
+DATA_FREE:
+	free(indata);
+	return ret;
+}
+
 API int contacts_db_search_records_with_query(contacts_query_h query, const char *keyword,
 		int offset, int limit, contacts_list_h* out_list)
 {

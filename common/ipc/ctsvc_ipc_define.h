@@ -56,6 +56,7 @@
 #define CTSVC_IPC_SERVER_DB_CHANGES_BY_VERSION        "changes_by_version"
 #define CTSVC_IPC_SERVER_DB_GET_CURRENT_VERSION       "get_current_version"
 #define CTSVC_IPC_SERVER_DB_SEARCH_RECORDS            "search_records"
+#define CTSVC_IPC_SERVER_DB_SEARCH_RECORDS_WITH_RANGE		"search_records_with_range"
 #define CTSVC_IPC_SERVER_DB_SEARCH_RECORDS_WITH_QUERY    "search_records_with_query"
 
 #define CTSVC_IPC_SERVER_ACTIVITY_DELETE_BY_CONTACT_ID   "activity_delete_by_contact_id"
