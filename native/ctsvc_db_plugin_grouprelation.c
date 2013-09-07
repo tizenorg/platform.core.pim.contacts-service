@@ -62,7 +62,7 @@ static int __ctsvc_db_grouprelation_insert_record( contacts_record_h record, int
 
 static int __ctsvc_db_grouprelation_get_record( int id, contacts_record_h* out_record )
 {
-	CTS_ERR("Not support update group-relation");
+	CTS_ERR("Not support get group-relation");
 	return CONTACTS_ERROR_INVALID_PARAMETER;
 }
 
@@ -90,7 +90,7 @@ static int __ctsvc_db_grouprelation_get_all_records( int offset, int limit, cont
 
 	len = snprintf(query, sizeof(query),
 			"SELECT group_id, contact_id, group_name FROM "CTSVC_DB_VIEW_GROUP_RELATION);
-	if (0 < limit) {
+	if (0 != limit) {
 		len += snprintf(query+len, sizeof(query)-len, " LIMIT %d", limit);
 		if (0 < offset)
 			len += snprintf(query+len, sizeof(query)-len, " OFFSET %d", offset);

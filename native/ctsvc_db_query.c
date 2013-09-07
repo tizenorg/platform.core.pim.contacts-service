@@ -677,7 +677,7 @@ int ctsvc_db_make_get_records_query_stmt(ctsvc_query_s *s_query, int offset, int
 	else if (0 == strcmp(s_query->view_uri, CTSVC_VIEW_URI_GROUP))
 		len += snprintf(query+len, sizeof(query)-len, " ORDER BY group_prio");
 
-	if (0 < limit) {
+	if (0 != limit) {
 		len += snprintf(query+len, sizeof(query)-len, " LIMIT %d", limit);
 		if (0 < offset)
 			len += snprintf(query+len, sizeof(query)-len, " OFFSET %d", offset);
@@ -797,7 +797,7 @@ static int __ctsvc_db_get_all_records_exec(const char *view_uri, const property_
 	} else if (0 == strcmp(view_uri, CTSVC_VIEW_URI_GROUP))
 		len += snprintf(query+len, sizeof(query)-len, " ORDER BY group_prio");
 
-	if (0 < limit) {
+	if (0 != limit) {
 		len += snprintf(query+len, sizeof(query)-len, " LIMIT %d", limit);
 		if (0 < offset)
 			len += snprintf(query+len, sizeof(query)-len, " OFFSET %d", offset);
@@ -1128,7 +1128,7 @@ static int __ctsvc_db_search_records_exec(const char *view_uri, const property_i
 	} else if (0 == strcmp(view_uri, CTSVC_VIEW_URI_GROUP))
 		len += snprintf(query+len, sizeof(query)-len, " ORDER BY group_prio");
 
-	if (0 < limit) {
+	if (0 != limit) {
 		len += snprintf(query+len, sizeof(query)-len, " LIMIT %d", limit);
 		if (0 < offset)
 			len += snprintf(query+len, sizeof(query)-len, " OFFSET %d", offset);
@@ -1323,7 +1323,7 @@ static inline int __ctsvc_db_search_records_with_query_exec(ctsvc_query_s *s_que
 	else if (0 == strcmp(s_query->view_uri, CTSVC_VIEW_URI_GROUP))
 		len += snprintf(query+len, sizeof(query)-len, " ORDER BY group_prio");
 
-	if (0 < limit) {
+	if (0 != limit) {
 		len += snprintf(query+len, sizeof(query)-len, " LIMIT %d", limit);
 		if (0 < offset)
 			len += snprintf(query+len, sizeof(query)-len, " OFFSET %d", offset);

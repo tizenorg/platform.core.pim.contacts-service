@@ -184,7 +184,7 @@ static int __ctsvc_db_image_insert_record( contacts_record_h record, int *id )
 	int len = 0;
 	int ret;
 	int version;
-	int contact_id;
+	int addressbook_id;
 	int person_id;
 	int old_default_image_id;
 	char query[CTS_SQL_MAX_LEN] = {0};
@@ -201,7 +201,7 @@ static int __ctsvc_db_image_insert_record( contacts_record_h record, int *id )
 	}
 
 	snprintf(query, sizeof(query),
-			"SELECT contact_id, person_id FROM "CTSVC_DB_VIEW_CONTACT" WHERE contact_id = %d", image->contact_id);
+			"SELECT addressbook_id, person_id FROM "CTSVC_DB_VIEW_CONTACT" WHERE contact_id = %d", image->contact_id);
 	stmt = cts_query_prepare(query);
 	if (NULL == stmt) {
 		CTS_ERR("DB error : cts_query_prepare() Failed");
@@ -214,9 +214,13 @@ static int __ctsvc_db_image_insert_record( contacts_record_h record, int *id )
 		CTS_ERR("DB error : cts_stmt_step() Failed(%d)", ret);
 		cts_stmt_finalize(stmt);
 		ctsvc_end_trans(false);
-		return CONTACTS_ERROR_NO_DATA;
+		if (ret == CONTACTS_ERROR_NONE)
+			return CONTACTS_ERROR_INVALID_PARAMETER;
+		else
+			return ret;
 	}
-	contact_id = ctsvc_stmt_get_int(stmt, 0);
+
+	addressbook_id = ctsvc_stmt_get_int(stmt, 0);
 	person_id = ctsvc_stmt_get_int(stmt, 1);
 	cts_stmt_finalize(stmt);
 
@@ -258,9 +262,9 @@ static int __ctsvc_db_image_insert_record( contacts_record_h record, int *id )
 		int primary_default_contact_id;
 
 		primary_default_contact_id = __ctsvc_db_image_get_primary_default_contact_id(person_id);
-		ctsvc_db_image_reset_default(*id, contact_id);
+		ctsvc_db_image_reset_default(*id, image->contact_id);
 
-		if (primary_default_contact_id == 0 || primary_default_contact_id == contact_id) {
+		if (primary_default_contact_id == 0 || primary_default_contact_id == image->contact_id) {
 			__ctsvc_db_image_set_primary_default(*id, true);
 			__ctsvc_db_image_update_person_image(person_id, image->path);
 		}
@@ -318,8 +322,8 @@ static int __ctsvc_db_image_update_record( contacts_record_h record )
 	int len = 0;
 	int ret;
 	int version;
-	int contact_id;
 	int person_id;
+	int addressbook_id;
 	char query[CTS_SQL_MAX_LEN] = {0};
 	ctsvc_image_s *image = (ctsvc_image_s *)record;
 	cts_stmt stmt = NULL;
@@ -332,8 +336,7 @@ static int __ctsvc_db_image_update_record( contacts_record_h record )
 	}
 
 	snprintf(query, sizeof(query),
-			"SELECT contact_id, person_id FROM "CTSVC_DB_VIEW_CONTACT" WHERE contact_id = %d", image->contact_id);
-
+			"SELECT addressbook_id, person_id FROM "CTSVC_DB_VIEW_CONTACT" WHERE contact_id = %d", image->contact_id);
 	stmt = cts_query_prepare(query);
 	if (NULL == stmt) {
 		CTS_ERR("DB error : cts_query_prepare() Failed");
@@ -348,7 +351,7 @@ static int __ctsvc_db_image_update_record( contacts_record_h record )
 		ctsvc_end_trans(false);
 		return CONTACTS_ERROR_NO_DATA;
 	}
-	contact_id = ctsvc_stmt_get_int(stmt, 0);
+	addressbook_id = ctsvc_stmt_get_int(stmt, 0);
 	person_id = ctsvc_stmt_get_int(stmt, 1);
 	cts_stmt_finalize(stmt);
 
@@ -385,10 +388,10 @@ static int __ctsvc_db_image_update_record( contacts_record_h record )
 	if (image->is_default) {
 		int primary_default_contact_id;
 
-		primary_default_contact_id = __ctsvc_db_image_get_primary_default_contact_id(contact_id);
-		ctsvc_db_image_reset_default(image->id, contact_id);
+		primary_default_contact_id = __ctsvc_db_image_get_primary_default_contact_id(image->contact_id);
+		ctsvc_db_image_reset_default(image->id, image->contact_id);
 
-		if (contact_id == primary_default_contact_id) {
+		if (image->contact_id == primary_default_contact_id) {
 			__ctsvc_db_image_set_primary_default(image->id, true);
 			__ctsvc_db_image_update_person_image(person_id, image->path);
 		}
@@ -542,7 +545,7 @@ static int __ctsvc_db_image_get_all_records( int offset, int limit, contacts_lis
 				"ON "CTS_TABLE_DATA".contact_id = "CTSVC_DB_VIEW_CONTACT".contact_id "
 				"WHERE datatype = %d AND is_my_profile=0 ",
 				CTSVC_DATA_IMAGE);
-	if (0 < limit) {
+	if (0 != limit) {
 		len += snprintf(query+len, sizeof(query)-len, " LIMIT %d", limit);
 		if (0 < offset)
 			len += snprintf(query+len, sizeof(query)-len, " OFFSET %d", offset);

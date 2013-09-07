@@ -287,7 +287,7 @@ static int __ctsvc_db_speeddial_get_all_records( int offset, int limit, contacts
 							"type, label, number, speed_number	"
 					"FROM "CTSVC_DB_VIEW_SPEEDIDAL " ",	ctsvc_get_display_column());
 
-	if (0 < limit) {
+	if (0 != limit) {
 		len += snprintf(query+len, sizeof(query)-len, " LIMIT %d", limit);
 		if (0 < offset)
 			len += snprintf(query+len, sizeof(query)-len, " OFFSET %d", offset);

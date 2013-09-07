@@ -60,7 +60,7 @@ ctsvc_db_plugin_info_s ctsvc_db_plugin_profile = {
 static int __ctsvc_db_profile_insert_record( contacts_record_h record, int *id )
 {
 	int ret;
-	int contact_id;
+	int addressbook_id;
 	char query[CTS_SQL_MAX_LEN] = {0};
 	ctsvc_profile_s *profile = (ctsvc_profile_s *)record;
 
@@ -74,12 +74,18 @@ static int __ctsvc_db_profile_insert_record( contacts_record_h record, int *id )
 	}
 
 	snprintf(query, sizeof(query),
-			"SELECT contact_id FROM "CTSVC_DB_VIEW_CONTACT" WHERE contact_id = %d", profile->contact_id);
-	ret = ctsvc_query_get_first_int_result(query, &contact_id);
+			"SELECT addressbook_id FROM "CTSVC_DB_VIEW_CONTACT" WHERE contact_id = %d", profile->contact_id);
+	ret = ctsvc_query_get_first_int_result(query, &addressbook_id);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("No data : contact_id (%d) is not exist", contact_id);
 		ctsvc_end_trans(false);
-		return CONTACTS_ERROR_INVALID_PARAMETER;
+		if (CONTACTS_ERROR_NO_DATA) {
+			CTS_ERR("No data : contact_id (%d) is not exist", profile->contact_id);
+			return CONTACTS_ERROR_INVALID_PARAMETER;
+		}
+		else {
+			CTS_ERR("ctsvc_query_get_first_int_result Fail(%d)", ret);
+			return ret;
+		}
 	}
 
 	ret = ctsvc_db_profile_insert(record, profile->contact_id, false, id);
@@ -145,7 +151,7 @@ static int __ctsvc_db_profile_get_record( int id, contacts_record_h* out_record 
 static int __ctsvc_db_profile_update_record( contacts_record_h record )
 {
 	int ret;
-	int contact_id;
+	int addressbook_id;
 	char query[CTS_SQL_MAX_LEN] = {0};
 	ctsvc_profile_s *profile = (ctsvc_profile_s *)record;
 	RETVM_IF(NULL == profile->text, CONTACTS_ERROR_INVALID_PARAMETER, "profile text is empty");
@@ -157,8 +163,8 @@ static int __ctsvc_db_profile_update_record( contacts_record_h record )
 	}
 
 	snprintf(query, sizeof(query),
-			"SELECT contact_id FROM "CTSVC_DB_VIEW_CONTACT" WHERE contact_id = %d", profile->contact_id);
-	ret = ctsvc_query_get_first_int_result(query, &contact_id);
+			"SELECT addressbook_id FROM "CTSVC_DB_VIEW_CONTACT" WHERE contact_id = %d", profile->contact_id);
+	ret = ctsvc_query_get_first_int_result(query, &addressbook_id);
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("No data : contact_id (%d) is not exist", profile->contact_id);
 		ctsvc_end_trans(false);
@@ -253,7 +259,7 @@ static int __ctsvc_db_profile_get_all_records( int offset, int limit, contacts_l
 				"ON "CTS_TABLE_DATA".contact_id = "CTSVC_DB_VIEW_CONTACT".contact_id "
 				"WHERE datatype = %d AND is_my_profile=0 ",
 				CTSVC_DATA_PROFILE);
-	if (0 < limit) {
+	if (0 != limit) {
 		len += snprintf(query+len, sizeof(query)-len, " LIMIT %d", limit);
 		if (0 < offset)
 			len += snprintf(query+len, sizeof(query)-len, " OFFSET %d", offset);

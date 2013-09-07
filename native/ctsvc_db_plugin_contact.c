@@ -1334,7 +1334,7 @@ static int __ctsvc_db_contact_get_all_records( int offset, int limit, contacts_l
 	len = snprintf(query, sizeof(query),
 			"SELECT contact_id FROM "CTS_TABLE_CONTACTS" WHERE deleted = 0");
 
-	if (0 < limit) {
+	if (0 != limit) {
 		len += snprintf(query+len, sizeof(query)-len, " LIMIT %d", limit);
 		if (0 < offset)
 			len += snprintf(query+len, sizeof(query)-len, " OFFSET %d", offset);

@@ -299,7 +299,7 @@ static int __ctsvc_db_simple_contact_get_all_records( int offset, int limit,
 				"ringtone_path, vibration, uid, is_favorite, has_phonenumber, has_email "
 				"FROM "CTS_TABLE_CONTACTS" WHERE deleted = 0", ctsvc_get_display_column());
 
-	if (0 < limit) {
+	if (0 != limit) {
 		len += snprintf(query+len, sizeof(query)-len, " LIMIT %d", limit);
 		if (0 < offset)
 			len += snprintf(query+len, sizeof(query)-len, " OFFSET %d", offset);
