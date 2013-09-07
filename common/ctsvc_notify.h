@@ -45,5 +45,7 @@
 #define CTSVC_NOTI_PHONELOG_CHANGED  "/opt/usr/data/contacts-svc/.CONTACTS_SVC_PLOG_CHANGED"
 #define CTSVC_NOTI_SPEEDDIAL_CHANGED  "/opt/usr/data/contacts-svc/.CONTACTS_SVC_SPEED_CHANGED"
 
+#define CTSVC_SETTING_DISPLAY_ORDER_CHANGED "contacts.setting.display_order"
+#define CTSVC_SETTING_SORTING_ORDER_CHANGED "contacts.setting.sorting_order"
 
 #endif /* __TIZEN_SOCIAL_CTSVC_NOTIFY_H__ */

@@ -1,5 +1,5 @@
 /*
- * Contacts Service Helper
+ * Contacts Service
  *
  * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
  *
@@ -27,5 +27,7 @@ void ctsvc_change_subject_clear_changed_info();
 
 void ctsvc_change_subject_add_changed_phone_log_id(contacts_changed_e type, int id);
 void ctsvc_change_subject_add_changed_person_id(contacts_changed_e type, int id);
+
+void ctsvc_change_subject_publish_setting(const char *setting_id, int value);
 
 #endif // __CTSVC_SERVER_CHANGE_SUBJECT_H__

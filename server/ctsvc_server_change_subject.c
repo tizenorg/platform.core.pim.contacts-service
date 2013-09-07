@@ -126,3 +126,21 @@ void ctsvc_change_subject_add_changed_person_id(contacts_changed_e type, int id)
 	}
 	snprintf(__person_changed_info + info_len, __person_buf_size - info_len, "%s", changed_info);
 }
+
+void ctsvc_change_subject_publish_setting(const char *setting_id, int value)
+{
+	pims_ipc_data_h indata = NULL;
+	indata = pims_ipc_data_create(0);
+	RETM_IF(NULL == indata, "pims_ipc_data_create error");
+
+	if (pims_ipc_data_put(indata, (void*)&value, sizeof(int)) != 0) {
+		CTS_ERR("pims_ipc_data_put error");
+		pims_ipc_data_destroy(indata);
+		return;
+	}
+
+	if (pims_ipc_svc_publish(CTSVC_IPC_SUBSCRIBE_MODULE, (char*)setting_id, indata) != 0)
+		CTS_ERR("pims_ipc_svc_publish error (%s)", setting_id);
+
+	pims_ipc_data_destroy(indata);
+}
