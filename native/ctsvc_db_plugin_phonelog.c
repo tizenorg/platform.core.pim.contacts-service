@@ -354,26 +354,36 @@ static int __ctsvc_db_phonelog_get_records_with_query( contacts_query_h query, i
 //static int __ctsvc_db_phonelog_update_records(const contacts_list_h in_list) { return CONTACTS_ERROR_NONE; }
 //static int __ctsvc_db_phonelog_delete_records( int ids[], int count) { return CONTACTS_ERROR_NONE; }
 
-static int __ctsvc_cb_phonelog_increase_outgoing_count(int person_id)
+static int __ctsvc_db_phonelog_increase_outgoing_count(ctsvc_phonelog_s *phonelog)
 {
 	int ret;
 	int id;
+	int type = CONTACTS_USAGE_STAT_TYPE_NONE;
 	char query[CTS_SQL_MIN_LEN] = {0};
+
+	if (phonelog->log_type == CONTACTS_PLOG_TYPE_VOICE_OUTGOING ||
+		phonelog->log_type == CONTACTS_PLOG_TYPE_VIDEO_OUTGOING)
+		type = CONTACTS_USAGE_STAT_TYPE_OUTGOING_CALL;
+	else if (phonelog->log_type == CONTACTS_PLOG_TYPE_MMS_OUTGOING ||
+		phonelog->log_type == CONTACTS_PLOG_TYPE_SMS_OUTGOING)
+		type = CONTACTS_USAGE_STAT_TYPE_OUTGOING_MSG;
+	else
+		return CONTACTS_ERROR_NONE;
 
 	snprintf(query, sizeof(query),
 			"SELECT person_id FROM %s WHERE person_id = %d and usage_type = %d ",
-			CTS_TABLE_CONTACT_STAT, person_id, CONTACTS_USAGE_STAT_TYPE_OUTGOING_CALL);
+			CTS_TABLE_CONTACT_STAT, phonelog->person_id, type);
 
 	ret = ctsvc_query_get_first_int_result(query, &id);
 	if (CONTACTS_ERROR_NO_DATA == ret) {
 		snprintf(query, sizeof(query),
 				"INSERT INTO %s(person_id, usage_type, times_used) VALUES(%d, %d, 1)",
-				CTS_TABLE_CONTACT_STAT, person_id, CONTACTS_USAGE_STAT_TYPE_OUTGOING_CALL);
+				CTS_TABLE_CONTACT_STAT, phonelog->person_id, type);
 	}
 	else {
 		snprintf(query, sizeof(query),
 				"UPDATE %s SET times_used = times_used + 1 WHERE person_id = %d and usage_type = %d",
-				CTS_TABLE_CONTACT_STAT, person_id, CONTACTS_USAGE_STAT_TYPE_OUTGOING_CALL);
+				CTS_TABLE_CONTACT_STAT, phonelog->person_id, type);
 	}
 
 	ret = ctsvc_query_exec(query);
@@ -454,8 +464,8 @@ static int __ctsvc_db_phonelog_insert_record( contacts_record_h record, int *id 
 	}
 
 	if (0 < phonelog->person_id) {
-		ret = __ctsvc_cb_phonelog_increase_outgoing_count(phonelog->person_id);
-		WARN_IF(CONTACTS_ERROR_NONE != ret, "cts_increase_outgoing_count() Failed(%d)", ret);
+		ret = __ctsvc_db_phonelog_increase_outgoing_count(phonelog);
+		WARN_IF(CONTACTS_ERROR_NONE != ret, "__ctsvc_db_phonelog_increase_outgoing_count() Failed(%d)", ret);
 	}
 
 #ifdef _CONTACTS_IPC_SERVER
@@ -471,7 +481,7 @@ static int __ctsvc_db_phonelog_insert_record( contacts_record_h record, int *id 
 	else
 	{
 		// set missed call Badge number to Apptray
-		if(phonelog-> log_type == CONTACTS_PLOG_TYPE_VOICE_INCOMMING_UNSEEN || phonelog-> log_type == CONTACTS_PLOG_TYPE_VIDEO_INCOMMING_UNSEEN) {
+		if(phonelog->log_type == CONTACTS_PLOG_TYPE_VOICE_INCOMMING_UNSEEN || phonelog->log_type == CONTACTS_PLOG_TYPE_VIDEO_INCOMMING_UNSEEN) {
 
 		#define PHONE_PACKAGE_NAME		"org.tizen.phone"
 			unsigned int call_cnt = 0;
