@@ -30,6 +30,7 @@
 #include "ctsvc_server_bg.h"
 #include "ctsvc_utils.h"
 #include "ctsvc_db_plugin_addressbook_helper.h"
+#include "ctsvc_db_access_control.h"
 
 #define CTSVC_SERVER_BG_DELETE_COUNT 50
 #define CTSVC_SERVER_BG_DELETE_STEP_TIME 1
@@ -332,6 +333,7 @@ static gpointer __ctsvc_server_bg_delete(gpointer user_data)
 			free(callback_data);
 			continue;
 		}
+		ctsvc_set_client_access_info("contacts-service", NULL);
 
 		while(1) {
 			sleep(CTSVC_SERVER_BG_DELETE_STEP_TIME); // sleep 1 sec.
@@ -341,6 +343,9 @@ static gpointer __ctsvc_server_bg_delete(gpointer user_data)
 				break;
 			}
 		}
+
+		ctsvc_unset_client_access_info();
+
 		ret = contacts_disconnect2();
 		if (CONTACTS_ERROR_NONE != ret)
 			CTS_ERR("contacts_disconnect2 Fail(%d)", ret);

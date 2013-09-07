@@ -18,10 +18,12 @@
  */
 
 #include <stdlib.h>
+#include <security-server.h>
 
 #include "ctsvc_service.h"
 #include "ctsvc_db_init.h"
 #include "ctsvc_db_query.h"
+#include "ctsvc_db_access_control.h"
 
 #include "ctsvc_ipc_marshal.h"
 #include "ctsvc_internal.h"
@@ -30,27 +32,75 @@
 
 void ctsvc_ipc_server_connect(pims_ipc_h ipc, pims_ipc_data_h indata, pims_ipc_data_h *outdata, void *userdata)
 {
+	CTS_FN_CALL;
 	int ret = CONTACTS_ERROR_NONE;
+	size_t cookie_size = 0;
+	char *smack_label = NULL;
+	char *cookie = NULL;
+	char *buf = NULL;
+	gsize buf_len;
+
+	if (indata) {
+		// Access control : get cookie from indata
+		ret = ctsvc_ipc_unmarshal_unsigned_int(indata, &cookie_size);
+		if (ret != CONTACTS_ERROR_NONE) {
+			CTS_ERR("ctsvc_ipc_marshal_int fail");
+			goto ERROR_RETURN;
+		}
+
+		if (cookie_size <= 0) {
+			CTS_ERR("cookie size is %d", cookie_size);
+			ret = CONTACTS_ERROR_IPC;
+			goto ERROR_RETURN;
+		}
+
+		ret = ctsvc_ipc_unmarshal_string(indata, &buf);
+		if (ret != CONTACTS_ERROR_NONE) {
+			CTS_ERR("ctsvc_ipc_unmarshal_string fail");
+			goto ERROR_RETURN;
+		}
+		cookie = (char*)g_base64_decode((const gchar*)buf, &buf_len);
+
+		smack_label = security_server_get_smacklabel_cookie(cookie);
+		if (NULL == smack_label) {
+			CTS_ERR("security_server_get_smacklabel_cookie fail");
+			ret = CONTACTS_ERROR_SYSTEM;
+			goto ERROR_RETURN;
+		}
+	}
+	else {
+		CTS_ERR("There is no indata fail");
+		ret = CONTACTS_ERROR_SYSTEM;
+		goto ERROR_RETURN;
+	}
 
 	ret = contacts_connect2();
 
+	if (CONTACTS_ERROR_NONE == ret)
+		ctsvc_set_client_access_info(smack_label, cookie);
+
+ERROR_RETURN:
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
 		if (!*outdata) {
 			CTS_ERR("pims_ipc_data_create fail");
-			return;
+			goto DATA_FREE;
 		}
+
 		if (pims_ipc_data_put(*outdata,(void*)&ret,sizeof(int)) != 0) {
 			pims_ipc_data_destroy(*outdata);
 			*outdata = NULL;
 			CTS_ERR("pims_ipc_data_put fail");
-			return;
+			goto DATA_FREE;
 		}
 	}
 	else {
 		CTS_ERR("outdata is NULL");
 	}
-	return;
+DATA_FREE:
+	free(smack_label);
+	free(cookie);
+	free(buf);
 }
 
 void ctsvc_ipc_server_disconnect(pims_ipc_h ipc, pims_ipc_data_h indata, pims_ipc_data_h *outdata, void *userdata)

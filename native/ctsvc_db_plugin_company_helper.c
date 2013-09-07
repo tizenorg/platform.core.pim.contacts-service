@@ -30,6 +30,7 @@
 #include "ctsvc_db_plugin_company_helper.h"
 #include "ctsvc_record.h"
 #include "ctsvc_notification.h"
+#include "ctsvc_db_access_control.h"
 
 static int __ctsvc_company_bind_stmt(cts_stmt stmt, ctsvc_company_s *company, int start_cnt)
 {
@@ -106,6 +107,12 @@ int ctsvc_db_company_insert(contacts_record_h record, int contact_id, bool is_my
 		__ctsvc_company_bind_stmt(stmt, company, 1);
 		if (company->logo) {
 			char image[CTS_SQL_MAX_LEN] = {0};
+			ret = ctsvc_have_file_read_permission(company->logo);
+			if (ret != CONTACTS_ERROR_NONE) {
+				CTS_ERR("ctsvc_have_file_read_permission Fail(%d)", ret);
+				cts_stmt_finalize(stmt);
+				return ret;
+			}
 			ctsvc_utils_make_image_file_name(contact_id, company_id, company->logo, image, sizeof(image));
 			ret = ctsvc_utils_copy_image(CTS_LOGO_IMAGE_LOCATION, company->logo, image);
 			if (CONTACTS_ERROR_NONE != ret) {
@@ -212,6 +219,7 @@ int ctsvc_db_company_update(contacts_record_h record, int contact_id, bool is_my
 	if (ctsvc_record_check_property_flag((ctsvc_record_s *)company, _contacts_company.logo, CTSVC_PROPERTY_FLAG_DIRTY)) {
 		char *logo = ctsvc_stmt_get_text(stmt, 1);
 		bool same = false;
+		bool check_permission = false;
 
 		// delete current logo image
 		if (logo) {
@@ -223,6 +231,15 @@ int ctsvc_db_company_update(contacts_record_h record, int contact_id, bool is_my
 				same = true;
 			}
 			else {
+				if (company->logo) {
+					ret = ctsvc_have_file_read_permission(company->logo);
+					if (ret != CONTACTS_ERROR_NONE) {
+						CTS_ERR("ctsvc_have_file_read_permission Fail(%d)", ret);
+						cts_stmt_finalize(stmt);
+						return ret;
+					}
+					check_permission = true;
+				}
 				ret = unlink(full_path);
 				if (ret < 0) {
 					CTS_WARN("unlink Failed(%d)", errno);
@@ -233,6 +250,14 @@ int ctsvc_db_company_update(contacts_record_h record, int contact_id, bool is_my
 		// add new logo file
 		if (!same && company->logo) {
 			char dest[CTS_SQL_MAX_LEN] = {0};
+			if (false == check_permission) {
+				ret = ctsvc_have_file_read_permission(company->logo);
+				if (ret != CONTACTS_ERROR_NONE) {
+					CTS_ERR("ctsvc_have_file_read_permission Fail(%d)", ret);
+					cts_stmt_finalize(stmt);
+					return ret;
+				}
+			}
 			ctsvc_utils_make_image_file_name(contact_id, company->id, company->logo, dest, sizeof(dest));
 			ret = ctsvc_utils_copy_image(CTS_LOGO_IMAGE_LOCATION, company->logo, dest);
 			if (CONTACTS_ERROR_NONE != ret) {

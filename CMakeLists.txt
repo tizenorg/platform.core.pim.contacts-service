@@ -23,7 +23,7 @@ SET(PC_REQUIRED "capi-base-common")
 SET(EXTRA_CFLAGS "${EXTRA_CFLAGS} -I${SRC_INCLUDE_DIR}")
 
 INCLUDE(FindPkgConfig)
-pkg_check_modules(pkgs REQUIRED glib-2.0 capi-base-common vconf dlog db-util icu-i18n)
+pkg_check_modules(pkgs REQUIRED glib-2.0 capi-base-common vconf dlog db-util icu-i18n security-server)
 
 FOREACH(flag ${pkgs_CFLAGS})
 	SET(EXTRA_CFLAGS "${EXTRA_CFLAGS} ${flag}")
@@ -56,6 +56,9 @@ INSTALL(FILES ${HEADER_FILES} DESTINATION ${DEST_INCLUDE_DIR})
 # Install DB file
 FILE(GLOB DB_FILES ${CMAKE_CURRENT_SOURCE_DIR}/build-util/.contacts-svc.db*)
 INSTALL(FILES ${DB_FILES} DESTINATION /opt/usr/dbspace)
+
+#Install SMACK rule file
+INSTALL(FILES ${CMAKE_SOURCE_DIR}/contacts-service2.rule DESTINATION /opt/etc/smack/accesses.d)
 
 ADD_SUBDIRECTORY(client)
 ADD_SUBDIRECTORY(server)

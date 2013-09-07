@@ -1,0 +1,18 @@
+contacts-service _ arwxt
+contacts-service system::vconf arwx
+contacts-service contacts-service::db rw
+contacts-service contacts-service::svc rw
+contacts-service contacts-service::phonelog rw
+contacts-service contacts-service::vconf arwx
+contacts-service contacts-service::vconf-private arwx
+contacts-service calendar-service x
+contacts-service device::sys_logging w
+contacts-service device::app_logging w
+contacts-service system::media arwxt
+contacts-service system::ext_storage arwxt
+contacts-service system::homedir arwxt
+contacts-service system::share arwxt
+contacts-service ail::db rw
+contacts-service badge::db rw
+contacts-service data-provider-master::badge rw
+

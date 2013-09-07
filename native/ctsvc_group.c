@@ -25,6 +25,7 @@
 #include "ctsvc_db_plugin_contact_helper.h"
 #include "ctsvc_group.h"
 #include "ctsvc_notification.h"
+#include "ctsvc_db_access_control.h"
 
 int ctsvc_group_add_contact_in_transaction(int group_id, int contact_id)
 {
@@ -90,11 +91,15 @@ int ctsvc_group_add_contact_in_transaction(int group_id, int contact_id)
 
 API int contacts_group_add_contact(int group_id, int contact_id)
 {
+	int ret;
+
+	RETVM_IF(!ctsvc_have_permission(CTSVC_PERMISSION_CONTACT_WRITE), CONTACTS_ERROR_PERMISSION_DENIED,
+				"Permission denied : contact write (group)");
 	RETVM_IF( group_id <= 0, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid Parameter: group_id should be greater than 0");
 	RETVM_IF( contact_id <= 0, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid Parameter: contact_id should be greater than 0");
 
 	/* BEGIN_TRANSACTION */
-	int ret = ctsvc_begin_trans();
+	ret = ctsvc_begin_trans();
 	RETVM_IF(ret, ret, "contacts_svc_begin_trans() Failed(%d)", ret);
 
 	/* DOING JOB */
@@ -167,11 +172,14 @@ int ctsvc_group_remove_contact_in_transaction(int group_id, int contact_id)
 
 API int contacts_group_remove_contact(int group_id, int contact_id)
 {
+	int ret;
+	RETVM_IF(!ctsvc_have_permission(CTSVC_PERMISSION_CONTACT_WRITE), CONTACTS_ERROR_PERMISSION_DENIED,
+				"Permission denied : contact write (group)");
 	RETVM_IF( group_id <= 0, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid Parameter: group_id should be greater than 0");
 	RETVM_IF( contact_id <= 0, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid Parameter: contact_id should be greater than 0");
 
 	/* BEGIN_TRANSACTION */
-	int ret = ctsvc_begin_trans();
+	ret = ctsvc_begin_trans();
 	RETVM_IF(ret, ret, "contacts_svc_begin_trans() Failed(%d)", ret);
 
 	/* DOING JOB */
@@ -219,6 +227,8 @@ API int contacts_group_set_group_order(int group_id, int previous_group_id, int 
 	cts_stmt stmt;
 	char query[CTS_SQL_MAX_LEN] = {0};
 
+	RETVM_IF(!ctsvc_have_permission(CTSVC_PERMISSION_CONTACT_WRITE), CONTACTS_ERROR_PERMISSION_DENIED,
+				"Permission denied : contact write (group)");
 	snprintf(query, sizeof(query), "SELECT group_prio, addressbook_id FROM "CTS_TABLE_GROUPS" WHERE group_id = ?");
 
 	stmt = cts_query_prepare(query);

@@ -38,6 +38,7 @@ typedef struct
 	GSList *callbacks;
 }subscribe_info_s;
 
+static int __ipc_pubsub_ref = 0;
 static pims_ipc_h __ipc = NULL;
 static GSList *__db_change_subscribe_list = NULL;
 
@@ -74,6 +75,12 @@ int ctsvc_ipc_create_for_change_subscription()
 {
 	ctsvc_mutex_lock(CTS_MUTEX_PIMS_IPC_PUBSUB);
 
+	if (0 < __ipc_pubsub_ref) {
+		__ipc_pubsub_ref++;
+		ctsvc_mutex_unlock(CTS_MUTEX_PIMS_IPC_PUBSUB);
+		return CONTACTS_ERROR_NONE;
+	}
+
 	if (!__ipc) {
 		__ipc = pims_ipc_create_for_subscribe(CTSVC_IPC_SOCKET_PATH_FOR_CHANGE_SUBSCRIPTION);
 		if (!__ipc) {
@@ -82,6 +89,7 @@ int ctsvc_ipc_create_for_change_subscription()
 			return CONTACTS_ERROR_IPC;
 		}
 	}
+	__ipc_pubsub_ref++;
 	ctsvc_mutex_unlock(CTS_MUTEX_PIMS_IPC_PUBSUB);
 	return CONTACTS_ERROR_NONE;
 }
@@ -90,8 +98,20 @@ int ctsvc_ipc_destroy_for_change_subscription()
 {
 	ctsvc_mutex_lock(CTS_MUTEX_PIMS_IPC_PUBSUB);
 
-	pims_ipc_destroy_for_subscribe(__ipc);
-	__ipc = NULL;
+	if (1 == __ipc_pubsub_ref) {
+		pims_ipc_destroy_for_subscribe(__ipc);
+		__ipc = NULL;
+	}
+	else if (1 < __ipc_pubsub_ref) {
+		CTS_DBG("ctsvc pubsub ipc ref count : %d", __ipc_pubsub_ref);
+	}
+	else {
+		CTS_DBG("System : please call connection APIs, connection count is (%d)", __ipc_pubsub_ref);
+		ctsvc_mutex_unlock(CTS_MUTEX_PIMS_IPC_PUBSUB);
+		return CONTACTS_ERROR_INVALID_PARAMETER;
+	}
+
+	__ipc_pubsub_ref--;
 
 	ctsvc_mutex_unlock(CTS_MUTEX_PIMS_IPC_PUBSUB);
 	return CONTACTS_ERROR_NONE;

@@ -688,7 +688,7 @@ static inline int __ctsvc_contact_make_search_data(int contact_id, char **search
 	char *temp_data=NULL;
 	int buf_size=0;
 
-	ret = contacts_db_get_record(_contacts_contact._uri, contact_id, (contacts_record_h*)&contact);
+	ret = ctsvc_db_contact_get(contact_id, (contacts_record_h*)&contact);
 	if (CONTACTS_ERROR_NO_DATA == ret) {
 		int r;
 		snprintf(query, sizeof(query), "DELETE FROM %s WHERE contact_id = %d",
@@ -701,7 +701,7 @@ static inline int __ctsvc_contact_make_search_data(int contact_id, char **search
 		return ret;
 	}
 	else if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("contacts_db_get_record() Failed(%d)", ret);
+		CTS_ERR("ctsvc_db_contact_get() Failed(%d)", ret);
 		return ret;
 	}
 
@@ -936,9 +936,9 @@ static inline int __ctsvc_contact_refresh_lookup_data(int contact_id)
 		return ret;
 	}
 
-	ret = contacts_db_get_record(_contacts_contact._uri, contact_id, (contacts_record_h*)&contact);
+	ret = ctsvc_db_contact_get(contact_id, (contacts_record_h*)&contact);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("contacts_db_get_record() Failed(%d)", ret);
+		CTS_ERR("ctsvc_db_contact_get() Failed(%d)", ret);
 		return ret;
 	}
 
@@ -1363,9 +1363,9 @@ static int __ctsvc_db_contact_get_all_records( int offset, int limit, contacts_l
 			return ret;
 		}
 		contact_id = ctsvc_stmt_get_int(stmt, 0);
-		ret = contacts_db_get_record(_contacts_contact._uri, contact_id, &record);
+		ret = ctsvc_db_contact_get(contact_id, &record);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("DB error : contacts_db_get_record() Failed(%d)", ret);
+			CTS_ERR("DB error : ctsvc_db_contact_get() Failed(%d)", ret);
 			cts_stmt_finalize(stmt);
 			contacts_list_destroy(list, true);
 			return CONTACTS_ERROR_NO_DATA;

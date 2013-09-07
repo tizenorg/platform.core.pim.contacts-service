@@ -32,9 +32,9 @@
 #include "ctsvc_view.h"
 
 #ifdef API
-#define API __attribute__ ((visibility("default")))
-//#undef API
+#undef API
 #endif
+#define API __attribute__ ((visibility("default")))
 
 //#define CONTACTS_DEBUGGING
 //#define CONTACTS_TIMECHECK

@@ -2019,8 +2019,8 @@ int ctsvc_contact_update_display_name(int contact_id, contacts_display_name_sour
 	int ret = CONTACTS_ERROR_NONE;
 	int display_name_type;
 	contacts_record_h record;
-	ret = contacts_db_get_record(_contacts_contact._uri, contact_id, &record);
-	RETVM_IF(ret != CONTACTS_ERROR_NONE, ret, "contacts_db_get_record Fail(%d)", ret);
+	ret = ctsvc_db_contact_get(contact_id, (contacts_record_h*)&record);
+	RETVM_IF(ret != CONTACTS_ERROR_NONE, ret, "ctsvc_db_contact_get Fail(%d)", ret);
 	contacts_record_get_int(record, _contacts_contact.display_source_type, &display_name_type);
 
 	if (display_name_type <= changed_record_type) {
@@ -2065,5 +2065,11 @@ int ctsvc_contact_update_display_name(int contact_id, contacts_display_name_sour
 
 	contacts_record_destroy(record, true);
 	return ret;
+}
+
+extern ctsvc_db_plugin_info_s ctsvc_db_plugin_contact;
+int ctsvc_db_contact_get( int id, contacts_record_h* out_record )
+{
+	return ctsvc_db_plugin_contact.get_record(id, out_record);
 }
 

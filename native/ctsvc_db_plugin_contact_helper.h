@@ -34,6 +34,8 @@ void ctsvc_make_contact_display_name(ctsvc_contact_s *contact);
 int ctsvc_db_contact_delete(int contact_id);
 int ctsvc_contact_delete_image_file_with_path(const unsigned char* image_path);
 
+int ctsvc_db_contact_get( int id, contacts_record_h* out_record );
+
 int ctsvc_get_data_info_name(cts_stmt stmt, contacts_list_h name_list);
 int ctsvc_get_data_info_event(cts_stmt stmt, contacts_list_h list);
 int ctsvc_get_data_info_number(cts_stmt stmt, contacts_list_h number_list);

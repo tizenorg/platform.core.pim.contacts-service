@@ -27,6 +27,10 @@
 
 #include <account.h>
 
+#ifdef _CONTACTS_NATIVE
+#include <security-server.h>
+#endif
+
 #include "contacts.h"
 #include "ctsvc_internal.h"
 #include "ctsvc_socket.h"
@@ -34,6 +38,7 @@
 #include "ctsvc_inotify.h"
 #include "ctsvc_db_init.h"
 #include "ctsvc_setting.h"
+#include "ctsvc_db_access_control.h"
 
 static int ctsvc_connection = 0;
 static __thread int thread_connection = 0;
@@ -69,16 +74,48 @@ API int contacts_connect2()
 		CTS_DBG("System : Contacts service has been already connected");
 
 	ctsvc_connection++;
-	ctsvc_mutex_unlock(CTS_MUTEX_CONNECTION);
-
 	if (0 == thread_connection) {
 		ret = ctsvc_db_init();
 		if (ret != CONTACTS_ERROR_NONE) {
 			CTS_ERR("ctsvc_db_init() Failed(%d)", ret);
+			ctsvc_mutex_unlock(CTS_MUTEX_CONNECTION);
 			return ret;
 		}
+#ifdef _CONTACTS_NATIVE
+		// Access control : get cookie from security-server
+		char *smack_label = NULL;
+		size_t cookie_size = security_server_get_cookie_size();
+
+		if (cookie_size <= 0) {
+			CTS_ERR("security_server_get_cookie_size : cookie_size is %d", cookie_size);
+			ctsvc_mutex_unlock(CTS_MUTEX_CONNECTION);
+			return CONTACTS_ERROR_SYSTEM;
+		}
+
+		char cookie[cookie_size];
+		cookie[0] = '\0';
+		ret = security_server_request_cookie(cookie, cookie_size);
+		if(ret < 0) {
+			CTS_ERR("security_server_request_cookie fail (%d)", ret);
+			ctsvc_mutex_unlock(CTS_MUTEX_CONNECTION);
+			return CONTACTS_ERROR_SYSTEM;
+		}
+
+		smack_label = security_server_get_smacklabel_cookie(cookie);
+		if (NULL == smack_label) {
+			CTS_ERR("security_server_get_smacklabel_cookie fail");
+			ctsvc_mutex_unlock(CTS_MUTEX_CONNECTION);
+			return CONTACTS_ERROR_SYSTEM;
+		}
+
+		// In case of server, set SMACK label in ctsvc_ipc_server_connect()
+		ctsvc_set_client_access_info(smack_label, cookie);
+		free(smack_label);
+#endif
 	}
 	thread_connection++;
+
+	ctsvc_mutex_unlock(CTS_MUTEX_CONNECTION);
 
 	return CONTACTS_ERROR_NONE;
 }
@@ -86,15 +123,19 @@ API int contacts_connect2()
 API int contacts_disconnect2()
 {
 	int ret;
-	if (1 == thread_connection)
+	ctsvc_mutex_lock(CTS_MUTEX_CONNECTION);
+
+	if (1 == thread_connection) {
 		ctsvc_db_deinit();
+		ctsvc_unset_client_access_info();
+	}
 	else if (thread_connection <= 0) {
 		CTS_DBG("System : please call contacts_connect_on_thread(), thread_connection count is (%d)", thread_connection);
+		ctsvc_mutex_unlock(CTS_MUTEX_CONNECTION);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	thread_connection--;
 
-	ctsvc_mutex_lock(CTS_MUTEX_CONNECTION);
 	if (1 == ctsvc_connection) {
 		ctsvc_socket_final();
 		ctsvc_inotify_close();
@@ -151,8 +192,26 @@ API int contacts_connect_on_thread()
 
 	ctsvc_mutex_lock(CTS_MUTEX_CONNECTION);
 
-	if (0 == thread_connection)
-	{
+	if (0 == thread_connection) {
+		ret = ctsvc_socket_init();
+		if (ret != CONTACTS_ERROR_NONE) {
+			CTS_ERR("ctsvc_socket_init() Failed(%d)", ret);
+			ctsvc_mutex_unlock(CTS_MUTEX_CONNECTION);
+			return ret;
+		}
+		ret = ctsvc_inotify_init();
+		if (ret != CONTACTS_ERROR_NONE) {
+			CTS_ERR("ctsvc_inotify_init() Failed(%d)", ret);
+			ctsvc_socket_final();
+			ctsvc_mutex_unlock(CTS_MUTEX_CONNECTION);
+			return ret;
+		}
+		ctsvc_db_plugin_init();
+		ctsvc_view_uri_init();
+		ctsvc_register_vconf();
+		ret = account_connect();
+		if (ACCOUNT_ERROR_NONE != ret)
+			CTS_ERR("account_connect Failed(%d)", ret);
 		ret = ctsvc_db_init();
 		if (ret != CONTACTS_ERROR_NONE)
 		{
@@ -160,6 +219,36 @@ API int contacts_connect_on_thread()
 			ctsvc_mutex_unlock(CTS_MUTEX_CONNECTION);
 			return ret;
 		}
+
+		// Access control : get cookie from security-server
+		char *smack_label = NULL;
+		size_t cookie_size = security_server_get_cookie_size();
+
+		if (cookie_size <= 0) {
+			CTS_ERR("security_server_get_cookie_size : cookie_size is %d", cookie_size);
+			ctsvc_mutex_unlock(CTS_MUTEX_CONNECTION);
+			return CONTACTS_ERROR_SYSTEM;
+		}
+
+		char cookie[cookie_size];
+		cookie[0] = '\0';
+		ret = security_server_request_cookie(cookie, cookie_size);
+		if(ret < 0) {
+			CTS_ERR("security_server_request_cookie fail (%d)", ret);
+			ctsvc_mutex_unlock(CTS_MUTEX_CONNECTION);
+			return CONTACTS_ERROR_SYSTEM;
+		}
+
+		smack_label = security_server_get_smacklabel_cookie(cookie);
+		if (NULL == smack_label) {
+			CTS_ERR("security_server_get_smacklabel_cookie fail");
+			ctsvc_mutex_unlock(CTS_MUTEX_CONNECTION);
+			return CONTACTS_ERROR_SYSTEM;
+		}
+
+		// In case of server, set SMACK label in ctsvc_ipc_server_connect()
+		ctsvc_set_client_access_info(smack_label, cookie);
+		free(smack_label);
 	}
 	else
 	{
@@ -176,12 +265,18 @@ API int contacts_disconnect_on_thread()
 {
 	ctsvc_mutex_lock(CTS_MUTEX_CONNECTION);
 
-	if (1 == thread_connection)
-	{
+	if (1 == thread_connection) {
 		ctsvc_db_deinit();
+		ctsvc_unset_client_access_info();
+		ctsvc_socket_final();
+		ctsvc_inotify_close();
+		ctsvc_deregister_vconf();
+		ctsvc_view_uri_deinit();
+		ctsvc_db_plugin_deinit();
+		ret = account_disconnect();
+		WARN_IF(ret != ACCOUNT_ERROR_NONE, "account_disconnect Fail(%d)", ret);
 	}
-	else if (thread_connection <= 0)
-	{
+	else if (thread_connection <= 0) {
 		CTS_DBG("System : please call contacts_connect_on_thread(), connection count is (%d)", thread_connection);
 		ctsvc_mutex_unlock(CTS_MUTEX_CONNECTION);
 		return CONTACTS_ERROR_INVALID_PARAMETER;

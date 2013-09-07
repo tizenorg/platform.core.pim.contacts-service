@@ -68,6 +68,7 @@ SET(SRCS
 
 	${CMAKE_SOURCE_DIR}/native/ctsvc_activity.c
 
+	${CMAKE_SOURCE_DIR}/native/ctsvc_db_access_control.c
 	${CMAKE_SOURCE_DIR}/native/ctsvc_db_init.c
 	${CMAKE_SOURCE_DIR}/native/ctsvc_db_plugin_activity.c
 
@@ -160,7 +161,7 @@ SET(SRCS
 )
 
 INCLUDE(FindPkgConfig)
-pkg_check_modules(ctsvc_server_pkgs REQUIRED glib-2.0 pims-ipc gobject-2.0 tapi dlog capi-media-image-util accounts-svc badge libexif)
+pkg_check_modules(ctsvc_server_pkgs REQUIRED glib-2.0 pims-ipc gobject-2.0 tapi dlog capi-media-image-util accounts-svc badge libexif libsmack)
 
 FOREACH(flag ${ctsvc_server_pkgs_CFLAGS})
 	SET(EXTRA_CFLAGS "${EXTRA_CFLAGS} ${flag}")
