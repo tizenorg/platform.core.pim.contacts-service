@@ -1012,10 +1012,56 @@ bool ctsvc_contact_check_default_image(contacts_list_h image_list)
 			contacts_list_get_current_record_p(image_list, (contacts_record_h*)&image);
 			if (NULL != image && image->path && *image->path) {
 				image->is_default = true;
+				ctsvc_record_set_property_flag((ctsvc_record_s *)image, _contacts_image.is_default, CTSVC_PROPERTY_FLAG_DIRTY);
 				has_default = true;
 				break;
 			}
 		}while(CONTACTS_ERROR_NONE == contacts_list_next(image_list));
+	}
+	return CONTACTS_ERROR_NONE;
+}
+
+bool ctsvc_contact_check_default_address(contacts_list_h address_list)
+{
+	bool has_default = false;
+	ctsvc_address_s* address;
+	unsigned int count;
+	int ret;
+
+	RETV_IF(NULL == address_list, false);
+
+	ret = contacts_list_get_count(address_list, &count);
+	if (CONTACTS_ERROR_NONE !=ret || 0 == count) {
+		CTS_DBG("list get count failed (%d)", count);
+		return false;
+	}
+
+	contacts_list_first(address_list);
+	do {
+		contacts_list_get_current_record_p(address_list, (contacts_record_h*)&address);
+		if (NULL != address &&
+						(address->pobox || address->postalcode || address->region || address->locality
+							|| address->street || address->extended || address->country)) {
+			if (address->is_default && false == has_default)
+				has_default = true;
+			else if (has_default)
+				address->is_default = false;
+		}
+	}while(CONTACTS_ERROR_NONE == contacts_list_next(address_list));
+
+	if (false == has_default) {
+		contacts_list_first(address_list);
+		do {
+			contacts_list_get_current_record_p(address_list, (contacts_record_h*)&address);
+			if (NULL != address &&
+						(address->pobox || address->postalcode || address->region || address->locality
+							|| address->street || address->extended || address->country)) {
+				address->is_default = true;
+				ctsvc_record_set_property_flag((ctsvc_record_s *)address, _contacts_address.is_default, CTSVC_PROPERTY_FLAG_DIRTY);
+				has_default = true;
+				break;
+			}
+		}while(CONTACTS_ERROR_NONE == contacts_list_next(address_list));
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -1551,20 +1597,21 @@ int ctsvc_contact_update_data_number(contacts_list_h number_list,
 	do {
 		contacts_list_get_current_record_p(number_list, &record);
 		number = (ctsvc_number_s*)record;
-		if (number->number) {
-			if (0 < number->id) {
-				if (number->number)
-					ret = ctsvc_db_number_update(record, is_my_profile);
-				else
-					ret = ctsvc_db_number_delete(number->id, is_my_profile);
+		if (0 < number->id) {
+			if (number->number) {
+				ret = ctsvc_db_number_update(record, is_my_profile);
+				had = true;
 			}
 			else
-				ret = ctsvc_db_number_insert(record, contact_id, is_my_profile, NULL);
-			if (CONTACTS_ERROR_DB == ret) {
-				CTS_ERR("DB error : return (%d)", ret);
-				break;
-			}
+				ret = ctsvc_db_number_delete(number->id, is_my_profile);
+		}
+		else if (number->number) {
+			ret = ctsvc_db_number_insert(record, contact_id, is_my_profile, NULL);
 			had = true;
+		}
+		if (CONTACTS_ERROR_DB == ret) {
+			CTS_ERR("DB error : return (%d)", ret);
+			break;
 		}
 	}while(CONTACTS_ERROR_NONE == contacts_list_next(number_list));
 
@@ -1600,20 +1647,22 @@ int ctsvc_contact_update_data_email(contacts_list_h email_list,
 	do {
 		contacts_list_get_current_record_p(email_list, &record);
 		email = (ctsvc_email_s*)record;
-		if (email->email_addr) {
-			if (0 < email->id) {
-				if (email->email_addr)
-					ret = ctsvc_db_email_update(record, is_my_profile);
-				else
-					ret = ctsvc_db_email_delete(email->id, is_my_profile);
+
+		if (0 < email->id) {
+			if (email->email_addr) {
+				ret = ctsvc_db_email_update(record, is_my_profile);
+				had = true;
 			}
 			else
-				ret = ctsvc_db_email_insert(record, contact_id, is_my_profile, NULL);
-			if (CONTACTS_ERROR_DB == ret){
-				CTS_ERR("DB error : return (%d)", ret);
-				break;
-			}
+				ret = ctsvc_db_email_delete(email->id, is_my_profile);
+		}
+		else if (email->email_addr) {
+			ret = ctsvc_db_email_insert(record, contact_id, is_my_profile, NULL);
 			had = true;
+		}
+		if (CONTACTS_ERROR_DB == ret){
+			CTS_ERR("DB error : return (%d)", ret);
+			break;
 		}
 	}while(CONTACTS_ERROR_NONE == contacts_list_next(email_list));
 

@@ -57,21 +57,6 @@ ctsvc_db_plugin_info_s ctsvc_db_plugin_image = {
 	.replace_records = NULL,
 };
 
-
-static int __ctsvc_db_image_reset_default(int image_id, int contact_id)
-{
-	int ret;
-	char query[CTS_SQL_MAX_LEN] = {0};
-
-	snprintf(query, sizeof(query),
-			"UPDATE "CTS_TABLE_DATA" SET is_default=0, is_primary_default=0 WHERE id != %d AND contact_id = %d AND datatype=%d",
-			image_id, contact_id, CTSVC_DATA_IMAGE);
-	ret = ctsvc_query_exec(query);
-
-	WARN_IF(CONTACTS_ERROR_NONE != ret, "cts_query_exec() Failed(%d)", ret);
-	return ret;
-}
-
 static int __ctsvc_db_image_get_default_image_id(int contact_id)
 {
 	int ret;
@@ -215,10 +200,6 @@ static int __ctsvc_db_image_insert_record( contacts_record_h record, int *id )
 		return ret;
 	}
 
-	old_default_image_id = __ctsvc_db_image_get_default_image_id(image->contact_id);
-	if (0 == old_default_image_id)
-		image->is_default = true;
-
 	snprintf(query, sizeof(query),
 			"SELECT contact_id, person_id FROM "CTSVC_DB_VIEW_CONTACT" WHERE contact_id = %d", image->contact_id);
 	stmt = cts_query_prepare(query);
@@ -238,6 +219,10 @@ static int __ctsvc_db_image_insert_record( contacts_record_h record, int *id )
 	contact_id = ctsvc_stmt_get_int(stmt, 0);
 	person_id = ctsvc_stmt_get_int(stmt, 1);
 	cts_stmt_finalize(stmt);
+
+	old_default_image_id = __ctsvc_db_image_get_default_image_id(image->contact_id);
+	if (0 == old_default_image_id)
+		image->is_default = true;
 
 	ret = ctsvc_db_image_insert(record, image->contact_id, false, id);
 	if (CONTACTS_ERROR_NONE != ret) {
@@ -273,7 +258,7 @@ static int __ctsvc_db_image_insert_record( contacts_record_h record, int *id )
 		int primary_default_contact_id;
 
 		primary_default_contact_id = __ctsvc_db_image_get_primary_default_contact_id(person_id);
-		__ctsvc_db_image_reset_default(*id, contact_id);
+		ctsvc_db_image_reset_default(*id, contact_id);
 
 		if (primary_default_contact_id == 0 || primary_default_contact_id == contact_id) {
 			__ctsvc_db_image_set_primary_default(*id, true);
@@ -401,7 +386,7 @@ static int __ctsvc_db_image_update_record( contacts_record_h record )
 		int primary_default_contact_id;
 
 		primary_default_contact_id = __ctsvc_db_image_get_primary_default_contact_id(contact_id);
-		__ctsvc_db_image_reset_default(image->id, contact_id);
+		ctsvc_db_image_reset_default(image->id, contact_id);
 
 		if (contact_id == primary_default_contact_id) {
 			__ctsvc_db_image_set_primary_default(image->id, true);

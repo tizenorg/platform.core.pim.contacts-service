@@ -64,6 +64,20 @@ static inline int __ctsvc_image_bind_stmt(cts_stmt stmt, ctsvc_image_s *image, i
 	return CONTACTS_ERROR_NONE;
 }
 
+int ctsvc_db_image_reset_default(int image_id, int contact_id)
+{
+	int ret;
+	char query[CTS_SQL_MAX_LEN] = {0};
+
+	snprintf(query, sizeof(query),
+			"UPDATE "CTS_TABLE_DATA" SET is_default=0, is_primary_default=0 WHERE id != %d AND contact_id = %d AND datatype=%d",
+			image_id, contact_id, CTSVC_DATA_IMAGE);
+	ret = ctsvc_query_exec(query);
+
+	WARN_IF(CONTACTS_ERROR_NONE != ret, "cts_query_exec() Failed(%d)", ret);
+	return ret;
+}
+
 int ctsvc_db_image_insert(contacts_record_h record, int contact_id, bool is_my_profile, int *id)
 {
 	int ret;
@@ -82,9 +96,8 @@ int ctsvc_db_image_insert(contacts_record_h record, int contact_id, bool is_my_p
 
 	image_id = cts_db_get_next_id(CTS_TABLE_DATA);
 	ret = ctsvc_contact_add_image_file(contact_id, image_id, image->path, image_path, sizeof(image_path));
-
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_contact_add_image_file(NORMAL) Failed(%d)", ret);
+		CTS_ERR("ctsvc_contact_add_image_file() Failed(%d)", ret);
 		return ret;
 	}
 	free(image->path);
@@ -109,8 +122,13 @@ int ctsvc_db_image_insert(contacts_record_h record, int contact_id, bool is_my_p
 
 	//image->id = cts_db_get_last_insert_id();
 	if (id)
-		*id = cts_db_get_last_insert_id();
+		*id = image_id;
 	cts_stmt_finalize(stmt);
+
+	if (ctsvc_record_check_property_flag((ctsvc_record_s *)record, _contacts_image.is_default, CTSVC_PROPERTY_FLAG_DIRTY)) {
+		if (image->is_default)
+			ctsvc_db_image_reset_default(image_id, contact_id);
+	}
 
 	if (!is_my_profile)
 		ctsvc_set_image_noti();
@@ -146,6 +164,11 @@ int ctsvc_db_image_update(contacts_record_h record, int contact_id, bool is_my_p
 			free(image->path);
 			image->path = strdup(image_path);
 		}
+	}
+
+	if (ctsvc_record_check_property_flag((ctsvc_record_s *)record, _contacts_image.is_default, CTSVC_PROPERTY_FLAG_DIRTY)) {
+		if (image->is_default)
+			ctsvc_db_image_reset_default(image->id, contact_id);
 	}
 
 	do {
