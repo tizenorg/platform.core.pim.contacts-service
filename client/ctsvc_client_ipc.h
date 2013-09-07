@@ -33,6 +33,7 @@ int ctsvc_ipc_disconnect_on_thread(void);
 
 bool ctsvc_ipc_is_busy();
 
+pims_ipc_h ctsvc_ipc_get_handle_for_change_subsciption();
 int ctsvc_ipc_create_for_change_subscription();
 int ctsvc_ipc_destroy_for_change_subscription();
 

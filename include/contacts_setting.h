@@ -118,6 +118,102 @@ API int contacts_setting_get_name_sorting_order(contacts_name_sorting_order_e *n
 API int contacts_setting_set_name_sorting_order(contacts_name_sorting_order_e name_sorting_order);
 
 /**
+ * @brief       Called when designated view changes.
+ *
+ * @param[in]   name_display_order	Name display order setting value
+ * @param[in]   user_data	The user data passed from the callback registration function
+ *
+ * @see contacts_setting_add_name_display_order_changed_cb()
+ * @see contacts_setting_remove_name_display_order_changed_cb()
+ */
+typedef void (*contacts_setting_name_display_order_changed_cb)(contacts_name_display_order_e name_display_order, void* user_data);
+
+
+/**
+ * @brief       Registers a callback function.
+ *
+ * @param[in]   callback	The callback function to register
+ * @param[in]	user_data	The user data to be passed to the callback function
+ *
+ * @return  0 on success, otherwise a negative error value.
+ * @retval	#CONTACTS_ERROR_NONE                Successful
+ * @retval	#CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ *
+ * @pre		This function requires an open connection to the contacts service by contacts_connect2().
+ *
+ * @see contacts_connect2()
+ * @see contacts_setting_remove_name_display_order_changed_cb()
+ */
+
+API int contacts_setting_add_name_display_order_changed_cb(contacts_setting_name_display_order_changed_cb callback, void* user_data);
+
+/**
+ * @brief       Unregisters a callback function.
+ *
+ * @param[in]   callback	The callback function to register
+ * @param[in]	user_data	The user data to be passed to the callback function
+ *
+ * @return  0 on success, otherwise a negative error value.
+ * @retval	#CONTACTS_ERROR_NONE                Successful
+ * @retval	#CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ *
+ * @pre		This function requires an open connection to the contacts service by contacts_connect2().
+ *
+ * @see contacts_connect2()
+ * @see contacts_setting_add_name_display_order_changed_cb()
+ */
+
+API int contacts_setting_remove_name_display_order_changed_cb(contacts_setting_name_display_order_changed_cb callback, void* user_data);
+
+/**
+ * @brief       Called when designated view changes.
+ *
+ * @param[in]   name_sorting_order	Name sorting order setting value
+ * @param[in]   user_data	The user data passed from the callback registration function
+ *
+ * @see contacts_setting_add_name_sorting_order_changed_cb()
+ * @see contacts_setting_remove_name_sorting_order_changed_cb()
+ */
+typedef void (*contacts_setting_name_sorting_order_changed_cb)(contacts_name_sorting_order_e name_sorting_order, void* user_data);
+
+
+/**
+ * @brief       Registers a callback function.
+ *
+ * @param[in]   callback	The callback function to register
+ * @param[in]	user_data	The user data to be passed to the callback function
+ *
+ * @return  0 on success, otherwise a negative error value.
+ * @retval	#CONTACTS_ERROR_NONE                Successful
+ * @retval	#CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ *
+ * @pre		This function requires an open connection to the contacts service by contacts_connect2().
+ *
+ * @see contacts_connect2()
+ * @see contacts_setting_remove_name_sorting_order_changed_cb()
+ */
+
+API int contacts_setting_add_name_sorting_order_changed_cb(contacts_setting_name_sorting_order_changed_cb callback, void* user_data);
+
+/**
+ * @brief       Unregisters a callback function.
+ *
+ * @param[in]   callback	The callback function to register
+ * @param[in]	user_data	The user data to be passed to the callback function
+ *
+ * @return  0 on success, otherwise a negative error value.
+ * @retval	#CONTACTS_ERROR_NONE                Successful
+ * @retval	#CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ *
+ * @pre		This function requires an open connection to the contacts service by contacts_connect2().
+ *
+ * @see contacts_connect2()
+ * @see contacts_setting_add_name_sorting_order_changed_cb()
+ */
+
+API int contacts_setting_remove_name_sorting_order_changed_cb(contacts_setting_name_sorting_order_changed_cb callback, void* user_data);
+
+/**
  * @}
  */
 

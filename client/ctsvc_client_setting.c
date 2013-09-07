@@ -22,9 +22,11 @@
 
 #include "contacts.h"
 #include "ctsvc_internal.h"
+#include "ctsvc_notify.h"
 #include "ctsvc_ipc_define.h"
 #include "ctsvc_ipc_marshal.h"
 #include "ctsvc_client_ipc.h"
+#include "ctsvc_mutex.h"
 
 API int contacts_setting_get_name_display_order(contacts_name_display_order_e *name_display_order)
 {
@@ -158,5 +160,179 @@ API int contacts_setting_set_name_sorting_order(contacts_name_sorting_order_e na
 	}
 
 	return ret;
+}
+
+typedef struct
+{
+	contacts_setting_name_display_order_changed_cb cb;
+	void *user_data;
+}ctsvc_name_display_order_changed_cb_info_s;
+
+static GSList *__setting_name_display_order_subscribe_list = NULL;
+
+static void __ctsvc_setting_name_display_order_subscriber_callback(pims_ipc_h ipc, pims_ipc_data_h data, void *user_data)
+{
+	int value = -1;
+	unsigned int size = 0;
+	if (data)
+		value = *(int*)pims_ipc_data_get(data, &size);
+
+	if (__setting_name_display_order_subscribe_list) {
+		GSList *l;
+		for (l = __setting_name_display_order_subscribe_list;l;l=l->next) {
+			ctsvc_name_display_order_changed_cb_info_s *cb_info = l->data;
+			if (cb_info->cb)
+				cb_info->cb((contacts_name_display_order_e)value, cb_info->user_data);
+		}
+	}
+}
+
+API int contacts_setting_add_name_display_order_changed_cb(
+	contacts_setting_name_display_order_changed_cb cb, void* user_data)
+{
+	GSList *l;
+	ctsvc_name_display_order_changed_cb_info_s *cb_info;
+
+	ctsvc_mutex_lock(CTS_MUTEX_PIMS_IPC_PUBSUB);
+
+	if (!__setting_name_display_order_subscribe_list) {
+		if (pims_ipc_subscribe(ctsvc_ipc_get_handle_for_change_subsciption(),
+					CTSVC_IPC_SUBSCRIBE_MODULE, CTSVC_SETTING_DISPLAY_ORDER_CHANGED,
+					__ctsvc_setting_name_display_order_subscriber_callback, NULL) != 0) {
+			CTS_ERR("pims_ipc_subscribe error\n");
+			ctsvc_mutex_unlock(CTS_MUTEX_PIMS_IPC_PUBSUB);
+			return CONTACTS_ERROR_IPC;
+		}
+	}
+
+	for (l = __setting_name_display_order_subscribe_list;l;l=l->next) {
+		ctsvc_name_display_order_changed_cb_info_s *cb_info = l->data;
+		if (cb_info->cb == cb && cb_info->user_data == user_data) {
+			CTS_ERR("The same callback(%s) is already exist");
+			return CONTACTS_ERROR_SYSTEM;
+		}
+	}
+
+	cb_info = calloc(1, sizeof(ctsvc_name_display_order_changed_cb_info_s));
+	cb_info->user_data = user_data;
+	cb_info->cb = cb;
+	__setting_name_display_order_subscribe_list = g_slist_append(__setting_name_display_order_subscribe_list, cb_info);
+
+	ctsvc_mutex_unlock(CTS_MUTEX_PIMS_IPC_PUBSUB);
+	return CONTACTS_ERROR_NONE;
+}
+
+API int contacts_setting_remove_name_display_order_changed_cb(
+	contacts_setting_name_display_order_changed_cb cb, void* user_data)
+{
+	ctsvc_mutex_lock(CTS_MUTEX_PIMS_IPC_PUBSUB);
+
+	if (__setting_name_display_order_subscribe_list) {
+		GSList *l;
+		for(l = __setting_name_display_order_subscribe_list;l;l=l->next) {
+			ctsvc_name_display_order_changed_cb_info_s *cb_info = l->data;
+			if (cb == cb_info->cb && user_data == cb_info->user_data) {
+				__setting_name_display_order_subscribe_list = g_slist_remove(__setting_name_display_order_subscribe_list, cb_info);
+				free(cb_info);
+				break;
+			}
+		}
+		if (g_slist_length(__setting_name_display_order_subscribe_list) == 0) {
+			pims_ipc_unsubscribe(ctsvc_ipc_get_handle_for_change_subsciption(),
+					CTSVC_IPC_SUBSCRIBE_MODULE, CTSVC_SETTING_DISPLAY_ORDER_CHANGED);
+			g_slist_free(__setting_name_display_order_subscribe_list);
+			__setting_name_display_order_subscribe_list = NULL;
+		}
+	}
+
+	ctsvc_mutex_unlock(CTS_MUTEX_PIMS_IPC_PUBSUB);
+	return CONTACTS_ERROR_NONE;
+}
+
+typedef struct
+{
+	contacts_setting_name_sorting_order_changed_cb cb;
+	void *user_data;
+}ctsvc_name_sorting_order_changed_cb_info_s;
+
+static GSList *__setting_name_sorting_order_subscribe_list = NULL;
+
+static void __ctsvc_setting_name_sorting_order_subscriber_callback(pims_ipc_h ipc, pims_ipc_data_h data, void *user_data)
+{
+	int value = -1;
+	unsigned int size = 0;
+	if (data)
+		value = *(int*)pims_ipc_data_get(data, &size);
+
+	if (__setting_name_sorting_order_subscribe_list) {
+		GSList *l;
+		for (l = __setting_name_sorting_order_subscribe_list;l;l=l->next) {
+			ctsvc_name_sorting_order_changed_cb_info_s *cb_info = l->data;
+			if (cb_info->cb)
+				cb_info->cb((contacts_name_sorting_order_e)value, cb_info->user_data);
+		}
+	}
+}
+
+API int contacts_setting_add_name_sorting_order_changed_cb(
+	contacts_setting_name_sorting_order_changed_cb cb, void* user_data)
+{
+	GSList *l;
+	ctsvc_name_sorting_order_changed_cb_info_s *cb_info;
+
+	ctsvc_mutex_lock(CTS_MUTEX_PIMS_IPC_PUBSUB);
+
+	if (!__setting_name_sorting_order_subscribe_list) {
+		if (pims_ipc_subscribe(ctsvc_ipc_get_handle_for_change_subsciption(),
+					CTSVC_IPC_SUBSCRIBE_MODULE, CTSVC_SETTING_SORTING_ORDER_CHANGED,
+					__ctsvc_setting_name_sorting_order_subscriber_callback, NULL) != 0) {
+			CTS_ERR("pims_ipc_subscribe error\n");
+			ctsvc_mutex_unlock(CTS_MUTEX_PIMS_IPC_PUBSUB);
+			return CONTACTS_ERROR_IPC;
+		}
+	}
+
+	for (l = __setting_name_sorting_order_subscribe_list;l;l=l->next) {
+		ctsvc_name_sorting_order_changed_cb_info_s *cb_info = l->data;
+		if (cb_info->cb == cb && cb_info->user_data == user_data) {
+			CTS_ERR("The same callback(%s) is already exist");
+			return CONTACTS_ERROR_SYSTEM;
+		}
+	}
+
+	cb_info = calloc(1, sizeof(ctsvc_name_sorting_order_changed_cb_info_s));
+	cb_info->user_data = user_data;
+	cb_info->cb = cb;
+	__setting_name_sorting_order_subscribe_list = g_slist_append(__setting_name_sorting_order_subscribe_list, cb_info);
+
+	ctsvc_mutex_unlock(CTS_MUTEX_PIMS_IPC_PUBSUB);
+	return CONTACTS_ERROR_NONE;
+}
+
+API int contacts_setting_remove_name_sorting_order_changed_cb(
+	contacts_setting_name_sorting_order_changed_cb cb, void* user_data)
+{
+	ctsvc_mutex_lock(CTS_MUTEX_PIMS_IPC_PUBSUB);
+
+	if (__setting_name_sorting_order_subscribe_list) {
+		GSList *l;
+		for(l = __setting_name_sorting_order_subscribe_list;l;l=l->next) {
+			ctsvc_name_sorting_order_changed_cb_info_s *cb_info = l->data;
+			if (cb == cb_info->cb && user_data == cb_info->user_data) {
+				__setting_name_sorting_order_subscribe_list = g_slist_remove(__setting_name_sorting_order_subscribe_list, cb_info);
+				free(cb_info);
+				break;
+			}
+		}
+		if (g_slist_length(__setting_name_sorting_order_subscribe_list) == 0) {
+			pims_ipc_unsubscribe(ctsvc_ipc_get_handle_for_change_subsciption(),
+					CTSVC_IPC_SUBSCRIBE_MODULE, CTSVC_SETTING_SORTING_ORDER_CHANGED);
+			g_slist_free(__setting_name_sorting_order_subscribe_list);
+			__setting_name_sorting_order_subscribe_list = NULL;
+		}
+	}
+
+	ctsvc_mutex_unlock(CTS_MUTEX_PIMS_IPC_PUBSUB);
+	return CONTACTS_ERROR_NONE;
 }
 

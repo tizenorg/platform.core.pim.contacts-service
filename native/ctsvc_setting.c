@@ -27,9 +27,14 @@
 
 #include "contacts.h"
 #include "ctsvc_internal.h"
+#include "ctsvc_notify.h"
 #include "ctsvc_setting.h"
 #include "ctsvc_normalize.h"
 #include "ctsvc_localize.h"
+
+#ifdef _CONTACTS_IPC_SERVER
+#include "ctsvc_server_change_subject.h"
+#endif
 
 static int primary_sort = -1;
 static int secondary_sort = -1;
@@ -61,6 +66,9 @@ API int contacts_setting_set_name_display_order(contacts_name_display_order_e or
 	RETVM_IF(CONTACTS_NAME_DISPLAY_ORDER_FIRSTLAST != order && CONTACTS_NAME_DISPLAY_ORDER_LASTFIRST != order,
 			CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : The parameter(order:%d) is Invalid", name_display_order);
 
+	if (order == name_display_order)
+		return CONTACTS_ERROR_NONE;
+
 	ret = vconf_set_int(CTSVC_VCONF_DISPLAY_ORDER, order);
 	RETVM_IF(ret<0, CONTACTS_ERROR_SYSTEM, "System : vconf_set_int(display order) Failed(%d)", ret);
 
@@ -89,6 +97,9 @@ API int contacts_setting_set_name_sorting_order(contacts_name_sorting_order_e or
 	RETVM_IF(CONTACTS_NAME_SORTING_ORDER_FIRSTLAST != order && CONTACTS_NAME_SORTING_ORDER_LASTFIRST != order,
 			CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : The parameter(order:%d) is Invalid", name_sorting_order);
 
+	if (order == name_sorting_order)
+		return CONTACTS_ERROR_NONE;
+
 	ret = vconf_set_int(CTSVC_VCONF_SORTING_ORDER, order);
 	RETVM_IF(ret<0, CONTACTS_ERROR_SYSTEM, "System : vconf_set_int(sort order) Failed(%d)", ret);
 
@@ -100,11 +111,21 @@ API int contacts_setting_set_name_sorting_order(contacts_name_sorting_order_e or
 static void ctsvc_vconf_display_order_cb(keynode_t *key, void *data)
 {
 	name_display_order = vconf_keynode_get_int(key);
+
+#ifdef _CONTACTS_IPC_SERVER
+	// publish display order changed
+	ctsvc_change_subject_publish_setting(CTSVC_SETTING_DISPLAY_ORDER_CHANGED, name_display_order);
+#endif
 }
 
 static void ctsvc_vconf_sorting_order_cb(keynode_t *key, void *data)
 {
 	name_sorting_order = vconf_keynode_get_int(key);
+
+#ifdef _CONTACTS_IPC_SERVER
+	// publish sort order changed
+	ctsvc_change_subject_publish_setting(CTSVC_SETTING_SORTING_ORDER_CHANGED, name_sorting_order);
+#endif
 }
 
 void ctscts_set_sort_memory(int sort_type)
@@ -200,3 +221,35 @@ int ctsvc_get_secondary_sort(void)
 	return secondary_sort;
 }
 
+#ifdef _CONTACTS_NATIVE
+API int contacts_setting_add_name_display_order_changed_cb(
+	contacts_setting_name_display_order_changed_cb cb, void* user_data)
+{
+	CTS_ERR("Please use contacts-service2 instead of contacts-service3");
+	return CONTACTS_ERROR_INTERNAL;
+}
+
+API int contacts_setting_remove_name_display_order_changed_cb(
+	contacts_setting_name_display_order_changed_cb cb, void* user_data)
+{
+	CTS_ERR("Please use contacts-service2 instead of contacts-service3");
+	return CONTACTS_ERROR_INTERNAL;
+
+}
+
+API int contacts_setting_add_name_sorting_order_changed_cb(
+	contacts_setting_name_sorting_order_changed_cb cb, void* user_data)
+{
+	CTS_ERR("Please use contacts-service2 instead of contacts-service3");
+	return CONTACTS_ERROR_INTERNAL;
+}
+
+
+API int contacts_setting_remove_name_sorting_order_changed_cb(
+	contacts_setting_name_sorting_order_changed_cb cb, void* user_data)
+{
+	CTS_ERR("Please use contacts-service2 instead of contacts-service3");
+	return CONTACTS_ERROR_INTERNAL;
+}
+
+#endif
