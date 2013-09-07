@@ -30,6 +30,7 @@
 #include "ctsvc_server_socket.h"
 #include "ctsvc_server_utils.h"
 #include "ctsvc_server_bg.h"
+#include "ctsvc_db_access_control.h"
 
 #include "ctsvc_ipc_define.h"
 #include "ctsvc_ipc_server.h"
@@ -98,6 +99,7 @@ static int __server_main(void)
 			CTS_ERR("contacts_connect2 fail(%d)", ret);
 			break;
 		}
+		ctsvc_set_client_access_info("contacts-service", NULL);
 
 		ctsvc_server_bg_add_cb();
 		ctsvc_server_bg_delete_start();
@@ -110,6 +112,8 @@ static int __server_main(void)
 		ctsvc_server_final_configuration();
 
 		ctsvc_server_bg_remove_cb();
+
+		ctsvc_unset_client_access_info();
 
 		ret = contacts_disconnect2();
 		if (CONTACTS_ERROR_NONE != ret)

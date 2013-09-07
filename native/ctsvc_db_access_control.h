@@ -3,8 +3,6 @@
  *
  * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
  *
- * Contact: Youngjae Shin <yj99.shin@samsung.com>
- *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,21 +16,24 @@
  * limitations under the License.
  *
  */
-#ifndef __CTSVC_MUTEX_H__
-#define __CTSVC_MUTEX_H__
+
+#ifndef __TIZEN_SOCIAL_CTSVC_DB_ACCESS_CONTROL_H__
+#define __TIZEN_SOCIAL_CTSVC_DB_ACCESS_CONTROL_H__
+
 
 enum {
-	CTS_MUTEX_CONNECTION,
-	CTS_MUTEX_UPDTATED_LIST_MEMPOOL,
-	CTS_MUTEX_SOCKET_FD,
-	CTS_MUTEX_TRANSACTION,
-	CTS_MUTEX_PIMS_IPC_CALL,
-	CTS_MUTEX_PIMS_IPC_PUBSUB,
-	CTS_MUTEX_ACCESS_CONTROL,
+	CTSVC_PERMISSION_CONTACT_NONE = 0x0,
+	CTSVC_PERMISSION_CONTACT_READ = 0x1,
+	CTSVC_PERMISSION_CONTACT_WRITE = 0x2,
+	CTSVC_PERMISSION_PHONELOG_READ = 0x4,
+	CTSVC_PERMISSION_PHONELOG_WRITE = 0x8,
 };
 
-void ctsvc_mutex_lock(int type);
-void ctsvc_mutex_unlock(int type);
+int ctsvc_have_file_read_permission(const char *path);
 
+void ctsvc_set_client_access_info(const char *smack_label, const char *cookie);
+void ctsvc_unset_client_access_info(void);
 
-#endif //__CTSVC_MUTEX_H__
+bool ctsvc_have_permission(int permission);
+
+#endif // __TIZEN_SOCIAL_CTSVC_DB_ACCESS_CONTROL_H__

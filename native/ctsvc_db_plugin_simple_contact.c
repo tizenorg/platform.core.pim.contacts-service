@@ -31,6 +31,7 @@
 #include "ctsvc_record.h"
 #include "ctsvc_db_query.h"
 #include "ctsvc_notification.h"
+#include "ctsvc_db_access_control.h"
 
 static int __ctsvc_db_simple_contact_insert_record( contacts_record_h record, int *id );
 static int __ctsvc_db_simple_contact_get_record( int id, contacts_record_h* out_record );
@@ -189,6 +190,16 @@ static int __ctsvc_db_simple_contact_update_record( contacts_record_h record )
 	// This code will be removed
 	if (ctsvc_record_check_property_flag((ctsvc_record_s *)contact, _contacts_simple_contact.image_thumbnail_path, CTSVC_PROPERTY_FLAG_DIRTY)) {
 		int img_id;
+
+		if (contact->image_thumbnail_path) {
+			ret = ctsvc_have_file_read_permission(contact->image_thumbnail_path);
+			if (ret != CONTACTS_ERROR_NONE) {
+				CTS_ERR("ctsvc_have_file_read_permission Fail(%d)", ret);
+				ctsvc_end_trans(false);
+				return ret;
+			}
+		}
+
 		image[0] = '\0';
 		img_id = __ctsvc_db_simple_contact_get_default_image_id(contact->contact_id);
 
@@ -460,6 +471,13 @@ static int __ctsvc_db_simple_contact_insert_record( contacts_record_h record, in
 
 	if (contact->image_thumbnail_path) {
 		int image_id;
+		ret = ctsvc_have_file_read_permission(contact->image_thumbnail_path);
+		if (ret != CONTACTS_ERROR_NONE) {
+			CTS_ERR("ctsvc_have_file_read_permission Fail(%d)", ret);
+			ctsvc_end_trans(false);
+			return ret;
+		}
+
 		image[0] = '\0';
 		image_id = __ctsvc_db_simple_contact_get_default_image_id(contact->contact_id);
 		ret = ctsvc_contact_add_image_file(contact->contact_id, image_id, contact->image_thumbnail_path,

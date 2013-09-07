@@ -69,4 +69,7 @@ int ctsvc_db_plugin_deinit();
 int ctsvc_db_get_table_name(const char *view_uri, const char **out_table);
 ctsvc_db_plugin_info_s* ctsvc_db_get_plugin_info(ctsvc_record_type_e type);
 
+int ctsvc_required_read_permission(const char *view_uri);
+int ctsvc_required_write_permission(const char *view_uri);
+
 #endif // __TIZEN_SOCIAL_CTSVC_DB_INIT_H__

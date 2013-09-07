@@ -37,6 +37,7 @@
 #include "ctsvc_localize.h"
 #include "ctsvc_setting.h"
 
+#include "ctsvc_db_access_control.h"
 #include "ctsvc_db_plugin_person_helper.h"
 
 typedef enum {
@@ -1793,6 +1794,8 @@ API int contacts_db_get_records_with_query( contacts_query_h query, int offset, 
 
 	RETV_IF(NULL == query, CONTACTS_ERROR_INVALID_PARAMETER);
 	s_query = (ctsvc_query_s*)query;
+	RETVM_IF(!ctsvc_have_permission(ctsvc_required_read_permission(s_query->view_uri)),
+				CONTACTS_ERROR_PERMISSION_DENIED, "Permission denied : read(%s)", s_query->view_uri);
 
 	if (( plugin_info = ctsvc_db_get_plugin_info(ctsvc_view_get_record_type(s_query->view_uri)))){
 		if( plugin_info->get_records_with_query ) {
@@ -2137,6 +2140,9 @@ API int contacts_db_get_changes_by_version( const char* view_uri, int addressboo
 	*out_list = NULL;
 	RETV_IF(NULL == out_current_version, CONTACTS_ERROR_INVALID_PARAMETER);
 	*out_current_version = 0;
+	RETVM_IF(!ctsvc_have_permission(CTSVC_PERMISSION_CONTACT_READ),
+				CONTACTS_ERROR_PERMISSION_DENIED, "Permission denied : read (%s)", view_uri);
+
 
 	if (0 == strcmp(view_uri, _contacts_contact_updated_info._uri)) {
 		ret = __ctsvc_db_get_contact_changes(view_uri, addressbook_id,
@@ -2171,6 +2177,8 @@ API int contacts_db_get_changes_by_version( const char* view_uri, int addressboo
 API int contacts_db_get_current_version( int* out_current_version )
 {
 	RETVM_IF(NULL == out_current_version, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter");
+	RETVM_IF(!ctsvc_have_permission(CTSVC_PERMISSION_CONTACT_READ) && !ctsvc_have_permission(CTSVC_PERMISSION_PHONELOG_READ),
+				CONTACTS_ERROR_PERMISSION_DENIED, "Permission denied : read (contact)");
 
 	return ctsvc_get_current_version(out_current_version);
 }
@@ -2181,6 +2189,8 @@ API int contacts_db_search_records(const char* view_uri, const char *keyword,
 	RETV_IF(NULL == out_list, CONTACTS_ERROR_INVALID_PARAMETER);
 	*out_list = NULL;
 	RETVM_IF(NULL == view_uri, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter");
+	RETVM_IF(!ctsvc_have_permission(ctsvc_required_read_permission(view_uri)),
+				CONTACTS_ERROR_PERMISSION_DENIED, "Permission denied : read(%s)", view_uri);
 
 	return __ctsvc_db_search_records(view_uri, keyword, offset, limit, out_list);
 }
@@ -2192,6 +2202,8 @@ API int contacts_db_search_records_with_range(const char* view_uri, const char *
 	*out_list = NULL;
 	RETVM_IF(range == 0, CONTACTS_ERROR_INVALID_PARAMETER, "range is 0");
 	RETVM_IF(NULL == view_uri, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter");
+	RETVM_IF(!ctsvc_have_permission(ctsvc_required_read_permission(view_uri)),
+				CONTACTS_ERROR_PERMISSION_DENIED, "Permission denied : read(%s)", view_uri);
 
 	return __ctsvc_db_search_records_with_range(view_uri, keyword, offset, limit, range, out_list);
 }
@@ -2202,6 +2214,8 @@ API int contacts_db_search_records_with_query( contacts_query_h query, const cha
 	RETV_IF(NULL == out_list, CONTACTS_ERROR_INVALID_PARAMETER);
 	*out_list = NULL;
 	RETVM_IF(NULL == query, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter");
+	RETVM_IF(!ctsvc_have_permission(ctsvc_required_read_permission(((ctsvc_query_s*)query)->view_uri)),
+				CONTACTS_ERROR_PERMISSION_DENIED, "Permission denied : read (%s)", ((ctsvc_query_s*)query)->view_uri);
 
 	return __ctsvc_db_search_records_with_query(query, keyword, offset, limit, out_list);
 }
@@ -2214,6 +2228,8 @@ API int contacts_db_get_count( const char* view_uri, int *out_count)
 	RETV_IF(NULL == out_count, CONTACTS_ERROR_INVALID_PARAMETER);
 	*out_count = 0;
 	RETVM_IF(NULL == view_uri, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter");
+	RETVM_IF(!ctsvc_have_permission(ctsvc_required_read_permission(view_uri)),
+				CONTACTS_ERROR_PERMISSION_DENIED, "Permission denied : read (%s)", view_uri);
 
 	if (( plugin_info = ctsvc_db_get_plugin_info(ctsvc_view_get_record_type(view_uri)))){
 		if( plugin_info->get_count ) {
@@ -2237,6 +2253,8 @@ API int contacts_db_get_count_with_query( contacts_query_h query, int *out_count
 
 	RETVM_IF(NULL == query, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter");
 	s_query = (ctsvc_query_s*)query;
+	RETVM_IF(!ctsvc_have_permission(ctsvc_required_read_permission(s_query->view_uri)),
+				CONTACTS_ERROR_PERMISSION_DENIED, "Permission denied : read (%s)", s_query->view_uri);
 
 	type = ctsvc_view_get_record_type(s_query->view_uri);
 	plugin_info = ctsvc_db_get_plugin_info(type);
@@ -2263,6 +2281,8 @@ API int contacts_db_insert_record(contacts_record_h record, int *id )
 	plugin_info = ctsvc_db_get_plugin_info(((ctsvc_record_s*)record)->r_type);
 	RETVM_IF(NULL == plugin_info, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter");
 	RETVM_IF(NULL == plugin_info->insert_record, CONTACTS_ERROR_INVALID_PARAMETER, "Not permitted");
+	RETVM_IF(!ctsvc_have_permission(ctsvc_required_write_permission(((ctsvc_record_s*)record)->view_uri)),
+				CONTACTS_ERROR_PERMISSION_DENIED, "Permission denied : write (%s)", ((ctsvc_record_s*)record)->view_uri);
 
 	return plugin_info->insert_record(record, id);
 }
@@ -2276,6 +2296,8 @@ API int contacts_db_update_record(contacts_record_h record)
 	plugin_info = ctsvc_db_get_plugin_info(((ctsvc_record_s*)record)->r_type);
 	RETVM_IF(NULL == plugin_info, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter");
 	RETVM_IF(NULL == plugin_info->update_record, CONTACTS_ERROR_INVALID_PARAMETER, "Not permitted");
+	RETVM_IF(!ctsvc_have_permission(ctsvc_required_write_permission(((ctsvc_record_s*)record)->view_uri)),
+				CONTACTS_ERROR_PERMISSION_DENIED, "Permission denied : write (%s)", ((ctsvc_record_s*)record)->view_uri);
 
 	return plugin_info->update_record(record);
 }
@@ -2291,6 +2313,8 @@ API int contacts_db_delete_record(const char* view_uri, int id)
 	plugin_info = ctsvc_db_get_plugin_info(type);
 	RETVM_IF(NULL == plugin_info, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter");
 	RETVM_IF(NULL == plugin_info->delete_record, CONTACTS_ERROR_INVALID_PARAMETER, "Not permitted");
+	RETVM_IF(!ctsvc_have_permission(ctsvc_required_write_permission(view_uri)),
+				CONTACTS_ERROR_PERMISSION_DENIED, "Permission denied : write (%s)", view_uri);
 
 	return plugin_info->delete_record(id);
 }
@@ -2309,6 +2333,8 @@ API int contacts_db_get_record(const char* view_uri, int id, contacts_record_h* 
 
 	RETVM_IF(NULL == plugin_info, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter");
 	RETVM_IF(NULL == plugin_info->get_record, CONTACTS_ERROR_INVALID_PARAMETER, "Not permitted");
+	RETVM_IF(!ctsvc_have_permission(ctsvc_required_read_permission(view_uri)),
+				CONTACTS_ERROR_PERMISSION_DENIED, "Permission denied : read (%s)", view_uri);
 
 	return plugin_info->get_record(id, out_record);
 }
@@ -2322,6 +2348,8 @@ API int contacts_db_replace_record( contacts_record_h record, int id )
 	plugin_info = ctsvc_db_get_plugin_info(((ctsvc_record_s*)record)->r_type);
 	RETVM_IF(NULL == plugin_info, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter");
 	RETVM_IF(NULL == plugin_info->replace_record, CONTACTS_ERROR_INVALID_PARAMETER, "Not permitted");
+	RETVM_IF(!ctsvc_have_permission(ctsvc_required_write_permission(((ctsvc_record_s*)record)->view_uri)),
+				CONTACTS_ERROR_PERMISSION_DENIED, "Permission denied : write (%s)", ((ctsvc_record_s*)record)->view_uri);
 
 	return plugin_info->replace_record(record, id);
 }
@@ -2335,6 +2363,8 @@ API int contacts_db_get_all_records(const char* view_uri, int offset, int limit,
 	RETV_IF(NULL == out_list, CONTACTS_ERROR_INVALID_PARAMETER);
 	*out_list = NULL;
 	RETVM_IF(NULL == view_uri, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter");
+	RETVM_IF(!ctsvc_have_permission(ctsvc_required_read_permission(view_uri)),
+				CONTACTS_ERROR_PERMISSION_DENIED, "Permission denied : read (%s)", view_uri);
 
 	type = ctsvc_view_get_record_type(view_uri);
 	plugin_info = ctsvc_db_get_plugin_info(type);
@@ -2589,6 +2619,8 @@ API int contacts_db_get_last_change_version(int* last_version)
 	int ret = CONTACTS_ERROR_NONE;
 
 	RETVM_IF(NULL == last_version, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter");
+	RETVM_IF(!ctsvc_have_permission(CTSVC_PERMISSION_CONTACT_READ) && !ctsvc_have_permission(CTSVC_PERMISSION_PHONELOG_READ),
+				CONTACTS_ERROR_PERMISSION_DENIED, "Permission denied : read (contact)");
 	*last_version = ctsvc_get_transaction_ver();
 	return ret;
 }

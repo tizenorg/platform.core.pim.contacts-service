@@ -44,6 +44,7 @@ typedef struct
 	bool blocked;
 }noti_info;
 
+static int __ctsvc_inoti_ref = 0;
 static int __inoti_fd = -1;
 static guint __inoti_handler = 0;
 static GSList *__noti_list = NULL;
@@ -151,6 +152,11 @@ static inline int __ctsvc_inotify_attach_handler(int fd)
 int ctsvc_inotify_init(void)
 {
 	int ret;
+
+	if (0 < __ctsvc_inoti_ref) {
+		__ctsvc_inoti_ref++;
+		return CONTACTS_ERROR_NONE;
+	}
 	__inoti_fd = inotify_init();
 	RETVM_IF(-1 == __inoti_fd, CONTACTS_ERROR_SYSTEM,
 			"System: inotify_init() Failed(%d)", errno);
@@ -169,6 +175,7 @@ int ctsvc_inotify_init(void)
 		return CONTACTS_ERROR_SYSTEM;
 	}
 
+	__ctsvc_inoti_ref++;
 	return CONTACTS_ERROR_NONE;
 }
 
@@ -266,8 +273,12 @@ int ctsvc_inotify_subscribe(const char *view_uri,
 			"__ctsvc_noti_get_file_path(%s) Failed", view_uri);
 
 	wd = __ctsvc_inotify_get_wd(__inoti_fd, path);
-	RETVM_IF(-1 == wd, CONTACTS_ERROR_SYSTEM,
-			"__ctsvc_inotify_get_wd() Failed(%d)", errno);
+	if (-1 == wd) {
+		CTS_ERR("__ctsvc_inotify_get_wd() Failed(errno : %d)", errno);
+		if (errno == EACCES)
+			return CONTACTS_ERROR_PERMISSION_DENIED;
+		return CONTACTS_ERROR_SYSTEM;
+	}
 
 	for (it=__noti_list;it;it=it->next) {
 		if (it->data) {
@@ -282,7 +293,7 @@ int ctsvc_inotify_subscribe(const char *view_uri,
 
 	if (same_noti) {
 		__ctsvc_inotify_watch(__inoti_fd, path);
-		CTS_ERR("The same callback(%s) is already exist", path);
+		CTS_ERR("The same callback(%s) is already exist", view_uri);
 		return CONTACTS_ERROR_SYSTEM;
 	}
 
@@ -352,8 +363,12 @@ int ctsvc_inotify_unsubscribe(const char *view_uri, contacts_db_changed_cb cb, v
 			"__ctsvc_noti_get_file_path(%s) Failed", view_uri);
 
 	wd = __ctsvc_inotify_get_wd(__inoti_fd, path);
-	RETVM_IF(-1 == wd, CONTACTS_ERROR_SYSTEM,
-			"System: __ctsvc_inotify_get_wd() Failed(%d)", errno);
+	if (-1 == wd) {
+		CTS_ERR("__ctsvc_inotify_get_wd() Failed(errno : %d)", errno);
+		if (errno == EACCES)
+			return CONTACTS_ERROR_PERMISSION_DENIED;
+		return CONTACTS_ERROR_SYSTEM;
+	}
 
 	ret = __ctsvc_del_noti(&__noti_list, wd, view_uri, cb, user_data);
 	WARN_IF(ret < CONTACTS_ERROR_NONE, "__ctsvc_del_noti() Failed(%d)", ret);
@@ -379,6 +394,18 @@ static inline gboolean __ctsvc_inotify_detach_handler(guint id)
 
 void ctsvc_inotify_close(void)
 {
+	if (1 < __ctsvc_inoti_ref) {
+		CTS_DBG("inotify ref count : %d", __ctsvc_inoti_ref);
+		__ctsvc_inoti_ref--;
+		return;
+	}
+	else if (__ctsvc_inoti_ref < 1) {
+		CTS_DBG("Please call connection API. inotify ref count : %d", __ctsvc_inoti_ref);
+		return;
+	}
+
+	__ctsvc_inoti_ref--;
+
 	if (__inoti_handler) {
 		__ctsvc_inotify_detach_handler(__inoti_handler);
 		__inoti_handler = 0;
