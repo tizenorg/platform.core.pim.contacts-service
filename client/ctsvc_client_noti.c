@@ -30,7 +30,7 @@ typedef struct
 {
 	contacts_db_change_cb_with_info cb;
 	void *user_data;
-}callback_info_s;
+}db_callback_info_s;
 
 typedef struct
 {
@@ -39,9 +39,9 @@ typedef struct
 }subscribe_info_s;
 
 static pims_ipc_h __ipc = NULL;
-static GSList *__subscribe_list = NULL;
+static GSList *__db_change_subscribe_list = NULL;
 
-static void __ctsvc_subscriber_callback(pims_ipc_h ipc, pims_ipc_data_h data, void *user_data)
+static void __ctsvc_db_subscriber_callback(pims_ipc_h ipc, pims_ipc_data_h data, void *user_data)
 {
 	unsigned int size = 0;
 	char *str = NULL;
@@ -58,10 +58,16 @@ static void __ctsvc_subscriber_callback(pims_ipc_h ipc, pims_ipc_data_h data, vo
 	if (info) {
 		GSList *l;
 		for (l = info->callbacks;l;l=l->next) {
-			callback_info_s *cb_info = l->data;
+			db_callback_info_s *cb_info = l->data;
 			cb_info->cb(info->view_uri, str, cb_info->user_data);
 		}
 	}
+}
+
+// This API should be called in CTS_MUTEX_PIMS_IPC_PUBSUB mutex
+pims_ipc_h ctsvc_ipc_get_handle_for_change_subsciption()
+{
+	return __ipc;
 }
 
 int ctsvc_ipc_create_for_change_subscription()
@@ -96,11 +102,11 @@ API int contacts_db_add_changed_cb_with_info(const char* view_uri,
 {
 	GSList *it = NULL;
 	subscribe_info_s *info = NULL;
-	callback_info_s *cb_info;
+	db_callback_info_s *cb_info;
 
 	ctsvc_mutex_lock(CTS_MUTEX_PIMS_IPC_PUBSUB);
 
-	for (it=__subscribe_list;it;it=it->next) {
+	for (it=__db_change_subscribe_list;it;it=it->next) {
 		if (!it->data) continue;
 
 		info = it->data;
@@ -119,17 +125,28 @@ API int contacts_db_add_changed_cb_with_info(const char* view_uri,
 		}
 
 		if (pims_ipc_subscribe(__ipc, CTSVC_IPC_SUBSCRIBE_MODULE, (char*)view_uri,
-					__ctsvc_subscriber_callback, (void*)info) != 0) {
+					__ctsvc_db_subscriber_callback, (void*)info) != 0) {
 			CTS_ERR("pims_ipc_subscribe error\n");
 			free(info);
 			ctsvc_mutex_unlock(CTS_MUTEX_PIMS_IPC_PUBSUB);
 			return CONTACTS_ERROR_IPC;
 		}
 		info->view_uri = strdup(view_uri);
-		__subscribe_list = g_slist_append(__subscribe_list, info);
+		__db_change_subscribe_list = g_slist_append(__db_change_subscribe_list, info);
+	}
+	else {
+		GSList *l;
+		for (l = info->callbacks;l;l=l->next) {
+			db_callback_info_s *cb_info = l->data;
+			if (cb_info->cb == cb && cb_info->user_data == user_data) {
+				CTS_ERR("The same callback(%s) is already exist", view_uri);
+				ctsvc_mutex_unlock(CTS_MUTEX_PIMS_IPC_PUBSUB);
+				return CONTACTS_ERROR_INVALID_PARAMETER;
+			}
+		}
 	}
 
-	cb_info = calloc(1, sizeof(callback_info_s));
+	cb_info = calloc(1, sizeof(db_callback_info_s));
 	cb_info->user_data = user_data;
 	cb_info->cb = cb;
 	info->callbacks = g_slist_append(info->callbacks, cb_info);
@@ -146,7 +163,7 @@ API int contacts_db_remove_changed_cb_with_info(const char* view_uri,
 
 	ctsvc_mutex_lock(CTS_MUTEX_PIMS_IPC_PUBSUB);
 
-	for (it=__subscribe_list;it;it=it->next) {
+	for (it=__db_change_subscribe_list;it;it=it->next) {
 		if (!it->data) continue;
 
 		info = it->data;
@@ -159,7 +176,7 @@ API int contacts_db_remove_changed_cb_with_info(const char* view_uri,
 	if (info) {
 		GSList *l;
 		for(l = info->callbacks;l;l=l->next) {
-			callback_info_s *cb_info = l->data;
+			db_callback_info_s *cb_info = l->data;
 			if (cb == cb_info->cb && user_data == cb_info->user_data) {
 				info->callbacks = g_slist_remove(info->callbacks, cb_info);
 				break;
@@ -167,7 +184,7 @@ API int contacts_db_remove_changed_cb_with_info(const char* view_uri,
 		}
 		if (g_slist_length(info->callbacks) == 0) {
 			pims_ipc_unsubscribe(__ipc, CTSVC_IPC_SUBSCRIBE_MODULE, info->view_uri);
-			__subscribe_list = g_slist_remove(__subscribe_list, info);
+			__db_change_subscribe_list = g_slist_remove(__db_change_subscribe_list, info);
 			free(info->view_uri);
 			free(info);
 		}
@@ -176,4 +193,3 @@ API int contacts_db_remove_changed_cb_with_info(const char* view_uri,
 	ctsvc_mutex_unlock(CTS_MUTEX_PIMS_IPC_PUBSUB);
 	return CONTACTS_ERROR_NONE;
 }
-
