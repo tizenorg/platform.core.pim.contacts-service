@@ -44,7 +44,7 @@ extern "C"
  *
  * @see  contacts_connect2()
  */
-API int contacts_sim_import_all_contacts();
+API int contacts_sim_import_all_contacts(void);
 
 
 /**

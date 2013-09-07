@@ -282,8 +282,6 @@ API int	contacts_record_add_child_record( contacts_record_h record, unsigned int
  */
 API int	contacts_record_remove_child_record( contacts_record_h record, unsigned int property_id, contacts_record_h child_record );
 
-//API int contacts_record_update_child_record( contacts_record_h record, contacts_record_h child_record );
-
 /**
  * @brief   Gets a number of child record handle from a parent record handle.
  *
