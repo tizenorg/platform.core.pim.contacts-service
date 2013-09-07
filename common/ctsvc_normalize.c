@@ -364,10 +364,11 @@ static inline int __ctsvc_collation_str(const char *src, char **dest)
 	UErrorCode status = U_ZERO_ERROR;
 	UChar *tmp_result = NULL;
 	UCollator *collator;
-	const char *region;
+	char *region = NULL;
 
 	region = vconf_get_str(VCONFKEY_REGIONFORMAT);
 	collator = ucol_open(region, &status);
+	free(region);
 	RETVM_IF(U_FAILURE(status), CONTACTS_ERROR_SYSTEM,
 			"ucol_open() Failed(%s)", u_errorName(status));
 
