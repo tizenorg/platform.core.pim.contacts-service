@@ -33,6 +33,7 @@
 #include "ctsvc_db_plugin_person_helper.h"
 #include "ctsvc_db_plugin_image_helper.h"
 #include "ctsvc_db_plugin_company_helper.h"
+#include "ctsvc_db_plugin_group_helper.h"
 
 
 #include "ctsvc_phonelog.h"
@@ -85,6 +86,10 @@ int ctsvc_db_open(void) {
 						"sqlite3_create_function() Failed(%d)", ret);
 		ret = sqlite3_create_function(ctsvc_db, "_PERSON_DELETE_", 1, SQLITE_UTF8, NULL,
 					ctsvc_db_person_delete_callback, NULL, NULL);
+		RETVM_IF(SQLITE_OK != ret, CONTACTS_ERROR_DB,
+						"sqlite3_create_function() Failed(%d)", ret);
+		ret = sqlite3_create_function(ctsvc_db, "_GROUP_DELETE_", 1, SQLITE_UTF8, NULL,
+					ctsvc_db_group_delete_callback, NULL, NULL);
 		RETVM_IF(SQLITE_OK != ret, CONTACTS_ERROR_DB,
 						"sqlite3_create_function() Failed(%d)", ret);
 

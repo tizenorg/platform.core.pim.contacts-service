@@ -249,6 +249,7 @@ CREATE TRIGGER trg_groups_del AFTER DELETE ON groups
  BEGIN
    UPDATE contacts SET changed_ver=((SELECT ver FROM cts_version) + 1) WHERE deleted = 0 AND contact_id IN (SELECT contact_id FROM group_relations WHERE group_id=old.group_id);
    DELETE FROM group_relations WHERE group_id = old.group_id;
+	SELECT _GROUP_DELETE_(old.image_thumbnail_path);
  END;
 
 CREATE TRIGGER trg_groups_del2 AFTER DELETE ON groups

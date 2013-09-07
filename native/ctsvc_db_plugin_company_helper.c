@@ -31,95 +31,6 @@
 #include "ctsvc_record.h"
 #include "ctsvc_notification.h"
 
-#define CTS_LOGO_IMAGE_LOCATION "/opt/usr/data/contacts-svc/img/logo"
-
-static int __ctsvc_company_add_logo_file(int parent_id, int company_id, char *src_img, char *dest_name, int dest_size)
-{
-	int ret;
-	char *temp;
-	char *ext;
-	char dest[CTSVC_IMG_FULL_PATH_SIZE_MAX] = {0};
-
-	RETVM_IF(NULL == src_img, CONTACTS_ERROR_INVALID_PARAMETER, "img_path is NULL");
-	RETVM_IF(NULL == dest_name, CONTACTS_ERROR_INVALID_PARAMETER, "img_path is NULL");
-	dest_name[0] = '\0';
-
-	ext = strrchr(src_img, '.');
-	if (NULL == ext || strchr(ext, '/'))
-		ext = "";
-
-	snprintf(dest, sizeof(dest), "%s/%d_%d%s",
-			CTS_LOGO_IMAGE_LOCATION, parent_id, company_id, ext);
-
-	ext = strrchr(dest, '.');
-	if (NULL == ext || strchr(ext, '/'))
-		ext = "";
-
-	temp = ext;
-	while (*temp) {
-		*temp = tolower(*temp);
-		temp++;
-	}
-
-	ret = ctsvc_copy_image(src_img, dest);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "cts_copy_file() Failed(%d)", ret);
-
-	snprintf(dest_name, dest_size, "%d_%d%s", parent_id, company_id, ext);
-	return CONTACTS_ERROR_NONE;
-}
-
-static int __ctsvc_company_delete_logo_file(int company_id)
-{
-	int ret;
-	cts_stmt stmt;
-	char *tmp_path;
-	char query[CTS_SQL_MIN_LEN] = {0};
-	snprintf(query, sizeof(query),
-			"SELECT data8 FROM %s WHERE id = %d AND datatype = %d",
-			CTS_TABLE_DATA, company_id, CTSVC_DATA_COMPANY);
-
-	stmt = cts_query_prepare(query);
-	if (NULL == stmt) {
-		CTS_ERR("cts_query_prepare() Failed");
-		cts_stmt_finalize(stmt);
-		return CONTACTS_ERROR_DB;
-	}
-
-	ret = cts_stmt_step(stmt);
-	if (1 /*CTS_TRUE*/  != ret) {
-		CTS_DBG("cts_stmt_step() Failed(%d)", ret);
-		cts_stmt_finalize(stmt);
-		return CONTACTS_ERROR_NO_DATA;
-	}
-
-	tmp_path = ctsvc_stmt_get_text(stmt, 0);
-	if (tmp_path) {
-		char full_path[CTSVC_IMG_FULL_PATH_SIZE_MAX] = {0};
-		snprintf(full_path, sizeof(full_path), "%s/%s", CTS_LOGO_IMAGE_LOCATION, tmp_path);
-		ret = unlink(full_path);
-		WARN_IF(ret < 0, "unlink(%s) Failed(%d)", full_path, errno);
-	}
-	cts_stmt_finalize(stmt);
-
-	return CONTACTS_ERROR_NONE;
-}
-
-
-static int __ctsvc_company_update_logo_file(int parent_id, int company_id, char *src_img, char *dest_name, int dest_size)
-{
-	int ret;
-	dest_name[0] = '\0';
-	ret = __ctsvc_company_delete_logo_file(company_id);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret && CONTACTS_ERROR_NO_DATA != ret,
-			ret, "ccts_company_delete_logo_file() Failed(%d)", ret);
-
-	if (src_img) {
-		ret = __ctsvc_company_add_logo_file(parent_id, company_id, src_img, dest_name, dest_size);
-		RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "__ctsvc_company_add_logo_file() Failed(%d)", ret);
-	}
-	return ret;
-}
-
 static int __ctsvc_company_bind_stmt(cts_stmt stmt, ctsvc_company_s *company, int start_cnt)
 {
 	cts_stmt_bind_int(stmt, start_cnt, company->is_default);
@@ -195,9 +106,10 @@ int ctsvc_db_company_insert(contacts_record_h record, int contact_id, bool is_my
 		__ctsvc_company_bind_stmt(stmt, company, 1);
 		if (company->logo) {
 			char image[CTS_SQL_MAX_LEN] = {0};
-			ret = __ctsvc_company_add_logo_file(contact_id, company->id, company->logo, image, sizeof(image));
+			ctsvc_utils_make_image_file_name(contact_id, company_id, company->logo, image, sizeof(image));
+			ret = ctsvc_utils_copy_image(CTS_LOGO_IMAGE_LOCATION, company->logo, image);
 			if (CONTACTS_ERROR_NONE != ret) {
-				CTS_ERR("__ctsvc_company_add_logo_file() Failed(%d)", ret);
+				CTS_ERR("ctsvc_utils_copy_image() Failed(%d)", ret);
 				cts_stmt_finalize(stmt);
 				return ret;
 			}
@@ -273,30 +185,66 @@ int ctsvc_db_company_get_value_from_stmt(cts_stmt stmt, contacts_record_h *recor
 
 int ctsvc_db_company_update(contacts_record_h record, int contact_id, bool is_my_profile)
 {
-	int id;
 	int ret = CONTACTS_ERROR_NONE;
 	char* set = NULL;
 	GSList *bind_text = NULL;
 	GSList *cursor = NULL;
 	char query[CTS_SQL_MAX_LEN] = {0};
 	ctsvc_company_s *company = (ctsvc_company_s*)record;
+	cts_stmt stmt = NULL;
 
 	RETVM_IF(!company->id, CONTACTS_ERROR_INVALID_PARAMETER, "company of contact has no ID.");
 	RETVM_IF(CTSVC_PROPERTY_FLAG_DIRTY != (company->base.property_flag & CTSVC_PROPERTY_FLAG_DIRTY), CONTACTS_ERROR_NONE, "No update");
 
 	snprintf(query, sizeof(query),
-			"SELECT id FROM "CTS_TABLE_DATA" WHERE id = %d", company->id);
-	ret = ctsvc_query_get_first_int_result(query, &id);
-	RETV_IF(ret != CONTACTS_ERROR_NONE, ret);
+			"SELECT id, data8 FROM "CTS_TABLE_DATA" WHERE id = %d", company->id);
+	stmt = cts_query_prepare(query);
+	RETVM_IF(stmt == NULL, CONTACTS_ERROR_DB, "cts_query_prepare Fail");
+	ret = cts_stmt_step(stmt);
+	if (ret != 1) {
+		cts_stmt_finalize(stmt);
+		if (ret == CONTACTS_ERROR_NONE)
+			return CONTACTS_ERROR_NO_DATA;
+		else
+			return ret;
+	}
 
 	if (ctsvc_record_check_property_flag((ctsvc_record_s *)company, _contacts_company.logo, CTSVC_PROPERTY_FLAG_DIRTY)) {
-		char dest[CTS_SQL_MAX_LEN] = {0};
-		__ctsvc_company_update_logo_file(contact_id, company->id, company->logo, dest, sizeof(dest));
-		if (*dest) {
+		char *logo = ctsvc_stmt_get_text(stmt, 1);
+		bool same = false;
+
+		// delete current logo image
+		if (logo) {
+			char full_path[CTSVC_IMG_FULL_PATH_SIZE_MAX] = {0};
+			snprintf(full_path, sizeof(full_path), "%s/%s", CTS_LOGO_IMAGE_LOCATION, logo);
+			if (company->logo && strcmp(company->logo, full_path) == 0) {
+				int index = _contacts_company.logo & 0x000000FF;
+				((ctsvc_record_s *)record)->properties_flags[index] = 0;
+				same = true;
+			}
+			else {
+				ret = unlink(full_path);
+				if (ret < 0) {
+					CTS_WARN("unlink Failed(%d)", errno);
+				}
+			}
+		}
+
+		// add new logo file
+		if (!same && company->logo) {
+			char dest[CTS_SQL_MAX_LEN] = {0};
+			ctsvc_utils_make_image_file_name(contact_id, company->id, company->logo, dest, sizeof(dest));
+			ret = ctsvc_utils_copy_image(CTS_LOGO_IMAGE_LOCATION, company->logo, dest);
+			if (CONTACTS_ERROR_NONE != ret) {
+				CTS_ERR("cts_copy_file() Failed(%d)", ret);
+				cts_stmt_finalize(stmt);
+				return ret;
+			}
 			free(company->logo);
 			company->logo = strdup(dest);
 		}
 	}
+	cts_stmt_finalize(stmt);
 
 	do {
 		if (CONTACTS_ERROR_NONE != (ret = ctsvc_db_create_set_query(record, &set, &bind_text))) break;

@@ -94,6 +94,7 @@ SET(SRCS
 	${CMAKE_SOURCE_DIR}/native/ctsvc_db_plugin_extension.c
 
 	${CMAKE_SOURCE_DIR}/native/ctsvc_db_plugin_group.c
+	${CMAKE_SOURCE_DIR}/native/ctsvc_db_plugin_group_helper.c
 	${CMAKE_SOURCE_DIR}/native/ctsvc_db_plugin_grouprelation.c
 
 	${CMAKE_SOURCE_DIR}/native/ctsvc_db_plugin_image_helper.c

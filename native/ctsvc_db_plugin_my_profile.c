@@ -708,7 +708,7 @@ static int __ctsvc_db_my_profile_update_record( contacts_record_h record )
 					(my_profile->image_thumbnail_path && image->path && 0 != strcmp(my_profile->image_thumbnail_path, image->path))) {
 				ctsvc_record_set_property_flag((ctsvc_record_s *)my_profile, _contacts_my_profile.image_thumbnail_path, CTSVC_PROPERTY_FLAG_DIRTY);
 
-				if ( image->path && *image->path && strstr(image->path, CTS_IMG_FULL_LOCATION) != NULL)
+				if (ctsvc_contact_check_image_location(image->path))
 					my_profile->image_thumbnail_path = SAFE_STRDUP(image->path + strlen(CTS_IMG_FULL_LOCATION) + 1);
 				else
 					my_profile->image_thumbnail_path = SAFE_STRDUP(image->path);
