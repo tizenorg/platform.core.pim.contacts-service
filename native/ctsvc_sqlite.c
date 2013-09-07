@@ -38,18 +38,19 @@
 #include "ctsvc_phonelog.h"
 #include "ctsvc_person.h"
 
-#define CTSVC_QUERY_RETRY_TIME	2
+#define CTSVC_QUERY_RETRY_TIME	8
+#define CTSVC_QUERY_RETRY_INTERVAL	50*1000
 
 static __thread sqlite3 *ctsvc_db = NULL;
 
 static inline int __ctsvc_db_busyhandler(void *pData, int count)
 {
 	if(10 - count > 0) {
-		CTS_DBG("Busy Handler Called! : PID(%d) / CNT(%d)\n", getpid(), count+1);
+		CTS_INFO("Busy Handler Called! : Thread(%08x) / CNT(%d)\n", pthread_self(), count+1);
 		usleep(20000);
 		return 1;
 	} else {
-		CTS_DBG("Busy Handler will be returned SQLITE_BUSY error : PID(%d) \n", getpid());
+		CTS_INFO("Busy Handler will be returned SQLITE_BUSY error : Thread(%08x) \n", pthread_self());
 		return 0;
 	}
 }
@@ -145,7 +146,6 @@ int ctsvc_query_get_first_int_result(const char *query, int *result) {
 	gettimeofday(&from, NULL);
 	do {
 		ret = sqlite3_prepare_v2(ctsvc_db, query, strlen(query), &stmt, NULL);
-
 		if (ret != SQLITE_OK)
 			CTS_ERR("DB error : sqlite3_prepare_v2() Failed(%d, %s)", ret, sqlite3_errmsg(ctsvc_db));
 
@@ -154,7 +154,7 @@ int ctsvc_query_get_first_int_result(const char *query, int *result) {
 			timersub(&now, &from, &diff);
 			retry = (diff.tv_sec < CTSVC_QUERY_RETRY_TIME)? true:false;
 			if (retry)
-				usleep(50*1000); // 50 ms
+				usleep(CTSVC_QUERY_RETRY_INTERVAL);
 		} else
 			retry = false;
 	}while(retry);
@@ -168,8 +168,7 @@ int ctsvc_query_get_first_int_result(const char *query, int *result) {
 	gettimeofday(&from, NULL);
 	do {
 		ret = sqlite3_step(stmt);
-
-		if (ret != SQLITE_ROW)
+		if (ret != SQLITE_ROW && SQLITE_DONE != ret)
 			CTS_ERR("DB error : sqlite3_step() Failed(%d, %s)", ret, sqlite3_errmsg(ctsvc_db));
 
 		if (ret == SQLITE_BUSY || ret == SQLITE_LOCKED) {
@@ -177,7 +176,7 @@ int ctsvc_query_get_first_int_result(const char *query, int *result) {
 			timersub(&now, &from, &diff);
 			retry = (diff.tv_sec < CTSVC_QUERY_RETRY_TIME)? true:false;
 			if (retry)
-				usleep(50*1000); // 50 ms
+				usleep(CTSVC_QUERY_RETRY_INTERVAL);
 		}
 		else
 			retry = false;
@@ -222,7 +221,7 @@ int ctsvc_query_exec(const char *query) {
 			timersub(&now, &from, &diff);
 			retry = (diff.tv_sec < CTSVC_QUERY_RETRY_TIME)? true:false;
 			if (retry)
-				usleep(50*1000); // 50 ms
+				usleep(CTSVC_QUERY_RETRY_INTERVAL);
 		}
 		else
 			retry = false;
@@ -268,7 +267,7 @@ cts_stmt cts_query_prepare(char *query) {
 			timersub(&now, &from, &diff);
 			retry = (diff.tv_sec < CTSVC_QUERY_RETRY_TIME)? true:false;
 			if (retry)
-				usleep(50*1000); // 50 ms
+				usleep(CTSVC_QUERY_RETRY_INTERVAL);
 		} else
 			retry = false;
 	}while(retry);
@@ -278,9 +277,27 @@ cts_stmt cts_query_prepare(char *query) {
 
 int ctsvc_stmt_get_first_int_result(cts_stmt stmt, int *result) {
 	int ret;
+	struct timeval from, now, diff;
+	bool retry = false;
 	RETVM_IF(NULL == ctsvc_db, CONTACTS_ERROR_DB /*CTS_ERR_DB_NOT_OPENED*/, "DB error : Database is not opened");
 
-	ret = sqlite3_step(stmt);
+	gettimeofday(&from, NULL);
+	do {
+		ret = sqlite3_step(stmt);
+		if (SQLITE_ROW != ret && SQLITE_DONE != ret)
+			CTS_ERR("sqlite3_step() Failed(%d, %s)", ret, sqlite3_errmsg(ctsvc_db));
+
+		if (ret == SQLITE_BUSY || ret == SQLITE_LOCKED) {
+			gettimeofday(&now, NULL);
+			timersub(&now, &from, &diff);
+			retry = (diff.tv_sec < CTSVC_QUERY_RETRY_TIME)? true:false;
+			if (retry)
+				usleep(CTSVC_QUERY_RETRY_INTERVAL);
+		}
+		else
+			retry = false;
+	}while(retry);
+
 	if (SQLITE_ROW != ret) {
 		CTS_ERR("sqlite3_step() Failed(%d, %s)", ret, sqlite3_errmsg(ctsvc_db));
 		sqlite3_finalize(stmt);
@@ -312,7 +329,7 @@ int cts_stmt_step(cts_stmt stmt) {
 			timersub(&now, &from, &diff);
 			retry = (diff.tv_sec < CTSVC_QUERY_RETRY_TIME)? true:false;
 			if (retry)
-				usleep(50*1000); // 50 ms
+				usleep(CTSVC_QUERY_RETRY_INTERVAL);
 		}
 		else
 			retry = false;
