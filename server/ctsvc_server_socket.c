@@ -24,6 +24,7 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <errno.h>
+#include <security-server.h>
 
 #include "contacts.h"
 #include "ctsvc_internal.h"
@@ -140,6 +141,10 @@ static gboolean __ctsvc_server_socket_request_handler(GIOChannel *src, GIOCondit
 		gpointer data)
 {
 	int ret;
+	int fd;
+	bool have_read_permission = false;
+	bool have_write_permission = false;
+
 	ctsvc_socket_msg_s msg = {0};
 	CTS_FN_CALL;
 
@@ -148,16 +153,32 @@ static gboolean __ctsvc_server_socket_request_handler(GIOChannel *src, GIOCondit
 		return FALSE;
 	}
 
-	ret = __ctsvc_server_socket_safe_read(g_io_channel_unix_get_fd(src), (char *)&msg, sizeof(msg));
+	fd = g_io_channel_unix_get_fd(src);
+	ret = __ctsvc_server_socket_safe_read(fd, (char *)&msg, sizeof(msg));
 	RETVM_IF(-1 == ret, TRUE, "__ctsvc_server_socket_safe_read() Failed(errno = %d)", errno);
 
 	CTS_DBG("attach number = %d", msg.attach_num);
 
+	if (SECURITY_SERVER_API_SUCCESS == security_server_check_privilege_by_sockfd(fd, "contacts-service::svc", "r"))
+		have_read_permission = true;
+	if (SECURITY_SERVER_API_SUCCESS == security_server_check_privilege_by_sockfd(fd, "contacts-service::svc", "w"))
+		have_write_permission = true;
+
 	switch (msg.type) {
 	case CTSVC_SOCKET_MSG_TYPE_REQUEST_IMPORT_SIM:
+		if (!have_write_permission) {
+			CTS_ERR("write permission denied");
+			ctsvc_server_socket_return(src, CONTACTS_ERROR_PERMISSION_DENIED, 0, NULL);
+			return TRUE;
+		}
 		__ctsvc_server_socket_import_sim(src);
 		break;
 	case CTSVC_SOCKET_MSG_TYPE_REQUEST_SIM_INIT_COMPLETE:
+		if (!have_read_permission) {
+			CTS_ERR("read permission denied");
+			ctsvc_server_socket_return(src, CONTACTS_ERROR_PERMISSION_DENIED, 0, NULL);
+			return TRUE;
+		}
 		__ctsvc_server_socket_get_sim_init_status(src);
 		break;
 	default:

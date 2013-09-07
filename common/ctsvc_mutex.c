@@ -40,6 +40,7 @@ static pthread_mutex_t sockfd_mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t trans_mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t ipc_mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t ipc_pubsub_mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t access_control_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 static inline pthread_mutex_t* cts_mutex_get_mutex(int type)
 {
@@ -60,6 +61,9 @@ static inline pthread_mutex_t* cts_mutex_get_mutex(int type)
 		break;
 	case CTS_MUTEX_PIMS_IPC_PUBSUB:
 		ret_val = &ipc_pubsub_mutex;
+		break;
+	case CTS_MUTEX_ACCESS_CONTROL:
+		ret_val = &access_control_mutex;
 		break;
 	default:
 		CTS_ERR("unknown type(%d)", type);

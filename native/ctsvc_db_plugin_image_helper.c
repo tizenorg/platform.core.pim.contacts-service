@@ -27,7 +27,7 @@
 #include "ctsvc_db_plugin_contact_helper.h"
 #include "ctsvc_record.h"
 #include "ctsvc_notification.h"
-
+#include "ctsvc_db_access_control.h"
 
 int ctsvc_db_image_get_value_from_stmt(cts_stmt stmt, contacts_record_h *record, int start_count)
 {
@@ -94,6 +94,9 @@ int ctsvc_db_image_insert(contacts_record_h record, int contact_id, bool is_my_p
 	RETVM_IF(0 < image->id, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : id(%d), This record is already inserted", image->id);
 
+	ret = ctsvc_have_file_read_permission(image->path);
+	RETVM_IF(ret != CONTACTS_ERROR_NONE, ret, "ctsvc_have_file_read_permission fail(%d)", ret);
+
 	image_id = cts_db_get_next_id(CTS_TABLE_DATA);
 	ret = ctsvc_contact_add_image_file(contact_id, image_id, image->path, image_path, sizeof(image_path));
 	if (CONTACTS_ERROR_NONE != ret) {
@@ -156,6 +159,13 @@ int ctsvc_db_image_update(contacts_record_h record, int contact_id, bool is_my_p
 
 	if (ctsvc_record_check_property_flag((ctsvc_record_s *)record, _contacts_image.path, CTSVC_PROPERTY_FLAG_DIRTY)) {
 		char image_path[CTS_SQL_MAX_LEN] = {0};
+		if (image->path) {
+			ret = ctsvc_have_file_read_permission(image->path);
+			if (ret != CONTACTS_ERROR_NONE) {
+				CTS_ERR("ctsvc_have_file_read_permission Fail(%d)", ret);
+				return ret;
+			}
+		}
 
 		ret = ctsvc_contact_update_image_file(contact_id, image->id, image->path, image_path, sizeof(image_path));
 		RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_contact_update_image_file() Failed(%d)", ret);

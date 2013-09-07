@@ -22,6 +22,8 @@ BuildRequires:  pkgconfig(pims-ipc)
 BuildRequires:  pkgconfig(accounts-svc)
 BuildRequires:  pkgconfig(badge)
 BuildRequires:  pkgconfig(libexif)
+BuildRequires:  pkgconfig(libsmack)
+BuildRequires:  pkgconfig(security-server)
 Requires(post): /usr/bin/sqlite3, /bin/chmod, /bin/chown
 Requires(post): /usr/bin/vconftool
 Requires(post): /sbin/ldconfig
@@ -108,7 +110,7 @@ vconftool set -t int db/contacts-svc/phonenumber_min_match_digit 8 -g 6005 -s co
 /usr/lib/systemd/user/contacts-service.service
 /usr/lib/systemd/user/tizen-middleware.target.wants/contacts-service.service
 %config(noreplace) /opt/usr/dbspace/.contacts-svc.db*
-
+/opt/etc/smack/accesses.d/%{name}2.rule
 
 %files -n contacts-service2-devel
 %manifest %{name}.manifest

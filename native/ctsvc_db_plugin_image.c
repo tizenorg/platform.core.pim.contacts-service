@@ -429,7 +429,11 @@ static int __ctsvc_db_image_delete_record( int id )
 			"SELECT contact_id, person_id FROM "CTSVC_DB_VIEW_CONTACT " "
 			"WHERE contact_id = (SELECT contact_id FROM "CTS_TABLE_DATA" WHERE id = %d)", id);
 	stmt = cts_query_prepare(query);
-	RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB, "DB error : cts_query_prepare() Failed");
+	if (NULL == stmt) {
+		CTS_ERR("DB error : cts_query_prepare() Failed");
+		ctsvc_end_trans(false);
+		return CONTACTS_ERROR_DB;
+	}
 
 	ret = cts_stmt_step(stmt);
 	if (1 /*CTS_TRUE*/ != ret) {
@@ -446,15 +450,23 @@ static int __ctsvc_db_image_delete_record( int id )
 			"SELECT is_default, is_primary_default FROM "CTS_TABLE_DATA" WHERE id = %d", id);
 
 	stmt = cts_query_prepare(query);
-	RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB , "DB error : cts_query_prepare() Failed");
+	if (NULL == stmt) {
+		CTS_ERR("DB error : cts_query_prepare() Failed");
+		ctsvc_end_trans(false);
+		return CONTACTS_ERROR_DB;
+	}
 
 	ret = cts_stmt_step(stmt);
 	if (1 != ret) {
 		CTS_ERR("DB error : cts_stmt_step() Failed(%d)", ret);
 		cts_stmt_finalize(stmt);
 		ctsvc_end_trans(false);
-		return CONTACTS_ERROR_NO_DATA;
+		if (CONTACTS_ERROR_NONE == ret)
+			return CONTACTS_ERROR_NO_DATA;
+		else
+			return ret;
 	}
+
 	is_default = ctsvc_stmt_get_int(stmt, 0);
 	is_primary_default = ctsvc_stmt_get_int(stmt, 1);
 	cts_stmt_finalize(stmt);

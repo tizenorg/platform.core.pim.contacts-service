@@ -383,7 +383,6 @@ static void __ctsvc_my_profile_check_default_data(ctsvc_my_profile_s *my_profile
 	ctsvc_contact_check_default_number((contacts_list_h)my_profile->numbers);
 	ctsvc_contact_check_default_email((contacts_list_h)my_profile->emails);
 	ctsvc_contact_check_default_image((contacts_list_h)my_profile->images);
-	ctsvc_contact_check_default_address((contacts_list_h)my_profile->postal_addrs);
 }
 
 static void __ctsvc_make_my_profile_display_name(ctsvc_my_profile_s *my_profile)

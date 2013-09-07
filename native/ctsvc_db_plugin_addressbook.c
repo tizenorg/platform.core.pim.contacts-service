@@ -30,6 +30,7 @@
 #include "ctsvc_person.h"
 #include "ctsvc_record.h"
 #include "ctsvc_notification.h"
+#include "ctsvc_db_access_control.h"
 
 static int __ctsvc_db_addressbook_insert_record( contacts_record_h record, int *id );
 static int __ctsvc_db_addressbook_get_record( int id, contacts_record_h* record );

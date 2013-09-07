@@ -29,6 +29,7 @@
 #include "ctsvc_db_init.h"
 #include "ctsvc_record.h"
 #include "ctsvc_notification.h"
+#include "ctsvc_db_access_control.h"
 #include "ctsvc_db_plugin_group_helper.h"
 
 static int __ctsvc_db_group_insert_record( contacts_record_h record, int *id );
@@ -131,6 +132,14 @@ static int __ctsvc_db_group_insert_record( contacts_record_h record, int *id )
 
 	if(group->image_thumbnail_path) {
 		char image[CTSVC_IMG_FULL_PATH_SIZE_MAX] = {0};
+		ret = ctsvc_have_file_read_permission(group->image_thumbnail_path);
+		if (ret != CONTACTS_ERROR_NONE) {
+			CTS_ERR("ctsvc_have_file_read_permission Fail(%d)", ret);
+			cts_stmt_finalize(stmt);
+			ctsvc_end_trans(false);
+			return ret;
+		}
+
 		ctsvc_utils_make_image_file_name(0, group->id, group->image_thumbnail_path, image, sizeof(image));
 		ret = ctsvc_utils_copy_image(CTS_GROUP_IMAGE_LOCATION, group->image_thumbnail_path, image);
 		if (CONTACTS_ERROR_NONE != ret) {
@@ -231,6 +240,7 @@ static int __ctsvc_db_group_update_record( contacts_record_h record )
 
 	if (ctsvc_record_check_property_flag((ctsvc_record_s *)group, _contacts_group.image_path, CTSVC_PROPERTY_FLAG_DIRTY)) {
 		bool same = false;
+		bool check_permission = 0;
 		// delete current image
 		if (image) {
 			char full_path[CTSVC_IMG_FULL_PATH_SIZE_MAX] = {0};
@@ -242,6 +252,16 @@ static int __ctsvc_db_group_update_record( contacts_record_h record )
 				same = true;
 			}
 			else {
+				if (group->image_thumbnail_path) {
+					ret = ctsvc_have_file_read_permission(group->image_thumbnail_path);
+					if (ret != CONTACTS_ERROR_NONE) {
+						CTS_ERR("Your module does not have read permission of the image file()");
+						ctsvc_end_trans(false);
+						free(image);
+						return ret;
+					}
+					check_permission = true;
+				}
 				ret = unlink(full_path);
 				if (ret < 0) {
 					CTS_WARN("unlink Failed(%d)", errno);
@@ -252,6 +272,15 @@ static int __ctsvc_db_group_update_record( contacts_record_h record )
 		// add new image file
 		if (!same && group->image_thumbnail_path) {
 			char dest[CTS_SQL_MAX_LEN] = {0};
+			if (false == check_permission) {
+				ret = ctsvc_have_file_read_permission(group->image_thumbnail_path);
+				if (ret != CONTACTS_ERROR_NONE) {
+					CTS_ERR("ctsvc_have_file_read_permission Fail(%d)", ret);
+					ctsvc_end_trans(false);
+					free(image);
+					return ret;
+				}
+			}
 			ctsvc_utils_make_image_file_name(0, group->id, group->image_thumbnail_path, dest, sizeof(dest));
 			ret = ctsvc_utils_copy_image(CTS_GROUP_IMAGE_LOCATION, group->image_thumbnail_path, dest);
 			if (CONTACTS_ERROR_NONE != ret) {

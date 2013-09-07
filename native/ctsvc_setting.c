@@ -31,6 +31,7 @@
 #include "ctsvc_setting.h"
 #include "ctsvc_normalize.h"
 #include "ctsvc_localize.h"
+#include "ctsvc_db_access_control.h"
 
 #ifdef _CONTACTS_IPC_SERVER
 #include "ctsvc_server_change_subject.h"
@@ -50,6 +51,9 @@ static const char *CTSVC_VCONF_PHONENUMBER_MIN_MATCH_DIGIT = VCONFKEY_CONTACTS_S
 API int contacts_setting_get_name_display_order(contacts_name_display_order_e *order)
 {
 	int ret;
+	RETVM_IF(!ctsvc_have_permission(CTSVC_PERMISSION_CONTACT_READ), CONTACTS_ERROR_PERMISSION_DENIED,
+				"Permission denied : contact read");
+
 	if (name_display_order < 0) {
 		ret = vconf_get_int(CTSVC_VCONF_DISPLAY_ORDER, &name_display_order);
 		RETVM_IF(ret<0, CONTACTS_ERROR_SYSTEM, "System : vconf_get_int() Failed(%d)", ret);
@@ -63,6 +67,8 @@ API int contacts_setting_get_name_display_order(contacts_name_display_order_e *o
 API int contacts_setting_set_name_display_order(contacts_name_display_order_e order)
 {
 	int ret;
+	RETVM_IF(!ctsvc_have_permission(CTSVC_PERMISSION_CONTACT_WRITE), CONTACTS_ERROR_PERMISSION_DENIED,
+				"Permission denied : contact write");
 	RETVM_IF(CONTACTS_NAME_DISPLAY_ORDER_FIRSTLAST != order && CONTACTS_NAME_DISPLAY_ORDER_LASTFIRST != order,
 			CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : The parameter(order:%d) is Invalid", name_display_order);
 
@@ -80,6 +86,8 @@ API int contacts_setting_set_name_display_order(contacts_name_display_order_e or
 API int contacts_setting_get_name_sorting_order(contacts_name_sorting_order_e *order)
 {
 	int ret;
+	RETVM_IF(!ctsvc_have_permission(CTSVC_PERMISSION_CONTACT_READ), CONTACTS_ERROR_PERMISSION_DENIED,
+				"Permission denied : contact read");
 	if (name_sorting_order < 0)
 	{
 		ret = vconf_get_int(CTSVC_VCONF_SORTING_ORDER, &name_sorting_order);
@@ -94,6 +102,8 @@ API int contacts_setting_get_name_sorting_order(contacts_name_sorting_order_e *o
 API int contacts_setting_set_name_sorting_order(contacts_name_sorting_order_e order)
 {
 	int ret;
+	RETVM_IF(!ctsvc_have_permission(CTSVC_PERMISSION_CONTACT_WRITE), CONTACTS_ERROR_PERMISSION_DENIED,
+				"Permission denied : contact write");
 	RETVM_IF(CONTACTS_NAME_SORTING_ORDER_FIRSTLAST != order && CONTACTS_NAME_SORTING_ORDER_LASTFIRST != order,
 			CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : The parameter(order:%d) is Invalid", name_sorting_order);
 
