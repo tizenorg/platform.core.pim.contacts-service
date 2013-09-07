@@ -179,9 +179,9 @@ static int __ctsvc_db_number_set_primary_default(int number_id, bool is_primary_
 static int __ctsvc_db_number_insert_record( contacts_record_h record, int *id )
 {
 	int ret;
-	int contact_id;
 	int person_id;
 	int old_default_number_id = 0;
+	int addressbook_id;
 	char query[CTS_SQL_MAX_LEN] = {0};
 	cts_stmt stmt = NULL;
 	ctsvc_number_s *number = (ctsvc_number_s *)record;
@@ -195,7 +195,7 @@ static int __ctsvc_db_number_insert_record( contacts_record_h record, int *id )
 	}
 
 	snprintf(query, sizeof(query),
-			"SELECT contact_id, person_id FROM "CTSVC_DB_VIEW_CONTACT" WHERE contact_id = %d", number->contact_id);
+			"SELECT addressbook_id, person_id FROM "CTSVC_DB_VIEW_CONTACT" WHERE contact_id = %d", number->contact_id);
 	stmt = cts_query_prepare(query);
 	if (NULL == stmt) {
 		CTS_ERR("DB error : cts_query_prepare() Failed");
@@ -208,9 +208,12 @@ static int __ctsvc_db_number_insert_record( contacts_record_h record, int *id )
 		CTS_ERR("DB error : cts_stmt_step() Failed(%d)", ret);
 		cts_stmt_finalize(stmt);
 		ctsvc_end_trans(false);
-		return CONTACTS_ERROR_NO_DATA;
+		if (CONTACTS_ERROR_NO_DATA)
+			return CONTACTS_ERROR_INVALID_PARAMETER;
+		else
+			return ret;
 	}
-	contact_id = ctsvc_stmt_get_int(stmt, 0);
+	addressbook_id = ctsvc_stmt_get_int(stmt, 0);
 	person_id = ctsvc_stmt_get_int(stmt, 1);
 	cts_stmt_finalize(stmt);
 
@@ -224,6 +227,7 @@ static int __ctsvc_db_number_insert_record( contacts_record_h record, int *id )
 		ctsvc_end_trans(false);
 		return ret;
 	}
+
 	snprintf(query, sizeof(query),
 		"UPDATE "CTS_TABLE_CONTACTS" SET has_phonenumber = %d, changed_ver = %d, changed_time = %d "
 			"WHERE contact_id = %d",
@@ -241,12 +245,12 @@ static int __ctsvc_db_number_insert_record( contacts_record_h record, int *id )
 		__ctsvc_db_number_update_person_has_phonenumber(person_id, true);
 
 		primary_default_contact_id = __ctsvc_db_number_get_primary_default_contact_id(person_id);
-		__ctsvc_db_number_reset_default(*id, contact_id);
+		__ctsvc_db_number_reset_default(*id, number->contact_id);
 
-		if (0 == primary_default_contact_id || contact_id == primary_default_contact_id)
+		if (0 == primary_default_contact_id || number->contact_id == primary_default_contact_id)
 			__ctsvc_db_number_set_primary_default(*id, true);
 
-		ctsvc_contact_update_display_name(contact_id, CONTACTS_DISPLAY_NAME_SOURCE_TYPE_NUMBER);
+		ctsvc_contact_update_display_name(number->contact_id, CONTACTS_DISPLAY_NAME_SOURCE_TYPE_NUMBER);
 	}
 
 	ctsvc_set_contact_noti();
@@ -291,7 +295,7 @@ static int __ctsvc_db_number_get_record( int id, contacts_record_h* out_record )
 static int __ctsvc_db_number_update_record( contacts_record_h record )
 {
 	int ret;
-	int contact_id;
+	int addressbook_id;
 	char query[CTS_SQL_MAX_LEN] = {0};
 	ctsvc_number_s *number = (ctsvc_number_s *)record;
 	RETVM_IF(NULL == number->number, CONTACTS_ERROR_INVALID_PARAMETER, "number is empty");
@@ -303,10 +307,10 @@ static int __ctsvc_db_number_update_record( contacts_record_h record )
 	}
 
 	snprintf(query, sizeof(query),
-			"SELECT contact_id, person_id FROM "CTSVC_DB_VIEW_CONTACT" WHERE contact_id = %d", number->contact_id);
-	ret = ctsvc_query_get_first_int_result(query, &contact_id);
+			"SELECT addressbook_id FROM "CTSVC_DB_VIEW_CONTACT" WHERE contact_id = %d", number->contact_id);
+	ret = ctsvc_query_get_first_int_result(query, &addressbook_id);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB error : ctsvc_begin_trans() Failed(%d)", ret);
+		CTS_ERR("No data : contact_id (%d) is not exist", number->contact_id);
 		ctsvc_end_trans(false);
 		return ret;
 	}
@@ -321,14 +325,13 @@ static int __ctsvc_db_number_update_record( contacts_record_h record )
 	if (number->is_default) {
 		int old_primary_default_number_id = 0;
 
-		old_primary_default_number_id = __ctsvc_db_number_get_primary_default(contact_id);
-		__ctsvc_db_number_reset_default(number->id, contact_id);
+		old_primary_default_number_id = __ctsvc_db_number_get_primary_default(number->contact_id);
+		__ctsvc_db_number_reset_default(number->id, number->contact_id);
 
 		if (old_primary_default_number_id)
 			__ctsvc_db_number_set_primary_default(number->id, true);
 	}
-	ctsvc_contact_update_display_name(contact_id, CONTACTS_DISPLAY_NAME_SOURCE_TYPE_NUMBER);
-
+	ctsvc_contact_update_display_name(number->contact_id, CONTACTS_DISPLAY_NAME_SOURCE_TYPE_NUMBER);
 
 	ret = ctsvc_db_contact_update_changed_time(number->contact_id);
 	if (CONTACTS_ERROR_NONE != ret) {
@@ -382,15 +385,18 @@ static int __ctsvc_db_number_delete_record( int id )
 		CTS_ERR("DB error : cts_stmt_step() Failed(%d)", ret);
 		cts_stmt_finalize(stmt);
 		ctsvc_end_trans(false);
-		return CONTACTS_ERROR_NO_DATA;
+		if (CONTACTS_ERROR_NONE == ret)
+			return CONTACTS_ERROR_NO_DATA;
+		else
+			return ret;
 	}
+
 	contact_id = ctsvc_stmt_get_int(stmt, 0);
 	person_id = ctsvc_stmt_get_int(stmt, 1);
 	cts_stmt_finalize(stmt);
 
 	snprintf(query, sizeof(query),
 			"SELECT is_default, is_primary_default FROM "CTS_TABLE_DATA" WHERE id = %d", id);
-
 	stmt = cts_query_prepare(query);
 	RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB , "DB error : cts_query_prepare() Failed");
 
@@ -466,7 +472,7 @@ static int __ctsvc_db_number_get_all_records( int offset, int limit, contacts_li
 
 	len = snprintf(query, sizeof(query),
 			"SELECT id, contact_id, is_default, data1, data2, data3, data4 FROM "CTSVC_DB_VIEW_NUMBER);
-	if (0 < limit) {
+	if (0 != limit) {
 		len += snprintf(query+len, sizeof(query)-len, " LIMIT %d", limit);
 		if (0 < offset)
 			len += snprintf(query+len, sizeof(query)-len, " OFFSET %d", offset);

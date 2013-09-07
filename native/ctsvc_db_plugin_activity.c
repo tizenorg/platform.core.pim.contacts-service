@@ -89,7 +89,7 @@ static int __ctsvc_db_activity_insert_record( contacts_record_h record, int *id 
 {
 	int ret;
 	int activity_id;
-	int contact_id;
+	int addressbook_id;
 	cts_stmt stmt = NULL;
 	unsigned int count = 0;
 	char query[CTS_SQL_MAX_LEN] = {0};
@@ -106,13 +106,19 @@ static int __ctsvc_db_activity_insert_record( contacts_record_h record, int *id 
 	RETVM_IF(ret, ret, "contacts_svc_begin_trans() Failed(%d)", ret);
 
 	snprintf(query, sizeof(query),
-			"SELECT contact_id from %s WHERE contact_id = %d",
+			"SELECT addressbook_id from %s WHERE contact_id = %d",
 				CTSVC_DB_VIEW_CONTACT, activity->contact_id);
-	ret = ctsvc_query_get_first_int_result(query, &contact_id);
+	ret = ctsvc_query_get_first_int_result(query, &addressbook_id);
 	if (CONTACTS_ERROR_NONE != ret ) {
-		CTS_ERR("No data : contact id (%d)", activity->contact_id);
 		ctsvc_end_trans(false);
-		return CONTACTS_ERROR_INVALID_PARAMETER;
+		if (CONTACTS_ERROR_NO_DATA) {
+			CTS_ERR("No data : contact id (%d)", activity->contact_id);
+			return CONTACTS_ERROR_INVALID_PARAMETER;
+		}
+		else {
+			CTS_ERR("ctsvc_query_get_first_int_result Fail(%d)", ret);
+			return ret;
+		}
 	}
 
 	snprintf(query, sizeof(query), "INSERT INTO "CTS_TABLE_ACTIVITIES"("
@@ -346,7 +352,7 @@ static int __ctsvc_db_activity_get_all_records( int offset, int limit,
 	len = snprintf(query, sizeof(query),
 			"SELECT id FROM "CTSVC_DB_VIEW_ACTIVITY);
 
-	if (0 < limit) {
+	if (0 != limit) {
 		len += snprintf(query+len, sizeof(query)-len, " LIMIT %d", limit);
 		if (0 < offset)
 			len += snprintf(query+len, sizeof(query)-len, " OFFSET %d", offset);

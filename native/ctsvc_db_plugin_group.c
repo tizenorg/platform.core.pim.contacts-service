@@ -499,7 +499,7 @@ static int __ctsvc_db_group_get_all_records( int offset, int limit, contacts_lis
 				"ringtone_path, vibration, image_thumbnail_path "
 				"FROM "CTS_TABLE_GROUPS" ORDER BY addressbook_id, group_prio");
 
-	if (0 < limit) {
+	if (0 != limit) {
 		len += snprintf(query+len, sizeof(query)-len, " LIMIT %d", limit);
 		if (0 < offset)
 			len += snprintf(query+len, sizeof(query)-len, " OFFSET %d", offset);

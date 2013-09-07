@@ -102,7 +102,10 @@ static int __ctsvc_db_addressbook_get_record( int id, contacts_record_h* out_rec
 	if (1 /*CTS_TRUE*/ != ret) {
 		CTS_ERR("cts_stmt_step() Failed(%d)", ret);
 		cts_stmt_finalize(stmt);
-		return CONTACTS_ERROR_NO_DATA;
+		if (CONTACTS_ERROR_NONE == ret)
+			return CONTACTS_ERROR_NO_DATA;
+		else
+			return ret;
 	}
 
 	ret = __ctsvc_db_addressbook_value_set(stmt, &record);
@@ -440,9 +443,9 @@ static int __ctsvc_db_addressbook_get_all_records( int offset, int limit,
 
 	len = snprintf(query, sizeof(query),
 				"SELECT addressbook_id, addressbook_name, account_id, mode, last_sync_ver "
-				 "FROM "CTS_TABLE_ADDRESSBOOKS" ORDER BY account_id, addressbook_id");
+				"FROM "CTS_TABLE_ADDRESSBOOKS" ORDER BY account_id, addressbook_id");
 
-	if (0 < limit) {
+	if (0 != limit) {
 		len += snprintf(query+len, sizeof(query)-len, " LIMIT %d", limit);
 		if (0 < offset)
 			len += snprintf(query+len, sizeof(query)-len, " OFFSET %d", offset);

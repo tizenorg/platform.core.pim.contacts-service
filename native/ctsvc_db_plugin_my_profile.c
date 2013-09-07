@@ -802,7 +802,7 @@ static int __ctsvc_db_my_profile_get_all_records( int offset, int limit, contact
 	len = snprintf(query, sizeof(query),
 			"SELECT my_profile_id FROM "CTSVC_DB_VIEW_MY_PROFILE);
 
-	if (0 < limit) {
+	if (0 != limit) {
 		len += snprintf(query+len, sizeof(query)-len, " LIMIT %d", limit);
 		if (0 < offset)
 			len += snprintf(query+len, sizeof(query)-len, " OFFSET %d", offset);

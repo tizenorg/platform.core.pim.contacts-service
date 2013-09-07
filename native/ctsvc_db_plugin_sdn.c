@@ -274,7 +274,7 @@ static int __ctsvc_db_sdn_get_all_records( int offset, int limit,
 	len = snprintf(query, sizeof(query),
 				"SELECT id, name, number FROM "CTS_TABLE_SDN);
 
-	if (0 < limit) {
+	if (0 != limit) {
 		len += snprintf(query+len, sizeof(query)-len, " LIMIT %d", limit);
 		if (0 < offset)
 			len += snprintf(query+len, sizeof(query)-len, " OFFSET %d", offset);

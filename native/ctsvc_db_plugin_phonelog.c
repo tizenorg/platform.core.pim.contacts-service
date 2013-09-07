@@ -234,7 +234,7 @@ static int __ctsvc_db_phonelog_get_all_records( int offset, int limit,
 	len = snprintf(query, sizeof(query),
 			"SELECT id, number, person_id, log_type, log_time, data1, data2 FROM "CTS_TABLE_PHONELOGS);
 
-	if (0 < limit) {
+	if (0 != limit) {
 		len += snprintf(query+len, sizeof(query)-len, " LIMIT %d", limit);
 		if (0 < offset)
 			len += snprintf(query+len, sizeof(query)-len, " OFFSET %d", offset);

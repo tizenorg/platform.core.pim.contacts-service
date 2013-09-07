@@ -385,8 +385,7 @@ static int __ctsvc_db_person_delete_record( int id )
 		ctsvc_set_group_rel_noti();
 
 	ret = ctsvc_end_trans(true);
-	if (ret < CONTACTS_ERROR_NONE)
-	{
+	if (ret < CONTACTS_ERROR_NONE) {
 		CTS_ERR("DB error : ctsvc_end_trans() Failed(%d)", ret);
 		return ret;
 	}
@@ -417,9 +416,9 @@ static int __ctsvc_db_person_get_all_records( int offset, int limit, contacts_li
 					"has_email, "
 					"is_favorite "
 			"FROM "CTSVC_DB_VIEW_PERSON" ORDER BY %s",
-				ctsvc_get_display_column(), ctsvc_get_sort_name_column(),	ctsvc_get_sort_column());
+				ctsvc_get_display_column(), ctsvc_get_sort_name_column(), ctsvc_get_sort_column());
 
-	if (0 < limit) {
+	if (0 != limit) {
 		len += snprintf(query+len, sizeof(query)-len, " LIMIT %d", limit);
 		if (0 < offset)
 			len += snprintf(query+len, sizeof(query)-len, " OFFSET %d", offset);
