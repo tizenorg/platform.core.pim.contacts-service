@@ -61,6 +61,7 @@ static int __server_main(void)
 		if (pims_ipc_svc_register(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_CHANGES_BY_VERSION, ctsvc_ipc_server_db_get_changes_by_version, NULL) != 0) break;
 		if (pims_ipc_svc_register(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_GET_CURRENT_VERSION, ctsvc_ipc_server_db_get_current_version, NULL) != 0) break;
 		if (pims_ipc_svc_register(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_SEARCH_RECORDS, ctsvc_ipc_server_db_search_records, NULL) != 0) break;
+		if (pims_ipc_svc_register(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_SEARCH_RECORDS_WITH_RANGE, ctsvc_ipc_server_db_search_records_with_range, NULL) != 0) break;
 		if (pims_ipc_svc_register(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_SEARCH_RECORDS_WITH_QUERY, ctsvc_ipc_server_db_search_records_with_query, NULL) != 0) break;
 
 		if (pims_ipc_svc_register(CTSVC_IPC_ACTIVITY_MODULE, CTSVC_IPC_SERVER_ACTIVITY_DELETE_BY_CONTACT_ID, ctsvc_ipc_activity_delete_by_contact_id, NULL) != 0) break;

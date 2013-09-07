@@ -225,6 +225,12 @@ typedef enum {
 	CONTACTS_RELATIONSHIP_TYPE_CUSTOM, /**< .*/
 }contacts_relationship_type_e;
 
+typedef enum {
+	CONTACTS_SEARCH_RANGE_NAME = 0x00000001,	 /**< .*/
+	CONTACTS_SEARCH_RANGE_NUMBER  = 0x00000002,	 /**< .*/
+	CONTACTS_SEARCH_RANGE_DATA  = 0x00000004,	 /**< .*/
+}contacts_search_range_e;
+
 /**
  * @}
  */

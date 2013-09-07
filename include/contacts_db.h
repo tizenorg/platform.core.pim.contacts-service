@@ -599,6 +599,32 @@ API int contacts_db_search_records(const char* view_uri, const char *keyword, in
 API int contacts_db_search_records_with_query(contacts_query_h query, const char *keyword, int offset, int limit, contacts_list_h* record_list);
 
 /**
+ * @brief       Retrieves records with a keyword in range
+ *
+ * @remarks     @a record_list must be released with contacts_list_destroy() by you. \n
+ * This API works only for \ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_person and \ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_person_grouprel.
+ *
+ * @param[in]   view_uri			The view URI to get records
+ * @param[in]   keyword			Thekeyword
+ * @param[in]   offset			The index to get results from which index
+ * @param[in]   limit			The number to limit results
+ * @param[in]   range			The search range
+ * @param[out]  record_list		The record list
+ *
+ * @return  0 on success, otherwise a negative error value.
+ * @retval  #CONTACTS_ERROR_NONE				Successful
+ * @retval  #CONTACTS_ERROR_OUT_OF_MEMORY		Out of memory
+ * @retval  #CONTACTS_ERROR_INVALID_PARAMETER	Invalid parameter
+ * @retval  #CONTACTS_ERROR_DB					Database operation failure
+ *
+ * @pre    This function requires an open connection to contacts service by contacts_connect2().
+ *
+ * @see contacts_connect2()
+ * @see contacts_list_destroy()
+ */
+API int contacts_db_search_records_with_range(const char* view_uri, const char *keyword, int offset, int limit, int range, contacts_list_h* record_list);
+
+/**
  * @brief       Gets records count of a specific view
  *
  * @param[in]   view_uri		The view URI to get records

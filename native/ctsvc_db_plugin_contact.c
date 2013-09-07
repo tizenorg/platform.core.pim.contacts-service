@@ -473,16 +473,22 @@ static inline void __ctsvc_contact_get_initial(char *src, char *dest, int dest_s
 	int i, j=0;
 	bool bFirst = true;
 	int len = strlen(src);
-	for(i = 0; i < len && j < (dest_size-1); i++)
+	for(i = 0; i < len && j < (dest_size-1);)
 	{
 		if (src[i] == ' ') {
 			bFirst=true;
+			i++;
 		} else if (bFirst) {
-			dest[j++] = src[i];
+			int char_len = ctsvc_check_utf8(src[i]);
+			int k;
+			for (k=0;k<char_len;k++)
+				dest[j++] = src[i++];
 			if (!pinyin)
 				dest[j++] = ' ';
 			bFirst = false;
 		}
+		else
+			i++;
 	}
 	CTS_DBG("src(%s) dest(%s)", src, dest);
 }
