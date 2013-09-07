@@ -45,7 +45,7 @@ extern "C"
  *
  * @see  contacts_connect2()
  */
-API int contacts_phone_log_reset_statistics();
+API int contacts_phone_log_reset_statistics(void);
 
 typedef enum {
 	CONTACTS_PHONE_LOG_DELETE_BY_ADDRESS,		/**< . */

@@ -62,7 +62,7 @@ _CONTACTS_BEGIN_VIEW()
 	_CONTACTS_PROPERTY_STR( vibration )				// read, write
 	_CONTACTS_PROPERTY_STR( status )				// read only
 	_CONTACTS_PROPERTY_BOOL( is_favorite )			// read, write
-	_CONTACTS_PROPERTY_DOUBLE( favorite_priority )	// read only
+	_CONTACTS_PROPERTY_DOUBLE( favorite_priority )	// filter only
 	_CONTACTS_PROPERTY_INT( link_count )			// read only
 	_CONTACTS_PROPERTY_STR( addressbook_ids )			// read only
 	_CONTACTS_PROPERTY_BOOL( has_phonenumber )		// read only
@@ -103,7 +103,7 @@ _CONTACTS_BEGIN_VIEW()
 	_CONTACTS_PROPERTY_INT( changed_time )			// read only
 	_CONTACTS_PROPERTY_INT( link_mode )			// read, write
 	_CONTACTS_PROPERTY_CHILD_SINGLE( name )					// read, write
-	_CONTACTS_PROPERTY_CHILD_SINGLE( image )				// read, write
+	_CONTACTS_PROPERTY_CHILD_MULTIPLE( image )				// read, write
 	_CONTACTS_PROPERTY_CHILD_MULTIPLE( company )				// read, write
 	_CONTACTS_PROPERTY_CHILD_MULTIPLE( note )					// read, write
 	_CONTACTS_PROPERTY_CHILD_MULTIPLE( number )					// read, write
@@ -128,7 +128,7 @@ _CONTACTS_BEGIN_VIEW()
 	_CONTACTS_PROPERTY_STR( uid )					// read, write
 	_CONTACTS_PROPERTY_INT( changed_time )			// read only
 	_CONTACTS_PROPERTY_CHILD_SINGLE( name )					// read, write
-	_CONTACTS_PROPERTY_CHILD_SINGLE( image )				// read, write
+	_CONTACTS_PROPERTY_CHILD_MULTIPLE( image )				// read, write
 	_CONTACTS_PROPERTY_CHILD_MULTIPLE( company )				// read, write
 	_CONTACTS_PROPERTY_CHILD_MULTIPLE( note )					// read, write
 	_CONTACTS_PROPERTY_CHILD_MULTIPLE( number )					// read, write
@@ -590,8 +590,8 @@ _CONTACTS_END_READ_ONLY_VIEW( _contacts_phone_log_number )
 
 // phone_log stat : read only
 _CONTACTS_BEGIN_READ_ONLY_VIEW()
-	_CONTACTS_PROPERTY_PROJECTION_STR( log_count )
-	_CONTACTS_PROPERTY_STR( log_type )
+	_CONTACTS_PROPERTY_PROJECTION_INT( log_count )
+	_CONTACTS_PROPERTY_INT( log_type )
 _CONTACTS_END_READ_ONLY_VIEW( _contacts_phone_log_stat )
 
 #ifdef __cplusplus

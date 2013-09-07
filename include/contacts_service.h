@@ -45,7 +45,7 @@ extern "C"
  *
  * @see  contacts_disconnect2()
  */
-API int contacts_connect2();
+API int contacts_connect2(void);
 
 /**
  * @brief	Disconnects from the contacts service.
@@ -58,7 +58,7 @@ API int contacts_connect2();
  *
  * @see contacts_connect2()
  */
-API int contacts_disconnect2();
+API int contacts_disconnect2(void);
 
 
 
@@ -73,7 +73,7 @@ API int contacts_disconnect2();
  *
  * @see  contacts_disconnect_on_thread()
  */
-API int contacts_connect_on_thread();
+API int contacts_connect_on_thread(void);
 
 /**
  * @brief	Disconnects from the contacts service.
@@ -86,7 +86,7 @@ API int contacts_connect_on_thread();
  *
  * @see contacts_connect_on_thread()
  */
-API int contacts_disconnect_on_thread();
+API int contacts_disconnect_on_thread(void);
 
 
 #define CONTACTS_CONNECT_FLAG_RETRY	0x00000001

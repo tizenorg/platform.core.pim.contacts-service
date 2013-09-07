@@ -958,7 +958,7 @@
  * <tr><td>string</td><td> app_id </td><td>read, write</td><td> </td>  </tr>
  * <tr><td>string</td><td> uri </td><td>read, write</td><td> </td ></tr>
  * <tr><td>string</td><td> catagory </td><td>read, write</td><td></td></tr>
- * <tr><td>string</td><td> extra_data </td><td>read, write</td><td> It includes "key:value" pair. You should parse it.</td></tr>
+ * <tr><td>string</td><td> extra_data </td><td>read, write</td><td> It includes "key:value,key:value," pairs. You should parse it. And you must base64 encode each key and value</td></tr>
  * </table>
  *
  * @section CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_activity _contacts_activity view
@@ -1028,8 +1028,8 @@
  * <tr><td>string</td><td> address </td><td>read, write once </td><td> </td></tr>
  * <tr><td>integer</td><td> log_time </td><td>read, write once</td><td> </td></tr>
  * <tr><td>integer</td><td> log_type </td><td>read, write</td><td>contacts_phone_log_type_e </td></tr>
- * <tr><td>integer</td><td> extra_data1 </td><td>read, write once</td><td> You can set the related integer data(e.g. message_id, email_id) or duration of call.  </td></tr>
- * <tr><td>string</td><td> extra_data2 </td><td>read, write once</td><td> You can set the related string data.  e.g.) short message, subject</td></tr>
+ * <tr><td>integer</td><td> extra_data1 </td><td>read, write once</td><td> You can set the related integer data (e.g. message_id, email_id or duration of call).  </td></tr>
+ * <tr><td>string</td><td> extra_data2 </td><td>read, write once</td><td> You can set the related string data (e.g. short message, subject). </td></tr>
  * </table>
  *
 * <br><br>
