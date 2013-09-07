@@ -841,13 +841,13 @@ static inline bool __ctsvc_db_view_can_keyword_search(const char *view_uri)
 	return false;
 }
 
-static char* __ctsvc_db_make_search_keyword(const char*keyword)
+static char* __ctsvc_db_make_search_keyword(const char *keyword)
 {
-	int size = strlen(keyword);
-
+	int size;
 	if (keyword == NULL)
 		return NULL;
 
+	size = strlen(keyword);
 	if (strstr(keyword, " ") != NULL) {
 		int i = 0;
 		int j = 0;
