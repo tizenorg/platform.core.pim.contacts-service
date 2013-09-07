@@ -97,7 +97,6 @@ enum {
 	CTSVC_VCARD_VALUE_X_ANNIVERSARY,
 	CTSVC_VCARD_VALUE_X_TIZEN_EVENT,
 	CTSVC_VCARD_VALUE_ADR,
-	CTSVC_VCARD_VALUE_LABEL,
 	CTSVC_VCARD_VALUE_TEL,
 	CTSVC_VCARD_VALUE_EMAIL,
 	CTSVC_VCARD_VALUE_TITLE,
@@ -129,10 +128,24 @@ enum {
 
 enum{
 	CTSVC_VCARD_IMG_NONE,
-	CTSVC_VCARD_IMG_JPEG,
-	CTSVC_VCARD_IMG_PNG,
-	CTSVC_VCARD_IMG_GIF,
-	CTSVC_VCARD_IMG_TIFF,
+	CTSVC_VCARD_IMG_PNG,		// Portable Network Graphics
+	// vcard  2.1 spec
+	CTSVC_VCARD_IMG_JPEG,	// ISO JPEG format
+	CTSVC_VCARD_IMG_GIF,		//Graphics Interchange Format
+	CTSVC_VCARD_IMG_TIFF,		// Tagged Image File Format
+	CTSVC_VCARD_IMG_CGM,		//ISO Computer Graphics Metafile
+	CTSVC_VCARD_IMG_WMF,	// MS Windows Metafile
+	CTSVC_VCARD_IMG_BMP,		// MS Windows Bitmap
+	CTSVC_VCARD_IMG_MET,		// IBM PM Metafile
+	CTSVC_VCARD_IMG_PMB,		// IBM PM Bitmap
+	CTSVC_VCARD_IMG_DIB,		// MS Windows DIB
+	CTSVC_VCARD_IMG_PICT,		// Apple Picture format
+	CTSVC_VCARD_IMG_PDF,		// Adobe Page Description Format
+	CTSVC_VCARD_IMG_PS,		// Adobe PostScript format
+	CTSVC_VCARD_IMG_QTIME,	// Apple QuickTime format
+	CTSVC_VCARD_IMG_MPEG,	// ISO MPEG format
+	CTSVC_VCARD_IMG_MPEG2,	// ISO MPEG version 2 format
+	CTSVC_VCARD_IMG_AVI,		// Intel AVI format
 };
 
 static const char *content_name[CTSVC_VCARD_VALUE_MAX] = {0};
@@ -155,7 +168,7 @@ static void __ctsvc_vcard_initial(void)
 		content_name[CTSVC_VCARD_VALUE_X_ANNIVERSARY] = "ANNIVERSARY";
 		content_name[CTSVC_VCARD_VALUE_X_TIZEN_EVENT] = "X-TIZEN-EVENT";
 		content_name[CTSVC_VCARD_VALUE_ADR] = "ADR";
-		content_name[CTSVC_VCARD_VALUE_LABEL] = "LABEL"; /* not supported */
+		//content_name[CTSVC_VCARD_VALUE_LABEL] = "LABEL"; /* not supported */
 		content_name[CTSVC_VCARD_VALUE_TEL] = "TEL";
 		content_name[CTSVC_VCARD_VALUE_EMAIL] = "EMAIL";
 		//content_name[CTSVC_VCARD_VALUE_MAILER] = "MAILER"; /* not supported */
@@ -282,10 +295,13 @@ static int __ctsvc_vcard_append_encode_str(char **buf, int *buf_size, int len, c
 
 static inline int __ctsvc_vcard_add_folding(char **buf, int *buf_size, int buf_len)
 {
+	int char_len = 0;
 	char *buf_copy = NULL;
 	int len, result_len;
 	char *r;
 	const char *s;
+	bool content_start = false;
+	bool encode_64 = false;
 
 	buf_copy = calloc(1, *buf_size);
 
@@ -301,25 +317,46 @@ static inline int __ctsvc_vcard_add_folding(char **buf, int *buf_size, int buf_l
 				free(buf_copy);
 				return -1;
 			}
-			else
+			else {
 				buf_copy = tmp;
+				r = (buf_copy + result_len);
+			}
+		}
+
+		if (false == content_start) {
+			if (':' == *s)
+				content_start = true;
+			else if (0 == strncmp(s, "ENCODING=BASE64", strlen("ENCODING=BASE64")))
+				encode_64 = true;
 		}
 
 		if ('\r' == *s)
 			len--;
-		else if ('\n' == *s)
+		else if ('\n' == *s) {
 			len = -1;
-
-		if (CTS_VCARD_FOLDING_LIMIT == len) {
-			*r = '\r';
-			r++;
-			*r = '\n';
-			r++;
-			*r = ' ';
-			r++;
-			len = 1;
-			result_len += 3;
+			char_len = 0;
+			content_start = false;
+			encode_64 = false;
 		}
+
+		if (0 == char_len) {
+			if (false == encode_64)
+				char_len = ctsvc_check_utf8(*s);
+
+			if (CTS_VCARD_FOLDING_LIMIT <= len + char_len) {
+				*r = '\r';
+				r++;
+				*r = '\n';
+				r++;
+				*r = ' ';
+				r++;
+				len = 1;
+				result_len += 3;
+			}
+		}
+
+		if (char_len)
+			char_len--;
 
 		*r = *s;
 		r++;
@@ -429,6 +466,32 @@ static inline const char* __ctsvc_get_img_suffix(int type)
 		return "gif";
 	case CTSVC_VCARD_IMG_PNG:
 		return "png";
+	case CTSVC_VCARD_IMG_CGM:
+		return "cgm";
+	case CTSVC_VCARD_IMG_WMF:
+		return "wmf";
+	case CTSVC_VCARD_IMG_BMP:
+		return "bmp";
+	case CTSVC_VCARD_IMG_MET:
+		return "met";
+	case CTSVC_VCARD_IMG_PMB:
+		return "pmb";
+	case CTSVC_VCARD_IMG_DIB:
+		return "dib";
+	case CTSVC_VCARD_IMG_PICT:
+		return "pict";
+	case CTSVC_VCARD_IMG_PDF:
+		return "pdf";
+	case CTSVC_VCARD_IMG_PS:
+		return "ps";
+	case CTSVC_VCARD_IMG_QTIME:
+		return "qtime";
+	case CTSVC_VCARD_IMG_MPEG:
+		return "mpeg";
+	case CTSVC_VCARD_IMG_MPEG2:
+		return "mpeg2";
+	case CTSVC_VCARD_IMG_AVI:
+		return "avi";
 	case CTSVC_VCARD_IMG_JPEG:
 	case CTSVC_VCARD_IMG_NONE:
 	default:
@@ -439,6 +502,7 @@ static inline const char* __ctsvc_get_img_suffix(int type)
 static inline int __ctsvc_vcard_get_image_type(char *val)
 {
 	char *temp, *result;
+	RETV_IF(NULL == val, CTSVC_VCARD_IMG_NONE);
 
 	temp = val;
 	while (*temp) {
@@ -461,6 +525,45 @@ static inline int __ctsvc_vcard_get_image_type(char *val)
 	result = strstr(val, "tiff");
 	if (result) return CTSVC_VCARD_IMG_TIFF;
 
+	result = strstr(val, "cgm");
+	if (result) return CTSVC_VCARD_IMG_CGM;
+
+	result = strstr(val, "wmf");
+	if (result) return CTSVC_VCARD_IMG_WMF;
+
+	result = strstr(val, "bmp");
+	if (result) return CTSVC_VCARD_IMG_BMP;
+
+	result = strstr(val, "met");
+	if (result) return CTSVC_VCARD_IMG_MET;
+
+	result = strstr(val, "pmb");
+	if (result) return CTSVC_VCARD_IMG_PMB;
+
+	result = strstr(val, "dib");
+	if (result) return CTSVC_VCARD_IMG_DIB;
+
+	result = strstr(val, "pict");
+	if (result) return CTSVC_VCARD_IMG_PICT;
+
+	result = strstr(val, "pdf");
+	if (result) return CTSVC_VCARD_IMG_PDF;
+
+	result = strstr(val, "ps");
+	if (result) return CTSVC_VCARD_IMG_PS;
+
+	result = strstr(val, "qtime");
+	if (result) return CTSVC_VCARD_IMG_QTIME;
+
+	result = strstr(val, "mpeg");
+	if (result) return CTSVC_VCARD_IMG_MPEG;
+
+	result = strstr(val, "mpeg2");
+	if (result) return CTSVC_VCARD_IMG_MPEG2;
+
+	result = strstr(val, "avi");
+	if (result) return CTSVC_VCARD_IMG_AVI;
+
 	return CTSVC_VCARD_IMG_NONE;
 }
 
@@ -474,6 +577,32 @@ static inline const char* __ctsvc_get_image_type_str(int type)
 		return "GIF";
 	case CTSVC_VCARD_IMG_PNG:
 		return "PNG";
+	case CTSVC_VCARD_IMG_CGM:
+		return "CGM";
+	case CTSVC_VCARD_IMG_WMF:
+		return "WMF";
+	case CTSVC_VCARD_IMG_BMP:
+		return "BMP";
+	case CTSVC_VCARD_IMG_MET:
+		return "MET";
+	case CTSVC_VCARD_IMG_PMB:
+		return "PMB";
+	case CTSVC_VCARD_IMG_DIB:
+		return "DIB";
+	case CTSVC_VCARD_IMG_PICT:
+		return "PICT";
+	case CTSVC_VCARD_IMG_PDF:
+		return "PDF";
+	case CTSVC_VCARD_IMG_PS:
+		return "PS";
+	case CTSVC_VCARD_IMG_QTIME:
+		return "QTIME";
+	case CTSVC_VCARD_IMG_MPEG:
+		return "MPEG";
+	case CTSVC_VCARD_IMG_MPEG2:
+		return "MPEG2";
+	case CTSVC_VCARD_IMG_AVI:
+		return "AVI";
 	case CTSVC_VCARD_IMG_JPEG:
 	default:
 		return "JPEG";
@@ -489,13 +618,10 @@ static inline int __ctsvc_vcard_put_company_logo(const char *path, char **buf, i
 	guchar image[CTSVC_VCARD_PHOTO_MAX_SIZE] = {0};
 
 	suffix = strrchr(path, '.');
-	RETVM_IF(NULL == suffix, len, "Image Type(%s) is invalid", path);
-
 	type = __ctsvc_vcard_get_image_type(suffix);
-	RETVM_IF(CTSVC_VCARD_IMG_NONE == type, len, "Invalid parameter : Image Type(%s) is invalid", path);
 
 	fd = open(path, O_RDONLY);
-	RETVM_IF(fd < 0, CONTACTS_ERROR_SYSTEM, "System : Open(%s) Failed(%d)", path, errno);
+	RETVM_IF(fd < 0, CONTACTS_ERROR_SYSTEM, "System : Open Failed(%d)", errno);
 
 	read_len = 0;
 	while ((ret = read(fd, image+read_len, sizeof(image)-read_len))) {
@@ -1225,14 +1351,10 @@ static inline int __ctsvc_vcard_put_photo(ctsvc_list_s *image_list, char **buf, 
 		if (!data->path) continue;
 
 		suffix = strrchr(data->path, '.');
-		RETVM_IF(NULL == suffix, CONTACTS_ERROR_INVALID_PARAMETER,
-				"Invalid parameter : Image Type(%s) is invalid", data->path);
-
 		type = __ctsvc_vcard_get_image_type(suffix);
-		RETVM_IF(CTSVC_VCARD_IMG_NONE == type, len, "Invalid parameter : Image Type(%s) is invalid", data->path);
 
 		fd = open(data->path, O_RDONLY);
-		RETVM_IF(fd < 0, CONTACTS_ERROR_SYSTEM, "System : Open(%s) Failed(%d)", data->path, errno);
+		RETVM_IF(fd < 0, CONTACTS_ERROR_SYSTEM, "System : Open Failed(%d)", errno);
 
 		read_len = 0;
 		while ((ret = read(fd, image+read_len, sizeof(image)-read_len))) {
@@ -1931,6 +2053,11 @@ static inline int __ctsvc_vcard_decode_quoted_val(char *val)
 			pre = __ctsvc_vcard_hex_to_dec(*(src+1));
 			if (0 <= pre) {
 				*dest = (char)((pre << 4) + __ctsvc_vcard_hex_to_dec(*(src+2)));
+				if (';' == *dest || ':' == *dest || '\\' == *dest || ',' == *dest) {
+					*(dest+1) = *dest;
+					*dest = '\\';
+					dest++;
+				}
 				dest++;
 				src += 2;
 			} else {
@@ -1970,6 +2097,7 @@ static inline char* __ctsvc_vcard_translate_charset(char *src, int len)
 		UChar *temp;
 		UConverter *conv;
 		UErrorCode err = U_ZERO_ERROR;
+		int dest_size = 0;
 		int temp_size = 0;
 		int src_len, i = 0;
 		char enc[32] = {0}, *dest;
@@ -1986,18 +2114,20 @@ static inline char* __ctsvc_vcard_translate_charset(char *src, int len)
 
 		src_len = len - (val - src);
 
-		temp_size = src_len * sizeof(UChar);
+		temp_size = (src_len+1) * sizeof(UChar);
 		temp = malloc(temp_size);
 		conv = ucnv_open(enc, &err);
 		WARN_IF(U_FAILURE(err), "ucnv_open() Failed(%d), enc=%s", err, enc);
 		ucnv_toUChars(conv, temp, temp_size, val, src_len, &err);
-		WARN_IF(U_FAILURE(err), "ucnv_toUChars() Failed(%d)", err);
+		WARN_IF(U_FAILURE(err), "ucnv_toUChars() Failed(%d), enc=%s", err, enc);
 		ucnv_close(conv);
 
-		dest = malloc(temp_size);
+		dest_size = temp_size*2;
+		dest = malloc(dest_size);
 		conv = ucnv_open("UTF-8", &err);
-		ucnv_fromUChars(conv, dest, temp_size, temp, u_strlen(temp), &err);
-		WARN_IF(U_FAILURE(err), "ucnv_fromUChars() Failed(%d)", err);
+		WARN_IF(U_FAILURE(err), "ucnv_open() Failed(%d), enc=%s", err, enc);
+		ucnv_fromUChars(conv, dest, dest_size, temp, u_strlen(temp), &err);
+		WARN_IF(U_FAILURE(err), "ucnv_fromUChars() Failed(%d), enc=%s", err, enc);
 		ucnv_close(conv);
 		free(temp);
 
@@ -2006,7 +2136,20 @@ static inline char* __ctsvc_vcard_translate_charset(char *src, int len)
 	return NULL;
 }
 
-static char* __ctsvc_vcard_get_val(int ver, char *src, char **dest)
+static void __ctsvc_vcard_get_prefix(char **prefix, char *src)
+{
+	char *temp = strchr(src, ':');
+	if (temp) {
+		int len = (int)temp - (int)src;
+		*prefix = calloc(len+1, sizeof(char));
+		snprintf(*prefix, len+1, "%s", src);
+	}
+	else {
+		*prefix = NULL;
+	}
+}
+
+static char* __ctsvc_vcard_get_val(int ver, char *src, char **prefix, char **dest)
 {
 	int len, quoted;
 	bool start = false;
@@ -2033,7 +2176,7 @@ static char* __ctsvc_vcard_get_val(int ver, char *src, char **dest)
 	quoted = FALSE;
 	cursor = src;
 	len = 0;
-	if(CTSVC_VCARD_VER_2_1 == ver) {
+	if (CTSVC_VCARD_VER_2_1 == ver) {
 		while (*cursor) {
 			if ('=' == *cursor && __ctsvc_vcard_check_quoted(src, cursor - src, &quoted)) {
 				if ('\r' == *(cursor+1) && '\n' == *(cursor+2))
@@ -2069,9 +2212,12 @@ static char* __ctsvc_vcard_get_val(int ver, char *src, char **dest)
 		char temp = *cursor;
 		char *new_dest;
 
+		if (prefix)
+			__ctsvc_vcard_get_prefix(prefix, src);
+
 		*cursor = '\0';
 		*dest = strdup(src);
-		if(CTSVC_VCARD_VER_2_1 != ver)
+		if (CTSVC_VCARD_VER_2_1 != ver)
 			__ctsvc_vcard_remove_folding(*dest);
 
 		if (__ctsvc_vcard_check_quoted(*dest, -1, &quoted))
@@ -2099,7 +2245,7 @@ static inline char* __ctsvc_get_content_value(char *val)
 		temp = val;
 
 	RETVM_IF('\0' == *(temp) || '\r' == *(temp) || '\n' == *(temp),
-		NULL, "Invalid vcard content(%s)", val);
+		NULL, "Invalid vcard content");
 
 	return temp;
 }
@@ -2151,7 +2297,7 @@ static inline int __ctsvc_vcard_get_display_name(ctsvc_list_s *name_list, char *
 	contacts_record_h name;
 
 	temp = __ctsvc_get_content_value(val);
-	RETVM_IF(NULL == temp, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : vcard(%s)", val);
+	RETVM_IF(NULL == temp, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : vcard");
 
 	contacts_list_get_count((contacts_list_h)name_list, &count);
 	if (count <= 0) {
@@ -2174,12 +2320,30 @@ static inline int __ctsvc_vcard_get_display_name(ctsvc_list_s *name_list, char *
 	return CONTACTS_ERROR_NONE;
 }
 
+#define CTS_GET_MULTIPLE_COMPONENT(dest, src, src_temp, tmp_char) \
+src_temp = src; \
+while (NULL != (tmp_char = strchr(src_temp, ';'))) { \
+	if (tmp_char != src && ((char *)(tmp_char-1))[0] == '\\') { \
+		src_temp = tmp_char+1; \
+		continue; \
+	} \
+	*tmp_char = '\0'; \
+	src = __ctsvc_vcard_remove_escape_char(src); \
+	dest = SMART_STRDUP(src); \
+	src = tmp_char+1;\
+	break; \
+} \
+if (NULL == tmp_char) { \
+	src = __ctsvc_vcard_remove_escape_char(src); \
+	dest = SMART_STRDUP(src); \
+	break; \
+} \
+
 static inline int __ctsvc_vcard_get_name(ctsvc_list_s *name_list, char *val)
 {
 	int ret;
 	unsigned int count;
-	char *temp, *start;
-	const char separator = ';';
+	char *start;
 	contacts_record_h name;
 
 	start = __ctsvc_get_content_value(val);
@@ -2195,24 +2359,18 @@ static inline int __ctsvc_vcard_get_name(ctsvc_list_s *name_list, char *val)
 		contacts_list_get_current_record_p((contacts_list_h)name_list, &name);
 	}
 
-	temp = __ctsvc_strtok(start, separator);
-	contacts_record_set_str(name, _contacts_name.last, __ctsvc_vcard_remove_escape_char(start));
+	while (true) {
+		char *temp, *start_temp;
 
-	start = temp;
-	temp = __ctsvc_strtok(start, separator);
-	contacts_record_set_str(name, _contacts_name.first, __ctsvc_vcard_remove_escape_char(start));
+		CTS_GET_MULTIPLE_COMPONENT(((ctsvc_name_s*)name)->last, start, start_temp, temp);
+		CTS_GET_MULTIPLE_COMPONENT(((ctsvc_name_s*)name)->first, start, start_temp, temp);
+		CTS_GET_MULTIPLE_COMPONENT(((ctsvc_name_s*)name)->addition, start, start_temp, temp);
+		CTS_GET_MULTIPLE_COMPONENT(((ctsvc_name_s*)name)->prefix, start, start_temp, temp);
+		CTS_GET_MULTIPLE_COMPONENT(((ctsvc_name_s*)name)->suffix, start, start_temp, temp);
 
-	start = temp;
-	temp = __ctsvc_strtok(start, separator);
-	contacts_record_set_str(name, _contacts_name.addition, __ctsvc_vcard_remove_escape_char(start));
-
-	start = temp;
-	temp = __ctsvc_strtok(start, separator);
-	contacts_record_set_str(name, _contacts_name.prefix, __ctsvc_vcard_remove_escape_char(start));
-
-	start = temp;
-	__ctsvc_strtok(start, separator);
-	contacts_record_set_str(name, _contacts_name.suffix, __ctsvc_vcard_remove_escape_char(start));
+		CTS_ERR("invalid name type");
+		break;
+	}
 
 	return CONTACTS_ERROR_NONE;
 }
@@ -2285,7 +2443,7 @@ static inline int __ctsvc_vcard_get_nickname(ctsvc_list_s *nickname_list, char *
 	return CONTACTS_ERROR_NONE;
 }
 
-static inline int __ctsvc_vcard_get_photo(contacts_record_h contact, ctsvc_list_s *image_list, char *val)
+static inline int __ctsvc_vcard_get_photo(contacts_record_h contact, ctsvc_list_s *image_list, char *prefix, char *val)
 {
 	int ret, type, fd;
 	gsize size;
@@ -2296,11 +2454,17 @@ static inline int __ctsvc_vcard_get_photo(contacts_record_h contact, ctsvc_list_
 	struct timeval tv;
 
 	temp = strchr(val , ':');
-	RETVM_IF(NULL == temp, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : val is invalid(%s)", val);
+	RETVM_IF(NULL == temp, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : val is invalid");
 
 	*temp = '\0';
 
-	type = __ctsvc_vcard_get_image_type(val);
+	type = __ctsvc_vcard_get_image_type(prefix);
+
+	buf = g_base64_decode(temp+1, &size);
+	if (0 == size) {
+		g_free(buf);
+		return CONTACTS_ERROR_NONE;
+	}
 
 	gettimeofday(&tv, NULL);
 	ret = snprintf(dest, sizeof(dest), "%s/vcard-image-%ld%ld.%s",
@@ -2308,9 +2472,7 @@ static inline int __ctsvc_vcard_get_photo(contacts_record_h contact, ctsvc_list_
 	RETVM_IF(ret<=0, CONTACTS_ERROR_INTERNAL, "Destination file name was not created");
 
 	fd = open(dest, O_WRONLY|O_CREAT|O_TRUNC, 0660);
-	RETVM_IF(fd < 0, CONTACTS_ERROR_SYSTEM, "System : open(%s) Failed(%d)", dest, errno);
-
-	buf = g_base64_decode(temp+1, &size);
+	RETVM_IF(fd < 0, CONTACTS_ERROR_SYSTEM, "System : open Failed(%d)", errno);
 
 	while (0 < size) {
 		ret = write(fd, buf, size);
@@ -2372,17 +2534,15 @@ static inline void __ctsvc_vcard_get_event_type(contacts_record_h event, char *v
 }
 
 
-static inline int __ctsvc_vcard_get_event(ctsvc_list_s *event_list, int type, char *val)
+static inline int __ctsvc_vcard_get_event(ctsvc_list_s *event_list, int type, char *prefix, char *val)
 {
 	int ret;
 	contacts_record_h event;
-	char *dest, *src, *temp, *cpy;
+	char *dest, *src, *temp;
 
-	cpy = strdup(val);
-	temp = __ctsvc_get_content_value(cpy);
+	temp = __ctsvc_get_content_value(val);
 	if (NULL == temp) {
-		free(cpy);
-		CTS_ERR("Invalid parameter : vcard(%s)", val);
+		CTS_ERR("Invalid parameter : vcard");
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 
@@ -2398,14 +2558,12 @@ static inline int __ctsvc_vcard_get_event(ctsvc_list_s *event_list, int type, ch
 	}
 	*dest = '\0';
 	if ('\0' == *val) {
-		free(cpy);
 		CTS_ERR("Invalid parameter : val(%d)", val);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 
 	ret = contacts_record_create(_contacts_event._uri, &event);
 	if (ret < CONTACTS_ERROR_NONE) {
-		free(cpy);
 		CTS_ERR("contacts_record_create is failed(%d)", ret);
 		return ret;
 	}
@@ -2417,13 +2575,9 @@ static inline int __ctsvc_vcard_get_event(ctsvc_list_s *event_list, int type, ch
 	else if (CTSVC_VCARD_VALUE_X_ANNIVERSARY == type)
 		contacts_record_set_int(event, _contacts_event.type, CONTACTS_EVENT_TYPE_ANNIVERSARY);
 	else if (CTSVC_VCARD_VALUE_X_TIZEN_EVENT == type) {
-		if (temp != cpy) {
-			*(temp-1) = '\0';
-			__ctsvc_vcard_get_event_type(event, cpy);
-		}
+		__ctsvc_vcard_get_event_type(event, prefix);
 	}
 	contacts_list_add((contacts_list_h)event_list, event);
-	free(cpy);
 	return CONTACTS_ERROR_NONE;
 }
 
@@ -2495,7 +2649,7 @@ static inline int __ctsvc_vcard_get_company_value(ctsvc_list_s *company_list, in
 	return CONTACTS_ERROR_NONE;
 }
 
-static inline int __ctsvc_vcard_get_company(ctsvc_list_s *company_list, char *val)
+static inline int __ctsvc_vcard_get_company(ctsvc_list_s *company_list, char *prefix, char *val)
 {
 	char *temp, *start, *depart;
 	const char separator = ';';
@@ -2521,13 +2675,13 @@ static inline int __ctsvc_vcard_get_company(ctsvc_list_s *company_list, char *va
 
 	if (val != temp) {
 		*(temp-1) = '\0';
-		__ctsvc_vcard_get_company_type(company, val);
+		__ctsvc_vcard_get_company_type(company, prefix);
 	}
 
 	return CONTACTS_ERROR_NONE;
 }
 
-static inline int __ctsvc_vcard_get_company_logo(ctsvc_list_s *company_list, char *val)
+static inline int __ctsvc_vcard_get_company_logo(ctsvc_list_s *company_list, char *prefix, char *val)
 {
 	int ret, type, fd;
 	gsize size;
@@ -2545,10 +2699,16 @@ static inline int __ctsvc_vcard_get_company_logo(ctsvc_list_s *company_list, cha
 	}
 
 	temp = strchr(val , ':');
-	RETVM_IF(NULL == temp, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : val is invalid(%s)", val);
+	RETVM_IF(NULL == temp, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : val is invalid");
 
 	*temp = '\0';
-	type = __ctsvc_vcard_get_image_type(val);
+	type = __ctsvc_vcard_get_image_type(prefix);
+
+	buf = g_base64_decode(temp+1, &size);
+	if (0 == size) {
+		g_free(buf);
+		return CONTACTS_ERROR_NONE;
+	}
 
 	gettimeofday(&tv, NULL);
 	ret = snprintf(dest, sizeof(dest), "%s/%d-%ld%ld-logo.%s", CTSVC_VCARD_IMAGE_LOCATION,
@@ -2556,9 +2716,7 @@ static inline int __ctsvc_vcard_get_company_logo(ctsvc_list_s *company_list, cha
 	RETVM_IF(ret<=0, CONTACTS_ERROR_SYSTEM, "Destination file name was not created");
 
 	fd = open(dest, O_WRONLY|O_CREAT|O_TRUNC, 0660);
-	RETVM_IF(fd < 0, CONTACTS_ERROR_INTERNAL, "System : open(%s) Failed(%d)", dest, errno);
-
-	buf = g_base64_decode(temp+1, &size);
+	RETVM_IF(fd < 0, CONTACTS_ERROR_INTERNAL, "System : open Failed(%d)", errno);
 
 	while (0 < size) {
 		ret = write(fd, buf, size);
@@ -2598,7 +2756,7 @@ static inline int __ctsvc_vcard_get_note(ctsvc_list_s *note_list, char *val)
 	temp = __ctsvc_get_content_value(val);
 	RETV_IF(NULL == temp, CONTACTS_ERROR_NO_DATA);
 
-	contacts_record_set_str(note, _contacts_note.note, g_strcompress(__ctsvc_vcard_remove_escape_char(temp)));
+	contacts_record_set_str(note, _contacts_note.note, __ctsvc_vcard_remove_escape_char(temp));
 
 	return CONTACTS_ERROR_NONE;
 }
@@ -2702,23 +2860,20 @@ static inline void __ctsvc_vcard_get_url_type(contacts_record_h url, char *val)
 	contacts_record_set_int(url, _contacts_url.type, type);
 }
 
-static inline int __ctsvc_vcard_get_url(ctsvc_list_s* url_list, char *val)
+static inline int __ctsvc_vcard_get_url(ctsvc_list_s* url_list, char *prefix, char *val)
 {
 	int ret;
 	contacts_record_h url;
 	char *temp;
 
 	temp = __ctsvc_get_content_value(val);
-	RETVM_IF(NULL == temp, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : vcard(%s)", val);
+	RETVM_IF(NULL == temp, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : vcard");
 
 	ret = contacts_record_create(_contacts_url._uri, &url);
 	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create is failed(%d)", ret);
 
 	contacts_record_set_str(url, _contacts_url.url, __ctsvc_vcard_remove_escape_char(temp));
-	if (val != temp) {
-		*(temp-1) = '\0';
-		__ctsvc_vcard_get_url_type(url, val);
-	}
+	__ctsvc_vcard_get_url_type(url, prefix);
 	contacts_list_add((contacts_list_h)url_list, url);
 
 	return CONTACTS_ERROR_NONE;
@@ -2785,14 +2940,14 @@ static inline bool __ctsvc_vcard_get_number_type(contacts_record_h number, char 
 	return pref;
 }
 
-static inline int __ctsvc_vcard_get_number(ctsvc_list_s *numbers, char *val)
+static inline int __ctsvc_vcard_get_number(ctsvc_list_s *numbers, char *prefix, char *val)
 {
 	int ret;
 	char *temp;
 	contacts_record_h number;
 
 	temp = __ctsvc_get_content_value(val);
-	RETVM_IF(NULL == temp, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : vcard(%s)", val);
+	RETVM_IF(NULL == temp, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : vcard");
 
 	ret = contacts_record_create(_contacts_number._uri, &number);
 	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create is failed(%d)", ret);
@@ -2800,7 +2955,7 @@ static inline int __ctsvc_vcard_get_number(ctsvc_list_s *numbers, char *val)
 	contacts_record_set_str(number, _contacts_number.number, __ctsvc_vcard_remove_escape_char(temp));
 	if (val != temp) {
 		*(temp-1) = '\0';
-		contacts_record_set_bool(number, _contacts_number.is_default, __ctsvc_vcard_get_number_type(number, val));
+		contacts_record_set_bool(number, _contacts_number.is_default, __ctsvc_vcard_get_number_type(number, prefix));
 	}
 	contacts_list_add((contacts_list_h)numbers, number);
 
@@ -2843,14 +2998,14 @@ static inline bool __ctsvc_vcard_get_email_type(contacts_record_h email, char *v
 	return pref;
 }
 
-static inline int __ctsvc_vcard_get_email(ctsvc_list_s* emails, char *val)
+static inline int __ctsvc_vcard_get_email(ctsvc_list_s* emails, char *prefix, char *val)
 {
 	int ret;
 	char *temp;
 	contacts_record_h email;
 
 	temp = __ctsvc_get_content_value(val);
-	RETVM_IF(NULL == temp, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : vcard(%s)", val);
+	RETVM_IF(NULL == temp, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : vcard");
 
 	ret = contacts_record_create(_contacts_email._uri, &email);
 	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create is failed(%d)", ret);
@@ -2858,7 +3013,7 @@ static inline int __ctsvc_vcard_get_email(ctsvc_list_s* emails, char *val)
 	contacts_record_set_str(email, _contacts_email.email, __ctsvc_vcard_remove_escape_char(temp));
 	if (val != temp) {
 		*(temp-1) = '\0';
-		contacts_record_set_bool(email, _contacts_email.is_default, __ctsvc_vcard_get_email_type(email, val));
+		contacts_record_set_bool(email, _contacts_email.is_default, __ctsvc_vcard_get_email_type(email, prefix));
 	}
 	contacts_list_add((contacts_list_h)emails, email);
 
@@ -2909,27 +3064,16 @@ static inline bool __ctsvc_vcard_get_postal_type(contacts_record_h address, char
 	return pref;
 }
 
-#define CTS_GET_ADDR_COMPONENT(dest, src, tmp_char) \
-	tmp_char = strchr(src , ';'); \
-if (tmp_char) { \
-	*tmp_char = '\0'; \
-	dest = SMART_STRDUP(src); \
-	src = tmp_char+1; \
-} \
-else { \
-	dest = SMART_STRDUP(src); \
-	break; \
-} \
-
-static inline int __ctsvc_vcard_get_address(ctsvc_list_s *address_list, char *val)
+static inline int __ctsvc_vcard_get_address(ctsvc_list_s *address_list, char *prefix, char *val)
 {
 	char *text;
+	char *text_temp;
 	contacts_record_h address;
 
 	contacts_record_create(_contacts_address._uri, &address);
 	if (address) {
 
-		text = strrchr(val, ':');
+		text = strchr(val, ':');
 		if (text) {
 			text++;
 			*(text-1) = '\0';
@@ -2940,15 +3084,15 @@ static inline int __ctsvc_vcard_get_address(ctsvc_list_s *address_list, char *va
 		while (true) {
 			char *temp;
 
-			CTS_GET_ADDR_COMPONENT(((ctsvc_address_s*)address)->pobox, text, temp);
-			CTS_GET_ADDR_COMPONENT(((ctsvc_address_s*)address)->extended, text, temp);
-			CTS_GET_ADDR_COMPONENT(((ctsvc_address_s*)address)->street, text, temp);
-			CTS_GET_ADDR_COMPONENT(((ctsvc_address_s*)address)->locality, text, temp);
-			CTS_GET_ADDR_COMPONENT(((ctsvc_address_s*)address)->region, text, temp);
-			CTS_GET_ADDR_COMPONENT(((ctsvc_address_s*)address)->postalcode, text, temp);
-			CTS_GET_ADDR_COMPONENT(((ctsvc_address_s*)address)->country, text, temp);
+			CTS_GET_MULTIPLE_COMPONENT(((ctsvc_address_s*)address)->pobox, text, text_temp, temp);
+			CTS_GET_MULTIPLE_COMPONENT(((ctsvc_address_s*)address)->extended, text, text_temp, temp);
+			CTS_GET_MULTIPLE_COMPONENT(((ctsvc_address_s*)address)->street, text, text_temp, temp);
+			CTS_GET_MULTIPLE_COMPONENT(((ctsvc_address_s*)address)->locality, text, text_temp, temp);
+			CTS_GET_MULTIPLE_COMPONENT(((ctsvc_address_s*)address)->region, text, text_temp, temp);
+			CTS_GET_MULTIPLE_COMPONENT(((ctsvc_address_s*)address)->postalcode, text, text_temp, temp);
+			CTS_GET_MULTIPLE_COMPONENT(((ctsvc_address_s*)address)->country, text, text_temp, temp);
 
-			CTS_ERR("invalid ADR type(%s)", temp);
+			CTS_ERR("invalid ADR type");
 			break;
 		}
 
@@ -2956,9 +3100,9 @@ static inline int __ctsvc_vcard_get_address(ctsvc_list_s *address_list, char *va
 				|| ((ctsvc_address_s*)address)->street || ((ctsvc_address_s*)address)->locality
 				|| ((ctsvc_address_s*)address)->region || ((ctsvc_address_s*)address)->postalcode
 				|| ((ctsvc_address_s*)address)->country) {
-			contacts_record_set_bool(address, _contacts_address.is_default, __ctsvc_vcard_get_postal_type(address, val));
+			contacts_record_set_bool(address, _contacts_address.is_default, __ctsvc_vcard_get_postal_type(address, prefix));
 		} else {
-			CTS_ERR("Invalid vcard(%s)", val);
+			CTS_ERR("Invalid vcard");
 			contacts_record_destroy(address, true);
 			return CONTACTS_ERROR_INVALID_PARAMETER;
 		}
@@ -2997,14 +3141,14 @@ static inline void __ctsvc_vcard_get_messenger_type(contacts_record_h messenger,
 	contacts_record_set_int(messenger, _contacts_messenger.type, type);
 }
 
-static inline int __ctsvc_vcard_get_messenger(ctsvc_list_s* messenger_list, int type, char *val)
+static inline int __ctsvc_vcard_get_messenger(ctsvc_list_s* messenger_list, int type, char *prefix, char *val)
 {
 	int ret;
 	contacts_record_h messenger;
 	char *temp;
 
 	temp = __ctsvc_get_content_value(val);
-	RETVM_IF(NULL == temp, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : vcard(%s)", val);
+	RETVM_IF(NULL == temp, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : vcard");
 
 	ret = contacts_record_create(_contacts_messenger._uri, &messenger);
 	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create is failed(%d)", ret);
@@ -3038,10 +3182,7 @@ static inline int __ctsvc_vcard_get_messenger(ctsvc_list_s* messenger_list, int 
 		contacts_record_set_int(messenger, _contacts_messenger.type, CONTACTS_MESSENGER_TYPE_GOOGLE);
 		break;
 	case CTSVC_VCARD_VALUE_X_TIZEN_MESSENGER:
-		if (val != temp) {
-			*(temp-1) = '\0';
-			__ctsvc_vcard_get_messenger_type(messenger, val);
-		}
+		__ctsvc_vcard_get_messenger_type(messenger, prefix);
 		break;
 	}
 	contacts_list_add((contacts_list_h)messenger_list, messenger);
@@ -3102,23 +3243,20 @@ static inline void __ctsvc_vcard_get_relationship_type(contacts_record_h relatio
 }
 
 
-static inline int __ctsvc_vcard_get_relationship(ctsvc_list_s* relationship_list, int type, char *val)
+static inline int __ctsvc_vcard_get_relationship(ctsvc_list_s* relationship_list, int type, char *prefix, char *val)
 {
 	int ret;
 	char *temp;
 	contacts_record_h relationship;
 
 	temp = __ctsvc_get_content_value(val);
-	RETVM_IF(NULL == temp, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : vcard(%s)", val);
+	RETVM_IF(NULL == temp, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : vcard");
 
 	ret = contacts_record_create(_contacts_relationship._uri, &relationship);
 	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create is failed(%d)", ret);
 
 	contacts_record_set_str(relationship, _contacts_relationship.name, __ctsvc_vcard_remove_escape_char(temp));
-	if (val != temp) {
-		*(temp-1) = '\0';
-		__ctsvc_vcard_get_relationship_type(relationship, val);
-	}
+	__ctsvc_vcard_get_relationship_type(relationship, prefix);
 	contacts_list_add((contacts_list_h)relationship_list, relationship);
 
 	return CONTACTS_ERROR_NONE;
@@ -3151,11 +3289,14 @@ static char* __ctsvc_vcard_decode_base64_val(char *val)
 static inline int __ctsvc_vcard_get_contact(int ver, char *vcard, contacts_record_h *record)
 {
 	int type;
-	char *cursor, *new_start, *val;
+	char *cursor, *new_start, *val, *prefix;
 	ctsvc_contact_s *contact = (ctsvc_contact_s*)*record;
 
 	cursor = vcard;
 	while (cursor) {
+		val = NULL;
+		prefix = NULL;
+
 		bool base64_encoded = false;
 		type = __ctsvc_vcard_check_content_type(&cursor);
 		if (CTSVC_VCARD_VALUE_NONE == type) {
@@ -3171,12 +3312,17 @@ static inline int __ctsvc_vcard_get_contact(int ver, char *vcard, contacts_recor
 		if (CTSVC_VCARD_VALUE_PHOTO != type && CTSVC_VCARD_VALUE_LOGO != type)
 			base64_encoded = __ctsvc_vcard_check_base64_encoded(cursor);
 
-		new_start = __ctsvc_vcard_get_val(ver, cursor, &val);
-		if (NULL == new_start)
+		new_start = __ctsvc_vcard_get_val(ver, cursor, &prefix, &val);
+		if (NULL == new_start) {
+			free(prefix);
+			free(val);
 			continue;
+		}
 
 		if (NULL == val) {
 			cursor = new_start;
+			free(prefix);
+			free(val);
 			continue;
 		}
 
@@ -3189,92 +3335,71 @@ static inline int __ctsvc_vcard_get_contact(int ver, char *vcard, contacts_recor
 		switch (type) {
 		case CTSVC_VCARD_VALUE_FN:
 			__ctsvc_vcard_get_display_name(contact->name, val);
-			free(val);
 			break;
 		case CTSVC_VCARD_VALUE_N:
 			__ctsvc_vcard_get_name(contact->name, val);
-			free(val);
 			break;
 		case CTSVC_VCARD_VALUE_PHONETIC_FIRST_NAME:
 		case CTSVC_VCARD_VALUE_PHONETIC_MIDDLE_NAME:
 		case CTSVC_VCARD_VALUE_PHONETIC_LAST_NAME:
 			__ctsvc_vcard_get_phonetic_name(contact->name, type, val);
-			free(val);
 			break;
 		case CTSVC_VCARD_VALUE_NICKNAME:
 			__ctsvc_vcard_get_nickname(contact->nicknames, val);
-			free(val);
 			break;
 		case CTSVC_VCARD_VALUE_PHOTO:
-			__ctsvc_vcard_get_photo(*record, contact->images, val);
-			free(val);
+			__ctsvc_vcard_get_photo(*record, contact->images, prefix, val);
 			break;
 		case CTSVC_VCARD_VALUE_BDAY:
 		case CTSVC_VCARD_VALUE_X_ANNIVERSARY:
 		case CTSVC_VCARD_VALUE_X_TIZEN_EVENT:
-			__ctsvc_vcard_get_event(contact->events, type, val);
-			free(val);
+			__ctsvc_vcard_get_event(contact->events, type, prefix, val);
 			break;
 		case CTSVC_VCARD_VALUE_ADR:
-			__ctsvc_vcard_get_address(contact->postal_addrs, val);
-			free(val);
+			__ctsvc_vcard_get_address(contact->postal_addrs, prefix, val);
 			break;
 		case CTSVC_VCARD_VALUE_TEL:
-			__ctsvc_vcard_get_number(contact->numbers, val);
-			free(val);
+			__ctsvc_vcard_get_number(contact->numbers, prefix, val);
 			break;
 		case CTSVC_VCARD_VALUE_EMAIL:
-			__ctsvc_vcard_get_email(contact->emails, val);
-			free(val);
+			__ctsvc_vcard_get_email(contact->emails, prefix, val);
 			break;
 		case CTSVC_VCARD_VALUE_TITLE:
 			__ctsvc_vcard_get_company_value(contact->company, _contacts_company.job_title, val);
-			free(val);
 			break;
 		case CTSVC_VCARD_VALUE_ROLE:
 			__ctsvc_vcard_get_company_value(contact->company, _contacts_company.role, val);
-			free(val);
 			break;
 		case CTSVC_VCARD_VALUE_X_TIZEN_COMPANY_LOCATION:
 			__ctsvc_vcard_get_company_value(contact->company, _contacts_company.location, val);
-			free(val);
 			break;
 		case CTSVC_VCARD_VALUE_X_TIZEN_COMPANY_DESCRIPTION:
 			__ctsvc_vcard_get_company_value(contact->company, _contacts_company.description, val);
-			free(val);
 			break;
 		case CTSVC_VCARD_VALUE_X_TIZEN_COMPANY_PHONETIC_NAME:
 			__ctsvc_vcard_get_company_value(contact->company, _contacts_company.phonetic_name, val);
-			free(val);
 			break;
 		case CTSVC_VCARD_VALUE_X_TIZEN_COMPANY_ASSISTANT_NAME:
 			__ctsvc_vcard_get_company_value(contact->company, _contacts_company.assistant_name, val);
-			free(val);
 			break;
 		case CTSVC_VCARD_VALUE_LOGO:
-			__ctsvc_vcard_get_company_logo(contact->company, val);
-			free(val);
+			__ctsvc_vcard_get_company_logo(contact->company, prefix, val);
 			break;
 		case CTSVC_VCARD_VALUE_ORG:
-			__ctsvc_vcard_get_company(contact->company, val);
-			free(val);
+			__ctsvc_vcard_get_company(contact->company, prefix, val);
 			break;
 		case CTSVC_VCARD_VALUE_NOTE:
 			__ctsvc_vcard_get_note(contact->note, val);
-			free(val);
 			break;
 		case CTSVC_VCARD_VALUE_REV:
 			if (*val)
 				contact->changed_time = __ctsvc_vcard_get_time(val);
-			free(val);
 			break;
 		case CTSVC_VCARD_VALUE_UID:
 			contacts_record_set_str((contacts_record_h)contact, _contacts_contact.uid, __ctsvc_vcard_remove_escape_char(val));
-			free(val);
 			break;
 		case CTSVC_VCARD_VALUE_URL:
-			__ctsvc_vcard_get_url(contact->urls, val);
-			free(val);
+			__ctsvc_vcard_get_url(contact->urls, prefix, val);
 			break;
 		case CTSVC_VCARD_VALUE_X_MSN:
 		case CTSVC_VCARD_VALUE_X_YAHOO:
@@ -3286,26 +3411,28 @@ static inline int __ctsvc_vcard_get_contact(int ver, char *vcard, contacts_recor
 		case CTSVC_VCARD_VALUE_X_QQ:
 		case CTSVC_VCARD_VALUE_X_GOOGLE_TALK:
 		case CTSVC_VCARD_VALUE_X_TIZEN_MESSENGER:
-			__ctsvc_vcard_get_messenger(contact->messengers, type, val);
-			free(val);
+			__ctsvc_vcard_get_messenger(contact->messengers, type, prefix, val);
 			break;
 
 		case CTSVC_VCARD_VALUE_X_TIZEN_RELATIONSHIP:
-			__ctsvc_vcard_get_relationship(contact->relationships, type, val);
-			free(val);
+			__ctsvc_vcard_get_relationship(contact->relationships, type, prefix, val);
 			break;
 		case CTSVC_VCARD_VALUE_END:
 			free(val);
+			free(prefix);
 			return CONTACTS_ERROR_NONE;
 		default:
 			CTS_ERR("Invalid parameter : __ctsvc_vcard_check_content_type() Failed(%d)", type);
 			free(val);
+			free(prefix);
 			return CONTACTS_ERROR_INVALID_PARAMETER;
 		}
+		free(val);
+		free(prefix);
 		cursor = new_start;
 	}
 
-	CTS_ERR("Invalid vcard(%s)", vcard);
+	CTS_ERR("Invalid vcard");
 	return CONTACTS_ERROR_INVALID_PARAMETER;
 }
 
@@ -3426,7 +3553,7 @@ static int __ctsvc_vcard_parse(const void *vcard_stream, contacts_record_h *reco
 	RETVM_IF(NULL == vcard, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : The vcard is invalid.");
 
 	val_begin = __ctsvc_vcard_check_word(vcard, "VERSION:");
-	new_start = __ctsvc_vcard_get_val(CTSVC_VCARD_VER_NONE, val_begin, &val);
+	new_start = __ctsvc_vcard_get_val(CTSVC_VCARD_VER_NONE, val_begin, NULL, &val);
 	if (NULL == new_start || NULL == val)
 		ver = CTSVC_VCARD_VER_2_1;
 	else {
