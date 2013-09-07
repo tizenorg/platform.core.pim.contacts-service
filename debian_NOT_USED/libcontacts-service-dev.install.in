@@ -1,4 +1,0 @@
-@PREFIX@/lib/*.so
-@PREFIX@/include/contacts-svc/*.h
-@PREFIX@/lib/pkgconfig/contacts-service.pc
-
