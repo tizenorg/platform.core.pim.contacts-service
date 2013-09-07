@@ -369,10 +369,13 @@ static inline int __ctsvc_db_create_composite_condition(ctsvc_composite_filter_s
 	GSList *filters = com_filter->filters;
 	GSList *ops = com_filter->filter_ops;
 
-	RETV_IF(NULL == filters, CONTACTS_ERROR_INVALID_PARAMETER);
+	*condition = NULL;
+	// the case : did not set filter condition after calling contacts_filter_create()
+	RETV_IF(NULL == filters, CONTACTS_ERROR_NONE);
 
 	cond = NULL;
 	bind = NULL;
+
 	filter = (ctsvc_filter_s *)filters->data;
 	if (filter->filter_type == CTSVC_FILTER_COMPOSITE)
 		__ctsvc_db_create_composite_condition((ctsvc_composite_filter_s *)filter, &cond, bind_text);
@@ -382,8 +385,10 @@ static inline int __ctsvc_db_create_composite_condition(ctsvc_composite_filter_s
 	cursor_filter = filters->next;
 
 	len = 0;
-	len = snprintf(out_cond, sizeof(out_cond), "(%s)", cond);
-	free(cond);
+	if (cond) {
+		len = snprintf(out_cond, sizeof(out_cond), "(%s)", cond);
+		free(cond);
+	}
 
 	for(cursor_ops=ops; cursor_ops && cursor_filter; cursor_filter=cursor_filter->next, cursor_ops=cursor_ops->next) {
 		cond = NULL;
@@ -406,7 +411,8 @@ static inline int __ctsvc_db_create_composite_condition(ctsvc_composite_filter_s
 			free(cond);
 		}
 	}
-	*condition = strdup(out_cond);
+	if(*out_cond)
+		*condition = strdup(out_cond);
 
 	return CONTACTS_ERROR_NONE;
 }
