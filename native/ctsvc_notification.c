@@ -443,7 +443,6 @@ void ctsvc_notification_send()
 	if (relationship_change) __ctsvc_noti_publish_relationship_change();
 	if (image_change) __ctsvc_noti_publish_image_change();
 	if (profile_change) __ctsvc_noti_publish_profile_change();
-	if (company_change) __ctsvc_noti_publish_company_change();
 }
 
 void ctsvc_db_data_delete_callback(sqlite3_context * context,

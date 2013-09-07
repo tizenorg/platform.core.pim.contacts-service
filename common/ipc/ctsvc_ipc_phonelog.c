@@ -47,8 +47,6 @@ static int __ctsvc_ipc_unmarshal_phonelog(pims_ipc_data_h ipc_data, const char* 
 		if (ctsvc_ipc_unmarshal_int(ipc_data, &phonelog_p->log_type) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_int(ipc_data, &phonelog_p->extra_data1) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_string(ipc_data, &phonelog_p->extra_data2) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_unmarshal_string(ipc_data, &phonelog_p->display_name) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_unmarshal_string(ipc_data, &phonelog_p->image_thumbnail_path) != CONTACTS_ERROR_NONE) break;
 
 		return CONTACTS_ERROR_NONE;
 	} while(0);
@@ -72,8 +70,6 @@ static int __ctsvc_ipc_marshal_phonelog(const contacts_record_h record, pims_ipc
 		if (ctsvc_ipc_marshal_int((phonelog_p->log_type),ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_int((phonelog_p->extra_data1),ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_string((phonelog_p->extra_data2),ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_string((phonelog_p->display_name),ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_string((phonelog_p->image_thumbnail_path),ipc_data) != CONTACTS_ERROR_NONE) break;
 
 		return CONTACTS_ERROR_NONE;
 	} while(0);

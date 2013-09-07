@@ -54,8 +54,6 @@
 #include "ctsvc_db_plugin_image_helper.h"
 #include "ctsvc_db_plugin_extension_helper.h"
 
-//#include "ctsvc_db_plugin_grouprelation_helper.h"
-
 #include "ctsvc_person.h"
 #include "ctsvc_group.h"
 

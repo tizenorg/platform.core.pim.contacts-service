@@ -80,8 +80,6 @@ static int __ctsvc_phonelog_destroy(contacts_record_h record, bool delete_child)
 
 	free(phonelog->address);
 	free(phonelog->extra_data2);
-	free(phonelog->display_name);
-	free(phonelog->image_thumbnail_path);
 	free(phonelog);
 
 	return CONTACTS_ERROR_NONE;
@@ -104,8 +102,6 @@ static int __ctsvc_phonelog_clone(contacts_record_h record, contacts_record_h *o
 	out_data->log_type = src_data->log_type;
 	out_data->extra_data1 = src_data->extra_data1;
 	out_data->extra_data2 = SAFE_STRDUP(src_data->extra_data2);
-	out_data->display_name = SAFE_STRDUP(src_data->display_name);
-	out_data->image_thumbnail_path = SAFE_STRDUP(src_data->image_thumbnail_path);
 
 	CTSVC_RECORD_COPY_BASE(&(out_data->base), &(src_data->base));
 
