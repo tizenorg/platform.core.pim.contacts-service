@@ -263,7 +263,7 @@ static int __ctsvc_db_contact_get_record( int id, contacts_record_h* out_record 
 	contact = (ctsvc_contact_s *)record;
 	ret = __ctsvc_db_get_contact_base_info(id, contact);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("cts_get_main_contacts_info(ALL) Failed(%d)", ret);
+		CTS_ERR("__ctsvc_db_get_contact_base_info(ALL) Failed(%d)", ret);
 		contacts_record_destroy(record, true);
 		return ret;
 	}
@@ -423,6 +423,8 @@ static void __ctsvc_contact_check_default_data(ctsvc_contact_s *contact)
 		contact->has_email = ctsvc_contact_check_default_email((contacts_list_h)contact->emails);
 	if (contact->images)
 		ctsvc_contact_check_default_image((contacts_list_h)contact->images);
+	if (contact->postal_addrs)
+		ctsvc_contact_check_default_address((contacts_list_h)contact->postal_addrs);
 }
 
 static inline int __ctsvc_contact_update_grouprel(int contact_id, contacts_list_h group_list)
@@ -454,6 +456,7 @@ static inline int __ctsvc_contact_update_grouprel(int contact_id, contacts_list_
 		if (NULL == grouprel)
 			continue;
 
+		RETVM_IF(grouprel->group_id <= 0, CONTACTS_ERROR_INVALID_PARAMETER, "group_id(%d) invalid", grouprel->group_id);
 		if (grouprel->group_id) {
 			ret = ctsvc_group_add_contact_in_transaction(grouprel->group_id, contact_id);
 			RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "ctsvc_db_group_set_relation() Failed(%d)", ret);
@@ -1757,6 +1760,7 @@ static inline int __ctsvc_contact_insert_grouprel(int contact_id, contacts_list_
 		if (NULL == grouprel)
 			continue;
 
+		RETVM_IF(grouprel->group_id <= 0, CONTACTS_ERROR_INVALID_PARAMETER, "group_id(%d) invalid", grouprel->group_id);
 		if (grouprel->group_id) {
 			int ret = ctsvc_group_add_contact_in_transaction(grouprel->group_id, contact_id);
 			RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "ctsvc_db_group_set_relation() Failed(%d)", ret);
