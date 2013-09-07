@@ -33,6 +33,7 @@
 #include "ctsvc_notification.h"
 #include "ctsvc_db_plugin_image_helper.h"
 #include "ctsvc_db_plugin_company_helper.h"
+#include "ctsvc_db_plugin_group_helper.h"
 
 #include "ctsvc_person.h"
 #include "ctsvc_phonelog.h"
@@ -67,6 +68,10 @@ int ctsvc_server_db_open(sqlite3 **db)
 						"sqlite3_create_function() Failed(%d)", ret);
 		ret = sqlite3_create_function(server_db, "_PERSON_DELETE_", 1, SQLITE_UTF8, NULL,
 					ctsvc_db_person_delete_callback, NULL, NULL);
+		RETVM_IF(SQLITE_OK != ret, CONTACTS_ERROR_DB,
+						"sqlite3_create_function() Failed(%d)", ret);
+		ret = sqlite3_create_function(server_db, "_GROUP_DELETE_", 1, SQLITE_UTF8, NULL,
+					ctsvc_db_group_delete_callback, NULL, NULL);
 		RETVM_IF(SQLITE_OK != ret, CONTACTS_ERROR_DB,
 						"sqlite3_create_function() Failed(%d)", ret);
 	}
@@ -126,14 +131,16 @@ int ctsvc_server_end_trans(bool success)
 			}
 			if (SQLITE_OK != ret) {
 				CTS_ERR("sqlite3_exec() Failed(%d)", ret);
-				sqlite3_exec(server_db, "ROLLBACK TRANSACTION",
+				ret = sqlite3_exec(server_db, "ROLLBACK TRANSACTION",
 						NULL, NULL, NULL);
+				WARN_IF(SQLITE_OK != ret, "sqlite3_exec (ROLLBACK) Failed(%d)", ret);
 				return CONTACTS_ERROR_DB;
 			}
 		}
 	}
 	else {
-		sqlite3_exec(server_db, "ROLLBACK TRANSACTION", NULL, NULL, NULL);
+		ret = sqlite3_exec(server_db, "ROLLBACK TRANSACTION", NULL, NULL, NULL);
+		WARN_IF(SQLITE_OK != ret, "sqlite3_exec (ROLLBACK) Failed(%d)", ret);
 	}
 
 	return CONTACTS_ERROR_NONE;

@@ -17,18 +17,37 @@
  *
  */
 
-#ifndef __CTSVC_DB_PLUGIN_COMPANY_HELPER_H__
-#define __CTSVC_DB_PLUGIN_COMPANY_HELPER_H__
+#include <ctype.h>
+#include <unistd.h>
 
 #include "contacts.h"
+#include "ctsvc_internal.h"
+#include "ctsvc_schema.h"
 #include "ctsvc_sqlite.h"
+#include "ctsvc_utils.h"
+#include "ctsvc_db_plugin_group_helper.h"
 
-#define CTS_LOGO_IMAGE_LOCATION "/opt/usr/data/contacts-svc/img/logo"
+void ctsvc_db_group_delete_callback(sqlite3_context *context, int argc, sqlite3_value ** argv)
+{
+	int ret;
+	const unsigned char* path;
 
-int ctsvc_db_company_insert(contacts_record_h record, int contact_id, bool is_my_profile, int *id);
-int ctsvc_db_company_update(contacts_record_h record, int contact_id, bool is_my_profile);
-int ctsvc_db_company_delete(int id, bool is_my_profile);
-int ctsvc_db_company_get_value_from_stmt(cts_stmt stmt, contacts_record_h *record, int start_count);
-void ctsvc_db_company_delete_callback(sqlite3_context *context, int argc, sqlite3_value ** argv);
+	if (argc > 1) {
+		sqlite3_result_null(context);
+		return;
+	}
+	path = sqlite3_value_text(argv[0]);
 
-#endif // __CTSVC_DB_PLUGIN_COMPANY_HELPER_H__
+	if (path) {
+		char full_path[CTSVC_IMG_FULL_PATH_SIZE_MAX] = {0};
+		snprintf(full_path, sizeof(full_path), "%s/%s", CTS_GROUP_IMAGE_LOCATION, path);
+		ret = unlink(full_path);
+		if (ret < 0) {
+			CTS_WARN("unlink Failed(%d)", errno);
+		}
+	}
+
+	return;
+}
+
+

@@ -17,6 +17,8 @@
  *
  */
 
+#include <unistd.h>
+
 #include "contacts.h"
 #include "ctsvc_internal.h"
 #include "ctsvc_schema.h"
@@ -27,8 +29,7 @@
 #include "ctsvc_db_init.h"
 #include "ctsvc_record.h"
 #include "ctsvc_notification.h"
-
-#define CTS_GROUP_IMAGE_LOCATION "/opt/usr/data/contacts-svc/img/group"
+#include "ctsvc_db_plugin_group_helper.h"
 
 static int __ctsvc_db_group_insert_record( contacts_record_h record, int *id );
 static int __ctsvc_db_group_get_record( int id, contacts_record_h* out_record );
@@ -85,7 +86,6 @@ static int __ctsvc_db_group_insert_record( contacts_record_h record, int *id )
 	double group_prio = 0.0;
 	ctsvc_group_s *group = (ctsvc_group_s *)record;
 	char query[CTS_SQL_MAX_LEN] = {0};
-	char image[CTSVC_IMG_FULL_PATH_SIZE_MAX] = {0};
 
 	RETV_IF(NULL == record, CONTACTS_ERROR_INVALID_PARAMETER);
 	RETVM_IF(CTSVC_RECORD_GROUP != group->base.r_type, CONTACTS_ERROR_INVALID_PARAMETER,
@@ -130,14 +130,16 @@ static int __ctsvc_db_group_insert_record( contacts_record_h record, int *id )
 		cts_stmt_bind_text(stmt, 5, group->vibration);
 
 	if(group->image_thumbnail_path) {
-		ret = ctsvc_change_image(CTS_GROUP_IMAGE_LOCATION, group->id, group->image_thumbnail_path,
-			image, sizeof(image));
-		if(CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("DB error : ctsvc_change_image() Failed(%d)", ret);
+		char image[CTSVC_IMG_FULL_PATH_SIZE_MAX] = {0};
+		ctsvc_utils_make_image_file_name(0, group->id, group->image_thumbnail_path, image, sizeof(image));
+		ret = ctsvc_utils_copy_image(CTS_GROUP_IMAGE_LOCATION, group->image_thumbnail_path, image);
+		if (CONTACTS_ERROR_NONE != ret) {
+			CTS_ERR("ctsvc_utils_copy_image() Failed(%d)", ret);
 			cts_stmt_finalize(stmt);
 			ctsvc_end_trans(false);
 			return ret;
 		}
+
 		free(group->image_thumbnail_path);
 		group->image_thumbnail_path = strdup(image);
 		cts_stmt_bind_text(stmt, 6, group->image_thumbnail_path);
@@ -178,6 +180,8 @@ static int __ctsvc_db_group_update_record( contacts_record_h record )
 	char query[CTS_SQL_MAX_LEN] = {0};
 	cts_stmt stmt = NULL;
 	bool is_read_only = false;
+	char *image = NULL;
+	char *temp = NULL;
 
 	RETV_IF(NULL == record, CONTACTS_ERROR_INVALID_PARAMETER);
 	RETVM_IF(CTSVC_RECORD_GROUP != group->base.r_type, CONTACTS_ERROR_INVALID_PARAMETER,
@@ -190,7 +194,7 @@ static int __ctsvc_db_group_update_record( contacts_record_h record )
 	RETVM_IF(ret, ret, "ctsvc_begin_trans() Failed(%d)", ret);
 
 	snprintf(query, sizeof(query),
-			"SELECT addressbook_id, is_read_only FROM %s WHERE group_id = %d",
+			"SELECT addressbook_id, is_read_only, image_thumbnail_path FROM %s WHERE group_id = %d",
 			CTS_TABLE_GROUPS, group->id);
 	stmt = cts_query_prepare(query);
 	if (NULL == stmt) {
@@ -214,25 +218,54 @@ static int __ctsvc_db_group_update_record( contacts_record_h record )
 
 	addressbook_id = ctsvc_stmt_get_int(stmt, 0);
 	is_read_only = ctsvc_stmt_get_int(stmt, 1);
+	temp = ctsvc_stmt_get_text(stmt, 2);
+	image = SAFE_STRDUP(temp);
 	cts_stmt_finalize(stmt);
 
 	if (is_read_only && ctsvc_record_check_property_flag((ctsvc_record_s *)record, _contacts_group.name, CTSVC_PROPERTY_FLAG_DIRTY)) {
 		CTS_ERR("Can not change the group name. It is a read-only group (group_id : %d)", group->id);
 		ctsvc_end_trans(false);
+		free(image);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 
 	if (ctsvc_record_check_property_flag((ctsvc_record_s *)group, _contacts_group.image_path, CTSVC_PROPERTY_FLAG_DIRTY)) {
-		char image[CTS_SQL_MAX_LEN] = {0};
-		ret = ctsvc_change_image(CTS_GROUP_IMAGE_LOCATION, group->id, group->image_thumbnail_path, image, sizeof(image));
-		if (*image) {
+		bool same = false;
+		// delete current image
+		if (image) {
+			char full_path[CTSVC_IMG_FULL_PATH_SIZE_MAX] = {0};
+			snprintf(full_path, sizeof(full_path), "%s/%s", CTS_GROUP_IMAGE_LOCATION, image);
+
+			if (group->image_thumbnail_path && strcmp(group->image_thumbnail_path, full_path) == 0) {
+				int index = _contacts_group.image_path & 0x000000FF;
+				((ctsvc_record_s *)record)->properties_flags[index] = 0;
+				same = true;
+			}
+			else {
+				ret = unlink(full_path);
+				if (ret < 0) {
+					CTS_WARN("unlink Failed(%d)", errno);
+				}
+			}
+		}
+
+		// add new image file
+		if (!same && group->image_thumbnail_path) {
+			char dest[CTS_SQL_MAX_LEN] = {0};
+			ctsvc_utils_make_image_file_name(0, group->id, group->image_thumbnail_path, dest, sizeof(dest));
+			ret = ctsvc_utils_copy_image(CTS_GROUP_IMAGE_LOCATION, group->image_thumbnail_path, dest);
+			if (CONTACTS_ERROR_NONE != ret) {
+				CTS_ERR("cts_copy_file() Failed(%d)", ret);
+				ctsvc_end_trans(false);
+				free(image);
+				return ret;
+			}
+
 			free(group->image_thumbnail_path);
-			if (strstr(image, CTS_GROUP_IMAGE_LOCATION) != NULL)
-				group->image_thumbnail_path = strdup(image + strlen(CTS_GROUP_IMAGE_LOCATION) + 1);
-			else
-				group->image_thumbnail_path = strdup(image);
+			group->image_thumbnail_path = strdup(dest);
 		}
 	}
+	free(image);
 
 	do {
 		char query[CTS_SQL_MAX_LEN] = {0};
@@ -336,13 +369,6 @@ static int __ctsvc_db_group_delete_record( int id )
 	}
 
 	ctsvc_get_next_ver();
-
-	ret = ctsvc_change_image(CTS_GROUP_IMAGE_LOCATION, id, NULL, NULL, 0);
-	if (ret < 0) {
-		CTS_ERR("DB error : ctsvc_change_image() Failed(%d)", ret);
-		ctsvc_end_trans(false);
-		return ret;
-	}
 
 	ctsvc_set_group_noti();
 	if (count > 0) {

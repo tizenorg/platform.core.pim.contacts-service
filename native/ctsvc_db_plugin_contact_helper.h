@@ -52,6 +52,7 @@ int ctsvc_get_data_info_extension(cts_stmt stmt, contacts_list_h list);
 bool ctsvc_contact_check_default_number(contacts_list_h number_list);
 bool ctsvc_contact_check_default_email(contacts_list_h email_list);
 bool ctsvc_contact_check_default_image(contacts_list_h image_list);
+bool ctsvc_contact_check_image_location(const char *path);
 
 int ctsvc_contact_update_data_name(contacts_list_h name_list, int contact_id, bool is_my_profile);
 int ctsvc_contact_update_data_company(contacts_list_h company_list, int contact_id, bool is_my_profile);

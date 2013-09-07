@@ -60,13 +60,13 @@
 #include "ctsvc_group.h"
 
 int ctsvc_contact_add_image_file(int parent_id, int img_id,
-		char *src_img, char *dest_name, int dest_size)
+		char *src_img, char *dest, int dest_size)
 {
 	int ret;
 	int version;
 	char *ext;
 	char *temp;
-	char dest[CTSVC_IMG_FULL_PATH_SIZE_MAX] = {0};
+	char *lower_ext;
 
 	RETVM_IF(NULL == src_img, CONTACTS_ERROR_INVALID_PARAMETER, "image_thumbnail_path is NULL");
 
@@ -74,27 +74,28 @@ int ctsvc_contact_add_image_file(int parent_id, int img_id,
 	if (NULL == ext || strchr(ext, '/'))
 		ext = "";
 
-	version = ctsvc_get_next_ver();
-	snprintf(dest, sizeof(dest), "%s/%d_%d-%d%s", CTS_IMG_FULL_LOCATION, parent_id, img_id, version, ext);
-
-	ext = strrchr(dest, '.');
-	if (NULL == ext || strchr(ext, '/'))
-		ext = "";
-
-	temp = ext;
+	lower_ext = strdup(ext);
+	temp = lower_ext;
 	while (*temp) {
 		*temp = tolower(*temp);
 		temp++;
 	}
 
-	ret = ctsvc_copy_image(src_img, dest);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "cts_copy_file() Failed(%d)", ret);
+	version = ctsvc_get_next_ver();
+	snprintf(dest, dest_size, "%d_%d-%d%s", parent_id, img_id, version, lower_ext);
+	free(lower_ext);
 
-	snprintf(dest_name, dest_size, "%d_%d-%d%s", parent_id, img_id, version, ext);
+	ret = ctsvc_utils_copy_image(CTS_IMG_FULL_LOCATION, src_img, dest);
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("ctsvc_utils_copy_image() Failed(%d)", ret);
+		dest[0] = '\0';
+		return ret;
+	}
+
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_contact_delete_image_file(int image_id)
+static int __ctsvc_contact_get_current_image_file(int image_id, char *dest, int dest_size)
 {
 	int ret;
 	cts_stmt stmt;
@@ -118,27 +119,57 @@ static int __ctsvc_contact_delete_image_file(int image_id)
 
 	tmp_path = ctsvc_stmt_get_text(stmt, 0);
 	if (tmp_path) {
-		char full_path[CTSVC_IMG_FULL_PATH_SIZE_MAX] = {0};
-		snprintf(full_path, sizeof(full_path), "%s/%s", CTS_IMG_FULL_LOCATION, tmp_path);
-		ret = unlink(full_path);
-		WARN_IF (ret < 0, "unlink(%s) Failed(%d)", full_path, errno);
+		snprintf(dest, dest_size, "%s/%s", CTS_IMG_FULL_LOCATION, tmp_path);
 	}
 	cts_stmt_finalize(stmt);
 	return CONTACTS_ERROR_NONE;
+}
+
+// check that the image file under location or not
+// we should check CTS_IMG_FULL_LOCATION, CTSVC_VCARD_IMAGE_LOCATION, CTS_GROUP_IMAGE_LOCATION, CTS_LOGO_IMAGE_LOCATION
+bool ctsvc_contact_check_image_location(const char *path)
+{
+	int len;
+	char *slash;
+
+	if (path == NULL || *path == '\0')
+		return false;
+
+	slash = strrchr(path, '/');
+	if (slash == NULL || slash == path)
+		return false;
+
+	len = (int)(slash-path);
+	if (len != strlen(CTS_IMG_FULL_LOCATION))
+		return false;
+
+	if (strncmp(path, CTS_IMG_FULL_LOCATION, len) == 0)
+		return true;
+
+	return false;
 }
 
 int ctsvc_contact_update_image_file(int parent_id, int img_id,
 		char *src_img, char *dest_name, int dest_size)
 {
 	int ret;
-	if (src_img && strstr(src_img, CTS_IMG_FULL_LOCATION) != NULL) {
-		snprintf(dest_name, dest_size, "%s", src_img + strlen(CTS_IMG_FULL_LOCATION) + 1);
-		return CONTACTS_ERROR_NONE;
-	}
+	char dest[CTSVC_IMG_FULL_PATH_SIZE_MAX] = {0};
 
-	ret = __ctsvc_contact_delete_image_file(img_id);
+	ret = __ctsvc_contact_get_current_image_file(img_id, dest, sizeof(dest));
+
 	WARN_IF(CONTACTS_ERROR_NONE != ret && CONTACTS_ERROR_NO_DATA != ret,
-			"__ctsvc_contact_delete_image_file() Failed(%d)", ret);
+			"__ctsvc_contact_get_current_image_file() Failed(%d)", ret);
+	if (*dest) {
+		if (src_img && strcmp(dest, src_img) == 0) {
+			snprintf(dest_name, dest_size, "%s", src_img + strlen(CTS_IMG_FULL_LOCATION) + 1);
+			return CONTACTS_ERROR_NONE;
+		}
+
+		ret = unlink(dest);
+		if (ret < 0) {
+			CTS_WARN("unlink Failed(%d)", errno);
+		}
+	}
 
 	if (src_img) {
 		ret = ctsvc_contact_add_image_file(parent_id, img_id, src_img, dest_name, dest_size);

@@ -30,7 +30,7 @@ int ctsvc_get_next_ver(void);
 int ctsvc_get_current_version( int* out_current_version );
 int ctsvc_get_transaction_ver(void);
 
-int ctsvc_change_image(const char *dir, int index, const char *path, char *image, int image_len);
-int ctsvc_copy_image(const char *src, const char *dest);
+int ctsvc_utils_copy_image(const char *dir, const char *src, const char *file);
+void ctsvc_utils_make_image_file_name(int parent_id, int id, char *src_img, char *dest, int dest_size);
 
 #endif /* __TIZEN_SOCIAL_CTSVC_UTILS_H__ */

@@ -52,7 +52,7 @@ static __thread int transaction_ver = 0;
 static __thread bool version_up = false;
 
 #define CTS_SECURITY_IMAGE_PERMISSION 0440
-#define CTS_IMAGE_ENCODE_QUALITY	90
+#define CTS_IMAGE_ENCODE_QUALITY	50
 
 #define CTS_COMMIT_TRY_MAX 500000 // For 3second
 int ctsvc_begin_trans(void)
@@ -164,7 +164,6 @@ int ctsvc_end_trans(bool is_success)
 	ctsvc_mutex_unlock(CTS_MUTEX_TRANSACTION);
 #endif
 
-
 	CTS_DBG("Transaction shut down! : (%d)\n", transaction_ver);
 
 	return CONTACTS_ERROR_NONE;
@@ -203,38 +202,28 @@ const char* ctsvc_get_sort_column(void)
 		return "reverse_display_name_language, reverse_sortkey";
 }
 
-static char* __ctsvc_get_image(const char *dir, int index, char *dest, int dest_size)
+void ctsvc_utils_make_image_file_name(int parent_id, int id, char *src_img, char *dest, int dest_size)
 {
-	DIR *dp;
-	char *ret_val;
-	struct dirent *file_info;
-	char tmp_path[CTSVC_IMG_FULL_PATH_SIZE_MAX] = {0};
+	char *ext;
+	char *temp;
+	char *lower_ext;
 
-	if (0 < index)
-		snprintf(tmp_path, sizeof(tmp_path), "%d", index);
+	ext = strrchr(src_img, '.');
+	if (NULL == ext || strchr(ext, '/'))
+		ext = "";
 
-	dp = opendir(dir);
-	if (dp) {
-		while ((file_info = readdir(dp)) != NULL) {
-			CTS_DBG("file = %s", file_info->d_name);
-			if ('.' != *file_info->d_name) {
-				if (0 == index || !strncmp(tmp_path, file_info->d_name, strlen(tmp_path))) {
-					if (dest) {
-						snprintf(dest, dest_size, "%s/%s", dir, file_info->d_name);
-						ret_val = dest;
-					} else {
-						snprintf(tmp_path, sizeof(tmp_path), "%s/%s", dir, file_info->d_name);
-						ret_val = strdup(tmp_path);
-					}
-					closedir(dp);
-					return ret_val;
-				}
-			}
-		}
-		closedir(dp);
+	lower_ext = strdup(ext);
+	temp = lower_ext;
+	while (*temp) {
+		*temp = tolower(*temp);
+		temp++;
 	}
 
-	return NULL;
+	if (parent_id > 0)
+		snprintf(dest, dest_size, "%d_%d%s", parent_id, id, lower_ext);
+	else
+		snprintf(dest, dest_size, "%d%s", id, ext);
+	free(lower_ext);
 }
 
 static inline bool ctsvc_check_available_image_space(void){
@@ -467,12 +456,18 @@ static int __ctsvc_resize_and_copy_image(const char *src, const char *dest)
 }
 
 #define CTSVC_COPY_SIZE_MAX 4096
-int ctsvc_copy_image(const char *src, const char *dest)
+int ctsvc_utils_copy_image(const char *dir, const char *src, const char *file)
 {
 	int ret;
 	int size;
 	int src_fd, dest_fd;
 	char buf[CTSVC_COPY_SIZE_MAX] = {0};
+
+	if (NULL == file || *file == '\0')
+		return CONTACTS_ERROR_INVALID_PARAMETER;
+
+	char dest[strlen(dir) + strlen(file) + 2];
+	snprintf(dest, sizeof(dest), "%s/%s", dir, file);
 
 	if (!ctsvc_check_available_image_space())
 		return CONTACTS_ERROR_FILE_NO_SPACE;
@@ -520,56 +515,6 @@ int ctsvc_copy_image(const char *src, const char *dest)
 		CTS_ERR("fchmod(%s) Failed(%d)", dest, ret);
 	close(src_fd);
 	close(dest_fd);
-
-	return CONTACTS_ERROR_NONE;
-}
-
-// This function is for group image.
-int ctsvc_change_image(const char *dir, int index, const char *path, char *image, int image_len)
-{
-	int ret;
-	char dest[CTSVC_IMG_FULL_PATH_SIZE_MAX] = {0};
-
-	if (__ctsvc_get_image(dir, index, dest, sizeof(dest))) {
-		if (path && 0 == strcmp(dest, path)) {
-			if (image)
-				snprintf(image, image_len, "%s", path);
-			return CONTACTS_ERROR_NONE;
-		}
-		ret = unlink(dest);
-		RETVM_IF(ret < 0, CONTACTS_ERROR_SYSTEM, "System : unlink(%s) Failed(%d)", dest, errno);
-	}
-
-	if (path) {
-		char *ext;
-		char *temp;
-		int len;
-		ext = strrchr(path, '.');
-		if (NULL == ext || strchr(ext, '/'))
-			ext = "";
-
-		snprintf(dest, sizeof(dest), "%s/%d%s",
-				dir, index, ext);
-
-		ext = strrchr(dest, '.');
-		if (NULL == ext || strchr(ext, '/'))
-			ext = "";
-
-		temp = ext;
-		while (*temp) {
-			*temp = tolower(*temp);
-			temp++;
-		}
-
-		ret = ctsvc_copy_image(path, dest);
-		RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_copy_image() Failed(%d)", ret);
-		len = strlen(dest) - strlen(dir);
-		if (image_len < len) {
-			CTS_ERR("The image_len is too short. It should be greater than %d", len);
-			return CONTACTS_ERROR_INVALID_PARAMETER;
-		}
-		snprintf(image, image_len, "%d%s", index, ext);
-	}
 
 	return CONTACTS_ERROR_NONE;
 }

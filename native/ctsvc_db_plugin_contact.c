@@ -292,15 +292,7 @@ static int __ctsvc_db_contact_delete_record( int id )
 	return ctsvc_db_contact_delete(id);
 }
 
-static inline int __ctsvc_safe_strcmp(char *s1, char *s2)
-{
-	if (NULL == s1 || NULL == s2)
-		return !(s1 == s2);
-	else
-		return strcmp(s1, s2);
-}
-
-static inline int __ctsvc_update_contact_data(ctsvc_contact_s *contact)
+static inline int __ctsvc_contact_update_data(ctsvc_contact_s *contact)
 {
 	int ret;
 
@@ -433,7 +425,7 @@ static void __ctsvc_contact_check_default_data(ctsvc_contact_s *contact)
 		ctsvc_contact_check_default_image((contacts_list_h)contact->images);
 }
 
-static inline int __ctsvc_update_contact_grouprel(int contact_id, contacts_list_h group_list)
+static inline int __ctsvc_contact_update_grouprel(int contact_id, contacts_list_h group_list)
 {
 	CTS_FN_CALL;
 	ctsvc_group_relation_s *grouprel;
@@ -1104,7 +1096,7 @@ static inline int __ctsvc_update_contact_search_data(int contact_id)
 
 	ret = __ctsvc_contact_make_search_data(contact_id, &search_name, &search_number, &search_data);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("cts_make_contact_search_data() Failed(%d)", ret);
+		CTS_ERR("__ctsvc_contact_make_search_data() Failed(%d)", ret);
 		cts_stmt_finalize(stmt);
 		ctsvc_end_trans(false);
 		return ret;
@@ -1174,15 +1166,15 @@ static int __ctsvc_db_contact_update_record( contacts_record_h record )
 	__ctsvc_contact_check_default_data(contact);
 
 	//update data
-	ret = __ctsvc_update_contact_data(contact);
+	ret = __ctsvc_contact_update_data(contact);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("__ctsvc_update_contact_data() Failed(%d)", ret);
+		CTS_ERR("__ctsvc_contact_update_data() Failed(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
 
 	if (contact->grouprelations) {
-		rel_changed = __ctsvc_update_contact_grouprel(contact->id, (contacts_list_h)contact->grouprelations);
+		rel_changed = __ctsvc_contact_update_grouprel(contact->id, (contacts_list_h)contact->grouprelations);
 		if (rel_changed < CONTACTS_ERROR_NONE) {
 			CTS_ERR("cts_update_contact_grouprel() Failed(%d)", rel_changed);
 			ctsvc_end_trans(false);
@@ -1216,7 +1208,7 @@ static int __ctsvc_db_contact_update_record( contacts_record_h record )
 					(contact->image_thumbnail_path && image->path && 0 != strcmp(contact->image_thumbnail_path, image->path))) {
 				ctsvc_record_set_property_flag((ctsvc_record_s *)contact, _contacts_contact.image_thumbnail_path, CTSVC_PROPERTY_FLAG_DIRTY);
 
-				if ( image->path && *image->path && strstr(image->path, CTS_IMG_FULL_LOCATION) != NULL)
+				if (ctsvc_contact_check_image_location(image->path))
 					contact->image_thumbnail_path = SAFE_STRDUP(image->path + strlen(CTS_IMG_FULL_LOCATION) + 1);
 				else
 					contact->image_thumbnail_path = SAFE_STRDUP(image->path);
@@ -2039,7 +2031,7 @@ static int __ctsvc_db_contact_replace_record( contacts_record_h record, int cont
 	int person_id;
 	char query[CTS_SQL_MAX_LEN] = {0};
 	ctsvc_contact_s *contact = (ctsvc_contact_s*)record;
-	cts_stmt stmt;
+	cts_stmt stmt = NULL;
 	int version;
 
 	ret = ctsvc_begin_trans();
@@ -2119,7 +2111,7 @@ static int __ctsvc_db_contact_replace_record( contacts_record_h record, int cont
 					(contact->image_thumbnail_path && image->path && 0 != strcmp(contact->image_thumbnail_path, image->path))) {
 				ctsvc_record_set_property_flag((ctsvc_record_s *)contact, _contacts_contact.image_thumbnail_path, CTSVC_PROPERTY_FLAG_DIRTY);
 
-				if ( image->path && *image->path && strstr(image->path, CTS_IMG_FULL_LOCATION) != NULL)
+				if (ctsvc_contact_check_image_location(image->path))
 					contact->image_thumbnail_path = SAFE_STRDUP(image->path + strlen(CTS_IMG_FULL_LOCATION) + 1);
 				else
 					contact->image_thumbnail_path = SAFE_STRDUP(image->path);
