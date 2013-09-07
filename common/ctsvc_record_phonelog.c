@@ -207,6 +207,8 @@ static int __ctsvc_phonelog_set_str(contacts_record_h record, unsigned int prope
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_PHONELOG_ADDRESS:
+		RETVM_IF(phonelog->id > 0, CONTACTS_ERROR_INVALID_PARAMETER,
+			"Invalid parameter : property_id(%d) is a read-only value (phonelog)", property_id);
 		FREEandSTRDUP(phonelog->address, str);
 		break;
 	case CTSVC_PROPERTY_PHONELOG_EXTRA_DATA2:

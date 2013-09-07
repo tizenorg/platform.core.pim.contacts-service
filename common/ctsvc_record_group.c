@@ -241,6 +241,8 @@ static int __ctsvc_group_set_bool(contacts_record_h record, unsigned int propert
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_GROUP_IS_READ_ONLY:
+		RETVM_IF(group->id > 0, CONTACTS_ERROR_INVALID_PARAMETER,
+				"Invalid parameter : property_id(%d) is a read-only value (group)", property_id);
 		group->is_read_only = value;
 		break;
 	default:
