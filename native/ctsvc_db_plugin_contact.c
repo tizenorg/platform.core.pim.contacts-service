@@ -625,41 +625,45 @@ static inline int __ctsvc_contact_make_search_name(ctsvc_contact_s *contact, cha
 
 			free(normalized_display_name);
 		}
+	}
 
-		if (contact->name) {
-			contacts_list_h name_list = (contacts_list_h)contact->name;
-			ctsvc_name_s *name_record;
-			contacts_list_first(name_list);
-			char *phonetic = NULL;
-			int temp_len = 0;
+	// append phonetic name
+	if (contact->name) {
+		contacts_list_h name_list = (contacts_list_h)contact->name;
+		ctsvc_name_s *name_record;
+		contacts_list_first(name_list);
+		char *phonetic = NULL;
+		int temp_len = 0;
 
-			contacts_list_get_current_record_p(name_list, (contacts_record_h*)&name_record);
-			if (NULL != name_record) {
-				buf_size = SAFE_STRLEN(name_record->phonetic_first) + SAFE_STRLEN(name_record->phonetic_last) + SAFE_STRLEN(name_record->phonetic_middle);
-				if (buf_size > 0) {
-					buf_size += 3; // for space and null string
-					phonetic = calloc(1, buf_size);
-					if (name_record->phonetic_first)
-						temp_len += snprintf(phonetic, buf_size, "%s", name_record->phonetic_first);
-					if (name_record->phonetic_middle) {
-						if (temp_len)
-							temp_len += snprintf(phonetic + temp_len, buf_size - temp_len, " ");
-						temp_len += snprintf(phonetic + temp_len, buf_size - temp_len, "%s", name_record->phonetic_middle);
-					}
-					if (name_record->phonetic_last) {
-						if (temp_len)
-							temp_len += snprintf(phonetic + temp_len, buf_size - temp_len, " ");
-						temp_len += snprintf(phonetic + temp_len, buf_size - temp_len, "%s", name_record->phonetic_last);
-					}
+		contacts_list_get_current_record_p(name_list, (contacts_record_h*)&name_record);
+		if (NULL != name_record) {
+			buf_size = SAFE_STRLEN(name_record->phonetic_first) + SAFE_STRLEN(name_record->phonetic_last) + SAFE_STRLEN(name_record->phonetic_middle);
+			if (buf_size > 0) {
+				buf_size += 3; // for space and null string
+				phonetic = calloc(1, buf_size);
+				if (name_record->phonetic_first)
+					temp_len += snprintf(phonetic, buf_size, "%s", name_record->phonetic_first);
+				if (name_record->phonetic_middle) {
+					if (temp_len)
+						temp_len += snprintf(phonetic + temp_len, buf_size - temp_len, " ");
+					temp_len += snprintf(phonetic + temp_len, buf_size - temp_len, "%s", name_record->phonetic_middle);
+				}
+				if (name_record->phonetic_last) {
+					if (temp_len)
+						temp_len += snprintf(phonetic + temp_len, buf_size - temp_len, " ");
+					temp_len += snprintf(phonetic + temp_len, buf_size - temp_len, "%s", name_record->phonetic_last);
+				}
 
+				if (name) {
 					buf_size = SAFE_STRLEN(name) + SAFE_STRLEN(phonetic) + 2;
 					temp_name = calloc(1, buf_size);
 					snprintf(temp_name, buf_size, "%s %s", name, phonetic);
 					free(name);
 					name = temp_name;
-
 					free(phonetic);
 				}
+				else
+					name = phonetic;
 			}
 		}
 	}
