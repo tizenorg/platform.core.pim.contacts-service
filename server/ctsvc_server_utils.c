@@ -103,12 +103,13 @@ void ctsvc_server_final_configuration(void)
 int ctsvc_server_init_configuration(void)
 {
 	int ret, sim_stat=-1;
-	const char *langset;
+	char *langset = NULL;
 	int sort_type;
 
 	langset = vconf_get_str(CTSVC_SERVER_VCONF_SYSTEM_LANGUAGE);
 	WARN_IF(NULL == langset, "vconf_get_str(%s) return NULL", CTSVC_SERVER_VCONF_SYSTEM_LANGUAGE);
 	system_language = ctsvc_get_language_type(langset);
+	free(langset);
 
 	ret = vconf_get_int(ctsvc_get_default_sort_vconfkey(), &sort_type);
 	if (ret < 0 || sort_type == CTSVC_SORT_OTHERS) {
