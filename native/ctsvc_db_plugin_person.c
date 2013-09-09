@@ -83,6 +83,7 @@ static int __ctsvc_db_person_get_record( int id, contacts_record_h* out_record )
 				"persons.image_thumbnail_path, "
 				"persons.ringtone_path, "
 				"persons.vibration, "
+				"persons.message_alert, "
 				"status, "
 				"link_count, "
 				"addressbook_ids, "
@@ -249,6 +250,8 @@ static int __ctsvc_db_person_update_record( contacts_record_h record )
 		len += snprintf(contact_query + len, sizeof(contact_query) - len, ", ringtone_path=? ");
 	if (ctsvc_record_check_property_flag((ctsvc_record_s *)person, _contacts_person.vibration, CTSVC_PROPERTY_FLAG_DIRTY))
 		len += snprintf(contact_query + len, sizeof(contact_query) - len, ", vibration=? ");
+	if (ctsvc_record_check_property_flag((ctsvc_record_s *)person, _contacts_person.message_alert, CTSVC_PROPERTY_FLAG_DIRTY))
+		len += snprintf(contact_query + len, sizeof(contact_query) - len, ", message_alert=? ");
 	snprintf(contact_query+len, sizeof(contact_query)-len, " WHERE person_id=%d AND deleted = 0", person->person_id);
 
 	stmt = cts_query_prepare(contact_query);
@@ -271,10 +274,14 @@ static int __ctsvc_db_person_update_record( contacts_record_h record )
 			cts_stmt_bind_text(stmt, i, person->ringtone_path);
 		i++;
 	}
-
 	if (ctsvc_record_check_property_flag((ctsvc_record_s *)person, _contacts_person.vibration, CTSVC_PROPERTY_FLAG_DIRTY)) {
 		if (person->vibration)
 			cts_stmt_bind_text(stmt, i, person->vibration);
+		i++;
+	}
+	if (ctsvc_record_check_property_flag((ctsvc_record_s *)person, _contacts_person.message_alert, CTSVC_PROPERTY_FLAG_DIRTY)) {
+		if (person->message_alert)
+			cts_stmt_bind_text(stmt, i, person->message_alert);
 		i++;
 	}
 
@@ -409,6 +416,7 @@ static int __ctsvc_db_person_get_all_records( int offset, int limit, contacts_li
 					"image_thumbnail_path, "
 					"ringtone_path, "
 					"vibration, "
+					"message_alert, "
 					"status, "
 					"link_count, "
 					"addressbook_ids, "
@@ -551,6 +559,10 @@ static int __ctsvc_db_person_get_records_with_query( contacts_query_h query, int
 			case CTSVC_PROPERTY_PERSON_STATUS:
 				temp = ctsvc_stmt_get_text(stmt, i);
 				person->status = SAFE_STRDUP(temp);
+				break;
+			case CTSVC_PROPERTY_PERSON_MESSAGE_ALERT:
+				temp = ctsvc_stmt_get_text(stmt, i);
+				person->message_alert = SAFE_STRDUP(temp);
 				break;
 			default:
 				break;

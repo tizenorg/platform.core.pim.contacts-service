@@ -49,6 +49,7 @@ _CONTACTS_BEGIN_VIEW()
 	_CONTACTS_PROPERTY_STR( vibration )				// read, write
 	_CONTACTS_PROPERTY_STR( extra_data )				// read, write, string
 	_CONTACTS_PROPERTY_BOOL( is_read_only )			// read only
+	_CONTACTS_PROPERTY_STR( message_alert )				// read, write
 _CONTACTS_END_VIEW( _contacts_group )
 
 // person
@@ -67,6 +68,7 @@ _CONTACTS_BEGIN_VIEW()
 	_CONTACTS_PROPERTY_STR( addressbook_ids )			// read only
 	_CONTACTS_PROPERTY_BOOL( has_phonenumber )		// read only
 	_CONTACTS_PROPERTY_BOOL( has_email )			// read only
+	_CONTACTS_PROPERTY_STR( message_alert )				// read, write
 _CONTACTS_END_VIEW( _contacts_person )
 
 // simple contact
@@ -84,6 +86,7 @@ _CONTACTS_BEGIN_VIEW()
 	_CONTACTS_PROPERTY_STR( uid )					// read, write
 	_CONTACTS_PROPERTY_STR( vibration )				// read, write
 	_CONTACTS_PROPERTY_INT( changed_time )			// read only
+	_CONTACTS_PROPERTY_STR( message_alert )				// read, write
 _CONTACTS_END_VIEW( _contacts_simple_contact )
 
 // contact
@@ -117,6 +120,7 @@ _CONTACTS_BEGIN_VIEW()
 	_CONTACTS_PROPERTY_CHILD_MULTIPLE( relationship )			// read, write
 	_CONTACTS_PROPERTY_CHILD_MULTIPLE( group_relation )		// read, write
 	_CONTACTS_PROPERTY_CHILD_MULTIPLE( extension )		// read, write
+	_CONTACTS_PROPERTY_STR( message_alert )				// read, write
 _CONTACTS_END_VIEW( _contacts_contact )
 
 // my_profile
@@ -426,6 +430,7 @@ _CONTACTS_BEGIN_READ_ONLY_VIEW()
 	_CONTACTS_PROPERTY_INT( address_book_id )
 	_CONTACTS_PROPERTY_STR( address_book_name )
 	_CONTACTS_PROPERTY_INT( address_book_mode )
+	_CONTACTS_PROPERTY_PROJECTION_STR( message_alert )
 _CONTACTS_END_READ_ONLY_VIEW( _contacts_person_contact )
 
 // person_number : read only
@@ -446,6 +451,7 @@ _CONTACTS_BEGIN_READ_ONLY_VIEW()
 	_CONTACTS_PROPERTY_BOOL( is_primary_default )
 	_CONTACTS_PROPERTY_STR( number )
 	_CONTACTS_PROPERTY_FILTER_STR( number_filter )
+	_CONTACTS_PROPERTY_PROJECTION_STR( message_alert )
 _CONTACTS_END_READ_ONLY_VIEW( _contacts_person_number )
 
 // person_email : read only
@@ -465,6 +471,7 @@ _CONTACTS_BEGIN_READ_ONLY_VIEW()
 	_CONTACTS_PROPERTY_PROJECTION_STR( label )
 	_CONTACTS_PROPERTY_BOOL( is_primary_default )
 	_CONTACTS_PROPERTY_STR( email )
+	_CONTACTS_PROPERTY_PROJECTION_STR( message_alert )
 _CONTACTS_END_READ_ONLY_VIEW( _contacts_person_email )
 
 // person_group : read only
@@ -487,6 +494,7 @@ _CONTACTS_BEGIN_READ_ONLY_VIEW()
 	_CONTACTS_PROPERTY_STR( address_book_name )
 	_CONTACTS_PROPERTY_INT( address_book_mode )
 	_CONTACTS_PROPERTY_PROJECTION_INT( contact_id )
+	_CONTACTS_PROPERTY_PROJECTION_STR( message_alert )
 _CONTACTS_END_READ_ONLY_VIEW( _contacts_person_grouprel )
 
 //person phone_log : read only
@@ -517,6 +525,7 @@ _CONTACTS_BEGIN_READ_ONLY_VIEW()
 	_CONTACTS_PROPERTY_BOOL( has_email )
 	_CONTACTS_PROPERTY_INT( usage_type )
 	_CONTACTS_PROPERTY_INT( times_used )
+	_CONTACTS_PROPERTY_PROJECTION_STR( message_alert )
 _CONTACTS_END_READ_ONLY_VIEW( _contacts_person_usage )
 
 // simple contact number : read only

@@ -77,6 +77,10 @@ int ctsvc_db_person_create_record_from_stmt_with_projection(cts_stmt stmt, unsig
 			temp = ctsvc_stmt_get_text(stmt, i);
 			person->vibration = SAFE_STRDUP(temp);
 			break;
+		case CTSVC_PROPERTY_PERSON_MESSAGE_ALERT:
+			temp = ctsvc_stmt_get_text(stmt, i);
+			person->message_alert = SAFE_STRDUP(temp);
+			break;
 		case CTSVC_PROPERTY_PERSON_STATUS:
 			temp = ctsvc_stmt_get_text(stmt, i);
 			person->status = SAFE_STRDUP(temp);
@@ -170,6 +174,8 @@ int ctsvc_db_person_create_record_from_stmt(cts_stmt stmt, contacts_record_h *re
 	person->ringtone_path = SAFE_STRDUP(temp);
 	temp = ctsvc_stmt_get_text(stmt, i++);
 	person->vibration = SAFE_STRDUP(temp);
+	temp = ctsvc_stmt_get_text(stmt, i++);
+	person->message_alert = SAFE_STRDUP(temp);
 	temp = ctsvc_stmt_get_text(stmt, i++);
 	person->status = SAFE_STRDUP(temp);
 
@@ -279,9 +285,9 @@ int ctsvc_db_insert_person(contacts_record_h record)
 	version = ctsvc_get_next_ver();
 	snprintf(query, sizeof(query),
 		"INSERT INTO "CTS_TABLE_PERSONS"(name_contact_id, created_ver, changed_ver, "
-			"has_phonenumber, has_email, ringtone_path, vibration, status, "
+			"has_phonenumber, has_email, ringtone_path, vibration, message_alert, status, "
 			"image_thumbnail_path, link_count, addressbook_ids) "
-			"VALUES(%d, %d, %d, %d, %d, ?, ?, ?, ?, 1, '%d') ",
+			"VALUES(%d, %d, %d, %d, %d, ?, ?, ?, ?, ?, 1, '%d') ",
 			contact->id, version, version,
 			contact->has_phonenumber, contact->has_email, contact->addressbook_id);
 
@@ -295,10 +301,12 @@ int ctsvc_db_insert_person(contacts_record_h record)
 		cts_stmt_bind_text(stmt, 1, contact->ringtone_path);
 	if(contact->vibration)
 		cts_stmt_bind_text(stmt, 2, contact->vibration);
+	if(contact->message_alert)
+		cts_stmt_bind_text(stmt, 3, contact->message_alert);
 	if(status)
-		cts_stmt_bind_text(stmt, 3, status);
+		cts_stmt_bind_text(stmt, 4, status);
 	if(contact->image_thumbnail_path)
-		cts_stmt_bind_text(stmt, 4, __cts_get_image_filename(contact->image_thumbnail_path));
+		cts_stmt_bind_text(stmt, 5, __cts_get_image_filename(contact->image_thumbnail_path));
 
 	ret = cts_stmt_step(stmt);
 	if (CONTACTS_ERROR_NONE != ret) {
@@ -467,6 +475,8 @@ int ctsvc_db_update_person(contacts_record_h record)
 		len += snprintf(query+len, sizeof(query)-len, ", ringtone_path=?");
 	if (ctsvc_record_check_property_flag((ctsvc_record_s *)record, _contacts_contact.vibration, CTSVC_PROPERTY_FLAG_DIRTY))
 		len += snprintf(query+len, sizeof(query)-len, ", vibration=?");
+	if (ctsvc_record_check_property_flag((ctsvc_record_s *)record, _contacts_contact.message_alert, CTSVC_PROPERTY_FLAG_DIRTY))
+		len += snprintf(query+len, sizeof(query)-len, ", message_alert=?");
 	if (ctsvc_record_check_property_flag((ctsvc_record_s *)record, _contacts_contact.image_thumbnail_path, CTSVC_PROPERTY_FLAG_DIRTY) &&
 			(contact->id == thumbnail_contact_id || thumbnail_contact_id == -1))
 		len += snprintf(query+len, sizeof(query)-len, ", image_thumbnail_path=?");
@@ -489,6 +499,11 @@ int ctsvc_db_update_person(contacts_record_h record)
 	if (ctsvc_record_check_property_flag((ctsvc_record_s *)record, _contacts_contact.vibration, CTSVC_PROPERTY_FLAG_DIRTY)) {
 		if (contact->vibration)
 			cts_stmt_bind_text(stmt, i, contact->vibration);
+		i++;
+	}
+	if (ctsvc_record_check_property_flag((ctsvc_record_s *)record, _contacts_contact.message_alert, CTSVC_PROPERTY_FLAG_DIRTY)) {
+		if (contact->message_alert)
+			cts_stmt_bind_text(stmt, i, contact->message_alert);
 		i++;
 	}
 	if (ctsvc_record_check_property_flag((ctsvc_record_s *)record, _contacts_contact.image_thumbnail_path, CTSVC_PROPERTY_FLAG_DIRTY) &&

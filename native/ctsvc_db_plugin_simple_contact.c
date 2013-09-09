@@ -89,6 +89,8 @@ static int __ctsvc_db_simple_contact_value_set(cts_stmt stmt, contacts_record_h 
 	temp = ctsvc_stmt_get_text(stmt, i++);
 	contact->vibration = SAFE_STRDUP(temp);
 	temp = ctsvc_stmt_get_text(stmt, i++);
+	contact->message_alert = SAFE_STRDUP(temp);
+	temp = ctsvc_stmt_get_text(stmt, i++);
 	contact->uid = SAFE_STRDUP(temp);
 	contact->is_favorite = ctsvc_stmt_get_int(stmt, i++);
 	contact->has_phonenumber = ctsvc_stmt_get_int(stmt, i++);
@@ -111,7 +113,7 @@ static int __ctsvc_db_simple_contact_get_record( int id, contacts_record_h* out_
 	len = snprintf(query, sizeof(query),
 				"SELECT contact_id, addressbook_id, person_id, changed_time, %s, "
 					"display_name_source, image_thumbnail_path, "
-					"ringtone_path, vibration, uid, is_favorite, has_phonenumber, has_email "
+					"ringtone_path, vibration, message_alert, uid, is_favorite, has_phonenumber, has_email "
 					"FROM "CTS_TABLE_CONTACTS" WHERE contact_id = %d AND deleted = 0",
 					ctsvc_get_display_column(), id);
 
@@ -296,7 +298,7 @@ static int __ctsvc_db_simple_contact_get_all_records( int offset, int limit,
 	len = snprintf(query, sizeof(query),
 			"SELECT contact_id, addressbook_id, person_id, changed_time, "
 				"%s, display_name_source, image_thumbnail_path, "
-				"ringtone_path, vibration, uid, is_favorite, has_phonenumber, has_email "
+				"ringtone_path, vibration, message_alert, uid, is_favorite, has_phonenumber, has_email "
 				"FROM "CTS_TABLE_CONTACTS" WHERE deleted = 0", ctsvc_get_display_column());
 
 	if (0 != limit) {
@@ -423,6 +425,10 @@ static int __ctsvc_db_simple_contact_get_records_with_query( contacts_query_h qu
 				temp = ctsvc_stmt_get_text(stmt, i);
 				contact->vibration = SAFE_STRDUP(temp);
 				break;
+			case CTSVC_PROPERTY_CONTACT_MESSAGE_ALERT:
+				temp = ctsvc_stmt_get_text(stmt, i);
+				contact->message_alert = SAFE_STRDUP(temp);
+				break;
 			case CTSVC_PROPERTY_CONTACT_CHANGED_TIME:
 				contact->changed_time = ctsvc_stmt_get_int(stmt, i);
 				break;
@@ -504,8 +510,8 @@ static int __ctsvc_db_simple_contact_insert_record( contacts_record_h record, in
 	snprintf(query, sizeof(query),
 		"INSERT INTO "CTS_TABLE_CONTACTS"(contact_id, person_id, addressbook_id, is_favorite, "
 			"created_ver, changed_ver, changed_time, "
-			"uid, ringtone_path, vibration, image_thumbnail_path) "
-			"VALUES(%d, %d, %d, %d, %d, %d, %d, ?, ?, ?, ?)",
+			"uid, ringtone_path, vibration, message_alert, image_thumbnail_path) "
+			"VALUES(%d, %d, %d, %d, %d, %d, %d, ?, ?, ?, ?, ?)",
 			contact->contact_id, contact->person_id, contact->addressbook_id, contact->is_favorite,
 			version, version, (int)time(NULL));
 
@@ -522,8 +528,10 @@ static int __ctsvc_db_simple_contact_insert_record( contacts_record_h record, in
 		cts_stmt_bind_text(stmt, 2, contact->ringtone_path);
 	if (contact->vibration)
 		cts_stmt_bind_text(stmt, 3, contact->vibration);
+	if (contact->message_alert)
+		cts_stmt_bind_text(stmt, 4, contact->message_alert);
 	if (contact->image_thumbnail_path)
-		cts_stmt_bind_text(stmt, 4, contact->image_thumbnail_path);
+		cts_stmt_bind_text(stmt, 5, contact->image_thumbnail_path);
 
 	ret = cts_stmt_step(stmt);
 	if (CONTACTS_ERROR_NONE != ret) {

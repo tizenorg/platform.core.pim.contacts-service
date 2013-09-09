@@ -557,22 +557,23 @@
  * <tr><td>integer</td><td>person_id</td><td>read only</td><td></td></tr>
  * <tr><td>string</td><td>uid</td><td>read, write</td><td></td></tr>
  * <tr><td>string</td><td>vibration</td><td>read, write</td><td></td></tr>
+ * <tr><td>string</td><td>message_alert</td><td>read, write</td><td></td></tr>
  * <tr><td>integer</td><td>changed_time</td><td>read only</td><td></td></tr>
  * <tr><td>integer</td><td>link_mode</td><td>read, write</td><td> contacts_contact_link_mode_e </td></tr>
- * <tr><td>record</td><td>name</td><td>read, write</td><td></td></tr>
- * <tr><td>record</td><td>company</td><td>read, write</td><td></td></tr>
- * <tr><td>record</td><td>note</td><td>read, write</td><td></td></tr>
- * <tr><td>record</td><td>number</td><td>read, write</td><td></td></tr>
- * <tr><td>record</td><td>email</td><td>read, write</td><td></td></tr>
- * <tr><td>record</td><td>event</td><td>read, write</td><td></td></tr>
- * <tr><td>record</td><td>messenger</td><td>read, write</td><td></td></tr>
- * <tr><td>record</td><td>address</td><td>read, write</td><td></td></tr>
- * <tr><td>record</td><td>url</td><td>read, write</td><td></td></tr>
- * <tr><td>record</td><td>nickname</td><td>read, write</td><td></td></tr>
- * <tr><td>record</td><td>profile</td><td>read, write</td><td></td></tr>
- * <tr><td>record</td><td>relationship</td><td>read, write</td><td></td></tr>
- * <tr><td>record</td><td>image</td><td>read, write</td><td></td></tr>
- * <tr><td>record</td><td>group_relation</td><td>read, write</td><td></td></tr>
+ * <tr><td>record</td><td>name</td><td>read, write</td><td> single </td></tr>
+ * <tr><td>record</td><td>company</td><td>read, write</td><td>multiple </td></tr>
+ * <tr><td>record</td><td>note</td><td>read, write</td><td>multiple</td></tr>
+ * <tr><td>record</td><td>number</td><td>read, write</td><td>multiple</td></tr>
+ * <tr><td>record</td><td>email</td><td>read, write</td><td>multiple</td></tr>
+ * <tr><td>record</td><td>event</td><td>read, write</td><td>multiple</td></tr>
+ * <tr><td>record</td><td>messenger</td><td>read, write</td><td>multiple</td></tr>
+ * <tr><td>record</td><td>address</td><td>read, write</td><td>multiple</td></tr>
+ * <tr><td>record</td><td>url</td><td>read, write</td><td>multiple</td></tr>
+ * <tr><td>record</td><td>nickname</td><td>read, write</td><td>multiple</td></tr>
+ * <tr><td>record</td><td>profile</td><td>read, write</td><td>	multiple</td></tr>
+ * <tr><td>record</td><td>relationship</td><td>read, write</td><td>multiple</td></tr>
+ * <tr><td>record</td><td>image</td><td>read, write</td><td>multiple</td></tr>
+ * <tr><td>record</td><td>group_relation</td><td>read, write</td><td>multiple</td></tr>
  * </table>
  *
  * @section CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_my_profile _contacts_my_profile view
@@ -626,6 +627,7 @@
  * <tr><td>integer</td><td>person_id</td><td>read only</td><td> </td></tr>
  * <tr><td>string</td><td>uid</td><td>read, write</td><td> </td></tr>
  * <tr><td>string</td><td>vibration</td><td>read, write</td><td> </td></tr>
+ * <tr><td>string</td><td>message_alert</td><td>read, write</td><td></td></tr>
  * <tr><td>integer</td><td>changed_time</td><td>read only</td><td> </td></tr>
  * </table>
  *
@@ -645,6 +647,7 @@
  * <tr><td>string</td><td> ringtone_path </td><td>read, write</td><td> </td></tr>
  * <tr><td>string</td><td> image_thumbnail_path </td><td>read only</td><td> </td></tr>
  * <tr><td>string</td><td> vibration </td><td>read, write</td><td> </td></tr>
+ * <tr><td>string</td><td>message_alert</td><td>read, write</td><td></td></tr>
  * <tr><td>string</td><td> status </td><td>read only</td><td> </td></tr>
  * <tr><td>boolean</td><td> is_favorite </td><td>read, write</td><td> </td></tr>
  * <tr><td>double</td><td> favorite_priority </td><td> filter only </td><td> The priority of favorite contacts. You can not set the value but you can use it as sorting key. </td></tr>
@@ -686,6 +689,7 @@
  * <tr><td>string</td><td> vibration </td><td>read, write</td><td> </td></tr>
  * <tr><td>string</td><td> extra_data </td><td>read, write</td><td> </td></tr>
  * <tr><td>boolean</td><td> is_read_only </td><td>read only</td><td> </td></tr>
+ * <tr><td>string</td><td> message_alert </td><td>read, write</td><td> </td></tr>
  * </table>
  *
  * @section CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_name _contacts_name view
@@ -1111,6 +1115,7 @@
  * <tr><td>string</td><td> ringtone_path </td><td></td><td> </td></tr>
  * <tr><td>string</td><td> image_thumbnail_path </td><td></td><td> </td></tr>
  * <tr><td>string</td><td> vibration </td><td></td><td> </td></tr>
+ * <tr><td>string</td><td> message_alert </td><td></td><td> </td></tr>
  * <tr><td>boolean</td><td> is_favorite </td><td></td><td> </td></tr>
  * <tr><td>boolean</td><td> has_phonenumber </td><td></td><td> </td></tr>
  * <tr><td>boolean</td><td> has_email </td><td></td><td> </td></tr>
@@ -1138,6 +1143,7 @@
  * <tr><td>string</td><td> ringtone_path </td><td></td><td> </td></tr>
  * <tr><td>string</td><td> image_thumbnail_path </td><td></td><td> </td></tr>
  * <tr><td>string</td><td> vibration </td><td></td><td> </td></tr>
+ * <tr><td>string</td><td> message_alert </td><td></td><td> </td></tr>
  * <tr><td>boolean</td><td> is_favorite </td><td></td><td> </td></tr>
  * <tr><td>boolean</td><td> has_phonenumber </td><td></td><td> </td></tr>
  * <tr><td>boolean</td><td> has_email </td><td></td><td> </td></tr>
@@ -1164,6 +1170,7 @@
  * <tr><td>string</td><td> ringtone_path </td><td></td><td> </td></tr>
  * <tr><td>string</td><td> image_thumbnail_path </td><td></td><td> </td></tr>
  * <tr><td>string</td><td> vibration </td><td></td><td> </td></tr>
+ * <tr><td>string</td><td> message_alert </td><td></td><td> </td></tr>
  * <tr><td>string</td><td> status </td><td></td><td> </td></tr>
  * <tr><td>boolean</td><td> is_favorite </td><td></td><td> </td></tr>
  * <tr><td>integer</td><td> link_count </td><td></td><td> </td></tr>
@@ -1210,6 +1217,7 @@
  * <tr><td>string</td><td> ringtone_path </td><td></td><td> </td></tr>
  * <tr><td>string</td><td> image_thumbnail_path </td><td></td><td> </td></tr>
  * <tr><td>string</td><td> vibration </td><td></td><td> </td></tr>
+ * <tr><td>string</td><td> message_alert </td><td></td><td> </td></tr>
  * <tr><td>boolean</td><td> is_favorite </td><td></td><td> </td></tr>
  * <tr><td>boolean</td><td> has_phonenumber </td><td></td>><td> </td></tr>
  * <tr><td>boolean</td><td> has_email </td><td></td><td> </td></tr>

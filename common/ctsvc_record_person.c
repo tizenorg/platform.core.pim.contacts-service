@@ -79,6 +79,7 @@ static int __ctsvc_person_destroy(contacts_record_h record, bool delete_child)
 	free(person->display_name_index);
 	free(person->ringtone_path);
 	free(person->vibration);
+	free(person->message_alert);
 	free(person->image_thumbnail_path);
 	free(person->status);
 	free(person->addressbook_ids);
@@ -109,6 +110,7 @@ static int __ctsvc_person_clone(contacts_record_h record, contacts_record_h *out
 	out_data->image_thumbnail_path = SAFE_STRDUP(src_data->image_thumbnail_path);
 	out_data->ringtone_path = SAFE_STRDUP(src_data->ringtone_path);
 	out_data->vibration = SAFE_STRDUP(src_data->vibration);
+	out_data->message_alert = SAFE_STRDUP(src_data->message_alert);
 	out_data->status = SAFE_STRDUP(src_data->status);
 
 	CTSVC_RECORD_COPY_BASE(&(out_data->base), &(src_data->base));
@@ -152,6 +154,9 @@ static int __ctsvc_person_get_str_real(contacts_record_h record, unsigned int pr
 		break;
 	case CTSVC_PROPERTY_PERSON_VIBRATION:
 		*out_str = GET_STR(copy, person->vibration);
+		break;
+	case CTSVC_PROPERTY_PERSON_MESSAGE_ALERT:
+		*out_str = GET_STR(copy, person->message_alert);
 		break;
 	case CTSVC_PROPERTY_PERSON_STATUS:
 		*out_str = GET_STR(copy, person->status);
@@ -239,6 +244,9 @@ static int __ctsvc_person_set_str(contacts_record_h record, unsigned int propert
 		break;
 	case CTSVC_PROPERTY_PERSON_VIBRATION:
 		FREEandSTRDUP(person->vibration, str);
+		break;
+	case CTSVC_PROPERTY_PERSON_MESSAGE_ALERT:
+		FREEandSTRDUP(person->message_alert, str);
 		break;
 	default :
 		ASSERT_NOT_REACHED("This field(%d) is not supported in value(person)", property_id);

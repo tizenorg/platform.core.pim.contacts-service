@@ -1115,6 +1115,7 @@ static int __ctsvc_simple_contact_destroy(contacts_record_h record, bool delete_
 	free(contact->image_thumbnail_path);
 	free(contact->ringtone_path);
 	free(contact->vibration);
+	free(contact->message_alert);
 	free(contact->uid);
 	free(contact);
 
@@ -1190,6 +1191,7 @@ static int __ctsvc_contact_destroy(contacts_record_h record, bool delete_child)
 	free(contact->image_thumbnail_path);
 	free(contact->ringtone_path);
 	free(contact->vibration);
+	free(contact->message_alert);
 	free(contact->sort_name);
 	free(contact->reverse_sort_name);
 	free(contact->sortkey);
@@ -1669,7 +1671,7 @@ static int __ctsvc_contact_set_int(contacts_record_h record, unsigned int proper
 		contact->link_mode = value;
 		break;
 	default:
-		CTS_ERR("Invalid parameter : property_id(%d) is not supported in valuecontact)", property_id);
+		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value (contact)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
@@ -2173,6 +2175,9 @@ static int __ctsvc_contact_get_str_real(contacts_record_h record, unsigned int p
 	case CTSVC_PROPERTY_CONTACT_VIBRATION:
 		*out_str = GET_STR(copy, contact->vibration);
 		break;
+	case CTSVC_PROPERTY_CONTACT_MESSAGE_ALERT:
+		*out_str = GET_STR(copy, contact->message_alert);
+		break;
 	default :
 		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(contact)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
@@ -2474,6 +2479,9 @@ static int __ctsvc_simple_contact_get_str_real(contacts_record_h record,
 		break;
 	case CTSVC_PROPERTY_CONTACT_VIBRATION:
 		*out_str = GET_STR(copy, contact->vibration);
+		break;
+	case CTSVC_PROPERTY_CONTACT_MESSAGE_ALERT:
+		*out_str = GET_STR(copy, contact->message_alert);
 		break;
 	default :
 		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(simple_contact)", property_id);
@@ -3090,6 +3098,9 @@ static int __ctsvc_contact_set_str(contacts_record_h record, unsigned int proper
 	case CTSVC_PROPERTY_CONTACT_VIBRATION:
 		FREEandSTRDUP(contact->vibration, str);
 		break;
+	case CTSVC_PROPERTY_CONTACT_MESSAGE_ALERT:
+		FREEandSTRDUP(contact->message_alert, str);
+		break;
 	default :
 		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(contact)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
@@ -3121,6 +3132,9 @@ static int __ctsvc_simple_contact_set_str(contacts_record_h record, unsigned int
 		break;
 	case CTSVC_PROPERTY_CONTACT_VIBRATION:
 		FREEandSTRDUP(contact->vibration, str);
+		break;
+	case CTSVC_PROPERTY_CONTACT_MESSAGE_ALERT:
+		FREEandSTRDUP(contact->message_alert, str);
 		break;
 	default :
 		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(simple_contact)", property_id);
@@ -3773,6 +3787,7 @@ static int __ctsvc_contact_clone(contacts_record_h record, contacts_record_h *ou
 	out_data->uid = SAFE_STRDUP(src_data->uid);
 	out_data->ringtone_path = SAFE_STRDUP(src_data->ringtone_path);
 	out_data->vibration = SAFE_STRDUP(src_data->vibration);
+	out_data->message_alert = SAFE_STRDUP(src_data->message_alert);
 	out_data->image_thumbnail_path = SAFE_STRDUP(src_data->image_thumbnail_path);
 	out_data->sort_name = SAFE_STRDUP(src_data->sort_name);
 	out_data->reverse_sort_name = SAFE_STRDUP(src_data->reverse_sort_name);
@@ -4257,6 +4272,7 @@ static int __ctsvc_simple_contact_clone(contacts_record_h record, contacts_recor
 	out_data->uid = SAFE_STRDUP(src_data->uid);
 	out_data->ringtone_path = SAFE_STRDUP(src_data->ringtone_path);
 	out_data->vibration = SAFE_STRDUP(src_data->vibration);
+	out_data->message_alert = SAFE_STRDUP(src_data->message_alert);
 	out_data->image_thumbnail_path = SAFE_STRDUP(src_data->image_thumbnail_path);
 
 	CTSVC_RECORD_COPY_BASE(&(out_data->base), &(src_data->base));
