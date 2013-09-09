@@ -95,10 +95,7 @@ static int __ctsvc_db_group_insert_record( contacts_record_h record, int *id )
 			"Invalid parameter : The name of record is empty.");
 
 	ret = ctsvc_begin_trans();
-	if( ret < CONTACTS_ERROR_NONE ) {
-		CTS_ERR("DB error : ctsvc_begin_trans() Failed(%d)", ret);
-		return ret;
-	}
+	RETVM_IF( ret < CONTACTS_ERROR_NONE, ret,  "DB error : ctsvc_begin_trans() Failed(%d)", ret);
 
 	group_prio = __ctsvc_db_group_get_next_group_prio();
 	group->id = cts_db_get_next_id(CTS_TABLE_GROUPS);
@@ -107,8 +104,8 @@ static int __ctsvc_db_group_insert_record( contacts_record_h record, int *id )
 
 	snprintf(query, sizeof(query),
 			"INSERT INTO "CTS_TABLE_GROUPS"(group_id, addressbook_id, group_name, created_ver, changed_ver, ringtone_path, "
-						"vibration, image_thumbnail_path, extra_data, is_read_only, group_prio) "
-			"VALUES(%d, %d, ?, ?, ?, ?, ?, ?, ?, %d, %lf)",
+						"vibration, message_alert, image_thumbnail_path, extra_data, is_read_only, group_prio) "
+			"VALUES(%d, %d, ?, ?, ?, ?, ?, ?, ?, ?, %d, %lf)",
 			group->id, group->addressbook_id, group->is_read_only, group_prio);
 
 	stmt = cts_query_prepare(query);
@@ -129,6 +126,8 @@ static int __ctsvc_db_group_insert_record( contacts_record_h record, int *id )
 		cts_stmt_bind_text(stmt, 4, group->ringtone_path);
 	if (group->vibration)
 		cts_stmt_bind_text(stmt, 5, group->vibration);
+	if (group->message_alert)
+		cts_stmt_bind_text(stmt, 6, group->message_alert);
 
 	if(group->image_thumbnail_path) {
 		char image[CTSVC_IMG_FULL_PATH_SIZE_MAX] = {0};
@@ -151,11 +150,11 @@ static int __ctsvc_db_group_insert_record( contacts_record_h record, int *id )
 
 		free(group->image_thumbnail_path);
 		group->image_thumbnail_path = strdup(image);
-		cts_stmt_bind_text(stmt, 6, group->image_thumbnail_path);
+		cts_stmt_bind_text(stmt, 7, group->image_thumbnail_path);
 	}
 
 	if (group->extra_data)
-		cts_stmt_bind_text(stmt, 7, group->extra_data);
+		cts_stmt_bind_text(stmt, 8, group->extra_data);
 
 	ret = cts_stmt_step(stmt);
 	if (CONTACTS_ERROR_NONE != ret) {
@@ -440,6 +439,8 @@ static int __ctsvc_db_group_value_set(cts_stmt stmt, contacts_record_h *record)
 	temp = ctsvc_stmt_get_text(stmt, i++);
 	group->vibration = SAFE_STRDUP(temp);
 	temp = ctsvc_stmt_get_text(stmt, i++);
+	group->message_alert = SAFE_STRDUP(temp);
+	temp = ctsvc_stmt_get_text(stmt, i++);
 	if (temp) {
 		snprintf(full_path, sizeof(full_path), "%s/%s", CTS_GROUP_IMAGE_LOCATION, temp);
 		group->image_thumbnail_path = strdup(full_path);
@@ -461,7 +462,7 @@ static int __ctsvc_db_group_get_record( int id, contacts_record_h *out_record )
 
 	len = snprintf(query, sizeof(query),
 			"SELECT group_id, addressbook_id, group_name, extra_data, is_read_only, "
-				"ringtone_path, vibration, image_thumbnail_path "
+				"ringtone_path, vibration, message_alert, image_thumbnail_path "
 				"FROM "CTS_TABLE_GROUPS" WHERE group_id = %d", id);
 
 	stmt = cts_query_prepare(query);
@@ -496,7 +497,7 @@ static int __ctsvc_db_group_get_all_records( int offset, int limit, contacts_lis
 
 	len = snprintf(query, sizeof(query),
 			"SELECT group_id, addressbook_id, group_name, extra_data, is_read_only, "
-				"ringtone_path, vibration, image_thumbnail_path "
+				"ringtone_path, vibration, message_alert, image_thumbnail_path "
 				"FROM "CTS_TABLE_GROUPS" ORDER BY addressbook_id, group_prio");
 
 	if (0 != limit) {
@@ -604,6 +605,10 @@ static int __ctsvc_db_group_get_records_with_query( contacts_query_h query,
 			case CTSVC_PROPERTY_GROUP_VIBRATION:
 				temp = ctsvc_stmt_get_text(stmt, i);
 				group->vibration = SAFE_STRDUP(temp);
+				break;
+			case CTSVC_PROPERTY_GROUP_MESSAGE_ALERT:
+				temp = ctsvc_stmt_get_text(stmt, i);
+				group->message_alert = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_GROUP_EXTRA_DATA:
 				temp = ctsvc_stmt_get_text(stmt, i);

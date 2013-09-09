@@ -559,6 +559,7 @@ int ctsvc_person_aggregate(int person_id)
 	char *ringtone_path = NULL;
 	char *image_thumbnail_path = NULL;
 	char *vibration = NULL;
+	char *message_alert = NULL;
 	char *status = NULL;
 	const char *temp;
 	cts_stmt stmt;
@@ -573,7 +574,8 @@ int ctsvc_person_aggregate(int person_id)
 					"name_contact_id, "
 					"image_thumbnail_path, "
 					"ringtone_path, "
-					"vibration "
+					"vibration, "
+					"message_alert "
 				"FROM "CTS_TABLE_PERSONS" "
 				"WHERE persons.person_id = %d", person_id);
 	stmt = cts_query_prepare(query);
@@ -598,6 +600,8 @@ int ctsvc_person_aggregate(int person_id)
 	person->ringtone_path = SAFE_STRDUP(temp);
 	temp = ctsvc_stmt_get_text(stmt, 4);
 	person->vibration = SAFE_STRDUP(temp);
+	temp = ctsvc_stmt_get_text(stmt, 5);
+	person->message_alert = SAFE_STRDUP(temp);
 	cts_stmt_finalize(stmt);
 
 	snprintf(query, sizeof(query),
@@ -655,11 +659,13 @@ int ctsvc_person_aggregate(int person_id)
 		ringtone_path = SAFE_STRDUP(person->ringtone_path);
 	if (person->vibration)
 		vibration = SAFE_STRDUP(person->vibration);
+	if (person->message_alert)
+		message_alert = SAFE_STRDUP(person->message_alert);
 	contacts_record_destroy((contacts_record_h)person, true);
 
 	snprintf(query, sizeof(query),
 			"SELECT contact_id, contacts.addressbook_id, %s, display_name_source, "
-				"image_thumbnail_path, ringtone_path, vibration, is_favorite "
+				"image_thumbnail_path, ringtone_path, vibration, message_alert, is_favorite "
 			"FROM %s "
 			"WHERE person_id = %d AND contacts.deleted = 0 "
 			"ORDER BY contact_id",
@@ -670,6 +676,7 @@ int ctsvc_person_aggregate(int person_id)
 		free(image_thumbnail_path);
 		free(ringtone_path);
 		free(vibration);
+		free(message_alert);
 		return CONTACTS_ERROR_DB;
 	}
 
@@ -685,6 +692,7 @@ int ctsvc_person_aggregate(int person_id)
 		char *contact_ringtone_path = NULL;
 		char *contact_image_thumbnail_path = NULL;
 		char *contact_vibration = NULL;
+		char *contact_message_alert = NULL;
 		bool is_favorite = false;
 		char addr[10] = {0};
 		int addr_len = 0;
@@ -701,6 +709,8 @@ int ctsvc_person_aggregate(int person_id)
 		contact_ringtone_path = SAFE_STRDUP(temp);
 		temp = ctsvc_stmt_get_text(stmt, i++);
 		contact_vibration = SAFE_STRDUP(temp);
+		temp = ctsvc_stmt_get_text(stmt, i++);
+		contact_message_alert = SAFE_STRDUP(temp);
 		is_favorite = ctsvc_stmt_get_int(stmt, i++);
 
 		link_count++;
@@ -738,6 +748,10 @@ int ctsvc_person_aggregate(int person_id)
 		if (!vibration && temp_str && strlen(temp_str))
 			vibration = SAFE_STRDUP(temp_str);
 
+		temp_str = contact_message_alert;
+		if (!contact_message_alert && temp_str && strlen(temp_str))
+			contact_message_alert = SAFE_STRDUP(temp_str);
+
 		if (is_favorite)
 			person_is_favorite = true;
 	}
@@ -750,7 +764,7 @@ int ctsvc_person_aggregate(int person_id)
 											"WHERE person_id = %d AND has_phonenumber = 1 AND deleted = 0), "
 			"has_email = EXISTS(SELECT contact_id FROM "CTS_TABLE_CONTACTS" "
 									"WHERE person_id = %d AND has_email = 1 AND deleted = 0), "
-			"link_count = %d, addressbook_ids = ?, ringtone_path=?, vibration=?, status=?, image_thumbnail_path=? "
+			"link_count = %d, addressbook_ids = ?, ringtone_path=?, vibration=?, message_alert=?, status=?, image_thumbnail_path=? "
 			"WHERE person_id = %d ",
 			name_contact_id, version, person_id,
 			person_id, link_count, person_id);
@@ -762,6 +776,7 @@ int ctsvc_person_aggregate(int person_id)
 		free(image_thumbnail_path);
 		free(ringtone_path);
 		free(vibration);
+		free(message_alert);
 		return CONTACTS_ERROR_DB;
 	}
 
@@ -771,10 +786,12 @@ int ctsvc_person_aggregate(int person_id)
 		cts_stmt_bind_text(stmt, 2, ringtone_path);
 	if (vibration)
 		cts_stmt_bind_text(stmt, 3, vibration);
+	if (message_alert)
+		cts_stmt_bind_text(stmt, 4, message_alert);
 	if (status)
-		cts_stmt_bind_text(stmt, 4, status);
+		cts_stmt_bind_text(stmt, 5, status);
 	if (image_thumbnail_path)
-		cts_stmt_bind_text(stmt, 5, image_thumbnail_path);
+		cts_stmt_bind_text(stmt, 6, image_thumbnail_path);
 
 	ret = cts_stmt_step(stmt);
 	if (CONTACTS_ERROR_NONE != ret) {
@@ -784,6 +801,7 @@ int ctsvc_person_aggregate(int person_id)
 		free(image_thumbnail_path);
 		free(ringtone_path);
 		free(vibration);
+		free(message_alert);
 		return ret;
 	}
 
@@ -793,6 +811,7 @@ int ctsvc_person_aggregate(int person_id)
 	free(image_thumbnail_path);
 	free(ringtone_path);
 	free(vibration);
+	free(message_alert);
 
 	if (!person_is_favorite) {
 		snprintf(query, sizeof(query),

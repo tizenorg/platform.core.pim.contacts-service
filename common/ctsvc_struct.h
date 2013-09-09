@@ -228,6 +228,7 @@ typedef struct {
 	char *ringtone_path;
 	char *vibration;
 	char *image_thumbnail_path;
+	char *message_alert;
 }ctsvc_group_s;
 
 typedef struct {
@@ -242,6 +243,7 @@ typedef struct {
 	char *image_thumbnail_path;
 	char *ringtone_path;
 	char *vibration;
+	char *message_alert;
 	char *status;
 	int link_count;
 	char *addressbook_ids;
@@ -259,6 +261,7 @@ typedef struct {
 	char *image_thumbnail_path;
 	char *ringtone_path;
 	char *vibration;
+	char *message_alert;
 	char *display_name;
 	char *uid;
 	int display_source_type;
@@ -496,6 +499,7 @@ typedef struct {
 	char *image_thumbnail_path;
 	char *ringtone_path;
 	char *vibration;
+	char *message_alert;
 	ctsvc_list_s* name;
 	ctsvc_list_s* note;
 	ctsvc_list_s* company;

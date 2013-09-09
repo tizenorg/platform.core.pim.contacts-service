@@ -83,6 +83,7 @@ static int __ctsvc_group_destroy(contacts_record_h record, bool delete_child)
 	free(group->name);
 	free(group->ringtone_path);
 	free(group->vibration);
+	free(group->message_alert);
 	free(group->image_thumbnail_path);
 	free(group->extra_data);
 	free(group);
@@ -106,6 +107,7 @@ static int __ctsvc_group_clone(contacts_record_h record, contacts_record_h *out_
 	out_data->name = SAFE_STRDUP(src_data->name);
 	out_data->extra_data = SAFE_STRDUP(src_data->extra_data);
 	out_data->vibration = SAFE_STRDUP(src_data->vibration);
+	out_data->message_alert = SAFE_STRDUP(src_data->message_alert);
 	out_data->ringtone_path = SAFE_STRDUP(src_data->ringtone_path);
 	out_data->image_thumbnail_path = SAFE_STRDUP(src_data->image_thumbnail_path);
 
@@ -149,6 +151,9 @@ static int __ctsvc_group_get_str_real(contacts_record_h record, unsigned int pro
 		break;
 	case CTSVC_PROPERTY_GROUP_VIBRATION:
 		*out_str = GET_STR(copy, group->vibration);
+		break;
+	case CTSVC_PROPERTY_GROUP_MESSAGE_ALERT:
+		*out_str = GET_STR(copy, group->message_alert);
 		break;
 	case CTSVC_PROPERTY_GROUP_EXTRA_DATA:
 		*out_str = GET_STR(copy, group->extra_data);
@@ -210,6 +215,9 @@ static int __ctsvc_group_set_str(contacts_record_h record, unsigned int property
 		break;
 	case CTSVC_PROPERTY_GROUP_VIBRATION:
 		FREEandSTRDUP(group->vibration, str);
+		break;
+	case CTSVC_PROPERTY_GROUP_MESSAGE_ALERT:
+		FREEandSTRDUP(group->message_alert, str);
 		break;
 	case CTSVC_PROPERTY_GROUP_EXTRA_DATA:
 		FREEandSTRDUP(group->extra_data, str);

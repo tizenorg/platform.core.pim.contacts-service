@@ -31,6 +31,7 @@ CREATE TABLE persons
 	changed_ver			INTEGER NOT NULL,
 	ringtone_path			TEXT,
 	vibration			TEXT,
+	message_alert		TEXT,
 	image_thumbnail_path		TEXT,
 	image_path			TEXT,
 	link_count			INTEGER,
@@ -92,6 +93,7 @@ CREATE TABLE contacts
 	uid				TEXT,
 	ringtone_path			TEXT,
 	vibration			TEXT,
+	message_alert		TEXT,
 	image_thumbnail_path		TEXT,
 	image_path			TEXT
 );
@@ -234,6 +236,7 @@ CREATE TABLE groups
 	ringtone_path			TEXT,
 	vibration			TEXT,
 	image_thumbnail_path		TEXT,
+	message_alert		TEXT,
 	member_changed_ver		INTEGER,
 	group_prio			REAL
 );

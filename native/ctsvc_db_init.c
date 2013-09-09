@@ -300,6 +300,7 @@ static int __ctsvc_db_create_views()
 					"persons.ringtone_path, "
 					"persons.image_thumbnail_path, "
 					"persons.vibration, "
+					"persons.message_alert, "
 					"status, "
 					"link_count, "
 					"addressbook_ids, "
