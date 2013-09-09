@@ -130,6 +130,9 @@ int ctsvc_server_init_configuration(void)
 	RETVM_IF(ret<0, CONTACTS_ERROR_SYSTEM, "vconf_notify_key_changed(%s) Failed(%d)",
 			VCONFKEY_REGIONFORMAT, ret);
 
+	ret = ctsvc_server_delete_sdn_contact();
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_server_delete_sdn_contact() Failed(%d)", ret);
+
 	ret = vconf_get_int(CTSVC_SERVER_VCONF_TAPI_SIM_PB_INIT, &sim_stat);
 	if (VCONFKEY_TELEPHONY_SIM_PB_INIT_COMPLETED == sim_stat) {
 		ret = ctsvc_server_sim_initialize();

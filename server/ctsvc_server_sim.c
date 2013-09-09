@@ -211,7 +211,7 @@ static inline void __ctsvc_server_set_return_data(void* data)
 
 static inline void* __ctsvc_server_get_return_data(void)
 {
-	RETVM_IF(greturn_data == NULL, NULL, "ghelper_data is NULL");
+	RETVM_IF(greturn_data == NULL, NULL, "greturn_data is NULL");
 	return greturn_data;
 }
 
@@ -559,22 +559,29 @@ static void __ctsvc_server_sim_sdn_meta_info_cb(TapiHandle *handle, int result, 
 	CTS_FN_CALL;
 	TelSimPbAccessResult_t sec_rt = result;
 	int ret=0;
-
+	TelSimPbEntryInfo_t *pe = data;
+	RETM_IF(pe == NULL, "pe is NULL result =%d",sec_rt);
 	if (TAPI_SIM_PB_SUCCESS != sec_rt) {
 		CTS_ERR("__ctsvc_server_sim_sdn_meta_info_cb() Failed(%d)", sec_rt);
 		goto ERROR_RETURN;
 	}
-	ret = tel_read_sim_pb_record(__ctsvc_server_get_tapi_handle(), TAPI_SIM_PB_SDN,1, __ctsvc_server_sim_sdn_read_cb, NULL);
-	if(TAPI_API_SUCCESS != ret) {
-		CTS_ERR("tel_read_sim_pb_record() Failed(%d)", ret);
-		goto ERROR_RETURN;
+
+	if(pe->PbIndexMin > 0){
+		ret = tel_read_sim_pb_record(__ctsvc_server_get_tapi_handle(), TAPI_SIM_PB_SDN,1, __ctsvc_server_sim_sdn_read_cb, NULL);
+		if(TAPI_API_SUCCESS != ret) {
+			CTS_ERR("tel_read_sim_pb_record() Failed(%d)", ret);
+			goto ERROR_RETURN;
+		}
 	}
+	else
+		CTS_ERR("pe->PbIndexMin : 0 no sdn!!!!", ret);
 
 ERROR_RETURN:
 	ctsvc_server_trim_memory();
 	return;
 }
-int ctsvc_server_sim_read_sdn(void* data)
+
+static int __ctsvc_server_sim_read_sdn(void* data)
 {
 	CTS_FN_CALL;
 	int ret, card_changed = 0;
@@ -610,10 +617,9 @@ int ctsvc_server_sim_read_sdn(void* data)
 			CTS_ERR("tel_get_sim_pb_meta_info() Failed(%d)", ret);
 			goto ERROR_RETURN;
 		}
-
+	}
 	else
 		CTS_ERR("sim_status Failed(%d)", sim_status);
-	}
 
 	return CONTACTS_ERROR_NONE;
 
@@ -625,7 +631,9 @@ ERROR_RETURN:
 static void __ctsvc_server_sim_initialize_cb(TapiHandle *handle, int result, void *data, void *user_data)
 {
 	CTS_FN_CALL;
+	int ret=0;
 	int i=0;
+
 	TelSimPbAccessResult_t access_rt = result;
 	TelSimPbType_t sim_type = __ctsvc_server_get_sim_type();
 
@@ -661,7 +669,12 @@ static void __ctsvc_server_sim_initialize_cb(TapiHandle *handle, int result, voi
 		CTS_ERR("sim_type [%d]error ", sim_type);
 		return;
 	}
+
 	__ctsvc_server_sim_set_init_completed(true);
+
+	ret = __ctsvc_server_sim_read_sdn(NULL);
+	WARN_IF(CONTACTS_ERROR_NONE != ret, "__ctsvc_server_sim_read_sdn() Failed(%d)", ret);
+
 	return;
 }
 

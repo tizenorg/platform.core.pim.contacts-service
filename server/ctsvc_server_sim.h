@@ -38,7 +38,6 @@ typedef struct {
 int ctsvc_server_sim_initialize(void);
 int ctsvc_server_sim_finalize(void);
 int ctsvc_server_sim_import(void* data);
-int ctsvc_server_sim_read_sdn(void* data);
 bool ctsvc_server_sim_get_init_completed(void);
 void ctsvc_server_sim_destroy_contact_record(sim_contact_s *record);
 
