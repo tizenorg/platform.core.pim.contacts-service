@@ -156,25 +156,23 @@ static int __ctsvc_db_addressbook_insert_record( contacts_record_h record, int *
 		}
 	}
 
-	if (0 < addressbook->account_id) {
-		// check account_id validation
-		ret = account_create(&account);
-		if (ACCOUNT_ERROR_NONE != ret) {
-			CTS_ERR("account_create() Failed(%d)", ret);
-			ctsvc_end_trans(false);
-			return CONTACTS_ERROR_SYSTEM;
-		}
-		ret = account_query_account_by_account_id(addressbook->account_id, &account);
-		if (ACCOUNT_ERROR_NONE != ret) {
-			CTS_ERR("account_query_account_by_account_id Faild(%d) : account_id(%d)", ret, addressbook->account_id);
-			ret = account_destroy(account);
-			WARN_IF(ret != ACCOUNT_ERROR_NONE, "account_destroy Fail(%d)", ret);
-			ctsvc_end_trans(false);
-			return CONTACTS_ERROR_INVALID_PARAMETER;
-		}
+	// check account_id validation
+	ret = account_create(&account);
+	if (ACCOUNT_ERROR_NONE != ret) {
+		CTS_ERR("account_create() Failed(%d)", ret);
+		ctsvc_end_trans(false);
+		return CONTACTS_ERROR_SYSTEM;
+	}
+	ret = account_query_account_by_account_id(addressbook->account_id, &account);
+	if (ACCOUNT_ERROR_NONE != ret) {
+		CTS_ERR("account_query_account_by_account_id Faild(%d) : account_id(%d)", ret, addressbook->account_id);
 		ret = account_destroy(account);
 		WARN_IF(ret != ACCOUNT_ERROR_NONE, "account_destroy Fail(%d)", ret);
+		ctsvc_end_trans(false);
+		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
+	ret = account_destroy(account);
+	WARN_IF(ret != ACCOUNT_ERROR_NONE, "account_destroy Fail(%d)", ret);
 
 	snprintf(query, sizeof(query),
 			"INSERT INTO %s(addressbook_name, account_id, mode) "
@@ -220,7 +218,6 @@ static int __ctsvc_db_addressbook_insert_record( contacts_record_h record, int *
 
 	/* ROLLBACK TRANSACTION */
 	ctsvc_end_trans(false);
-
 	return ret;
 }
 
@@ -298,14 +295,14 @@ static inline int __ctsvc_db_addressbook_reset_internal_addressbook(void)
 {
 	CTS_FN_CALL;
 	char query[CTS_SQL_MIN_LEN] = {0};
+	int ret;
+
+	ret = ctsvc_begin_trans();
+	RETVM_IF(CONTACTS_ERROR_NONE > ret, ret, "DB error : ctsvc_begin_trans() Failed(%d)", ret);
 
 	snprintf(query, sizeof(query), "UPDATE %s SET deleted=1, person_id=0, "
 			"changed_ver = ((SELECT ver FROM cts_version) + 1) WHERE addressbook_id = %d",
 			CTS_TABLE_CONTACTS, 0 /*CTS_ADDRESSBOOK_INTERNAL*/);
-
-	/* BEGIN_TRANSACTION */
-	int ret = ctsvc_begin_trans();
-	RETVM_IF(CONTACTS_ERROR_NONE > ret, ret, "DB error : ctsvc_begin_trans() Failed(%d)", ret);
 
 	/* DOING JOB */
 	do {
@@ -382,12 +379,11 @@ static int __ctsvc_db_addressbook_delete_record( int addressbook_id )
 		return __ctsvc_db_addressbook_reset_internal_addressbook();
 
 	char query[CTS_SQL_MAX_LEN] = {0};
-	snprintf(query, sizeof(query), "DELETE FROM %s WHERE addressbook_id = %d",
-			CTS_TABLE_ADDRESSBOOKS, addressbook_id);
-
-	/* BEGIN_TRANSACTION */
 	int ret = ctsvc_begin_trans();
 	RETVM_IF(CONTACTS_ERROR_NONE > ret, ret, "DB error : ctsvc_begin_trans() Failed(%d)", ret);
+
+	snprintf(query, sizeof(query), "DELETE FROM %s WHERE addressbook_id = %d",
+			CTS_TABLE_ADDRESSBOOKS, addressbook_id);
 
 	/* DOING JOB */
 	do {
