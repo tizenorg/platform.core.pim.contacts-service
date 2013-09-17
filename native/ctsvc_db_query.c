@@ -31,6 +31,7 @@
 #include "ctsvc_record.h"
 #include "ctsvc_utils.h"
 #include "ctsvc_normalize.h"
+#include "ctsvc_number_utils.h"
 #include "ctsvc_db_init.h"
 #include "ctsvc_view.h"
 #include "ctsvc_inotify.h"
@@ -39,6 +40,8 @@
 
 #include "ctsvc_db_access_control.h"
 #include "ctsvc_db_plugin_person_helper.h"
+#include "ctsvc_db_plugin_group_helper.h"
+#include "ctsvc_db_plugin_company_helper.h"
 
 typedef enum {
 	QUERY_SORTKEY,
@@ -289,12 +292,81 @@ static inline int __ctsvc_db_create_str_condition(ctsvc_composite_filter_s *com_
 
 	if (filter->value.s) {
 		if (filter->property_id == CTSVC_PROPERTY_NUMBER_NUMBER_FILTER) {
-			char dest[strlen(filter->value.s)+1];
-			ret = ctsvc_normalize_number(filter->value.s, dest, sizeof(dest), ctsvc_get_phonenumber_min_match_digit());
-			if (CONTACTS_ERROR_NONE == ret)
-				*bind_text = g_slist_append(*bind_text, __ctsvc_db_get_str_with_escape(dest, strlen(dest), with_escape));
+			char dest[strlen(filter->value.s)+1+5]; // for cc
+			char normal_num[strlen(filter->value.s)+1+5];	// for cc
+			ret = ctsvc_normalize_number(filter->value.s, normal_num, sizeof(normal_num));
+			if (0 < ret) {
+				ret = ctsvc_get_minmatch_number(normal_num, dest, sizeof(dest), ctsvc_get_phonenumber_min_match_digit());
+				if (CONTACTS_ERROR_NONE == ret)
+					*bind_text = g_slist_append(*bind_text, __ctsvc_db_get_str_with_escape(dest, strlen(dest), with_escape));
+				else
+					return CONTACTS_ERROR_INVALID_PARAMETER;
+			}
+			else if (ret == 0) {
+				const char *number_field = NULL;
+				number_field = __ctsvc_db_get_property_field_name(com_filter->properties,
+								com_filter->property_count, QUERY_FILTER, CTSVC_PROPERTY_NUMBER_NUMBER);
+				snprintf(out_cond, sizeof(out_cond), "(%s IS NULL AND %s IS NULL)", field_name, number_field);
+			}
 			else
 				return CONTACTS_ERROR_INVALID_PARAMETER;
+		}
+		else if (filter->property_id == CTSVC_PROPERTY_NUMBER_NORMALIZED_NUMBER
+				|| filter->property_id == CTSVC_PROPERTY_PHONELOG_NORMALIZED_ADDRESS
+				|| filter->property_id == CTSVC_PROPERTY_SPEEDDIAL_NORMALIZED_NUMBER) {
+			char normal_num[strlen(filter->value.s)+1+5]; // for cc
+			ret = ctsvc_normalize_number(filter->value.s, normal_num, sizeof(normal_num));
+			CTS_ERR("ctsvc_normalize_number : %d", ret);
+			if (0 < ret) {
+				CTS_ERR("bind text : %s", normal_num);
+				*bind_text = g_slist_append(*bind_text, __ctsvc_db_get_str_with_escape(normal_num, strlen(normal_num), with_escape));
+			}
+			else if (ret == 0) {
+				const char *number_field = NULL;
+				if (filter->property_id == CTSVC_PROPERTY_NUMBER_NORMALIZED_NUMBER)
+					number_field = __ctsvc_db_get_property_field_name(com_filter->properties,
+									com_filter->property_count, QUERY_FILTER, CTSVC_PROPERTY_NUMBER_NUMBER);
+				if (filter->property_id == CTSVC_PROPERTY_PHONELOG_NORMALIZED_ADDRESS)
+					number_field =  __ctsvc_db_get_property_field_name(com_filter->properties,
+										com_filter->property_count, QUERY_FILTER, CTSVC_PROPERTY_PHONELOG_ADDRESS);
+				if (filter->property_id == CTSVC_PROPERTY_SPEEDDIAL_NORMALIZED_NUMBER)
+					number_field =  __ctsvc_db_get_property_field_name(com_filter->properties,
+										com_filter->property_count, QUERY_FILTER, CTSVC_PROPERTY_SPEEDDIAL_NUMBER);
+				snprintf(out_cond, sizeof(out_cond), "(%s IS NULL AND %s IS NULL)", field_name, number_field);
+			}
+			else
+				return CONTACTS_ERROR_INVALID_PARAMETER;
+		}
+		else if (filter->property_id == CTSVC_PROPERTY_CONTACT_IMAGE_THUMBNAIL
+				|| filter->property_id == CTSVC_PROPERTY_PERSON_IMAGE_THUMBNAIL
+				|| filter->property_id == CTSVC_PROPERTY_MY_PROFILE_IMAGE_THUMBNAIL
+				|| filter->property_id == CTSVC_PROPERTY_IMAGE_PATH) {
+			if (strncmp(filter->value.s, CTS_IMG_FULL_LOCATION, strlen(CTS_IMG_FULL_LOCATION)) == 0) {
+				*bind_text = g_slist_append(*bind_text,
+									__ctsvc_db_get_str_with_escape(filter->value.s+strlen(CTS_IMG_FULL_LOCATION)+1,
+									strlen(filter->value.s)-strlen(CTS_IMG_FULL_LOCATION)-1, with_escape));
+			}
+			else
+				*bind_text = g_slist_append(*bind_text, __ctsvc_db_get_str_with_escape(filter->value.s, strlen(filter->value.s), with_escape));
+		}
+		else if (filter->property_id == CTSVC_PROPERTY_GROUP_IMAGE) {
+			if (strncmp(filter->value.s, CTS_GROUP_IMAGE_LOCATION, strlen(CTS_GROUP_IMAGE_LOCATION)) == 0) {
+				*bind_text = g_slist_append(*bind_text,
+									__ctsvc_db_get_str_with_escape(filter->value.s+strlen(CTS_GROUP_IMAGE_LOCATION)+1,
+									strlen(filter->value.s)-strlen(CTS_GROUP_IMAGE_LOCATION)-1, with_escape));
+			}
+			else
+				*bind_text = g_slist_append(*bind_text, __ctsvc_db_get_str_with_escape(filter->value.s, strlen(filter->value.s), with_escape));
+		}
+		else if (filter->property_id == CTSVC_PROPERTY_COMPANY_LOGO) {
+			if (strncmp(filter->value.s, CTS_LOGO_IMAGE_LOCATION, strlen(CTS_LOGO_IMAGE_LOCATION)) == 0) {
+				*bind_text = g_slist_append(*bind_text,
+									__ctsvc_db_get_str_with_escape(filter->value.s+strlen(CTS_LOGO_IMAGE_LOCATION)+1,
+									strlen(filter->value.s)-strlen(CTS_LOGO_IMAGE_LOCATION)-1, with_escape));
+			}
+			else
+				*bind_text = g_slist_append(*bind_text, __ctsvc_db_get_str_with_escape(filter->value.s, strlen(filter->value.s), with_escape));
+
 		}
 		else
 			*bind_text = g_slist_append(*bind_text, __ctsvc_db_get_str_with_escape(filter->value.s, strlen(filter->value.s), with_escape));
@@ -966,12 +1038,16 @@ static int __ctsvc_db_append_search_query(const char *src, char *query, int size
 
 		if (range & CONTACTS_SEARCH_RANGE_NUMBER) {
 			char normalized_number[CTSVC_NUMBER_MAX_LEN];
-			int err = ctsvc_normalize_number(keyword, normalized_number, CTSVC_NUMBER_MAX_LEN, CTSVC_NUMBER_MAX_LEN -1);
+			char minmatch[CTSVC_NUMBER_MAX_LEN];
+			int err = ctsvc_normalize_number(keyword, normalized_number, sizeof(normalized_number));
 			if (0 < err) {
-				ret += snprintf(query+ret, size-ret,
+				err = ctsvc_get_minmatch_number(normalized_number, minmatch, CTSVC_NUMBER_MAX_LEN, CTSVC_NUMBER_MAX_LEN-1);
+				if (err == CONTACTS_ERROR_NONE) {
+					ret += snprintf(query+ret, size-ret,
 							"UNION "
 								"SELECT contact_id FROM %s WHERE number LIKE '%%%s%%' ",
-							CTS_TABLE_PHONE_LOOKUP, normalized_number);
+							CTS_TABLE_PHONE_LOOKUP, minmatch);
+				}
 			}
 		}
 		ret += snprintf(query+ret, size-ret, ")");

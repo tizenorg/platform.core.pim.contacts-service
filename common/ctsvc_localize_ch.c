@@ -2241,7 +2241,7 @@ int ctsvc_convert_chinese_to_pinyin(const char *src, pinyin_name_s **name, int *
 
 	*size = total_count;
 	temp_name = calloc(total_count, sizeof(pinyin_name_s));
-	RETVM_IF(temp_name==NULL, CONTACTS_ERROR_OUT_OF_MEMORY,"calloc Failed(%s)");
+	RETVM_IF(temp_name == NULL, CONTACTS_ERROR_OUT_OF_MEMORY,"calloc Failed()");
 
 	int repeat = 1;
 	int name_len[total_count];

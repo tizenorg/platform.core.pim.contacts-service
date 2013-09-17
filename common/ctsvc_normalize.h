@@ -68,13 +68,11 @@ enum LANGTYPE{
 	CTSVC_LANG_OTHERS = 1000,
 };
 
-int ctsvc_clean_number(const char *src, char *dest, int dest_size);
-int ctsvc_normalize_number(const char *src, char *dest, int dest_size, int min_match);
+#define CTSVC_COMPARE_BETWEEN(left_range, value, right_range) (((left_range) <= (value)) && ((value) <= (right_range)))
+
 int ctsvc_normalize_str(const char *src, char **dest);
 int ctsvc_collation_str(char *src, char **dest);
 int ctsvc_normalize_index(const char *src, char **dest);
-
-bool ctsvc_is_phonenumber(const char* src);
 int ctsvc_get_halfwidth_string(const char *src, char** dest, int* dest_size);
 
 #endif /*  __TIZEN_SOCIAL_CTSVC_NORMALIZE_H__ */

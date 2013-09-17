@@ -24,6 +24,7 @@
 #include "ctsvc_schema.h"
 #include "ctsvc_sqlite.h"
 #include "ctsvc_normalize.h"
+#include "ctsvc_number_utils.h"
 #include "ctsvc_utils.h"
 #include "ctsvc_list.h"
 #include "ctsvc_record.h"
@@ -396,17 +397,17 @@ static int  __ctsvc_db_phonelog_insert(ctsvc_phonelog_s *phonelog, int *id)
 {
 	int ret;
 	cts_stmt stmt = NULL;
-	char clean_num[CTSVC_NUMBER_MAX_LEN] = {0};
-	char query[CTS_SQL_MAX_LEN] = {0};
 	char normal_num[CTSVC_NUMBER_MAX_LEN] = {0};
+	char query[CTS_SQL_MAX_LEN] = {0};
+	char minmatch[CTSVC_NUMBER_MAX_LEN] = {0};
 
 	RETVM_IF(phonelog->log_type <= CONTACTS_PLOG_TYPE_NONE
 			|| CONTACTS_PLOG_TYPE_MAX <= phonelog->log_type,
 			CONTACTS_ERROR_INVALID_PARAMETER, "phonelog type(%d) is invaid", phonelog->log_type);
 
 	snprintf(query, sizeof(query), "INSERT INTO "CTS_TABLE_PHONELOGS"("
-			"number, normal_num, person_id, log_type, log_time, data1, data2) "
-			"VALUES(?, ?, ?, %d, %d, %d, ?)",
+			"number, normal_num, minmatch, person_id, log_type, log_time, data1, data2) "
+			"VALUES(?, ?, ?, ?, %d, %d, %d, ?)",
 			phonelog->log_type, phonelog->log_time, phonelog->extra_data1);
 
 	stmt = cts_query_prepare(query);
@@ -415,23 +416,23 @@ static int  __ctsvc_db_phonelog_insert(ctsvc_phonelog_s *phonelog, int *id)
 	if (phonelog->address) {
 		cts_stmt_bind_text(stmt, 1, phonelog->address);
 		if (phonelog->log_type < CONTACTS_PLOG_TYPE_EMAIL_RECEIVED) {
-			ret = ctsvc_clean_number(phonelog->address, clean_num, sizeof(clean_num));
+			ret = ctsvc_normalize_number(phonelog->address, normal_num, sizeof(normal_num));
+			cts_stmt_bind_text(stmt, 2, normal_num);
 			if (0 < ret) {
-				ret = ctsvc_normalize_number(clean_num, normal_num, CTSVC_NUMBER_MAX_LEN, ctsvc_get_phonenumber_min_match_digit());
-				cts_stmt_bind_text(stmt, 2, normal_num);
+				ret = ctsvc_get_minmatch_number(normal_num, minmatch, CTSVC_NUMBER_MAX_LEN, ctsvc_get_phonenumber_min_match_digit());
+				cts_stmt_bind_text(stmt, 3, minmatch);
 			}
 		}
 	}
 
 	if (0 < phonelog->person_id)
-		cts_stmt_bind_int(stmt, 3, phonelog->person_id);
+		cts_stmt_bind_int(stmt, 4, phonelog->person_id);
 
 	if (phonelog->extra_data2)
-		cts_stmt_bind_text(stmt, 4, phonelog->extra_data2);
+		cts_stmt_bind_text(stmt, 5, phonelog->extra_data2);
 
 	ret = cts_stmt_step(stmt);
-	if (CONTACTS_ERROR_NONE != ret)
-	{
+	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("cts_stmt_step() Failed(%d)", ret);
 		cts_stmt_finalize(stmt);
 		return ret;

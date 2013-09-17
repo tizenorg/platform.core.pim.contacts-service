@@ -24,8 +24,6 @@
 #include "ctsvc_normalize.h"
 #include "ctsvc_localize.h"
 
-#define CTSVC_COMPARE_BETWEEN(left_range, value, right_range) (((left_range) <= (value)) && ((value) <= (right_range)))
-
 /* korean -Hangul Jamo extended A*/
 #define CTSVC_JAMO_A_START (UChar)0xA960
 #define CTSVC_JAMO_A_END (UChar)0xA97F

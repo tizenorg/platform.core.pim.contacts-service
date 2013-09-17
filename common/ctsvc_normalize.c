@@ -59,273 +59,6 @@ static hiragana_group_letter hiragana_group[13] = {
 	{0x3093, 0x93, 0x93}, // ゐ	ゑ	を
 };
 
-
-static inline bool __ctsvc_check_dirty_number(char digit)
-{
-	switch (digit)
-	{
-		case '0' ... '9':
-		case 'p':
-		case 'w':
-		case 'P':
-		case 'W':
-		case '#':
-		case '*':
-		case '(':
-		case '/':
-		case ')':
-		case 'N':
-		case ',':
-		case '.':
-		case ';':
-		case '+':
-			return false;
-		default:
-			return true;
-	}
-}
-
-int ctsvc_clean_number(const char *src, char *dest, int dest_size)
-{
-	int s_pos=0, d_pos=0, char_type;
-
-	if (NULL == src)
-		CTS_ERR("The parameter(src) is NULL");
-	else {
-		while (src[s_pos] != 0)
-		{
-			if (d_pos >= dest_size-2) break;
-			char_type = ctsvc_check_utf8(src[s_pos]);
-			if (char_type <= 1) {
-				if (__ctsvc_check_dirty_number(src[s_pos])) {
-					s_pos++;
-					continue;
-				}
-				dest[d_pos++] = src[s_pos++];
-			}
-			else
-				s_pos += char_type;
-		}
-	}
-
-	dest[d_pos] = 0;
-	return d_pos;
-}
-
-static inline const char* __ctsvc_clean_country_code(const char *src)
-{
-	int ret = 1;
-	switch (src[ret++]-'0')
-	{
-	case 1:
-	case 7:
-		break;
-	case 2:
-		switch (src[ret++]-'0')
-		{
-		case 0:
-		case 7:
-			break;
-		case 1:
-		case 2:
-		case 3:
-		case 4:
-		case 5:
-		case 6:
-		case 8:
-		case 9:
-			ret += 1;
-			break;
-		default:
-			CTS_ERR("The parameter(src:%s) has invalid character set", src);
-		}
-		break;
-	case 3:
-		switch (src[ret++]-'0')
-		{
-		case 0:
-		case 1:
-		case 2:
-		case 3:
-		case 4:
-		case 6:
-		case 9:
-			break;
-		case 5:
-		case 7:
-		case 8:
-			ret += 1;
-			break;
-		default:
-			CTS_ERR("The parameter(src:%s) has invalid character set", src);
-		}
-		break;
-	case 4:
-		switch (src[ret++]-'0')
-		{
-		case 0:
-		case 1:
-		case 3:
-		case 4:
-		case 5:
-		case 6:
-		case 7:
-		case 8:
-		case 9:
-			break;
-		case 2:
-			ret += 1;
-			break;
-		default:
-			CTS_ERR("The parameter(src:%s) has invalid character set", src);
-		}
-		break;
-	case 5:
-		switch (src[ret++]-'0')
-		{
-		case 1:
-		case 2:
-		case 3:
-		case 4:
-		case 5:
-		case 6:
-		case 7:
-		case 8:
-			break;
-		case 0:
-		case 9:
-			ret += 1;
-			break;
-		default:
-			CTS_ERR("The parameter(src:%s) has invalid character set", src);
-		}
-		break;
-	case 6:
-		switch (src[ret++]-'0')
-		{
-		case 0:
-		case 1:
-		case 2:
-		case 3:
-		case 4:
-		case 5:
-		case 6:
-			break;
-		case 7:
-		case 8:
-		case 9:
-			ret += 1;
-			break;
-		default:
-			CTS_ERR("The parameter(src:%s) has invalid character set", src);
-		}
-		break;
-	case 8:
-		switch (src[ret++]-'0')
-		{
-		case 1:
-		case 2:
-		case 4:
-		case 6:
-			break;
-		case 0:
-		case 3:
-		case 5:
-		case 7:
-		case 8:
-		case 9:
-			ret += 1;
-			break;
-		default:
-			CTS_ERR("The parameter(src:%s) has invalid character set", src);
-		}
-		break;
-	case 9:
-		switch (src[ret++]-'0')
-		{
-		case 0:
-		case 1:
-		case 2:
-		case 3:
-		case 4:
-		case 5:
-		case 8:
-			break;
-		case 6:
-		case 7:
-		case 9:
-			ret += 1;
-			break;
-		default:
-			CTS_ERR("The parameter(src:%s) has invalid character set", src);
-		}
-		break;
-	case 0:
-	default:
-		CTS_ERR("The parameter(src:%s) has invalid character set", src);
-		return src;
-	}
-
-	return &src[ret];
-}
-
-static int __ctsvc_normalize_number(const char *src, char *dest, int dest_size, int min_match)
-{
-	int i;
-	int len;
-	int d_pos = 0;
-	const char *temp_number;
-
-	if ('+' == src[0])
-		temp_number = __ctsvc_clean_country_code(src);
-	else if ('0' == src[0])
-		temp_number = src+1;
-	else
-		temp_number = src;
-
-	len = strlen(temp_number);
-
-	if (0 < len) {
-		while(0 <= (len-d_pos-1) && temp_number[len-d_pos-1]
-				&& d_pos < min_match) {
-			if (dest_size-d_pos == 0) {
-				CTS_ERR("Destination string buffer is not enough(%s)", src);
-				return CONTACTS_ERROR_INTERNAL;
-			}
-
-			dest[d_pos] = temp_number[len-d_pos-1];
-			d_pos++;
-		}
-		dest[d_pos] = 0;
-
-		len = strlen(dest);
-		for(i=0; i<len/2;i++) {
-			char c;
-			c = dest[i];
-			dest[i] = dest[len-i-1];
-			dest[len-i-1] = c;
-		}
-	}
-
-	return CONTACTS_ERROR_NONE;
-}
-
-
-int ctsvc_normalize_number(const char *src, char *dest, int dest_size, int min_match)
-{
-	int ret;
-
-	RETV_IF(NULL == src, CONTACTS_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == dest, CONTACTS_ERROR_INVALID_PARAMETER);
-
-	ret = __ctsvc_normalize_number(src, dest, dest_size, min_match);
-	if (ret != CONTACTS_ERROR_NONE) {
-		CTS_ERR("__ctsvc_normalize_number(src) failed(%d)", src, ret);
-		return ret;
-	}
-	return CONTACTS_ERROR_NONE;
-}
-
 static int __ctsvc_remove_special_char(const char *src, char *dest, int dest_size)
 {
 	int s_pos=0, d_pos=0, char_type, src_size;
@@ -487,6 +220,28 @@ static int __ctsvc_normalize_str(const char *src, char **dest)
 	ret = ctsvc_check_language(result);
 	ctsvc_extra_normalize(result, size);
 
+	// remove diacritical : U+3000 ~ U+034F
+	int i, j;
+	UChar *temp_result = NULL;
+	temp_result = calloc(1, sizeof(UChar)*(size+1));
+	bool replaced = false;
+	for(i=0,j=0; i<size;i++) {
+		if (CTSVC_COMPARE_BETWEEN((UChar)CTSVC_COMBINING_DIACRITICAL_MARKS_START,
+			result[i], (UChar)CTSVC_COMBINING_DIACRITICAL_MARKS_END)) {
+			replaced = true;
+		}
+		else
+			temp_result[j++] = result[i];
+	}
+
+	if (replaced) {
+		temp_result[j] = 0x0;
+		free(result);
+		result = temp_result;
+	}
+	else
+		free(temp_result);
+
 	u_strToUTF8(NULL, 0, &size, result, -1, &status);
 	status = U_ZERO_ERROR;
 	*dest = calloc(1, sizeof(char) * (size+1));
@@ -506,11 +261,6 @@ DATA_FREE:
 	free(result);
 	return ret;
 }
-
-
-
-////// contacts_normalized_strstr API should be separated from contacts-service /////////////////////////////////////////////////////////////
-#define CTSVC_COMPARE_BETWEEN(left_range, value, right_range) (((left_range) <= (value)) && ((value) <= (right_range)))
 
 static int __ctsvc_convert_halfwidth_ascii_and_symbol(const char *src, UChar *dest, int dest_size, int* str_size)
 {
@@ -581,54 +331,7 @@ static int __ctsvc_convert_halfwidth_ascii_and_symbol(const char *src, UChar *de
 	return CONTACTS_ERROR_NONE;
 }
 
-static bool __ctsvc_is_phonenumber_halfwidth(const char* keyword)
-{
-	int i;
-	int len = strlen(keyword);
-
-	// TODO: we should add predicate including '+'
-	// TODO: finally, we try to check the number with regular expression.
-	for(i=0; i<len; i++) {
-		if (keyword[i] < '0' || keyword[i] > '9') {
-			CTS_ERR("keyword[%d]: %c is not number)", i, keyword[i]);
-			return false;
-		}
-	}
-	return true;
-}
-
 #define LARGE_BUFFER_SIZE 100
-
-static bool __ctsvc_is_phonenumber_fullwidth(const char* keyword)
-{
-	UChar unicodes[LARGE_BUFFER_SIZE];
-
-	int size = 0;
-	if( __ctsvc_convert_halfwidth_ascii_and_symbol(keyword, unicodes, LARGE_BUFFER_SIZE, &size) != CONTACTS_ERROR_NONE )
-	{
-		CTS_ERR("convert failed! %s", keyword);
-
-		return false;
-	}
-
-	int i = 0;
-	for( i = 0; i < size; i++ )
-	{
-		if (unicodes[i] < (UChar)0xFF10 || unicodes[i] > (UChar)0xFF19 )
-		{
-			CTS_ERR("keyword[%d]: 0x%0x is not number)", i, unicodes[i] );
-
-			return false;
-		}
-	}
-
-	return true;
-}
-
-bool ctsvc_is_phonenumber(const char* src)
-{
-	return ( __ctsvc_is_phonenumber_halfwidth(src) || __ctsvc_is_phonenumber_fullwidth(src) );
-}
 
 int ctsvc_get_halfwidth_string(const char *src, char** dest, int* dest_size)
 {
@@ -664,6 +367,7 @@ int ctsvc_get_halfwidth_string(const char *src, char** dest, int* dest_size)
 	return CONTACTS_ERROR_NONE;
 }
 
+////// contacts_normalized_strstr API should be separated from contacts-service /////////////////////////////////////////////////////////////
 static int __ctsvc_normalize_str_to_unicode(const char *src, int src_size, UChar *dest, int dest_size)
 {
 	int ret;
@@ -761,9 +465,6 @@ int ctsvc_normalize_index(const char *src, char **dest)
 	}
 	return ret;
 }
-
-////// contacts_normalized_strstr API should be separated from contacts-service /////////////////////////////////////////////////////////////
-#define CTSVC_COMPARE_BETWEEN(left_range, value, right_range) (((left_range) <= (value)) && ((value) <= (right_range)))
 
 static inline bool __ctsvc_is_choseong(const char *src)
 {
