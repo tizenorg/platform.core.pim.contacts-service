@@ -993,6 +993,10 @@ static inline int __ctsvc_vcard_put_number_type(int type, char *label, char **bu
 		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";TYPE=PCS");
 	if (type & CONTACTS_NUMBER_TYPE_ASSISTANT)
 		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";TYPE=X-ASSISTANT");
+	if (type & CONTACTS_NUMBER_TYPE_RADIO)
+		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";TYPE=X-RADIO");
+	if (type & CONTACTS_NUMBER_TYPE_COMPANY_MAIN)
+		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";TYPE=X-COMPANY-MAIN");
 	if (type == CONTACTS_NUMBER_TYPE_CUSTOM) {
 		if (__ctsvc_vcard_is_valid_custom_label(label)) {
 			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";TYPE=X-");
@@ -2928,6 +2932,10 @@ static inline bool __ctsvc_vcard_get_number_type(contacts_record_h number, char 
 		if (result) {
 			if (strstr(lower, "x-assistant"))
 				type |= CONTACTS_NUMBER_TYPE_ASSISTANT;
+			else if (strstr(lower, "x-radio"))
+				type |= CONTACTS_NUMBER_TYPE_RADIO;
+			else if (strstr(lower, "x-company-main"))
+				type |= CONTACTS_NUMBER_TYPE_COMPANY_MAIN;
 			else {
 				type = CONTACTS_NUMBER_TYPE_CUSTOM;
 				contacts_record_set_str(number, _contacts_number.label, temp+(result-lower)+2);
@@ -3772,7 +3780,7 @@ static int __ctsvc_vcard_parse(const void *vcard_stream, contacts_record_h *reco
 	if (CONTACTS_ERROR_NONE!= ret) {
 		contacts_record_destroy((contacts_record_h)contact, true);
 		if (CONTACTS_ERROR_INVALID_PARAMETER == ret)
-			CTS_ERR("cts_vcard_get_contact() Failed(%d)\n %s \n", ret, vcard);
+			CTS_ERR("cts_vcard_get_contact() Failed(%d)", ret);
 		else
 			CTS_ERR("cts_vcard_get_contact() Failed(%d)", ret);
 
