@@ -6,6 +6,7 @@ Group:      System/Libraries
 License:    Apache-2.0
 Source0:    %{name}-%{version}.tar.gz
 Source1:    contacts-service.service
+Source2:    contacts-service.socket
 BuildRequires:  cmake
 BuildRequires:  vconf-keys-devel
 BuildRequires:  pkgconfig(db-util)
@@ -67,6 +68,10 @@ mkdir -p %{buildroot}/usr/lib/systemd/user/tizen-middleware.target.wants
 install -m 0644 %SOURCE1 %{buildroot}/usr/lib/systemd/user/contacts-service.service
 ln -s ../contacts-service.service %{buildroot}/usr/lib/systemd/user/tizen-middleware.target.wants/contacts-service.service
 
+mkdir -p %{buildroot}/usr/lib/systemd/user/sockets.target.wants
+install -m 0644 %SOURCE2 %{buildroot}/usr/lib/systemd/user/contacts-service.socket
+ln -s ../contacts-service.socket %{buildroot}/usr/lib/systemd/user/sockets.target.wants/contacts-service.socket
+
 
 %post -n contacts-service2
 /sbin/ldconfig
@@ -103,6 +108,8 @@ vconftool set -t int db/contacts-svc/phonenumber_min_match_digit 8 -g 6005 -s co
 /opt/usr/data/contacts-svc/img/*
 /usr/lib/systemd/user/contacts-service.service
 /usr/lib/systemd/user/tizen-middleware.target.wants/contacts-service.service
+/usr/lib/systemd/user/sockets.target.wants/contacts-service.socket
+/usr/lib/systemd/user/contacts-service.socket
 %config(noreplace) /opt/usr/dbspace/.contacts-svc.db*
 /opt/etc/smack/accesses.d/%{name}2.rule
 
