@@ -97,13 +97,15 @@ API int contacts_query_set_projection(contacts_query_h query, unsigned int prope
 
 API int contacts_query_set_filter(contacts_query_h query, contacts_filter_h filter)
 {
+	int ret;
 	ctsvc_query_s *s_query;
 	contacts_filter_h new_filter;
 
 	RETV_IF(NULL == query || NULL == filter, CONTACTS_ERROR_INVALID_PARAMETER);
 	s_query = (ctsvc_query_s *)query;
 
-	ctsvc_filter_clone(filter, &new_filter);
+	ret = ctsvc_filter_clone(filter, &new_filter);
+	RETVM_IF(ret != CONTACTS_ERROR_NONE, ret, "ctsvc_filter_clone Fail(%d)", ret);
 	s_query->filter = (ctsvc_composite_filter_s*)new_filter;
 
 	return CONTACTS_ERROR_NONE;

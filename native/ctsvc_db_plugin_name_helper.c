@@ -211,7 +211,6 @@ int ctsvc_db_name_insert(contacts_record_h record, int contact_id, bool is_my_pr
 			ctsvc_set_name_noti();
 	}
 
-
 	// update search index table
 	return CONTACTS_ERROR_NONE;
 }

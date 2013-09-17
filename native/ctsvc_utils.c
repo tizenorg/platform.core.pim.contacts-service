@@ -133,6 +133,7 @@ int ctsvc_end_trans(bool is_success)
 		WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_query_exec(version up) Failed(%d)", ret);
 	}
 
+	INFO("start commit");
 	progress = 100000;
 	ret = ctsvc_query_exec("COMMIT TRANSACTION");
 	while (CONTACTS_ERROR_DB == ret && progress<CTS_COMMIT_TRY_MAX) {
@@ -140,6 +141,8 @@ int ctsvc_end_trans(bool is_success)
 		ret = ctsvc_query_exec("COMMIT TRANSACTION");
 		progress *= 2;
 	}
+	INFO("%s", (CONTACTS_ERROR_NONE == ret)?"commit": "rollback");
+
 	if (CONTACTS_ERROR_NONE != ret) {
 		int tmp_ret;
 		CTS_ERR("ctsvc_query_exec() Failed(%d)", ret);

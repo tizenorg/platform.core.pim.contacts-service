@@ -664,7 +664,6 @@ int ctsvc_get_halfwidth_string(const char *src, char** dest, int* dest_size)
 	return CONTACTS_ERROR_NONE;
 }
 
-
 static int __ctsvc_normalize_str_to_unicode(const char *src, int src_size, UChar *dest, int dest_size)
 {
 	int ret;
@@ -1013,7 +1012,6 @@ static bool __ctsvc_compare_unicode_letter(const UChar* haystack, int haystack_l
 API int contacts_utils_strstr(const char *haystack,
 		const char *needle, int *len)
 {
-
 	int ret, h_len, n_len, i, j;
 	UChar haystack_letter[SMALL_BUFFER_SIZE];
 	UChar needle_letter[SMALL_BUFFER_SIZE];
@@ -1029,7 +1027,6 @@ API int contacts_utils_strstr(const char *haystack,
 	char temp_haystack[strlen(haystack) + 1];
 	char temp_needle[strlen(needle) + 1];
 
-
 	RETVM_IF(NULL == haystack, -1, "The parameter(haystack) is NULL");
 	RETVM_IF(NULL == needle, -1, "The parameter(needle) is NULL");
 	CTS_VERBOSE("haystack = %s, needle = %s", haystack, needle);
@@ -1044,15 +1041,13 @@ API int contacts_utils_strstr(const char *haystack,
 	first_needle_letter_lang = __ctsvc_normalize_str_to_unicode(temp_needle, n_len, first_needle_letter, SMALL_BUFFER_SIZE);
 	RETVM_IF(first_needle_letter_lang < CONTACTS_ERROR_NONE , -1, "The __ctsvc_normalize_str_to_unicode failed(%d)", first_needle_letter_lang);
 
-
 	for (i=0, j=0;i<strlen(temp_haystack) && j<strlen(temp_needle);i+=h_len) {
 		h_len = ctsvc_check_utf8(temp_haystack[i]);
 
 		haystack_letter_lang = __ctsvc_normalize_str_to_unicode(temp_haystack + i, h_len, haystack_letter, SMALL_BUFFER_SIZE);
 		RETVM_IF(haystack_letter_lang < CONTACTS_ERROR_NONE , -1, "The __ctsvc_normalize_str_to_unicode failed(%d)", haystack_letter_lang);
 
-		if (matching == false)
-		{
+		if (matching == false) {
 			if (__ctsvc_compare_unicode_letter(haystack_letter, haystack_letter_lang, first_needle_letter, first_needle_letter_lang)
 					|| __ctsvc_compare_pinyin_letter(temp_haystack + i, haystack_letter_lang, temp_needle + j, first_needle_letter_lang, &h_len, &n_len)) {
 				matching = true;
