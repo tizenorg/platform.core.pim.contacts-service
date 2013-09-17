@@ -18,13 +18,10 @@
  */
 #include <unistd.h>
 #include <fcntl.h>
-//#include <errno.h>
-//#include <dirent.h>
 #include <sys/stat.h>
 
 #include "contacts.h"
 #include "ctsvc_internal.h"
-//#include "ctsvc_utils.h"
 #include "ctsvc_notify.h"
 #include "ctsvc_notification.h"
 

@@ -1859,7 +1859,8 @@ API int contacts_vcard_make_from_person(contacts_record_h record, char **vcard_s
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	contacts_query_create(_contacts_contact._uri, &query);
-	contacts_query_set_filter(query, filter);
+	ret = contacts_query_set_filter(query, filter);
+	WARN_IF(CONTACTS_ERROR_NONE != ret, "contacts_query_set_filter() Failed(%d)", ret);
 	ret = contacts_db_get_records_with_query(query, 0, 0, &list);
 
 	if (ret == CONTACTS_ERROR_NONE)
