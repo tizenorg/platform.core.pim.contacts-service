@@ -273,10 +273,14 @@ static int __ctsvc_db_simple_contact_update_record( contacts_record_h record )
 		g_slist_free(bind_text);
 	}
 
+	if (ret < CONTACTS_ERROR_NONE) {
+		ctsvc_end_trans(false);
+		return ret;
+	}
+
 	ctsvc_set_contact_noti();
 	//ctsvc_update_person(contact);
 	ret = ctsvc_end_trans(true);
-	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "ctsvc_end_trans() Failed(%d)", ret);
 
 	return CONTACTS_ERROR_NONE;
 }
