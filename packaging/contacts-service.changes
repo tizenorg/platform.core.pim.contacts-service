@@ -1,3 +1,41 @@
+* Wed Oct 02 2013 Jacek Pielaszkiewicz <j.pielaszkie@samsung.com> accepted/tizen/20130724.121814@087acfd
+- Add systemd socket file. When booting time, if the client tried to connect to contacts daemon which is not running yet, then connection can be failed. systemd socket file will gurantee it.
+- Remove script file to booting (not used) Change manifest : add SMACK rules
+- Merge "check return error when updating simple contact" into tizen
+- Merge "Fix : Check account_id valication when inserting addressbook although the account_id is less than or equal zero, it should be checked. Each account_id is related to only one addressbook_id." into tizen
+- Merge "Fix number search" into tizen
+- Add company_main, radio number type
+- check return error when updating simple contact
+- Fix : Check account_id valication when inserting addressbook although the account_id is less than or equal zero, it should be checked. Each account_id is related to only one addressbook_id.
+- Fix number search
+- Remove white space Check return value
+- Fix : control SDN. Did not remove SDN before initializing SIM Did not read SDN
+- Add message_alert property (contact, person, group)
+- Fix : set query limit If you want to set only offset, you should set negative limit
+- Return success when user did not set filter condition after creating filter
+- Can not change the group is_read_only and phonelog address after inserting
+- Set explicit void if API does not have any parameters
+- Fix error : increase person usage value
+- Add user space access control Check resource access permission Fix contacts_connect_on_thread  - without calling contacts_connect2 module can use contacts APIs
+- Insert/Update contact/my_profile error - Check is_default of address - Check is_default of image - Update number/email record if number/email is empty - Return error when insert/update invalid group relation
+- Improve search API - Add contacts_db_search_records_with_range API (range: name, number, data) - Fix search query for special character (sqlite keyword '_', '%', '\') - Fix search contact (diacritical case) - Change keyword : full-width -> half-width number
+- Add API to subscribe setting name dirplay/sorting order changes
+- Remove unused code Remove duplicated notification
+- Remove unused debian files
+- Fix image add/update/delete logic, check image location under contacts-svc data Delete group image when deleting group (contact/my_profile image, company logo, group image)
+- Fix make display name (contact, my_profile, vcard) Make reverse display name (Last name first) - Default         : Prefix Last, First Middle(addition), Suffix - Korean, Chinese : Prefix LastFirstMiddleSuffix - Japanese        : Prefix Last Middle First Suffix - reverse sort name does not include prefix    But, if there is only prefix, reverse sort_name is prefix
+- Fix memory leak : filter destroy
+- Fix bugs : Parse vcard   - Memory leak : get note(g_strcompress)   - BS in __ctsvc_vcard_translate_charset (buffer overflow)   - Ignore invalid photo if g_base64_decode size is 0   - Decode quoted-printable with special character (':', ';', '\' , ',')   - Remove vcard LABLE parsing (use ADR) Fix bugs : Make vcard   - Fix Multi-octet character handling (folding)   - Set default image extension to jpeg
+- Fix memory leak related to vconf_get_str
+- Fix NULL pointer reference
+- Fix image orientation check logic
+- Add retry logic to ctsvc_stmt_get_first_int_result
+- packaging: remove explicit requires on sys-assert
+- systemd: can not set negative OOMScoreAdjust for user service
+- Merge "resetting manifest requested domain to floor" into tizen
+- resetting manifest requested domain to floor
+- resetting manifest requested domain to floor
+
 * Fri Jun 28 2013 Patrick McCarty <patrick.mccarty@linux.intel.com> 719c70f
 - packaging: remove explicit requires on sys-assert
 
