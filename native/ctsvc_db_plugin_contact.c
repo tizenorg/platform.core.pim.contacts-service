@@ -30,6 +30,7 @@
 #include "ctsvc_utils.h"
 #include "ctsvc_record.h"
 #include "ctsvc_normalize.h"
+#include "ctsvc_number_utils.h"
 #include "ctsvc_list.h"
 #include "ctsvc_setting.h"
 #include "ctsvc_localize_ch.h"
@@ -1009,12 +1010,14 @@ static inline int __ctsvc_contact_refresh_lookup_data(int contact_id)
 		len = 0;
 		do {
 			contacts_list_get_current_record_p(number_list, (contacts_record_h*)&number_record);
-			if (NULL != number_record) {
-				char normalized_number[CTSVC_NUMBER_MAX_LEN] = {0};
-
-				ctsvc_normalize_number(number_record->number, normalized_number, CTSVC_NUMBER_MAX_LEN, CTSVC_NUMBER_MAX_LEN -1);
+			if (NULL != number_record && number_record->number) {
+				char clean_num[CTSVC_NUMBER_MAX_LEN] = {0};
+				char normal_num[CTSVC_NUMBER_MAX_LEN] = {0};
+				ret = ctsvc_clean_number(number_record->number, clean_num, sizeof(clean_num));
+				if (ret <= 0)
+					continue;
 				snprintf(query, sizeof(query), "INSERT INTO %s(data_id, contact_id, number, min_match) "
-								"VALUES(%d, %d, ?, ?)",	CTS_TABLE_PHONE_LOOKUP, number_record->id,
+								"VALUES(%d, %d, ?, ?)", CTS_TABLE_PHONE_LOOKUP, number_record->id,
 								contact_id);
 
 				stmt = cts_query_prepare(query);
@@ -1023,21 +1026,33 @@ static inline int __ctsvc_contact_refresh_lookup_data(int contact_id)
 					return CONTACTS_ERROR_DB;
 				}
 
-				if (*normalized_number)
-					cts_stmt_bind_text(stmt, 1, normalized_number);
-
+				if (*clean_num)
+					cts_stmt_bind_text(stmt, 1, clean_num);
 				if (number_record->lookup)
 					cts_stmt_bind_text(stmt, 2, number_record->lookup);
-
 				ret = cts_stmt_step(stmt);
-
-				cts_stmt_finalize(stmt);
-
 				if (CONTACTS_ERROR_NONE != ret) {
 					CTS_ERR("cts_stmt_step() Failed(%d)", ret);
+					cts_stmt_finalize(stmt);
 					contacts_record_destroy((contacts_record_h)contact, true);
 					return CONTACTS_ERROR_DB;
 				}
+				ret = ctsvc_normalize_number(clean_num, normal_num, sizeof(normal_num));
+				if (ret > 0 && strcmp(clean_num, normal_num) != 0) {
+					cts_stmt_reset(stmt);
+					if (*normal_num)
+						cts_stmt_bind_text(stmt, 1, normal_num);
+					if (number_record->lookup)
+						cts_stmt_bind_text(stmt, 2, number_record->lookup);
+					ret = cts_stmt_step(stmt);
+					if (CONTACTS_ERROR_NONE != ret) {
+						CTS_ERR("cts_stmt_step() Failed(%d)", ret);
+						cts_stmt_finalize(stmt);
+						contacts_record_destroy((contacts_record_h)contact, true);
+						return CONTACTS_ERROR_DB;
+					}
+				}
+				cts_stmt_finalize(stmt);
 			}
 		}while(CONTACTS_ERROR_NONE == contacts_list_next(number_list));
 	}
@@ -1782,23 +1797,22 @@ static inline int __ctsvc_contact_insert_grouprel(int contact_id, contacts_list_
 		return CONTACTS_ERROR_NONE;
 }
 
-inline static int __ctsvc_find_person_to_link_with_number(const char *normalized_number, int addressbook_id, int *person_id)
+inline static int __ctsvc_find_person_to_link_with_number(const char *number, int addressbook_id, int *person_id)
 {
 	int ret;
-
 	char query[CTS_SQL_MIN_LEN] = {0};
+	char minmatch[CTSVC_NUMBER_MAX_LEN] = {0};
 	char normal_num[CTSVC_NUMBER_MAX_LEN] = {0};
-	char clean_num[CTSVC_NUMBER_MAX_LEN] = {0};
 
-	ret = ctsvc_clean_number(normalized_number, clean_num, sizeof(clean_num));
+	ret = ctsvc_normalize_number(number, normal_num, sizeof(normal_num));
 	if (0 < ret) {
-		ret = ctsvc_normalize_number(clean_num, normal_num, CTSVC_NUMBER_MAX_LEN, ctsvc_get_phonenumber_min_match_digit());
+		ret = ctsvc_get_minmatch_number(normal_num, minmatch, CTSVC_NUMBER_MAX_LEN, ctsvc_get_phonenumber_min_match_digit());
 		snprintf(query, sizeof(query),
 				"SELECT C.person_id FROM "CTS_TABLE_CONTACTS" C, "CTS_TABLE_DATA" D "
 				"ON C.contact_id=D.contact_id AND D.datatype=%d AND C.deleted = 0 "
 				"AND C.addressbook_id <> %d "
 				"WHERE D.data4='%s' AND D.is_my_profile = 0",
-				CTSVC_DATA_NUMBER, addressbook_id, normal_num);
+				CTSVC_DATA_NUMBER, addressbook_id, minmatch);
 		ret = ctsvc_query_get_first_int_result(query, person_id);
 		CTS_DBG("%s", query);
 		CTS_DBG("result ret(%d) person_id(%d)", ret, *person_id);

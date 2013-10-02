@@ -144,6 +144,7 @@ SET(SRCS
 	${CMAKE_SOURCE_DIR}/native/ctsvc_service.c
 	${CMAKE_SOURCE_DIR}/native/ctsvc_sqlite.c
 	${CMAKE_SOURCE_DIR}/native/ctsvc_utils.c
+	${CMAKE_SOURCE_DIR}/native/ctsvc_number_utils.c
 	${CMAKE_SOURCE_DIR}/native/ctsvc_notification.c
 	${CMAKE_SOURCE_DIR}/native/ctsvc_setting.c
 

@@ -312,6 +312,7 @@ CREATE TABLE phonelogs
 	id				INTEGER PRIMARY KEY AUTOINCREMENT,
 	number				TEXT,
 	normal_num			TEXT,
+	minmatch				TEXT,
 	person_id			INTEGER, --person_id
 	log_type			INTEGER,
 	log_time			INTEGER,

@@ -24,6 +24,7 @@
 #include "ctsvc_db_init.h"
 #include "ctsvc_db_query.h"
 #include "ctsvc_normalize.h"
+#include "ctsvc_number_utils.h"
 #include "ctsvc_db_plugin_number_helper.h"
 #include "ctsvc_record.h"
 #include "ctsvc_notification.h"
@@ -35,8 +36,8 @@ int ctsvc_db_number_insert(contacts_record_h record, int contact_id, bool is_my_
 	cts_stmt stmt = NULL;
 	char query[CTS_SQL_MAX_LEN] = {0};
 	ctsvc_number_s *number = (ctsvc_number_s *)record;
+	char minmatch[CTSVC_NUMBER_MAX_LEN] = {0};
 	char normal_num[CTSVC_NUMBER_MAX_LEN] = {0};
-	char clean_num[CTSVC_NUMBER_MAX_LEN] = {0};
 
 	RETV_IF(NULL == number->number, CONTACTS_ERROR_NONE);
 	RETVM_IF(contact_id <= 0, CONTACTS_ERROR_INVALID_PARAMETER,
@@ -45,8 +46,8 @@ int ctsvc_db_number_insert(contacts_record_h record, int contact_id, bool is_my_
 				"Invalid parameter : id(%d), This record is already inserted", number->id);
 
 	snprintf(query, sizeof(query),
-		"INSERT INTO "CTS_TABLE_DATA"(contact_id, is_my_profile, datatype, is_default, data1, data2, data3, data4) "
-									"VALUES(%d, %d, %d, %d, %d, ?, ?, ?)",
+		"INSERT INTO "CTS_TABLE_DATA"(contact_id, is_my_profile, datatype, is_default, data1, data2, data3, data4, data5) "
+									"VALUES(%d, %d, %d, %d, %d, ?, ?, ?, ?)",
 			contact_id, is_my_profile, CTSVC_DATA_NUMBER, number->is_default, number->type);
 
 	stmt = cts_query_prepare(query);
@@ -56,11 +57,12 @@ int ctsvc_db_number_insert(contacts_record_h record, int contact_id, bool is_my_
 		cts_stmt_bind_text(stmt, 1, number->label);
 
 	cts_stmt_bind_text(stmt, 2, number->number);
-	ret = ctsvc_clean_number(number->number, clean_num, sizeof(clean_num));
+	ret = ctsvc_normalize_number(number->number, normal_num, sizeof(normal_num));
 	if (0 < ret) {
-		ret = ctsvc_normalize_number(clean_num, normal_num, CTSVC_NUMBER_MAX_LEN, ctsvc_get_phonenumber_min_match_digit());
+		cts_stmt_bind_text(stmt, 4, normal_num);
+		ret = ctsvc_get_minmatch_number(normal_num, minmatch, CTSVC_NUMBER_MAX_LEN, ctsvc_get_phonenumber_min_match_digit());
 		if (CONTACTS_ERROR_NONE == ret)
-			cts_stmt_bind_text(stmt, 3, normal_num);
+			cts_stmt_bind_text(stmt, 3, minmatch);
 	}
 
 	ret = cts_stmt_step(stmt);
@@ -114,12 +116,13 @@ int ctsvc_db_number_update(contacts_record_h record, bool is_my_profile)
 	GSList *bind_text = NULL;
 	GSList *cursor = NULL;
 	ctsvc_number_s *number = (ctsvc_number_s *)record;
-	char clean_num[CTSVC_NUMBER_MAX_LEN] = {0};
 	char normal_num[CTSVC_NUMBER_MAX_LEN] = {0};
+	char minmatch[CTSVC_NUMBER_MAX_LEN] = {0};
 	char query[CTS_SQL_MAX_LEN] = {0};
 
 	RETVM_IF(!number->id, CONTACTS_ERROR_INVALID_PARAMETER, "number of contact has no ID.");
-	RETVM_IF(CTSVC_PROPERTY_FLAG_DIRTY != (number->base.property_flag & CTSVC_PROPERTY_FLAG_DIRTY), CONTACTS_ERROR_NONE, "No update");
+	RETVM_IF(CTSVC_PROPERTY_FLAG_DIRTY != (number->base.property_flag & CTSVC_PROPERTY_FLAG_DIRTY),
+				CONTACTS_ERROR_NONE, "No update");
 
 	snprintf(query, sizeof(query),
 			"SELECT id FROM "CTS_TABLE_DATA" WHERE id = %d", number->id);
@@ -129,12 +132,19 @@ int ctsvc_db_number_update(contacts_record_h record, bool is_my_profile)
 	do {
 		if (CONTACTS_ERROR_NONE != (ret = ctsvc_db_create_set_query(record, &set, &bind_text))) break;
 		if (ctsvc_record_check_property_flag((ctsvc_record_s *)record, CTSVC_PROPERTY_NUMBER_NUMBER, CTSVC_PROPERTY_FLAG_DIRTY)) {
-			ret = ctsvc_clean_number(number->number, clean_num, sizeof(clean_num));
+			ret = ctsvc_normalize_number(number->number, normal_num, sizeof(normal_num));
 			if (0 < ret) {
-				ret = ctsvc_normalize_number(clean_num, normal_num, CTSVC_NUMBER_MAX_LEN, ctsvc_get_phonenumber_min_match_digit());
+				char query_set[CTS_SQL_MAX_LEN] = {0};
+				ret = ctsvc_get_minmatch_number(normal_num, minmatch, CTSVC_NUMBER_MAX_LEN, ctsvc_get_phonenumber_min_match_digit());
 				if (CONTACTS_ERROR_NONE == ret) {
-					char query_set[CTS_SQL_MAX_LEN] = {0};
-					snprintf(query_set, sizeof(query_set), "%s, data4=?", set);
+					snprintf(query_set, sizeof(query_set), "%s, data4=?, data5=?", set);
+					free(set);
+					set = strdup(query_set);
+					bind_text = g_slist_append(bind_text, strdup(minmatch));
+					bind_text = g_slist_append(bind_text, strdup(normal_num));
+				}
+				else {
+					snprintf(query_set, sizeof(query_set), "%s, data5=?", set);
 					free(set);
 					set = strdup(query_set);
 					bind_text = g_slist_append(bind_text, strdup(normal_num));

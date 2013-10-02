@@ -688,7 +688,7 @@
  * <tr><td>string</td><td> image_path </td><td>read, write</td><td> </td></tr>
  * <tr><td>string</td><td> vibration </td><td>read, write</td><td> </td></tr>
  * <tr><td>string</td><td> extra_data </td><td>read, write</td><td> </td></tr>
- * <tr><td>boolean</td><td> is_read_only </td><td>read only</td><td> </td></tr>
+ * <tr><td>boolean</td><td> is_read_only </td><td>read, write once</td><td> </td></tr>
  * <tr><td>string</td><td> message_alert </td><td>read, write</td><td> </td></tr>
  * </table>
  *
@@ -728,6 +728,7 @@
  * <tr><td>string</td><td> label </td><td>read, write</td><td> </td></tr>
  * <tr><td>boolean</td><td> is_default </td><td>read, write</td><td> </td></tr>
  * <tr><td>string</td><td> number </td><td>read, write</td><td> </td></tr>
+ * <tr><td>string</td><td> normalized_number </td><td> filter only </td><td> You can only use this property for search filter. </td></tr>
  * </table>
  *
  * @section CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_email _contacts_email view
@@ -1034,6 +1035,7 @@
  * <tr><td>integer</td><td> log_type </td><td>read, write</td><td>contacts_phone_log_type_e </td></tr>
  * <tr><td>integer</td><td> extra_data1 </td><td>read, write once</td><td> You can set the related integer data (e.g. message_id, email_id or duration of call).  </td></tr>
  * <tr><td>string</td><td> extra_data2 </td><td>read, write once</td><td> You can set the related string data (e.g. short message, subject). </td></tr>
+ * <tr><td>string</td><td> normalized_address </td><td> filter only</td><td> You can only use this property for search filter.</td></tr>
  * </table>
  *
 * <br><br>
@@ -1124,7 +1126,8 @@
  * <tr><td>string</td><td> label </td><td></td><td> </td></tr>
  * <tr><td>boolean</td><td> is_primary_default </td><td></td><td> </td></tr>
  * <tr><td>string</td><td> number </td><td></td><td> </td></tr>
- * <tr><td>string</td><td> number_filter </td><td></td><td> If you add filter with this property, the string will be normalized internally and the match rule will be applied CONTACTS_MATCH_EXACTLY </td></tr>
+ * <tr><td>string</td><td> number_filter </td><td></td><td> If you add filter with this property, the string will be normalized as minmatch length internally and the match rule will be applied CONTACTS_MATCH_EXACTLY </td></tr>
+ * <tr><td>string</td><td> normalized_number </td><td></td><td> You can only use this property for search filter</td></tr>
  * </table>
  *
  * @section CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_person_email _contacts_person_email view
@@ -1199,6 +1202,7 @@
  * <tr><td>integer</td><td> log_type </td><td></td><td> </td></tr>
  * <tr><td>integer</td><td> extra_data1 </td><td></td><td> </td></tr>
  * <tr><td>string</td><td> extra_data2 </td><td></td><td> </td></tr>
+ * <tr><td>string</td><td> normalized_address </td><td></td><td>You can only use this property for search filter </td></tr>
  * </table>
  *
  * @section CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_person_usage _contacts_person_usage view
@@ -1246,7 +1250,8 @@
  * <tr><td>string</td><td> label </td><td></td><td> </td></tr>
  * <tr><td>boolean</td><td> is_ default </td><td></td><td> </td></tr>
  * <tr><td>string</td><td> number </td><td></td><td> </td></tr>
- * <tr><td>string</td><td> number_filter </td><td></td><td> If you add filter with this property, the string will be normalized internally and the match rule will be applied CONTACTS_MATCH_EXACTLY </td></tr>
+ * <tr><td>string</td><td> number_filter </td><td></td><td> If you add filter with this property, the string will be normalized as minmatch length internally and the match rule will be applied CONTACTS_MATCH_EXACTLY </td></tr>
+ * <tr><td>string</td><td> normalized_number </td><td></td><td>You can only use this property for search filter </td></tr>
  * </table>
  *
  * @section CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_contact_email _contacts_contact_email view
