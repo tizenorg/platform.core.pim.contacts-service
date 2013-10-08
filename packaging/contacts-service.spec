@@ -7,6 +7,7 @@ License:    Apache-2.0
 Source0:    %{name}-%{version}.tar.gz
 Source1:    contacts-service.service
 Source2:    contacts-service.socket
+Source3:    contacts-service2.manifest
 BuildRequires:  cmake
 BuildRequires:  vconf-keys-devel
 BuildRequires:  pkgconfig(db-util)
@@ -53,6 +54,7 @@ New Contacts Service Library (devel)
 
 %prep
 %setup -q
+cp %{SOURCE3} .
 
 
 %build
