@@ -1,55 +1,5 @@
 <manifest>
-	<define>
-		<domain name="contacts-service" />
-		<provide>
-			<label name="contacts-service::db"/>
-			<label name="contacts-service::svc"/>
-			<label name="contacts-service::phonelog"/>
-			<label name="contacts-service::vconf"/>
-			<label name="contacts-service::vconf-private"/>
-		</provide>
-		<request>
-			<smack request="sys-assert::core" type="rwxat"/>
-			<smack request="libaccounts-svc::db" type="rw"/>
-			<smack request="telephony_framework::api_sim" type="r"/>
-			<smack request="telephony_framework::api_phonebook" type="rx"/>
-			<smack request="system::vconf_system" type="r"/>
-			<smack request="system::vconf_inhouse" type="r"/>
-		</request>
-	</define>
-	<assign>
-		<filesystem path="/usr/lib/libcontacts-service2.so.0.9.84.2" label="_"/>
-		<filesystem path="/usr/lib/libcontacts-service2.so.0" label="_"/>
-		<filesystem path="/opt/usr/dbspace/.contacts-svc.db" label="contacts-service::db"/>
-		<filesystem path="/opt/usr/dbspace/.contacts-svc.db-journal" label="contacts-service::db"/>
-		<filesystem path="/usr/lib/systemd/user/contacts-service.service" label="_" exec_label="none" />
-		<filesystem path="/usr/lib/systemd/user/tizen-middleware.target.wants/contacts-service.service" label="_" exec_label="none" />
-		<filesystem path="/opt/usr/data/contacts-svc/.CONTACTS_SVC_AB_CHANGED" label="contacts-service::svc"/>
-		<filesystem path="/opt/usr/data/contacts-svc/.CONTACTS_SVC_ACTIVITY_CHANGED" label="contacts-service::svc"/>
-		<filesystem path="/opt/usr/data/contacts-svc/.CONTACTS_SVC_ADDRESS_CHANGED" label="contacts-service::svc"/>
-		<filesystem path="/opt/usr/data/contacts-svc/.CONTACTS_SVC_COMPANY_CHANGED" label="contacts-service::svc"/>
-		<filesystem path="/opt/usr/data/contacts-svc/.CONTACTS_SVC_DATA_CHANGED" label="contacts-service::svc"/>
-		<filesystem path="/opt/usr/data/contacts-svc/.CONTACTS_SVC_DB_CHANGED" label="contacts-service::svc"/>
-		<filesystem path="/opt/usr/data/contacts-svc/.CONTACTS_SVC_EMAIL_CHANGED" label="contacts-service::svc"/>
-		<filesystem path="/opt/usr/data/contacts-svc/.CONTACTS_SVC_EVENT_CHANGED" label="contacts-service::svc"/>
-		<filesystem path="/opt/usr/data/contacts-svc/.CONTACTS_SVC_GROUP_CHANGED" label="contacts-service::svc"/>
-		<filesystem path="/opt/usr/data/contacts-svc/.CONTACTS_SVC_GROUP_RELATION_CHANGED" label="contacts-service::svc"/>
-		<filesystem path="/opt/usr/data/contacts-svc/.CONTACTS_SVC_IMAGE_CHANGED" label="contacts-service::svc"/>
-		<filesystem path="/opt/usr/data/contacts-svc/.CONTACTS_SVC_MESSENGER_CHANGED" label="contacts-service::svc"/>
-		<filesystem path="/opt/usr/data/contacts-svc/.CONTACTS_SVC_MY_PROFILE_CHANGED" label="contacts-service::svc"/>
-		<filesystem path="/opt/usr/data/contacts-svc/.CONTACTS_SVC_NAME_CHANGED" label="contacts-service::svc"/>
-		<filesystem path="/opt/usr/data/contacts-svc/.CONTACTS_SVC_NICKNAME_CHANGED" label="contacts-service::svc"/>
-		<filesystem path="/opt/usr/data/contacts-svc/.CONTACTS_SVC_NUMBER_CHANGED" label="contacts-service::svc"/>
-		<filesystem path="/opt/usr/data/contacts-svc/.CONTACTS_SVC_NOTE_CHANGED" label="contacts-service::svc"/>
-		<filesystem path="/opt/usr/data/contacts-svc/.CONTACTS_SVC_PERSON_CHANGED" label="contacts-service::svc"/>
-		<filesystem path="/opt/usr/data/contacts-svc/.CONTACTS_SVC_PROFILE_CHANGED" label="contacts-service::svc"/>
-		<filesystem path="/opt/usr/data/contacts-svc/.CONTACTS_SVC_RELATIONSHIP_CHANGED" label="contacts-service::svc"/>
-		<filesystem path="/opt/usr/data/contacts-svc/.CONTACTS_SVC_SDN_CHANGED" label="contacts-service::svc"/>
-		<filesystem path="/opt/usr/data/contacts-svc/.CONTACTS_SVC_SPEED_CHANGED" label="contacts-service::svc"/>
-		<filesystem path="/opt/usr/data/contacts-svc/.CONTACTS_SVC_URL_CHANGED" label="contacts-service::svc"/>
-		<filesystem path="/opt/usr/data/contacts-svc/.CONTACTS_SVC_PLOG_CHANGED" label="contacts-service::phonelog"/>
-	</assign>
 	<request>
-		<domain name="contacts-service" />
+		<domain name="_" />
 	</request>
 </manifest>
