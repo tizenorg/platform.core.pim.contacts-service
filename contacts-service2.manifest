@@ -8,14 +8,6 @@
 			<label name="contacts-service::vconf"/>
 			<label name="contacts-service::vconf-private"/>
 		</provide>
-		<request>
-			<smack request="sys-assert::core" type="rwxat"/>
-			<smack request="libaccounts-svc::db" type="rw"/>
-			<smack request="telephony_framework::api_sim" type="r"/>
-			<smack request="telephony_framework::api_phonebook" type="rx"/>
-			<smack request="system::vconf_system" type="r"/>
-			<smack request="system::vconf_inhouse" type="r"/>
-		</request>
 	</define>
 	<assign>
 		<filesystem path="/usr/lib/libcontacts-service2.so.0.9.84.2" label="_"/>

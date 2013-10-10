@@ -15,4 +15,10 @@ contacts-service system::share arwxt
 contacts-service ail::db rw
 contacts-service badge::db rw
 contacts-service data-provider-master::badge rw
+contacts-service sys-assert::core rwxat
+contacts-service libaccounts-svc::db rw
+contacts-service telephony_framework::api_sim r
+contacts-service telephony_framework::api_phonebook rx
+contacts-service system::vconf_system r
+contacts-srevice system::vconf_inhouse r
 
