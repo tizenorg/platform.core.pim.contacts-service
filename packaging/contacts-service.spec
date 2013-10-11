@@ -7,6 +7,7 @@ License:    Apache-2.0
 Source0:    %{name}-%{version}.tar.gz
 Source1:    contacts-service.service
 Source2:    contacts-service.socket
+Source1001: %{name}.manifest
 BuildRequires:  cmake
 BuildRequires:  vconf-keys-devel
 BuildRequires:  pkgconfig(db-util)
@@ -53,7 +54,7 @@ New Contacts Service Library (devel)
 
 %prep
 %setup -q
-
+cp %{SOURCE1001} .
 
 %build
 %cmake .
@@ -100,7 +101,7 @@ vconftool set -t int db/contacts-svc/phonenumber_min_match_digit 8 -g 6005 -s co
 %postun -p /sbin/ldconfig
 
 %files -n contacts-service2
-%manifest contacts-service2.manifest
+%manifest contacts-service.manifest
 %defattr(-,root,root,-)
 %{_libdir}/libcontacts-service2.so.*
 %{_bindir}/contacts-service-ipcd*
