@@ -1,0 +1,10 @@
+Code-Review+2: Ryan Ware <ryan.r.ware@intel.com>
+Code-Review+1: Patrick McCarty <patrick.mccarty@linux.intel.com>
+Code-Review+1: Anas Nashif <anas.nashif@intel.com>
+Verified+1: Anas Nashif <anas.nashif@intel.com>
+Code-Review+1: Michael Demeter <michael.demeter@intel.com>
+Submitted-by: Ryan Ware <ryan.r.ware@intel.com>
+Submitted-at: Fri, 11 Oct 2013 09:22:41 -0700
+Reviewed-on: https://review.tizen.org/gerrit/10660
+Project: platform/core/pim/contacts-service
+Branch: refs/heads/tizen
