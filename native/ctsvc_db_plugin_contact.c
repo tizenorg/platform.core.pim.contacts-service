@@ -707,12 +707,12 @@ static inline int __ctsvc_contact_make_search_data(int contact_id, ctsvc_contact
 		do {
 			contacts_list_get_current_record_p(number_list, (contacts_record_h*)&number_record);
 			if (NULL != number_record) {
-				buf_size = SAFE_STRLEN(number) + SAFE_STRLEN(number_record->lookup) + 3;
+				buf_size = SAFE_STRLEN(number) + SAFE_STRLEN(number_record->number) + 3;
 				temp_number = calloc(1, buf_size);
 				if (number)
-					snprintf(temp_number, buf_size, "%s %s ", SAFE_STR(number), number_record->lookup);
+					snprintf(temp_number, buf_size, "%s %s ", SAFE_STR(number), number_record->number);
 				else
-					snprintf(temp_number, buf_size, "%s ", number_record->lookup);
+					snprintf(temp_number, buf_size, "%s ", number_record->number);
 				free(number);
 				number = temp_number;
 			}
