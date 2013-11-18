@@ -316,9 +316,7 @@ static inline int __ctsvc_db_create_str_condition(ctsvc_composite_filter_s *com_
 				|| filter->property_id == CTSVC_PROPERTY_SPEEDDIAL_NORMALIZED_NUMBER) {
 			char normal_num[strlen(filter->value.s)+1+5]; // for cc
 			ret = ctsvc_normalize_number(filter->value.s, normal_num, sizeof(normal_num));
-			CTS_ERR("ctsvc_normalize_number : %d", ret);
 			if (0 < ret) {
-				CTS_ERR("bind text : %s", normal_num);
 				*bind_text = g_slist_append(*bind_text, __ctsvc_db_get_str_with_escape(normal_num, strlen(normal_num), with_escape));
 			}
 			else if (ret == 0) {
