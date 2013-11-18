@@ -60,6 +60,10 @@ int ctsvc_clean_number(const char *src, char *dest, int dest_size)
 						ch = '*';
 					else if (0x83 == src[s_pos+2])								// ef bc 83 : '#'
 						ch = '#';
+					else if (0x8c == src[s_pos+2])								// ef bc 8c : ','
+						ch = ',';
+					else if (0x9b == src[s_pos+2])								// ef bc 9b : ';'
+						ch = ';';
 				}
 				else if (src[s_pos+1] == 0xbd
 						&& (0x81 <= src[s_pos+2] && src[s_pos+2] <= 0x9a))		// ef bd 81 : 'a' ~ ef bd 9a : 'z'
@@ -81,9 +85,8 @@ int ctsvc_clean_number(const char *src, char *dest, int dest_size)
 
 		if ('0' <= ch && ch <= '9')
 			temp[d_pos++] = ch;
-		else if (s_pos == 0 && src[s_pos] == '+')
-			temp[d_pos++] = ch;
-		else if (src[s_pos] == '#' || src[s_pos] == '*')
+		else if (src[s_pos] == '+' || src[s_pos] == '#'
+				|| src[s_pos] == '*' || src[s_pos] == ';' || src[s_pos] == ',')
 			temp[d_pos++] = ch;
 		s_pos += char_len;
 	}
