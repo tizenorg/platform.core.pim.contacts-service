@@ -138,9 +138,11 @@ CREATE TRIGGER trg_contacts_del2 AFTER DELETE ON contacts
 CREATE TRIGGER trg_contacts_update AFTER UPDATE ON contacts
 	WHEN new.deleted = 1
 	BEGIN
+		SELECT _DATA_DELETE_(data.id, data.datatype) FROM data WHERE contact_id = old.contact_id AND is_my_profile = 0;
 		DELETE FROM group_relations WHERE old.addressbook_id != -1 AND contact_id = old.contact_id;
 		DELETE FROM persons WHERE person_id = old.person_id AND link_count = 1;
 		UPDATE persons SET dirty=1 WHERE person_id = old.person_id AND link_count > 1;
+		DELETE FROM speeddials WHERE number_id = (SELECT id FROM data WHERE data.contact_id = old.contact_id AND datatype = 8);
 	END;
 
 CREATE TABLE contact_deleteds
@@ -187,11 +189,6 @@ CREATE TABLE data
 	data11				TEXT,
 	data12				TEXT
 );
-
-CREATE TRIGGER trg_data_del AFTER DELETE ON data
-	BEGIN
-		SELECT _DATA_DELETE_(old.id, old.datatype);
-	END;
 
 CREATE TRIGGER trg_data_image_del AFTER DELETE ON data
 	WHEN old.datatype = 13
@@ -252,7 +249,7 @@ CREATE TRIGGER trg_groups_del AFTER DELETE ON groups
  BEGIN
    UPDATE contacts SET changed_ver=((SELECT ver FROM cts_version) + 1) WHERE deleted = 0 AND contact_id IN (SELECT contact_id FROM group_relations WHERE group_id=old.group_id);
    DELETE FROM group_relations WHERE group_id = old.group_id;
-	SELECT _GROUP_DELETE_(old.image_thumbnail_path);
+   SELECT _GROUP_DELETE_(old.image_thumbnail_path);
  END;
 
 CREATE TRIGGER trg_groups_del2 AFTER DELETE ON groups
