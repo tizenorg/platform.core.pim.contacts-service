@@ -482,6 +482,7 @@ typedef struct {
 	int id;
 	int person_id;
 	int changed_time;
+	int changed_ver;		// internally used, check when updating contact
 	int addressbook_id;
 	int link_mode;
 	bool has_phonenumber;

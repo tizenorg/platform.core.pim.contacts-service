@@ -357,6 +357,12 @@ void ctsvc_make_contact_display_name(ctsvc_contact_s *contact)
 	free(contact->reverse_sort_name);
 	contact->reverse_sort_name = NULL;
 
+	free(contact->sortkey);
+	contact->sortkey = NULL;
+
+	free(contact->reverse_sortkey);
+	contact->reverse_sortkey = NULL;
+
 	contact->display_name_language = CTSVC_SORT_OTHERS;
 	contact->reverse_display_name_language = CTSVC_SORT_OTHERS;
 
@@ -2033,9 +2039,11 @@ int ctsvc_contact_update_display_name(int contact_id, contacts_display_name_sour
 		snprintf(query, sizeof(query), "UPDATE "CTS_TABLE_CONTACTS" SET "
 				"display_name=?, reverse_display_name=?, display_name_source=%d, "
 				"display_name_language=%d, reverse_display_name_language=%d, "
-				"sort_name=?, reverse_sort_name=?, sortkey=?, reverse_sortkey=? "
-				"WHERE contact_id=%d", contact->display_source_type,
-				contact->display_name_language, contact->reverse_display_name_language, contact_id);
+				"sort_name=?, reverse_sort_name=?, sortkey=?, reverse_sortkey=?, "
+				"changed_ver=%d, changed_time=%d  WHERE contact_id=%d",
+				contact->display_source_type,
+				contact->display_name_language, contact->reverse_display_name_language,
+				ctsvc_get_next_ver(), (int)time(NULL), contact_id);
 
 		stmt = cts_query_prepare(query);
 		if (NULL == stmt) {

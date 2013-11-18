@@ -3774,6 +3774,7 @@ static int __ctsvc_contact_clone(contacts_record_h record, contacts_record_h *ou
 	out_data->person_id = src_data->person_id;
 	out_data->addressbook_id = src_data->addressbook_id;
 	out_data->changed_time = src_data->changed_time;
+	out_data->changed_ver = src_data->changed_ver;
 	out_data->link_mode = src_data->link_mode;
 	out_data->display_source_type = src_data->display_source_type;
 	out_data->display_name_language = src_data->display_name_language;
@@ -3926,7 +3927,6 @@ static int __ctsvc_address_clone(contacts_record_h record, contacts_record_h *ou
 
 static int __ctsvc_company_clone(contacts_record_h record, contacts_record_h *out_record)
 {
-
 	ctsvc_company_s *out_data = NULL;
 	ctsvc_company_s *src_data = NULL;
 
