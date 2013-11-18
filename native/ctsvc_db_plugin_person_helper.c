@@ -461,6 +461,7 @@ int ctsvc_db_update_person(contacts_record_h record)
 	bool has_phonenumber=false, has_email=false;
 	int thumbnail_contact_id = 0;
 	int person_id = 0;
+	int is_favorite = 0;
 
 	ret = ctsvc_begin_trans();
 	RETVM_IF(ret, ret, "ctsvc_begin_trans() Failed(%d)", ret);
@@ -530,9 +531,18 @@ int ctsvc_db_update_person(contacts_record_h record)
 
 	// update favorite
 	snprintf(query, sizeof(query),
+			"SELECT is_favorite FROM "CTS_TABLE_CONTACTS" WHERE contact_id =%d ", contact->id);
+	ret = ctsvc_query_get_first_int_result(query, &is_favorite);
+	if (ret < CONTACTS_ERROR_NONE) {
+		CTS_ERR("ctsvc_query_get_first_int_result() Failed(%d)", ret);
+		ctsvc_end_trans(false);
+		return ret;
+	}
+
+	snprintf(query, sizeof(query),
 			"SELECT person_id FROM "CTS_TABLE_FAVORITES" WHERE person_id =%d ", contact->person_id);
 	ret = ctsvc_query_get_first_int_result(query, &person_id);
-	if (CONTACTS_ERROR_NO_DATA == ret && contact->is_favorite) {
+	if (CONTACTS_ERROR_NO_DATA == ret && is_favorite) {
 		ret = ctsvc_db_person_set_favorite(contact->person_id, true, false);
 		if (CONTACTS_ERROR_NONE != ret) {
 			CTS_ERR("ctsvc_db_person_set_favorite() Failed(%d)", ret);
@@ -540,7 +550,7 @@ int ctsvc_db_update_person(contacts_record_h record)
 			return ret;
 		}
 	}
-	else if (CONTACTS_ERROR_NONE == ret && !contact->is_favorite) {
+	else if (CONTACTS_ERROR_NONE == ret && !is_favorite) {
 		snprintf(query, sizeof(query),
 			"SELECT person_id FROM "CTS_TABLE_CONTACTS" WHERE person_id =%d AND is_favorite = 1", contact->person_id);
 		ret = ctsvc_query_get_first_int_result(query, &person_id);
