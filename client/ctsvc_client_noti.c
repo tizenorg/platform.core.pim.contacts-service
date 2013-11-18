@@ -199,6 +199,7 @@ API int contacts_db_remove_changed_cb_with_info(const char* view_uri,
 			db_callback_info_s *cb_info = l->data;
 			if (cb == cb_info->cb && user_data == cb_info->user_data) {
 				info->callbacks = g_slist_remove(info->callbacks, cb_info);
+				free(cb_info);
 				break;
 			}
 		}
