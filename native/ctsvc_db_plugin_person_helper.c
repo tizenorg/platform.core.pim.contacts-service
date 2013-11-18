@@ -354,6 +354,7 @@ static inline int __ctsvc_db_update_person_default(int person_id, int datatype)
 	cts_stmt stmt = NULL;
 	char query[CTS_SQL_MIN_LEN] = {0};
 	char *temp = NULL;
+	char *image_thumbnail_path = NULL;
 
 	snprintf(query, sizeof(query),
 		"SELECT D.id FROM "CTS_TABLE_CONTACTS" C, "CTS_TABLE_DATA" D "
@@ -389,22 +390,27 @@ static inline int __ctsvc_db_update_person_default(int person_id, int datatype)
 				return ret;
 			}
 			temp = ctsvc_stmt_get_text(stmt, 1);
+			image_thumbnail_path = SAFE_STRDUP(temp);
 		}
 		cts_stmt_finalize(stmt);
 
 		if (CTSVC_DATA_IMAGE == datatype) {
-			if (temp) {
+			if (image_thumbnail_path) {
 				snprintf(query, sizeof(query),
 						"UPDATE "CTS_TABLE_PERSONS" SET image_thumbnail_path=? WHERE person_id=%d", person_id);
 				stmt = cts_query_prepare(query);
-				cts_stmt_bind_text(stmt, 1, temp);
+				cts_stmt_bind_text(stmt, 1, image_thumbnail_path);
 				ret = cts_stmt_step(stmt);
 				cts_stmt_finalize(stmt);
+				free(image_thumbnail_path);
 				if (CONTACTS_ERROR_NONE != ret) {
 					CTS_ERR("cts_query_exec Failed(%d)", ret);
 					return ret;
 				}
 			}
+		}
+		else {
+			free(image_thumbnail_path);
 		}
 	}
 
