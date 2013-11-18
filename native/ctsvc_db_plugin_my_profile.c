@@ -646,6 +646,10 @@ static void __ctsvc_make_my_profile_display_name(ctsvc_my_profile_s *my_profile)
 		if (ctsvc_record_check_property_flag((ctsvc_record_s *)my_profile, _contacts_my_profile.display_name, CTSVC_PROPERTY_FLAG_DIRTY)) {
 			my_profile->reverse_display_name = SAFE_STRDUP(my_profile->display_name);
 		}
+		else {
+			// Update as NULL
+			ctsvc_record_set_property_flag((ctsvc_record_s *)my_profile, _contacts_my_profile.display_name, CTSVC_PROPERTY_FLAG_DIRTY);
+		}
 	}
 	return;
 }
