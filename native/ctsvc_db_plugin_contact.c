@@ -1428,14 +1428,15 @@ static int __ctsvc_db_contact_get_all_records( int offset, int limit, contacts_l
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_db_contact_get_changed_ver(ctsvc_contact_s *contact)
+static int __ctsvc_db_contact_get_changed_ver(ctsvc_contact_s *contact,
+					      int contact_id)
 {
 	int ret;
 	int version;
 	char query[CTS_SQL_MAX_LEN] = {0};
 
 	snprintf(query, sizeof(query),
-			"SELECT changed_ver FROM "CTS_TABLE_CONTACTS" WHERE contact_id = %d AND deleted = 0", contact->id);
+			"SELECT changed_ver FROM "CTS_TABLE_CONTACTS" WHERE contact_id = %d AND deleted = 0", contact_id);
 	ret = ctsvc_query_get_first_int_result(query, &version);
 	if (CONTACTS_ERROR_NONE == ret)
 		contact->changed_ver = version;
@@ -1571,7 +1572,7 @@ static int __ctsvc_db_contact_get_records_with_query( contacts_query_h query, in
 			}
 		}
 		// get changed_ver
-		ret = __ctsvc_db_contact_get_changed_ver(contact);
+		ret = __ctsvc_db_contact_get_changed_ver(contact, contact_id);
 		if (CONTACTS_ERROR_NONE != ret) {
 			CTS_ERR("__ctsvc_db_contact_get_changed_ver Failed(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
