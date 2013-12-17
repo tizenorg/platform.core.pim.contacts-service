@@ -87,20 +87,6 @@ static int __ctsvc_db_email_update_person_has_email(int person_id, bool has_emai
 	return ret;
 }
 
-static int __ctsvc_db_email_reset_default(int email_id, int contact_id)
-{
-	int ret;
-	char query[CTS_SQL_MAX_LEN] = {0};
-
-	snprintf(query, sizeof(query),
-			"UPDATE "CTS_TABLE_DATA" SET is_default = 0, is_primary_default = 0 WHERE id != %d AND contact_id = %d AND datatype = %d",
-			email_id, contact_id, CTSVC_DATA_EMAIL);
-	ret = ctsvc_query_exec(query);
-
-	WARN_IF(CONTACTS_ERROR_NONE != ret, "cts_query_exec() Failed(%d)", ret);
-	return ret;
-}
-
 static int __ctsvc_db_email_update_default(int email_id, int contact_id, bool is_default, bool is_primary_default)
 {
 	int ret;
@@ -242,8 +228,6 @@ static int __ctsvc_db_email_insert_record( contacts_record_h record, int *id )
 		__ctsvc_db_email_update_person_has_email(person_id, true);
 
 		primary_default_contact_id = __ctsvc_db_email_get_primary_default_contact_id(person_id);
-		__ctsvc_db_email_reset_default(*id, email->contact_id);
-
 		if (0 == primary_default_contact_id || email->contact_id == primary_default_contact_id)
 			__ctsvc_db_email_set_primary_default(*id, true);
 
@@ -332,10 +316,7 @@ static int __ctsvc_db_email_update_record( contacts_record_h record )
 
 	if (email->is_default) {
 		int old_primary_default_email_id = 0;
-
 		old_primary_default_email_id = __ctsvc_db_email_get_primary_default_email_id(email->contact_id);
-		__ctsvc_db_email_reset_default(email->id, email->contact_id);
-
 		if (old_primary_default_email_id)
 			__ctsvc_db_email_set_primary_default(email->id, true);
 	}

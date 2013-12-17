@@ -103,21 +103,6 @@ static int __ctsvc_db_number_get_default_number_id(int contact_id)
 	return number_id;
 }
 
-
-static int __ctsvc_db_number_reset_default(int number_id, int contact_id)
-{
-	int ret;
-	char query[CTS_SQL_MAX_LEN] = {0};
-
-	snprintf(query, sizeof(query),
-			"UPDATE "CTS_TABLE_DATA" SET is_default = 0, is_primary_default = 0 WHERE id != %d AND contact_id = %d AND datatype = %d",
-			number_id, contact_id, CTSVC_DATA_NUMBER);
-	ret = ctsvc_query_exec(query);
-
-	WARN_IF(CONTACTS_ERROR_NONE != ret, "cts_query_exec() Failed(%d)", ret);
-	return ret;
-}
-
 static int __ctsvc_db_number_update_default(int number_id, int contact_id, bool is_default, bool is_primary_default)
 {
 	int ret;
@@ -245,8 +230,6 @@ static int __ctsvc_db_number_insert_record( contacts_record_h record, int *id )
 		__ctsvc_db_number_update_person_has_phonenumber(person_id, true);
 
 		primary_default_contact_id = __ctsvc_db_number_get_primary_default_contact_id(person_id);
-		__ctsvc_db_number_reset_default(*id, number->contact_id);
-
 		if (0 == primary_default_contact_id || number->contact_id == primary_default_contact_id)
 			__ctsvc_db_number_set_primary_default(*id, true);
 
@@ -327,10 +310,7 @@ static int __ctsvc_db_number_update_record( contacts_record_h record )
 
 	if (number->is_default) {
 		int old_primary_default_number_id = 0;
-
 		old_primary_default_number_id = __ctsvc_db_number_get_primary_default(number->contact_id);
-		__ctsvc_db_number_reset_default(number->id, number->contact_id);
-
 		if (old_primary_default_number_id)
 			__ctsvc_db_number_set_primary_default(number->id, true);
 	}

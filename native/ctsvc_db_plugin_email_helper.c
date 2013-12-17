@@ -49,9 +49,25 @@ int ctsvc_db_email_get_value_from_stmt(cts_stmt stmt, contacts_record_h *record,
 	return CONTACTS_ERROR_NONE;
 }
 
+static int __ctsvc_db_email_reset_default(int email_id, int contact_id)
+{
+	int ret;
+	char query[CTS_SQL_MAX_LEN] = {0};
+
+	snprintf(query, sizeof(query),
+			"UPDATE "CTS_TABLE_DATA" SET is_default = 0, is_primary_default = 0 "
+					"WHERE id != %d AND contact_id = %d AND datatype = %d",
+			email_id, contact_id, CTSVC_DATA_EMAIL);
+	ret = ctsvc_query_exec(query);
+
+	WARN_IF(CONTACTS_ERROR_NONE != ret, "cts_query_exec() Failed(%d)", ret);
+	return ret;
+}
+
 int ctsvc_db_email_insert(contacts_record_h record, int contact_id, bool is_my_profile, int *id)
 {
 	int ret;
+	int email_id;
 	cts_stmt stmt = NULL;
 	char query[CTS_SQL_MAX_LEN] = {0};
 	ctsvc_email_s *email = (ctsvc_email_s *)record;
@@ -82,10 +98,15 @@ int ctsvc_db_email_insert(contacts_record_h record, int contact_id, bool is_my_p
 		return ret;
 	}
 
-	//email->id = ctsvc_db_get_last_insert_id();
+	email_id = ctsvc_db_get_last_insert_id();
 	if (id)
-		*id = ctsvc_db_get_last_insert_id();
+		*id = email_id;
 	ctsvc_stmt_finalize(stmt);
+
+	if (ctsvc_record_check_property_flag((ctsvc_record_s *)record, _contacts_email.is_default, CTSVC_PROPERTY_FLAG_DIRTY)) {
+		if (email->is_default)
+			__ctsvc_db_email_reset_default(email_id, contact_id);
+	}
 
 	if (!is_my_profile)
 		ctsvc_set_email_noti();
@@ -110,6 +131,11 @@ int ctsvc_db_email_update(contacts_record_h record, bool is_my_profile)
 			"SELECT id FROM "CTS_TABLE_DATA" WHERE id = %d", email->id);
 	ret = ctsvc_query_get_first_int_result(query, &id);
 	RETV_IF(ret != CONTACTS_ERROR_NONE, ret);
+
+	if (ctsvc_record_check_property_flag((ctsvc_record_s *)record, _contacts_email.is_default, CTSVC_PROPERTY_FLAG_DIRTY)) {
+		if (email->is_default)
+			__ctsvc_db_email_reset_default(email->id, email->contact_id);
+	}
 
 	do {
 		if (CONTACTS_ERROR_NONE != (ret = ctsvc_db_create_set_query(record, &set, &bind_text))) break;

@@ -254,8 +254,6 @@ static int __ctsvc_db_image_insert_record( contacts_record_h record, int *id )
 		int primary_default_contact_id;
 
 		primary_default_contact_id = __ctsvc_db_image_get_primary_default_contact_id(person_id);
-		ctsvc_db_image_reset_default(*id, image->contact_id);
-
 		if (primary_default_contact_id == 0 || primary_default_contact_id == image->contact_id) {
 			__ctsvc_db_image_set_primary_default(*id, true);
 			__ctsvc_db_image_update_person_image(person_id, image->path);
@@ -382,10 +380,7 @@ static int __ctsvc_db_image_update_record( contacts_record_h record )
 
 	if (image->is_default) {
 		int primary_default_contact_id;
-
 		primary_default_contact_id = __ctsvc_db_image_get_primary_default_contact_id(image->contact_id);
-		ctsvc_db_image_reset_default(image->id, image->contact_id);
-
 		if (image->contact_id == primary_default_contact_id) {
 			__ctsvc_db_image_set_primary_default(image->id, true);
 			__ctsvc_db_image_update_person_image(person_id, image->path);

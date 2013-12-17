@@ -939,6 +939,7 @@ bool ctsvc_contact_check_default_number(contacts_list_h number_list)
 			contacts_list_get_current_record_p(number_list, (contacts_record_h*)&number);
 			if (NULL != number && number->number && *number->number) {
 				number->is_default = true;
+				ctsvc_record_set_property_flag((ctsvc_record_s *)number, _contacts_number.is_default, CTSVC_PROPERTY_FLAG_DIRTY);
 				has_default = true;
 				break;
 			}
@@ -977,6 +978,7 @@ bool ctsvc_contact_check_default_email(contacts_list_h email_list)
 			contacts_list_get_current_record_p(email_list, (contacts_record_h*)&email);
 			if (NULL != email && email->email_addr && *email->email_addr) {
 				email->is_default = true;
+				ctsvc_record_set_property_flag((ctsvc_record_s *)email, _contacts_email.is_default, CTSVC_PROPERTY_FLAG_DIRTY);
 				has_default = true;
 				break;
 			}

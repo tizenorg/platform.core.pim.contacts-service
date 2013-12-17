@@ -64,7 +64,7 @@ static inline int __ctsvc_image_bind_stmt(cts_stmt stmt, ctsvc_image_s *image, i
 	return CONTACTS_ERROR_NONE;
 }
 
-int ctsvc_db_image_reset_default(int image_id, int contact_id)
+static int __ctsvc_db_image_reset_default(int image_id, int contact_id)
 {
 	int ret;
 	char query[CTS_SQL_MAX_LEN] = {0};
@@ -130,7 +130,7 @@ int ctsvc_db_image_insert(contacts_record_h record, int contact_id, bool is_my_p
 
 	if (ctsvc_record_check_property_flag((ctsvc_record_s *)record, _contacts_image.is_default, CTSVC_PROPERTY_FLAG_DIRTY)) {
 		if (image->is_default)
-			ctsvc_db_image_reset_default(image_id, contact_id);
+			__ctsvc_db_image_reset_default(image_id, contact_id);
 	}
 
 	if (!is_my_profile)
@@ -178,7 +178,7 @@ int ctsvc_db_image_update(contacts_record_h record, int contact_id, bool is_my_p
 
 	if (ctsvc_record_check_property_flag((ctsvc_record_s *)record, _contacts_image.is_default, CTSVC_PROPERTY_FLAG_DIRTY)) {
 		if (image->is_default)
-			ctsvc_db_image_reset_default(image->id, contact_id);
+			__ctsvc_db_image_reset_default(image->id, contact_id);
 	}
 
 	do {
