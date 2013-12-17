@@ -1251,7 +1251,8 @@ static int __ctsvc_db_contact_update_record( contacts_record_h record )
 		else if (contact->image_thumbnail_path) {
 			free(contact->image_thumbnail_path);
 			contact->image_thumbnail_path = NULL;
-			if (!ctsvc_record_check_property_flag((ctsvc_record_s *)contact, _contacts_contact.image_thumbnail_path, CTSVC_PROPERTY_FLAG_DIRTY)) {
+			bool is_changed = ctsvc_record_check_property_flag((ctsvc_record_s *)contact, _contacts_contact.image_thumbnail_path, CTSVC_PROPERTY_FLAG_DIRTY);
+			if ((!is_changed && !is_invalid) || (is_changed && !is_invalid)) {
 				ctsvc_record_set_property_flag((ctsvc_record_s *)contact, _contacts_contact.image_thumbnail_path, CTSVC_PROPERTY_FLAG_DIRTY);
 			}
 			else {
