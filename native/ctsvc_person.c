@@ -608,21 +608,7 @@ int ctsvc_person_aggregate(int person_id)
 	person->message_alert = SAFE_STRDUP(temp);
 	ctsvc_stmt_finalize(stmt);
 
-	snprintf(query, sizeof(query),
-			"SELECT contact_id FROM %s "
-			"WHERE person_id=%d AND contact_id=%d AND deleted = 0",
-			CTS_TABLE_CONTACTS, person->person_id, person->name_contact_id);
-
-	ret = ctsvc_query_get_first_int_result(query, &id);
-	if(ret == CONTACTS_ERROR_NONE) {
-		name_contact_id = person->name_contact_id;
-		person_name_contact_id = person->name_contact_id;
-	}
-	else {
-		name_contact_id = 0;
-		person_name_contact_id = 0;
-	}
-
+	// check image_thumbnail_path
 	if (person->image_thumbnail_path) {
 		temp = __ctsvc_get_image_filename(person->image_thumbnail_path);
 		snprintf(query, sizeof(query),
@@ -639,6 +625,23 @@ int ctsvc_person_aggregate(int person_id)
 		image_thumbnail_path = NULL;
 	}
 
+	// check name_contact_id
+	snprintf(query, sizeof(query),
+			"SELECT contact_id FROM %s "
+			"WHERE person_id=%d AND contact_id=%d AND deleted = 0",
+			CTS_TABLE_CONTACTS, person->person_id, person->name_contact_id);
+
+	ret = ctsvc_query_get_first_int_result(query, &id);
+	if(ret == CONTACTS_ERROR_NONE) {
+		name_contact_id = person->name_contact_id;
+		person_name_contact_id = person->name_contact_id;
+	}
+	else {
+		name_contact_id = 0;
+		person_name_contact_id = 0;
+	}
+
+	// get status of person
 	snprintf(query, sizeof(query),
 		"SELECT a.status FROM %s c, %s a "
 		"ON c.contact_id = a.contact_id AND c.deleted = 0 "
@@ -659,12 +662,53 @@ int ctsvc_person_aggregate(int person_id)
 	}
 	ctsvc_stmt_finalize(stmt);
 
-	if (person->ringtone_path)
-		ringtone_path = SAFE_STRDUP(person->ringtone_path);
-	if (person->vibration)
-		vibration = SAFE_STRDUP(person->vibration);
-	if (person->message_alert)
-		message_alert = SAFE_STRDUP(person->message_alert);
+	// check ringtone_path
+	if (person->ringtone_path) {
+		snprintf(query, sizeof(query),
+			"SELECT C.contact_id FROM "CTS_TABLE_CONTACTS" C "
+				"WHERE C.person_id=%d AND C.deleted = 0 "
+					"AND C.ringtone_path = '%s'",
+				person->person_id, person->ringtone_path);
+		ret = ctsvc_query_get_first_int_result(query, &id);
+		if(ret == CONTACTS_ERROR_NONE) {
+			ringtone_path = SAFE_STRDUP(person->ringtone_path);
+		}
+	}
+	else {
+		ringtone_path = NULL;
+	}
+
+	// check vibration
+	if (person->vibration) {
+		snprintf(query, sizeof(query),
+			"SELECT C.contact_idFROM "CTS_TABLE_CONTACTS" C "
+				"WHERE C.person_id=%d AND C.deleted = 0 "
+					"AND C.vibration = '%s'",
+				person->person_id, person->vibration);
+		ret = ctsvc_query_get_first_int_result(query, &id);
+		if(ret == CONTACTS_ERROR_NONE) {
+			vibration = SAFE_STRDUP(person->vibration);
+		}
+	}
+	else {
+		vibration = NULL;
+	}
+
+	// check vibration
+	if (person->message_alert) {
+		snprintf(query, sizeof(query),
+			"SELECT C.contact_id FROM "CTS_TABLE_CONTACTS" C "
+				"WHERE C.person_id=%d AND C.deleted = 0 "
+					"AND C.message_alert = '%s'",
+				person->person_id, person->message_alert);
+		ret = ctsvc_query_get_first_int_result(query, &id);
+		if(ret == CONTACTS_ERROR_NONE) {
+			message_alert = SAFE_STRDUP(person->message_alert);
+		}
+	}
+	else {
+		message_alert = NULL;
+	}
 	contacts_record_destroy((contacts_record_h)person, true);
 
 	snprintf(query, sizeof(query),
@@ -1137,6 +1181,7 @@ API int contacts_person_unlink_contact(int person_id, int contact_id, int* out_p
 		return ret;
 	}
 
+	// create new person
 	id = ctsvc_db_insert_person(record);
 	if (CONTACTS_ERROR_NONE > id) {
 		CTS_ERR("ctsvc_db_insert_person() Failed(%d)", id);
@@ -1144,6 +1189,7 @@ API int contacts_person_unlink_contact(int person_id, int contact_id, int* out_p
 		return id;
 	}
 
+	// insert statistic info for new person
 	snprintf(query, sizeof(query),
 			"INSERT INTO %s (person_id, usage_type, times_used) "
 			"SELECT %d, usage_type, times_used FROM %s WHERE person_id = %d",
@@ -1157,6 +1203,7 @@ API int contacts_person_unlink_contact(int person_id, int contact_id, int* out_p
 
 	is_favorite = __ctsvc_get_person_favorite_info(person_id, &priority);
 
+	// update person_id of unlinked contact
 	snprintf(query, sizeof(query),
 			"UPDATE %s SET person_id = %d WHERE contact_id = %d",
 			CTS_TABLE_CONTACTS, id, contact_id);
@@ -1167,6 +1214,7 @@ API int contacts_person_unlink_contact(int person_id, int contact_id, int* out_p
 		return ret;
 	}
 
+	// update bsae person info
 	ret = ctsvc_person_aggregate(person_id);
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("ctsvc_person_aggregate(%d) Failed(%d)", person_id, ret);
