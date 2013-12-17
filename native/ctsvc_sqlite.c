@@ -166,7 +166,10 @@ int ctsvc_query_get_first_int_result(const char *query, int *result) {
 
 	if (SQLITE_OK != ret) {
 		CTS_ERR("DB error : sqlite3_prepare_v2(%s) Failed(%s)", query, sqlite3_errmsg(ctsvc_db));
-		return CONTACTS_ERROR_DB;
+		if (ret == SQLITE_BUSY || ret == SQLITE_LOCKED)
+			return CONTACTS_ERROR_DB_LOCKED;
+		else
+			return CONTACTS_ERROR_DB;
 	}
 
 	retry = false;
@@ -196,7 +199,10 @@ int ctsvc_query_get_first_int_result(const char *query, int *result) {
 			return CONTACTS_ERROR_NO_DATA /*CONTACTS_ERR_DB_RECORD_NOT_FOUND*/;
 		}
 		CTS_ERR("sqlite3_step() Failed(%d, %s)", ret, sqlite3_errmsg(ctsvc_db));
-		return CONTACTS_ERROR_DB;
+		if (ret == SQLITE_BUSY || ret == SQLITE_LOCKED)
+			return CONTACTS_ERROR_DB_LOCKED;
+		else
+			return CONTACTS_ERROR_DB;
 	}
 
 	*result = sqlite3_column_int(stmt, 0);
@@ -238,7 +244,7 @@ int ctsvc_query_exec(const char *query) {
 		switch (ret) {
 		case SQLITE_BUSY:
 		case SQLITE_LOCKED:
-			return CONTACTS_ERROR_DB /*CTS_ERR_DB_LOCK*/;
+			return CONTACTS_ERROR_DB_LOCKED /*CTS_ERR_DB_LOCK*/;
 		case SQLITE_IOERR:
 			return CONTACTS_ERROR_DB /*CTS_ERR_IO_ERR*/;
 		case SQLITE_FULL:
@@ -277,7 +283,9 @@ int ctsvc_query_prepare(char *query, cts_stmt *stmt) {
 			retry = false;
 	}while(retry);
 
-	if (ret == SQLITE_OK)
+	if (ret == SQLITE_BUSY || ret == SQLITE_LOCKED)
+		return CONTACTS_ERROR_DB_LOCKED;
+	else if (ret == SQLITE_OK)
 		return CONTACTS_ERROR_NONE;
 	else
 		return CONTACTS_ERROR_DB;
@@ -311,7 +319,10 @@ int ctsvc_stmt_get_first_int_result(cts_stmt stmt, int *result) {
 		sqlite3_finalize(stmt);
 		if (SQLITE_DONE == ret)
 			return CONTACTS_ERROR_NO_DATA /*CONTACTS_ERR_DB_RECORD_NOT_FOUND*/;
-		return CONTACTS_ERROR_DB;
+		if (ret == SQLITE_BUSY || ret == SQLITE_LOCKED)
+			return CONTACTS_ERROR_DB_LOCKED;
+		else
+			return CONTACTS_ERROR_DB;
 	}
 
 	*result = sqlite3_column_int(stmt, 0);
@@ -321,7 +332,7 @@ int ctsvc_stmt_get_first_int_result(cts_stmt stmt, int *result) {
 }
 
 int ctsvc_stmt_step(cts_stmt stmt) {
-	int ret;
+	int ret = CONTACTS_ERROR_NONE;
 	struct timeval from, now, diff;
 	bool retry = false;
 
@@ -346,7 +357,7 @@ int ctsvc_stmt_step(cts_stmt stmt) {
 	switch (ret) {
 	case SQLITE_BUSY:
 	case SQLITE_LOCKED:
-		ret = CONTACTS_ERROR_DB /*CTS_ERR_DB_LOCK*/;
+		ret = CONTACTS_ERROR_DB_LOCKED /*CTS_ERR_DB_LOCK*/;
 		break;
 	case SQLITE_IOERR:
 		ret = CONTACTS_ERROR_DB /*CTS_ERR_IO_ERR*/;
