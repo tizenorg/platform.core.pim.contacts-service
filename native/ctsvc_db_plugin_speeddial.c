@@ -58,11 +58,26 @@ ctsvc_db_plugin_info_s ctsvc_db_plugin_speeddial = {
 static int __ctsvc_db_speeddial_insert_record( contacts_record_h record, int *id )
 {
 	int ret;
+	int number_id = 0;
 	char query[CTS_SQL_MAX_LEN] = {0};
 	ctsvc_speeddial_s *speeddial = (ctsvc_speeddial_s*)record;
 
 	ret = ctsvc_begin_trans();
 	RETVM_IF(ret, ret, "ctsvc_begin_trans() Failed(%d)", ret);
+
+	// check number_id validation
+	snprintf(query, sizeof(query),
+			"SELECT data.id FROM "CTS_TABLE_DATA", "CTS_TABLE_CONTACTS" "
+						"ON "CTS_TABLE_DATA".contact_id = "CTS_TABLE_CONTACTS".contact_id "
+								"AND contacts.deleted = 0  AND is_my_profile = 0 AND datatype = %d "
+						"WHERE id = %d ",
+						CTSVC_DATA_NUMBER, speeddial->number_id);
+	ret = ctsvc_query_get_first_int_result(query, &number_id);
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("ctsvc_query_get_first_int_result() Failed(%d) : number_id is invalid", ret);
+		ctsvc_end_trans(false);
+		return CONTACTS_ERROR_INVALID_PARAMETER;
+	}
 
 	snprintf(query, sizeof(query),
 			"INSERT INTO "CTS_TABLE_SPEEDDIALS"(speed_number, number_id) VALUES(%d, %d)",
@@ -168,6 +183,7 @@ static int __ctsvc_db_speeddial_get_record( int id, contacts_record_h* out_recor
 static int __ctsvc_db_speeddial_update_record( contacts_record_h record )
 {
 	int ret;
+	int number_id;
 	int speeddial_id;
 	cts_stmt stmt;
 	char query[CTS_SQL_MIN_LEN] = {0};
@@ -179,6 +195,20 @@ static int __ctsvc_db_speeddial_update_record( contacts_record_h record )
 				"Invalid parameter : number id (%d)", speeddial->number_id);
 	ret = ctsvc_begin_trans();
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, CONTACTS_ERROR_DB, "DB error : ctsvc_begin_trans() Fail(%d)", ret);
+
+	// check number_id validation
+	snprintf(query, sizeof(query),
+			"SELECT data.id FROM "CTS_TABLE_DATA", "CTS_TABLE_CONTACTS" "
+						"ON "CTS_TABLE_DATA".contact_id = "CTS_TABLE_CONTACTS".contact_id "
+								"AND contacts.deleted = 0  AND is_my_profile = 0 AND datatype = %d "
+						"WHERE id = %d ",
+						speeddial->number_id, CTSVC_DATA_NUMBER);
+	ret = ctsvc_query_get_first_int_result(query, &number_id);
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("ctsvc_query_get_first_int_result() Failed(%d) : number_id is invalid", ret);
+		ctsvc_end_trans(false);
+		return CONTACTS_ERROR_INVALID_PARAMETER;
+	}
 
 	snprintf(query, sizeof(query),
 		"SELECT speed_number FROM "CTS_TABLE_SPEEDDIALS" WHERE speed_number = %d", speeddial->dial_number);
