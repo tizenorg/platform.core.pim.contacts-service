@@ -958,9 +958,11 @@ static inline int __ctsvc_contact_refresh_lookup_data(int contact_id)
 		char *temp_name = NULL;
 		contacts_list_first(name_list);
 		len = 0;
+		// name record of contact should be one
 		do {
 			contacts_list_get_current_record_p(name_list, (contacts_record_h*)&name_record);
-			if (NULL != name_record) {
+			if (NULL != name_record
+					&& (name_record->last || name_record->first || name_record->addition || name_record->suffix)) {
 				char *normalized_name = NULL;
 				// make display name
 				temp_len = SAFE_STRLEN(name_record->first) + SAFE_STRLEN(name_record->addition)
@@ -1003,6 +1005,7 @@ static inline int __ctsvc_contact_refresh_lookup_data(int contact_id)
 					contacts_record_destroy((contacts_record_h)contact, true);
 					return CONTACTS_ERROR_DB;
 				}
+				break;
 			}
 		}while(CONTACTS_ERROR_NONE == contacts_list_next(name_list));
 	}
