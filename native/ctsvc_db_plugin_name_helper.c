@@ -132,6 +132,19 @@ int ctsvc_db_name_insert(contacts_record_h record, int contact_id, bool is_my_pr
 
 	if (name->first || name->last || name->addition || name->prefix || name->suffix
 		|| name->phonetic_first || name->phonetic_middle || name->phonetic_last) {
+		// If name record already exists, delete current name record
+		// If user update record with out-of-date record, name record can be two
+		snprintf(query, sizeof(query),
+				"DELETE FROM "CTS_TABLE_DATA" "
+						"WHERE contact_id = %d AND datatype=%d "
+									"AND is_my_profile = %d",
+						contact_id, CTSVC_DATA_NAME, is_my_profile);
+		ret = ctsvc_query_exec(query);
+		if (CONTACTS_ERROR_NONE != ret) {
+			CTS_ERR("ctsvc_query_exec Faild(%d)", ret);
+			return ret;
+		}
+
 		snprintf(query, sizeof(query),
 			"INSERT INTO "CTS_TABLE_DATA"(contact_id, is_my_profile, datatype, is_default, data1, data2, data3, "
 						"data4, data5, data6, data7, data8, data9, data10, data11, data12) "
