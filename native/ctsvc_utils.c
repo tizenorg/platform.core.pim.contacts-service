@@ -55,6 +55,7 @@ static __thread bool version_up = false;
 #define CTS_IMAGE_ENCODE_QUALITY	50
 
 #define CTS_COMMIT_TRY_MAX 500000 // For 3second
+
 int ctsvc_begin_trans(void)
 {
 	int ret = -1, progress;
@@ -63,7 +64,7 @@ int ctsvc_begin_trans(void)
 	ctsvc_mutex_lock(CTS_MUTEX_TRANSACTION);
 #endif
 	if (transaction_count <= 0) {
-		ret = ctsvc_query_exec("BEGIN IMMEDIATE TRANSACTION"); //taken 600ms
+		ret = ctsvc_query_exec("BEGIN IMMEDIATE TRANSACTION");
 		progress = 100000;
 		while (CONTACTS_ERROR_DB == ret && progress < CTS_COMMIT_TRY_MAX) {
 			usleep(progress);
@@ -400,11 +401,16 @@ static bool __ctsvc_image_util_supported_jpeg_colorspace_cb(image_util_colorspac
 		int rotated_width, rotated_height;
 		unsigned char *img_rotate = 0;
 		img_rotate = malloc( size_decode );
-		image_util_rotate(img_rotate, &rotated_width, &rotated_height,
+		ret = image_util_rotate(img_rotate, &rotated_width, &rotated_height,
 					rotation, img_target, resized_width, resized_height, colorspace);
+		free(img_target);
+		if (IMAGE_UTIL_ERROR_NONE != ret) {
+			CTS_ERR("image_util_rotate failed(%d)", ret);
+			info->ret = CONTACTS_ERROR_INTERNAL;
+			return false;
+		}
 		resized_width = rotated_width;
 		resized_height = rotated_height;
-		free(img_target);
 		img_target = img_rotate;
 	}
 
