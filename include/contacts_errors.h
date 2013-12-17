@@ -44,7 +44,7 @@ typedef enum
 
 	/* DB */
 //	CONTACTS_ERROR_DB_NOT_OPENED        = TIZEN_ERROR_SOCIAL_CLASS | 0x80,    /**< Database didn't opened not yet */
-//	CONTACTS_ERROR_DB_LOCKED 			= TIZEN_ERROR_SOCIAL_CLASS | 0x81,	  /**< Database table locked or file locked */
+	CONTACTS_ERROR_DB_LOCKED 			= TIZEN_ERROR_SOCIAL_CLASS | 0x81,	  /**< Database table locked or file locked */
 //	CONTACTS_ERROR_DB_FAILED			= TIZEN_ERROR_SOCIAL_CLASS | 0x82,	  /**< Database operation failure */
 //	CONTACTS_ERROR_DB_RECORD_NOT_FOUND  = TIZEN_ERROR_SOCIAL_CLASS | 0x83,	  /**< Empty result set */
 //	CONTACTS_ERROR_DB_FULL				= TIZEN_ERROR_SOCIAL_CLASS | 0x84,	  /**< Database Full */
