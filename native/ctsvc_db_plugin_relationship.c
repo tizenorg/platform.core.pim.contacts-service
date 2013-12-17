@@ -131,19 +131,22 @@ static int __ctsvc_db_relationship_get_record( int id, contacts_record_h* out_re
 				"WHERE id = %d AND datatype = %d ",
 				id, CTSVC_DATA_RELATIONSHIP);
 
-	stmt = cts_query_prepare(query);
-	RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB, "DB error : cts_query_prepare() Failed");
+	ret = ctsvc_query_prepare(query, &stmt);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
 
-	ret = cts_stmt_step(stmt);
+	ret = ctsvc_stmt_step(stmt);
 	if (1 /*CTS_TRUE*/ != ret) {
-		CTS_ERR("cts_stmt_step() Failed(%d)", ret);
-		cts_stmt_finalize(stmt);
-		return CONTACTS_ERROR_NO_DATA;
+		CTS_ERR("ctsvc_stmt_step() Failed(%d)", ret);
+		ctsvc_stmt_finalize(stmt);
+		if (CONTACTS_ERROR_NONE == ret)
+			return CONTACTS_ERROR_NO_DATA;
+		else
+			return ret;
 	}
 
 	ctsvc_db_relationship_get_value_from_stmt(stmt, out_record, 0);
 
-	cts_stmt_finalize(stmt);
+	ctsvc_stmt_finalize(stmt);
 
 	return CONTACTS_ERROR_NONE;
 }
@@ -264,21 +267,21 @@ static int __ctsvc_db_relationship_get_all_records( int offset, int limit, conta
 			len += snprintf(query+len, sizeof(query)-len, " OFFSET %d", offset);
 	}
 
-	stmt = cts_query_prepare(query);
-	RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB, "DB error : cts_query_prepare() Failed");
+	ret = ctsvc_query_prepare(query, &stmt);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
 
 	contacts_list_create(&list);
-	while ((ret = cts_stmt_step(stmt))) {
+	while ((ret = ctsvc_stmt_step(stmt))) {
 		if (1 /*CTS_TRUE */ != ret) {
-			CTS_ERR("DB : cts_stmt_step fail(%d)", ret);
-			cts_stmt_finalize(stmt);
+			CTS_ERR("DB : ctsvc_stmt_step fail(%d)", ret);
+			ctsvc_stmt_finalize(stmt);
 			contacts_list_destroy(list, true);
 			return ret;
 		}
 		ctsvc_db_relationship_get_value_from_stmt(stmt, (contacts_record_h*)&relationship, 0);
 		ctsvc_list_prepend(list, (contacts_record_h)relationship);
 	}
-	cts_stmt_finalize(stmt);
+	ctsvc_stmt_finalize(stmt);
 	ctsvc_list_reverse(list);
 
 	*out_list = list;
@@ -303,11 +306,11 @@ static int __ctsvc_db_relationship_get_records_with_query( contacts_query_h quer
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_db_make_get_records_query_stmt fail(%d)", ret);
 
 	contacts_list_create(&list);
-	while ((ret = cts_stmt_step(stmt))) {
+	while ((ret = ctsvc_stmt_step(stmt))) {
 		contacts_record_h record;
 		if (1 /*CTS_TRUE */ != ret) {
-			CTS_ERR("DB error : cts_stmt_step() Failed(%d)", ret);
-			cts_stmt_finalize(stmt);
+			CTS_ERR("DB error : ctsvc_stmt_step() Failed(%d)", ret);
+			ctsvc_stmt_finalize(stmt);
 			contacts_list_destroy(list, true);
 			return ret;
 		}
@@ -357,7 +360,7 @@ static int __ctsvc_db_relationship_get_records_with_query( contacts_query_h quer
 		}
 		ctsvc_list_prepend(list, record);
 	}
-	cts_stmt_finalize(stmt);
+	ctsvc_stmt_finalize(stmt);
 	ctsvc_list_reverse(list);
 
 	*out_list = list;

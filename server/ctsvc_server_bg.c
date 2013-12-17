@@ -64,21 +64,18 @@ static int __ctsvc_server_bg_contact_delete_step1(__ctsvc_delete_data_s* data)
 	int count = 0;
 	GSList *cursor;
 
-	if (data->contact_ids == NULL){
+	if (data->contact_ids == NULL) {
 		// get event_list
 		snprintf(query, sizeof(query), "SELECT contact_id FROM "CTS_TABLE_CONTACTS" WHERE deleted = 1");
-		stmt = cts_query_prepare(query);
-		if (NULL == stmt) {
-			CTS_ERR("cts_query_prepare() Failed");
-			return CONTACTS_ERROR_DB;
-		}
+		ret = ctsvc_query_prepare(query, &stmt);
+		RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
 
-		while(1 == (ret = cts_stmt_step(stmt))) {
+		while(1 == (ret = ctsvc_stmt_step(stmt))) {
 			int id = 0;
 			id = ctsvc_stmt_get_int(stmt, 0);
 			data->contact_ids = g_slist_append(data->contact_ids, GINT_TO_POINTER(id));
 		}
-		cts_stmt_finalize(stmt);
+		ctsvc_stmt_finalize(stmt);
 		if (ret < CONTACTS_ERROR_NONE)
 			return ret;
 	}
@@ -115,18 +112,15 @@ static int __ctsvc_server_bg_contact_delete_step2(__ctsvc_delete_data_s* data)
 		"SELECT id FROM "CTS_TABLE_DATA" WHERE contact_id = %d LIMIT %d",
 		data->current_contact_id, CTSVC_SERVER_BG_DELETE_COUNT);
 
-	stmt = cts_query_prepare(query);
-		if (NULL == stmt) {
-		CTS_ERR("cts_query_prepare() Failed");
-		return CONTACTS_ERROR_DB;
-	}
+	ret = ctsvc_query_prepare(query, &stmt);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
 
-	while(1 == (ret = cts_stmt_step(stmt))) {
+	while(1 == (ret = ctsvc_stmt_step(stmt))) {
 		int id = 0;
 		id = ctsvc_stmt_get_int(stmt, 0);
 		list = g_slist_append(list, GINT_TO_POINTER(id));
 	}
-	cts_stmt_finalize(stmt);
+	ctsvc_stmt_finalize(stmt);
 
 	count = g_slist_length(list);
 	if (count <= 0)
@@ -145,7 +139,7 @@ static int __ctsvc_server_bg_contact_delete_step2(__ctsvc_delete_data_s* data)
 			CTS_ERR("DB failed");
 			ctsvc_end_trans(false);
 			g_slist_free(list);
-			return CONTACTS_ERROR_DB;
+			return ret;
 		}
 		cursor = g_slist_next(cursor);
 	}
@@ -172,18 +166,15 @@ static int __ctsvc_server_bg_contact_delete_step3(__ctsvc_delete_data_s* data)
 		"SELECT id FROM "CTS_TABLE_ACTIVITIES" WHERE contact_id = %d LIMIT %d",
 		data->current_contact_id, CTSVC_SERVER_BG_DELETE_COUNT);
 
-	stmt = cts_query_prepare(query);
-		if (NULL == stmt) {
-		CTS_ERR("cts_query_prepare() Failed");
-		return CONTACTS_ERROR_DB;
-	}
+	ret = ctsvc_query_prepare(query, &stmt);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
 
-	while(1 == (ret = cts_stmt_step(stmt))) {
+	while(1 == (ret = ctsvc_stmt_step(stmt))) {
 		int id = 0;
 		id = ctsvc_stmt_get_int(stmt, 0);
 		list = g_slist_append(list, GINT_TO_POINTER(id));
 	}
-	cts_stmt_finalize(stmt);
+	ctsvc_stmt_finalize(stmt);
 
 	count = g_slist_length(list);
 	if (count <= 0)
@@ -202,7 +193,7 @@ static int __ctsvc_server_bg_contact_delete_step3(__ctsvc_delete_data_s* data)
 			CTS_ERR("DB failed");
 			ctsvc_end_trans(false);
 			g_slist_free(list);
-			return CONTACTS_ERROR_DB;
+			return ret;
 		}
 		cursor = g_slist_next(cursor);
 	}
@@ -226,7 +217,7 @@ static int __ctsvc_server_bg_contact_delete_step4(__ctsvc_delete_data_s* data)
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("DB failed");
 		ctsvc_end_trans(false);
-		return CONTACTS_ERROR_DB;
+		return ret;
 	}
 
 	snprintf(query, sizeof(query), "DELETE FROM "CTS_TABLE_CONTACTS" WHERE contact_id = %d",
@@ -235,7 +226,7 @@ static int __ctsvc_server_bg_contact_delete_step4(__ctsvc_delete_data_s* data)
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("DB failed");
 		ctsvc_end_trans(false);
-		return CONTACTS_ERROR_DB;
+		return ret;
 	}
 
 	ret = ctsvc_end_trans(true);
@@ -292,15 +283,19 @@ static bool  __ctsvc_server_db_delete_run(__ctsvc_delete_data_s* data)
 
 	switch (data->step) {
 		case STEP_1:
+			// get deleted contact id list
 			ret = __ctsvc_server_bg_contact_delete_step1(data);
 			break;
 		case STEP_2:
+			// delete data of current contact id (MAX CTSVC_SERVER_BG_DELETE_COUNT)
 			ret = __ctsvc_server_bg_contact_delete_step2(data);
 			break;
 		case STEP_3:
+			// delete activity of current contact id (MAX CTSVC_SERVER_BG_DELETE_COUNT each time)
 			ret = __ctsvc_server_bg_contact_delete_step3(data);
 			break;
 		case STEP_4:
+			// delete search index of current contact id
 			ret = __ctsvc_server_bg_contact_delete_step4(data);
 			break;
 		default:
@@ -387,6 +382,7 @@ static void __ctsvc_server_contact_deleted_cb(const char *view_uri, void *data)
 static bool __ctsvc_server_account_delete_cb(const char* event_type, int account_id, void* user_data)
 {
 	CTS_FN_CALL;
+	CTS_INFO("event_type : %s, account_id : %d", event_type, account_id);
 	if (strcmp(event_type, ACCOUNT_NOTI_NAME_DELETE) == 0)
 		ctsvc_addressbook_delete(account_id);
 	return true;

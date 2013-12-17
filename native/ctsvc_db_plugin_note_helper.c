@@ -66,21 +66,21 @@ int ctsvc_db_note_insert(contacts_record_h record, int contact_id, bool is_my_pr
 		"INSERT INTO "CTS_TABLE_DATA"(contact_id, is_my_profile, datatype, data3) "
 					"VALUES(%d, %d, %d, ?)", contact_id, is_my_profile, CTSVC_DATA_NOTE);
 
-	stmt = cts_query_prepare(query);
-	RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB, "DB error : cts_query_prepare() Failed");
+	ret = ctsvc_query_prepare(query, &stmt);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
 
 	sqlite3_bind_text(stmt, 1, note->note,
 			strlen(note->note), SQLITE_STATIC);
 
-	ret = cts_stmt_step(stmt);
+	ret = ctsvc_stmt_step(stmt);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("cts_stmt_step() Failed(%d)", ret);
-		cts_stmt_finalize(stmt);
+		CTS_ERR("ctsvc_stmt_step() Failed(%d)", ret);
+		ctsvc_stmt_finalize(stmt);
 		return ret;
 	}
 	if (id)
-		*id = cts_db_get_last_insert_id();
-	cts_stmt_finalize(stmt);
+		*id = ctsvc_db_get_last_insert_id();
+	ctsvc_stmt_finalize(stmt);
 
 	if (!is_my_profile)
 		ctsvc_set_note_noti();

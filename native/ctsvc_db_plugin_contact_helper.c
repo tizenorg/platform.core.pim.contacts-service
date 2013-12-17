@@ -101,25 +101,24 @@ static int __ctsvc_contact_get_current_image_file(int image_id, char *dest, int 
 	char query[CTS_SQL_MIN_LEN] = {0};
 
 	snprintf(query, sizeof(query), "SELECT data3 FROM %s WHERE id = %d", CTS_TABLE_DATA, image_id);
+	ret = ctsvc_query_prepare(query, &stmt);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
 
-	stmt = cts_query_prepare(query);
-	if (NULL == stmt) {
-		CTS_ERR("DB error: cts_query_prepare() Failed");
-		return CONTACTS_ERROR_DB;
-	}
-
-	ret = cts_stmt_step(stmt);
+	ret = ctsvc_stmt_step(stmt);
 	if (1 /*CTS_TRUE*/ != ret) {
-		CTS_ERR("DB error: cts_stmt_step() Failed(%d)", ret);
-		cts_stmt_finalize(stmt);
-		return CONTACTS_ERROR_NO_DATA;
+		CTS_ERR("DB error: ctsvc_stmt_step() Failed(%d)", ret);
+		ctsvc_stmt_finalize(stmt);
+		if (CONTACTS_ERROR_NONE == ret)
+			return CONTACTS_ERROR_NO_DATA;
+		else
+			return ret;
 	}
 
 	tmp_path = ctsvc_stmt_get_text(stmt, 0);
 	if (tmp_path) {
 		snprintf(dest, dest_size, "%s/%s", CTS_IMG_FULL_LOCATION, tmp_path);
 	}
-	cts_stmt_finalize(stmt);
+	ctsvc_stmt_finalize(stmt);
 	return CONTACTS_ERROR_NONE;
 }
 
@@ -226,17 +225,17 @@ int ctsvc_db_contact_delete(int contact_id)
 		"SELECT addressbook_id, person_id "
 		"FROM "CTS_TABLE_CONTACTS" WHERE contact_id = %d AND deleted = 0", contact_id);
 
-	stmt = cts_query_prepare(query);
+	ret = ctsvc_query_prepare(query, &stmt);
 	if (NULL == stmt) {
-		CTS_ERR("DB error : cts_query_prepare() Failed");
+		CTS_ERR("DB error : ctsvc_query_prepare() Failed(%d)", ret);
 		ctsvc_end_trans(false);
-		return CONTACTS_ERROR_DB;
+		return ret;
 	}
 
-	ret = cts_stmt_step(stmt);
+	ret = ctsvc_stmt_step(stmt);
 	if (1 != ret) {
-		CTS_ERR("DB error : cts_stmt_step() Failed(%d)", ret);
-		cts_stmt_finalize(stmt);
+		CTS_ERR("DB error : ctsvc_stmt_step() Failed(%d)", ret);
+		ctsvc_stmt_finalize(stmt);
 		ctsvc_end_trans(false);
 		if (CONTACTS_ERROR_NONE == ret)
 			return CONTACTS_ERROR_NO_DATA;
@@ -247,7 +246,7 @@ int ctsvc_db_contact_delete(int contact_id)
 	addressbook_id = ctsvc_stmt_get_int(stmt, 0);
 	person_id = ctsvc_stmt_get_int(stmt, 1);
 	CTS_DBG("addressbook_id : %d, person_id : %d", addressbook_id, person_id);
-	cts_stmt_finalize(stmt);
+	ctsvc_stmt_finalize(stmt);
 
 	version = ctsvc_get_next_ver();
 	snprintf(query, sizeof(query),
@@ -260,7 +259,7 @@ int ctsvc_db_contact_delete(int contact_id)
 		ctsvc_end_trans(false);
 		return ret;
 	}
-	rel_changed = cts_db_change();
+	rel_changed = ctsvc_db_change();
 
 	snprintf(query, sizeof(query),
 			"UPDATE %s SET deleted = 1, person_id = 0, changed_ver=%d WHERE contact_id = %d",
@@ -2045,30 +2044,30 @@ int ctsvc_contact_update_display_name(int contact_id, contacts_display_name_sour
 				contact->display_name_language, contact->reverse_display_name_language,
 				ctsvc_get_next_ver(), (int)time(NULL), contact_id);
 
-		stmt = cts_query_prepare(query);
+		ret = ctsvc_query_prepare(query, &stmt);
 		if (NULL == stmt) {
-			CTS_ERR("DB error : cts_query_prepare() Failed");
+			CTS_ERR("DB error : ctsvc_query_prepare() Failed(%d)", ret);
 			contacts_record_destroy(record, true);
-			return CONTACTS_ERROR_DB;
+			return ret;
 		}
 
 		if (contact->display_name)
-			cts_stmt_bind_text(stmt, 1, contact->display_name);
+			ctsvc_stmt_bind_text(stmt, 1, contact->display_name);
 		if (contact->reverse_display_name)
-			cts_stmt_bind_text(stmt, 2, contact->reverse_display_name);
+			ctsvc_stmt_bind_text(stmt, 2, contact->reverse_display_name);
 		if (contact->sort_name)
-			cts_stmt_bind_text(stmt, 3, contact->sort_name);
+			ctsvc_stmt_bind_text(stmt, 3, contact->sort_name);
 		if (contact->reverse_sort_name)
-			cts_stmt_bind_text(stmt, 4, contact->reverse_sort_name);
+			ctsvc_stmt_bind_text(stmt, 4, contact->reverse_sort_name);
 		if (contact->sortkey)
-			cts_stmt_bind_text(stmt, 5, contact->sortkey);
+			ctsvc_stmt_bind_text(stmt, 5, contact->sortkey);
 		if (contact->reverse_sortkey)
-			cts_stmt_bind_text(stmt, 6, contact->reverse_sortkey);
+			ctsvc_stmt_bind_text(stmt, 6, contact->reverse_sortkey);
 
-		ret = cts_stmt_step(stmt);
-		WARN_IF(CONTACTS_ERROR_NONE != ret, "cts_stmt_step() Failed(%d)", ret);
+		ret = ctsvc_stmt_step(stmt);
+		WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_stmt_step() Failed(%d)", ret);
 
-		cts_stmt_finalize(stmt);
+		ctsvc_stmt_finalize(stmt);
 	}
 
 	contacts_record_destroy(record, true);

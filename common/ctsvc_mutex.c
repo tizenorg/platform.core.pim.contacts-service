@@ -27,9 +27,9 @@
 typedef struct {
 	int (* lock) (pthread_mutex_t *mutex);
 	int (* unlock) (pthread_mutex_t *mutex);
-}cts_mutex_fns;
+}ctsvc_mutex_fns;
 
-static cts_mutex_fns cts_mutex_funtions =
+static ctsvc_mutex_fns __ctsvc_mutex_funtions =
 {
 	pthread_mutex_lock,
 	pthread_mutex_unlock
@@ -42,7 +42,7 @@ static pthread_mutex_t ipc_mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t ipc_pubsub_mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t access_control_mutex = PTHREAD_MUTEX_INITIALIZER;
 
-static inline pthread_mutex_t* cts_mutex_get_mutex(int type)
+static inline pthread_mutex_t* __ctsvc_mutex_get_mutex(int type)
 {
 	pthread_mutex_t *ret_val;
 
@@ -78,10 +78,10 @@ void ctsvc_mutex_lock(int type)
 	int ret;
 	pthread_mutex_t *mutex;
 
-	mutex = cts_mutex_get_mutex(type);
+	mutex = __ctsvc_mutex_get_mutex(type);
 
-	if (cts_mutex_funtions.lock) {
-		ret = cts_mutex_funtions.lock(mutex);
+	if (__ctsvc_mutex_funtions.lock) {
+		ret = __ctsvc_mutex_funtions.lock(mutex);
 		WARN_IF(ret, "mutex_lock Failed(%d)", ret);
 	}
 }
@@ -91,10 +91,10 @@ void ctsvc_mutex_unlock(int type)
 	int ret;
 	pthread_mutex_t *mutex;
 
-	mutex = cts_mutex_get_mutex(type);
+	mutex = __ctsvc_mutex_get_mutex(type);
 
-	if (cts_mutex_funtions.unlock) {
-		ret = cts_mutex_funtions.unlock(mutex);
+	if (__ctsvc_mutex_funtions.unlock) {
+		ret = __ctsvc_mutex_funtions.unlock(mutex);
 		WARN_IF(ret, "mutex_unlock Failed(%d)", ret);
 	}
 }

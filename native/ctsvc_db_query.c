@@ -496,27 +496,24 @@ int ctsvc_db_update_record_with_set_query(const char *set, GSList *bind_text, co
 
 	snprintf(query, sizeof(query), "UPDATE %s SET %s WHERE id = %d", table, set, id);
 
-	stmt = cts_query_prepare(query);
-	if (NULL == stmt) {
-		CTS_ERR("DB error : cts_query_prepare() Failed");
-		return CONTACTS_ERROR_DB;
-	}
+	ret = ctsvc_query_prepare(query, &stmt);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
 
 	if (bind_text) {
 		int i = 0;
 		for (cursor=bind_text,i=1;cursor;cursor=cursor->next,i++) {
 			const char *text = cursor->data;
 			if (text && *text)
-				cts_stmt_bind_text(stmt, i, text);
+				ctsvc_stmt_bind_text(stmt, i, text);
 		}
 	}
-	ret = cts_stmt_step(stmt);
+	ret = ctsvc_stmt_step(stmt);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("cts_stmt_step() Failed(%d)", ret);
-		cts_stmt_finalize(stmt);
+		CTS_ERR("ctsvc_stmt_step() Failed(%d)", ret);
+		ctsvc_stmt_finalize(stmt);
 		return ret;
 	}
-	cts_stmt_finalize(stmt);
+	ctsvc_stmt_finalize(stmt);
 	return ret;
 }
 
@@ -757,17 +754,17 @@ int ctsvc_db_make_get_records_query_stmt(ctsvc_query_s *s_query, int offset, int
 	free(projection);
 
 	CTS_DBG("query : %s", query);
-	*stmt = cts_query_prepare(query);
+	ret = ctsvc_query_prepare(query, stmt);
 	if(NULL == *stmt) {
-		CTS_ERR("DB error : cts_query_prepare() Failed");
+		CTS_ERR("DB error : ctsvc_query_prepare() Failed(%d)", ret);
 		for (cursor=bind_text;cursor;cursor=cursor->next)
 			free(cursor->data);
 		g_slist_free(bind_text);
-		return CONTACTS_ERROR_DB;
+		return ret;
 	}
 
 	for (cursor=bind_text, i=1; cursor;cursor=cursor->next, i++)
-		cts_stmt_bind_copy_text(*stmt, i, cursor->data, strlen(cursor->data));
+		ctsvc_stmt_bind_copy_text(*stmt, i, cursor->data, strlen(cursor->data));
 
 	for (cursor=bind_text;cursor;cursor=cursor->next)
 		free(cursor->data);
@@ -789,12 +786,12 @@ static int __ctsvc_db_get_records_with_query_exec(ctsvc_query_s *query, int offs
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_db_make_get_records_query_stmt(%d)", ret);
 
 	contacts_list_create(&list);
-	while ((ret = cts_stmt_step(stmt))) {
+	while ((ret = ctsvc_stmt_step(stmt))) {
 		contacts_record_h record;
 		int field_count;
 		if (1 != ret) {
-			CTS_ERR("DB error : cts_stmt_step() Failed(%d)", ret);
-			cts_stmt_finalize(stmt);
+			CTS_ERR("DB error : ctsvc_stmt_step() Failed(%d)", ret);
+			ctsvc_stmt_finalize(stmt);
 			contacts_list_destroy(list, true);
 			return ret;
 		}
@@ -835,7 +832,7 @@ static int __ctsvc_db_get_records_with_query_exec(ctsvc_query_s *query, int offs
 		}
 		ctsvc_list_prepend(list, record);
 	}
-	cts_stmt_finalize(stmt);
+	ctsvc_stmt_finalize(stmt);
 	ctsvc_list_reverse(list);
 
 	*out_list = list;
@@ -873,19 +870,19 @@ static int __ctsvc_db_get_all_records_exec(const char *view_uri, const property_
 			len += snprintf(query+len, sizeof(query)-len, " OFFSET %d", offset);
 	}
 
-	stmt = cts_query_prepare(query);
-	RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB , "DB error : cts_query_prepare() Failed");
+	ret = ctsvc_query_prepare(query, &stmt);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
 
 	r_type = ctsvc_view_get_record_type(view_uri);
 
 	contacts_list_create(&list);
-	while ((ret = cts_stmt_step(stmt))) {
+	while ((ret = ctsvc_stmt_step(stmt))) {
 		contacts_record_h record;
 		if (1 != ret) {
-			CTS_ERR("DB error : cts_stmt_step() Failed(%d)", ret);
-			cts_stmt_finalize(stmt);
+			CTS_ERR("DB error : ctsvc_stmt_step() Failed(%d)", ret);
+			ctsvc_stmt_finalize(stmt);
 			contacts_list_destroy(list, true);
-			return CONTACTS_ERROR_NO_DATA;
+			return ret;
 		}
 
 		contacts_record_create(view_uri, &record);
@@ -906,7 +903,7 @@ static int __ctsvc_db_get_all_records_exec(const char *view_uri, const property_
 		}
 		ctsvc_list_prepend(list, record);
 	}
-	cts_stmt_finalize(stmt);
+	ctsvc_stmt_finalize(stmt);
 	ctsvc_list_reverse(list);
 
 	*out_list = (contacts_list_h)list;
@@ -1208,19 +1205,19 @@ static int __ctsvc_db_search_records_exec(const char *view_uri, const property_i
 			len += snprintf(query+len, sizeof(query)-len, " OFFSET %d", offset);
 	}
 
-	stmt = cts_query_prepare(query);
-	RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB , "DB error : cts_query_prepare() Failed");
+	ret = ctsvc_query_prepare(query, &stmt);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
 
 	r_type = ctsvc_view_get_record_type(view_uri);
 
 	contacts_list_create(&list);
-	while ((ret = cts_stmt_step(stmt))) {
+	while ((ret = ctsvc_stmt_step(stmt))) {
 		contacts_record_h record;
 		if (1 != ret) {
-			CTS_ERR("DB error : cts_stmt_step() Failed(%d)", ret);
-			cts_stmt_finalize(stmt);
+			CTS_ERR("DB error : ctsvc_stmt_step() Failed(%d)", ret);
+			ctsvc_stmt_finalize(stmt);
 			contacts_list_destroy(list, true);
-			return CONTACTS_ERROR_NO_DATA;
+			return ret;
 		}
 
 		if( r_type == CTSVC_RECORD_PERSON )
@@ -1263,7 +1260,7 @@ static int __ctsvc_db_search_records_exec(const char *view_uri, const property_i
 		ctsvc_list_prepend(list, record);
 	}
 
-	cts_stmt_finalize(stmt);
+	ctsvc_stmt_finalize(stmt);
 	ctsvc_list_reverse(list);
 	*out_list = (contacts_list_h)list;
 	return CONTACTS_ERROR_NONE;
@@ -1404,20 +1401,20 @@ static inline int __ctsvc_db_search_records_with_query_exec(ctsvc_query_s *s_que
 	}
 
 	CTS_DBG("%s", query);
-	stmt = cts_query_prepare(query);
-	RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB , "DB error : cts_query_prepare() Failed");
+	ret = ctsvc_query_prepare(query, &stmt);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
 
 	i = 1;
 	len = g_slist_length(bind);
 	for (cursor=bind; cursor;cursor=cursor->next, i++)
-		sqlite3_bind_text(stmt, i, cursor->data, strlen(cursor->data), SQLITE_STATIC);
+		ctsvc_stmt_bind_text(stmt, i, cursor->data);
 
 	contacts_list_create(&list);
-	while ((ret = cts_stmt_step(stmt))) {
+	while ((ret = ctsvc_stmt_step(stmt))) {
 		contacts_record_h record;
 		if (1 != ret) {
-			CTS_ERR("DB error : cts_stmt_step() Failed(%d)", ret);
-			cts_stmt_finalize(stmt);
+			CTS_ERR("DB error : ctsvc_stmt_step() Failed(%d)", ret);
+			ctsvc_stmt_finalize(stmt);
 			contacts_list_destroy(list, true);
 			return ret;
 		}
@@ -1485,7 +1482,7 @@ static inline int __ctsvc_db_search_records_with_query_exec(ctsvc_query_s *s_que
 		}
 		ctsvc_list_prepend(list, record);
 	}
-	cts_stmt_finalize(stmt);
+	ctsvc_stmt_finalize(stmt);
 	ctsvc_list_reverse(list);
 
 	*out_list = list;
@@ -1700,7 +1697,7 @@ static int __ctsvc_db_update_records( contacts_list_h list)
 	RETVM_IF(count <= 0, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : count is 0");
 
 	ret = ctsvc_begin_trans();
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_server_db_begin_trans is failed(%d)", ret);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_begin_trans is failed(%d)", ret);
 
 	contacts_list_first(list);
 	do {
@@ -1724,7 +1721,6 @@ static int __ctsvc_db_update_records( contacts_list_h list)
 		CTS_ERR("DB error : ctsvc_end_trans() Failed(%d)", ret);
 		return ret;
 	}
-
 
 	return CONTACTS_ERROR_NONE;
 }
@@ -1762,6 +1758,7 @@ static int __ctsvc_db_get_count_exec(const char *view_uri, const property_info_s
 	len = snprintf(query, sizeof(query), "SELECT COUNT(*) FROM (SELECT %s FROM %s)", projection, table);
 
 	ret = ctsvc_query_get_first_int_result(query, out_count);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret , "DB error : ctsvc_query_get_first_int_result() Failed(%d)", ret);
 
 	return ret;
 }
@@ -1809,18 +1806,18 @@ static int __ctsvc_db_get_count_with_query_exec(ctsvc_query_s *s_query, const ch
 		cts_stmt stmt;
 		GSList *cursor;
 		int i;
-		stmt = cts_query_prepare(query);
-		if(NULL == stmt) {
-			CTS_ERR("DB error : cts_query_prepare() Failed");
-			return CONTACTS_ERROR_DB;
-		}
+		ret = ctsvc_query_prepare(query, &stmt);
+		RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
 
 		for (cursor=bind_text, i=1; cursor;cursor=cursor->next, i++)
-			cts_stmt_bind_copy_text(stmt, i, cursor->data, strlen(cursor->data));
+			ctsvc_stmt_bind_copy_text(stmt, i, cursor->data, strlen(cursor->data));
 		ret = ctsvc_stmt_get_first_int_result(stmt, out_count);
+		RETVM_IF(CONTACTS_ERROR_NONE != ret, ret , "DB error : ctsvc_stmt_get_first_int_result() Failed(%d)", ret);
 	}
-	else
+	else {
 		ret = ctsvc_query_get_first_int_result(query, out_count);
+		RETVM_IF(CONTACTS_ERROR_NONE != ret, ret , "DB error : ctsvc_query_get_first_int_result() Failed(%d)", ret);
+	}
 	return ret;
 }
 
@@ -1932,17 +1929,17 @@ static int __ctsvc_db_get_contact_changes(const char* view_uri, int addressbook_
 			CONTACTS_CHANGE_DELETED, version ,version);
 	}
 
-	stmt = cts_query_prepare(query);
-	RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB , "DB error : cts_query_prepare() Failed");
+	ret = ctsvc_query_prepare(query, &stmt);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
 
 	contacts_list_create(&list);
-	while ((ret = cts_stmt_step(stmt))) {
+	while ((ret = ctsvc_stmt_step(stmt))) {
 		contacts_record_h record;
 		ctsvc_updated_info_s *update_info;
 
 		if (1 != ret) {
-			CTS_ERR("DB error : cts_stmt_step() Failed(%d)", ret);
-			cts_stmt_finalize(stmt);
+			CTS_ERR("DB error : ctsvc_stmt_step() Failed(%d)", ret);
+			ctsvc_stmt_finalize(stmt);
 			contacts_list_destroy(list, true);
 			return ret;
 		}
@@ -1963,12 +1960,13 @@ static int __ctsvc_db_get_contact_changes(const char* view_uri, int addressbook_
 
 		ctsvc_list_prepend(list, record);
 	}
-	cts_stmt_finalize(stmt);
+	ctsvc_stmt_finalize(stmt);
 	ctsvc_list_reverse(list);
 
-	*out_list = list;
 	snprintf(query, sizeof(query), "SELECT ver FROM "CTS_TABLE_VERSION);
 	ret = ctsvc_query_get_first_int_result(query, out_current_version);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret , "DB error : ctsvc_query_get_first_int_result() Failed(%d)", ret);
+	*out_list = list;
 
 	return CONTACTS_ERROR_NONE;
 }
@@ -2002,17 +2000,17 @@ static int __ctsvc_db_get_group_changes(const char* view_uri, int addressbook_id
 			CONTACTS_CHANGE_DELETED, CTS_TABLE_GROUP_DELETEDS, version, version);
 	}
 
-	stmt = cts_query_prepare(query);
-	RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB , "DB error : cts_query_prepare() Failed");
+	ret = ctsvc_query_prepare(query, &stmt);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
 
 	contacts_list_create(&list);
-	while ((ret = cts_stmt_step(stmt))) {
+	while ((ret = ctsvc_stmt_step(stmt))) {
 		contacts_record_h record;
 		ctsvc_updated_info_s *update_info;
 
 		if (1 != ret) {
-			CTS_ERR("DB error : cts_stmt_step() Failed(%d)", ret);
-			cts_stmt_finalize(stmt);
+			CTS_ERR("DB error : ctsvc_stmt_step() Failed(%d)", ret);
+			ctsvc_stmt_finalize(stmt);
 			contacts_list_destroy(list, true);
 			return ret;
 		}
@@ -2030,12 +2028,13 @@ static int __ctsvc_db_get_group_changes(const char* view_uri, int addressbook_id
 
 		ctsvc_list_prepend(list, record);
 	}
-	cts_stmt_finalize(stmt);
+	ctsvc_stmt_finalize(stmt);
 	ctsvc_list_reverse(list);
 
-	*out_list = list;
 	snprintf(query, sizeof(query), "SELECT ver FROM "CTS_TABLE_VERSION);
 	ret = ctsvc_query_get_first_int_result(query, out_current_version);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret , "DB error : ctsvc_query_get_first_int_result() Failed(%d)", ret);
+	*out_list = list;
 
 	return CONTACTS_ERROR_NONE;
 }
@@ -2067,15 +2066,15 @@ static int __ctsvc_db_get_group_relations_changes(const char* view_uri, int addr
 				"AND addressbook_id = %d ", addressbook_id);
 	}
 
-	stmt = cts_query_prepare(query);
-	RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB , "DB error : cts_query_prepare() Failed");
+	ret = ctsvc_query_prepare(query, &stmt);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
 
 	contacts_list_create(&list);
-	while ((ret = cts_stmt_step(stmt))) {
+	while ((ret = ctsvc_stmt_step(stmt))) {
 		contacts_record_h record;
 		if (1 != ret) {
-			CTS_ERR("DB error : cts_stmt_step() Failed(%d)", ret);
-			cts_stmt_finalize(stmt);
+			CTS_ERR("DB error : ctsvc_stmt_step() Failed(%d)", ret);
+			ctsvc_stmt_finalize(stmt);
 			contacts_list_destroy(list, true);
 			return ret;
 		}
@@ -2089,12 +2088,12 @@ static int __ctsvc_db_get_group_relations_changes(const char* view_uri, int addr
 
 		ctsvc_list_prepend(list, record);
 	}
-	cts_stmt_finalize(stmt);
+	ctsvc_stmt_finalize(stmt);
 	ctsvc_list_reverse(list);
-
-	*out_list = list;
 	snprintf(query, sizeof(query), "SELECT ver FROM "CTS_TABLE_VERSION);
 	ret = ctsvc_query_get_first_int_result(query, out_current_version);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret , "DB error : ctsvc_query_get_first_int_result() Failed(%d)", ret);
+	*out_list = list;
 
 	return CONTACTS_ERROR_NONE;
 }
@@ -2115,15 +2114,15 @@ static int __ctsvc_db_get_group_member_changes(const char* view_uri, int address
 	if (0 <= addressbook_id)
 		len += snprintf(query+len, sizeof(query)-len, " AND addressbook_id = %d ", addressbook_id);
 
-	stmt = cts_query_prepare(query);
-	RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB , "DB error : cts_query_prepare() Failed");
+	ret = ctsvc_query_prepare(query, &stmt);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
 
 	contacts_list_create(&list);
-	while ((ret = cts_stmt_step(stmt))) {
+	while ((ret = ctsvc_stmt_step(stmt))) {
 		contacts_record_h record;
 		if (1 != ret) {
-			CTS_ERR("DB error : cts_stmt_step() Failed(%d)", ret);
-			cts_stmt_finalize(stmt);
+			CTS_ERR("DB error : ctsvc_stmt_step() Failed(%d)", ret);
+			ctsvc_stmt_finalize(stmt);
 			contacts_list_destroy(list, true);
 			return ret;
 		}
@@ -2135,12 +2134,13 @@ static int __ctsvc_db_get_group_member_changes(const char* view_uri, int address
 
 		ctsvc_list_prepend(list, record);
 	}
-	cts_stmt_finalize(stmt);
+	ctsvc_stmt_finalize(stmt);
 	ctsvc_list_reverse(list);
 
-	*out_list = list;
 	snprintf(query, sizeof(query), "SELECT ver FROM "CTS_TABLE_VERSION);
 	ret = ctsvc_query_get_first_int_result(query, out_current_version);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret , "DB error : ctsvc_query_get_first_int_result() Failed(%d)", ret);
+	*out_list = list;
 
 	return CONTACTS_ERROR_NONE;
 }
@@ -2182,15 +2182,15 @@ static int __ctsvc_db_get_my_profile_changes(const char* view_uri, int addressbo
 			CONTACTS_CHANGE_DELETED, CTS_TABLE_MY_PROFILES, version);
 	}
 
-	stmt = cts_query_prepare(query);
-	RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB , "DB error : cts_query_prepare() Failed");
+	ret = ctsvc_query_prepare(query, &stmt);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
 
 	contacts_list_create(&list);
-	while ((ret = cts_stmt_step(stmt))) {
+	while ((ret = ctsvc_stmt_step(stmt))) {
 		contacts_record_h record;
 		if (1 != ret) {
-			CTS_ERR("DB error : cts_stmt_step() Failed(%d)", ret);
-			cts_stmt_finalize(stmt);
+			CTS_ERR("DB error : ctsvc_stmt_step() Failed(%d)", ret);
+			ctsvc_stmt_finalize(stmt);
 			contacts_list_destroy(list, true);
 			return ret;
 		}
@@ -2201,12 +2201,13 @@ static int __ctsvc_db_get_my_profile_changes(const char* view_uri, int addressbo
 		ctsvc_record_set_int(record, _contacts_my_profile_updated_info.last_changed_type, ctsvc_stmt_get_int(stmt, 2));
 		ctsvc_list_prepend(list, record);
 	}
-	cts_stmt_finalize(stmt);
+	ctsvc_stmt_finalize(stmt);
 	ctsvc_list_reverse(list);
 
-	*out_list = list;
 	snprintf(query, sizeof(query), "SELECT ver FROM "CTS_TABLE_VERSION);
 	ret = ctsvc_query_get_first_int_result(query, out_current_version);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret , "DB error : ctsvc_query_get_first_int_result() Failed(%d)", ret);
+	*out_list = list;
 
 	return CONTACTS_ERROR_NONE;
 }
@@ -2468,7 +2469,7 @@ int ctsvc_db_insert_records(contacts_list_h list, int **ids, unsigned int *count
 
 	if (count)
 		contacts_list_get_count(list, count);
-	if (( plugin_info = ctsvc_db_get_plugin_info(((ctsvc_list_s*)list)->l_type))){
+	if (( plugin_info = ctsvc_db_get_plugin_info(((ctsvc_list_s*)list)->l_type))) {
 		if( plugin_info->insert_records ) {
 			ret = plugin_info->insert_records( list, ids );
 			return ret;

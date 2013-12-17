@@ -33,17 +33,17 @@ typedef sqlite3_stmt* cts_stmt;
 
 int ctsvc_db_open(void);
 int ctsvc_db_close(void);
-int cts_db_change();
-int cts_db_get_last_insert_id(void);
-int cts_db_get_next_id(const char *table);
+int ctsvc_db_change();
+int ctsvc_db_get_last_insert_id(void);
+int ctsvc_db_get_next_id(const char *table);
 
 int ctsvc_query_get_first_int_result(const char *query, int *result);
 int ctsvc_query_exec(const char *query);
-cts_stmt cts_query_prepare(char *query);
+int ctsvc_query_prepare(char *query, cts_stmt *stmt);
 
-int cts_stmt_step(cts_stmt stmt);
-void cts_stmt_reset(cts_stmt stmt);
-void cts_stmt_finalize(cts_stmt stmt);
+int ctsvc_stmt_step(cts_stmt stmt);
+void ctsvc_stmt_reset(cts_stmt stmt);
+void ctsvc_stmt_finalize(cts_stmt stmt);
 
 int ctsvc_stmt_get_first_int_result(cts_stmt stmt, int *result);
 
@@ -61,18 +61,18 @@ static inline long long int ctsvc_stmt_get_int64(cts_stmt stmt, int pos) {
 	return sqlite3_column_int64(stmt, pos);
 }
 
-static inline int cts_stmt_bind_int(cts_stmt stmt, int pos, int num) {
+static inline int ctsvc_stmt_bind_int(cts_stmt stmt, int pos, int num) {
 	return sqlite3_bind_int(stmt, pos, num);
 }
-static inline int cts_stmt_bind_text(cts_stmt stmt, int pos, const char *str) {
+static inline int ctsvc_stmt_bind_text(cts_stmt stmt, int pos, const char *str) {
 	return sqlite3_bind_text(stmt, pos, str, strlen(str), SQLITE_STATIC);
 }
-static inline int cts_stmt_bind_copy_text(cts_stmt stmt, int pos,
+static inline int ctsvc_stmt_bind_copy_text(cts_stmt stmt, int pos,
 		const char *str, int strlen){
 	return sqlite3_bind_text(stmt, pos, str, strlen, SQLITE_TRANSIENT);
 }
 
-int cts_stmt_bind_copy_text(cts_stmt stmt, int pos, const char *str, int strlen);
+int ctsvc_stmt_bind_copy_text(cts_stmt stmt, int pos, const char *str, int strlen);
 
 
 #endif //__TIZEN_SOCIAL_CTSVC_SQLITE_H__

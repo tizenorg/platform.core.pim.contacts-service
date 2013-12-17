@@ -52,14 +52,17 @@ static inline int __ctsvc_get_person_default_number_value(int id, contacts_recor
 				"WHERE contacts.person_id = %d",
 				CTS_TABLE_CONTACTS, CTS_TABLE_DATA, CTSVC_DATA_NUMBER, id);
 
-	stmt = cts_query_prepare(query);
-	RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB, "DB error : cts_query_prepare() Failed");
+	ret = ctsvc_query_prepare(query, &stmt);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
 
-	ret = cts_stmt_step(stmt);
+	ret = ctsvc_stmt_step(stmt);
 	if (1 /*CTS_TRUE*/ != ret) {
-		cts_stmt_finalize(stmt);
-		CTS_ERR("No data : person(%d) has no default phone", id);
-		return CONTACTS_ERROR_NO_DATA;
+		ctsvc_stmt_finalize(stmt);
+		CTS_ERR("ctsvc_stmt_step Fail(%d)", ret);
+		if (CONTACTS_ERROR_NONE == ret)
+			return CONTACTS_ERROR_NO_DATA;
+		else
+			return ret;
 	}
 
 	ret = contacts_record_create(_contacts_number._uri, (contacts_record_h*)&number);
@@ -81,7 +84,7 @@ static inline int __ctsvc_get_person_default_number_value(int id, contacts_recor
 	else
 		CTS_ERR("contacts_record_create() Failed");
 
-	cts_stmt_finalize(stmt);
+	ctsvc_stmt_finalize(stmt);
 	return ret;
 }
 
@@ -99,15 +102,17 @@ static inline int __ctsvc_get_person_default_email_value(int id, contacts_record
 					"WHERE contacts.person_id = %d",
 					CTS_TABLE_CONTACTS, CTS_TABLE_DATA, CTSVC_DATA_EMAIL, id);
 
-	stmt = cts_query_prepare(query);
-	RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB, "DB error : cts_query_prepare() Failed");
+	ret = ctsvc_query_prepare(query, &stmt);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
 
-	ret = cts_stmt_step(stmt);
-
+	ret = ctsvc_stmt_step(stmt);
 	if (1 /*CTS_TRUE*/ != ret) {
-		cts_stmt_finalize(stmt);
-		CTS_ERR("person(%d) has no default email", id);
-		return CONTACTS_ERROR_NO_DATA;
+		ctsvc_stmt_finalize(stmt);
+		CTS_ERR("ctsvc_stmt_step Fail(%d)", ret);
+		if (CONTACTS_ERROR_NONE == ret)
+			return CONTACTS_ERROR_NO_DATA;
+		else
+			return ret;
 	}
 
 	ret = contacts_record_create(_contacts_email._uri, (contacts_record_h*)&email);
@@ -127,7 +132,7 @@ static inline int __ctsvc_get_person_default_email_value(int id, contacts_record
 	else
 		CTS_ERR("contacts_record_create() Failed");
 
-	cts_stmt_finalize(stmt);
+	ctsvc_stmt_finalize(stmt);
 	return ret;
 }
 
@@ -146,14 +151,17 @@ static inline int __ctsvc_get_person_default_image_value(int id, contacts_record
 				"WHERE contacts.person_id = %d",
 					CTSVC_DATA_IMAGE, id);
 
-	stmt = cts_query_prepare(query);
-	RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB, "DB error : cts_query_prepare() Failed");
+	ret = ctsvc_query_prepare(query, &stmt);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
 
-	ret = cts_stmt_step(stmt);
+	ret = ctsvc_stmt_step(stmt);
 	if (1 /*CTS_TRUE*/ != ret) {
-		cts_stmt_finalize(stmt);
-		CTS_ERR("person(%d) has no default image", id);
-		return CONTACTS_ERROR_NO_DATA;
+		ctsvc_stmt_finalize(stmt);
+		CTS_ERR("ctsvc_stmt_step Fail(%d)", ret);
+		if (CONTACTS_ERROR_NONE == ret)
+			return CONTACTS_ERROR_NO_DATA;
+		else
+			return ret;
 	}
 
 	ret = contacts_record_create(_contacts_image._uri, (contacts_record_h*)&image);
@@ -173,7 +181,7 @@ static inline int __ctsvc_get_person_default_image_value(int id, contacts_record
 	else
 		CTS_ERR("contacts_record_create() Failed");
 
-	cts_stmt_finalize(stmt);
+	ctsvc_stmt_finalize(stmt);
 	return ret;
 }
 
@@ -274,16 +282,16 @@ static inline int __ctsvc_put_person_default_image(int person_id, int id)
 				"ON D.contact_id = C.contact_id AND C.deleted = 0 "
 				"WHERE D.datatype=%d AND D.is_my_profile = 0 AND C.person_id=%d AND D.id=%d",
 				CTSVC_DATA_IMAGE, person_id, id);
-	stmt = cts_query_prepare(query);
+	ret = ctsvc_query_prepare(query, &stmt);
 	if (NULL == stmt) {
-		CTS_ERR("cts_query_prepare failed");
+		CTS_ERR("ctsvc_query_prepare failed(%d)", ret);
 		ctsvc_end_trans(false);
-		return CONTACTS_ERROR_DB;
+		return ret;
 	}
 
-	ret = cts_stmt_step(stmt);
+	ret = ctsvc_stmt_step(stmt);
 	if (1 != ret) {
-		cts_stmt_finalize(stmt);
+		ctsvc_stmt_finalize(stmt);
 		ctsvc_end_trans(false);
 		return ret;
 	}
@@ -291,7 +299,7 @@ static inline int __ctsvc_put_person_default_image(int person_id, int id)
 	is_default = ctsvc_stmt_get_int(stmt, 0);
 	contact_id = ctsvc_stmt_get_int(stmt, 1);
 	image_path = SAFE_STRDUP(ctsvc_stmt_get_text(stmt, 2));
-	cts_stmt_finalize(stmt);
+	ctsvc_stmt_finalize(stmt);
 
 	// unset is_primary_default of all data of the person
 	snprintf(query, sizeof(query),
@@ -337,46 +345,46 @@ static inline int __ctsvc_put_person_default_image(int person_id, int id)
 	// update person's image_thumbnail_path
 	snprintf(query, sizeof(query),
 			"UPDATE "CTS_TABLE_PERSONS" SET image_thumbnail_path=? WHERE person_id=%d ", person_id);
-	stmt = cts_query_prepare(query);
+	ret = ctsvc_query_prepare(query, &stmt);
 	if( NULL == stmt ) {
-		CTS_ERR( "cts_query_prepare() Failed()");
-		free(image_path);
-		ctsvc_end_trans(false);
-		return CONTACTS_ERROR_DB;
-	}
-
-	cts_stmt_bind_text(stmt, 1, image_path);
-	ret = cts_stmt_step(stmt);
-	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("cts_stmt_step() Failed(%d)", ret);
-		cts_stmt_finalize(stmt);
+		CTS_ERR( "ctsvc_query_prepare() Failed(%d)", ret);
 		free(image_path);
 		ctsvc_end_trans(false);
 		return ret;
 	}
-	cts_stmt_finalize(stmt);
+
+	ctsvc_stmt_bind_text(stmt, 1, image_path);
+	ret = ctsvc_stmt_step(stmt);
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("ctsvc_stmt_step() Failed(%d)", ret);
+		ctsvc_stmt_finalize(stmt);
+		free(image_path);
+		ctsvc_end_trans(false);
+		return ret;
+	}
+	ctsvc_stmt_finalize(stmt);
 
 	// update contact's image_thumbnail_path
 	snprintf(query, sizeof(query),
 			"UPDATE "CTS_TABLE_CONTACTS" SET image_thumbnail_path=? WHERE contact_id=%d ", contact_id);
-	stmt = cts_query_prepare(query);
+	ret = ctsvc_query_prepare(query, &stmt);
 	if( NULL == stmt ) {
-		CTS_ERR( "cts_query_prepare() Failed");
-		free(image_path);
-		ctsvc_end_trans(false);
-		return CONTACTS_ERROR_DB;
-	}
-
-	cts_stmt_bind_text(stmt, 1, image_path);
-	ret = cts_stmt_step(stmt);
-	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("cts_stmt_step() Failed(%d)", ret);
-		cts_stmt_finalize(stmt);
+		CTS_ERR( "ctsvc_query_prepare() Failed(%d)", ret);
 		free(image_path);
 		ctsvc_end_trans(false);
 		return ret;
 	}
-	cts_stmt_finalize(stmt);
+
+	ctsvc_stmt_bind_text(stmt, 1, image_path);
+	ret = ctsvc_stmt_step(stmt);
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("ctsvc_stmt_step() Failed(%d)", ret);
+		ctsvc_stmt_finalize(stmt);
+		free(image_path);
+		ctsvc_end_trans(false);
+		return ret;
+	}
+	ctsvc_stmt_finalize(stmt);
 
 	free(image_path);
 
@@ -400,22 +408,20 @@ static inline int __ctsvc_put_person_default_data(int person_id, int id, int dat
 				"WHERE D.datatype=%d AND C.person_id=%d AND D.id=%d",
 				CTS_TABLE_DATA, CTS_TABLE_CONTACTS, datatype, person_id, id);
 
-	stmt = cts_query_prepare(query);
-	if (NULL == stmt) {
-		CTS_ERR("cts_query_prepare Fail(stmt NULL)");
-		return CONTACTS_ERROR_DB;
-	}
-	ret = cts_stmt_step(stmt);
+	ret = ctsvc_query_prepare(query, &stmt);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
+
+	ret = ctsvc_stmt_step(stmt);
 	if (1 != ret) {
-		CTS_ERR("cts_stmt_step Fail(%d)", ret);
-		cts_stmt_finalize(stmt);
+		CTS_ERR("ctsvc_stmt_step Fail(%d)", ret);
+		ctsvc_stmt_finalize(stmt);
 		return ret;
 	}
 
 	is_default = ctsvc_stmt_get_int(stmt, 0);
 	contact_id = ctsvc_stmt_get_int(stmt, 1);
 
-	cts_stmt_finalize(stmt);
+	ctsvc_stmt_finalize(stmt);
 
 	ret = ctsvc_begin_trans();
 	RETVM_IF(CONTACTS_ERROR_NONE > ret, ret, "DB error : ctsvc_begin_trans() Failed(%d)", ret);
@@ -530,7 +536,7 @@ void ctsvc_db_person_delete_callback(sqlite3_context * context,
 #endif
 }
 
-inline static const char* __cts_get_image_filename(const char* src)
+inline static const char* __ctsvc_get_image_filename(const char* src)
 {
 	const char* dir = CTS_IMG_FULL_LOCATION;
 	int pos=0;
@@ -578,13 +584,11 @@ int ctsvc_person_aggregate(int person_id)
 					"message_alert "
 				"FROM "CTS_TABLE_PERSONS" "
 				"WHERE persons.person_id = %d", person_id);
-	stmt = cts_query_prepare(query);
-	if (NULL == stmt) {
-		CTS_ERR("DB error : cts_query_prepare() Failed");
-		return CONTACTS_ERROR_DB;
-	}
-	if (1 != cts_stmt_step(stmt)) {
-	   CTS_ERR("cts_stmt_step() Failed\n");
+	ret = ctsvc_query_prepare(query, &stmt);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
+
+	if (1 != ctsvc_stmt_step(stmt)) {
+	   CTS_ERR("ctsvc_stmt_step() Failed\n");
 	   return CONTACTS_ERROR_DB;
 	}
 	ret = contacts_record_create(_contacts_person._uri, (contacts_record_h*)&person);
@@ -602,7 +606,7 @@ int ctsvc_person_aggregate(int person_id)
 	person->vibration = SAFE_STRDUP(temp);
 	temp = ctsvc_stmt_get_text(stmt, 5);
 	person->message_alert = SAFE_STRDUP(temp);
-	cts_stmt_finalize(stmt);
+	ctsvc_stmt_finalize(stmt);
 
 	snprintf(query, sizeof(query),
 			"SELECT contact_id FROM %s "
@@ -620,7 +624,7 @@ int ctsvc_person_aggregate(int person_id)
 	}
 
 	if (person->image_thumbnail_path) {
-		temp = __cts_get_image_filename(person->image_thumbnail_path);
+		temp = __ctsvc_get_image_filename(person->image_thumbnail_path);
 		snprintf(query, sizeof(query),
 			"SELECT D.id FROM "CTS_TABLE_CONTACTS" C, "CTS_TABLE_DATA" D "
 				"WHERE C.person_id=%d AND C.contact_id=D.contact_id AND C.deleted = 0 "
@@ -641,19 +645,19 @@ int ctsvc_person_aggregate(int person_id)
 		"WHERE c.person_id=%d "
 		"ORDER BY timestamp DESC LIMIT 1",
 		CTS_TABLE_CONTACTS, CTS_TABLE_ACTIVITIES, person->person_id);
-	stmt = cts_query_prepare(query);
+	ret = ctsvc_query_prepare(query, &stmt);
 	if (NULL == stmt) {
-		CTS_ERR("DB error : cts_query_prepare() Failed");
+		CTS_ERR("DB error : ctsvc_query_prepare() Failed(%d)", ret);
 		free(image_thumbnail_path);
 		contacts_record_destroy((contacts_record_h)person, true);
-		return CONTACTS_ERROR_DB;
+		return ret;
 	}
 
-	if (1 == cts_stmt_step(stmt)) {
+	if (1 == ctsvc_stmt_step(stmt)) {
 		temp = ctsvc_stmt_get_text(stmt, 0);
 		status = SAFE_STRDUP(temp);
 	}
-	cts_stmt_finalize(stmt);
+	ctsvc_stmt_finalize(stmt);
 
 	if (person->ringtone_path)
 		ringtone_path = SAFE_STRDUP(person->ringtone_path);
@@ -670,19 +674,19 @@ int ctsvc_person_aggregate(int person_id)
 			"WHERE person_id = %d AND contacts.deleted = 0 "
 			"ORDER BY contact_id",
 			ctsvc_get_display_column(), CTS_TABLE_CONTACTS, person_id);
-	stmt = cts_query_prepare(query);
+	ret = ctsvc_query_prepare(query, &stmt);
 	if (NULL == stmt) {
-		CTS_ERR("DB error : cts_query_prepare() Failed");
+		CTS_ERR("DB error : ctsvc_query_prepare() Failed(%d)", ret);
 		free(image_thumbnail_path);
 		free(ringtone_path);
 		free(vibration);
 		free(message_alert);
-		return CONTACTS_ERROR_DB;
+		return ret;
 	}
 
 	link_count = 0;
 	len = 0;
-	while ((ret = cts_stmt_step(stmt))) {
+	while ((ret = ctsvc_stmt_step(stmt))) {
 		const char *temp_str;
 		int i = 0;
 		int contact_id;
@@ -734,7 +738,7 @@ int ctsvc_person_aggregate(int person_id)
 		len += snprintf(addressbook_ids + len, addressbooks_len -len, "%d%s", addressbook_id, ADDRESSBOOK_ID_DELIM );
 
 		if (!image_thumbnail_path && contact_image_thumbnail_path && *contact_image_thumbnail_path) {
-			temp = __cts_get_image_filename(contact_image_thumbnail_path);
+			temp = __ctsvc_get_image_filename(contact_image_thumbnail_path);
 			image_thumbnail_path = SAFE_STRDUP(temp);
 			// update data table : is_primary_default
 		}
@@ -755,7 +759,7 @@ int ctsvc_person_aggregate(int person_id)
 		if (is_favorite)
 			person_is_favorite = true;
 	}
-	cts_stmt_finalize(stmt);
+	ctsvc_stmt_finalize(stmt);
 	version = ctsvc_get_next_ver();
 
 	snprintf(query, sizeof(query),
@@ -769,34 +773,9 @@ int ctsvc_person_aggregate(int person_id)
 			name_contact_id, version, person_id,
 			person_id, link_count, person_id);
 
-	stmt = cts_query_prepare(query);
+	ret = ctsvc_query_prepare(query, &stmt);
 	if (NULL == stmt) {
-		CTS_ERR("DB error : cts_query_prepare() Failed");
-		free(addressbook_ids);
-		free(image_thumbnail_path);
-		free(ringtone_path);
-		free(vibration);
-		free(message_alert);
-		return CONTACTS_ERROR_DB;
-	}
-
-	if (addressbook_ids)
-		cts_stmt_bind_text(stmt, 1, addressbook_ids);
-	if (ringtone_path)
-		cts_stmt_bind_text(stmt, 2, ringtone_path);
-	if (vibration)
-		cts_stmt_bind_text(stmt, 3, vibration);
-	if (message_alert)
-		cts_stmt_bind_text(stmt, 4, message_alert);
-	if (status)
-		cts_stmt_bind_text(stmt, 5, status);
-	if (image_thumbnail_path)
-		cts_stmt_bind_text(stmt, 6, image_thumbnail_path);
-
-	ret = cts_stmt_step(stmt);
-	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("cts_stmt_step() Failed(%d)", ret);
-		cts_stmt_finalize(stmt);
+		CTS_ERR("DB error : ctsvc_query_prepare() Failed(%d)", ret);
 		free(addressbook_ids);
 		free(image_thumbnail_path);
 		free(ringtone_path);
@@ -805,7 +784,32 @@ int ctsvc_person_aggregate(int person_id)
 		return ret;
 	}
 
-	cts_stmt_finalize(stmt);
+	if (addressbook_ids)
+		ctsvc_stmt_bind_text(stmt, 1, addressbook_ids);
+	if (ringtone_path)
+		ctsvc_stmt_bind_text(stmt, 2, ringtone_path);
+	if (vibration)
+		ctsvc_stmt_bind_text(stmt, 3, vibration);
+	if (message_alert)
+		ctsvc_stmt_bind_text(stmt, 4, message_alert);
+	if (status)
+		ctsvc_stmt_bind_text(stmt, 5, status);
+	if (image_thumbnail_path)
+		ctsvc_stmt_bind_text(stmt, 6, image_thumbnail_path);
+
+	ret = ctsvc_stmt_step(stmt);
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("ctsvc_stmt_step() Failed(%d)", ret);
+		ctsvc_stmt_finalize(stmt);
+		free(addressbook_ids);
+		free(image_thumbnail_path);
+		free(ringtone_path);
+		free(vibration);
+		free(message_alert);
+		return ret;
+	}
+
+	ctsvc_stmt_finalize(stmt);
 
 	free(addressbook_ids);
 	free(image_thumbnail_path);
@@ -838,16 +842,16 @@ static bool __ctsvc_get_person_favorite_info(int person_id, double *priority)
 	char query[CTS_SQL_MIN_LEN] = {0};
 	snprintf(query, sizeof(query),
 			"SELECT favorite_prio FROM "CTS_TABLE_FAVORITES" WHERE person_id = %d", person_id);
-	stmt = cts_query_prepare(query);
-	RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB, "DB error : cts_query_prepare() Failed");
+	ret = ctsvc_query_prepare(query, &stmt);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
 
-	ret = cts_stmt_step(stmt);
+	ret = ctsvc_stmt_step(stmt);
 	if (1 == ret) {
 		*priority = ctsvc_stmt_get_dbl(stmt, 0);
-		cts_stmt_finalize(stmt);
+		ctsvc_stmt_finalize(stmt);
 		return true;
 	}
-	cts_stmt_finalize(stmt);
+	ctsvc_stmt_finalize(stmt);
 	return false;
 }
 
@@ -985,10 +989,10 @@ static int __ctsvc_update_primary_default_data(int person_id)
 				"WHERE person_id = %d AND deleted = 0 "
 				"ORDER BY contact_id",
 				CTS_TABLE_CONTACTS, person_id);
-		stmt = cts_query_prepare(query);
-		RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB, "cts_query_prepare fail(%d)", CONTACTS_ERROR_DB);
+		ret = ctsvc_query_prepare(query, &stmt);
+		RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
 
-		while (1 == cts_stmt_step(stmt)) {
+		while (1 == ctsvc_stmt_step(stmt)) {
 			int contact_id = ctsvc_stmt_get_int(stmt, 0);
 			cts_stmt stmt_number;
 
@@ -997,17 +1001,18 @@ static int __ctsvc_update_primary_default_data(int person_id)
 					"WHERE contact_id = %d AND datatype = %d AND is_default = 1 AND is_my_profile = 0",
 					CTS_TABLE_DATA, contact_id, CTSVC_DATA_NUMBER);
 
-			stmt_number = cts_query_prepare(query);
+			ret = ctsvc_query_prepare(query, &stmt_number);
+			RETVM_IF(NULL == stmt_number, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
 
-			if( 1 == cts_stmt_step(stmt_number) ) {
+			if( 1 == ctsvc_stmt_step(stmt_number) ) {
 				int default_number_id = ctsvc_stmt_get_int(stmt_number, 0);
 				__ctsvc_put_person_default_data(person_id, default_number_id, CTSVC_DATA_NUMBER);
-				cts_stmt_finalize(stmt_number);
+				ctsvc_stmt_finalize(stmt_number);
 				break;
 			}
-			cts_stmt_finalize(stmt_number);
+			ctsvc_stmt_finalize(stmt_number);
 		}
-		cts_stmt_finalize(stmt);
+		ctsvc_stmt_finalize(stmt);
 	}
 	else {
 		contacts_record_destroy(record, true);
@@ -1021,10 +1026,10 @@ static int __ctsvc_update_primary_default_data(int person_id)
 				"WHERE person_id = %d AND deleted = 0 "
 				"ORDER BY contact_id",
 				CTS_TABLE_CONTACTS, person_id);
-		stmt = cts_query_prepare(query);
-		RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB, "cts_query_prepare fail(%d)", CONTACTS_ERROR_DB);
+		ret = ctsvc_query_prepare(query, &stmt);
+		RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
 
-		while (1 == cts_stmt_step(stmt)) {
+		while (1 == ctsvc_stmt_step(stmt)) {
 			int contact_id = ctsvc_stmt_get_int(stmt, 0);
 			cts_stmt stmt_email;
 
@@ -1033,17 +1038,18 @@ static int __ctsvc_update_primary_default_data(int person_id)
 					"WHERE contact_id = %d AND datatype = %d AND is_default = 1 AND is_my_profile = 0",
 					CTS_TABLE_DATA, contact_id, CTSVC_DATA_EMAIL);
 
-			stmt_email = cts_query_prepare(query);
+			ret = ctsvc_query_prepare(query, &stmt_email);
+			RETVM_IF(NULL == stmt_email, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
 
-			if( 1 == cts_stmt_step(stmt_email))	{
+			if( 1 == ctsvc_stmt_step(stmt_email))	{
 				int default_email_id = ctsvc_stmt_get_int(stmt_email, 0);
 				__ctsvc_put_person_default_data(person_id, default_email_id, CTSVC_DATA_EMAIL);
-				cts_stmt_finalize(stmt_email);
+				ctsvc_stmt_finalize(stmt_email);
 				break;
 			}
-			cts_stmt_finalize(stmt_email);
+			ctsvc_stmt_finalize(stmt_email);
 		}
-		cts_stmt_finalize(stmt);
+		ctsvc_stmt_finalize(stmt);
 	}
 	else {
 		contacts_record_destroy(record, true);
@@ -1057,10 +1063,10 @@ static int __ctsvc_update_primary_default_data(int person_id)
 				"WHERE person_id = %d AND deleted = 0 "
 				"ORDER BY contact_id",
 				CTS_TABLE_CONTACTS, person_id);
-		stmt = cts_query_prepare(query);
-		RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB, "cts_query_prepare fail(%d)", CONTACTS_ERROR_DB);
+		ret = ctsvc_query_prepare(query, &stmt);
+		RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
 
-		while ( 1 == cts_stmt_step(stmt)) {
+		while ( 1 == ctsvc_stmt_step(stmt)) {
 			int contact_id = ctsvc_stmt_get_int(stmt, 0);
 			cts_stmt stmt_image;
 
@@ -1069,16 +1075,18 @@ static int __ctsvc_update_primary_default_data(int person_id)
 					"WHERE contact_id = %d AND datatype = %d AND is_default = 1 AND is_my_profile = 0",
 					CTS_TABLE_DATA, contact_id, CTSVC_DATA_IMAGE);
 
-			stmt_image = cts_query_prepare(query);
-			if( 1 == cts_stmt_step(stmt_image))	{
+			ret = ctsvc_query_prepare(query, &stmt_image);
+			RETVM_IF(NULL == stmt_image, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
+
+			if( 1 == ctsvc_stmt_step(stmt_image))	{
 				int default_image_id = ctsvc_stmt_get_int(stmt_image, 0);
 				__ctsvc_put_person_default_image(person_id, default_image_id);
-				cts_stmt_finalize(stmt_image);
+				ctsvc_stmt_finalize(stmt_image);
 				break;
 			}
-			cts_stmt_finalize(stmt_image);
+			ctsvc_stmt_finalize(stmt_image);
 		}
-		cts_stmt_finalize(stmt);
+		ctsvc_stmt_finalize(stmt);
 	}
 	else {
 		contacts_record_destroy(record, true);
@@ -1194,20 +1202,21 @@ API int contacts_person_unlink_contact(int person_id, int contact_id, int* out_p
 
 int ctsvc_person_do_garbage_collection(void)
 {
+	int ret;
 	cts_stmt stmt = NULL;
 	char query[CTS_SQL_MIN_LEN] = {0};
 
 	snprintf(query, sizeof(query), "SELECT person_id FROM "CTS_TABLE_PERSONS" WHERE dirty=1");
 
-	stmt = cts_query_prepare(query);
-	RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB, "DB error : cts_query_prepare() Failed");
+	ret = ctsvc_query_prepare(query, &stmt);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
 
-	while ( 1 /*CTS_TRUE*/ == cts_stmt_step(stmt)) {
+	while ( 1 /*CTS_TRUE*/ == ctsvc_stmt_step(stmt)) {
 		int person_id;
 		person_id = ctsvc_stmt_get_int(stmt, 0);
 		ctsvc_person_aggregate(person_id);
 	}
-	cts_stmt_finalize(stmt);
+	ctsvc_stmt_finalize(stmt);
 
 	return CONTACTS_ERROR_NONE;
 }
@@ -1259,19 +1268,19 @@ API int contacts_person_set_favorite_order(int person_id, int front_person_id, i
 
 	snprintf(query, sizeof(query), "SELECT favorite_prio FROM "CTS_TABLE_FAVORITES" WHERE person_id = ?");
 
-	stmt = cts_query_prepare(query);
-	RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB, "cts_query_prepare() Failed");
+	ret = ctsvc_query_prepare(query, &stmt);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
 
-	cts_stmt_bind_int(stmt, 1, front_person_id);
-	ret = cts_stmt_step(stmt);
+	ctsvc_stmt_bind_int(stmt, 1, front_person_id);
+	ret = ctsvc_stmt_step(stmt);
 	if (1 /*CTS_TRUE*/  == ret)
 		front_prio = ctsvc_stmt_get_dbl(stmt, 0);
-	cts_stmt_reset(stmt);
-	cts_stmt_bind_int(stmt, 1, back_person_id);
-	ret = cts_stmt_step(stmt);
+	ctsvc_stmt_reset(stmt);
+	ctsvc_stmt_bind_int(stmt, 1, back_person_id);
+	ret = ctsvc_stmt_step(stmt);
 	if (1 /*CTS_TRUE*/ == ret)
 		back_prio = ctsvc_stmt_get_dbl(stmt, 0);
-	cts_stmt_finalize(stmt);
+	ctsvc_stmt_finalize(stmt);
 
 	RETVM_IF(0.0 == front_prio && 0.0 == back_prio, CONTACTS_ERROR_INVALID_PARAMETER,
 			"The indexes for front and back are invalid.");

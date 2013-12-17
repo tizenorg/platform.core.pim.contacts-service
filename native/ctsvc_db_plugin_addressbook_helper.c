@@ -46,7 +46,7 @@ int ctsvc_addressbook_delete(int account_id)
 		return ret;
 	}
 
-	ret = cts_db_change();
+	ret = ctsvc_db_change();
 	if (0 < ret) {
 		ctsvc_set_my_profile_noti();
 		ctsvc_set_contact_noti();
@@ -62,7 +62,7 @@ int ctsvc_addressbook_delete(int account_id)
 
 	ret = ctsvc_person_do_garbage_collection();
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB error : cts_person_garbagecollection() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_person_garbagecollection() Failed(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}

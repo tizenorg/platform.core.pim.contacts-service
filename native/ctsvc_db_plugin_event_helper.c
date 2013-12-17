@@ -45,26 +45,26 @@ int ctsvc_db_event_insert(contacts_record_h record, int contact_id, bool is_my_p
 		"INSERT INTO "CTS_TABLE_DATA"(contact_id, is_my_profile, datatype, data1, data2, data3, data4, data5) "
 									"VALUES(%d, %d, %d, %d, ?, ?, %d, ?)",
 			contact_id, is_my_profile, CTSVC_DATA_EVENT, event->type, event->is_lunar);
-	stmt = cts_query_prepare(query);
-	RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB, "DB error : cts_query_prepare() Failed");
+	ret = ctsvc_query_prepare(query, &stmt);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
 
 	if (event->label)
-		cts_stmt_bind_text(stmt, 1, event->label);
-	cts_stmt_bind_int(stmt, 2, event->date);
-	cts_stmt_bind_int(stmt, 3, event->lunar_date);
+		ctsvc_stmt_bind_text(stmt, 1, event->label);
+	ctsvc_stmt_bind_int(stmt, 2, event->date);
+	ctsvc_stmt_bind_int(stmt, 3, event->lunar_date);
 
-	ret = cts_stmt_step(stmt);
+	ret = ctsvc_stmt_step(stmt);
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("DB error : ctsvc_query_exec() Failed(%d)", ret);
-		cts_stmt_finalize(stmt);
+		ctsvc_stmt_finalize(stmt);
 		return ret;
 	}
 
-//	event->id = cts_db_get_last_insert_id();
+//	event->id = ctsvc_db_get_last_insert_id();
 	if (id)
-		*id = cts_db_get_last_insert_id();
+		*id = ctsvc_db_get_last_insert_id();
 
-	cts_stmt_finalize(stmt);
+	ctsvc_stmt_finalize(stmt);
 
 	if (!is_my_profile)
 		ctsvc_set_event_noti();

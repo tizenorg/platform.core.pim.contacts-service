@@ -71,27 +71,27 @@ int ctsvc_db_extension_get_value_from_stmt(cts_stmt stmt, contacts_record_h *rec
 static inline int __ctsvc_extension_bind_stmt(cts_stmt stmt, ctsvc_extension_s *extension, int start_cnt)
 {
 	if (extension->data2)
-		cts_stmt_bind_text(stmt, start_cnt, extension->data2);
+		ctsvc_stmt_bind_text(stmt, start_cnt, extension->data2);
 	if (extension->data3)
-		cts_stmt_bind_text(stmt, start_cnt+1, extension->data3);
+		ctsvc_stmt_bind_text(stmt, start_cnt+1, extension->data3);
 	if (extension->data4)
-		cts_stmt_bind_text(stmt, start_cnt+2, extension->data4);
+		ctsvc_stmt_bind_text(stmt, start_cnt+2, extension->data4);
 	if (extension->data5)
-		cts_stmt_bind_text(stmt, start_cnt+3, extension->data5);
+		ctsvc_stmt_bind_text(stmt, start_cnt+3, extension->data5);
 	if (extension->data6)
-		cts_stmt_bind_text(stmt, start_cnt+4, extension->data6);
+		ctsvc_stmt_bind_text(stmt, start_cnt+4, extension->data6);
 	if (extension->data7)
-		cts_stmt_bind_text(stmt, start_cnt+5, extension->data7);
+		ctsvc_stmt_bind_text(stmt, start_cnt+5, extension->data7);
 	if (extension->data8)
-		cts_stmt_bind_text(stmt, start_cnt+6, extension->data8);
+		ctsvc_stmt_bind_text(stmt, start_cnt+6, extension->data8);
 	if (extension->data9)
-		cts_stmt_bind_text(stmt, start_cnt+7, extension->data9);
+		ctsvc_stmt_bind_text(stmt, start_cnt+7, extension->data9);
 	if (extension->data10)
-		cts_stmt_bind_text(stmt, start_cnt+8, extension->data10);
+		ctsvc_stmt_bind_text(stmt, start_cnt+8, extension->data10);
 	if (extension->data11)
-		cts_stmt_bind_text(stmt, start_cnt+9, extension->data11);
+		ctsvc_stmt_bind_text(stmt, start_cnt+9, extension->data11);
 	if (extension->data12)
-		cts_stmt_bind_text(stmt, start_cnt+10, extension->data12);
+		ctsvc_stmt_bind_text(stmt, start_cnt+10, extension->data12);
 	return CONTACTS_ERROR_NONE;
 }
 
@@ -116,22 +116,22 @@ int ctsvc_db_extension_insert(contacts_record_h record, int contact_id, bool is_
 								"VALUES(%d, %d, %d, %d, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 						contact_id, is_my_profile, CTSVC_DATA_EXTENSION, extension->data1);
 
-		stmt = cts_query_prepare(query);
-		RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB, "DB error : cts_query_prepare() Failed");
+		ret = ctsvc_query_prepare(query, &stmt);
+		RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
 
 		__ctsvc_extension_bind_stmt(stmt, extension, 1);
 
-		ret = cts_stmt_step(stmt);
+		ret = ctsvc_stmt_step(stmt);
 		if (CONTACTS_ERROR_NONE != ret) {
 			CTS_ERR("DB error : ctsvc_query_exec() Failed(%d)", ret);
-			cts_stmt_finalize(stmt);
+			ctsvc_stmt_finalize(stmt);
 			return ret;
 		}
 
-//		extension->id = cts_db_get_last_insert_id();
+//		extension->id = ctsvc_db_get_last_insert_id();
 		if (id)
-			*id = cts_db_get_last_insert_id();
-		cts_stmt_finalize(stmt);
+			*id = ctsvc_db_get_last_insert_id();
+		ctsvc_stmt_finalize(stmt);
 
 		if (!is_my_profile)
 			ctsvc_set_data_noti();

@@ -68,13 +68,13 @@ static double __ctsvc_db_group_get_next_group_prio(void)
 
 	snprintf(query, sizeof(query), "SELECT MAX(group_prio) FROM "CTS_TABLE_GROUPS" ");
 
-	stmt = cts_query_prepare(query);
-	RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB, "cts_query_prepare() Failed");
+	ret = ctsvc_query_prepare(query, &stmt);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
 
-	ret = cts_stmt_step(stmt);
+	ret = ctsvc_stmt_step(stmt);
 	if (1 /*CTS_TRUE*/  == ret)
 		prio = ctsvc_stmt_get_dbl(stmt, 0);
-	cts_stmt_finalize(stmt);
+	ctsvc_stmt_finalize(stmt);
 
 	return prio + 1.0;
 }
@@ -98,7 +98,7 @@ static int __ctsvc_db_group_insert_record( contacts_record_h record, int *id )
 	RETVM_IF( ret < CONTACTS_ERROR_NONE, ret,  "DB error : ctsvc_begin_trans() Failed(%d)", ret);
 
 	group_prio = __ctsvc_db_group_get_next_group_prio();
-	group->id = cts_db_get_next_id(CTS_TABLE_GROUPS);
+	group->id = ctsvc_db_get_next_id(CTS_TABLE_GROUPS);
 	if (id)
 		*id = group->id;
 
@@ -108,33 +108,33 @@ static int __ctsvc_db_group_insert_record( contacts_record_h record, int *id )
 			"VALUES(%d, %d, ?, ?, ?, ?, ?, ?, ?, ?, %d, %lf)",
 			group->id, group->addressbook_id, group->is_read_only, group_prio);
 
-	stmt = cts_query_prepare(query);
+	ret = ctsvc_query_prepare(query, &stmt);
 	if (NULL == stmt) {
-		CTS_ERR("DB error : cts_query_prepare() Failed");
+		CTS_ERR("DB error : ctsvc_query_prepare() Failed(%d)", ret);
 		ctsvc_end_trans(false);
-		return CONTACTS_ERROR_DB;
+		return ret;
 	}
 
-	cts_stmt_bind_text(stmt, 1, group->name);
+	ctsvc_stmt_bind_text(stmt, 1, group->name);
 
 	ver = ctsvc_get_next_ver();
 
-	cts_stmt_bind_int(stmt, 2, ver);
-	cts_stmt_bind_int(stmt, 3, ver);
+	ctsvc_stmt_bind_int(stmt, 2, ver);
+	ctsvc_stmt_bind_int(stmt, 3, ver);
 
 	if (group->ringtone_path)
-		cts_stmt_bind_text(stmt, 4, group->ringtone_path);
+		ctsvc_stmt_bind_text(stmt, 4, group->ringtone_path);
 	if (group->vibration)
-		cts_stmt_bind_text(stmt, 5, group->vibration);
+		ctsvc_stmt_bind_text(stmt, 5, group->vibration);
 	if (group->message_alert)
-		cts_stmt_bind_text(stmt, 6, group->message_alert);
+		ctsvc_stmt_bind_text(stmt, 6, group->message_alert);
 
 	if(group->image_thumbnail_path) {
 		char image[CTSVC_IMG_FULL_PATH_SIZE_MAX] = {0};
 		ret = ctsvc_have_file_read_permission(group->image_thumbnail_path);
 		if (ret != CONTACTS_ERROR_NONE) {
 			CTS_ERR("ctsvc_have_file_read_permission Fail(%d)", ret);
-			cts_stmt_finalize(stmt);
+			ctsvc_stmt_finalize(stmt);
 			ctsvc_end_trans(false);
 			return ret;
 		}
@@ -143,30 +143,30 @@ static int __ctsvc_db_group_insert_record( contacts_record_h record, int *id )
 		ret = ctsvc_utils_copy_image(CTS_GROUP_IMAGE_LOCATION, group->image_thumbnail_path, image);
 		if (CONTACTS_ERROR_NONE != ret) {
 			CTS_ERR("ctsvc_utils_copy_image() Failed(%d)", ret);
-			cts_stmt_finalize(stmt);
+			ctsvc_stmt_finalize(stmt);
 			ctsvc_end_trans(false);
 			return ret;
 		}
 
 		free(group->image_thumbnail_path);
 		group->image_thumbnail_path = strdup(image);
-		cts_stmt_bind_text(stmt, 7, group->image_thumbnail_path);
+		ctsvc_stmt_bind_text(stmt, 7, group->image_thumbnail_path);
 	}
 
 	if (group->extra_data)
-		cts_stmt_bind_text(stmt, 8, group->extra_data);
+		ctsvc_stmt_bind_text(stmt, 8, group->extra_data);
 
-	ret = cts_stmt_step(stmt);
+	ret = ctsvc_stmt_step(stmt);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB error : cts_stmt_step() Failed(%d)", ret);
-		cts_stmt_finalize(stmt);
+		CTS_ERR("DB error : ctsvc_stmt_step() Failed(%d)", ret);
+		ctsvc_stmt_finalize(stmt);
 		ctsvc_end_trans(false);
 		return ret;
 	}
 
 	ctsvc_set_group_noti();
 
-	cts_stmt_finalize(stmt);
+	ctsvc_stmt_finalize(stmt);
 
 	ret = ctsvc_end_trans(true);
 	if(ret < CONTACTS_ERROR_NONE ) {
@@ -204,17 +204,17 @@ static int __ctsvc_db_group_update_record( contacts_record_h record )
 	snprintf(query, sizeof(query),
 			"SELECT addressbook_id, is_read_only, image_thumbnail_path FROM %s WHERE group_id = %d",
 			CTS_TABLE_GROUPS, group->id);
-	stmt = cts_query_prepare(query);
+	ret = ctsvc_query_prepare(query, &stmt);
 	if (NULL == stmt) {
-		CTS_ERR("DB error : cts_query_prepare() Failed");
+		CTS_ERR("DB error : ctsvc_query_prepare() Failed(%d)", ret);
 		ctsvc_end_trans(false);
-		return CONTACTS_ERROR_DB;
+		return ret;
 	}
 
-	ret = cts_stmt_step(stmt);
+	ret = ctsvc_stmt_step(stmt);
 	if (1 != ret) {
-		CTS_ERR("DB error : cts_stmt_step() Failed(%d)", ret);
-		cts_stmt_finalize(stmt);
+		CTS_ERR("DB error : ctsvc_stmt_step() Failed(%d)", ret);
+		ctsvc_stmt_finalize(stmt);
 		ctsvc_end_trans(false);
 		if (CONTACTS_ERROR_NONE == ret) {
 			CTS_ERR("DB error : The group record(%d) is Invalid(%d)", group->id, ret);
@@ -228,7 +228,7 @@ static int __ctsvc_db_group_update_record( contacts_record_h record )
 	is_read_only = ctsvc_stmt_get_int(stmt, 1);
 	temp = ctsvc_stmt_get_text(stmt, 2);
 	image = SAFE_STRDUP(temp);
-	cts_stmt_finalize(stmt);
+	ctsvc_stmt_finalize(stmt);
 
 	if (is_read_only && ctsvc_record_check_property_flag((ctsvc_record_s *)record, _contacts_group.name, CTSVC_PROPERTY_FLAG_DIRTY)) {
 		CTS_ERR("Can not change the group name. It is a read-only group (group_id : %d)", group->id);
@@ -306,10 +306,9 @@ static int __ctsvc_db_group_update_record( contacts_record_h record )
 		snprintf(query_set, sizeof(query_set), "%s, changed_ver=%d ", set, ctsvc_get_next_ver());
 
 		snprintf(query, sizeof(query), "UPDATE %s SET %s WHERE group_id = %d", CTS_TABLE_GROUPS, query_set, group->id);
-		stmt = cts_query_prepare(query);
+		ret = ctsvc_query_prepare(query, &stmt);
 		if (NULL == stmt) {
-			CTS_ERR("DB error : cts_query_prepare() Failed");
-			ret = CONTACTS_ERROR_DB;
+			CTS_ERR("DB error : ctsvc_query_prepare() Failed(%d)", ret);
 			break;
 		}
 		if (bind_text) {
@@ -317,16 +316,16 @@ static int __ctsvc_db_group_update_record( contacts_record_h record )
 			for (cursor=bind_text,i=1;cursor;cursor=cursor->next,i++) {
 				const char *text = cursor->data;
 				if (text && *text)
-					cts_stmt_bind_text(stmt, i, text);
+					ctsvc_stmt_bind_text(stmt, i, text);
 			}
 		}
-		ret = cts_stmt_step(stmt);
+		ret = ctsvc_stmt_step(stmt);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("cts_stmt_step() Failed(%d)", ret);
-			cts_stmt_finalize(stmt);
+			CTS_ERR("ctsvc_stmt_step() Failed(%d)", ret);
+			ctsvc_stmt_finalize(stmt);
 			break;
 		}
-		cts_stmt_finalize(stmt);
+		ctsvc_stmt_finalize(stmt);
 
 		ctsvc_set_group_noti();
 	} while (0);
@@ -390,7 +389,7 @@ static int __ctsvc_db_group_delete_record( int id )
 		return ret;
 	}
 
-	ret = cts_db_change();
+	ret = ctsvc_db_change();
 	if (ret <= 0) {
 		ctsvc_end_trans(false);
 		return CONTACTS_ERROR_NO_DATA;
@@ -465,19 +464,22 @@ static int __ctsvc_db_group_get_record( int id, contacts_record_h *out_record )
 				"ringtone_path, vibration, message_alert, image_thumbnail_path "
 				"FROM "CTS_TABLE_GROUPS" WHERE group_id = %d", id);
 
-	stmt = cts_query_prepare(query);
-	RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB, "DB error : cts_query_prepare() Failed");
+	ret = ctsvc_query_prepare(query, &stmt);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
 
-	ret = cts_stmt_step(stmt);
+	ret = ctsvc_stmt_step(stmt);
 	if (1 /*CTS_TRUE*/ != ret) {
-		CTS_ERR("cts_stmt_step() Failed(%d)", ret);
-		cts_stmt_finalize(stmt);
-		return CONTACTS_ERROR_NO_DATA;
+		CTS_ERR("ctsvc_stmt_step() Failed(%d)", ret);
+		ctsvc_stmt_finalize(stmt);
+		if (CONTACTS_ERROR_NONE == ret)
+			return CONTACTS_ERROR_NO_DATA;
+		else
+			return ret;
 	}
 
 	ret = __ctsvc_db_group_value_set(stmt, &record);
 
-	cts_stmt_finalize(stmt);
+	ctsvc_stmt_finalize(stmt);
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("__ctsvc_db_group_value_set(ALL) Failed(%d)", ret);
 		return ret;
@@ -506,15 +508,15 @@ static int __ctsvc_db_group_get_all_records( int offset, int limit, contacts_lis
 			len += snprintf(query+len, sizeof(query)-len, " OFFSET %d", offset);
 	}
 
-	stmt = cts_query_prepare(query);
-	RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB , "DB error : cts_query_prepare() Failed");
+	ret = ctsvc_query_prepare(query, &stmt);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
 
 	contacts_list_create(&list);
-	while ((ret = cts_stmt_step(stmt))) {
+	while ((ret = ctsvc_stmt_step(stmt))) {
 		contacts_record_h record;
 		if (1 != ret) {
-			CTS_ERR("DB error : cts_stmt_step() Failed(%d)", ret);
-			cts_stmt_finalize(stmt);
+			CTS_ERR("DB error : ctsvc_stmt_step() Failed(%d)", ret);
+			ctsvc_stmt_finalize(stmt);
 			contacts_list_destroy(list, true);
 			return ret;
 		}
@@ -522,7 +524,7 @@ static int __ctsvc_db_group_get_all_records( int offset, int limit, contacts_lis
 
 		ctsvc_list_prepend(list, record);
 	}
-	cts_stmt_finalize(stmt);
+	ctsvc_stmt_finalize(stmt);
 	ctsvc_list_reverse(list);
 
 	*out_list = (contacts_list_h)list;
@@ -549,11 +551,11 @@ static int __ctsvc_db_group_get_records_with_query( contacts_query_h query,
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_db_make_get_records_query_stmt fail(%d)", ret);
 
 	contacts_list_create(&list);
-	while ((ret = cts_stmt_step(stmt))) {
+	while ((ret = ctsvc_stmt_step(stmt))) {
 		contacts_record_h record;
 		if (1 != ret) {
-			CTS_ERR("DB error : cts_stmt_step() Failed(%d)", ret);
-			cts_stmt_finalize(stmt);
+			CTS_ERR("DB error : ctsvc_stmt_step() Failed(%d)", ret);
+			ctsvc_stmt_finalize(stmt);
 			contacts_list_destroy(list, true);
 			return ret;
 		}
@@ -623,7 +625,7 @@ static int __ctsvc_db_group_get_records_with_query( contacts_query_h query,
 		}
 		ctsvc_list_prepend(list, record);
 	}
-	cts_stmt_finalize(stmt);
+	ctsvc_stmt_finalize(stmt);
 	ctsvc_list_reverse(list);
 
 	*out_list = (contacts_list_h)list;

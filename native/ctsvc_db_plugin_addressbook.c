@@ -95,13 +95,13 @@ static int __ctsvc_db_addressbook_get_record( int id, contacts_record_h* out_rec
 				"SELECT addressbook_id, addressbook_name, account_id, mode, last_sync_ver "
 				"FROM "CTS_TABLE_ADDRESSBOOKS" WHERE addressbook_id = %d", id);
 
-	stmt = cts_query_prepare(query);
-	RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB, "DB error : cts_query_prepare() Failed");
+	ret = ctsvc_query_prepare(query, &stmt);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
 
-	ret = cts_stmt_step(stmt);
+	ret = ctsvc_stmt_step(stmt);
 	if (1 /*CTS_TRUE*/ != ret) {
-		CTS_ERR("cts_stmt_step() Failed(%d)", ret);
-		cts_stmt_finalize(stmt);
+		CTS_ERR("ctsvc_stmt_step() Failed(%d)", ret);
+		ctsvc_stmt_finalize(stmt);
 		if (CONTACTS_ERROR_NONE == ret)
 			return CONTACTS_ERROR_NO_DATA;
 		else
@@ -110,7 +110,7 @@ static int __ctsvc_db_addressbook_get_record( int id, contacts_record_h* out_rec
 
 	ret = __ctsvc_db_addressbook_value_set(stmt, &record);
 
-	cts_stmt_finalize(stmt);
+	ctsvc_stmt_finalize(stmt);
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("__ctsvc_db_addressbook_value_set(ALL) Failed(%d)", ret);
 		return ret;
@@ -179,28 +179,28 @@ static int __ctsvc_db_addressbook_insert_record( contacts_record_h record, int *
 			"VALUES(?, %d, %d)",
 			CTS_TABLE_ADDRESSBOOKS, addressbook->account_id, addressbook->mode);
 
-	stmt = cts_query_prepare(query);
+	ret = ctsvc_query_prepare(query, &stmt);
 	if (NULL == stmt) {
-		CTS_ERR("DB error : cts_query_prepare() Failed");
+		CTS_ERR("DB error : ctsvc_query_prepare() Failed(%d)", ret);
 		ctsvc_end_trans(false);
-		return CONTACTS_ERROR_DB;
+		return ret;
 	}
 
-	cts_stmt_bind_text(stmt, 1, addressbook->name);
+	ctsvc_stmt_bind_text(stmt, 1, addressbook->name);
 
 	/* DOING JOB */
 	do {
-		ret = cts_stmt_step(stmt);
+		ret = ctsvc_stmt_step(stmt);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("DB error : cts_stmt_step() Failed(%d)", ret);
-			cts_stmt_finalize(stmt);
+			CTS_ERR("DB error : ctsvc_stmt_step() Failed(%d)", ret);
+			ctsvc_stmt_finalize(stmt);
 			break;
 		}
 
-		//int index = cts_db_get_last_insert_id();
+		//int index = ctsvc_db_get_last_insert_id();
 		if (id)
-			*id = cts_db_get_last_insert_id();
-		cts_stmt_finalize(stmt);
+			*id = ctsvc_db_get_last_insert_id();
+		ctsvc_stmt_finalize(stmt);
 
 		ctsvc_set_addressbook_noti();
 		ret = ctsvc_end_trans(true);
@@ -247,10 +247,9 @@ static int __ctsvc_db_addressbook_update_record( contacts_record_h record )
 			break;
 
 		snprintf(query, sizeof(query), "UPDATE %s SET %s WHERE addressbook_id = %d", CTS_TABLE_ADDRESSBOOKS, set, addressbook->id);
-		stmt = cts_query_prepare(query);
+		ret = ctsvc_query_prepare(query, &stmt);
 		if (NULL == stmt) {
-			CTS_ERR("DB error : cts_query_prepare() Failed");
-			ret = CONTACTS_ERROR_DB;
+			CTS_ERR("DB error : ctsvc_query_prepare() Failed(%d)", ret);
 			break;
 		}
 		if (bind_text) {
@@ -258,16 +257,16 @@ static int __ctsvc_db_addressbook_update_record( contacts_record_h record )
 			for (cursor=bind_text,i=1;cursor;cursor=cursor->next,i++) {
 				const char *text = cursor->data;
 				if (text && *text)
-					cts_stmt_bind_text(stmt, i, text);
+					ctsvc_stmt_bind_text(stmt, i, text);
 			}
 		}
-		ret = cts_stmt_step(stmt);
+		ret = ctsvc_stmt_step(stmt);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("cts_stmt_step() Failed(%d)", ret);
-			cts_stmt_finalize(stmt);
+			CTS_ERR("ctsvc_stmt_step() Failed(%d)", ret);
+			ctsvc_stmt_finalize(stmt);
 			break;
 		}
-		cts_stmt_finalize(stmt);
+		ctsvc_stmt_finalize(stmt);
 
 		ctsvc_set_addressbook_noti();
 	} while (0);
@@ -393,7 +392,7 @@ static int __ctsvc_db_addressbook_delete_record( int addressbook_id )
 			break;
 		}
 
-		ret = cts_db_change();
+		ret = ctsvc_db_change();
 		if (0 < ret) {
 			ctsvc_set_my_profile_noti();
 			ctsvc_set_contact_noti();
@@ -408,7 +407,7 @@ static int __ctsvc_db_addressbook_delete_record( int addressbook_id )
 
 		ret = ctsvc_person_do_garbage_collection();
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("DB error : cts_person_garbagecollection() Failed(%d)", ret);
+			CTS_ERR("DB error : ctsvc_person_garbagecollection() Failed(%d)", ret);
 			break;
 		}
 
@@ -447,23 +446,23 @@ static int __ctsvc_db_addressbook_get_all_records( int offset, int limit,
 			len += snprintf(query+len, sizeof(query)-len, " OFFSET %d", offset);
 	}
 
-	stmt = cts_query_prepare(query);
-	RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB , "DB error : cts_query_prepare() Failed");
+	ret = ctsvc_query_prepare(query, &stmt);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
 
 	contacts_list_create(&list);
-	while ((ret = cts_stmt_step(stmt))) {
+	while ((ret = ctsvc_stmt_step(stmt))) {
 		contacts_record_h record;
 		if (1 != ret) {
-			CTS_ERR("DB error : cts_stmt_step() Failed(%d)", ret);
-			cts_stmt_finalize(stmt);
+			CTS_ERR("DB error : ctsvc_stmt_step() Failed(%d)", ret);
+			ctsvc_stmt_finalize(stmt);
 			contacts_list_destroy(list, true);
-			return CONTACTS_ERROR_NO_DATA;
+			return ret;
 		}
 		__ctsvc_db_addressbook_value_set(stmt, &record);
 
 		ctsvc_list_prepend(list, record);
 	}
-	cts_stmt_finalize(stmt);
+	ctsvc_stmt_finalize(stmt);
 	ctsvc_list_reverse(list);
 
 	*out_list = (contacts_list_h)list;
@@ -487,13 +486,13 @@ static int __ctsvc_db_addressbook_get_records_with_query( contacts_query_h query
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_db_make_get_records_query_stmt fail(%d)", ret);
 
 	contacts_list_create(&list);
-	while ((ret = cts_stmt_step(stmt))) {
+	while ((ret = ctsvc_stmt_step(stmt))) {
 		contacts_record_h record;
 		if (1 != ret) {
-			CTS_ERR("DB error : cts_stmt_step() Failed(%d)", ret);
-			cts_stmt_finalize(stmt);
+			CTS_ERR("DB error : ctsvc_stmt_step() Failed(%d)", ret);
+			ctsvc_stmt_finalize(stmt);
 			contacts_list_destroy(list, true);
-			return CONTACTS_ERROR_NO_DATA;
+			return ret;
 		}
 
 		contacts_record_create(_contacts_address_book._uri, &record);
@@ -537,7 +536,7 @@ static int __ctsvc_db_addressbook_get_records_with_query( contacts_query_h query
 		}
 		ctsvc_list_prepend(list, record);
 	}
-	cts_stmt_finalize(stmt);
+	ctsvc_stmt_finalize(stmt);
 	ctsvc_list_reverse(list);
 
 	*out_list = (contacts_list_h)list;

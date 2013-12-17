@@ -190,7 +190,7 @@ int ctsvc_db_person_create_record_from_stmt(cts_stmt stmt, contacts_record_h *re
 	return CONTACTS_ERROR_NONE;
 }
 
-inline static const char* __cts_get_image_filename(const char* src)
+inline static const char* __ctsvc_get_image_filename(const char* src)
 {
 	const char* dir = CTS_IMG_FULL_LOCATION;
 	int pos=0;
@@ -215,19 +215,19 @@ int ctsvc_db_person_set_favorite(int person_id, bool set, bool propagate)
 		snprintf(query, sizeof(query),
 			"SELECT MAX(favorite_prio) FROM "CTS_TABLE_FAVORITES);
 
-		stmt = cts_query_prepare(query);
-		RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB, "cts_query_prepare() Failed");
+		ret = ctsvc_query_prepare(query, &stmt);
+		RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
 
-		ret = cts_stmt_step(stmt);
+		ret = ctsvc_stmt_step(stmt);
 		if (1 /*CTS_TRUE*/ == ret) {
 			prio = ctsvc_stmt_get_dbl(stmt, 0);
 		}
 		else if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("cts_stmt_step() Failed(%d)", ret);
-			cts_stmt_finalize(stmt);
+			CTS_ERR("ctsvc_stmt_step() Failed(%d)", ret);
+			ctsvc_stmt_finalize(stmt);
 			return ret;
 		}
-		cts_stmt_finalize(stmt);
+		ctsvc_stmt_finalize(stmt);
 
 		prio = prio + 1.0;
 		snprintf(query, sizeof(query),
@@ -272,15 +272,12 @@ int ctsvc_db_insert_person(contacts_record_h record)
 		"WHERE contact_id=%d "
 		"ORDER BY timestamp DESC LIMIT 1",
 		CTS_TABLE_ACTIVITIES, contact->id);
-	stmt = cts_query_prepare(query);
-	if (NULL == stmt) {
-		CTS_ERR("DB error : cts_query_prepare() Failed()");
-		return CONTACTS_ERROR_DB;
-	}
+	ret = ctsvc_query_prepare(query, &stmt);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
 
-	if (1 == cts_stmt_step(stmt))
+	if (1 == ctsvc_stmt_step(stmt))
 		status = SAFE_STRDUP(ctsvc_stmt_get_text(stmt, 0));
-	cts_stmt_finalize(stmt);
+	ctsvc_stmt_finalize(stmt);
 
 	version = ctsvc_get_next_ver();
 	snprintf(query, sizeof(query),
@@ -291,33 +288,33 @@ int ctsvc_db_insert_person(contacts_record_h record)
 			contact->id, version, version,
 			contact->has_phonenumber, contact->has_email, contact->addressbook_id);
 
-	stmt = cts_query_prepare(query);
+	ret = ctsvc_query_prepare(query, &stmt);
 	if (NULL == stmt) {
-		CTS_ERR("DB error : cts_query_prepare() Failed()");
-		free(status);
-		return CONTACTS_ERROR_DB;
-	}
-	if(contact->ringtone_path)
-		cts_stmt_bind_text(stmt, 1, contact->ringtone_path);
-	if(contact->vibration)
-		cts_stmt_bind_text(stmt, 2, contact->vibration);
-	if(contact->message_alert)
-		cts_stmt_bind_text(stmt, 3, contact->message_alert);
-	if(status)
-		cts_stmt_bind_text(stmt, 4, status);
-	if(contact->image_thumbnail_path)
-		cts_stmt_bind_text(stmt, 5, __cts_get_image_filename(contact->image_thumbnail_path));
-
-	ret = cts_stmt_step(stmt);
-	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("cts_stmt_step() Failed(%d)", ret);
-		cts_stmt_finalize(stmt);
+		CTS_ERR("DB error : ctsvc_query_prepare() Failed(%d)", ret);
 		free(status);
 		return ret;
 	}
-	index = cts_db_get_last_insert_id();
+	if(contact->ringtone_path)
+		ctsvc_stmt_bind_text(stmt, 1, contact->ringtone_path);
+	if(contact->vibration)
+		ctsvc_stmt_bind_text(stmt, 2, contact->vibration);
+	if(contact->message_alert)
+		ctsvc_stmt_bind_text(stmt, 3, contact->message_alert);
+	if(status)
+		ctsvc_stmt_bind_text(stmt, 4, status);
+	if(contact->image_thumbnail_path)
+		ctsvc_stmt_bind_text(stmt, 5, __ctsvc_get_image_filename(contact->image_thumbnail_path));
 
-	cts_stmt_finalize(stmt);
+	ret = ctsvc_stmt_step(stmt);
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("ctsvc_stmt_step() Failed(%d)", ret);
+		ctsvc_stmt_finalize(stmt);
+		free(status);
+		return ret;
+	}
+	index = ctsvc_db_get_last_insert_id();
+
+	ctsvc_stmt_finalize(stmt);
 
 	snprintf(query, sizeof(query),
 		"UPDATE "CTS_TABLE_DATA" SET is_primary_default = 1 "
@@ -334,7 +331,7 @@ int ctsvc_db_insert_person(contacts_record_h record)
 	if (contact->is_favorite) {
 		ret = ctsvc_db_person_set_favorite(index, contact->is_favorite, false);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("cts_stmt_step() Failed(%d)", ret);
+			CTS_ERR("ctsvc_db_person_set_favorite() Failed(%d)", ret);
 			return ret;
 		}
 	}
@@ -370,13 +367,11 @@ static inline int __ctsvc_db_update_person_default(int person_id, int datatype)
 			"WHERE C.person_id=%d AND D.datatype=%d AND D.is_default=1 AND D.is_my_profile = 0 ORDER BY D.id",
 			person_id, datatype);
 
-		stmt = cts_query_prepare(query);
-		if (NULL == stmt) {
-			CTS_ERR("cts_query_prepare() Failed");
-			return CONTACTS_ERROR_DB;
-		}
+		ret = ctsvc_query_prepare(query, &stmt);
+		RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
 
-		if ((ret = cts_stmt_step(stmt))) {
+		ret = ctsvc_stmt_step(stmt);
+		if (1 == ret) {
 			data_id = ctsvc_stmt_get_int(stmt, 0);
 
 			snprintf(query, sizeof(query),
@@ -386,22 +381,27 @@ static inline int __ctsvc_db_update_person_default(int person_id, int datatype)
 			ret = ctsvc_query_exec(query);
 			if (CONTACTS_ERROR_NONE != ret) {
 				CTS_ERR("cts_query_exec Failed(%d)", ret);
-				cts_stmt_finalize(stmt);
+				ctsvc_stmt_finalize(stmt);
 				return ret;
 			}
 			temp = ctsvc_stmt_get_text(stmt, 1);
 			image_thumbnail_path = SAFE_STRDUP(temp);
 		}
-		cts_stmt_finalize(stmt);
+		ctsvc_stmt_finalize(stmt);
 
 		if (CTSVC_DATA_IMAGE == datatype) {
 			if (image_thumbnail_path) {
 				snprintf(query, sizeof(query),
 						"UPDATE "CTS_TABLE_PERSONS" SET image_thumbnail_path=? WHERE person_id=%d", person_id);
-				stmt = cts_query_prepare(query);
-				cts_stmt_bind_text(stmt, 1, image_thumbnail_path);
-				ret = cts_stmt_step(stmt);
-				cts_stmt_finalize(stmt);
+				ret = ctsvc_query_prepare(query, &stmt);
+				if (NULL == stmt) {
+					free(image_thumbnail_path);
+					CTS_ERR("DB error : ctsvc_query_prepare() Failed(%d)", ret);
+					return ret;
+				}
+				ctsvc_stmt_bind_text(stmt, 1, image_thumbnail_path);
+				ret = ctsvc_stmt_step(stmt);
+				ctsvc_stmt_finalize(stmt);
 				free(image_thumbnail_path);
 				if (CONTACTS_ERROR_NONE != ret) {
 					CTS_ERR("cts_query_exec Failed(%d)", ret);
@@ -491,43 +491,43 @@ int ctsvc_db_update_person(contacts_record_h record)
 	snprintf(query+len, sizeof(query)-len,
 			" WHERE person_id=%d", contact->person_id);
 
-	stmt = cts_query_prepare(query);
+	ret = ctsvc_query_prepare(query, &stmt);
 	if (NULL == stmt) {
-		CTS_ERR("cts_query_prepare() Failed");
+		CTS_ERR("ctsvc_query_prepare() Failed(%d)", ret);
 		ctsvc_end_trans(false);
-		return CONTACTS_ERROR_DB;
+		return ret;
 	}
 
 	if (ctsvc_record_check_property_flag((ctsvc_record_s *)record, _contacts_contact.ringtone_path, CTSVC_PROPERTY_FLAG_DIRTY)) {
 		if (contact->ringtone_path)
-			cts_stmt_bind_text(stmt, i, contact->ringtone_path);
+			ctsvc_stmt_bind_text(stmt, i, contact->ringtone_path);
 		i++;
 	}
 	if (ctsvc_record_check_property_flag((ctsvc_record_s *)record, _contacts_contact.vibration, CTSVC_PROPERTY_FLAG_DIRTY)) {
 		if (contact->vibration)
-			cts_stmt_bind_text(stmt, i, contact->vibration);
+			ctsvc_stmt_bind_text(stmt, i, contact->vibration);
 		i++;
 	}
 	if (ctsvc_record_check_property_flag((ctsvc_record_s *)record, _contacts_contact.message_alert, CTSVC_PROPERTY_FLAG_DIRTY)) {
 		if (contact->message_alert)
-			cts_stmt_bind_text(stmt, i, contact->message_alert);
+			ctsvc_stmt_bind_text(stmt, i, contact->message_alert);
 		i++;
 	}
 	if (ctsvc_record_check_property_flag((ctsvc_record_s *)record, _contacts_contact.image_thumbnail_path, CTSVC_PROPERTY_FLAG_DIRTY) &&
 			(contact->id == thumbnail_contact_id || thumbnail_contact_id == -1)) {
 		if (contact->image_thumbnail_path)
-			cts_stmt_bind_text(stmt, i, contact->image_thumbnail_path);
+			ctsvc_stmt_bind_text(stmt, i, contact->image_thumbnail_path);
 		i++;
 	}
 
-	ret = cts_stmt_step(stmt);
+	ret = ctsvc_stmt_step(stmt);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("cts_stmt_step() Failed(%d)", ret);
-		cts_stmt_finalize(stmt);
+		CTS_ERR("ctsvc_stmt_step() Failed(%d)", ret);
+		ctsvc_stmt_finalize(stmt);
 		ctsvc_end_trans(false);
 		return ret;
 	}
-	cts_stmt_finalize(stmt);
+	ctsvc_stmt_finalize(stmt);
 
 	// update favorite
 	snprintf(query, sizeof(query),

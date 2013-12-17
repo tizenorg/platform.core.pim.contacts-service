@@ -67,22 +67,22 @@ int ctsvc_db_profile_get_value_from_stmt(cts_stmt stmt, contacts_record_h *recor
 static inline int __ctsvc_profile_bind_stmt(cts_stmt stmt, ctsvc_profile_s *profile, int start_cnt)
 {
 	if (profile->uid)
-		cts_stmt_bind_text(stmt, start_cnt, profile->uid);
+		ctsvc_stmt_bind_text(stmt, start_cnt, profile->uid);
 	if (profile->text)
-		cts_stmt_bind_text(stmt, start_cnt+1, profile->text);
-	cts_stmt_bind_int(stmt, start_cnt+2, profile->order);
+		ctsvc_stmt_bind_text(stmt, start_cnt+1, profile->text);
+	ctsvc_stmt_bind_int(stmt, start_cnt+2, profile->order);
 	if (profile->service_operation)
-		cts_stmt_bind_text(stmt, start_cnt+3, profile->service_operation);
+		ctsvc_stmt_bind_text(stmt, start_cnt+3, profile->service_operation);
 	if (profile->mime)
-		cts_stmt_bind_text(stmt, start_cnt+4, profile->mime);
+		ctsvc_stmt_bind_text(stmt, start_cnt+4, profile->mime);
 	if (profile->app_id)
-		cts_stmt_bind_text(stmt, start_cnt+5, profile->app_id);
+		ctsvc_stmt_bind_text(stmt, start_cnt+5, profile->app_id);
 	if (profile->uri)
-		cts_stmt_bind_text(stmt, start_cnt+6, profile->uri);
+		ctsvc_stmt_bind_text(stmt, start_cnt+6, profile->uri);
 	if (profile->category)
-		cts_stmt_bind_text(stmt, start_cnt+7, profile->category);
+		ctsvc_stmt_bind_text(stmt, start_cnt+7, profile->category);
 	if (profile->extra_data)
-		cts_stmt_bind_text(stmt, start_cnt+8, profile->extra_data);
+		ctsvc_stmt_bind_text(stmt, start_cnt+8, profile->extra_data);
 	return CONTACTS_ERROR_NONE;
 }
 
@@ -105,22 +105,22 @@ int ctsvc_db_profile_insert(contacts_record_h record, int contact_id, bool is_my
 				"VALUES(%d, %d, %d, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 				contact_id, is_my_profile, CTSVC_DATA_PROFILE);
 
-	stmt = cts_query_prepare(query);
-	RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB, "DB error : cts_query_prepare() Failed");
+	ret = ctsvc_query_prepare(query, &stmt);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
 
 	__ctsvc_profile_bind_stmt(stmt, profile, 1);
 
-	ret = cts_stmt_step(stmt);
+	ret = ctsvc_stmt_step(stmt);
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("DB error : ctsvc_query_exec() Failed(%d)", ret);
-		cts_stmt_finalize(stmt);
+		ctsvc_stmt_finalize(stmt);
 		return ret;
 	}
 
-	//profile->id = cts_db_get_last_insert_id();
+	//profile->id = ctsvc_db_get_last_insert_id();
 	if (id)
-		*id = cts_db_get_last_insert_id();
-	cts_stmt_finalize(stmt);
+		*id = ctsvc_db_get_last_insert_id();
+	ctsvc_stmt_finalize(stmt);
 
 	if (!is_my_profile)
 		ctsvc_set_profile_noti();
