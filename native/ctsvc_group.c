@@ -34,33 +34,39 @@ int ctsvc_group_add_contact_in_transaction(int group_id, int contact_id)
 	cts_stmt stmt = NULL;
 	char query[CTS_SQL_MIN_LEN] = {0};
 	int rel_changed = 0;
-	int grp_acc, contact_acc;
-	int exist;
+	int grp_acc = -1;
+	int contact_acc = -1;
+	int exist = 0;
 
 	snprintf(query, sizeof(query),
 			"SELECT COUNT(*) FROM %s WHERE group_id = %d AND contact_id=%d AND deleted = 0",
 			CTS_TABLE_GROUP_RELATIONS, group_id, contact_id);
 
 	ret = ctsvc_query_get_first_int_result(query, &exist);
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_DBG("ctsvc_query_get_first_int_result fail(%d)");
+		return ret;
+	}
 	if (1 == exist)	{
 		CTS_DBG("group relation already exist (group_id:%d, contac_id:%d)", group_id, contact_id);
 		return CONTACTS_ERROR_NONE;
 	}
 
 	version = ctsvc_get_next_ver();
+
 	snprintf(query, sizeof(query),
 			"SELECT addressbook_id FROM %s WHERE group_id = %d",
 			CTS_TABLE_GROUPS, group_id);
-
 	ret = ctsvc_query_get_first_int_result(query, &grp_acc);
-	RETVM_IF(CONTACTS_ERROR_NO_DATA == grp_acc, CONTACTS_ERROR_INVALID_PARAMETER,
+	RETVM_IF(CONTACTS_ERROR_NO_DATA == ret, CONTACTS_ERROR_INVALID_PARAMETER,
 			"Invalid Parameter: group_id(%d) is Invalid", group_id);
 
 	snprintf(query, sizeof(query),
 			"SELECT addressbook_id FROM %s WHERE contact_id = %d AND deleted = 0",
 			CTS_TABLE_CONTACTS, contact_id);
-
 	ret = ctsvc_query_get_first_int_result(query, &contact_acc);
+	RETVM_IF(CONTACTS_ERROR_NO_DATA == ret, CONTACTS_ERROR_INVALID_PARAMETER,
+			"Invalid Parameter: contact_id(%d) is Invalid", contact_id);
 	RETVM_IF( contact_acc != grp_acc, CONTACTS_ERROR_INVALID_PARAMETER,
 			"Invalid Parameter: group_acc(%d) is differ from contact_acc(%d) Invalid", grp_acc, contact_acc);
 
