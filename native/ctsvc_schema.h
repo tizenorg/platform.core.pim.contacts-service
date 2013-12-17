@@ -91,6 +91,8 @@
 #define CTSVC_DB_VIEW_PERSON_NUMBER		"view_person_contact_number"
 #define CTSVC_DB_VIEW_PERSON_EMAIL		"view_person_contact_email"
 #define CTSVC_DB_VIEW_PERSON_GROUP			"view_person_contact_group"
+#define CTSVC_DB_VIEW_PERSON_GROUP_ASSIGNED	"view_person_contact_group_assigned"
+#define CTSVC_DB_VIEW_PERSON_GROUP_NOT_ASSIGNED	"view_person_contact_group_not_assigned"
 
 #define CTSVC_DB_VIEW_PERSON_PHONELOG	"view_person_contact_phonelog"
 #define CTSVC_DB_VIEW_PERSON_USAGE				"view_person_usage"

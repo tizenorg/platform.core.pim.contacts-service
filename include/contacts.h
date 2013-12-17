@@ -1184,6 +1184,63 @@
  * <tr><td>integer</td><td> group_id </td><td>*</td><td> </td></tr>
  * </table>
  *
+ * @section CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_person_group_assigned _contacts_person_group_assigned view
+ * <table>
+ * <tr>
+ *    <th>Type</th>
+ *    <th>Property ID</th>
+ *    <th>Primary Key</th>
+ *    <th>Description</th>
+ * </tr>
+ * <tr><td>string</td><td>_uri</td><td></td><td> </td></tr>
+ * <tr><td>integer</td><td> person_id </td><td>*</td><td> </td></tr>
+ * <tr><td>string</td><td> display_name </td><td></td><td> </td></tr>
+ * <tr><td>string</td><td> display_name_index </td><td></td><td> projection </td></tr>
+ * <tr><td>integer</td><td> display_contact_id </td><td></td><td> projection </td></tr>
+ * <tr><td>string</td><td> ringtone_path </td><td></td><td> projection </td></tr>
+ * <tr><td>string</td><td> image_thumbnail_path </td><td></td><td> projection </td></tr>
+ * <tr><td>string</td><td> vibration </td><td></td><td> projection </td></tr>
+ * <tr><td>string</td><td> message_alert </td><td></td><td> projection </td></tr>
+ * <tr><td>string</td><td> status </td><td></td><td> projection </td></tr>
+ * <tr><td>boolean</td><td> is_favorite </td><td></td><td> </td></tr>
+ * <tr><td>integer</td><td> link_count </td><td></td><td> projection </td></tr>
+ * <tr><td>string</td><td> linked_address_book_ids </td><td></td><td> projection </td></tr>
+ * <tr><td>boolean</td><td> has_phonenumber </td><td></td><td> </td></tr>
+ * <tr><td>boolean</td><td> has_email </td><td></td><td> </td></tr>
+ * <tr><td>integer</td><td> address_book_id </td><td></td><td> </td></tr>
+ * <tr><td>integer</td><td> address_book_mode </td><td></td><td> </td></tr>
+ * <tr><td>integer</td><td> group_id </td><td>*</td><td> </td></tr>
+ * <tr><td>integer</td><td> contact_id </td><td></td><td> projection </td></tr>
+ * </table>
+ *
+ * @section CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_person_group_not_assigned _contacts_person_group_not_assigned view
+ * <table>
+ * <tr>
+ *    <th>Type</th>
+ *    <th>Property ID</th>
+ *    <th>Primary Key</th>
+ *    <th>Description</th>
+ * </tr>
+ * <tr><td>string</td><td>_uri</td><td></td><td> </td></tr>
+ * <tr><td>integer</td><td> person_id </td><td>*</td><td> </td></tr>
+ * <tr><td>string</td><td> display_name </td><td></td><td> </td></tr>
+ * <tr><td>string</td><td> display_name_index </td><td></td><td> projection </td></tr>
+ * <tr><td>integer</td><td> display_contact_id </td><td></td><td> projection </td></tr>
+ * <tr><td>string</td><td> ringtone_path </td><td></td><td> projection </td></tr>
+ * <tr><td>string</td><td> image_thumbnail_path </td><td></td><td> projection </td></tr>
+ * <tr><td>string</td><td> vibration </td><td></td><td> projection </td></tr>
+ * <tr><td>string</td><td> message_alert </td><td></td><td> projection </td></tr>
+ * <tr><td>string</td><td> status </td><td></td><td> projection </td></tr>
+ * <tr><td>boolean</td><td> is_favorite </td><td></td><td> </td></tr>
+ * <tr><td>integer</td><td> link_count </td><td></td><td> projection </td></tr>
+ * <tr><td>string</td><td> linked_address_book_ids </td><td></td><td> projection </td></tr>
+ * <tr><td>boolean</td><td> has_phonenumber </td><td></td><td> </td></tr>
+ * <tr><td>boolean</td><td> has_email </td><td></td><td> </td></tr>
+ * <tr><td>integer</td><td> address_book_id </td><td></td><td> </td></tr>
+ * <tr><td>integer</td><td> address_book_mode </td><td></td><td> </td></tr>
+ * <tr><td>integer</td><td> contact_id </td><td></td><td> projection </td></tr>
+ * </table>
+ *
  * @section CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_person_phone_log _contacts_person_phone_log view
  * <table>
  * <tr>

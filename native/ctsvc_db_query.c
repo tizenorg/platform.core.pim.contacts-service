@@ -932,7 +932,9 @@ static inline bool __ctsvc_db_view_can_keyword_search(const char *view_uri)
 
 	if (0 == strcmp(view_uri, CTSVC_VIEW_URI_PERSON)
 		|| 0 == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_CONTACT)
-		|| 0 == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP)) {
+		|| 0 == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP)
+		|| 0 == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP_ASSIGNED)
+		|| 0 == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP_NOT_ASSIGNED)) {
 		return true;
 	}
 	return false;
@@ -1169,7 +1171,9 @@ static int __ctsvc_db_search_records_exec(const char *view_uri, const property_i
 	RETVM_IF (CONTACTS_ERROR_NONE != ret, ret, "Invalid parameter : view uri (%s)", view_uri);
 
 	if (0 == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_CONTACT)
-			|| 0 == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP)) {
+			|| 0 == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP)
+			|| 0 == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP_ASSIGNED)
+			|| 0 == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP_NOT_ASSIGNED)) {
 		len = snprintf(query, sizeof(query), "SELECT %s FROM %s "
 					"WHERE contact_id IN ",
 					projection, table);
@@ -1185,18 +1189,12 @@ static int __ctsvc_db_search_records_exec(const char *view_uri, const property_i
 		len += snprintf(query + len, sizeof(query) - len, " GROUP BY person_id_in_contact) temp_contacts "
 						"ON %s.person_id = temp_contacts.person_id_in_contact", table);
 	}
-/*
-	len += snprintf(query+len, sizeof(query)-len, "FROM %s, %s "
-					"LEFT JOIN (SELECT contact_id, person_id person_id_in_contact FROM %s) temp_contacts "
-					"ON %s.person_id = temp_contacts.person_id_in_contact AND "
-					"temp_contacts.contact_id = %s.contact_id",
-					table, CTS_TABLE_SEARCH_INDEX, CTS_TABLE_CONTACTS, table, CTS_TABLE_SEARCH_INDEX);
-*/
 
 	if (__ctsvc_db_view_has_display_name(view_uri, properties, ids_count)) {
 		sortkey = ctsvc_get_sort_column();
 		len += snprintf(query+len, sizeof(query)-len, " ORDER BY %s", sortkey);
-	} else if (0 == strcmp(view_uri, CTSVC_VIEW_URI_GROUP))
+	}
+	else if (0 == strcmp(view_uri, CTSVC_VIEW_URI_GROUP))
 		len += snprintf(query+len, sizeof(query)-len, " ORDER BY group_prio");
 
 	if (0 != limit) {
@@ -1346,7 +1344,9 @@ static inline int __ctsvc_db_search_records_with_query_exec(ctsvc_query_s *s_que
 		len = snprintf(query, sizeof(query), "SELECT %s ", projection);
 
 	if (0 == strcmp(s_query->view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_CONTACT)
-			|| 0 == strcmp(s_query->view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP)) {
+			|| 0 == strcmp(s_query->view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP)
+			|| 0 == strcmp(s_query->view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP_ASSIGNED)
+			|| 0 == strcmp(s_query->view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP_NOT_ASSIGNED)) {
 		len += snprintf(query+len, sizeof(query)-len, "FROM %s WHERE %s.contact_id IN ", table, table);
 	}
 	else {		// CTSVC_VIEW_URI_PERSON
@@ -2061,6 +2061,7 @@ static int __ctsvc_db_get_group_relations_changes(const char* view_uri, int addr
 			"UNION SELECT %d, group_id, contact_id, addressbook_id, ver "
 				"FROM "CTS_TABLE_GROUP_RELATIONS", "CTS_TABLE_GROUPS" USING (group_id) "
 				"WHERE ver > %d AND deleted = 1 ", CONTACTS_CHANGE_DELETED, version);
+
 	if (0 <= addressbook_id) {
 		len += snprintf(query + len , sizeof(query) - len ,
 				"AND addressbook_id = %d ", addressbook_id);
@@ -2090,6 +2091,7 @@ static int __ctsvc_db_get_group_relations_changes(const char* view_uri, int addr
 	}
 	ctsvc_stmt_finalize(stmt);
 	ctsvc_list_reverse(list);
+
 	snprintf(query, sizeof(query), "SELECT ver FROM "CTS_TABLE_VERSION);
 	ret = ctsvc_query_get_first_int_result(query, out_current_version);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret , "DB error : ctsvc_query_get_first_int_result() Failed(%d)", ret);

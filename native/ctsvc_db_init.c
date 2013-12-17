@@ -114,6 +114,8 @@ static const db_table_info_s __db_tables[] = {
 	{CTSVC_VIEW_URI_READ_ONLY_PERSON_NUMBER, CTSVC_DB_VIEW_PERSON_NUMBER, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_NONE},
 	{CTSVC_VIEW_URI_READ_ONLY_PERSON_EMAIL, CTSVC_DB_VIEW_PERSON_EMAIL, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_NONE},
 	{CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP, CTSVC_DB_VIEW_PERSON_GROUP, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_NONE},
+	{CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP_ASSIGNED, CTSVC_DB_VIEW_PERSON_GROUP_ASSIGNED, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_NONE},
+	{CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP_NOT_ASSIGNED, CTSVC_DB_VIEW_PERSON_GROUP_NOT_ASSIGNED, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_NONE},
 	{CTSVC_VIEW_URI_READ_ONLY_PERSON_PHONELOG, CTSVC_DB_VIEW_PERSON_PHONELOG, CTSVC_PERMISSION_CONTACT_READ|CTSVC_PERMISSION_PHONELOG_READ, CTSVC_PERMISSION_CONTACT_NONE},
 	{CTSVC_VIEW_URI_READ_ONLY_PERSON_USAGE, CTSVC_DB_VIEW_PERSON_USAGE, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_NONE},
 
@@ -787,13 +789,35 @@ static int __ctsvc_db_create_views()
 	// CTSVC_DB_VIEW_PERSON_GROUP
 	snprintf(query, sizeof(query),
 		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_PERSON_GROUP" AS "
+			"SELECT view_person_contact.*, groups.group_id, group_prio "
+				"FROM "CTSVC_DB_VIEW_PERSON_CONTACT" "
+					"LEFT JOIN "CTS_TABLE_GROUP_RELATIONS" "
+						"ON "CTS_TABLE_GROUP_RELATIONS".deleted = 0 AND "
+							CTS_TABLE_GROUP_RELATIONS".contact_id = "CTSVC_DB_VIEW_PERSON_CONTACT".contact_id "
+					"LEFT JOIN "CTS_TABLE_GROUPS" "
+						"ON "CTS_TABLE_GROUP_RELATIONS".group_id = "CTS_TABLE_GROUPS".group_id "
+					"ORDER BY group_prio");
+	ret = ctsvc_query_exec(query);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Failed(%d)", ret);
+
+	// CTSVC_DB_VIEW_PERSON_GROUP_NOT_ASSIGNED
+	snprintf(query, sizeof(query),
+		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_PERSON_GROUP_NOT_ASSIGNED" AS "
 			"SELECT * FROM "CTSVC_DB_VIEW_PERSON_CONTACT" "
-			"LEFT JOIN (SELECT groups.group_id, "
-						"contact_id contact_id_in_group, "
-						"group_prio "
-					"FROM "CTS_TABLE_GROUP_RELATIONS", "CTS_TABLE_GROUPS" "
-					"WHERE deleted = 0 AND group_relations.group_id = groups.group_id) temp_group "
-			"ON temp_group.contact_id_in_group = "CTSVC_DB_VIEW_PERSON_CONTACT".contact_id "
+			"WHERE contact_id NOT IN (select contact_id FROM "CTS_TABLE_GROUP_RELATIONS" WHERE deleted = 0)");
+	ret = ctsvc_query_exec(query);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Failed(%d)", ret);
+
+	// CTSVC_DB_VIEW_PERSON_GROUP_ASSIGNED
+	snprintf(query, sizeof(query),
+		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_PERSON_GROUP_ASSIGNED" AS "
+			"SELECT "CTSVC_DB_VIEW_PERSON_CONTACT".*, groups.group_id, group_prio "
+				"FROM "CTSVC_DB_VIEW_PERSON_CONTACT", "
+					CTS_TABLE_GROUP_RELATIONS", "CTS_TABLE_GROUPS" "
+				"ON "
+			CTS_TABLE_GROUP_RELATIONS".contact_id = "CTSVC_DB_VIEW_PERSON_CONTACT".contact_id AND "
+			CTS_TABLE_GROUP_RELATIONS".group_id = "CTS_TABLE_GROUPS".group_id AND "
+			CTS_TABLE_GROUP_RELATIONS".deleted = 0 "
 			"ORDER BY group_prio");
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Failed(%d)", ret);
@@ -835,13 +859,13 @@ static int __ctsvc_db_create_views()
 	// CTSVC_DB_VIEW_CONTACT_GROUP
 	snprintf(query, sizeof(query),
 		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_CONTACT_GROUP" AS "
-			"SELECT * FROM "CTSVC_DB_VIEW_CONTACT" "
-			"LEFT JOIN (SELECT group_relations.group_id, "
-						"group_name, "
-						"contact_id contact_id_in_group "
-					"FROM "CTS_TABLE_GROUP_RELATIONS", "CTS_TABLE_GROUPS" "
-					"ON group_relations.group_id = groups.group_id AND deleted = 0) temp_group "
-			"ON temp_group.contact_id_in_group = "CTSVC_DB_VIEW_CONTACT".contact_id");
+			"SELECT C.*, groups.group_id, group_name "
+				"FROM "CTSVC_DB_VIEW_CONTACT" C "
+				"LEFT JOIN "CTS_TABLE_GROUP_RELATIONS" "
+					"ON "CTS_TABLE_GROUP_RELATIONS".deleted = 0 AND "
+							CTS_TABLE_GROUP_RELATIONS".contact_id = C.contact_id "
+				"LEFT JOIN "CTS_TABLE_GROUPS" "
+					"ON "CTS_TABLE_GROUP_RELATIONS".group_id = "CTS_TABLE_GROUPS".group_id");
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Failed(%d)", ret);
 

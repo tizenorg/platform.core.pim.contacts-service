@@ -63,6 +63,9 @@
 #define CTSVC_VIEW_URI_READ_ONLY_PERSON_EMAIL					"tizen.contacts_view.person/simple_contact/email"
 
 #define CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP					"tizen.contacts_view.person/simple_contact/group"
+#define CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP_ASSIGNED		"tizen.contacts_view.person/simple_contact/group_assigned"
+#define CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP_NOT_ASSIGNED		"tizen.contacts_view.person/simple_contact/group_not_assigned"
+
 #define CTSVC_VIEW_URI_READ_ONLY_PERSON_PHONELOG				"tizen.contacts_view.person/simple_contact/phonelog"
 #define CTSVC_VIEW_URI_READ_ONLY_PERSON_USAGE							"tizen.contacts_view.person/usage"
 
