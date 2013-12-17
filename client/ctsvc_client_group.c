@@ -34,7 +34,6 @@ API int contacts_group_add_contact(int group_id, int contact_id)
 	pims_ipc_data_h outdata = NULL;
 
 	RETVM_IF(group_id <= 0 || contact_id <= 0, CONTACTS_ERROR_INVALID_PARAMETER,"id should be greater than 0");
-	RETVM_IF(ctsvc_get_ipc_handle() == NULL,CONTACTS_ERROR_IPC,"contacts not connected");
 
 	// make indata
 	indata = pims_ipc_data_create(0);
@@ -65,10 +64,7 @@ API int contacts_group_add_contact(int group_id, int contact_id)
 		return CONTACTS_ERROR_IPC;
 	}
 
-	if (indata)
-	{
-		pims_ipc_data_destroy(indata);
-	}
+	pims_ipc_data_destroy(indata);
 
 	if (outdata)
 	{
@@ -96,7 +92,6 @@ API int contacts_group_remove_contact(int group_id, int contact_id)
 	pims_ipc_data_h outdata = NULL;
 
 	RETVM_IF(group_id <= 0 || contact_id <= 0, CONTACTS_ERROR_INVALID_PARAMETER,"id should be greater than 0");
-	RETVM_IF(ctsvc_get_ipc_handle() == NULL,CONTACTS_ERROR_IPC,"contacts not connected");
 
 	// make indata
 	indata = pims_ipc_data_create(0);
@@ -127,10 +122,7 @@ API int contacts_group_remove_contact(int group_id, int contact_id)
 		return CONTACTS_ERROR_IPC;
 	}
 
-	if (indata)
-	{
-		pims_ipc_data_destroy(indata);
-	}
+	pims_ipc_data_destroy(indata);
 
 	if (outdata)
 	{
@@ -158,7 +150,6 @@ API int contacts_group_set_group_order(int group_id, int previous_group_id, int 
 	pims_ipc_data_h outdata = NULL;
 
 	RETVM_IF(group_id <= 0 || previous_group_id < 0 || next_group_id < 0, CONTACTS_ERROR_INVALID_PARAMETER,"id should be greater than 0");
-	RETVM_IF(ctsvc_get_ipc_handle() == NULL,CONTACTS_ERROR_IPC,"contacts not connected");
 
 	// make indata
 	indata = pims_ipc_data_create(0);
@@ -199,10 +190,7 @@ API int contacts_group_set_group_order(int group_id, int previous_group_id, int 
 		return CONTACTS_ERROR_IPC;
 	}
 
-	if (indata)
-	{
-		pims_ipc_data_destroy(indata);
-	}
+	pims_ipc_data_destroy(indata);
 
 	if (outdata)
 	{

@@ -18,12 +18,12 @@
  */
 
 #include <glib.h>
+#include <pims-ipc-data.h>
 
 #include "contacts.h"
 #include "ctsvc_internal.h"
 #include "ctsvc_ipc_define.h"
 #include "ctsvc_client_ipc.h"
-#include <pims-ipc-data.h>
 #include "ctsvc_ipc_marshal.h"
 
 API int contacts_phone_log_reset_statistics(void)
@@ -32,8 +32,6 @@ API int contacts_phone_log_reset_statistics(void)
 
 	pims_ipc_data_h indata = NULL;
 	pims_ipc_data_h outdata = NULL;
-
-	RETVM_IF(ctsvc_get_ipc_handle() == NULL,CONTACTS_ERROR_IPC,"contacts not connected");
 
 	// make indata
 	indata = pims_ipc_data_create(0);
@@ -51,13 +49,9 @@ API int contacts_phone_log_reset_statistics(void)
 		return CONTACTS_ERROR_IPC;
 	}
 
-	if (indata)
-	{
-		pims_ipc_data_destroy(indata);
-	}
+	pims_ipc_data_destroy(indata);
 
-	if (outdata)
-	{
+	if (outdata) {
 		// check result
 		unsigned int size = 0;
 		ret = *(int*) pims_ipc_data_get(outdata, &size);
@@ -72,7 +66,6 @@ API int contacts_phone_log_reset_statistics(void)
 	}
 
 	return ret;
-
 }
 
 API int contacts_phone_log_delete(contacts_phone_log_delete_e op, ...)
@@ -85,8 +78,6 @@ API int contacts_phone_log_delete(contacts_phone_log_delete_e op, ...)
 	int extra_data1;
 
 	va_list args;
-
-	RETVM_IF(ctsvc_get_ipc_handle() == NULL,CONTACTS_ERROR_IPC, "contacts not connected");
 
 	indata = pims_ipc_data_create(0);
 	if (indata == NULL) {

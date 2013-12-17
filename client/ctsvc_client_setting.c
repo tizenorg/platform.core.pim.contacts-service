@@ -35,7 +35,6 @@ API int contacts_setting_get_name_display_order(contacts_name_display_order_e *n
 
 	RETVM_IF(name_display_order == NULL, CONTACTS_ERROR_INVALID_PARAMETER,"The out param is NULL");
 	*name_display_order = 0;
-	RETVM_IF(ctsvc_get_ipc_handle() == NULL,CONTACTS_ERROR_IPC,"contacts not connected");
 
 	if (ctsvc_ipc_call(CTSVC_IPC_SETTING_MODULE, CTSVC_IPC_SERVER_SETTING_GET_NAME_DISPLAY_ORDER, NULL, &outdata) != 0) {
 		CTS_ERR("ctsvc_ipc_call failed");
@@ -61,7 +60,6 @@ API int contacts_setting_get_name_sorting_order(contacts_name_sorting_order_e *n
 
 	RETVM_IF(name_sorting_order == NULL, CONTACTS_ERROR_INVALID_PARAMETER, "The out param is NULL");
 	*name_sorting_order = 0;
-	RETVM_IF(ctsvc_get_ipc_handle() == NULL,CONTACTS_ERROR_IPC,"contacts not connected");
 
 	if (ctsvc_ipc_call(CTSVC_IPC_SETTING_MODULE, CTSVC_IPC_SERVER_SETTING_GET_NAME_SORTING_ORDER, NULL, &outdata) != 0) {
 		CTS_ERR("ctsvc_ipc_call failed");
@@ -89,7 +87,6 @@ API int contacts_setting_set_name_display_order(contacts_name_display_order_e na
 	RETVM_IF(name_display_order != CONTACTS_NAME_DISPLAY_ORDER_FIRSTLAST
 			&& name_display_order != CONTACTS_NAME_DISPLAY_ORDER_LASTFIRST,
 			CONTACTS_ERROR_INVALID_PARAMETER, "name display order is invalid : %d", name_display_order);
-	RETVM_IF(ctsvc_get_ipc_handle() == NULL,CONTACTS_ERROR_IPC,"contacts not connected");
 
 	indata = pims_ipc_data_create(0);
 	if (indata == NULL) {
@@ -130,7 +127,6 @@ API int contacts_setting_set_name_sorting_order(contacts_name_sorting_order_e na
 	RETVM_IF(name_sorint_order != CONTACTS_NAME_SORTING_ORDER_FIRSTLAST
 			&& name_sorint_order != CONTACTS_NAME_SORTING_ORDER_LASTFIRST,
 			CONTACTS_ERROR_INVALID_PARAMETER, "name sorting order is invalid : %d", name_sorint_order);
-	RETVM_IF(ctsvc_get_ipc_handle() == NULL,CONTACTS_ERROR_IPC,"contacts not connected");
 
 	indata = pims_ipc_data_create(0);
 	if (indata == NULL) {

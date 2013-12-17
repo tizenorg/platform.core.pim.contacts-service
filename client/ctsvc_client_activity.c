@@ -18,13 +18,13 @@
  */
 
 #include <glib.h>
+#include <pims-ipc-data.h>
 
 #include "contacts.h"
 #include "ctsvc_internal.h"
 #include "ctsvc_ipc_define.h"
 #include "ctsvc_ipc_marshal.h"
 #include "ctsvc_client_ipc.h"
-#include <pims-ipc-data.h>
 
 API int contacts_activity_delete_by_contact_id(int contact_id)
 {
@@ -58,10 +58,7 @@ API int contacts_activity_delete_by_contact_id(int contact_id)
 		return CONTACTS_ERROR_IPC;
 	}
 
-	if (indata)
-	{
-		pims_ipc_data_destroy(indata);
-	}
+	pims_ipc_data_destroy(indata);
 
 	if (outdata)
 	{
@@ -112,10 +109,7 @@ API int contacts_activity_delete_by_account_id(int account_id)
 		return CONTACTS_ERROR_IPC;
 	}
 
-	if (indata)
-	{
-		pims_ipc_data_destroy(indata);
-	}
+	pims_ipc_data_destroy(indata);
 
 	if (outdata)
 	{

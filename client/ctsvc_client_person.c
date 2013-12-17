@@ -18,12 +18,12 @@
  */
 
 #include <glib.h>
+#include <pims-ipc-data.h>
 
 #include "contacts.h"
 #include "ctsvc_internal.h"
 #include "ctsvc_ipc_define.h"
 #include "ctsvc_client_ipc.h"
-#include <pims-ipc-data.h>
 #include "ctsvc_ipc_marshal.h"
 
 API int contacts_person_link_person(int base_person_id, int person_id)
@@ -35,7 +35,6 @@ API int contacts_person_link_person(int base_person_id, int person_id)
 	pims_ipc_data_h outdata = NULL;
 
 	RETVM_IF(base_person_id <= 0 || person_id <= 0, CONTACTS_ERROR_INVALID_PARAMETER,"id should be greater than 0");
-	RETVM_IF(ctsvc_get_ipc_handle() == NULL,CONTACTS_ERROR_IPC,"contacts not connected");
 
 	// make indata
 	indata = pims_ipc_data_create(0);
@@ -82,10 +81,7 @@ API int contacts_person_link_person(int base_person_id, int person_id)
 		return CONTACTS_ERROR_IPC;
 	}
 
-	if (indata)
-	{
-		pims_ipc_data_destroy(indata);
-	}
+	pims_ipc_data_destroy(indata);
 
 	if (outdata)
 	{
@@ -113,7 +109,6 @@ API int contacts_person_unlink_contact(int person_id, int contact_id, int* unlin
 	pims_ipc_data_h outdata = NULL;
 
 	RETVM_IF(person_id <= 0 || contact_id <= 0, CONTACTS_ERROR_INVALID_PARAMETER,"id should be greater than 0");
-	RETVM_IF(ctsvc_get_ipc_handle() == NULL,CONTACTS_ERROR_IPC,"contacts not connected");
 
 	if (unlinked_person_id)
 		*unlinked_person_id = 0;
@@ -150,10 +145,7 @@ API int contacts_person_unlink_contact(int person_id, int contact_id, int* unlin
 		return CONTACTS_ERROR_IPC;
 	}
 
-	if (indata)
-	{
-		pims_ipc_data_destroy(indata);
-	}
+	pims_ipc_data_destroy(indata);
 
 	if (outdata)
 	{
@@ -184,7 +176,6 @@ API int contacts_person_reset_usage(int person_id, contacts_usage_type_e type)
 	pims_ipc_data_h outdata = NULL;
 
 	RETVM_IF(person_id <= 0, CONTACTS_ERROR_INVALID_PARAMETER,"contact_id should be greater than 0");
-	RETVM_IF(ctsvc_get_ipc_handle() == NULL,CONTACTS_ERROR_IPC,"contacts not connected");
 
 	// make indata
 	indata = pims_ipc_data_create(0);
@@ -218,10 +209,7 @@ API int contacts_person_reset_usage(int person_id, contacts_usage_type_e type)
 		return CONTACTS_ERROR_IPC;
 	}
 
-	if (indata)
-	{
-		pims_ipc_data_destroy(indata);
-	}
+	pims_ipc_data_destroy(indata);
 
 	if (outdata)
 	{
@@ -249,7 +237,6 @@ API int contacts_person_set_favorite_order(int person_id, int previous_person_id
 	pims_ipc_data_h outdata = NULL;
 
 	RETVM_IF(person_id <= 0 || previous_person_id < 0 || next_person_id < 0, CONTACTS_ERROR_INVALID_PARAMETER,"id should be greater than 0");
-	RETVM_IF(ctsvc_get_ipc_handle() == NULL,CONTACTS_ERROR_IPC,"contacts not connected");
 
 	// make indata
 	indata = pims_ipc_data_create(0);
@@ -290,10 +277,7 @@ API int contacts_person_set_favorite_order(int person_id, int previous_person_id
 		return CONTACTS_ERROR_IPC;
 	}
 
-	if (indata)
-	{
-		pims_ipc_data_destroy(indata);
-	}
+	pims_ipc_data_destroy(indata);
 
 	if (outdata)
 	{
@@ -323,7 +307,6 @@ API int contacts_person_set_default_property(contacts_person_property_e property
 	pims_ipc_data_h outdata = NULL;
 
 	RETVM_IF(person_id <= 0 || id <= 0, CONTACTS_ERROR_INVALID_PARAMETER,"id should be greater than 0");
-	RETVM_IF(ctsvc_get_ipc_handle() == NULL,CONTACTS_ERROR_IPC,"contacts not connected");
 
 	// make indata
 	indata = pims_ipc_data_create(0);
@@ -364,10 +347,7 @@ API int contacts_person_set_default_property(contacts_person_property_e property
 		return CONTACTS_ERROR_IPC;
 	}
 
-	if (indata)
-	{
-		pims_ipc_data_destroy(indata);
-	}
+	pims_ipc_data_destroy(indata);
 
 	if (outdata)
 	{
@@ -395,7 +375,6 @@ API int contacts_person_get_default_property(contacts_person_property_e property
 
 	RETVM_IF(person_id <= 0 || id == NULL, CONTACTS_ERROR_INVALID_PARAMETER,"id should be greater than 0");
 	*id = 0;
-	RETVM_IF(ctsvc_get_ipc_handle() == NULL,CONTACTS_ERROR_IPC,"contacts not connected");
 
 	// make indata
 	indata = pims_ipc_data_create(0);
@@ -427,9 +406,7 @@ API int contacts_person_get_default_property(contacts_person_property_e property
 		return CONTACTS_ERROR_IPC;
 	}
 
-	if (indata) {
-		pims_ipc_data_destroy(indata);
-	}
+	pims_ipc_data_destroy(indata);
 
 	if (outdata) {
 		// check result

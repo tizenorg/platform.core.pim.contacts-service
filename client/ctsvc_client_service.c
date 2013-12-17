@@ -72,7 +72,6 @@ API int contacts_connect2()
 
 	ctsvc_mutex_lock(CTS_MUTEX_CONNECTION);
 	if (0 == ctsvc_connection) {
-
 		ret = ctsvc_ipc_connect();
 		if (ret != CONTACTS_ERROR_NONE) {
 			CTS_ERR("ctsvc_ipc_connect() Failed(%d)", ret);
