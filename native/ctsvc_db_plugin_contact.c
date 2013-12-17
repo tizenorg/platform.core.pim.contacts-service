@@ -683,12 +683,10 @@ static inline int __ctsvc_contact_make_search_name(ctsvc_contact_s *contact, cha
 }
 
 
-static inline int __ctsvc_contact_make_search_data(int contact_id, char **search_name,
-		char **search_number, char **search_data)
+static inline int __ctsvc_contact_make_search_data(int contact_id, ctsvc_contact_s *contact,
+		char **search_name, char **search_number, char **search_data)
 {
-	int ret, len = 0;
-	char query[CTS_SQL_MAX_LEN] = {0};
-	ctsvc_contact_s *contact;
+	int len = 0;
 
 	char *number = NULL;
 	char *data = NULL;
@@ -697,22 +695,8 @@ static inline int __ctsvc_contact_make_search_data(int contact_id, char **search
 	char *temp_data=NULL;
 	int buf_size=0;
 
-	ret = ctsvc_db_contact_get(contact_id, (contacts_record_h*)&contact);
-	if (CONTACTS_ERROR_NO_DATA == ret) {
-		int r;
-		snprintf(query, sizeof(query), "DELETE FROM %s WHERE contact_id = %d",
-				CTS_TABLE_SEARCH_INDEX, contact_id);
-		r = ctsvc_query_exec(query);
-		if (CONTACTS_ERROR_NONE != r) {
-			CTS_ERR("ctsvc_query_exec() Failed(%d)", r);
-			return r;
-		}
-		return ret;
-	}
-	else if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_db_contact_get() Failed(%d)", ret);
-		return ret;
-	}
+	if (contact == NULL)
+		return CONTACTS_ERROR_NO_DATA;
 
 	__ctsvc_contact_make_search_name(contact, search_name);
 
@@ -912,8 +896,6 @@ static inline int __ctsvc_contact_make_search_data(int contact_id, char **search
 		}while(CONTACTS_ERROR_NONE == contacts_list_next(company_list));
 	}
 
-	contacts_record_destroy((contacts_record_h)contact, true);
-
 	*search_number = number;
 	if (data) {
 		ctsvc_normalize_str(data, &normalized_data);
@@ -923,11 +905,10 @@ static inline int __ctsvc_contact_make_search_data(int contact_id, char **search
 	return CONTACTS_ERROR_NONE;
 }
 
-static inline int __ctsvc_contact_refresh_lookup_data(int contact_id)
+static inline int __ctsvc_contact_refresh_lookup_data(int contact_id, ctsvc_contact_s *contact)
 {
 	int ret, len = 0, temp_len =0;
 	char query[CTS_SQL_MAX_LEN] = {0};
-	ctsvc_contact_s *contact;
 
 	snprintf(query, sizeof(query), "DELETE FROM %s WHERE contact_id = %d",
 			CTS_TABLE_NAME_LOOKUP, contact_id);
@@ -945,11 +926,8 @@ static inline int __ctsvc_contact_refresh_lookup_data(int contact_id)
 		return ret;
 	}
 
-	ret = ctsvc_db_contact_get(contact_id, (contacts_record_h*)&contact);
-	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_db_contact_get() Failed(%d)", ret);
-		return ret;
-	}
+	if (contact == NULL)
+		return CONTACTS_ERROR_NO_DATA;
 
 	if (contact->name) {
 		contacts_list_h name_list = (contacts_list_h)contact->name;
@@ -1002,8 +980,7 @@ static inline int __ctsvc_contact_refresh_lookup_data(int contact_id)
 
 				if (CONTACTS_ERROR_NONE != ret) {
 					CTS_ERR("ctsvc_stmt_step() Failed(%d)", ret);
-					contacts_record_destroy((contacts_record_h)contact, true);
-					return CONTACTS_ERROR_DB;
+					return ret;
 				}
 				break;
 			}
@@ -1039,8 +1016,7 @@ static inline int __ctsvc_contact_refresh_lookup_data(int contact_id)
 				if (CONTACTS_ERROR_NONE != ret) {
 					CTS_ERR("ctsvc_stmt_step() Failed(%d)", ret);
 					ctsvc_stmt_finalize(stmt);
-					contacts_record_destroy((contacts_record_h)contact, true);
-					return CONTACTS_ERROR_DB;
+					return ret;
 				}
 				ret = ctsvc_normalize_number(clean_num, normal_num, sizeof(normal_num));
 				if (ret > 0 && strcmp(clean_num, normal_num) != 0) {
@@ -1053,8 +1029,7 @@ static inline int __ctsvc_contact_refresh_lookup_data(int contact_id)
 					if (CONTACTS_ERROR_NONE != ret) {
 						CTS_ERR("ctsvc_stmt_step() Failed(%d)", ret);
 						ctsvc_stmt_finalize(stmt);
-						contacts_record_destroy((contacts_record_h)contact, true);
-						return CONTACTS_ERROR_DB;
+						return ret;
 					}
 				}
 				ctsvc_stmt_finalize(stmt);
@@ -1094,19 +1069,16 @@ static inline int __ctsvc_contact_refresh_lookup_data(int contact_id)
 
 				if (CONTACTS_ERROR_NONE != ret) {
 					CTS_ERR("ctsvc_stmt_step() Failed(%d)", ret);
-					contacts_record_destroy((contacts_record_h)contact, true);
-					return CONTACTS_ERROR_DB;
+					return ret;
 				}
 			}
 		}while(CONTACTS_ERROR_NONE == contacts_list_next(nickname_list));
 	}
 
-	contacts_record_destroy((contacts_record_h)contact, true);
-
 	return CONTACTS_ERROR_NONE;
 }
 
-static inline int __ctsvc_update_contact_search_data(int contact_id)
+static inline int __ctsvc_contact_update_search_data(int contact_id)
 {
 	int ret;
 	cts_stmt stmt = NULL;
@@ -1114,9 +1086,36 @@ static inline int __ctsvc_update_contact_search_data(int contact_id)
 	char *search_name = NULL;
 	char *search_number = NULL;
 	char *search_data = NULL;
+	ctsvc_contact_s *contact = NULL;
 
 	ret = ctsvc_begin_trans();
 	RETVM_IF(ret, ret, "ctsvc_begin_trans() Failed(%d)", ret);
+
+	ret = ctsvc_db_contact_get(contact_id, (contacts_record_h*)&contact);
+	if (CONTACTS_ERROR_NO_DATA == ret) {
+		int r;
+		snprintf(query, sizeof(query), "DELETE FROM %s WHERE contact_id = %d",
+				CTS_TABLE_SEARCH_INDEX, contact_id);
+		r = ctsvc_query_exec(query);
+		if (CONTACTS_ERROR_NONE != r) {
+			CTS_ERR("ctsvc_query_exec() Failed(%d)", r);
+			return r;
+		}
+		return ret;
+	}
+	else if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("ctsvc_db_contact_get() Failed(%d)", ret);
+		ctsvc_end_trans(false);
+		return ret;
+	}
+
+	ret = __ctsvc_contact_make_search_data(contact_id, contact, &search_name, &search_number, &search_data);
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("__ctsvc_contact_make_search_data() Failed(%d)", ret);
+		contacts_record_destroy((contacts_record_h)contact, true);
+		ctsvc_end_trans(false);
+		return ret;
+	}
 
 	snprintf(query, sizeof(query),
 			"UPDATE %s SET name=?, number=?, data=? "
@@ -1126,15 +1125,11 @@ static inline int __ctsvc_update_contact_search_data(int contact_id)
 	ret = ctsvc_query_prepare(query, &stmt);
 	if (NULL == stmt) {
 		CTS_ERR("ctsvc_query_prepare() Failed(%d)", ret);
+		contacts_record_destroy((contacts_record_h)contact, true);
 		ctsvc_end_trans(false);
-		return ret;
-	}
-
-	ret = __ctsvc_contact_make_search_data(contact_id, &search_name, &search_number, &search_data);
-	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("__ctsvc_contact_make_search_data() Failed(%d)", ret);
-		ctsvc_stmt_finalize(stmt);
-		ctsvc_end_trans(false);
+		free(search_name);
+		free(search_number);
+		free(search_data);
 		return ret;
 	}
 
@@ -1153,18 +1148,23 @@ static inline int __ctsvc_update_contact_search_data(int contact_id)
 
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("ctsvc_stmt_step() Failed(%d)", ret);
+		contacts_record_destroy((contacts_record_h)contact, true);
 		ctsvc_stmt_finalize(stmt);
 		ctsvc_end_trans(false);
 		return ret;
 	}
 	ctsvc_stmt_finalize(stmt);
 
-	ret = __ctsvc_contact_refresh_lookup_data(contact_id);
+	// update phone_lookup, name_lookup
+	ret = __ctsvc_contact_refresh_lookup_data(contact_id, contact);
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("__ctsvc_contact_refresh_lookup_data() Failed(%d)", ret);
+		contacts_record_destroy((contacts_record_h)contact, true);
 		ctsvc_end_trans(false);
 		return ret;
 	}
+
+	contacts_record_destroy((contacts_record_h)contact, true);
 
 	ret = ctsvc_end_trans(true);
 	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "ctsvc_end_trans() Failed(%d)", ret);
@@ -1364,7 +1364,7 @@ static int __ctsvc_db_contact_update_record( contacts_record_h record )
 	if (0 < rel_changed)
 		ctsvc_set_group_rel_noti();
 
-	__ctsvc_update_contact_search_data(contact->id);
+	__ctsvc_contact_update_search_data(contact->id);
 	ctsvc_db_update_person((contacts_record_h)contact);
 
 	CTSVC_RECORD_RESET_PROPERTY_FLAGS((ctsvc_record_s *)record);
@@ -1750,15 +1750,23 @@ static inline int __ctsvc_contact_insert_search_data(int contact_id)
 	char *search_name = NULL;
 	char *search_number = NULL;
 	char *search_data = NULL;
+	ctsvc_contact_s *contact = NULL;
 
 	ret = ctsvc_begin_trans();
 	RETVM_IF(ret, ret, "contacts_begin_trans() Failed(%d)", ret);
 
-	snprintf(query, sizeof(query), "DELETE FROM %s WHERE contact_id = %d",
-			CTS_TABLE_SEARCH_INDEX, contact_id);
-	ret = ctsvc_query_exec(query);
+	ret = ctsvc_db_contact_get(contact_id, (contacts_record_h*)&contact);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_query_exec() Failed(%d)", ret);
+		CTS_ERR("ctsvc_db_contact_get() Failed(%d)", ret);
+		ctsvc_end_trans(false);
+		return ret;
+	}
+
+	ret = __ctsvc_contact_make_search_data(contact_id, contact, &search_name, &search_number, &search_data);
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("__ctsvc_contact_make_search_data() Failed(%d)", ret);
+		contacts_record_destroy((contacts_record_h)contact, true);
+		ctsvc_end_trans(false);
 		return ret;
 	}
 
@@ -1770,15 +1778,11 @@ static inline int __ctsvc_contact_insert_search_data(int contact_id)
 	ret = ctsvc_query_prepare(query, &stmt);
 	if (NULL == stmt) {
 		CTS_ERR("ctsvc_query_prepare() Failed(%d)", ret);
+		contacts_record_destroy((contacts_record_h)contact, true);
 		ctsvc_end_trans(false);
-		return ret;
-	}
-
-	ret = __ctsvc_contact_make_search_data(contact_id, &search_name, &search_number, &search_data);
-	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("__ctsvc_contact_make_search_data() Failed(%d)", ret);
-		ctsvc_stmt_finalize(stmt);
-		ctsvc_end_trans(false);
+		free(search_name);
+		free(search_number);
+		free(search_data);
 		return ret;
 	}
 
@@ -1797,19 +1801,23 @@ static inline int __ctsvc_contact_insert_search_data(int contact_id)
 
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("ctsvc_stmt_step() Failed(%d)", ret);
+		contacts_record_destroy((contacts_record_h)contact, true);
 		ctsvc_stmt_finalize(stmt);
 		ctsvc_end_trans(false);
 		return ret;
 	}
 	ctsvc_stmt_finalize(stmt);
 
-	ret = __ctsvc_contact_refresh_lookup_data(contact_id);
-
+	// update phone_lookup, name_lookup
+	ret = __ctsvc_contact_refresh_lookup_data(contact_id, contact);
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("__ctsvc_contact_refresh_lookup_data() Failed(%d)", ret);
+		contacts_record_destroy((contacts_record_h)contact, true);
 		ctsvc_end_trans(false);
 		return ret;
 	}
+
+	contacts_record_destroy((contacts_record_h)contact, true);
 
 	ret = ctsvc_end_trans(true);
 	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "ctsvc_end_trans() Failed(%d)", ret);
@@ -2098,7 +2106,12 @@ static int __ctsvc_db_contact_insert_record( contacts_record_h record, int *id)
 		}
 	}
 
-	__ctsvc_contact_insert_search_data(contact->id);
+	ret = __ctsvc_contact_insert_search_data(contact->id);
+	if (ret != CONTACTS_ERROR_NONE) {
+		CTS_ERR("__ctsvc_contact_insert_search_data() Failed(%d)", ret);
+		ctsvc_end_trans(false);
+		return ret;
+	}
 
 	// person aggregation when auto_linked
 	if (auto_linked)
@@ -2285,7 +2298,7 @@ static int __ctsvc_db_contact_replace_record( contacts_record_h record, int cont
 	if (0 < rel_changed)
 		ctsvc_set_group_rel_noti();
 
-	__ctsvc_update_contact_search_data(contact->id);
+	__ctsvc_contact_update_search_data(contact->id);
 	ctsvc_db_update_person((contacts_record_h)contact);
 
 	ret = ctsvc_end_trans(true);

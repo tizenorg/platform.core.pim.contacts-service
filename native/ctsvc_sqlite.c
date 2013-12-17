@@ -35,7 +35,6 @@
 #include "ctsvc_db_plugin_company_helper.h"
 #include "ctsvc_db_plugin_group_helper.h"
 
-
 #include "ctsvc_phonelog.h"
 #include "ctsvc_person.h"
 
@@ -43,18 +42,6 @@
 #define CTSVC_QUERY_RETRY_INTERVAL	50*1000
 
 static __thread sqlite3 *ctsvc_db = NULL;
-
-static inline int __ctsvc_db_busyhandler(void *pData, int count)
-{
-	if(10 - count > 0) {
-		CTS_INFO("Busy Handler Called! : Thread(%08x) / CNT(%d)\n", pthread_self(), count+1);
-		usleep(20000);
-		return 1;
-	} else {
-		CTS_INFO("Busy Handler will be returned SQLITE_BUSY error : Thread(%08x) \n", pthread_self());
-		return 0;
-	}
-}
 
 int ctsvc_db_open(void) {
 	CTS_FN_CALL;
@@ -92,12 +79,8 @@ int ctsvc_db_open(void) {
 					ctsvc_db_group_delete_callback, NULL, NULL);
 		RETVM_IF(SQLITE_OK != ret, CONTACTS_ERROR_DB,
 						"sqlite3_create_function() Failed(%d)", ret);
-
-		/* Register Busy handler */
-		ret = sqlite3_busy_handler(ctsvc_db, __ctsvc_db_busyhandler, NULL);
-		RETVM_IF(SQLITE_OK != ret, CONTACTS_ERROR_DB,
-						"sqlite3_busy_handler() Failed(%d)", ret);
 	}
+
 	return CONTACTS_ERROR_NONE /*CTS_SUCCESS*/;
 }
 

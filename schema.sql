@@ -406,6 +406,7 @@ CREATE TABLE name_lookup
 	name TEXT,
 	type INTEGER
 );
+CREATE INDEX name_lookup_idx1 ON name_lookup(contact_id);
 
 CREATE TABLE phone_lookup
 (
@@ -414,7 +415,7 @@ CREATE TABLE phone_lookup
 	number TEXT,
 	min_match TEXT
 );
-
+CREATE INDEX phone_lookup_idx1 ON phone_lookup(contact_id);
 
 CREATE TABLE my_profiles
 (
