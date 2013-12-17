@@ -21,5 +21,6 @@
 #define __CTSVC_DB_PLUGIN_ADDRESS_BOOK_HELPER_H__
 
 int ctsvc_addressbook_delete(int account_id);
+int ctsvc_addressbook_reset_internal_addressbook(void);
 
 #endif // __CTSVC_DB_PLUGIN_ADDRESS_BOOK_HELPER_H__
