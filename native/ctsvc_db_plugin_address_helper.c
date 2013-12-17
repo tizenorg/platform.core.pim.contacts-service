@@ -81,43 +81,35 @@ int ctsvc_db_address_insert(contacts_record_h record, int contact_id, bool is_my
 						"VALUES(%d, %d, %d, %d, %d, ?, ?, ?, ?, ?, ?, ?, ?)",
 				contact_id, is_my_profile, CTSVC_DATA_POSTAL, address->is_default, address->type);
 
-		stmt = cts_query_prepare(query);
-		RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB, "DB error : cts_query_prepare() Failed");
+		ret = ctsvc_query_prepare(query, &stmt);
+		RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
 
 		if (address->label)
-			sqlite3_bind_text(stmt, 1, address->label,
-					strlen(address->label), SQLITE_STATIC);
+			ctsvc_stmt_bind_text(stmt, 1, address->label);
 		if (address->pobox)
-			sqlite3_bind_text(stmt, 2, address->pobox,
-					strlen(address->pobox), SQLITE_STATIC);
+			ctsvc_stmt_bind_text(stmt, 2, address->pobox);
 		if (address->postalcode)
-			sqlite3_bind_text(stmt, 3, address->postalcode,
-					strlen(address->postalcode), SQLITE_STATIC);
+			ctsvc_stmt_bind_text(stmt, 3, address->postalcode);
 		if (address->region)
-			sqlite3_bind_text(stmt, 4, address->region,
-					strlen(address->region), SQLITE_STATIC);
+			ctsvc_stmt_bind_text(stmt, 4, address->region);
 		if (address->locality)
-			sqlite3_bind_text(stmt, 5, address->locality,
-					strlen(address->locality), SQLITE_STATIC);
+			ctsvc_stmt_bind_text(stmt, 5, address->locality);
 		if (address->street)
-			sqlite3_bind_text(stmt, 6, address->street,
-					strlen(address->street), SQLITE_STATIC);
+			ctsvc_stmt_bind_text(stmt, 6, address->street);
 		if (address->extended)
-			sqlite3_bind_text(stmt, 7, address->extended,
-					strlen(address->extended), SQLITE_STATIC);
+			ctsvc_stmt_bind_text(stmt, 7, address->extended);
 		if (address->country)
-			sqlite3_bind_text(stmt, 8, address->country,
-					strlen(address->country), SQLITE_STATIC);
+			ctsvc_stmt_bind_text(stmt, 8, address->country);
 
-		ret = cts_stmt_step(stmt);
+		ret = ctsvc_stmt_step(stmt);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("cts_stmt_step() Failed(%d)", ret);
-			cts_stmt_finalize(stmt);
+			CTS_ERR("ctsvc_stmt_step() Failed(%d)", ret);
+			ctsvc_stmt_finalize(stmt);
 			return ret;
 		}
 		if (id)
-			*id = cts_db_get_last_insert_id();
-		cts_stmt_finalize(stmt);
+			*id = ctsvc_db_get_last_insert_id();
+		ctsvc_stmt_finalize(stmt);
 
 		if (!is_my_profile)
 			ctsvc_set_address_noti();
@@ -175,7 +167,7 @@ int ctsvc_db_address_delete(int id, bool is_my_profile)
 			CTSVC_DATA_POSTAL, id);
 
 	ret = ctsvc_query_exec(query);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : cts_query_exec() Fail(%d)", ret);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Fail(%d)", ret);
 
 	if (!is_my_profile)
 		ctsvc_set_address_noti();

@@ -58,9 +58,9 @@ int ctsvc_db_image_get_value_from_stmt(cts_stmt stmt, contacts_record_h *record,
 static inline int __ctsvc_image_bind_stmt(cts_stmt stmt, ctsvc_image_s *image, int start_cnt)
 {
 	if (image->label)
-		cts_stmt_bind_text(stmt, start_cnt, image->label);
+		ctsvc_stmt_bind_text(stmt, start_cnt, image->label);
 	if (image->path)
-		cts_stmt_bind_text(stmt, start_cnt+1, image->path);
+		ctsvc_stmt_bind_text(stmt, start_cnt+1, image->path);
 	return CONTACTS_ERROR_NONE;
 }
 
@@ -97,7 +97,7 @@ int ctsvc_db_image_insert(contacts_record_h record, int contact_id, bool is_my_p
 	ret = ctsvc_have_file_read_permission(image->path);
 	RETVM_IF(ret != CONTACTS_ERROR_NONE, ret, "ctsvc_have_file_read_permission fail(%d)", ret);
 
-	image_id = cts_db_get_next_id(CTS_TABLE_DATA);
+	image_id = ctsvc_db_get_next_id(CTS_TABLE_DATA);
 	ret = ctsvc_contact_add_image_file(contact_id, image_id, image->path, image_path, sizeof(image_path));
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("ctsvc_contact_add_image_file() Failed(%d)", ret);
@@ -111,22 +111,22 @@ int ctsvc_db_image_insert(contacts_record_h record, int contact_id, bool is_my_p
 			"VALUES(%d, %d, %d, %d, %d, %d, ?, ?)",
 			image_id, contact_id, is_my_profile, CTSVC_DATA_IMAGE, image->is_default, image->type);
 
-	stmt = cts_query_prepare(query);
-	RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB, "DB error : cts_query_prepare() Failed");
+	ret = ctsvc_query_prepare(query, &stmt);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
 
 	__ctsvc_image_bind_stmt(stmt, image, 1);
 
-	ret = cts_stmt_step(stmt);
+	ret = ctsvc_stmt_step(stmt);
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("DB error : ctsvc_query_exec() Failed(%d)", ret);
-		cts_stmt_finalize(stmt);
+		ctsvc_stmt_finalize(stmt);
 		return ret;
 	}
 
-	//image->id = cts_db_get_last_insert_id();
+	//image->id = ctsvc_db_get_last_insert_id();
 	if (id)
 		*id = image_id;
-	cts_stmt_finalize(stmt);
+	ctsvc_stmt_finalize(stmt);
 
 	if (ctsvc_record_check_property_flag((ctsvc_record_s *)record, _contacts_image.is_default, CTSVC_PROPERTY_FLAG_DIRTY)) {
 		if (image->is_default)

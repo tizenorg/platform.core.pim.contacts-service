@@ -34,8 +34,8 @@
 
 static int __ctsvc_company_bind_stmt(cts_stmt stmt, ctsvc_company_s *company, int start_cnt)
 {
-	cts_stmt_bind_int(stmt, start_cnt, company->is_default);
-	cts_stmt_bind_int(stmt, start_cnt+1, company->type);
+	ctsvc_stmt_bind_int(stmt, start_cnt, company->is_default);
+	ctsvc_stmt_bind_int(stmt, start_cnt+1, company->type);
 	if (company->label)
 		sqlite3_bind_text(stmt, start_cnt+2, company->label,
 			strlen(company->label), SQLITE_STATIC);
@@ -87,9 +87,9 @@ int ctsvc_db_company_insert(contacts_record_h record, int contact_id, bool is_my
 			|| company->assistant_name || company->logo || company->location || company->description
 			|| company->phonetic_name) {
 
-		ret = cts_db_get_next_id(CTS_TABLE_DATA);
+		ret = ctsvc_db_get_next_id(CTS_TABLE_DATA);
 		if (ret < CONTACTS_ERROR_NONE) {
-			CTS_ERR("cts_db_get_next_id() Failed(%d)", ret);
+			CTS_ERR("ctsvc_db_get_next_id() Failed(%d)", ret);
 			ctsvc_end_trans(false);
 			return ret;
 		}
@@ -101,8 +101,8 @@ int ctsvc_db_company_insert(contacts_record_h record, int contact_id, bool is_my
 					"VALUES(%d, %d, %d, %d, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 					company_id, contact_id, is_my_profile, CTSVC_DATA_COMPANY);
 
-		stmt = cts_query_prepare(query);
-		RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB, "DB error : cts_query_prepare() Failed");
+		ret = ctsvc_query_prepare(query, &stmt);
+		RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
 
 		__ctsvc_company_bind_stmt(stmt, company, 1);
 		if (company->logo) {
@@ -110,26 +110,26 @@ int ctsvc_db_company_insert(contacts_record_h record, int contact_id, bool is_my
 			ret = ctsvc_have_file_read_permission(company->logo);
 			if (ret != CONTACTS_ERROR_NONE) {
 				CTS_ERR("ctsvc_have_file_read_permission Fail(%d)", ret);
-				cts_stmt_finalize(stmt);
+				ctsvc_stmt_finalize(stmt);
 				return ret;
 			}
 			ctsvc_utils_make_image_file_name(contact_id, company_id, company->logo, image, sizeof(image));
 			ret = ctsvc_utils_copy_image(CTS_LOGO_IMAGE_LOCATION, company->logo, image);
 			if (CONTACTS_ERROR_NONE != ret) {
 				CTS_ERR("ctsvc_utils_copy_image() Failed(%d)", ret);
-				cts_stmt_finalize(stmt);
+				ctsvc_stmt_finalize(stmt);
 				return ret;
 			}
-			cts_stmt_bind_text(stmt, 9, image);
+			ctsvc_stmt_bind_text(stmt, 9, image);
 		}
 
-		ret = cts_stmt_step(stmt);
+		ret = ctsvc_stmt_step(stmt);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("cts_stmt_step() Failed(%d)", ret);
-			cts_stmt_finalize(stmt);
+			CTS_ERR("ctsvc_stmt_step() Failed(%d)", ret);
+			ctsvc_stmt_finalize(stmt);
 			return ret;
 		}
-		cts_stmt_finalize(stmt);
+		ctsvc_stmt_finalize(stmt);
 
 		company->id = company_id;
 		if (id)
@@ -205,11 +205,12 @@ int ctsvc_db_company_update(contacts_record_h record, int contact_id, bool is_my
 
 	snprintf(query, sizeof(query),
 			"SELECT id, data8 FROM "CTS_TABLE_DATA" WHERE id = %d", company->id);
-	stmt = cts_query_prepare(query);
-	RETVM_IF(stmt == NULL, CONTACTS_ERROR_DB, "cts_query_prepare Fail");
-	ret = cts_stmt_step(stmt);
+	ret = ctsvc_query_prepare(query, &stmt);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
+
+	ret = ctsvc_stmt_step(stmt);
 	if (ret != 1) {
-		cts_stmt_finalize(stmt);
+		ctsvc_stmt_finalize(stmt);
 		if (ret == CONTACTS_ERROR_NONE)
 			return CONTACTS_ERROR_NO_DATA;
 		else
@@ -235,7 +236,7 @@ int ctsvc_db_company_update(contacts_record_h record, int contact_id, bool is_my
 					ret = ctsvc_have_file_read_permission(company->logo);
 					if (ret != CONTACTS_ERROR_NONE) {
 						CTS_ERR("ctsvc_have_file_read_permission Fail(%d)", ret);
-						cts_stmt_finalize(stmt);
+						ctsvc_stmt_finalize(stmt);
 						return ret;
 					}
 					check_permission = true;
@@ -254,7 +255,7 @@ int ctsvc_db_company_update(contacts_record_h record, int contact_id, bool is_my
 				ret = ctsvc_have_file_read_permission(company->logo);
 				if (ret != CONTACTS_ERROR_NONE) {
 					CTS_ERR("ctsvc_have_file_read_permission Fail(%d)", ret);
-					cts_stmt_finalize(stmt);
+					ctsvc_stmt_finalize(stmt);
 					return ret;
 				}
 			}
@@ -262,14 +263,14 @@ int ctsvc_db_company_update(contacts_record_h record, int contact_id, bool is_my
 			ret = ctsvc_utils_copy_image(CTS_LOGO_IMAGE_LOCATION, company->logo, dest);
 			if (CONTACTS_ERROR_NONE != ret) {
 				CTS_ERR("cts_copy_file() Failed(%d)", ret);
-				cts_stmt_finalize(stmt);
+				ctsvc_stmt_finalize(stmt);
 				return ret;
 			}
 			free(company->logo);
 			company->logo = strdup(dest);
 		}
 	}
-	cts_stmt_finalize(stmt);
+	ctsvc_stmt_finalize(stmt);
 
 	do {
 		if (CONTACTS_ERROR_NONE != (ret = ctsvc_db_create_set_query(record, &set, &bind_text))) break;

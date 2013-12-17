@@ -69,25 +69,25 @@ int ctsvc_db_url_insert(contacts_record_h record, int contact_id, bool is_my_pro
 									"VALUES(%d, %d, %d, %d, ?, ?)",
 							contact_id, is_my_profile, CTSVC_DATA_URL, url->type);
 
-	stmt = cts_query_prepare(query);
-	RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB, "DB error : cts_query_prepare() Failed");
+	ret = ctsvc_query_prepare(query, &stmt);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
 
 	if (url->label)
-		cts_stmt_bind_text(stmt, 1, url->label);
+		ctsvc_stmt_bind_text(stmt, 1, url->label);
 	if (url->url)
-		cts_stmt_bind_text(stmt, 2, url->url);
+		ctsvc_stmt_bind_text(stmt, 2, url->url);
 
-	ret = cts_stmt_step(stmt);
+	ret = ctsvc_stmt_step(stmt);
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("DB error : ctsvc_query_exec() Failed(%d)", ret);
-		cts_stmt_finalize(stmt);
+		ctsvc_stmt_finalize(stmt);
 		return ret;
 	}
 
-	//url->id = cts_db_get_last_insert_id();
+	//url->id = ctsvc_db_get_last_insert_id();
 	if (id)
-		*id = cts_db_get_last_insert_id();
-	cts_stmt_finalize(stmt);
+		*id = ctsvc_db_get_last_insert_id();
+	ctsvc_stmt_finalize(stmt);
 
 	if (!is_my_profile)
 		ctsvc_set_url_noti();

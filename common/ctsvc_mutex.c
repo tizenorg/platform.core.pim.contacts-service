@@ -29,7 +29,7 @@ typedef struct {
 	int (* unlock) (pthread_mutex_t *mutex);
 }cts_mutex_fns;
 
-static cts_mutex_fns cts_mutex_funtions =
+static cts_mutex_fns __ctsvc_mutex_funtions =
 {
 	pthread_mutex_lock,
 	pthread_mutex_unlock
@@ -80,8 +80,8 @@ void ctsvc_mutex_lock(int type)
 
 	mutex = cts_mutex_get_mutex(type);
 
-	if (cts_mutex_funtions.lock) {
-		ret = cts_mutex_funtions.lock(mutex);
+	if (__ctsvc_mutex_funtions.lock) {
+		ret = __ctsvc_mutex_funtions.lock(mutex);
 		WARN_IF(ret, "mutex_lock Failed(%d)", ret);
 	}
 }
@@ -93,8 +93,8 @@ void ctsvc_mutex_unlock(int type)
 
 	mutex = cts_mutex_get_mutex(type);
 
-	if (cts_mutex_funtions.unlock) {
-		ret = cts_mutex_funtions.unlock(mutex);
+	if (__ctsvc_mutex_funtions.unlock) {
+		ret = __ctsvc_mutex_funtions.unlock(mutex);
 		WARN_IF(ret, "mutex_unlock Failed(%d)", ret);
 	}
 }

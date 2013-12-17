@@ -58,8 +58,8 @@ static inline void __ctsvc_make_name_lookup(int op_code, const char *name_first,
 
 static inline int __ctsvc_name_bind_stmt(cts_stmt stmt, ctsvc_name_s *name, int start_cnt)
 {
-	cts_stmt_bind_int(stmt, start_cnt, name->is_default);
-	cts_stmt_bind_int(stmt, start_cnt+1, name->language_type);
+	ctsvc_stmt_bind_int(stmt, start_cnt, name->is_default);
+	ctsvc_stmt_bind_int(stmt, start_cnt+1, name->language_type);
 	if (name->first)
 		sqlite3_bind_text(stmt, start_cnt+2, name->first,
 				strlen(name->first), SQLITE_STATIC);
@@ -100,13 +100,13 @@ static int __ctsvc_normalize_name(ctsvc_name_s *src, char *dest[])
 
 	if (src->first) {
 		ret = ctsvc_normalize_str(src->first, &dest[CTSVC_NN_FIRST]);
-		RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "_cts_normalize_str() Failed(%d)", ret);
+		RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "ctsvc_normalize_str() Failed(%d)", ret);
 		language_type = ret;
 	}
 
 	if (src->last) {
 		ret = ctsvc_normalize_str(src->last, &dest[CTSVC_NN_LAST]);
-		RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "_cts_normalize_str() Failed(%d)", ret);
+		RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "ctsvc_normalize_str() Failed(%d)", ret);
 		if (language_type < ret)
 			language_type = ret;
 	}
@@ -138,13 +138,13 @@ int ctsvc_db_name_insert(contacts_record_h record, int contact_id, bool is_my_pr
 						"VALUES(%d, %d, %d, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 				contact_id, is_my_profile, CTSVC_DATA_NAME);
 
-		stmt = cts_query_prepare(query);
-		RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB, "DB error : cts_query_prepare() Failed");
+		ret = ctsvc_query_prepare(query, &stmt);
+		RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
 
 		ret = __ctsvc_normalize_name(name, normal_name);
 		if (ret < CONTACTS_ERROR_NONE) {
 			CTS_ERR("__ctsvc_normalize_name() Failed(%d)", ret);
-			cts_stmt_finalize(stmt);
+			ctsvc_stmt_finalize(stmt);
 			return ret;
 		}
 
@@ -194,18 +194,18 @@ int ctsvc_db_name_insert(contacts_record_h record, int contact_id, bool is_my_pr
 
 		__ctsvc_name_bind_stmt(stmt, name, 1);
 
-		ret = cts_stmt_step(stmt);
+		ret = ctsvc_stmt_step(stmt);
 		if (CONTACTS_ERROR_NONE != ret) {
 			CTS_ERR("DB error : ctsvc_query_exec() Failed(%d)", ret);
-			cts_stmt_finalize(stmt);
+			ctsvc_stmt_finalize(stmt);
 			return ret;
 		}
 
-		//name->id = cts_db_get_last_insert_id();
+		//name->id = ctsvc_db_get_last_insert_id();
 		if (id)
-			*id = cts_db_get_last_insert_id();
+			*id = ctsvc_db_get_last_insert_id();
 		name->contact_id = contact_id;
-		cts_stmt_finalize(stmt);
+		ctsvc_stmt_finalize(stmt);
 
 		if (!is_my_profile)
 			ctsvc_set_name_noti();

@@ -66,15 +66,14 @@ int ctsvc_group_add_contact_in_transaction(int group_id, int contact_id)
 
 	snprintf(query, sizeof(query), "INSERT OR REPLACE INTO %s VALUES(%d, %d, %d, 0)",
 			CTS_TABLE_GROUP_RELATIONS, group_id, contact_id, version);
+	ret = ctsvc_query_prepare(query, &stmt);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
 
-	stmt = cts_query_prepare(query);
-	RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB, "DB error : cts_query_prepare() Failed");
+	ret = ctsvc_stmt_step(stmt);
+	WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_stmt_step() Failed(%d)", ret);
 
-	ret = cts_stmt_step(stmt);
-	WARN_IF(CONTACTS_ERROR_NONE != ret, "cts_stmt_step() Failed(%d)", ret);
-
-	rel_changed = cts_db_change();
-	cts_stmt_finalize(stmt);
+	rel_changed = ctsvc_db_change();
+	ctsvc_stmt_finalize(stmt);
 
 	if (0 < rel_changed) {
 		snprintf(query, sizeof(query),
@@ -148,14 +147,14 @@ int ctsvc_group_remove_contact_in_transaction(int group_id, int contact_id)
 			"UPDATE %s SET deleted=1, ver = %d WHERE group_id = %d AND contact_id = %d",
 			CTS_TABLE_GROUP_RELATIONS, version, group_id, contact_id);
 
-	stmt = cts_query_prepare(query);
-	RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB, "DB Error: cts_query_prepare() Failed");
+	ret = ctsvc_query_prepare(query, &stmt);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
 
-	ret = cts_stmt_step(stmt);
-	WARN_IF(CONTACTS_ERROR_NONE != ret, "DB Error: cts_stmt_step() Failed(%d)", ret);
+	ret = ctsvc_stmt_step(stmt);
+	WARN_IF(CONTACTS_ERROR_NONE != ret, "DB Error: ctsvc_stmt_step() Failed(%d)", ret);
 
-	int rel_changed = cts_db_change();
-	cts_stmt_finalize(stmt);
+	int rel_changed = ctsvc_db_change();
+	ctsvc_stmt_finalize(stmt);
 
 	if (0 <= rel_changed) {
 		snprintf(query, sizeof(query),
@@ -231,29 +230,29 @@ API int contacts_group_set_group_order(int group_id, int previous_group_id, int 
 				"Permission denied : contact write (group)");
 	snprintf(query, sizeof(query), "SELECT group_prio, addressbook_id FROM "CTS_TABLE_GROUPS" WHERE group_id = ?");
 
-	stmt = cts_query_prepare(query);
-	RETVM_IF(NULL == stmt, CONTACTS_ERROR_DB, "cts_query_prepare() Failed");
+	ret = ctsvc_query_prepare(query, &stmt);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
 
-	cts_stmt_bind_int(stmt, 1, previous_group_id);
-	ret = cts_stmt_step(stmt);
+	ctsvc_stmt_bind_int(stmt, 1, previous_group_id);
+	ret = ctsvc_stmt_step(stmt);
 	if (1 /*CTS_TRUE*/  == ret) {
 		previous_prio = ctsvc_stmt_get_dbl(stmt, 0);
 		previous_addressbook_id = ctsvc_stmt_get_int(stmt, 1);
 	}
-	cts_stmt_reset(stmt);
-	cts_stmt_bind_int(stmt, 1, next_group_id);
-	ret = cts_stmt_step(stmt);
+	ctsvc_stmt_reset(stmt);
+	ctsvc_stmt_bind_int(stmt, 1, next_group_id);
+	ret = ctsvc_stmt_step(stmt);
 	if (1 /*CTS_TRUE*/ == ret) {
 		next_prio = ctsvc_stmt_get_dbl(stmt, 0);
 		next_addressbook_id = ctsvc_stmt_get_int(stmt, 1);
 	}
-	cts_stmt_reset(stmt);
-	cts_stmt_bind_int(stmt, 1, group_id);
-	ret = cts_stmt_step(stmt);
+	ctsvc_stmt_reset(stmt);
+	ctsvc_stmt_bind_int(stmt, 1, group_id);
+	ret = ctsvc_stmt_step(stmt);
 	if (1 /*CTS_TRUE*/ == ret) {
 		addressbook_id = ctsvc_stmt_get_int(stmt, 1);
 	}
-	cts_stmt_finalize(stmt);
+	ctsvc_stmt_finalize(stmt);
 
 	RETVM_IF(0.0 == previous_prio && 0.0 == next_prio, CONTACTS_ERROR_INVALID_PARAMETER,
 			"The indexes for previous and next are invalid.");

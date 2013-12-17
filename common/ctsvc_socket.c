@@ -28,16 +28,16 @@
 #include "ctsvc_mutex.h"
 #include "ctsvc_inotify.h"
 
-static int ctsvc_conn_refcnt = 0;
-static int cts_sockfd = -1;
+static int __ctsvc_conn_refcnt = 0;
+static int __ctsvc_sockfd = -1;
 
 int ctsvc_socket_init(void)
 {
 	int ret;
 	struct sockaddr_un caddr;
 
-	if (0 < ctsvc_conn_refcnt) {
-		ctsvc_conn_refcnt++;
+	if (0 < __ctsvc_conn_refcnt) {
+		__ctsvc_conn_refcnt++;
 		return  CONTACTS_ERROR_NONE;
 	}
 
@@ -45,37 +45,37 @@ int ctsvc_socket_init(void)
 	caddr.sun_family = AF_UNIX;
 	snprintf(caddr.sun_path, sizeof(caddr.sun_path), "%s", CTSVC_SOCKET_PATH);
 
-	cts_sockfd = socket(PF_UNIX, SOCK_STREAM, 0);
-	RETVM_IF(-1 == cts_sockfd, CONTACTS_ERROR_IPC,
+	__ctsvc_sockfd = socket(PF_UNIX, SOCK_STREAM, 0);
+	RETVM_IF(-1 == __ctsvc_sockfd, CONTACTS_ERROR_IPC,
 			"socket() Failed(errno = %d)", errno);
 
-	ret = connect(cts_sockfd, (struct sockaddr *)&caddr, sizeof(caddr));
+	ret = connect(__ctsvc_sockfd, (struct sockaddr *)&caddr, sizeof(caddr));
 	if (-1 == ret) {
 		CTS_ERR("connect() Failed(errno = %d)", errno);
-		close(cts_sockfd);
-		cts_sockfd = -1;
+		close(__ctsvc_sockfd);
+		__ctsvc_sockfd = -1;
 		return CONTACTS_ERROR_IPC;
 	}
 
-	ctsvc_conn_refcnt++;
+	__ctsvc_conn_refcnt++;
 	return CONTACTS_ERROR_NONE;
 }
 
 void ctsvc_socket_final(void)
 {
-	if (1 < ctsvc_conn_refcnt) {
-		CTS_DBG("socket ref count : %d", ctsvc_conn_refcnt);
-		ctsvc_conn_refcnt--;
+	if (1 < __ctsvc_conn_refcnt) {
+		CTS_DBG("socket ref count : %d", __ctsvc_conn_refcnt);
+		__ctsvc_conn_refcnt--;
 		return;
 	}
-	else if (ctsvc_conn_refcnt < 1) {
-		CTS_DBG("Please call connection API. socket ref count : %d", ctsvc_conn_refcnt);
+	else if (__ctsvc_conn_refcnt < 1) {
+		CTS_DBG("Please call connection API. socket ref count : %d", __ctsvc_conn_refcnt);
 		return;
 	}
-	ctsvc_conn_refcnt--;
+	__ctsvc_conn_refcnt--;
 
-	close(cts_sockfd);
-	cts_sockfd = -1;
+	close(__ctsvc_sockfd);
+	__ctsvc_sockfd = -1;
 }
 
 static inline int __ctsvc_safe_write(int fd, const char *buf, int buf_size)
@@ -167,18 +167,18 @@ int ctsvc_request_sim_import(void)
 	int i, ret;
 	ctsvc_socket_msg_s msg = {0};
 
-	RETVM_IF(-1 == cts_sockfd, CONTACTS_ERROR_IPC, "socket is not connected");
+	RETVM_IF(-1 == __ctsvc_sockfd, CONTACTS_ERROR_IPC, "socket is not connected");
 
 	msg.type = CTSVC_SOCKET_MSG_TYPE_REQUEST_IMPORT_SIM;
-	ret = __ctsvc_safe_write(cts_sockfd, (char *)&msg, sizeof(msg));
+	ret = __ctsvc_safe_write(__ctsvc_sockfd, (char *)&msg, sizeof(msg));
 	RETVM_IF(-1 == ret, CONTACTS_ERROR_IPC, "__ctsvc_safe_write() Failed(errno = %d)", errno);
 
-	ret = __ctsvc_socket_handle_return(cts_sockfd, &msg);
+	ret = __ctsvc_socket_handle_return(__ctsvc_sockfd, &msg);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "__ctsvc_socket_handle_return() Failed(%d)", ret);
 	CTS_DBG("attach_num = %d", msg.attach_num);
 
 	for (i=0;i<msg.attach_num;i++)
-		__ctsvc_remove_invalid_msg(cts_sockfd, msg.attach_sizes[i]);
+		__ctsvc_remove_invalid_msg(__ctsvc_sockfd, msg.attach_sizes[i]);
 
 	return msg.val;
 }
@@ -189,17 +189,17 @@ int ctsvc_request_sim_get_initialization_status(bool *completed)
 	ctsvc_socket_msg_s msg = {0};
 	char dest[CTSVC_SOCKET_MSG_SIZE] = {0};
 
-	RETVM_IF(-1 == cts_sockfd, CONTACTS_ERROR_IPC, "socket is not connected");
+	RETVM_IF(-1 == __ctsvc_sockfd, CONTACTS_ERROR_IPC, "socket is not connected");
 
 	msg.type = CTSVC_SOCKET_MSG_TYPE_REQUEST_SIM_INIT_COMPLETE;
-	ret = __ctsvc_safe_write(cts_sockfd, (char *)&msg, sizeof(msg));
+	ret = __ctsvc_safe_write(__ctsvc_sockfd, (char *)&msg, sizeof(msg));
 	RETVM_IF(-1 == ret, CONTACTS_ERROR_IPC, "__ctsvc_safe_write() Failed(errno = %d)", errno);
 
-	ret = __ctsvc_socket_handle_return(cts_sockfd, &msg);
+	ret = __ctsvc_socket_handle_return(__ctsvc_sockfd, &msg);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "__ctsvc_socket_handle_return() Failed(%d)", ret);
 	CTS_DBG("attach_num = %d", msg.attach_num);
 
-	ret = __ctsvc_safe_read(cts_sockfd, dest, msg.attach_sizes[0]);
+	ret = __ctsvc_safe_read(__ctsvc_sockfd, dest, msg.attach_sizes[0]);
 	RETVM_IF(-1 == ret, CONTACTS_ERROR_IPC, "__ctsvc_safe_read() Failed(errno = %d)", errno);
 
 	if(atoi(dest) ==0)

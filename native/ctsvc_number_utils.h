@@ -24,7 +24,4 @@ int ctsvc_normalize_number(const char *src, char *dest, int dest_size);
 int ctsvc_get_minmatch_number(const char *src, char *dest, int dest_size, int min_match);
 bool ctsvc_is_phonenumber(const char* src);
 
-void* ctsvc_init_tapi_handle_for_cc();
-void ctsvc_deinit_tapi_handle_for_cc();
-
 #endif /*  __TIZEN_SOCIAL_CTSVC_NUMBER_UTILS_H__ */
