@@ -2,7 +2,7 @@ Name:       contacts-service
 Summary:    Contacts Service
 Version: 0.9.84.2
 Release:    1
-Group:      System/Libraries
+Group:      Social & Contents/Contacts
 License:    Apache-2.0
 Source0:    %{name}-%{version}.tar.gz
 Source1:    contacts-service.service
@@ -36,8 +36,6 @@ Contacts Service Library
 
 %package -n contacts-service2
 Summary:	New Contacts service library
-Group:	Development/Libraries
-Requires(post): telephony-daemon
 Requires(post): libprivilege-control-conf
 
 %description -n contacts-service2
@@ -46,7 +44,6 @@ New Contact Serivce Library
 
 %package -n contacts-service2-devel
 Summary:    New Contacts Service  (devel)
-Group:      Development/Libraries
 Requires:   %{name}2 = %{version}-%{release}
 
 %description -n contacts-service2-devel
