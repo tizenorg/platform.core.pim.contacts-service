@@ -202,7 +202,7 @@ static int __ctsvc_db_speeddial_update_record( contacts_record_h record )
 						"ON "CTS_TABLE_DATA".contact_id = "CTS_TABLE_CONTACTS".contact_id "
 								"AND contacts.deleted = 0  AND is_my_profile = 0 AND datatype = %d "
 						"WHERE id = %d ",
-						speeddial->number_id, CTSVC_DATA_NUMBER);
+						CTSVC_DATA_NUMBER, speeddial->number_id);
 	ret = ctsvc_query_get_first_int_result(query, &number_id);
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("ctsvc_query_get_first_int_result() Failed(%d) : number_id is invalid", ret);
