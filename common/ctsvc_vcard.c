@@ -246,9 +246,26 @@ static int __ctsvc_vcard_append_str(char **buf, int *buf_size, int len, const ch
 
 		while (*s) {
 			switch (*s) {
+			case '\n':
+				*r = '\\';
+				r++;
+				str_len++;
+				if (*buf_size<str_len+len+1) {
+					*buf_size = *buf_size * 2;
+					if (NULL == (tmp = realloc(*buf, *buf_size)))
+						return -1;
+					else {
+						*buf = tmp;
+						r = (char *)(*buf+len+str_len);
+					}
+				}
+				*r = 'n';
+				break;
 			case ';':
 			case ':':
 			case ',':
+			case '<':
+			case '>':
 			case '\\':
 				*r = '\\';
 				r++;
@@ -257,14 +274,83 @@ static int __ctsvc_vcard_append_str(char **buf, int *buf_size, int len, const ch
 					*buf_size = *buf_size * 2;
 					if (NULL == (tmp = realloc(*buf, *buf_size)))
 						return -1;
-					else
+					else {
 						*buf = tmp;
+						r = (char *)(*buf+len+str_len);
+					}
+				}
+				*r = *s;
+				break;
+			case 0xA1:
+				if (*(s+1) && 0xAC == *(s+1)) { // en/em backslash
+					*r = '\\';
+					r++;
+					str_len++;
+					if (*buf_size<str_len+len+1) {
+						*buf_size = *buf_size * 2;
+						if (NULL == (tmp = realloc(*buf, *buf_size)))
+							return -1;
+						else {
+							*buf = tmp;
+							r = (char *)(*buf+len+str_len);
+						}
+					}
+
+					*r = *s;
+					r++;
+					s++;
+					if (*buf_size<str_len+len+1) {
+						*buf_size = *buf_size * 2;
+						if (NULL == (tmp = realloc(*buf, *buf_size)))
+							return -1;
+						else {
+							*buf = tmp;
+							r = (char *)(*buf+len+str_len);
+						}
+					}
+					*r = *s;
+				}
+				else {
+					*r = *s;
+				}
+				break;
+			case 0x81:
+				if (*(s+1) && 0x5F == *(s+1)) { // en/em backslash
+					*r = '\\';
+					r++;
+					str_len++;
+					if (*buf_size<str_len+len+1) {
+						*buf_size = *buf_size * 2;
+						if (NULL == (tmp = realloc(*buf, *buf_size)))
+							return -1;
+						else {
+							*buf = tmp;
+							r = (char *)(*buf+len+str_len);
+						}
+					}
+
+					*r = *s;
+					r++;
+					s++;
+					if (*buf_size<str_len+len+1) {
+						*buf_size = *buf_size * 2;
+						if (NULL == (tmp = realloc(*buf, *buf_size)))
+							return -1;
+						else {
+							*buf = tmp;
+							r = (char *)(*buf+len+str_len);
+						}
+					}
+					*r = *s;
+				}
+				else {
+					*r = *s;
 				}
 				break;
 			default:
+				*r = *s;
 				break;
 			}
-			*r = *s;
 			r++;
 			s++;
 		}
@@ -2272,9 +2358,27 @@ static char* __ctsvc_vcard_remove_escape_char(char *str)
 			case ';':
 			case ':':
 			case ',':
+			case '<':
+			case '>':
 			case '\\':
 				*r = *n;
 				s++;
+				break;
+			case 0xA1: // en/em backslash
+				if (*(n+1) && 0xAC == *(n+1)) {
+					*r = *n;
+					r++;
+					*r = *(n+1);
+					s+=2;
+				}
+				break;
+			case 0x81:  // en/em backslash
+				if (*(n+1) && 0x5F == *(n+1)) {
+					*r = *n;
+					r++;
+					*r = *(n+1);
+					s+=2;
+				}
 				break;
 			default:
 				*r = *s;
