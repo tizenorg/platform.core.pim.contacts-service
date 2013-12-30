@@ -97,6 +97,7 @@ typedef enum {
 	CONTACTS_NUMBER_TYPE_PCS = 1<<13,		/**< A personal communication services telephone number */
 	CONTACTS_NUMBER_TYPE_COMPANY_MAIN = 1<<14,		/**< A company main number */
 	CONTACTS_NUMBER_TYPE_RADIO = 1<<15,		/**< A radio phone number */
+	CONTACTS_NUMBER_TYPE_MAIN = 1<<29,		/**< A additional type for main */
 	CONTACTS_NUMBER_TYPE_ASSISTANT = 1<<30,		/**< A additional type for assistant */
 }contacts_number_type_e;
 
