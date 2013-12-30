@@ -2173,15 +2173,17 @@ static inline char* __ctsvc_vcard_translate_charset(char *src, int len)
 {
 	int ret;
 	char *val = src;
+	int prefix = 0;
 
 	while (*val) {
 		if ('C' == *val) {
 			ret = strncmp(val, "CHARSET", sizeof("CHARSET") - 1);
 			if (!ret) {
+				prefix = val - src;
 				val += sizeof("CHARSET");
 				break;
 			}
-		}else if (':' == *val) {
+		} else if (':' == *val) {
 			return NULL;
 		}
 		val++;
@@ -2194,7 +2196,8 @@ static inline char* __ctsvc_vcard_translate_charset(char *src, int len)
 		int dest_size = 0;
 		int temp_size = 0;
 		int src_len, i = 0;
-		char enc[32] = {0}, *dest;
+		char enc[32] = {0}, *conv_str;
+		char *dest = NULL;
 
 		while (';' != *val && ':' != *val) {
 			enc[i++] = *val++;
@@ -2217,17 +2220,23 @@ static inline char* __ctsvc_vcard_translate_charset(char *src, int len)
 		ucnv_close(conv);
 
 		dest_size = temp_size*2;
-		dest = malloc(dest_size);
+		conv_str = malloc(dest_size);
 		conv = ucnv_open("UTF-8", &err);
 		WARN_IF(U_FAILURE(err), "ucnv_open() Failed(%d), enc=%s", err, enc);
-		ucnv_fromUChars(conv, dest, dest_size, temp, u_strlen(temp), &err);
+		ucnv_fromUChars(conv, conv_str, dest_size, temp, u_strlen(temp), &err);
 		WARN_IF(U_FAILURE(err), "ucnv_fromUChars() Failed(%d), enc=%s", err, enc);
 		ucnv_close(conv);
 		free(temp);
 
+		dest = calloc(prefix+strlen(conv_str)+1, sizeof(char));
+		snprintf(dest, prefix+1, "%s", src);
+		snprintf(dest+prefix, strlen(conv_str)+1, "%s", conv_str);
+
+		free(conv_str);
 		return dest;
 	}
 	return NULL;
+
 }
 
 static void __ctsvc_vcard_get_prefix(char **prefix, char *src)
