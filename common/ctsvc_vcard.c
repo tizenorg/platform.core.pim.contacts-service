@@ -1083,6 +1083,8 @@ static inline int __ctsvc_vcard_put_number_type(int type, char *label, char **bu
 		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";TYPE=X-RADIO");
 	if (type & CONTACTS_NUMBER_TYPE_COMPANY_MAIN)
 		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";TYPE=X-COMPANY-MAIN");
+	if (type & CONTACTS_NUMBER_TYPE_MAIN)
+		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";TYPE=X-MAIN");
 	if (type == CONTACTS_NUMBER_TYPE_CUSTOM) {
 		if (__ctsvc_vcard_is_valid_custom_label(label)) {
 			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";TYPE=X-");
@@ -3040,6 +3042,8 @@ static inline bool __ctsvc_vcard_get_number_type(contacts_record_h number, char 
 				type |= CONTACTS_NUMBER_TYPE_RADIO;
 			else if (strstr(lower, "x-company-main"))
 				type |= CONTACTS_NUMBER_TYPE_COMPANY_MAIN;
+			else if (strstr(lower, "x-main"))
+				type |= CONTACTS_NUMBER_TYPE_MAIN;
 			else {
 				type = CONTACTS_NUMBER_TYPE_CUSTOM;
 				contacts_record_set_str(number, _contacts_number.label, temp+(result-lower)+2);
