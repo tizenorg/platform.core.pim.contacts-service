@@ -989,6 +989,121 @@ static inline int __ctsvc_vcard_put_number_type(int type, char *label, char **bu
 	return len;
 }
 
+static int __ctsvc_vcard_check_utf8(char c)
+{
+	if ((c & 0xff) < (128 & 0xff))
+		return 1;
+	else if ((c & (char)0xe0) == (char)0xc0)
+		return 2;
+	else if ((c & (char)0xf0) == (char)0xe0)
+		return 3;
+	else if ((c & (char)0xf8) == (char)0xf0)
+		return 4;
+	else if ((c & (char)0xfc) == (char)0xf8)
+		return 5;
+	else if ((c & (char)0xfe) == (char)0xfc)
+		return 6;
+	else
+		return CONTACTS_ERROR_INVALID_PARAMETER;
+}
+
+static void __ctsvc_vcard_get_clean_number_for_export(char *str, char *dest)
+{
+	int char_len = 0;
+	char *s= SAFE_STR(str);
+	char *r = NULL;
+
+	r = dest;
+
+	while (*s) {
+		char_len = __ctsvc_vcard_check_utf8(*s);
+		if (3 == char_len) {
+			if (*s == 0xef) {
+				if (*(s+1) == 0xbc) {
+					if (0x90 <= *(s+2) && *(s+2) <= 0x99) {				// ef bc 90 : '0' ~ ef bc 99 : '9'
+						*r = '0' + (*(s+2) - 0x90);
+						r++;
+						s+=3;
+					}
+					else if (0x8b == *(s+2)) {								// ef bc 8b : '+'
+						*r = '+';
+						r++;
+						s+=3;
+					}
+					else if (0x8a == *(s+2)) {								// ef bc 8a : '*'
+						*r = '*';
+						r++;
+						s+=3;
+					}
+					else if (0x83 == *(s+2)) {								// ef bc 83 : '#'
+						*r = '#';
+						r++;
+						s+=3;
+					}
+					else if (0x8c == *(s+2)) {								// ef bc 8c : ','
+						*r = 'p';
+						r++;
+						s+=3;
+					}
+					else if (0x9b == *(s+2)) {								// ef bc 9b : ';'
+						*r = 'w';
+						r++;
+						s+=3;
+					}
+					else {
+						s+=char_len;
+					}
+				}
+				else {
+					s+=char_len;
+				}
+			}
+			else {
+				s+=char_len;
+			}
+		}
+		else if (1 == char_len) {
+			switch (*s) {
+				case '/':
+				case 'N':
+				case '.':
+				case '0' ... '9':
+				case '#':
+				case '*':
+				case '(':
+				case ')':
+				case '+':
+					*r = *s;
+					r++;
+					s++;
+					break;
+				case ',':
+				case 'p':
+				case 'P':
+					*r = 'p';
+					r++;
+					s++;
+					break;
+				case ';':
+				case 'w':
+				case 'W':
+					*r = 'w';
+					r++;
+					s++;
+					break;
+				default:
+					s++;
+					break;
+			}
+		}
+		else {
+			s+=char_len;
+		}
+	}
+	*r = '\0';
+	return;
+}
+
 
 static inline int __ctsvc_vcard_append_numbers(ctsvc_list_s *number_list, char **buf, int* buf_size, int len)
 {
@@ -998,6 +1113,8 @@ static inline int __ctsvc_vcard_append_numbers(ctsvc_list_s *number_list, char *
 	for (cursor=number_list->records;cursor;cursor=cursor->next) {
 		number = cursor->data;
 		if (number->number) {
+			char clean_number[strlen(number->number)];
+			clean_number[0] = '\0';
 			CTSVC_VCARD_APPEND_STR(buf,buf_size,len,content_name[CTSVC_VCARD_VALUE_TEL]);
 
 			len = __ctsvc_vcard_put_number_type(number->type, SAFE_STR(number->label), buf, buf_size, len);
@@ -1006,10 +1123,13 @@ static inline int __ctsvc_vcard_append_numbers(ctsvc_list_s *number_list, char *
 			if (number->is_default) {
 				CTSVC_VCARD_APPEND_STR(buf,buf_size,len,";PREF");
 			}
-			CTSVC_VCARD_APPEND_CONTENT(buf, buf_size, len, number->number);
+
+			__ctsvc_vcard_get_clean_number_for_export(number->number, clean_number);
+			if (*clean_number) {
+				CTSVC_VCARD_APPEND_CONTENT(buf, buf_size, len, clean_number);
+			}
 		}
 	}
-
 	return len;
 }
 
@@ -2952,6 +3072,112 @@ static inline bool __ctsvc_vcard_get_number_type(contacts_record_h number, char 
 	return pref;
 }
 
+static char* __ctsvc_vcard_get_clean_number_for_import(char *str)
+{
+	int char_len = 0;
+	char *s = SAFE_STR(str);
+	char *r = s;
+	while (*s) {
+		char_len = __ctsvc_vcard_check_utf8(*s);
+		if (3 == char_len) {
+			if (*s == 0xef) {
+				if (*(s+1) == 0xbc) {
+					if (0x90 <= *(s+2) && *(s+2) <= 0x99) {				// ef bc 90 : '0' ~ ef bc 99 : '9'
+						*r = '0' + (*(s+2) - 0x90);
+						r++;
+						s+=3;
+					}
+					else if (0x8b == *(s+2)) {								// ef bc 8b : '+'
+						*r = '+';
+						r++;
+						s+=3;
+					}
+					else if (0x8a == *(s+2)) {								// ef bc 8a : '*'
+						*r = '*';
+						r++;
+						s+=3;
+					}
+					else if (0x83 == *(s+2)) {								// ef bc 83 : '#'
+						*r = '#';
+						r++;
+						s+=3;
+					}
+					else if (0xb0 == *(s+2) || 0x8c == *(s+2)) {		// ef bc b0 : 'P', ef bc 8c : ','
+						*r = ',';
+						r++;
+						s+=3;
+					}
+					else if (0xb7 == *(s+2) || 0x9b == *(s+2)) {		// ef bc b7 : 'W', ef bc 9b : ';'
+						*r = ';';
+						r++;
+						s+=3;
+					}
+					else {
+						s+=char_len;
+					}
+				}
+				else if (*(s+1) == 0xbd) {
+					if (0x90 == *(s+2)) {
+						*r = ',';
+						r++;
+						s+=3;
+					}
+					else if (0x97 == *(s+2)) {
+						*r = ';';
+						r++;
+						s+=3;
+					}
+				}
+				else {
+					s+=char_len;
+				}
+			}
+			else {
+				s+=char_len;
+			}
+		}
+		else if (1 == char_len) {
+			switch (*s) {
+				case '/':
+				case 'N':
+				case '.':
+				case '0' ... '9':
+				case '#':
+				case '*':
+				case '(':
+				case ')':
+				case ',':
+				case ';':
+				case '+':
+					*r = *s;
+					r++;
+					s++;
+					break;
+				case 'p':
+				case 'P':
+					*r = ',';
+					r++;
+					s++;
+					break;
+				case 'w':
+				case 'W':
+					*r = ';';
+					r++;
+					s++;
+					break;
+				default:
+					s++;
+					break;
+			}
+		}
+		else {
+			s+=char_len;
+		}
+	}
+	*r = '\0';
+	return str;
+}
+
 static inline int __ctsvc_vcard_get_number(ctsvc_list_s *numbers, char *prefix, char *val)
 {
 	int ret;
@@ -2964,7 +3190,8 @@ static inline int __ctsvc_vcard_get_number(ctsvc_list_s *numbers, char *prefix, 
 	ret = contacts_record_create(_contacts_number._uri, &number);
 	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create is failed(%d)", ret);
 
-	contacts_record_set_str(number, _contacts_number.number, __ctsvc_vcard_remove_escape_char(temp));
+	temp = __ctsvc_vcard_remove_escape_char(temp);
+	contacts_record_set_str(number, _contacts_number.number, __ctsvc_vcard_get_clean_number_for_import(temp));
 	if (val != temp) {
 		*(temp-1) = '\0';
 		contacts_record_set_bool(number, _contacts_number.is_default, __ctsvc_vcard_get_number_type(number, prefix));
