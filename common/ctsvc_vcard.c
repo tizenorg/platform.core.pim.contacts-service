@@ -2452,24 +2452,29 @@ static inline int __ctsvc_vcard_get_display_name(ctsvc_list_s *name_list, char *
 	return CONTACTS_ERROR_NONE;
 }
 
-#define CTS_GET_MULTIPLE_COMPONENT(dest, src, src_temp, tmp_char) \
+#define CTS_GET_MULTIPLE_COMPONENT(dest, src, src_temp, separator) \
 src_temp = src; \
-while (NULL != (tmp_char = strchr(src_temp, ';'))) { \
-	if (tmp_char != src && ((char *)(tmp_char-1))[0] == '\\') { \
-		src_temp = tmp_char+1; \
+separator = false; \
+while (src_temp && *src_temp) { \
+	if (*src_temp == ';') { \
+		separator = true; \
+		*src_temp = '\0'; \
+		src = __ctsvc_vcard_remove_escape_char(src); \
+		dest = SMART_STRDUP(src); \
+		src = src_temp+1; \
+		break; \
+	} \
+	else if (*src_temp == '\\') {\
+		src_temp+=2; \
 		continue; \
 	} \
-	*tmp_char = '\0'; \
-	src = __ctsvc_vcard_remove_escape_char(src); \
-	dest = SMART_STRDUP(src); \
-	src = tmp_char+1;\
-	break; \
+	src_temp++; \
 } \
-if (NULL == tmp_char) { \
+if (false == separator && src && *src) { \
 	src = __ctsvc_vcard_remove_escape_char(src); \
 	dest = SMART_STRDUP(src); \
 	break; \
-} \
+}\
 
 static inline int __ctsvc_vcard_get_name(ctsvc_list_s *name_list, char *val)
 {
@@ -2494,13 +2499,14 @@ static inline int __ctsvc_vcard_get_name(ctsvc_list_s *name_list, char *val)
 	contacts_record_set_str(name, _contacts_name.first, NULL); // remove FN
 
 	while (true) {
-		char *temp, *start_temp;
+		bool separator = false;
+		char *start_temp;
 
-		CTS_GET_MULTIPLE_COMPONENT(((ctsvc_name_s*)name)->last, start, start_temp, temp);
-		CTS_GET_MULTIPLE_COMPONENT(((ctsvc_name_s*)name)->first, start, start_temp, temp);
-		CTS_GET_MULTIPLE_COMPONENT(((ctsvc_name_s*)name)->addition, start, start_temp, temp);
-		CTS_GET_MULTIPLE_COMPONENT(((ctsvc_name_s*)name)->prefix, start, start_temp, temp);
-		CTS_GET_MULTIPLE_COMPONENT(((ctsvc_name_s*)name)->suffix, start, start_temp, temp);
+		CTS_GET_MULTIPLE_COMPONENT(((ctsvc_name_s*)name)->last, start, start_temp, separator);
+		CTS_GET_MULTIPLE_COMPONENT(((ctsvc_name_s*)name)->first, start, start_temp, separator);
+		CTS_GET_MULTIPLE_COMPONENT(((ctsvc_name_s*)name)->addition, start, start_temp, separator);
+		CTS_GET_MULTIPLE_COMPONENT(((ctsvc_name_s*)name)->prefix, start, start_temp, separator);
+		CTS_GET_MULTIPLE_COMPONENT(((ctsvc_name_s*)name)->suffix, start, start_temp, separator);
 
 		CTS_ERR("invalid name type");
 		break;
@@ -3329,15 +3335,15 @@ static inline int __ctsvc_vcard_get_address(ctsvc_list_s *address_list, char *pr
 			text = val;
 
 		while (true) {
-			char *temp;
+			bool separator = false;
 
-			CTS_GET_MULTIPLE_COMPONENT(((ctsvc_address_s*)address)->pobox, text, text_temp, temp);
-			CTS_GET_MULTIPLE_COMPONENT(((ctsvc_address_s*)address)->extended, text, text_temp, temp);
-			CTS_GET_MULTIPLE_COMPONENT(((ctsvc_address_s*)address)->street, text, text_temp, temp);
-			CTS_GET_MULTIPLE_COMPONENT(((ctsvc_address_s*)address)->locality, text, text_temp, temp);
-			CTS_GET_MULTIPLE_COMPONENT(((ctsvc_address_s*)address)->region, text, text_temp, temp);
-			CTS_GET_MULTIPLE_COMPONENT(((ctsvc_address_s*)address)->postalcode, text, text_temp, temp);
-			CTS_GET_MULTIPLE_COMPONENT(((ctsvc_address_s*)address)->country, text, text_temp, temp);
+			CTS_GET_MULTIPLE_COMPONENT(((ctsvc_address_s*)address)->pobox, text, text_temp, separator);
+			CTS_GET_MULTIPLE_COMPONENT(((ctsvc_address_s*)address)->extended, text, text_temp, separator);
+			CTS_GET_MULTIPLE_COMPONENT(((ctsvc_address_s*)address)->street, text, text_temp, separator);
+			CTS_GET_MULTIPLE_COMPONENT(((ctsvc_address_s*)address)->locality, text, text_temp, separator);
+			CTS_GET_MULTIPLE_COMPONENT(((ctsvc_address_s*)address)->region, text, text_temp, separator);
+			CTS_GET_MULTIPLE_COMPONENT(((ctsvc_address_s*)address)->postalcode, text, text_temp, separator);
+			CTS_GET_MULTIPLE_COMPONENT(((ctsvc_address_s*)address)->country, text, text_temp, separator);
 
 			CTS_ERR("invalid ADR type");
 			break;
