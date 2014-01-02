@@ -49,32 +49,18 @@
 	} \
 } while (0)
 
-#define CTSVC_VCARD_APPEND_ENCODE_STR(buf, buf_size, len, content) do { \
-	if ((len = __ctsvc_vcard_append_encode_str(buf, buf_size, len, content)) < 0) { \
-		CTS_ERR("__ctsvc_vcard_append_encode_str() Failed"); \
-		return CONTACTS_ERROR_INTERNAL; \
-	} \
-} while (0)
-
 #define CTSVC_VCARD_APPEND_CONTENT_STR(buf, buf_size, len, content) do { \
 	if ((len = __ctsvc_vcard_append_str(buf, buf_size, len, content, true)) < 0) { \
-		ERR("__ctsvc_vcard_append_encode_str() Failed"); \
+		ERR("__ctsvc_vcard_append_str() Failed"); \
 		return CONTACTS_ERROR_INTERNAL; \
 	} \
 } while (0)
 
 
 #define CTSVC_VCARD_APPEND_CONTENT(buf, buf_size, len, content) do { \
-	if (__ctsvc_need_encode(content)) { \
-		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";CHARSET=UTF-8"); \
-		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";ENCODING=BASE64:"); \
-		CTSVC_VCARD_APPEND_ENCODE_STR(buf, buf_size, len, content); \
-	} \
-	else { \
-		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";CHARSET=UTF-8"); \
-		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ":"); \
-		CTSVC_VCARD_APPEND_CONTENT_STR(buf, buf_size, len, content); \
-	} \
+	CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";CHARSET=UTF-8"); \
+	CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ":"); \
+	CTSVC_VCARD_APPEND_CONTENT_STR(buf, buf_size, len, content); \
 	CTSVC_VCARD_APPEND_STR(buf, buf_size, len, CTSVC_CRLF); \
 } while (0)
 
@@ -211,14 +197,6 @@ static void __ctsvc_vcard_initial(void)
 	}
 };
 
-static inline bool __ctsvc_need_encode(const char *str)
-{
-	const char *safe_str = SAFE_STR(str);
-	if (strchr(safe_str, '\r') || strchr(safe_str, '\n'))
-		return true;
-	return false;
-}
-
 static int __ctsvc_vcard_append_str(char **buf, int *buf_size, int len, const char *str, bool need_conversion)
 {
 	int len_temp = 0;
@@ -246,6 +224,17 @@ static int __ctsvc_vcard_append_str(char **buf, int *buf_size, int len, const ch
 
 		while (*s) {
 			switch (*s) {
+			case '\r':
+				if (*(s+1) && '\n' == *(s+1)) {
+					s++;
+					*r = '\\';
+					r++;
+					*r = 'n';
+				}
+				else {
+					*r = *s;
+				}
+				break;
 			case '\n':
 				*r = '\\';
 				r++;
@@ -363,21 +352,6 @@ static int __ctsvc_vcard_append_str(char **buf, int *buf_size, int len, const ch
 	return len;
 }
 
-static int __ctsvc_vcard_append_encode_str(char **buf, int *buf_size, int len, const char *str)
-{
-	int str_len = 0;
-	const char *safe_str = NULL;
-	gchar *encoded_str = NULL;
-
-	safe_str = SAFE_STR(str);
-	str_len = strlen(safe_str);
-
-	encoded_str = g_base64_encode((guchar *)safe_str, str_len);
-	len = __ctsvc_vcard_append_str(buf, buf_size, len, encoded_str, false);
-	g_free(encoded_str);
-	return len;
-}
-
 #define CTS_VCARD_FOLDING_LIMIT 75
 
 static inline int __ctsvc_vcard_add_folding(char **buf, int *buf_size, int buf_len)
@@ -459,7 +433,6 @@ static inline int __ctsvc_vcard_add_folding(char **buf, int *buf_size, int buf_l
 
 static inline int __ctsvc_vcard_append_name(ctsvc_list_s *names, char **buf, int *buf_size, int len)
 {
-	bool need_encode = false;
 	char display[1024] = {0};
 	GList *cursor = names->records;
 	ctsvc_name_s *name;
@@ -468,42 +441,19 @@ static inline int __ctsvc_vcard_append_name(ctsvc_list_s *names, char **buf, int
 
 	name = (ctsvc_name_s *)cursor->data;
 
-	do {
-		if (true == (need_encode = __ctsvc_need_encode(name->first))) break;
-		if (true == (need_encode = __ctsvc_need_encode(name->last))) break;
-		if (true == (need_encode = __ctsvc_need_encode(name->addition))) break;
-		if (true == (need_encode = __ctsvc_need_encode(name->prefix))) break;
-		if (true == (need_encode = __ctsvc_need_encode(name->suffix))) break;
-	} while (0);
-
 	CTSVC_VCARD_APPEND_STR(buf, buf_size, len, content_name[CTSVC_VCARD_VALUE_N]);
 
-	if (need_encode) {
-		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";CHARSET=UTF-8");
-		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";ENCODING=BASE64:");
-		CTSVC_VCARD_APPEND_ENCODE_STR(buf, buf_size, len, name->last);
-		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";");
-		CTSVC_VCARD_APPEND_ENCODE_STR(buf, buf_size, len, name->first);
-		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";");
-		CTSVC_VCARD_APPEND_ENCODE_STR(buf, buf_size, len, name->addition);
-		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";");
-		CTSVC_VCARD_APPEND_ENCODE_STR(buf, buf_size, len, name->prefix);
-		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";");
-		CTSVC_VCARD_APPEND_ENCODE_STR(buf, buf_size, len, name->suffix);
-	}
-	else {
-		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";CHARSET=UTF-8");
-		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ":");
-		CTSVC_VCARD_APPEND_CONTENT_STR(buf, buf_size, len, name->last);
-		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";");
-		CTSVC_VCARD_APPEND_CONTENT_STR(buf, buf_size, len, name->first);
-		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";");
-		CTSVC_VCARD_APPEND_CONTENT_STR(buf, buf_size, len, name->addition);
-		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";");
-		CTSVC_VCARD_APPEND_CONTENT_STR(buf, buf_size, len, name->prefix);
-		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";");
-		CTSVC_VCARD_APPEND_CONTENT_STR(buf, buf_size, len, name->suffix);
-	}
+	CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";CHARSET=UTF-8");
+	CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ":");
+	CTSVC_VCARD_APPEND_CONTENT_STR(buf, buf_size, len, name->last);
+	CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";");
+	CTSVC_VCARD_APPEND_CONTENT_STR(buf, buf_size, len, name->first);
+	CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";");
+	CTSVC_VCARD_APPEND_CONTENT_STR(buf, buf_size, len, name->addition);
+	CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";");
+	CTSVC_VCARD_APPEND_CONTENT_STR(buf, buf_size, len, name->prefix);
+	CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";");
+	CTSVC_VCARD_APPEND_CONTENT_STR(buf, buf_size, len, name->suffix);
 
 	CTSVC_VCARD_APPEND_STR(buf, buf_size, len, CTSVC_CRLF);
 
@@ -776,7 +726,6 @@ static inline int __ctsvc_vcard_append_company(ctsvc_list_s *company_list, char 
 	ctsvc_company_s *company;
 
 	for (cursor=company_list->records;cursor;cursor=cursor->next) {
-		bool need_encode = false;
 
 		company = (ctsvc_company_s *)cursor->data;
 
@@ -785,29 +734,14 @@ static inline int __ctsvc_vcard_append_company(ctsvc_list_s *company_list, char 
 		len = __ctsvc_vcard_put_company_type(company->type, SAFE_STR(company->label), buf, buf_size, len);
 		RETV_IF(len < 0, CONTACTS_ERROR_INTERNAL);
 
-		do {
-			if (true == (need_encode = (__ctsvc_need_encode(company->name)))) break;
-			if (true == (need_encode = (__ctsvc_need_encode(company->department)))) break;
-		} while (0);
+		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";CHARSET=UTF-8");
+		CTSVC_VCARD_APPEND_STR(buf,buf_size,len,":");
+		CTSVC_VCARD_APPEND_CONTENT_STR(buf,buf_size,len,company->name);
+		if (company->department) {
+			CTSVC_VCARD_APPEND_STR(buf,buf_size,len,";");
+			CTSVC_VCARD_APPEND_CONTENT_STR(buf,buf_size,len,company->department);
+		}
 
-		if (need_encode) {
-			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";CHARSET=UTF-8");
-			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";ENCODING=BASE64:");
-			CTSVC_VCARD_APPEND_ENCODE_STR(buf,buf_size,len,company->name);
-			if (company->department) {
-				CTSVC_VCARD_APPEND_STR(buf,buf_size,len,";");
-				CTSVC_VCARD_APPEND_ENCODE_STR(buf,buf_size,len,company->department);
-			}
-		}
-		else {
-			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";CHARSET=UTF-8");
-			CTSVC_VCARD_APPEND_STR(buf,buf_size,len,":");
-			CTSVC_VCARD_APPEND_CONTENT_STR(buf,buf_size,len,company->name);
-			if (company->department) {
-				CTSVC_VCARD_APPEND_STR(buf,buf_size,len,";");
-				CTSVC_VCARD_APPEND_CONTENT_STR(buf,buf_size,len,company->department);
-			}
-		}
 		CTSVC_VCARD_APPEND_STR(buf,buf_size,len,CTSVC_CRLF);
 
 		if (company->job_title) {
@@ -924,7 +858,6 @@ static inline int __ctsvc_vcard_append_postals(ctsvc_list_s *address_list, char 
 	for (cursor = address_list->records;cursor;cursor=cursor->next) {
 		address = cursor->data;
 		if (address) {
-			bool need_encode = false;
 			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, content_name[CTSVC_VCARD_VALUE_ADR]);
 
 			len = __ctsvc_vcard_put_postal_type(address->type, SAFE_STR(address->label), buf, buf_size, len);
@@ -933,50 +866,22 @@ static inline int __ctsvc_vcard_append_postals(ctsvc_list_s *address_list, char 
 			if (address->is_default) {
 				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";PREF");
 			}
-			do {
-				if (true == (need_encode = __ctsvc_need_encode(address->pobox))) break;
-				if (true == (need_encode = __ctsvc_need_encode(address->extended))) break;
-				if (true == (need_encode = __ctsvc_need_encode(address->street))) break;
-				if (true == (need_encode = __ctsvc_need_encode(address->locality))) break;
-				if (true == (need_encode = __ctsvc_need_encode(address->region))) break;
-				if (true == (need_encode = __ctsvc_need_encode(address->postalcode))) break;
-				if (true == (need_encode = __ctsvc_need_encode(address->country))) break;
-			} while (0);
 
-			if (need_encode) {
-				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";CHARSET=UTF-8");
-				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";ENCODING=BASE64:");
-				CTSVC_VCARD_APPEND_ENCODE_STR(buf, buf_size, len, address->pobox);
-				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";");
-				CTSVC_VCARD_APPEND_ENCODE_STR(buf, buf_size, len, address->extended);
-				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";");
-				CTSVC_VCARD_APPEND_ENCODE_STR(buf, buf_size, len, address->street);
-				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";");
-				CTSVC_VCARD_APPEND_ENCODE_STR(buf, buf_size, len, address->locality);
-				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";");
-				CTSVC_VCARD_APPEND_ENCODE_STR(buf, buf_size, len, address->region);
-				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";");
-				CTSVC_VCARD_APPEND_ENCODE_STR(buf, buf_size, len, address->postalcode);
-				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";");
-				CTSVC_VCARD_APPEND_ENCODE_STR(buf, buf_size, len, address->country);
-			}
-			else {
-				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";CHARSET=UTF-8");
-				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ":");
-				CTSVC_VCARD_APPEND_CONTENT_STR(buf, buf_size, len, address->pobox);
-				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";");
-				CTSVC_VCARD_APPEND_CONTENT_STR(buf, buf_size, len, address->extended);
-				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";");
-				CTSVC_VCARD_APPEND_CONTENT_STR(buf, buf_size, len, address->street);
-				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";");
-				CTSVC_VCARD_APPEND_CONTENT_STR(buf, buf_size, len, address->locality);
-				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";");
-				CTSVC_VCARD_APPEND_CONTENT_STR(buf, buf_size, len, address->region);
-				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";");
-				CTSVC_VCARD_APPEND_CONTENT_STR(buf, buf_size, len, address->postalcode);
-				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";");
-				CTSVC_VCARD_APPEND_CONTENT_STR(buf, buf_size, len, address->country);
-			}
+			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";CHARSET=UTF-8");
+			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ":");
+			CTSVC_VCARD_APPEND_CONTENT_STR(buf, buf_size, len, address->pobox);
+			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";");
+			CTSVC_VCARD_APPEND_CONTENT_STR(buf, buf_size, len, address->extended);
+			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";");
+			CTSVC_VCARD_APPEND_CONTENT_STR(buf, buf_size, len, address->street);
+			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";");
+			CTSVC_VCARD_APPEND_CONTENT_STR(buf, buf_size, len, address->locality);
+			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";");
+			CTSVC_VCARD_APPEND_CONTENT_STR(buf, buf_size, len, address->region);
+			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";");
+			CTSVC_VCARD_APPEND_CONTENT_STR(buf, buf_size, len, address->postalcode);
+			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";");
+			CTSVC_VCARD_APPEND_CONTENT_STR(buf, buf_size, len, address->country);
 
 			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, CTSVC_CRLF);
 		}
