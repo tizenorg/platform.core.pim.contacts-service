@@ -904,7 +904,7 @@ static inline int __ctsvc_vcard_append_nicknames(ctsvc_list_s *nickname_list, ch
 				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, content_name[CTSVC_VCARD_VALUE_NICKNAME]);
 				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";CHARSET=UTF-8");
 				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ":");
-				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, nickname->nickname);
+				CTSVC_VCARD_APPEND_CONTENT_STR(buf, buf_size, len, nickname->nickname);
 				first = false;
 			}
 			else {
