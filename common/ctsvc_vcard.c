@@ -2494,6 +2494,8 @@ static inline int __ctsvc_vcard_get_name(ctsvc_list_s *name_list, char *val)
 		contacts_list_get_current_record_p((contacts_list_h)name_list, &name);
 	}
 
+	contacts_record_set_str(name, _contacts_name.first, NULL); // remove FN
+
 	while (true) {
 		char *temp, *start_temp;
 
