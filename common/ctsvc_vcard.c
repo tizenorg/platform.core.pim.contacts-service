@@ -2052,11 +2052,6 @@ static inline int __ctsvc_vcard_decode_quoted_val(char *val)
 			pre = __ctsvc_vcard_hex_to_dec(*(src+1));
 			if (0 <= pre) {
 				*dest = (char)((pre << 4) + __ctsvc_vcard_hex_to_dec(*(src+2)));
-				if (';' == *dest || ':' == *dest || '\\' == *dest || ',' == *dest) {
-					*(dest+1) = *dest;
-					*dest = '\\';
-					dest++;
-				}
 				dest++;
 				src += 2;
 			} else {
