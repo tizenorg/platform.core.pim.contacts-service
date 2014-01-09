@@ -1,5 +1,5 @@
 /*
- * Contacts Service Helper
+ * Contacts Service
  *
  * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
  *
@@ -24,8 +24,8 @@
 enum SORTTYPE{
 	CTSVC_SORT_OTHERS,		// 0??
 	CTSVC_SORT_NUMBER,		// 1
-	CTSVC_SORT_PRIMARY, 	// 2
-	CTSVC_SORT_SECONDARY, 	// 3
+	CTSVC_SORT_PRIMARY,	// 2
+	CTSVC_SORT_SECONDARY,	// 3
 	CTSVC_SORT_WESTERN,		// 4
 	CTSVC_SORT_KOREAN,		// 5
 	CTSVC_SORT_JAPANESE,	// 6
@@ -39,20 +39,16 @@ enum SORTTYPE{
 	CTSVC_SORT_TURKISH,
 };
 
-int ctsvc_check_utf8(char c);
-int ctsvc_check_language(UChar *word);
-int ctsvc_check_language_type(const char *src);
-
 int ctsvc_get_name_sort_type(const char *src);
+int ctsvc_get_sort_type_from_language(int language);
 int ctsvc_get_language_type(const char *system_lang);
 const char *ctsvc_get_language_locale(int lang);
-int ctsvc_get_sort_type_from_language(int language);
-
-void ctsvc_extra_normalize(UChar *word, int32_t word_size);
 
 int ctsvc_get_chosung(const char *src, char *dest, int dest_size);
+int ctsvc_get_korean_search_pattern(const char *src, char *dest, int dest_size);
 int ctsvc_convert_japanese_to_hiragana(const char *src, char **dest);
 int ctsvc_convert_japanese_to_hiragana_unicode(UChar *src, UChar *dest, int dest_size);
-int ctsvc_get_korean_search_pattern(const char *src, char *dest, int dest_size);
+
+void ctsvc_extra_normalize(UChar *word, int32_t word_size);
 
 #endif // __TIZEN_SOCIAL_CTSVC_LOCALIZE_H__

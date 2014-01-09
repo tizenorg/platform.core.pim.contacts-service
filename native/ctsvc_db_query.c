@@ -36,6 +36,7 @@
 #include "ctsvc_view.h"
 #include "ctsvc_inotify.h"
 #include "ctsvc_localize.h"
+#include "ctsvc_localize_utils.h"
 #include "ctsvc_setting.h"
 
 #include "ctsvc_db_access_control.h"

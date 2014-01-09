@@ -16,8 +16,10 @@
  * limitations under the License.
  *
  */
-#ifndef __TIZEN_SOCIAL_CTSVC_NORMALIZE_H__
-#define __TIZEN_SOCIAL_CTSVC_NORMALIZE_H__
+#ifndef __TIZEN_SOCIAL_CTSVC_LOCALIZE_UTILS_H__
+#define __TIZEN_SOCIAL_CTSVC_LOCALIZE_UTILS_H__
+
+#include <unicode/utypes.h>
 
 enum LANGTYPE{
 	CTSVC_LANG_NUMBER = 0,
@@ -68,11 +70,12 @@ enum LANGTYPE{
 	CTSVC_LANG_OTHERS = 1000,
 };
 
+#define array_sizeof(a) (sizeof(a) / sizeof(a[0]))
+
 #define CTSVC_COMPARE_BETWEEN(left_range, value, right_range) (((left_range) <= (value)) && ((value) <= (right_range)))
 
-int ctsvc_normalize_str(const char *src, char **dest);
-int ctsvc_collation_str(char *src, char **dest);
-int ctsvc_normalize_index(const char *src, char **dest);
-int ctsvc_get_halfwidth_string(const char *src, char** dest, int* dest_size);
+int ctsvc_check_utf8(char c);
+int ctsvc_check_language(UChar *word);
+int ctsvc_check_language_type(const char *src);
 
-#endif /*  __TIZEN_SOCIAL_CTSVC_NORMALIZE_H__ */
+#endif // __TIZEN_SOCIAL_CTSVC_LOCALIZE_UTILS_H__

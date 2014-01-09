@@ -23,6 +23,7 @@
 #include "ctsvc_sqlite.h"
 #include "ctsvc_db_plugin_person_helper.h"
 #include "ctsvc_localize.h"
+#include "ctsvc_localize_utils.h"
 #include "ctsvc_normalize.h"
 #include "ctsvc_db_init.h"
 #include "ctsvc_utils.h"

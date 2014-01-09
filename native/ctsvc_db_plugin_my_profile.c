@@ -34,7 +34,7 @@
 #include "ctsvc_localize_ch.h"
 #include "ctsvc_group.h"
 #include "ctsvc_notification.h"
-#include "ctsvc_localize.h"
+#include "ctsvc_localize_utils.h"
 
 #include "ctsvc_db_plugin_contact_helper.h"
 

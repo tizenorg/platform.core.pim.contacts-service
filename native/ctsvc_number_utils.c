@@ -24,7 +24,7 @@
 #include "ctsvc_internal.h"
 #include "ctsvc_setting.h"
 #include "ctsvc_normalize.h"
-#include "ctsvc_localize.h"
+#include "ctsvc_localize_utils.h"
 #include "ctsvc_number_utils.h"
 
 // ctsvc_clean_number

@@ -33,8 +33,7 @@
 #include "ctsvc_internal.h"
 #include "ctsvc_list.h"
 #include "ctsvc_vcard.h"
-#include "ctsvc_normalize.h"
-#include "ctsvc_localize.h"
+#include "ctsvc_localize_utils.h"
 
 #define DEFAULT_ADDRESS_BOOK_ID 0
 

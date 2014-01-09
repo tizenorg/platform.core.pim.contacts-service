@@ -1,5 +1,5 @@
 /*
- * Contacts Service Helper
+ * Contacts Service
  *
  * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
  *
@@ -19,12 +19,12 @@
 #include <unicode/uchar.h>
 #include <unicode/ustring.h>
 
-
 #include "ctsvc_internal.h"
 #include "ctsvc_localize_ch.h"
+#include "ctsvc_localize_utils.h"
 
 
-#define CHINESE_COUNT	 					20902
+#define CHINESE_COUNT						20902
 #define CHINESE_DUOYINZI_MAX_COUNT			6
 
 
@@ -2171,8 +2171,6 @@ __ctsvc_has_chinese(const UChar *src)
 
 	return false;
 }
-
-#define array_sizeof(a) (sizeof(a) / sizeof(a[0]))
 
 bool ctsvc_has_chinese(const char *src)
 {

@@ -22,6 +22,7 @@
 #include "ctsvc_schema.h"
 #include "ctsvc_sqlite.h"
 #include "ctsvc_normalize.h"
+#include "ctsvc_localize_utils.h"
 #include "ctsvc_db_init.h"
 #include "ctsvc_db_query.h"
 #include "ctsvc_db_plugin_name_helper.h"
