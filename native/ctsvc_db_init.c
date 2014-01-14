@@ -311,7 +311,7 @@ static int __ctsvc_db_create_views()
 					"EXISTS(SELECT person_id FROM "CTS_TABLE_FAVORITES" WHERE person_id=persons.person_id) is_favorite, "
 					"(SELECT favorite_prio FROM "CTS_TABLE_FAVORITES" WHERE person_id=persons.person_id) favorite_prio "
 			"FROM "CTS_TABLE_CONTACTS", "CTS_TABLE_PERSONS" "
-			"ON (name_contact_id = contacts.contact_id) ");
+			"ON (persons.person_id = contacts.person_id) ");
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Failed(%d)", ret);
 
