@@ -308,7 +308,9 @@ CREATE TABLE phonelogs
 (
 	id				INTEGER PRIMARY KEY AUTOINCREMENT,
 	number				TEXT,
+	number_type			INTEGER,
 	normal_num			TEXT,
+	clean_num				TEXT,
 	minmatch				TEXT,
 	person_id			INTEGER, --person_id
 	log_type			INTEGER,

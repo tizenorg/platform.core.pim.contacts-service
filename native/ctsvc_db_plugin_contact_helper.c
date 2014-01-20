@@ -56,6 +56,7 @@
 
 #include "ctsvc_person.h"
 #include "ctsvc_group.h"
+#include "ctsvc_phonelog.h"
 
 int ctsvc_contact_add_image_file(int parent_id, int img_id,
 		char *src_img, char *dest, int dest_size)
@@ -276,8 +277,12 @@ int ctsvc_db_contact_delete(int contact_id)
 	WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_query_get_first_int_result() Failed(%d)", ret);
 	// set dirty bit to person by trigger : person will be aggregated in ctsvc_person_aggregate
 
-	if (1 < link_count)
+	if (1 < link_count) {
 		ctsvc_person_aggregate(person_id);
+
+		// update phonelog
+		ctsvc_db_phone_log_update_person_id(NULL, person_id, -1, false);
+	}
 	else
 		ctsvc_set_person_noti();
 

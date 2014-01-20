@@ -171,6 +171,8 @@ _CONTACTS_BEGIN_VIEW()
 	_CONTACTS_PROPERTY_BOOL( is_default )			// read, write
 	_CONTACTS_PROPERTY_STR( number )				// read, write
 	_CONTACTS_PROPERTY_STR( normalized_number )	// filter only
+	_CONTACTS_PROPERTY_STR( cleaned_number )	// filter only
+	_CONTACTS_PROPERTY_STR( number_filter )		// filter only
 _CONTACTS_END_VIEW( _contacts_number )
 
 // contact_email
@@ -358,6 +360,8 @@ _CONTACTS_BEGIN_VIEW()
 	_CONTACTS_PROPERTY_STR( display_name )			// read only
 	_CONTACTS_PROPERTY_STR( image_thumbnail_path )	// read only
 	_CONTACTS_PROPERTY_STR( normalized_number)		// filter only
+	_CONTACTS_PROPERTY_STR( cleaned_number)		// filter only
+	_CONTACTS_PROPERTY_STR( number_filter)		// filter only
 _CONTACTS_END_VIEW( _contacts_speeddial )
 
 // phone_log
@@ -370,6 +374,8 @@ _CONTACTS_BEGIN_VIEW()
 	_CONTACTS_PROPERTY_INT( extra_data1 )			// read, write once : message or email id, duration
 	_CONTACTS_PROPERTY_STR( extra_data2 )			// read, write once : shortmsg, subject
 	_CONTACTS_PROPERTY_STR( normalized_address )	// filter only
+	_CONTACTS_PROPERTY_STR( cleaned_address )		// filter only
+	_CONTACTS_PROPERTY_STR( address_filter )		// filter only
 _CONTACTS_END_VIEW( _contacts_phone_log )
 
 // contact_updated_info : read only
@@ -456,6 +462,7 @@ _CONTACTS_BEGIN_READ_ONLY_VIEW()
 	_CONTACTS_PROPERTY_FILTER_STR( number_filter )
 	_CONTACTS_PROPERTY_FILTER_STR( normalized_number )
 	_CONTACTS_PROPERTY_PROJECTION_STR( message_alert )
+	_CONTACTS_PROPERTY_FILTER_STR( cleaned_number )
 _CONTACTS_END_READ_ONLY_VIEW( _contacts_person_number )
 
 // person_email : read only
@@ -557,6 +564,8 @@ _CONTACTS_BEGIN_READ_ONLY_VIEW()
 	_CONTACTS_PROPERTY_PROJECTION_INT( extra_data1 )
 	_CONTACTS_PROPERTY_PROJECTION_STR( extra_data2 )
 	_CONTACTS_PROPERTY_FILTER_STR( normalized_address)
+	_CONTACTS_PROPERTY_FILTER_STR( cleaned_address)
+	_CONTACTS_PROPERTY_FILTER_STR( address_filter)
 _CONTACTS_END_READ_ONLY_VIEW( _contacts_person_phone_log )
 
 // person, stat : read only
@@ -592,6 +601,7 @@ _CONTACTS_BEGIN_READ_ONLY_VIEW()
 	_CONTACTS_PROPERTY_STR( number )
 	_CONTACTS_PROPERTY_FILTER_STR( number_filter )
 	_CONTACTS_PROPERTY_FILTER_STR( normalized_number )
+	_CONTACTS_PROPERTY_FILTER_STR( cleaned_number )
 _CONTACTS_END_READ_ONLY_VIEW( _contacts_contact_number )
 
 // simple contact email : read only

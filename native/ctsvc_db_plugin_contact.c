@@ -38,6 +38,7 @@
 #include "ctsvc_notification.h"
 #include "ctsvc_localize.h"
 #include "ctsvc_person.h"
+#include "ctsvc_phonelog.h"
 
 #include "ctsvc_db_plugin_contact_helper.h"
 #include "ctsvc_db_plugin_person_helper.h"
@@ -690,7 +691,6 @@ static inline int __ctsvc_contact_make_search_data(int contact_id, ctsvc_contact
 
 	char *number = NULL;
 	char *data = NULL;
-	char *normalized_data = NULL;
 	char *temp_number=NULL;
 	char *temp_data=NULL;
 	int buf_size=0;
@@ -706,13 +706,13 @@ static inline int __ctsvc_contact_make_search_data(int contact_id, ctsvc_contact
 		contacts_list_first(number_list);
 		do {
 			contacts_list_get_current_record_p(number_list, (contacts_record_h*)&number_record);
-			if (NULL != number_record) {
-				buf_size = SAFE_STRLEN(number) + SAFE_STRLEN(number_record->lookup) + 3;
+			if (NULL != number_record && number_record->cleaned) {
+				buf_size = SAFE_STRLEN(number) + SAFE_STRLEN(number_record->cleaned) + SAFE_STRLEN(number_record->normalized) + 3;
 				temp_number = calloc(1, buf_size);
 				if (number)
-					snprintf(temp_number, buf_size, "%s %s ", SAFE_STR(number), number_record->lookup);
+					snprintf(temp_number, buf_size, "%s %s %s", SAFE_STR(number), number_record->cleaned, number_record->normalized);
 				else
-					snprintf(temp_number, buf_size, "%s ", number_record->lookup);
+					snprintf(temp_number, buf_size, "%s %s", number_record->cleaned, number_record->normalized);
 				free(number);
 				number = temp_number;
 			}
@@ -897,11 +897,9 @@ static inline int __ctsvc_contact_make_search_data(int contact_id, ctsvc_contact
 	}
 
 	*search_number = number;
-	if (data) {
-		ctsvc_normalize_str(data, &normalized_data);
-		*search_data = normalized_data;
-		free(data);
-	}
+	if (data)
+		*search_data = data;
+
 	return CONTACTS_ERROR_NONE;
 }
 
@@ -996,35 +994,29 @@ static inline int __ctsvc_contact_refresh_lookup_data(int contact_id, ctsvc_cont
 		do {
 			contacts_list_get_current_record_p(number_list, (contacts_record_h*)&number_record);
 			if (NULL != number_record && number_record->number) {
-				char clean_num[CTSVC_NUMBER_MAX_LEN] = {0};
-				char normal_num[CTSVC_NUMBER_MAX_LEN] = {0};
-				ret = ctsvc_clean_number(number_record->number, clean_num, sizeof(clean_num));
-				if (ret <= 0)
+				if (NULL == number_record->cleaned)
 					continue;
-				snprintf(query, sizeof(query), "INSERT INTO %s(data_id, contact_id, number, min_match) "
-								"VALUES(%d, %d, ?, ?)", CTS_TABLE_PHONE_LOOKUP, number_record->id,
+				snprintf(query, sizeof(query), "INSERT INTO %s(data_id, contact_id, number) "
+								"VALUES(%d, %d, ?)", CTS_TABLE_PHONE_LOOKUP, number_record->id,
 								contact_id);
 
 				ret = ctsvc_query_prepare(query, &stmt);
 				RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
 
-				if (*clean_num)
-					ctsvc_stmt_bind_text(stmt, 1, clean_num);
-				if (number_record->lookup)
-					ctsvc_stmt_bind_text(stmt, 2, number_record->lookup);
+				if (*number_record->cleaned)
+					ctsvc_stmt_bind_text(stmt, 1, number_record->cleaned);
+
 				ret = ctsvc_stmt_step(stmt);
 				if (CONTACTS_ERROR_NONE != ret) {
 					CTS_ERR("ctsvc_stmt_step() Failed(%d)", ret);
 					ctsvc_stmt_finalize(stmt);
 					return ret;
 				}
-				ret = ctsvc_normalize_number(clean_num, normal_num, sizeof(normal_num));
-				if (ret > 0 && strcmp(clean_num, normal_num) != 0) {
+				if (number_record->normalized && strcmp(number_record->cleaned, number_record->normalized) != 0) {
 					ctsvc_stmt_reset(stmt);
-					if (*normal_num)
-						ctsvc_stmt_bind_text(stmt, 1, normal_num);
-					if (number_record->lookup)
-						ctsvc_stmt_bind_text(stmt, 2, number_record->lookup);
+					if (*number_record->normalized)
+						ctsvc_stmt_bind_text(stmt, 1, number_record->normalized);
+
 					ret = ctsvc_stmt_step(stmt);
 					if (CONTACTS_ERROR_NONE != ret) {
 						CTS_ERR("ctsvc_stmt_step() Failed(%d)", ret);
@@ -1862,21 +1854,36 @@ static inline int __ctsvc_contact_insert_grouprel(int contact_id, contacts_list_
 inline static int __ctsvc_find_person_to_link_with_number(const char *number, int addressbook_id, int *person_id)
 {
 	int ret;
+	cts_stmt stmt = NULL;
 	char query[CTS_SQL_MIN_LEN] = {0};
-	char minmatch[CTSVC_NUMBER_MAX_LEN] = {0};
-	char normal_num[CTSVC_NUMBER_MAX_LEN] = {0};
+	int number_len = SAFE_STRLEN(number);
+	char clean_num[number_len+1];
 
-	ret = ctsvc_normalize_number(number, normal_num, sizeof(normal_num));
+	ret = ctsvc_clean_number(number, clean_num, sizeof(clean_num));
 	if (0 < ret) {
-		ret = ctsvc_get_minmatch_number(normal_num, minmatch, CTSVC_NUMBER_MAX_LEN, ctsvc_get_phonenumber_min_match_digit());
+		char normal_num[sizeof(clean_num)+20];
+		ret = ctsvc_normalize_number(clean_num, normal_num, sizeof(normal_num));
+		char minmatch[sizeof(normal_num)+1];
+		if (0 < ret)
+			ret = ctsvc_get_minmatch_number(normal_num, minmatch, sizeof(minmatch), ctsvc_get_phonenumber_min_match_digit());
 		snprintf(query, sizeof(query),
 				"SELECT C.person_id FROM "CTS_TABLE_CONTACTS" C, "CTS_TABLE_DATA" D "
 				"ON C.contact_id=D.contact_id AND D.datatype=%d AND C.deleted = 0 "
-				"AND C.addressbook_id <> %d "
-				"WHERE D.data4='%s' AND D.is_my_profile = 0",
-				CTSVC_DATA_NUMBER, addressbook_id, minmatch);
-		ret = ctsvc_query_get_first_int_result(query, person_id);
-		CTS_DBG("%s", query);
+				"AND C.addressbook_id <> %d AND D.is_my_profile = 0 "
+				"WHERE D.data4 = ?",
+				CTSVC_DATA_NUMBER, addressbook_id);
+		ret = ctsvc_query_prepare(query, &stmt);
+		RETVM_IF(NULL == stmt, ret, "ctsvc_query_prepare fail(%d)", ret);
+		ctsvc_stmt_bind_text(stmt, 1, minmatch);
+		ret = ctsvc_stmt_step(stmt);
+		if (1 == ret) {
+			*person_id = ctsvc_stmt_get_int(stmt, 0);
+			ret = CONTACTS_ERROR_NONE;
+		}
+		else if (CONTACTS_ERROR_NONE == ret) {
+			ret = CONTACTS_ERROR_NO_DATA;
+		}
+		ctsvc_stmt_finalize(stmt);
 		CTS_DBG("result ret(%d) person_id(%d)", ret, *person_id);
 		return ret;
 	}
@@ -2116,6 +2123,21 @@ static int __ctsvc_db_contact_insert_record( contacts_record_h record, int *id)
 	// person aggregation when auto_linked
 	if (auto_linked)
 		ctsvc_person_aggregate(contact->person_id);
+
+	// update phonelog
+	if (contact->numbers) {
+		unsigned int count;
+		ret = contacts_list_get_count((contacts_list_h)contact->numbers, &count);
+		contacts_list_first((contacts_list_h)contact->numbers);
+		if (count > 0) {
+			ctsvc_number_s *number_record;
+			do {
+				contacts_list_get_current_record_p((contacts_list_h)contact->numbers, (contacts_record_h*)&number_record);
+				if (number_record->number)
+					ctsvc_db_phone_log_update_person_id(number_record->number, -1, contact->person_id, false);
+			} while(CONTACTS_ERROR_NONE == contacts_list_next((contacts_list_h)contact->numbers));
+		}
+	}
 
 	if (rel_changed)
 		ctsvc_set_group_rel_noti();

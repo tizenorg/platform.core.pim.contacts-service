@@ -27,6 +27,7 @@
 #include "ctsvc_db_plugin_person_helper.h"
 #include "ctsvc_db_plugin_contact_helper.h"
 #include "ctsvc_db_access_control.h"
+#include "ctsvc_phonelog.h"
 
 #ifdef _CONTACTS_IPC_SERVER
 #include "ctsvc_server_change_subject.h"
@@ -531,6 +532,10 @@ void ctsvc_db_person_delete_callback(sqlite3_context * context,
 	person_id = sqlite3_value_int(argv[0]);
 	ctsvc_change_subject_add_changed_person_id(CONTACTS_CHANGE_DELETED, person_id);
 
+	// update phonelog
+	// CASE : do not know the proper new person_id
+	ctsvc_db_phone_log_update_person_id(NULL, person_id, -1, false);
+
 	sqlite3_result_null(context);
 	return;
 #endif
@@ -983,6 +988,12 @@ API int contacts_person_link_person(int base_person_id, int person_id)
 	if (default_image_id)
 		__ctsvc_put_person_default_image(base_person_id, default_image_id);
 
+	// update phonelog
+	// Updating phonelog person_id before deleting person
+	// Because, when deleting, ctsvc_db_person_delete_callback will be called
+	// the logic takes more time to find proper person_id (base_person_id)
+	ctsvc_db_phone_log_update_person_id(NULL, person_id, base_person_id, true);
+
 	snprintf(query, sizeof(query), "DELETE FROM %s WHERE person_id = %d",
 			CTS_TABLE_PERSONS, person_id);
 	ret = ctsvc_query_exec(query);
@@ -1235,6 +1246,9 @@ API int contacts_person_unlink_contact(int person_id, int contact_id, int* out_p
 
 	__ctsvc_update_primary_default_data(person_id);
 
+	// update phonelog
+	ctsvc_db_phone_log_update_person_id(NULL, person_id, id, false);
+
 	if (out_person_id)
 		*out_person_id = id;
 	ctsvc_set_person_noti();
@@ -1263,6 +1277,9 @@ int ctsvc_person_do_garbage_collection(void)
 		int person_id;
 		person_id = ctsvc_stmt_get_int(stmt, 0);
 		ctsvc_person_aggregate(person_id);
+
+		// update phonelog
+		ctsvc_db_phone_log_update_person_id(NULL, person_id, -1, false);
 	}
 	ctsvc_stmt_finalize(stmt);
 

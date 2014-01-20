@@ -163,7 +163,9 @@ API const _contacts_number_property_ids _contacts_number = {
 	.label		= CTSVC_PROPERTY_NUMBER_LABEL,
 	.is_default	= CTSVC_PROPERTY_NUMBER_IS_DEFAULT,
 	.number		= CTSVC_PROPERTY_NUMBER_NUMBER,
-	.normalized_number = CTSVC_PROPERTY_NUMBER_NORMALIZED_NUMBER
+	.normalized_number = CTSVC_PROPERTY_NUMBER_NORMALIZED_NUMBER,
+	.cleaned_number = CTSVC_PROPERTY_NUMBER_CLEANED_NUMBER,
+	.number_filter = CTSVC_PROPERTY_NUMBER_NUMBER_FILTER
 };
 
 API const _contacts_email_property_ids _contacts_email = {
@@ -312,6 +314,8 @@ API const _contacts_speeddial_property_ids _contacts_speeddial = {
 	.display_name			= CTSVC_PROPERTY_SPEEDDIAL_DISPLAY_NAME,
 	.image_thumbnail_path	= CTSVC_PROPERTY_SPEEDDIAL_IMAGE_THUMBNAIL,
 	.normalized_number	= CTSVC_PROPERTY_SPEEDDIAL_NORMALIZED_NUMBER,
+	.cleaned_number		= CTSVC_PROPERTY_SPEEDDIAL_CLEANED_NUMBER,
+	.number_filter		= CTSVC_PROPERTY_SPEEDDIAL_NUMBER_FILTER,
 };
 
 API const _contacts_contact_updated_info_property_ids _contacts_contact_updated_info = {
@@ -384,6 +388,8 @@ API const _contacts_phone_log_property_ids _contacts_phone_log = {
 	.extra_data1	= CTSVC_PROPERTY_PHONELOG_EXTRA_DATA1,
 	.extra_data2	= CTSVC_PROPERTY_PHONELOG_EXTRA_DATA2,
 	.normalized_address = CTSVC_PROPERTY_PHONELOG_NORMALIZED_ADDRESS,
+	.cleaned_address = CTSVC_PROPERTY_PHONELOG_CLEANED_ADDRESS,
+	.address_filter = CTSVC_PROPERTY_PHONELOG_ADDRESS_FILTER,
 };
 
 API const _contacts_extension_property_ids _contacts_extension = {
@@ -446,6 +452,7 @@ API const _contacts_person_number_property_ids _contacts_person_number = {
 	.number				= CTSVC_PROPERTY_NUMBER_NUMBER,
 	.number_filter		= CTSVC_PROPERTY_NUMBER_NUMBER_FILTER,
 	.normalized_number = CTSVC_PROPERTY_NUMBER_NORMALIZED_NUMBER,
+	.cleaned_number = CTSVC_PROPERTY_NUMBER_CLEANED_NUMBER
 };
 
 API const _contacts_person_email_property_ids _contacts_person_email = {
@@ -564,6 +571,8 @@ API const _contacts_person_phone_log_property_ids _contacts_person_phone_log = {
 	.extra_data1	= CTSVC_PROPERTY_PHONELOG_EXTRA_DATA1,
 	.extra_data2	= CTSVC_PROPERTY_PHONELOG_EXTRA_DATA2,
 	.normalized_address = CTSVC_PROPERTY_PHONELOG_NORMALIZED_ADDRESS,
+	.cleaned_address = CTSVC_PROPERTY_PHONELOG_CLEANED_ADDRESS,
+	.address_filter = CTSVC_PROPERTY_PHONELOG_CLEANED_ADDRESS,
 };
 
 API const _contacts_contact_number_property_ids _contacts_contact_number = {
@@ -582,6 +591,7 @@ API const _contacts_contact_number_property_ids _contacts_contact_number = {
 	.number				= CTSVC_PROPERTY_NUMBER_NUMBER,
 	.number_filter		= CTSVC_PROPERTY_NUMBER_NUMBER_FILTER,
 	.normalized_number = CTSVC_PROPERTY_NUMBER_NORMALIZED_NUMBER,
+	.cleaned_number = CTSVC_PROPERTY_NUMBER_CLEANED_NUMBER
 };
 
 API const _contacts_contact_email_property_ids _contacts_contact_email = {
@@ -723,6 +733,8 @@ const property_info_s __property_number[] = {		//_contacts_number
 	{CTSVC_PROPERTY_NUMBER_IS_DEFAULT,	CTSVC_SEARCH_PROPERTY_ALL,	"is_default"},
 	{CTSVC_PROPERTY_NUMBER_NUMBER,		CTSVC_SEARCH_PROPERTY_ALL,	"data3"},
 	{CTSVC_PROPERTY_NUMBER_NORMALIZED_NUMBER,	CTSVC_SEARCH_PROPERTY_FILTER,	"data5"},
+	{CTSVC_PROPERTY_NUMBER_CLEANED_NUMBER,	CTSVC_SEARCH_PROPERTY_FILTER,	"data6"},
+	{CTSVC_PROPERTY_NUMBER_NUMBER_FILTER,	CTSVC_SEARCH_PROPERTY_FILTER,	"data4"},
 };
 
 const property_info_s __property_email[] = {
@@ -941,6 +953,8 @@ const property_info_s __property_speeddial[] = {		// _contacts_speeddial
 	{CTSVC_PROPERTY_SPEEDDIAL_DISPLAY_NAME,	CTSVC_SEARCH_PROPERTY_ALL,	NULL},		// display_name or reverse_display_name
 	{CTSVC_PROPERTY_SPEEDDIAL_IMAGE_THUMBNAIL,	CTSVC_SEARCH_PROPERTY_ALL,	"image_thumbnail_path"},
 	{CTSVC_PROPERTY_SPEEDDIAL_NORMALIZED_NUMBER,	CTSVC_SEARCH_PROPERTY_FILTER,	"normalized_number"},
+	{CTSVC_PROPERTY_SPEEDDIAL_CLEANED_NUMBER,	CTSVC_SEARCH_PROPERTY_FILTER,	"cleaned_number"},
+	{CTSVC_PROPERTY_SPEEDDIAL_NUMBER_FILTER,	CTSVC_SEARCH_PROPERTY_FILTER,	"minmatch"},
 };
 
 const property_info_s __property_phonelog[] = {		// _contacts_phone_log
@@ -952,6 +966,8 @@ const property_info_s __property_phonelog[] = {		// _contacts_phone_log
 	{CTSVC_PROPERTY_PHONELOG_EXTRA_DATA1,	CTSVC_SEARCH_PROPERTY_ALL,	"data1"},		// duration
 	{CTSVC_PROPERTY_PHONELOG_EXTRA_DATA2,	CTSVC_SEARCH_PROPERTY_ALL,	"data2"},		// short message, email subject
 	{CTSVC_PROPERTY_PHONELOG_NORMALIZED_ADDRESS,	CTSVC_SEARCH_PROPERTY_FILTER,	"normal_num"},
+	{CTSVC_PROPERTY_PHONELOG_CLEANED_ADDRESS, CTSVC_SEARCH_PROPERTY_FILTER, "clean_num"},
+	{CTSVC_PROPERTY_PHONELOG_ADDRESS_FILTER, CTSVC_SEARCH_PROPERTY_FILTER, "minmatch"},
 };
 
 #if 0
@@ -1017,6 +1033,7 @@ const property_info_s __property_person_number[] = {		// _contacts_person_number
 	{CTSVC_PROPERTY_NUMBER_NUMBER,				CTSVC_SEARCH_PROPERTY_ALL,	"number"},
 	{CTSVC_PROPERTY_NUMBER_NUMBER_FILTER,			CTSVC_SEARCH_PROPERTY_FILTER,	"minmatch"},
 	{CTSVC_PROPERTY_NUMBER_NORMALIZED_NUMBER,	CTSVC_SEARCH_PROPERTY_FILTER,	"normalized_number"},
+	{CTSVC_PROPERTY_NUMBER_CLEANED_NUMBER,	CTSVC_SEARCH_PROPERTY_FILTER,	"cleaned_number"},
 };
 
 const property_info_s __property_person_email[] = {	// _contacts_person_email
@@ -1123,6 +1140,8 @@ const property_info_s __property_person_phonelog[] = {	// _contacts_person_phone
 	{CTSVC_PROPERTY_PHONELOG_EXTRA_DATA1,		CTSVC_SEARCH_PROPERTY_PROJECTION,	"data1"},		// duration
 	{CTSVC_PROPERTY_PHONELOG_EXTRA_DATA2,		CTSVC_SEARCH_PROPERTY_PROJECTION,	"data2"},		// message_id
 	{CTSVC_PROPERTY_PHONELOG_NORMALIZED_ADDRESS,	CTSVC_SEARCH_PROPERTY_FILTER,	"normal_num"},
+	{CTSVC_PROPERTY_PHONELOG_CLEANED_ADDRESS,	CTSVC_SEARCH_PROPERTY_FILTER,	"clean_num"},
+	{CTSVC_PROPERTY_PHONELOG_ADDRESS_FILTER,	CTSVC_SEARCH_PROPERTY_FILTER,	"minmatch"},
 };
 
 const property_info_s __property_person_usage[] = {	// _contacts_person_usage
@@ -1158,6 +1177,7 @@ const property_info_s __property_contact_number[] = {		// _contacts_contact_numb
 	{CTSVC_PROPERTY_NUMBER_NUMBER,				CTSVC_SEARCH_PROPERTY_ALL,	"number"},
 	{CTSVC_PROPERTY_NUMBER_NUMBER_FILTER,		CTSVC_SEARCH_PROPERTY_FILTER,	"minmatch"},
 	{CTSVC_PROPERTY_NUMBER_NORMALIZED_NUMBER,	CTSVC_SEARCH_PROPERTY_FILTER,	"normalized_number"},
+	{CTSVC_PROPERTY_NUMBER_CLEANED_NUMBER,	CTSVC_SEARCH_PROPERTY_FILTER,	"cleaned_number"},
 };
 
 const property_info_s __property_contact_email[] = {		// _contacts_contact_email

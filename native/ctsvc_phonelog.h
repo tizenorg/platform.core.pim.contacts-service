@@ -23,5 +23,6 @@
 #include "ctsvc_sqlite.h"
 void ctsvc_db_phone_log_delete_callback(sqlite3_context * context,
 		int argc, sqlite3_value ** argv);
+int ctsvc_db_phone_log_update_person_id(const char *number, int old_person_id, int candidate_person_id, bool person_link);
 
 #endif // __TIZEN_SOCIAL_CTSVC_PHONELOG_H__

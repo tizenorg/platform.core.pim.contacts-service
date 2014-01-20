@@ -247,12 +247,49 @@ static char * __ctsvc_db_get_str_with_escape(char *str, int len, bool with_escap
 	return strdup(temp_str);
 }
 
+static inline int __ctsvc_db_add_str_matching_rule(const char *field_name, int match, char **condition, bool *with_escape)
+{
+	int cond_len = 0;
+	char out_cond[CTS_SQL_MAX_LEN] = {0};
+
+	*with_escape = true;
+	switch(match) {
+	case CONTACTS_MATCH_EXACTLY:
+		cond_len = snprintf(out_cond, sizeof(out_cond), "%s = ?", field_name);
+		*with_escape = false;
+		break;
+	case CONTACTS_MATCH_FULLSTRING:
+		cond_len = snprintf(out_cond, sizeof(out_cond), "%s LIKE ? ESCAPE '%c'", field_name, CTSVC_DB_ESCAPE_CHAR);
+		break;
+	case CONTACTS_MATCH_CONTAINS:
+		cond_len = snprintf(out_cond, sizeof(out_cond), "%s LIKE ('%%' || ? || '%%') ESCAPE '%c'", field_name, CTSVC_DB_ESCAPE_CHAR);
+		break;
+	case CONTACTS_MATCH_STARTSWITH:
+		cond_len = snprintf(out_cond, sizeof(out_cond), "%s LIKE ( ? || '%%') ESCAPE '%c'", field_name, CTSVC_DB_ESCAPE_CHAR);
+		break;
+	case CONTACTS_MATCH_ENDSWITH:
+		cond_len = snprintf(out_cond, sizeof(out_cond), "%s LIKE ('%%' || ?) ESCAPE '%c'", field_name, CTSVC_DB_ESCAPE_CHAR);
+		break;
+	case CONTACTS_MATCH_EXISTS:
+		cond_len = snprintf(out_cond, sizeof(out_cond), "%s IS NOT NULL", field_name);
+		break;
+	default :
+		CTS_ERR("Invalid parameter : int match rule (%d) is not supported", match);
+		return CONTACTS_ERROR_INVALID_PARAMETER;
+	}
+
+	*condition = strdup(out_cond);
+	return cond_len;
+}
+
 static inline int __ctsvc_db_create_str_condition(ctsvc_composite_filter_s *com_filter,
 		ctsvc_attribute_filter_s *filter, char **condition, GSList **bind_text)
 {
 	int ret;
 	const char *field_name;
 	char out_cond[CTS_SQL_MAX_LEN] = {0};
+	char *temp = NULL;
+	int cond_len = 0;
 	bool with_escape = true;
 
 	*condition = NULL;
@@ -262,62 +299,97 @@ static inline int __ctsvc_db_create_str_condition(ctsvc_composite_filter_s *com_
 	RETVM_IF(NULL == field_name, CONTACTS_ERROR_INVALID_PARAMETER,
 			"Invalid parameter : property id(%d)", filter->property_id);
 
-	if (filter->property_id == CTSVC_PROPERTY_NUMBER_NUMBER_FILTER)
+	if (filter->property_id == CTSVC_PROPERTY_NUMBER_NUMBER_FILTER
+			|| filter->property_id == CTSVC_PROPERTY_PHONELOG_ADDRESS_FILTER
+			|| filter->property_id == CTSVC_PROPERTY_SPEEDDIAL_NUMBER_FILTER)
 		filter->match = CONTACTS_MATCH_EXACTLY;
 
-	switch(filter->match) {
-	case CONTACTS_MATCH_EXACTLY:
-		snprintf(out_cond, sizeof(out_cond), "%s = ?", field_name);
-		with_escape = false;
-		break;
-	case CONTACTS_MATCH_FULLSTRING:
-		snprintf(out_cond, sizeof(out_cond), "%s LIKE ? ESCAPE '%c'", field_name, CTSVC_DB_ESCAPE_CHAR);
-		break;
-	case CONTACTS_MATCH_CONTAINS:
-		snprintf(out_cond, sizeof(out_cond), "%s LIKE ('%%' || ? || '%%') ESCAPE '%c'", field_name, CTSVC_DB_ESCAPE_CHAR);
-		break;
-	case CONTACTS_MATCH_STARTSWITH:
-		snprintf(out_cond, sizeof(out_cond), "%s LIKE ( ? || '%%') ESCAPE '%c'", field_name, CTSVC_DB_ESCAPE_CHAR);
-		break;
-	case CONTACTS_MATCH_ENDSWITH:
-		snprintf(out_cond, sizeof(out_cond), "%s LIKE ('%%' || ?) ESCAPE '%c'", field_name, CTSVC_DB_ESCAPE_CHAR);
-		break;
-	case CONTACTS_MATCH_EXISTS:
-		snprintf(out_cond, sizeof(out_cond), "%s IS NOT NULL", field_name);
-		break;
-	default :
-		CTS_ERR("Invalid parameter : int match rule (%d) is not supported", filter->match);
-		return CONTACTS_ERROR_INVALID_PARAMETER;
-	}
+	ret = __ctsvc_db_add_str_matching_rule(field_name, filter->match, &temp, &with_escape);
+	RETVM_IF(ret <= 0, CONTACTS_ERROR_INVALID_PARAMETER,
+			"__ctsvc_db_add_str_matching_rule Fail");
+	cond_len = snprintf(out_cond, sizeof(out_cond), "%s", temp);
+	free(temp);
+	temp = NULL;
 
 	if (filter->value.s) {
-		if (filter->property_id == CTSVC_PROPERTY_NUMBER_NUMBER_FILTER) {
-			char dest[strlen(filter->value.s)+1+5]; // for cc
+		// number filter
+		if (filter->property_id == CTSVC_PROPERTY_NUMBER_NUMBER_FILTER
+			|| filter->property_id == CTSVC_PROPERTY_PHONELOG_ADDRESS_FILTER
+			|| filter->property_id == CTSVC_PROPERTY_SPEEDDIAL_NUMBER_FILTER) {
+			// number filter is for matching number depends on internal rule _NUMBER_COMPARE_
+			char clean_num[strlen(filter->value.s)+1+5];	// for cc
 			char normal_num[strlen(filter->value.s)+1+5];	// for cc
-			ret = ctsvc_normalize_number(filter->value.s, normal_num, sizeof(normal_num));
+			bool add_condition = false;
+			ret = ctsvc_clean_number(filter->value.s, clean_num, sizeof(clean_num));
 			if (0 < ret) {
-				ret = ctsvc_get_minmatch_number(normal_num, dest, sizeof(dest), ctsvc_get_phonenumber_min_match_digit());
-				if (CONTACTS_ERROR_NONE == ret)
-					*bind_text = g_slist_append(*bind_text, __ctsvc_db_get_str_with_escape(dest, strlen(dest), with_escape));
-				else
-					return CONTACTS_ERROR_INVALID_PARAMETER;
+				ret = ctsvc_normalize_number(clean_num, normal_num, sizeof(normal_num));
+				if (0 < ret) {
+					char min_match[strlen(filter->value.s)+1+5];	// for cc
+					ret = ctsvc_get_minmatch_number(normal_num, min_match, sizeof(min_match), ctsvc_get_phonenumber_min_match_digit());
+					if (CONTACTS_ERROR_NONE == ret) {
+						*bind_text = g_slist_append(*bind_text, __ctsvc_db_get_str_with_escape(min_match, strlen(min_match), with_escape));
+
+						// _NUMBER_COMPARE_(noraml_num, normalized keyword)
+						const char *number_field = NULL;
+						if (filter->property_id == CTSVC_PROPERTY_NUMBER_NUMBER_FILTER)
+							number_field = __ctsvc_db_get_property_field_name(com_filter->properties,
+											com_filter->property_count, QUERY_FILTER, CTSVC_PROPERTY_NUMBER_NORMALIZED_NUMBER);
+						else if (filter->property_id == CTSVC_PROPERTY_PHONELOG_ADDRESS_FILTER)
+							number_field = __ctsvc_db_get_property_field_name(com_filter->properties,
+											com_filter->property_count, QUERY_FILTER, CTSVC_PROPERTY_PHONELOG_NORMALIZED_ADDRESS);
+						else if (filter->property_id == CTSVC_PROPERTY_SPEEDDIAL_NUMBER_FILTER)
+							number_field = __ctsvc_db_get_property_field_name(com_filter->properties,
+											com_filter->property_count, QUERY_FILTER, CTSVC_PROPERTY_SPEEDDIAL_NORMALIZED_NUMBER);
+						cond_len += snprintf(out_cond+cond_len, sizeof(out_cond)-cond_len, " AND _NUMBER_COMPARE_(%s, ?, NULL, NULL)", number_field);
+						*bind_text = g_slist_append(*bind_text, strdup(normal_num));
+						add_condition = true;
+					}
+				}
 			}
-			else if (ret == 0) {
+
+			if (add_condition == false) {
 				const char *number_field = NULL;
-				number_field = __ctsvc_db_get_property_field_name(com_filter->properties,
-								com_filter->property_count, QUERY_FILTER, CTSVC_PROPERTY_NUMBER_NUMBER);
-				snprintf(out_cond, sizeof(out_cond), "(%s IS NULL AND %s IS NULL)", field_name, number_field);
+				if (filter->property_id == CTSVC_PROPERTY_NUMBER_NUMBER_FILTER)
+					number_field = __ctsvc_db_get_property_field_name(com_filter->properties,
+									com_filter->property_count, QUERY_FILTER, CTSVC_PROPERTY_NUMBER_NUMBER);
+				else if (filter->property_id == CTSVC_PROPERTY_PHONELOG_ADDRESS_FILTER)
+					number_field = __ctsvc_db_get_property_field_name(com_filter->properties,
+									com_filter->property_count, QUERY_FILTER, CTSVC_PROPERTY_PHONELOG_ADDRESS);
+				else if (filter->property_id == CTSVC_PROPERTY_SPEEDDIAL_NUMBER_FILTER)
+					number_field = __ctsvc_db_get_property_field_name(com_filter->properties,
+									com_filter->property_count, QUERY_FILTER, CTSVC_PROPERTY_SPEEDDIAL_NUMBER);
+				snprintf(out_cond, sizeof(out_cond), "%s = ?", number_field);
+				*bind_text = g_slist_append(*bind_text, strdup(filter->value.s));
 			}
-			else
-				return CONTACTS_ERROR_INVALID_PARAMETER;
 		}
+		// normalized number
 		else if (filter->property_id == CTSVC_PROPERTY_NUMBER_NORMALIZED_NUMBER
 				|| filter->property_id == CTSVC_PROPERTY_PHONELOG_NORMALIZED_ADDRESS
 				|| filter->property_id == CTSVC_PROPERTY_SPEEDDIAL_NORMALIZED_NUMBER) {
-			char normal_num[strlen(filter->value.s)+1+5]; // for cc
-			ret = ctsvc_normalize_number(filter->value.s, normal_num, sizeof(normal_num));
+			char clean_num[strlen(filter->value.s)+1+5]; // for cc
+			ret = ctsvc_clean_number(filter->value.s, clean_num, sizeof(clean_num));
 			if (0 < ret) {
-				*bind_text = g_slist_append(*bind_text, __ctsvc_db_get_str_with_escape(normal_num, strlen(normal_num), with_escape));
+				const char *clean_field = NULL;
+				// has clean number or normalized number
+				*bind_text = g_slist_append(*bind_text, __ctsvc_db_get_str_with_escape(clean_num, strlen(clean_num), with_escape));
+
+				if (filter->property_id == CTSVC_PROPERTY_NUMBER_NORMALIZED_NUMBER)
+					clean_field = __ctsvc_db_get_property_field_name(com_filter->properties,
+									com_filter->property_count, QUERY_FILTER, CTSVC_PROPERTY_NUMBER_CLEANED_NUMBER);
+				if (filter->property_id == CTSVC_PROPERTY_PHONELOG_NORMALIZED_ADDRESS)
+					clean_field =  __ctsvc_db_get_property_field_name(com_filter->properties,
+										com_filter->property_count, QUERY_FILTER, CTSVC_PROPERTY_PHONELOG_CLEANED_ADDRESS);
+				if (filter->property_id == CTSVC_PROPERTY_SPEEDDIAL_NORMALIZED_NUMBER)
+					clean_field =  __ctsvc_db_get_property_field_name(com_filter->properties,
+										com_filter->property_count, QUERY_FILTER, CTSVC_PROPERTY_SPEEDDIAL_CLEANED_NUMBER);
+				cond_len += snprintf(out_cond+cond_len, sizeof(out_cond)-cond_len, " OR ");
+				ret = __ctsvc_db_add_str_matching_rule(clean_field, filter->match, &temp, &with_escape);
+				RETVM_IF(ret <= 0, CONTACTS_ERROR_INVALID_PARAMETER,
+						"__ctsvc_db_add_str_matching_rule Fail");
+				cond_len += snprintf(out_cond+cond_len, sizeof(out_cond)-cond_len, "%s", temp);
+				free(temp);
+				temp = NULL;
+				*bind_text = g_slist_append(*bind_text, __ctsvc_db_get_str_with_escape(clean_num, strlen(clean_num), with_escape));
 			}
 			else if (ret == 0) {
 				const char *number_field = NULL;
@@ -330,7 +402,42 @@ static inline int __ctsvc_db_create_str_condition(ctsvc_composite_filter_s *com_
 				if (filter->property_id == CTSVC_PROPERTY_SPEEDDIAL_NORMALIZED_NUMBER)
 					number_field =  __ctsvc_db_get_property_field_name(com_filter->properties,
 										com_filter->property_count, QUERY_FILTER, CTSVC_PROPERTY_SPEEDDIAL_NUMBER);
-				snprintf(out_cond, sizeof(out_cond), "(%s IS NULL AND %s IS NULL)", field_name, number_field);
+				ret = __ctsvc_db_add_str_matching_rule(number_field, filter->match, &temp, &with_escape);
+				RETVM_IF(ret <= 0, CONTACTS_ERROR_INVALID_PARAMETER,
+							"__ctsvc_db_add_str_matching_rule Fail");
+				cond_len = snprintf(out_cond, sizeof(out_cond), "%s", temp);
+				free(temp);
+				temp = NULL;
+				*bind_text = g_slist_append(*bind_text, __ctsvc_db_get_str_with_escape(filter->value.s, strlen(filter->value.s), with_escape));
+			}
+			else
+				return CONTACTS_ERROR_INVALID_PARAMETER;
+		}
+		// cleaned number
+		else if (filter->property_id == CTSVC_PROPERTY_NUMBER_CLEANED_NUMBER
+				|| filter->property_id == CTSVC_PROPERTY_PHONELOG_CLEANED_ADDRESS
+				|| filter->property_id == CTSVC_PROPERTY_SPEEDDIAL_CLEANED_NUMBER) {
+			char clean_num[strlen(filter->value.s)+1+5]; // for cc
+			ret = ctsvc_clean_number(filter->value.s, clean_num, sizeof(clean_num));
+			if (0 < ret) {
+				*bind_text = g_slist_append(*bind_text, __ctsvc_db_get_str_with_escape(clean_num, strlen(clean_num), with_escape));
+			}
+			else if (ret == 0) {
+				const char *number_field = NULL;
+				if (filter->property_id == CTSVC_PROPERTY_NUMBER_CLEANED_NUMBER)
+					number_field = __ctsvc_db_get_property_field_name(com_filter->properties,
+									com_filter->property_count, QUERY_FILTER, CTSVC_PROPERTY_NUMBER_NUMBER);
+				if (filter->property_id == CTSVC_PROPERTY_PHONELOG_CLEANED_ADDRESS)
+					number_field =  __ctsvc_db_get_property_field_name(com_filter->properties,
+										com_filter->property_count, QUERY_FILTER, CTSVC_PROPERTY_PHONELOG_ADDRESS);
+
+				ret = __ctsvc_db_add_str_matching_rule(number_field, filter->match, &temp, &with_escape);
+				RETVM_IF(ret <= 0, CONTACTS_ERROR_INVALID_PARAMETER,
+							"__ctsvc_db_add_str_matching_rule Fail");
+				cond_len = snprintf(out_cond, sizeof(out_cond), "%s", temp);
+				free(temp);
+				temp = NULL;
+				*bind_text = g_slist_append(*bind_text, __ctsvc_db_get_str_with_escape(filter->value.s, strlen(filter->value.s), with_escape));
 			}
 			else
 				return CONTACTS_ERROR_INVALID_PARAMETER;
@@ -369,7 +476,9 @@ static inline int __ctsvc_db_create_str_condition(ctsvc_composite_filter_s *com_
 		else
 			*bind_text = g_slist_append(*bind_text, __ctsvc_db_get_str_with_escape(filter->value.s, strlen(filter->value.s), with_escape));
 	}
+
 	*condition = strdup(out_cond);
+
 	return CONTACTS_ERROR_NONE;
 }
 
@@ -1034,17 +1143,13 @@ static int __ctsvc_db_append_search_query(const char *src, char *query, int size
 							range, search_keyword, search_keyword, search_keyword);
 
 		if (range & CONTACTS_SEARCH_RANGE_NUMBER) {
-			char normalized_number[CTSVC_NUMBER_MAX_LEN];
-			char minmatch[CTSVC_NUMBER_MAX_LEN];
-			int err = ctsvc_normalize_number(keyword, normalized_number, sizeof(normalized_number));
+			char clean_number[SAFE_STRLEN(keyword)+1];
+			int err = ctsvc_clean_number(keyword, clean_number, sizeof(clean_number));
 			if (0 < err) {
-				err = ctsvc_get_minmatch_number(normalized_number, minmatch, CTSVC_NUMBER_MAX_LEN, CTSVC_NUMBER_MAX_LEN-1);
-				if (err == CONTACTS_ERROR_NONE) {
-					ret += snprintf(query+ret, size-ret,
-							"UNION "
-								"SELECT contact_id FROM %s WHERE number LIKE '%%%s%%' ",
-							CTS_TABLE_PHONE_LOOKUP, minmatch);
-				}
+				ret += snprintf(query+ret, size-ret,
+						"UNION "
+							"SELECT contact_id FROM %s WHERE number LIKE '%%%s%%' ",
+							CTS_TABLE_PHONE_LOOKUP, clean_number);
 			}
 		}
 		ret += snprintf(query+ret, size-ret, ")");

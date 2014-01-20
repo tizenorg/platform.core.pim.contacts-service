@@ -256,7 +256,7 @@ static int __ctsvc_db_number_get_record( int id, contacts_record_h* out_record )
 	cts_stmt stmt = NULL;
 
 	snprintf(query, sizeof(query),
-		"SELECT id, contact_id, is_default, data1, data2, data3, data4 "
+		"SELECT id, contact_id, is_default, data1, data2, data3, data4, data5, data6 "
 				"FROM "CTSVC_DB_VIEW_NUMBER" WHERE id = %d", id);
 
 	ret = ctsvc_query_prepare(query, &stmt);
@@ -457,7 +457,8 @@ static int __ctsvc_db_number_get_all_records( int offset, int limit, contacts_li
 	char query[CTS_SQL_MAX_LEN] = {0};
 
 	len = snprintf(query, sizeof(query),
-			"SELECT id, contact_id, is_default, data1, data2, data3, data4 FROM "CTSVC_DB_VIEW_NUMBER);
+			"SELECT id, contact_id, is_default, data1, data2, data3, data4, data5, data6 "
+				"FROM "CTSVC_DB_VIEW_NUMBER);
 	if (0 != limit) {
 		len += snprintf(query+len, sizeof(query)-len, " LIMIT %d", limit);
 		if (0 < offset)

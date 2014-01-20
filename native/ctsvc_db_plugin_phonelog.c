@@ -32,6 +32,7 @@
 #include "ctsvc_db_init.h"
 #include "ctsvc_notification.h"
 #include "ctsvc_setting.h"
+#include "ctsvc_phonelog.h"
 
 #ifdef _CONTACTS_IPC_SERVER
 #include "ctsvc_server_change_subject.h"
@@ -210,7 +211,7 @@ static int __ctsvc_db_phonelog_delete_record( int id )
 
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("cts_query_exec() Failed(%d)", ret);
+		CTS_ERR("ctsvc_query_exec() Failed(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
@@ -401,17 +402,15 @@ static int  __ctsvc_db_phonelog_insert(ctsvc_phonelog_s *phonelog, int *id)
 {
 	int ret;
 	cts_stmt stmt = NULL;
-	char normal_num[CTSVC_NUMBER_MAX_LEN] = {0};
 	char query[CTS_SQL_MAX_LEN] = {0};
-	char minmatch[CTSVC_NUMBER_MAX_LEN] = {0};
 
 	RETVM_IF(phonelog->log_type <= CONTACTS_PLOG_TYPE_NONE
 			|| CONTACTS_PLOG_TYPE_MAX <= phonelog->log_type,
 			CONTACTS_ERROR_INVALID_PARAMETER, "phonelog type(%d) is invaid", phonelog->log_type);
 
 	snprintf(query, sizeof(query), "INSERT INTO "CTS_TABLE_PHONELOGS"("
-			"number, normal_num, minmatch, person_id, log_type, log_time, data1, data2) "
-			"VALUES(?, ?, ?, ?, %d, %d, %d, ?)",
+			"number, normal_num, minmatch, clean_num, person_id, log_type, log_time, data1, data2) "
+			"VALUES(?, ?, ?, ?, ?, %d, %d, %d, ?)",
 			phonelog->log_type, phonelog->log_time, phonelog->extra_data1);
 
 	ret = ctsvc_query_prepare(query, &stmt);
@@ -420,20 +419,27 @@ static int  __ctsvc_db_phonelog_insert(ctsvc_phonelog_s *phonelog, int *id)
 	if (phonelog->address) {
 		ctsvc_stmt_bind_text(stmt, 1, phonelog->address);
 		if (phonelog->log_type < CONTACTS_PLOG_TYPE_EMAIL_RECEIVED) {
-			ret = ctsvc_normalize_number(phonelog->address, normal_num, sizeof(normal_num));
-			ctsvc_stmt_bind_text(stmt, 2, normal_num);
+			char clean_num[strlen(phonelog->address) + 1];
+			ret = ctsvc_clean_number(phonelog->address, clean_num, sizeof(clean_num));
 			if (0 < ret) {
-				ret = ctsvc_get_minmatch_number(normal_num, minmatch, CTSVC_NUMBER_MAX_LEN, ctsvc_get_phonenumber_min_match_digit());
-				ctsvc_stmt_bind_text(stmt, 3, minmatch);
+				char normal_num[sizeof(clean_num) + 20];
+				ctsvc_stmt_bind_copy_text(stmt, 4, clean_num, strlen(clean_num));
+				ret = ctsvc_normalize_number(clean_num, normal_num, sizeof(normal_num));
+				if (0 < ret) {
+					char minmatch[sizeof(normal_num) + 1];
+					ctsvc_stmt_bind_copy_text(stmt, 2, normal_num, strlen(normal_num));
+					ret = ctsvc_get_minmatch_number(normal_num, minmatch, sizeof(minmatch), ctsvc_get_phonenumber_min_match_digit());
+					ctsvc_stmt_bind_copy_text(stmt, 3, minmatch, strlen(minmatch));
+				}
 			}
 		}
 	}
 
 	if (0 < phonelog->person_id)
-		ctsvc_stmt_bind_int(stmt, 4, phonelog->person_id);
+		ctsvc_stmt_bind_int(stmt, 5, phonelog->person_id);
 
 	if (phonelog->extra_data2)
-		ctsvc_stmt_bind_text(stmt, 5, phonelog->extra_data2);
+		ctsvc_stmt_bind_text(stmt, 6, phonelog->extra_data2);
 
 	ret = ctsvc_stmt_step(stmt);
 	if (CONTACTS_ERROR_NONE != ret) {
@@ -444,6 +450,9 @@ static int  __ctsvc_db_phonelog_insert(ctsvc_phonelog_s *phonelog, int *id)
 	if (id)
 		*id = ctsvc_db_get_last_insert_id();
 	ctsvc_stmt_finalize(stmt);
+
+	// update phonelog
+	ctsvc_db_phone_log_update_person_id(phonelog->address, phonelog->person_id, -1, false);
 
 	ctsvc_set_phonelog_noti();
 	return CONTACTS_ERROR_NONE;

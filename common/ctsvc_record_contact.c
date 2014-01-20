@@ -912,6 +912,8 @@ static int __ctsvc_number_destroy(contacts_record_h record, bool delete_child)
 
 	free(number->label);
 	free(number->number);
+	free(number->normalized);
+	free(number->cleaned);
 	free(number->lookup);
 	free(number);
 

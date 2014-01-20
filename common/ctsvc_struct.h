@@ -32,7 +32,6 @@
 #include "contacts_views.h"
 
 #define CTSVC_IMG_FULL_PATH_SIZE_MAX 1024
-#define CTSVC_NUMBER_MAX_LEN 512
 #define CTS_IMG_FULL_LOCATION "/opt/usr/data/contacts-svc/img"
 
 #define SAFE_STR(src) (src)?src:""
@@ -293,6 +292,8 @@ typedef struct {
 	int type;
 	char *label;
 	char *number;
+	char *cleaned;		// internally used
+	char *normalized;	// internally used
 	char *lookup;		// internally used
 }ctsvc_number_s;
 

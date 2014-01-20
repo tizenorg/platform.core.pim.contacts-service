@@ -29,6 +29,7 @@
 #include "ctsvc_normalize.h"
 #include "ctsvc_localize.h"
 #include "ctsvc_server_utils.h"
+#include "ctsvc_number_utils.h"
 
 #include "ctsvc_notification.h"
 #include "ctsvc_db_plugin_image_helper.h"
@@ -72,6 +73,10 @@ int ctsvc_server_db_open(sqlite3 **db)
 						"sqlite3_create_function() Failed(%d)", ret);
 		ret = sqlite3_create_function(server_db, "_GROUP_DELETE_", 1, SQLITE_UTF8, NULL,
 					ctsvc_db_group_delete_callback, NULL, NULL);
+		RETVM_IF(SQLITE_OK != ret, CONTACTS_ERROR_DB,
+						"sqlite3_create_function() Failed(%d)", ret);
+		ret = sqlite3_create_function(server_db, "_NUMBER_COMPARE_", 4, SQLITE_UTF8, NULL,
+					ctsvc_db_phone_number_equal_callback, NULL, NULL);
 		RETVM_IF(SQLITE_OK != ret, CONTACTS_ERROR_DB,
 						"sqlite3_create_function() Failed(%d)", ret);
 	}
