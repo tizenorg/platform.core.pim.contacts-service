@@ -767,10 +767,13 @@ int ctsvc_person_aggregate(int person_id)
 			display_name_source_type = contact_display_name_source_type;
 			name_contact_id = contact_id;
 		}
-		else if (contact_display_name_source_type == display_name_source_type){
+		else if (contact_display_name_source_type == display_name_source_type) {
 			if (name_contact_id != person_name_contact_id && person_name_contact_id != 0)
 				name_contact_id = person_name_contact_id;
+			else if (person_name_contact_id == 0 && name_contact_id == 0)
+				name_contact_id = contact_id;
 		}
+
 		addr_len = snprintf(addr, sizeof(addr), "%d%s", addressbook_id, ADDRESSBOOK_ID_DELIM);
 		if (NULL == addressbook_ids)
 			addressbook_ids = calloc(addressbooks_len+1, sizeof(char));
