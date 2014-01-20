@@ -74,7 +74,7 @@ static int __ctsvc_db_image_reset_default(int image_id, int contact_id)
 			image_id, contact_id, CTSVC_DATA_IMAGE);
 	ret = ctsvc_query_exec(query);
 
-	WARN_IF(CONTACTS_ERROR_NONE != ret, "cts_query_exec() Failed(%d)", ret);
+	WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_query_exec() Failed(%d)", ret);
 	return ret;
 }
 
@@ -118,7 +118,7 @@ int ctsvc_db_image_insert(contacts_record_h record, int contact_id, bool is_my_p
 
 	ret = ctsvc_stmt_step(stmt);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB error : ctsvc_query_exec() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_stmt_step() Failed(%d)", ret);
 		ctsvc_stmt_finalize(stmt);
 		return ret;
 	}

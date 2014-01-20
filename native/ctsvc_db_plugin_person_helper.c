@@ -240,7 +240,7 @@ int ctsvc_db_person_set_favorite(int person_id, bool set, bool propagate)
 
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("cts_query_exec() Failed(%d)", ret);
+		CTS_ERR("ctsvc_query_exec() Failed(%d)", ret);
 		return ret;
 	}
 
@@ -250,7 +250,7 @@ int ctsvc_db_person_set_favorite(int person_id, bool set, bool propagate)
 					"WHERE person_id=%d AND deleted = 0", set?1:0, person_id);
 		ret = ctsvc_query_exec(query);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("cts_query_exec() Failed(%d)", ret);
+			CTS_ERR("ctsvc_query_exec() Failed(%d)", ret);
 			return ret;
 		}
 	}
@@ -322,7 +322,7 @@ int ctsvc_db_insert_person(contacts_record_h record)
 
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("cts_query_exec Failed(%d)", ret);
+		CTS_ERR("ctsvc_query_exec Failed(%d)", ret);
 		free(status);
 		return ret;
 	}
@@ -380,7 +380,7 @@ static inline int __ctsvc_db_update_person_default(int person_id, int datatype)
 
 			ret = ctsvc_query_exec(query);
 			if (CONTACTS_ERROR_NONE != ret) {
-				CTS_ERR("cts_query_exec Failed(%d)", ret);
+				CTS_ERR("ctsvc_query_exec Failed(%d)", ret);
 				ctsvc_stmt_finalize(stmt);
 				return ret;
 			}
@@ -404,7 +404,7 @@ static inline int __ctsvc_db_update_person_default(int person_id, int datatype)
 				ctsvc_stmt_finalize(stmt);
 				free(image_thumbnail_path);
 				if (CONTACTS_ERROR_NONE != ret) {
-					CTS_ERR("cts_query_exec Failed(%d)", ret);
+					CTS_ERR("ctsvc_stmt_step Failed(%d)", ret);
 					return ret;
 				}
 			}

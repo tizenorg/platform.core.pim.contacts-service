@@ -138,7 +138,7 @@ static void ctsvc_vconf_sorting_order_cb(keynode_t *key, void *data)
 #endif
 }
 
-void ctscts_set_sort_memory(int sort_type)
+void ctsvc_set_sort_memory(int sort_type)
 {
 	primary_sort = sort_type;
 	secondary_sort = CTSVC_SORT_WESTERN;
@@ -147,7 +147,7 @@ void ctscts_set_sort_memory(int sort_type)
 static void ctsvc_vconf_sort_change_cb(keynode_t *key, void *data)
 {
 	int sort = vconf_keynode_get_int(key);
-	ctscts_set_sort_memory(sort);
+	ctsvc_set_sort_memory(sort);
 }
 
 int ctsvc_register_vconf(void)
@@ -183,7 +183,7 @@ int ctsvc_register_vconf(void)
 
 	ret = vconf_get_int(ctsvc_get_default_sort_vconfkey(), &primary_sort);
 	WARN_IF(ret < 0, "vconf_get_int() Failed(%d)", ret);
-	ctscts_set_sort_memory(primary_sort);
+	ctsvc_set_sort_memory(primary_sort);
 
 	ret = vconf_notify_key_changed(ctsvc_get_default_sort_vconfkey(),
 			ctsvc_vconf_sort_change_cb, NULL);
@@ -221,7 +221,7 @@ int ctsvc_get_primary_sort(void)
 		int ret;
 		ret = vconf_get_int(ctsvc_get_default_sort_vconfkey(), &primary_sort);
 		WARN_IF(ret < 0, "vconf_get_int() Failed(%d)", ret);
-		ctscts_set_sort_memory(primary_sort);
+		ctsvc_set_sort_memory(primary_sort);
 	}
 	return primary_sort;
 }

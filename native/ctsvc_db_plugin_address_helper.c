@@ -72,7 +72,7 @@ static int __ctsvc_db_address_reset_default(int address_id, int contact_id)
 			address_id, contact_id, CTSVC_DATA_POSTAL);
 	ret = ctsvc_query_exec(query);
 
-	WARN_IF(CONTACTS_ERROR_NONE != ret, "cts_query_exec() Failed(%d)", ret);
+	WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_query_exec() Failed(%d)", ret);
 	return ret;
 }
 

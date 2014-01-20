@@ -83,7 +83,7 @@ static int __ctsvc_db_email_update_person_has_email(int person_id, bool has_emai
 			has_email, person_id);
 
 	ret = ctsvc_query_exec(query);
-	WARN_IF(CONTACTS_ERROR_NONE != ret, "cts_query_exec() Failed(%d)", ret);
+	WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_query_exec() Failed(%d)", ret);
 	return ret;
 }
 
@@ -97,7 +97,7 @@ static int __ctsvc_db_email_update_default(int email_id, int contact_id, bool is
 			is_default, is_primary_default, email_id);
 	ret = ctsvc_query_exec(query);
 
-	WARN_IF(CONTACTS_ERROR_NONE != ret, "cts_query_exec() Failed(%d)", ret);
+	WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_query_exec() Failed(%d)", ret);
 	return ret;
 }
 
@@ -154,7 +154,7 @@ static int __ctsvc_db_email_set_primary_default(int email_id, bool is_primary_de
 			"UPDATE "CTS_TABLE_DATA" SET is_primary_default = %d WHERE id = %d",
 			is_primary_default, email_id);
 	ret = ctsvc_query_exec(query);
-	WARN_IF(CONTACTS_ERROR_NONE != ret, "cts_query_exec() Failed(%d)", ret);
+	WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_query_exec() Failed(%d)", ret);
 	return ret;
 }
 
@@ -217,7 +217,7 @@ static int __ctsvc_db_email_insert_record( contacts_record_h record, int *id )
 
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("cts_query_exec() Failed(%d)", ret);
+		CTS_ERR("ctsvc_query_exec() Failed(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
@@ -424,7 +424,7 @@ static int __ctsvc_db_email_delete_record( int id )
 
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("cts_query_exec() Failed(%d)", ret);
+		CTS_ERR("ctsvc_query_exec() Failed(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}

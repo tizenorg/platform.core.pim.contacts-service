@@ -1,5 +1,5 @@
 /*
- * Contacts Service Helper
+ * Contacts Service
  *
  * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
  *
@@ -23,7 +23,6 @@
 
 #include "contacts.h"
 #include "ctsvc_internal.h"
-
 #include "ctsvc_ipc_define.h"
 #include "ctsvc_server_change_subject.h"
 

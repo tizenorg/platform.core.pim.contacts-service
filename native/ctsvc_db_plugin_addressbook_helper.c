@@ -122,7 +122,7 @@ int ctsvc_addressbook_delete(int account_id)
 			CTS_TABLE_ADDRESSBOOKS, account_id);
 	ret = ctsvc_query_get_first_int_result(query, &addressbook_id);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB error : ctsvc_query_exec() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_query_get_first_int_result() Failed(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}

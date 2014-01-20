@@ -39,11 +39,11 @@ inline int ctsvc_server_set_default_sort(int sort)
 {
 	int ret = vconf_set_int(ctsvc_get_default_sort_vconfkey(), sort);
 	RETVM_IF(ret<0, CONTACTS_ERROR_INTERNAL, "vconf_set_int() Failed(%d)", ret);
-	ctscts_set_sort_memory(sort);
+	ctsvc_set_sort_memory(sort);
 	return CONTACTS_ERROR_NONE;
 }
 
-static void ctsvc_server_change_language_cb(keynode_t *key, void *data)
+static void __ctsvc_server_change_language_cb(keynode_t *key, void *data)
 {
 	int ret = -1;
 	int new_primary_sort, new_secondary_sort;
@@ -91,7 +91,7 @@ void ctsvc_server_final_configuration(void)
 {
 	int ret = -1;
 
-	ret = vconf_ignore_key_changed(CTSVC_SERVER_VCONF_SYSTEM_LANGUAGE, ctsvc_server_change_language_cb);
+	ret = vconf_ignore_key_changed(CTSVC_SERVER_VCONF_SYSTEM_LANGUAGE, __ctsvc_server_change_language_cb);
 	RETM_IF(ret<0,"vconf_ignore_key_changed(%s) Failed(%d)",CTSVC_SERVER_VCONF_SYSTEM_LANGUAGE,ret);
 
 	ret = vconf_ignore_key_changed(VCONFKEY_REGIONFORMAT, ctsvc_server_update_collation_cb);
@@ -121,7 +121,7 @@ int ctsvc_server_init_configuration(void)
 	ctsvc_server_set_default_sort(sort_type);
 
 	ret = vconf_notify_key_changed(CTSVC_SERVER_VCONF_SYSTEM_LANGUAGE,
-			ctsvc_server_change_language_cb, NULL);
+			__ctsvc_server_change_language_cb, NULL);
 	RETVM_IF(ret<0, CONTACTS_ERROR_SYSTEM, "vconf_notify_key_changed(%s) Failed(%d)",
 			CTSVC_SERVER_VCONF_SYSTEM_LANGUAGE, ret);
 

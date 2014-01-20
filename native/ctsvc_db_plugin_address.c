@@ -181,7 +181,7 @@ static int __ctsvc_db_address_delete_record( int id )
 
 	ret = ctsvc_db_address_delete(id, false);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB error : ctsvc_query_exec() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_db_address_delete() Failed(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}

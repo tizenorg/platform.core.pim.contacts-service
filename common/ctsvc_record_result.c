@@ -175,7 +175,7 @@ static int __ctsvc_result_get_int(contacts_record_h record, unsigned int propert
 	GSList *cursor;
 	//TODO: check the value type of property_id is int
 	for(cursor = result->values;cursor;cursor=cursor->next){
-	ctsvc_result_value_s *data = cursor->data;
+		ctsvc_result_value_s *data = cursor->data;
 		if (data->property_id == property_id) {
 			if (data->type == CTSVC_VIEW_DATA_TYPE_INT) {
 				*out_value = data->value.i;

@@ -60,7 +60,7 @@ static int __ctsvc_db_email_reset_default(int email_id, int contact_id)
 			email_id, contact_id, CTSVC_DATA_EMAIL);
 	ret = ctsvc_query_exec(query);
 
-	WARN_IF(CONTACTS_ERROR_NONE != ret, "cts_query_exec() Failed(%d)", ret);
+	WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_query_exec() Failed(%d)", ret);
 	return ret;
 }
 
@@ -93,7 +93,7 @@ int ctsvc_db_email_insert(contacts_record_h record, int contact_id, bool is_my_p
 
 	ret = ctsvc_stmt_step(stmt);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB error : ctsvc_query_exec() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_stmt_step() Failed(%d)", ret);
 		ctsvc_stmt_finalize(stmt);
 		return ret;
 	}

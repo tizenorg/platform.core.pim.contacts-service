@@ -85,7 +85,7 @@ static int __ctsvc_db_number_update_person_has_phonenumber(int person_id, bool h
 			has_phonenumber, person_id);
 
 	ret = ctsvc_query_exec(query);
-	WARN_IF(CONTACTS_ERROR_NONE != ret, "cts_query_exec() Failed(%d)", ret);
+	WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_query_exec() Failed(%d)", ret);
 	return ret;
 }
 
@@ -113,7 +113,7 @@ static int __ctsvc_db_number_update_default(int number_id, int contact_id, bool 
 			is_default, is_primary_default, number_id);
 	ret = ctsvc_query_exec(query);
 
-	WARN_IF(CONTACTS_ERROR_NONE != ret, "cts_query_exec() Failed(%d)", ret);
+	WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_query_exec() Failed(%d)", ret);
 	return ret;
 }
 
@@ -157,7 +157,7 @@ static int __ctsvc_db_number_set_primary_default(int number_id, bool is_primary_
 			"UPDATE "CTS_TABLE_DATA" SET is_primary_default = %d WHERE id = %d",
 			is_primary_default, number_id);
 	ret = ctsvc_query_exec(query);
-	WARN_IF(CONTACTS_ERROR_NONE != ret, "cts_query_exec() Failed(%d)", ret);
+	WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_query_exec() Failed(%d)", ret);
 	return ret;
 }
 
@@ -220,7 +220,7 @@ static int __ctsvc_db_number_insert_record( contacts_record_h record, int *id )
 
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("cts_query_exec() Failed(%d)", ret);
+		CTS_ERR("ctsvc_query_exec() Failed(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
@@ -419,7 +419,7 @@ static int __ctsvc_db_number_delete_record( int id )
 
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("cts_query_exec() Failed(%d)", ret);
+		CTS_ERR("ctsvc_query_exec() Failed(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}

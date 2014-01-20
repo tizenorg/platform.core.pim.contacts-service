@@ -80,7 +80,7 @@ static int __ctsvc_db_image_set_primary_default(int image_id, bool is_primary_de
 			"UPDATE "CTS_TABLE_DATA" SET is_primary_default = %d WHERE id = %d",
 			is_primary_default, image_id);
 	ret = ctsvc_query_exec(query);
-	WARN_IF(CONTACTS_ERROR_NONE != ret, "cts_query_exec() Failed(%d)", ret);
+	WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_query_exec() Failed(%d)", ret);
 	return ret;
 }
 
@@ -94,7 +94,7 @@ static int __ctsvc_db_image_set_default(int image_id, int contact_id, bool is_de
 			is_default, is_primary_default, image_id);
 	ret = ctsvc_query_exec(query);
 
-	WARN_IF(CONTACTS_ERROR_NONE != ret, "cts_query_exec() Failed(%d)", ret);
+	WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_query_exec() Failed(%d)", ret);
 	return ret;
 }
 
@@ -483,7 +483,7 @@ static int __ctsvc_db_image_delete_record( int id )
 
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("cts_query_exec() Failed(%d)", ret);
+		CTS_ERR("ctsvc_query_exec() Failed(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}

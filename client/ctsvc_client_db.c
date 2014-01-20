@@ -276,7 +276,6 @@ API int contacts_db_update_record( contacts_record_h record )
 
 	RETVM_IF(record==NULL,CONTACTS_ERROR_INVALID_PARAMETER,"record is NULL");
 
-
 	// make indata
 	indata = pims_ipc_data_create(0);
 	if (indata == NULL)
@@ -328,7 +327,6 @@ API int contacts_db_delete_record( const char* view_uri, int id )
 
 	RETVM_IF(view_uri==NULL,CONTACTS_ERROR_INVALID_PARAMETER,"view_uri is NULL");
 	RETVM_IF(id<=0,CONTACTS_ERROR_INVALID_PARAMETER,"id <= 0");
-
 
 	// make indata
 	indata = pims_ipc_data_create(0);

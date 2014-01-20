@@ -210,7 +210,7 @@ static int __ctsvc_db_phonelog_delete_record( int id )
 
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("cts_query_exec() Failed(%d)", ret);
+		CTS_ERR("ctsvc_query_exec() Failed(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
