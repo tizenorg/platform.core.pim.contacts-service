@@ -3,8 +3,6 @@ Description=Contacts Service socket
 
 [Socket]
 ListenStream=/tmp/.contacts_svc_ipc-monitor
-SmackLabelIPIn=*
-SmackLabelIPOut=@
 
 [Install]
 WantedBy=sockets.target
