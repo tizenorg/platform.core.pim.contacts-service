@@ -25,6 +25,9 @@
 #include "ctsvc_notify.h"
 #include "ctsvc_notification.h"
 
+#define CTSVC_SECURITY_FILE_GROUP 6005
+#define CTSVC_SECURITY_DEFAULT_PERMISSION 0770
+
 static TLS bool contact_change = false;
 static TLS bool my_profile_change = false;
 static TLS bool phonelog_change = false;
@@ -52,218 +55,582 @@ static TLS bool company_change = false;
 
 static inline void __ctsvc_noti_publish_contact_change(void)
 {
+	int ret;
 	int fd = open(CTSVC_NOTI_CONTACT_CHANGED, O_TRUNC | O_RDWR);
 	if (0 <= fd) {
 		close(fd);
 		contact_change = false;
 	}
+	ret = fchown(fd, getuid(), CTSVC_SECURITY_FILE_GROUP);
+	if (-1 == ret)
+	{
+		printf("Failed to fchown\n");
+		close(fd);
+		return -1;
+	}
+	ret = fchmod(fd, CTSVC_SECURITY_DEFAULT_PERMISSION);
+	if (-1 == ret)
+	{
+		printf("Failed to fchmod\n");
+		close(fd);
+		return -1;
+	}
 }
 
 static inline void __ctsvc_noti_publish_my_profile_change(void)
 {
+	int ret;
 	int fd = open(CTSVC_NOTI_MY_PROFILE_CHANGED, O_TRUNC | O_RDWR);
 	if (0 <= fd) {
 		close(fd);
 		my_profile_change = false;
 	}
+	ret = fchown(fd, getuid(), CTSVC_SECURITY_FILE_GROUP);
+	if (-1 == ret)
+	{
+		printf("Failed to fchown\n");
+		close(fd);
+		return -1;
+	}
+	ret = fchmod(fd, CTSVC_SECURITY_DEFAULT_PERMISSION);
+	if (-1 == ret)
+	{
+		printf("Failed to fchmod\n");
+		close(fd);
+		return -1;
+	}
 }
 
 static inline void __ctsvc_noti_publish_phonelog_change(void)
 {
+	int ret;
 	int fd = open(CTSVC_NOTI_PHONELOG_CHANGED, O_TRUNC | O_RDWR);
 	if (0 <= fd) {
 		close(fd);
 		phonelog_change = false;
 	}
+	ret = fchown(fd, getuid(), CTSVC_SECURITY_FILE_GROUP);
+	if (-1 == ret)
+	{
+		printf("Failed to fchown\n");
+		close(fd);
+		return -1;
+	}
+	ret = fchmod(fd, CTSVC_SECURITY_DEFAULT_PERMISSION);
+	if (-1 == ret)
+	{
+		printf("Failed to fchmod\n");
+		close(fd);
+		return -1;
+	}
 }
 
 static inline void __ctsvc_noti_publish_speed_change(void)
 {
+	int ret;
 	int fd = open(CTSVC_NOTI_SPEEDDIAL_CHANGED, O_TRUNC | O_RDWR);
 	if (0 <= fd) {
 		close(fd);
 		speed_change = false;
 	}
+	ret = fchown(fd, getuid(), CTSVC_SECURITY_FILE_GROUP);
+	if (-1 == ret)
+	{
+		printf("Failed to fchown\n");
+		close(fd);
+		return -1;
+	}
+	ret = fchmod(fd, CTSVC_SECURITY_DEFAULT_PERMISSION);
+	if (-1 == ret)
+	{
+		printf("Failed to fchmod\n");
+		close(fd);
+		return -1;
+	}
 }
 
 static inline void __ctsvc_noti_publish_addressbook_change(void)
 {
+	int ret;
 	int fd = open(CTSVC_NOTI_ADDRESSBOOK_CHANGED, O_TRUNC | O_RDWR);
 	if (0 <= fd) {
 		close(fd);
 		addressbook_change = false;
 	}
+	ret = fchown(fd, getuid(), CTSVC_SECURITY_FILE_GROUP);
+	if (-1 == ret)
+	{
+		printf("Failed to fchown\n");
+		close(fd);
+		return -1;
+	}
+	ret = fchmod(fd, CTSVC_SECURITY_DEFAULT_PERMISSION);
+	if (-1 == ret)
+	{
+		printf("Failed to fchmod\n");
+		close(fd);
+		return -1;
+	}
 }
 
 static inline void __ctsvc_noti_publish_group_change(void)
 {
+	int ret;
 	int fd = open(CTSVC_NOTI_GROUP_CHANGED, O_TRUNC | O_RDWR);
 	if (0 <= fd) {
 		close(fd);
 		group_change = false;
 	}
+	ret = fchown(fd, getuid(), CTSVC_SECURITY_FILE_GROUP);
+	if (-1 == ret)
+	{
+		printf("Failed to fchown\n");
+		close(fd);
+		return -1;
+	}
+	ret = fchmod(fd, CTSVC_SECURITY_DEFAULT_PERMISSION);
+	if (-1 == ret)
+	{
+		printf("Failed to fchmod\n");
+		close(fd);
+		return -1;
+	}
 }
 
 static inline void __ctsvc_noti_publish_group_rel_change(void)
 {
+	int ret;
 	int fd = open(CTSVC_NOTI_GROUP_RELATION_CHANGED, O_TRUNC | O_RDWR);
 	if (0 <= fd) {
 		close(fd);
 		group_rel_change = false;
 	}
+	ret = fchown(fd, getuid(), CTSVC_SECURITY_FILE_GROUP);
+	if (-1 == ret)
+	{
+		printf("Failed to fchown\n");
+		close(fd);
+		return -1;
+	}
+	ret = fchmod(fd, CTSVC_SECURITY_DEFAULT_PERMISSION);
+	if (-1 == ret)
+	{
+		printf("Failed to fchmod\n");
+		close(fd);
+		return -1;
+	}
 }
 
 static inline void __ctsvc_noti_publish_person_change(void)
 {
+	int ret;
 	int fd = open(CTSVC_NOTI_PERSON_CHANGED, O_TRUNC | O_RDWR);
 	if (0 <= fd) {
 		close(fd);
 		person_change = false;
 	}
+	ret = fchown(fd, getuid(), CTSVC_SECURITY_FILE_GROUP);
+	if (-1 == ret)
+	{
+		printf("Failed to fchown\n");
+		close(fd);
+		return -1;
+	}
+	ret = fchmod(fd, CTSVC_SECURITY_DEFAULT_PERMISSION);
 }
 
 static inline void __ctsvc_noti_publish_name_change(void)
 {
+	int ret;
 	int fd = open(CTSVC_NOTI_NAME_CHANGED, O_TRUNC | O_RDWR);
 	if (0 <= fd) {
 		close(fd);
 		name_change = false;
 	}
+	ret = fchown(fd, getuid(), CTSVC_SECURITY_FILE_GROUP);
+	if (-1 == ret)
+	{
+		printf("Failed to fchown\n");
+		close(fd);
+		return -1;
+	}
+	ret = fchmod(fd, CTSVC_SECURITY_DEFAULT_PERMISSION);
+	if (-1 == ret)
+	{
+		printf("Failed to fchmod\n");
+		close(fd);
+		return -1;
+	}
 }
 
 static inline void __ctsvc_noti_publish_number_change(void)
 {
+	int ret;
 	int fd = open(CTSVC_NOTI_NUMBER_CHANGED, O_TRUNC | O_RDWR);
 	if (0 <= fd) {
 		close(fd);
 		number_change = false;
 	}
+	ret = fchown(fd, getuid(), CTSVC_SECURITY_FILE_GROUP);
+	if (-1 == ret)
+	{
+		printf("Failed to fchown\n");
+		close(fd);
+		return -1;
+	}
+	ret = fchmod(fd, CTSVC_SECURITY_DEFAULT_PERMISSION);
+	if (-1 == ret)
+	{
+		printf("Failed to fchmod\n");
+		close(fd);
+		return -1;
+	}
 }
 
 static inline void __ctsvc_noti_publish_email_change(void)
 {
+	int ret;
 	int fd = open(CTSVC_NOTI_EMAIL_CHANGED, O_TRUNC | O_RDWR);
 	if (0 <= fd) {
 		close(fd);
 		email_change = false;
 	}
+	ret = fchown(fd, getuid(), CTSVC_SECURITY_FILE_GROUP);
+	if (-1 == ret)
+	{
+		printf("Failed to fchown\n");
+		close(fd);
+		return -1;
+	}
+	ret = fchmod(fd, CTSVC_SECURITY_DEFAULT_PERMISSION);
+	if (-1 == ret)
+	{
+		printf("Failed to fchmod\n");
+		close(fd);
+		return -1;
+	}
 }
 
 static inline void __ctsvc_noti_publish_event_change(void)
 {
+	int ret;
 	int fd = open(CTSVC_NOTI_EVENT_CHANGED, O_TRUNC | O_RDWR);
 	if (0 <= fd) {
 		close(fd);
 		event_change = false;
 	}
+	ret = fchown(fd, getuid(), CTSVC_SECURITY_FILE_GROUP);
+	if (-1 == ret)
+	{
+		printf("Failed to fchown\n");
+		close(fd);
+		return -1;
+	}
+	ret = fchmod(fd, CTSVC_SECURITY_DEFAULT_PERMISSION);
+	if (-1 == ret)
+	{
+		printf("Failed to fchmod\n");
+		close(fd);
+		return -1;
+	}
 }
 
 static inline void __ctsvc_noti_publish_url_change(void)
 {
+	int ret;
 	int fd = open(CTSVC_NOTI_URL_CHANGED, O_TRUNC | O_RDWR);
 	if (0 <= fd) {
 		close(fd);
 		url_change = false;
 	}
+	ret = fchown(fd, getuid(), CTSVC_SECURITY_FILE_GROUP);
+	if (-1 == ret)
+	{
+		printf("Failed to fchown\n");
+		close(fd);
+		return -1;
+	}
+	ret = fchmod(fd, CTSVC_SECURITY_DEFAULT_PERMISSION);
+	if (-1 == ret)
+	{
+		printf("Failed to fchmod\n");
+		close(fd);
+		return -1;
+	}
 }
 
 static inline void __ctsvc_noti_publish_address_change(void)
 {
+	int ret;
 	int fd = open(CTSVC_NOTI_ADDRESS_CHANGED, O_TRUNC | O_RDWR);
 	if (0 <= fd) {
 		close(fd);
 		address_change = false;
 	}
+	ret = fchown(fd, getuid(), CTSVC_SECURITY_FILE_GROUP);
+	if (-1 == ret)
+	{
+		printf("Failed to fchown\n");
+		close(fd);
+		return -1;
+	}
+	ret = fchmod(fd, CTSVC_SECURITY_DEFAULT_PERMISSION);
+	if (-1 == ret)
+	{
+		printf("Failed to fchmod\n");
+		close(fd);
+		return -1;
+	}
 }
 
 static inline void __ctsvc_noti_publish_note_change(void)
 {
+	int ret;
 	int fd = open(CTSVC_NOTI_NOTE_CHANGED, O_TRUNC | O_RDWR);
 	if (0 <= fd) {
 		close(fd);
 		note_change = false;
 	}
+	ret = fchown(fd, getuid(), CTSVC_SECURITY_FILE_GROUP);
+	if (-1 == ret)
+	{
+		printf("Failed to fchown\n");
+		close(fd);
+		return -1;
+	}
+	ret = fchmod(fd, CTSVC_SECURITY_DEFAULT_PERMISSION);
+	if (-1 == ret)
+	{
+		printf("Failed to fchmod\n");
+		close(fd);
+		return -1;
+	}
+
 }
 
 static inline void __ctsvc_noti_publish_company_change(void)
 {
+	int ret;
 	int fd = open(CTSVC_NOTI_COMPANY_CHANGED, O_TRUNC | O_RDWR);
 	if (0 <= fd) {
 		close(fd);
 		company_change = false;
 	}
+	ret = fchown(fd, getuid(), CTSVC_SECURITY_FILE_GROUP);
+	if (-1 == ret)
+	{
+		printf("Failed to fchown\n");
+		close(fd);
+		return -1;
+	}
+	ret = fchmod(fd, CTSVC_SECURITY_DEFAULT_PERMISSION);
+	if (-1 == ret)
+	{
+		printf("Failed to fchmod\n");
+		close(fd);
+		return -1;
+	}
+
 }
 
 static inline void __ctsvc_noti_publish_relationship_change(void)
 {
+	int ret;
 	int fd = open(CTSVC_NOTI_RELATIONSHIP_CHANGED, O_TRUNC | O_RDWR);
 	if (0 <= fd) {
 		close(fd);
 		relationship_change = false;
 	}
+	ret = fchown(fd, getuid(), CTSVC_SECURITY_FILE_GROUP);
+	if (-1 == ret)
+	{
+		printf("Failed to fchown\n");
+		close(fd);
+		return -1;
+	}
+	ret = fchmod(fd, CTSVC_SECURITY_DEFAULT_PERMISSION);
+	if (-1 == ret)
+	{
+		printf("Failed to fchmod\n");
+		close(fd);
+		return -1;
+	}
+
 }
 
 static inline void __ctsvc_noti_publish_image_change(void)
 {
+	int ret;
 	int fd = open(CTSVC_NOTI_IMAGE_CHANGED, O_TRUNC | O_RDWR);
 	if (0 <= fd) {
 		close(fd);
 		image_change = false;
 	}
+	ret = fchown(fd, getuid(), CTSVC_SECURITY_FILE_GROUP);
+	if (-1 == ret)
+	{
+		printf("Failed to fchown\n");
+		close(fd);
+		return -1;
+	}
+	ret = fchmod(fd, CTSVC_SECURITY_DEFAULT_PERMISSION);
+	if (-1 == ret)
+	{
+		printf("Failed to fchmod\n");
+		close(fd);
+		return -1;
+	}
+
 }
 
 static inline void __ctsvc_noti_publish_nickname_change(void)
 {
+	int ret;
 	int fd = open(CTSVC_NOTI_NICKNAME_CHANGED, O_TRUNC | O_RDWR);
 	if (0 <= fd) {
 		close(fd);
 		nickname_change = false;
 	}
+	ret = fchown(fd, getuid(), CTSVC_SECURITY_FILE_GROUP);
+	if (-1 == ret)
+	{
+		printf("Failed to fchown\n");
+		close(fd);
+		return -1;
+	}
+	ret = fchmod(fd, CTSVC_SECURITY_DEFAULT_PERMISSION);
+	if (-1 == ret)
+	{
+		printf("Failed to fchmod\n");
+		close(fd);
+		return -1;
+	}
+
 }
 
 static inline void __ctsvc_noti_publish_messenger_change(void)
 {
+	int ret;
 	int fd = open(CTSVC_NOTI_MESSENGER_CHANGED, O_TRUNC | O_RDWR);
 	if (0 <= fd) {
 		close(fd);
 		messenger_change = false;
 	}
+	ret = fchown(fd, getuid(), CTSVC_SECURITY_FILE_GROUP);
+	if (-1 == ret)
+	{
+		printf("Failed to fchown\n");
+		close(fd);
+		return -1;
+	}
+	ret = fchmod(fd, CTSVC_SECURITY_DEFAULT_PERMISSION);
+	if (-1 == ret)
+	{
+		printf("Failed to fchmod\n");
+		close(fd);
+		return -1;
+	}
+
 }
 
 static inline void __ctsvc_noti_publish_data_change(void)
 {
+	int ret;
 	int fd = open(CTSVC_NOTI_DATA_CHANGED, O_TRUNC | O_RDWR);
 	if (0 <= fd) {
 		close(fd);
 		data_change = false;
 	}
+	ret = fchown(fd, getuid(), CTSVC_SECURITY_FILE_GROUP);
+	if (-1 == ret)
+	{
+		printf("Failed to fchown\n");
+		close(fd);
+		return -1;
+	}
+	ret = fchmod(fd, CTSVC_SECURITY_DEFAULT_PERMISSION);
+	if (-1 == ret)
+	{
+		printf("Failed to fchmod\n");
+		close(fd);
+		return -1;
+	}
+
 }
 
 static inline void __ctsvc_noti_publish_sdn_change(void)
 {
+	int ret;
 	int fd = open(CTSVC_NOTI_SDN_CHANGED, O_TRUNC | O_RDWR);
 	if (0 <= fd) {
 		close(fd);
 		sdn_change = false;
 	}
+	ret = fchown(fd, getuid(), CTSVC_SECURITY_FILE_GROUP);
+	if (-1 == ret)
+	{
+		printf("Failed to fchown\n");
+		close(fd);
+		return -1;
+	}
+	ret = fchmod(fd, CTSVC_SECURITY_DEFAULT_PERMISSION);
+	if (-1 == ret)
+	{
+		printf("Failed to fchmod\n");
+		close(fd);
+		return -1;
+	}
+
 }
 
 static inline void __ctsvc_noti_publish_profile_change(void)
 {
+	int ret;
 	int fd = open(CTSVC_NOTI_PROFILE_CHANGED, O_TRUNC | O_RDWR);
 	if (0 <= fd) {
 		close(fd);
 		profile_change = false;
 	}
+	ret = fchown(fd, getuid(), CTSVC_SECURITY_FILE_GROUP);
+	if (-1 == ret)
+	{
+		printf("Failed to fchown\n");
+		close(fd);
+		return -1;
+	}
+	ret = fchmod(fd, CTSVC_SECURITY_DEFAULT_PERMISSION);
+	if (-1 == ret)
+	{
+		printf("Failed to fchmod\n");
+		close(fd);
+		return -1;
+	}
+
 }
 
 static inline void __ctsvc_noti_publish_activity_change(void)
 {
+	int ret;
 	int fd = open(CTSVC_NOTI_ACTIVITY_CHANGED, O_TRUNC | O_RDWR);
 	if (0 <= fd) {
 		close(fd);
 		activity_change = false;
 	}
+	ret = fchown(fd, getuid(), CTSVC_SECURITY_FILE_GROUP);
+	if (-1 == ret)
+	{
+		printf("Failed to fchown\n");
+		close(fd);
+		return -1;
+	}
+	ret = fchmod(fd, CTSVC_SECURITY_DEFAULT_PERMISSION);
+	if (-1 == ret)
+	{
+		printf("Failed to fchmod\n");
+		close(fd);
+		return -1;
+	}
+
 }
 
 void ctsvc_nofitication_cancel(void)
