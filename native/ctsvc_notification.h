@@ -22,6 +22,7 @@
 
 #include "ctsvc_sqlite.h"
 
+void ctsvc_set_permission(int fd);
 void ctsvc_set_contact_noti(void);
 void ctsvc_set_my_profile_noti(void);
 void ctsvc_set_phonelog_noti(void);

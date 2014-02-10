@@ -25,6 +25,9 @@
 #include "ctsvc_notify.h"
 #include "ctsvc_notification.h"
 
+#define CTSVC_SECURITY_FILE_GROUP 6005
+#define CTSVC_SECURITY_DEFAULT_PERMISSION 0770
+
 static TLS bool contact_change = false;
 static TLS bool my_profile_change = false;
 static TLS bool phonelog_change = false;
@@ -50,12 +53,34 @@ static TLS bool image_change = false;
 static TLS bool profile_change = false;
 static TLS bool company_change = false;
 
+
+void ctsvc_set_permission(int fd)
+{
+	int ret;
+	ret = fchown(fd, getuid(), CTSVC_SECURITY_FILE_GROUP);
+	if (-1 == ret)
+	{
+		printf("Failed to fchown\n");
+		return;
+	}
+	ret = fchmod(fd, CTSVC_SECURITY_DEFAULT_PERMISSION);
+	if (-1 == ret)
+	{
+		printf("Failed to fchmod\n");
+		return;
+	}
+	
+}
+
 static inline void __ctsvc_noti_publish_contact_change(void)
 {
 	int fd = open(CTSVC_NOTI_CONTACT_CHANGED, O_TRUNC | O_RDWR);
 	if (0 <= fd) {
 		close(fd);
 		contact_change = false;
+	}
+	else{
+		ctsvc_set_permission(fd);
 	}
 }
 
@@ -66,6 +91,9 @@ static inline void __ctsvc_noti_publish_my_profile_change(void)
 		close(fd);
 		my_profile_change = false;
 	}
+	else{
+		ctsvc_set_permission(fd);
+	}
 }
 
 static inline void __ctsvc_noti_publish_phonelog_change(void)
@@ -74,6 +102,9 @@ static inline void __ctsvc_noti_publish_phonelog_change(void)
 	if (0 <= fd) {
 		close(fd);
 		phonelog_change = false;
+	}
+	else{
+		ctsvc_set_permission(fd);
 	}
 }
 
@@ -84,6 +115,9 @@ static inline void __ctsvc_noti_publish_speed_change(void)
 		close(fd);
 		speed_change = false;
 	}
+	else{
+		ctsvc_set_permission(fd);
+	}
 }
 
 static inline void __ctsvc_noti_publish_addressbook_change(void)
@@ -92,6 +126,9 @@ static inline void __ctsvc_noti_publish_addressbook_change(void)
 	if (0 <= fd) {
 		close(fd);
 		addressbook_change = false;
+	}
+	else{
+		ctsvc_set_permission(fd);
 	}
 }
 
@@ -102,6 +139,9 @@ static inline void __ctsvc_noti_publish_group_change(void)
 		close(fd);
 		group_change = false;
 	}
+	else{
+		ctsvc_set_permission(fd);
+	}
 }
 
 static inline void __ctsvc_noti_publish_group_rel_change(void)
@@ -110,6 +150,9 @@ static inline void __ctsvc_noti_publish_group_rel_change(void)
 	if (0 <= fd) {
 		close(fd);
 		group_rel_change = false;
+	}
+	else{
+		ctsvc_set_permission(fd);
 	}
 }
 
@@ -120,6 +163,9 @@ static inline void __ctsvc_noti_publish_person_change(void)
 		close(fd);
 		person_change = false;
 	}
+	else{
+		ctsvc_set_permission(fd);
+	}
 }
 
 static inline void __ctsvc_noti_publish_name_change(void)
@@ -128,6 +174,9 @@ static inline void __ctsvc_noti_publish_name_change(void)
 	if (0 <= fd) {
 		close(fd);
 		name_change = false;
+	}
+	else{
+		ctsvc_set_permission(fd);
 	}
 }
 
@@ -138,6 +187,9 @@ static inline void __ctsvc_noti_publish_number_change(void)
 		close(fd);
 		number_change = false;
 	}
+	else{
+		ctsvc_set_permission(fd);
+	}
 }
 
 static inline void __ctsvc_noti_publish_email_change(void)
@@ -146,6 +198,9 @@ static inline void __ctsvc_noti_publish_email_change(void)
 	if (0 <= fd) {
 		close(fd);
 		email_change = false;
+	}
+	else{
+		ctsvc_set_permission(fd);
 	}
 }
 
@@ -156,6 +211,9 @@ static inline void __ctsvc_noti_publish_event_change(void)
 		close(fd);
 		event_change = false;
 	}
+	else{
+		ctsvc_set_permission(fd);
+	}
 }
 
 static inline void __ctsvc_noti_publish_url_change(void)
@@ -164,6 +222,9 @@ static inline void __ctsvc_noti_publish_url_change(void)
 	if (0 <= fd) {
 		close(fd);
 		url_change = false;
+	}
+	else{
+		ctsvc_set_permission(fd);
 	}
 }
 
@@ -174,6 +235,9 @@ static inline void __ctsvc_noti_publish_address_change(void)
 		close(fd);
 		address_change = false;
 	}
+	else{
+		ctsvc_set_permission(fd);
+	}
 }
 
 static inline void __ctsvc_noti_publish_note_change(void)
@@ -183,6 +247,10 @@ static inline void __ctsvc_noti_publish_note_change(void)
 		close(fd);
 		note_change = false;
 	}
+	else{
+		ctsvc_set_permission(fd);
+	}
+
 }
 
 static inline void __ctsvc_noti_publish_company_change(void)
@@ -192,6 +260,10 @@ static inline void __ctsvc_noti_publish_company_change(void)
 		close(fd);
 		company_change = false;
 	}
+	else{
+		ctsvc_set_permission(fd);
+	}
+
 }
 
 static inline void __ctsvc_noti_publish_relationship_change(void)
@@ -200,6 +272,9 @@ static inline void __ctsvc_noti_publish_relationship_change(void)
 	if (0 <= fd) {
 		close(fd);
 		relationship_change = false;
+	}
+	else{
+		ctsvc_set_permission(fd);
 	}
 }
 
@@ -210,6 +285,9 @@ static inline void __ctsvc_noti_publish_image_change(void)
 		close(fd);
 		image_change = false;
 	}
+	else{
+		ctsvc_set_permission(fd);
+	}
 }
 
 static inline void __ctsvc_noti_publish_nickname_change(void)
@@ -219,6 +297,10 @@ static inline void __ctsvc_noti_publish_nickname_change(void)
 		close(fd);
 		nickname_change = false;
 	}
+	else{
+		ctsvc_set_permission(fd);
+	}
+
 }
 
 static inline void __ctsvc_noti_publish_messenger_change(void)
@@ -228,6 +310,10 @@ static inline void __ctsvc_noti_publish_messenger_change(void)
 		close(fd);
 		messenger_change = false;
 	}
+	else{
+		ctsvc_set_permission(fd);
+	}
+
 }
 
 static inline void __ctsvc_noti_publish_data_change(void)
@@ -237,6 +323,10 @@ static inline void __ctsvc_noti_publish_data_change(void)
 		close(fd);
 		data_change = false;
 	}
+	else{
+		ctsvc_set_permission(fd);
+	}
+
 }
 
 static inline void __ctsvc_noti_publish_sdn_change(void)
@@ -246,6 +336,10 @@ static inline void __ctsvc_noti_publish_sdn_change(void)
 		close(fd);
 		sdn_change = false;
 	}
+	else{
+		ctsvc_set_permission(fd);
+	}
+
 }
 
 static inline void __ctsvc_noti_publish_profile_change(void)
@@ -255,6 +349,10 @@ static inline void __ctsvc_noti_publish_profile_change(void)
 		close(fd);
 		profile_change = false;
 	}
+	else{
+		ctsvc_set_permission(fd);
+	}
+
 }
 
 static inline void __ctsvc_noti_publish_activity_change(void)
@@ -264,6 +362,10 @@ static inline void __ctsvc_noti_publish_activity_change(void)
 		close(fd);
 		activity_change = false;
 	}
+	else{
+		ctsvc_set_permission(fd);
+	}
+
 }
 
 void ctsvc_nofitication_cancel(void)
