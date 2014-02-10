@@ -25,6 +25,8 @@ BuildRequires:  pkgconfig(badge)
 BuildRequires:  pkgconfig(libexif)
 BuildRequires:  pkgconfig(libsmack)
 BuildRequires:  pkgconfig(security-server)
+BuildRequires:  pkgconfig(libtzplatform-config)
+
 Requires(post): /usr/bin/sqlite3, /bin/chmod, /bin/chown
 Requires(post): /usr/bin/vconftool
 Requires(post): /sbin/ldconfig
@@ -54,7 +56,7 @@ cp %{SOURCE3} .
 
 
 %build
-%cmake .
+%cmake . -DTZ_SYS_ETC=%TZ_SYS_ETC
 make %{?_smp_mflags}
 
 
@@ -74,18 +76,6 @@ ln -s ../contacts-service.socket %{buildroot}/usr/lib/systemd/user/sockets.targe
 %post -n contacts-service2
 /sbin/ldconfig
 
-chown :6005 /opt/usr/data/contacts-svc
-chown :6005 /opt/usr/dbspace/.contacts-svc.db
-chown :6005 /opt/usr/dbspace/.contacts-svc.db-journal
-chown :6005 -R /opt/usr/data/contacts-svc/img
-chown :6005 /opt/usr/data/contacts-svc/.CONTACTS_SVC_*_CHANGED
-
-chmod 660 /opt/usr/dbspace/.contacts-svc.db
-chmod 660 /opt/usr/dbspace/.contacts-svc.db-journal
-chmod 775 /opt/usr/data/contacts-svc
-chmod 770 -R /opt/usr/data/contacts-svc/img/
-chmod 660 /opt/usr/data/contacts-svc/.CONTACTS_SVC_*
-
 vconftool set -t int file/private/contacts-service/default_lang 0 -g 6005 -s contacts-service::vconf-private
 vconftool set -t int db/contacts-svc/name_sorting_order 0 -g 6005 -s contacts-service::vconf
 vconftool set -t int db/contacts-svc/name_display_order 0 -g 6005 -s contacts-service::vconf
@@ -102,14 +92,11 @@ vconftool set -t int db/contacts-svc/phonenumber_min_match_digit 8 -g 6005 -s co
 %defattr(-,root,root,-)
 %{_libdir}/libcontacts-service2.so.*
 %{_bindir}/contacts-service-ipcd*
-/opt/usr/data/contacts-svc/.CONTACTS_SVC_*
-/opt/usr/data/contacts-svc/img/*
 /usr/lib/systemd/user/contacts-service.service
 /usr/lib/systemd/user/tizen-middleware.target.wants/contacts-service.service
 /usr/lib/systemd/user/sockets.target.wants/contacts-service.socket
 /usr/lib/systemd/user/contacts-service.socket
-%config(noreplace) /opt/usr/dbspace/.contacts-svc.db*
-/opt/etc/smack/accesses.d/%{name}2.rule
+%{TZ_SYS_ETC}/smack/accesses.d/%{name}2.rule
 
 %files -n contacts-service2-devel
 %defattr(-,root,root,-)
