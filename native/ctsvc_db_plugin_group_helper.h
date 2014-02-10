@@ -22,8 +22,9 @@
 
 #include "contacts.h"
 #include "ctsvc_sqlite.h"
+#include <tzplatform_config.h>
 
-#define CTS_GROUP_IMAGE_LOCATION "/opt/usr/data/contacts-svc/img/group"
+#define CTS_GROUP_IMAGE_LOCATION tzplatform_mkpath(TZ_USER_DATA,"contacts-svc/img/group")
 
 void ctsvc_db_group_delete_callback(sqlite3_context *context, int argc, sqlite3_value ** argv);
 
