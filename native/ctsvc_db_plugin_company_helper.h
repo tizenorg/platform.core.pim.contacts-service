@@ -20,10 +20,12 @@
 #ifndef __CTSVC_DB_PLUGIN_COMPANY_HELPER_H__
 #define __CTSVC_DB_PLUGIN_COMPANY_HELPER_H__
 
+#include <tzplatform_config.h>
+
 #include "contacts.h"
 #include "ctsvc_sqlite.h"
 
-#define CTS_LOGO_IMAGE_LOCATION "/opt/usr/data/contacts-svc/img/logo"
+#define CTS_LOGO_IMAGE_LOCATION tzplatform_mkpath(TZ_USER_DATA,"contacts-svc/img/logo")
 
 int ctsvc_db_company_insert(contacts_record_h record, int contact_id, bool is_my_profile, int *id);
 int ctsvc_db_company_update(contacts_record_h record, int contact_id, bool is_my_profile);

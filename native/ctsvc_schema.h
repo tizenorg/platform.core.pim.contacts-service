@@ -20,12 +20,13 @@
  * limitations under the License.
  *
  */
+#include <tzplatform_config.h>
 
 #ifndef __TIZEN_SOCIAL_CTSVC_SCHEMA_H__
 #define __TIZEN_SOCIAL_CTSVC_SCHEMA_H__
 
-#define CTSVC_DB_PATH "/opt/usr/dbspace/.contacts-svc.db"
-#define CTSVC_DB_JOURNAL_PATH "/opt/usr/dbspace/.contacts-svc.db-journal"
+#define CTSVC_DB_PATH tzplatform_mkpath(TZ_USER_DB,".contacts-svc.db")
+#define CTSVC_DB_JOURNAL_PATH tzplatform_mkpath(TZ_USER_DB,".contacts-svc.db-journal")
 
 // For Security
 #define CTS_SECURITY_FILE_GROUP 6005

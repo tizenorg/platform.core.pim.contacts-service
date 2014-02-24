@@ -16,34 +16,42 @@
  * limitations under the License.
  *
  */
+#include <tzplatform_config.h>
 
 #ifndef __TIZEN_SOCIAL_CTSVC_NOTIFY_H__
 #define __TIZEN_SOCIAL_CTSVC_NOTIFY_H__
 
-#define CTSVC_NOTI_ADDRESSBOOK_CHANGED  "/opt/usr/data/contacts-svc/.CONTACTS_SVC_AB_CHANGED"
-#define CTSVC_NOTI_GROUP_CHANGED  "/opt/usr/data/contacts-svc/.CONTACTS_SVC_GROUP_CHANGED"
-#define CTSVC_NOTI_PERSON_CHANGED  "/opt/usr/data/contacts-svc/.CONTACTS_SVC_PERSON_CHANGED"
-#define CTSVC_NOTI_CONTACT_CHANGED  "/opt/usr/data/contacts-svc/.CONTACTS_SVC_DB_CHANGED"
-#define CTSVC_NOTI_MY_PROFILE_CHANGED  "/opt/usr/data/contacts-svc/.CONTACTS_SVC_MY_PROFILE_CHANGED"
-#define CTSVC_NOTI_NAME_CHANGED  "/opt/usr/data/contacts-svc/.CONTACTS_SVC_NAME_CHANGED"
-#define CTSVC_NOTI_NUMBER_CHANGED  "/opt/usr/data/contacts-svc/.CONTACTS_SVC_NUMBER_CHANGED"
-#define CTSVC_NOTI_EMAIL_CHANGED  "/opt/usr/data/contacts-svc/.CONTACTS_SVC_EMAIL_CHANGED"
-#define CTSVC_NOTI_EVENT_CHANGED  "/opt/usr/data/contacts-svc/.CONTACTS_SVC_EVENT_CHANGED"
-#define CTSVC_NOTI_URL_CHANGED  "/opt/usr/data/contacts-svc/.CONTACTS_SVC_URL_CHANGED"
-#define CTSVC_NOTI_GROUP_RELATION_CHANGED  "/opt/usr/data/contacts-svc/.CONTACTS_SVC_GROUP_RELATION_CHANGED"
-#define CTSVC_NOTI_ADDRESS_CHANGED  "/opt/usr/data/contacts-svc/.CONTACTS_SVC_ADDRESS_CHANGED"
-#define CTSVC_NOTI_NOTE_CHANGED  "/opt/usr/data/contacts-svc/.CONTACTS_SVC_NOTE_CHANGED"
-#define CTSVC_NOTI_COMPANY_CHANGED  "/opt/usr/data/contacts-svc/.CONTACTS_SVC_COMPANY_CHANGED"
-#define CTSVC_NOTI_RELATIONSHIP_CHANGED  "/opt/usr/data/contacts-svc/.CONTACTS_SVC_RELATIONSHIP_CHANGED"
-#define CTSVC_NOTI_IMAGE_CHANGED  "/opt/usr/data/contacts-svc/.CONTACTS_SVC_IMAGE_CHANGED"
-#define CTSVC_NOTI_NICKNAME_CHANGED  "/opt/usr/data/contacts-svc/.CONTACTS_SVC_NICKNAME_CHANGED"
-#define CTSVC_NOTI_MESSENGER_CHANGED  "/opt/usr/data/contacts-svc/.CONTACTS_SVC_MESSENGER_CHANGED"
-#define CTSVC_NOTI_DATA_CHANGED  "/opt/usr/data/contacts-svc/.CONTACTS_SVC_DATA_CHANGED"
-#define CTSVC_NOTI_SDN_CHANGED  "/opt/usr/data/contacts-svc/.CONTACTS_SVC_SDN_CHANGED"
-#define CTSVC_NOTI_PROFILE_CHANGED  "/opt/usr/data/contacts-svc/.CONTACTS_SVC_PROFILE_CHANGED"
-#define CTSVC_NOTI_ACTIVITY_CHANGED  "/opt/usr/data/contacts-svc/.CONTACTS_SVC_ACTIVITY_CHANGED"
-#define CTSVC_NOTI_PHONELOG_CHANGED  "/opt/usr/data/contacts-svc/.CONTACTS_SVC_PLOG_CHANGED"
-#define CTSVC_NOTI_SPEEDDIAL_CHANGED  "/opt/usr/data/contacts-svc/.CONTACTS_SVC_SPEED_CHANGED"
+#define DATA_REPERTORY tzplatform_getenv(TZ_USER_DATA)
+#define CTSVC_NOTI_REPERTORY tzplatform_mkpath(TZ_USER_DATA,"contacts-svc")
+#define CTSVC_NOTI_IMG_REPERTORY tzplatform_mkpath(TZ_USER_DATA,"contacts-svc/img/")
+#define CTSVC_VCARD_IMAGE_LOCATION tzplatform_mkpath(TZ_USER_DATA,"contacts-svc/img/vcard")
+#define CTS_MY_IMAGE_LOCATION tzplatform_mkpath(TZ_USER_DATA,"contacts-svc/img/my")
+#define CTS_GROUP_IMAGE_LOCATION tzplatform_mkpath(TZ_USER_DATA,"contacts-svc/img/group")
+#define CTS_LOGO_IMAGE_LOCATION tzplatform_mkpath(TZ_USER_DATA,"contacts-svc/img/logo")
+#define CTSVC_NOTI_ADDRESSBOOK_CHANGED tzplatform_mkpath(TZ_USER_DATA,"contacts-svc/.CONTACTS_SVC_AB_CHANGED")
+#define CTSVC_NOTI_GROUP_CHANGED tzplatform_mkpath(TZ_USER_DATA,"contacts-svc/.CONTACTS_SVC_GROUP_CHANGED")
+#define CTSVC_NOTI_PERSON_CHANGED tzplatform_mkpath(TZ_USER_DATA,"contacts-svc/.CONTACTS_SVC_PERSON_CHANGED")
+#define CTSVC_NOTI_CONTACT_CHANGED tzplatform_mkpath(TZ_USER_DATA,"contacts-svc/.CONTACTS_SVC_DB_CHANGED")
+#define CTSVC_NOTI_MY_PROFILE_CHANGED tzplatform_mkpath(TZ_USER_DATA,"contacts-svc/.CONTACTS_SVC_MY_PROFILE_CHANGED")
+#define CTSVC_NOTI_NAME_CHANGED tzplatform_mkpath(TZ_USER_DATA,"contacts-svc/.CONTACTS_SVC_NAME_CHANGED")
+#define CTSVC_NOTI_NUMBER_CHANGED tzplatform_mkpath(TZ_USER_DATA,"contacts-svc/.CONTACTS_SVC_NUMBER_CHANGED")
+#define CTSVC_NOTI_EMAIL_CHANGED tzplatform_mkpath(TZ_USER_DATA,"contacts-svc/.CONTACTS_SVC_EMAIL_CHANGED")
+#define CTSVC_NOTI_EVENT_CHANGED tzplatform_mkpath(TZ_USER_DATA,"contacts-svc/.CONTACTS_SVC_EVENT_CHANGED")
+#define CTSVC_NOTI_URL_CHANGED tzplatform_mkpath(TZ_USER_DATA,"contacts-svc/.CONTACTS_SVC_URL_CHANGED")
+#define CTSVC_NOTI_GROUP_RELATION_CHANGED tzplatform_mkpath(TZ_USER_DATA,"contacts-svc/.CONTACTS_SVC_GROUP_RELATION_CHANGED")
+#define CTSVC_NOTI_ADDRESS_CHANGED tzplatform_mkpath(TZ_USER_DATA,"contacts-svc/.CONTACTS_SVC_ADDRESS_CHANGED")
+#define CTSVC_NOTI_NOTE_CHANGED tzplatform_mkpath(TZ_USER_DATA,"contacts-svc/.CONTACTS_SVC_NOTE_CHANGED")
+#define CTSVC_NOTI_COMPANY_CHANGED tzplatform_mkpath(TZ_USER_DATA,"contacts-svc/.CONTACTS_SVC_COMPANY_CHANGED")
+#define CTSVC_NOTI_RELATIONSHIP_CHANGED tzplatform_mkpath(TZ_USER_DATA,"contacts-svc/.CONTACTS_SVC_RELATIONSHIP_CHANGED")
+#define CTSVC_NOTI_IMAGE_CHANGED tzplatform_mkpath(TZ_USER_DATA,"contacts-svc/.CONTACTS_SVC_IMAGE_CHANGED")
+#define CTSVC_NOTI_NICKNAME_CHANGED tzplatform_mkpath(TZ_USER_DATA,"contacts-svc/.CONTACTS_SVC_NICKNAME_CHANGED")
+#define CTSVC_NOTI_MESSENGER_CHANGED tzplatform_mkpath(TZ_USER_DATA,"contacts-svc/.CONTACTS_SVC_MESSENGER_CHANGED")
+#define CTSVC_NOTI_DATA_CHANGED tzplatform_mkpath(TZ_USER_DATA,"contacts-svc/.CONTACTS_SVC_DATA_CHANGED")
+#define CTSVC_NOTI_SDN_CHANGED tzplatform_mkpath(TZ_USER_DATA,"contacts-svc/.CONTACTS_SVC_SDN_CHANGED")
+#define CTSVC_NOTI_PROFILE_CHANGED tzplatform_mkpath(TZ_USER_DATA,"contacts-svc/.CONTACTS_SVC_PROFILE_CHANGED")
+#define CTSVC_NOTI_ACTIVITY_CHANGED tzplatform_mkpath(TZ_USER_DATA, "contacts-svc/.CONTACTS_SVC_ACTIVITY_CHANGED")
+#define CTSVC_NOTI_PHONELOG_CHANGED tzplatform_mkpath(TZ_USER_DATA,"contacts-svc/.CONTACTS_SVC_PLOG_CHANGED")
+#define CTSVC_NOTI_SPEEDDIAL_CHANGED tzplatform_mkpath(TZ_USER_DATA,"contacts-svc/.CONTACTS_SVC_SPEED_CHANGED")
 
 #define CTSVC_SETTING_DISPLAY_ORDER_CHANGED "contacts.setting.display_order"
 #define CTSVC_SETTING_SORTING_ORDER_CHANGED "contacts.setting.sorting_order"
