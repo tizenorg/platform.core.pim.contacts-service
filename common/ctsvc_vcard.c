@@ -28,6 +28,7 @@
 #include <unistd.h>
 #include <unicode/ucnv.h>
 #include <unicode/ustring.h>
+#include <tzplatform_config.h>
 
 #include "contacts.h"
 #include "ctsvc_internal.h"
@@ -40,7 +41,7 @@
 
 #define SMART_STRDUP(src) (src && *src)?strdup(src):NULL
 #define CTSVC_VCARD_PHOTO_MAX_SIZE 1024*1024
-#define CTSVC_VCARD_IMAGE_LOCATION "/opt/usr/data/contacts-svc/img/vcard"
+#define CTSVC_VCARD_IMAGE_LOCATION tzplatform_mkpath(TZ_USER_DATA,"contacts-svc/img/vcard")
 
 #define CTSVC_VCARD_APPEND_STR(buf, buf_size, len, str) do { \
 	if ((len = __ctsvc_vcard_append_str(buf, buf_size, len, str, false)) < 0) { \

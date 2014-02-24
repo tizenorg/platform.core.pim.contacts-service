@@ -20,7 +20,6 @@
 #define __CTSVC_SERVER_SCHEMA_RECOVERY_H__
 
 int ctsvc_server_check_schema();
-
 #endif // __CTSVC_SERVER_SCHEMA_RECOVERY_H__
 
 
