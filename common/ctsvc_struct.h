@@ -28,12 +28,13 @@
 #include <stdlib.h>
 #include <glib.h>
 #include <string.h>
+#include <tzplatform_config.h>
 
 #include "contacts_views.h"
 
 #define CTSVC_IMG_FULL_PATH_SIZE_MAX 1024
 #define CTSVC_NUMBER_MAX_LEN 512
-#define CTS_IMG_FULL_LOCATION "/opt/usr/data/contacts-svc/img"
+#define CTS_IMG_FULL_LOCATION tzplatform_mkpath(TZ_USER_DATA,"contacts-svc/img")
 
 #define SAFE_STR(src) (src)?src:""
 #define SAFE_STRDUP(src) (src)?strdup(src):NULL
