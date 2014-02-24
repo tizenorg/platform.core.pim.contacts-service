@@ -20,6 +20,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/stat.h>
 #include <pims-ipc.h>
 #include <pims-ipc-svc.h>
 
@@ -37,6 +40,7 @@
 #include "ctsvc_ipc_server2.h"
 #include "ctsvc_ipc_server_sim.h"
 
+#include "ctsvc_notify.h"
 static int __server_main(void)
 {
 	int ret;
@@ -131,6 +135,24 @@ static int __server_main(void)
 	return -1;
 }
 
+#define CTSVC_SECURITY_FILE_GROUP 6005
+void ctsvc_create_file_set_permission(const char* file, mode_t mode)
+{
+	int fd, ret;
+	fd = creat(file, mode);
+	if (0 <= fd)
+	{
+		ret = fchown(fd, -1, CTSVC_SECURITY_FILE_GROUP);
+		if (-1 == ret)
+		{
+			printf("Failed to fchown\n");
+			return;
+		}
+		close(fd);
+	}
+
+}
+
 int main(int argc, char *argv[])
 {
 	CTS_FN_CALL;
@@ -138,6 +160,32 @@ int main(int argc, char *argv[])
 	ctsvc_server_check_schema();
 	if (2 <= argc && !strcmp(argv[1], "schema"))
 		return CONTACTS_ERROR_NONE;
+
+	ctsvc_create_file_set_permission(CTSVC_NOTI_REPERTORY, 0775);
+	ctsvc_create_file_set_permission(CTSVC_NOTI_IMG_REPERTORY, 0770);
+	ctsvc_create_file_set_permission(CTSVC_NOTI_ADDRESSBOOK_CHANGED, 0660);
+	ctsvc_create_file_set_permission(CTSVC_NOTI_GROUP_CHANGED, 0660);
+	ctsvc_create_file_set_permission(CTSVC_NOTI_PERSON_CHANGED, 0660);
+	ctsvc_create_file_set_permission(CTSVC_NOTI_CONTACT_CHANGED, 0660);
+	ctsvc_create_file_set_permission(CTSVC_NOTI_MY_PROFILE_CHANGED, 0660);
+	ctsvc_create_file_set_permission(CTSVC_NOTI_NAME_CHANGED, 0660);
+	ctsvc_create_file_set_permission(CTSVC_NOTI_NUMBER_CHANGED, 0660);
+	ctsvc_create_file_set_permission(CTSVC_NOTI_EMAIL_CHANGED, 0660);
+	ctsvc_create_file_set_permission(CTSVC_NOTI_EVENT_CHANGED, 0660);
+	ctsvc_create_file_set_permission(CTSVC_NOTI_URL_CHANGED, 0660);
+	ctsvc_create_file_set_permission(CTSVC_NOTI_GROUP_RELATION_CHANGED, 0660);
+	ctsvc_create_file_set_permission(CTSVC_NOTI_ADDRESS_CHANGED, 0660);
+	ctsvc_create_file_set_permission(CTSVC_NOTI_NOTE_CHANGED, 0660);
+	ctsvc_create_file_set_permission(CTSVC_NOTI_COMPANY_CHANGED, 0660);
+	ctsvc_create_file_set_permission(CTSVC_NOTI_RELATIONSHIP_CHANGED, 0660);
+	ctsvc_create_file_set_permission(CTSVC_NOTI_IMAGE_CHANGED, 0660);
+	ctsvc_create_file_set_permission(CTSVC_NOTI_NICKNAME_CHANGED, 0660);
+	ctsvc_create_file_set_permission(CTSVC_NOTI_DATA_CHANGED, 0660);
+	ctsvc_create_file_set_permission(CTSVC_NOTI_SDN_CHANGED, 0660);
+	ctsvc_create_file_set_permission(CTSVC_NOTI_PROFILE_CHANGED, 0660);
+	ctsvc_create_file_set_permission(CTSVC_NOTI_ACTIVITY_CHANGED, 0660);
+	ctsvc_create_file_set_permission(CTSVC_NOTI_PHONELOG_CHANGED, 0660);
+	ctsvc_create_file_set_permission(CTSVC_NOTI_SPEEDDIAL_CHANGED, 0660);
 
 	ret = ctsvc_server_socket_init();
 	CTS_DBG("%d", ret);
