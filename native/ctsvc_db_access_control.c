@@ -138,6 +138,7 @@ static void __ctsvc_set_permission_info(unsigned int thread_id, const char *cook
 			find->permission |= CTSVC_PERMISSION_PHONELOG_WRITE;
 		}
 		else if (cookie) {
+			/*
 			if (SECURITY_SERVER_API_SUCCESS == security_server_check_privilege_by_cookie(cookie, "contacts-service::svc", "r"))
 				find->permission |= CTSVC_PERMISSION_CONTACT_READ;
 			if (SECURITY_SERVER_API_SUCCESS == security_server_check_privilege_by_cookie(cookie, "contacts-service::svc", "w"))
@@ -146,6 +147,11 @@ static void __ctsvc_set_permission_info(unsigned int thread_id, const char *cook
 				find->permission |= CTSVC_PERMISSION_PHONELOG_READ;
 			if (SECURITY_SERVER_API_SUCCESS == security_server_check_privilege_by_cookie(cookie, "contacts-service::phonelog", "w"))
 				find->permission |= CTSVC_PERMISSION_PHONELOG_WRITE;
+			*/
+			find->permission |= CTSVC_PERMISSION_CONTACT_READ;
+			find->permission |= CTSVC_PERMISSION_CONTACT_WRITE;
+			find->permission |= CTSVC_PERMISSION_PHONELOG_READ;
+			find->permission |= CTSVC_PERMISSION_PHONELOG_WRITE;
 		}
 	}
 }

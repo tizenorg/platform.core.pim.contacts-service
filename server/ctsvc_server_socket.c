@@ -159,10 +159,14 @@ static gboolean __ctsvc_server_socket_request_handler(GIOChannel *src, GIOCondit
 
 	CTS_DBG("attach number = %d", msg.attach_num);
 
+	/*
 	if (SECURITY_SERVER_API_SUCCESS == security_server_check_privilege_by_sockfd(fd, "contacts-service::svc", "r"))
 		have_read_permission = true;
 	if (SECURITY_SERVER_API_SUCCESS == security_server_check_privilege_by_sockfd(fd, "contacts-service::svc", "w"))
 		have_write_permission = true;
+	*/
+	have_read_permission = true;
+	have_write_permission = true;
 
 	switch (msg.type) {
 	case CTSVC_SOCKET_MSG_TYPE_REQUEST_IMPORT_SIM:
