@@ -109,7 +109,6 @@ vconftool set -t int db/contacts-svc/phonenumber_min_match_digit 8 -g 6005 -s co
 /usr/lib/systemd/user/sockets.target.wants/contacts-service.socket
 /usr/lib/systemd/user/contacts-service.socket
 %config(noreplace) /opt/usr/dbspace/.contacts-svc.db*
-/opt/etc/smack/accesses.d/%{name}2.rule
 
 %files -n contacts-service2-devel
 %defattr(-,root,root,-)

@@ -57,9 +57,6 @@ INSTALL(FILES ${HEADER_FILES} DESTINATION ${DEST_INCLUDE_DIR})
 FILE(GLOB DB_FILES ${CMAKE_CURRENT_SOURCE_DIR}/build-util/.contacts-svc.db*)
 INSTALL(FILES ${DB_FILES} DESTINATION /opt/usr/dbspace)
 
-#Install SMACK rule file
-INSTALL(FILES ${CMAKE_SOURCE_DIR}/contacts-service2.rule DESTINATION /opt/etc/smack/accesses.d)
-
 ADD_SUBDIRECTORY(client)
 ADD_SUBDIRECTORY(server)
 
