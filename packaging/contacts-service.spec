@@ -86,6 +86,8 @@ chmod 775 /opt/usr/data/contacts-svc
 chmod 770 -R /opt/usr/data/contacts-svc/img/
 chmod 660 /opt/usr/data/contacts-svc/.CONTACTS_SVC_*
 
+chsmack -a 'User' /opt/usr/dbspace/.contacts-svc.db*
+
 vconftool set -t int file/private/contacts-service/default_lang 0 -g 6005 -s contacts-service::vconf-private
 vconftool set -t int db/contacts-svc/name_sorting_order 0 -g 6005 -s contacts-service::vconf
 vconftool set -t int db/contacts-svc/name_display_order 0 -g 6005 -s contacts-service::vconf
