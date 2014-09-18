@@ -1,8 +1,8 @@
 Name:       contacts-service
 Summary:    Contacts Service
-Version: 0.10.3
+Version:    0.10.3
 Release:    1
-Group:      Social & Contents/Contacts
+Group:      Social & Contents/Pim
 License:    Apache-2.0
 Source0:    %{name}-%{version}.tar.gz
 Source1:    contacts-service.service
@@ -34,19 +34,18 @@ Requires(postun): /sbin/ldconfig
 Contacts Service Library
 
 %package -n contacts-service2
-Summary:	New Contacts service library
+Summary:        New Contacts service library
 Requires(post): libprivilege-control-conf
 
 %description -n contacts-service2
-New Contact Serivce Library
-
+New Contact Serivce Library files
 
 %package -n contacts-service2-devel
 Summary:    New Contacts Service  (devel)
 Requires:   %{name}2 = %{version}-%{release}
 
 %description -n contacts-service2-devel
-New Contacts Service Library (devel)
+New Contacts Service Library (devel) files
 
 %prep
 %setup -q
@@ -55,20 +54,20 @@ cp %{SOURCE3} .
 
 %build
 %cmake . -DTZ_SYS_ETC=%TZ_SYS_ETC
-make %{?_smp_mflags}
+%__make %{?_smp_mflags}
 
 
 %install
 rm -rf %{buildroot}
 %make_install
 
-mkdir -p %{buildroot}/usr/lib/systemd/user/tizen-middleware.target.wants
-install -m 0644 %SOURCE1 %{buildroot}/usr/lib/systemd/user/contacts-service.service
-ln -s ../contacts-service.service %{buildroot}/usr/lib/systemd/user/tizen-middleware.target.wants/contacts-service.service
+mkdir -p %{buildroot}%{_unitdir_user}/tizen-middleware.target.wants
+install -m 0644 %SOURCE1 %{buildroot}%{_unitdir_user}/contacts-service.service
+ln -s ../contacts-service.service %{buildroot}%{_unitdir_user}/tizen-middleware.target.wants/contacts-service.service
 
-mkdir -p %{buildroot}/usr/lib/systemd/user/sockets.target.wants
-install -m 0644 %SOURCE2 %{buildroot}/usr/lib/systemd/user/contacts-service.socket
-ln -s ../contacts-service.socket %{buildroot}/usr/lib/systemd/user/sockets.target.wants/contacts-service.socket
+mkdir -p %{buildroot}%{_unitdir_user}/sockets.target.wants
+install -m 0644 %SOURCE2 %{buildroot}%{_unitdir_user}/contacts-service.socket
+ln -s ../contacts-service.socket %{buildroot}%{_unitdir_user}/sockets.target.wants/contacts-service.socket
 
 
 %post -n contacts-service2
@@ -90,10 +89,10 @@ vconftool set -t int db/contacts-svc/phonenumber_min_match_digit 8 -g 6005 -s co
 %defattr(-,root,root,-)
 %{_libdir}/libcontacts-service2.so.*
 %{_bindir}/contacts-service-ipcd*
-/usr/lib/systemd/user/contacts-service.service
-/usr/lib/systemd/user/tizen-middleware.target.wants/contacts-service.service
-/usr/lib/systemd/user/sockets.target.wants/contacts-service.socket
-/usr/lib/systemd/user/contacts-service.socket
+%{_unitdir_user}/contacts-service.service
+%{_unitdir_user}/tizen-middleware.target.wants/contacts-service.service
+%{_unitdir_user}/sockets.target.wants/contacts-service.socket
+%{_unitdir_user}/contacts-service.socket
 
 %files -n contacts-service2-devel
 %defattr(-,root,root,-)
