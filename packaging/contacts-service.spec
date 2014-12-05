@@ -9,7 +9,6 @@ Source1:    contacts-service.service
 Source2:    contacts-service.socket
 Source3:    contacts-service2.manifest
 BuildRequires:  cmake
-BuildRequires:  vconf-keys-devel
 BuildRequires:  pkgconfig(db-util)
 BuildRequires:  pkgconfig(vconf)
 BuildRequires:  pkgconfig(dlog)
