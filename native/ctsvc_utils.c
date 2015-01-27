@@ -245,6 +245,7 @@ static inline bool ctsvc_check_available_image_space(void){
 	return false;
 }
 
+#if 0 // image util change
 static image_util_rotation_e __ctsvc_get_rotation_info(const char *path)
 {
 	ExifData *ed = NULL;
@@ -463,6 +464,7 @@ static int __ctsvc_resize_and_copy_image(const char *src, const char *dest)
 
 	return info.ret;
 }
+#endif // image util change
 
 #define CTSVC_COPY_SIZE_MAX 4096
 int ctsvc_utils_copy_image(const char *dir, const char *src, const char *file)
@@ -481,12 +483,14 @@ int ctsvc_utils_copy_image(const char *dir, const char *src, const char *file)
 	if (!ctsvc_check_available_image_space())
 		return CONTACTS_ERROR_FILE_NO_SPACE;
 
+#if 0 // image util change
 	ret = __ctsvc_resize_and_copy_image(src, dest);
 	if (CONTACTS_ERROR_NONE == ret) {
 		return ret;
 	}
 	else
 		CTS_ERR("__ctsvc_resize_and_copy_image Failed(%d)", ret);
+#endif // image util change
 
 	src_fd = open(src, O_RDONLY);
 	RETVM_IF(src_fd < 0, CONTACTS_ERROR_SYSTEM, "System : Open(src:%s) Failed(%d)", src, errno);
