@@ -3728,7 +3728,7 @@ static int __ctsvc_event_get_bool(contacts_record_h record, unsigned int propert
 {
 	ctsvc_event_s *event = (ctsvc_event_s *)record;
 	switch (property_id) {
-	case CTSVC_PROPERTY_EVENT_IS_LEAP_MONTH:
+	case CTSVC_PROPERTY_EVENT_IS_LEAP_MONTH: // deprecated
 		*value = event->is_leap_month;
 		break;
 	default:
@@ -3826,7 +3826,7 @@ static int __ctsvc_event_set_bool(contacts_record_h record, unsigned int propert
 	ctsvc_event_s *event = (ctsvc_event_s *)record;
 
 	switch(property_id) {
-	case CTSVC_PROPERTY_EVENT_IS_LEAP_MONTH:
+	case CTSVC_PROPERTY_EVENT_IS_LEAP_MONTH: // deprecated
 		event->is_leap_month = value;
 		break;
 	default:

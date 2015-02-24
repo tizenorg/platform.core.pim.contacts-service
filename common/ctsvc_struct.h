@@ -350,7 +350,7 @@ typedef struct {
 	int type;
 	char *label;
 	int date;
-	bool is_leap_month;
+	bool is_leap_month; // deprecated
 	int calendar_type;
 }ctsvc_event_s;
 

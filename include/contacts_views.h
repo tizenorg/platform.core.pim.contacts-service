@@ -588,9 +588,9 @@ _CONTACTS_END_VIEW( _contacts_url )
  * <tr><td>integer</td><td> contact_id </td><td>read, write once</td><td> Contact ID that the event belongs to </td></tr>
  * <tr><td>integer</td><td> type </td><td>read, write</td><td> Event type, refer to the @ref contacts_event_type_e </td></tr>
  * <tr><td>string</td><td> label </td><td>read, write</td><td> Custom event type label, when the event type is #CONTACTS_EVENT_TYPE_CUSTOM </td></tr>
- * <tr><td>integer</td><td> date </td><td>read, write</td><td> Event date(YYYYMMDD). e.g. 2014/1/1 : 20140101 </td></tr>
+ * <tr><td>integer</td><td> date </td><td>read, write</td><td> Event date(YYYYMMDD). e.g. 2014/1/1 : 20140101. If the calendar_type is set as CONTACTS_EVENT_CALENDAR_TYPE_CHINESE, you SHOULD convert this value to lunar date </td></tr>
  * <tr><td>integer</td><td> calendar_type </td><td>read, write</td><td> Calendar type, refer to the @ref contacts_event_calendar_type_e </td></tr>
- * <tr><td>bool</td><td> is_leap_month </td><td>read, write</td><td> The month is leap or not (valid on lunisolar calendar only) </td></tr>
+ * <tr><td>bool</td><td> is_leap_month (Deprecated) </td><td>read, write</td><td> The month is leap or not (valid on lunisolar calendar only) </td></tr>
  * </table>
  */
 _CONTACTS_BEGIN_VIEW()
@@ -600,7 +600,7 @@ _CONTACTS_BEGIN_VIEW()
     _CONTACTS_PROPERTY_STR( label )             // read, write
     _CONTACTS_PROPERTY_INT( date )              // read, write
     _CONTACTS_PROPERTY_INT( calendar_type )     // read, write
-    _CONTACTS_PROPERTY_BOOL( is_leap_month )    // read, write
+    _CONTACTS_PROPERTY_BOOL( is_leap_month )    // read, write (Deprecated)
 _CONTACTS_END_VIEW( _contacts_event )
 
 /**
