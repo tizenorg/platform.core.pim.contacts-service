@@ -22,6 +22,7 @@
 #include "ctsvc_schema.h"
 #include "ctsvc_sqlite.h"
 #include "ctsvc_normalize.h"
+#include "ctsvc_localize_utils.h"
 #include "ctsvc_db_init.h"
 #include "ctsvc_db_query.h"
 #include "ctsvc_db_plugin_name_helper.h"
@@ -122,6 +123,8 @@ int ctsvc_db_name_insert(contacts_record_h record, int contact_id, bool is_my_pr
 	char *normal_name[CTSVC_NN_MAX]={NULL};	//insert name search info
 	char *temp_normal_first = NULL;
 	char *temp_normal_last = NULL;
+	int len_normal_first = 0;
+	int len_normal_last = 0;
 
 	RETV_IF(NULL == name, CONTACTS_ERROR_INVALID_PARAMETER);
 
@@ -155,21 +158,19 @@ int ctsvc_db_name_insert(contacts_record_h record, int contact_id, bool is_my_pr
 		RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
 
 		ret = __ctsvc_normalize_name(name, normal_name);
-		if (ret < CONTACTS_ERROR_NONE) {
-			CTS_ERR("__ctsvc_normalize_name() Failed(%d)", ret);
-			ctsvc_stmt_finalize(stmt);
-			return ret;
-		}
+		WARN_IF(ret < CONTACTS_ERROR_NONE, "__ctsvc_normalize_name() Failed(%d)", ret);
 
 		switch (ret) {
 		case CTSVC_LANG_KOREAN:
-			temp_normal_first = calloc(1, SAFE_STRLEN(normal_name[CTSVC_NN_LAST]) +  SAFE_STRLEN(normal_name[CTSVC_NN_LAST]) + 1);
+			len_normal_first = SAFE_STRLEN(normal_name[CTSVC_NN_FIRST]);
+			len_normal_last = SAFE_STRLEN(normal_name[CTSVC_NN_LAST]);
+			temp_normal_first = calloc(1, len_normal_first + len_normal_last + 1);
 			if (normal_name[CTSVC_NN_LAST]) {
-				len = snprintf(temp_normal_first, SAFE_STRLEN(normal_name[CTSVC_NN_LAST]) +  SAFE_STRLEN(normal_name[CTSVC_NN_LAST]) + 1,
+				len = snprintf(temp_normal_first, len_normal_first + len_normal_last + 1,
 					"%s", normal_name[CTSVC_NN_LAST]);
 			}
 			if (normal_name[CTSVC_NN_FIRST]) {
-				snprintf(temp_normal_first+len, SAFE_STRLEN(normal_name[CTSVC_NN_LAST]) +  SAFE_STRLEN(normal_name[CTSVC_NN_LAST]) + 1 - len,
+				snprintf(temp_normal_first+len, len_normal_first + len_normal_last + 1 - len,
 					"%s", normal_name[CTSVC_NN_FIRST]);
 			}
 			temp_normal_last = NULL;
@@ -209,7 +210,7 @@ int ctsvc_db_name_insert(contacts_record_h record, int contact_id, bool is_my_pr
 
 		ret = ctsvc_stmt_step(stmt);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("DB error : ctsvc_query_exec() Failed(%d)", ret);
+			CTS_ERR("DB error : ctsvc_stmt_step() Failed(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
 			return ret;
 		}

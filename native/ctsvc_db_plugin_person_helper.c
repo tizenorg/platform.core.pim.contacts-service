@@ -16,13 +16,17 @@
  * limitations under the License.
  *
  */
+#include <vconf.h>
+#include <vconf-keys.h>
 
 #include "contacts.h"
 #include "ctsvc_internal.h"
 #include "ctsvc_schema.h"
 #include "ctsvc_sqlite.h"
+#include "ctsvc_db_access_control.h"
 #include "ctsvc_db_plugin_person_helper.h"
 #include "ctsvc_localize.h"
+#include "ctsvc_localize_utils.h"
 #include "ctsvc_normalize.h"
 #include "ctsvc_db_init.h"
 #include "ctsvc_utils.h"
@@ -69,7 +73,7 @@ int ctsvc_db_person_create_record_from_stmt_with_projection(cts_stmt stmt, unsig
 		case CTSVC_PROPERTY_PERSON_IMAGE_THUMBNAIL:
 			temp = ctsvc_stmt_get_text(stmt, i);
 			if (temp && *temp) {
-				snprintf(full_path, sizeof(full_path), "%s/%s", CTS_IMG_FULL_LOCATION, temp);
+				snprintf(full_path, sizeof(full_path), "%s/%s", CTSVC_CONTACT_IMG_FULL_LOCATION, temp);
 				person->image_thumbnail_path = strdup(full_path);
 			}
 			break;
@@ -166,7 +170,7 @@ int ctsvc_db_person_create_record_from_stmt(cts_stmt stmt, contacts_record_h *re
 	temp = ctsvc_stmt_get_text(stmt, i++);
 	if (temp && *temp) {
 		char full_path[CTSVC_IMG_FULL_PATH_SIZE_MAX] = {0};
-		snprintf(full_path, sizeof(full_path), "%s/%s", CTS_IMG_FULL_LOCATION, temp);
+		snprintf(full_path, sizeof(full_path), "%s/%s", CTSVC_CONTACT_IMG_FULL_LOCATION, temp);
 		person->image_thumbnail_path = strdup(full_path);
 	}
 
@@ -192,7 +196,7 @@ int ctsvc_db_person_create_record_from_stmt(cts_stmt stmt, contacts_record_h *re
 
 inline static const char* __ctsvc_get_image_filename(const char* src)
 {
-	const char* dir = CTS_IMG_FULL_LOCATION;
+	const char* dir = CTSVC_CONTACT_IMG_FULL_LOCATION;
 	int pos=0;
 	while (dir[pos]==src[pos]) {
 		pos++;
@@ -240,7 +244,7 @@ int ctsvc_db_person_set_favorite(int person_id, bool set, bool propagate)
 
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("cts_query_exec() Failed(%d)", ret);
+		CTS_ERR("ctsvc_query_exec() Failed(%d)", ret);
 		return ret;
 	}
 
@@ -253,7 +257,7 @@ int ctsvc_db_person_set_favorite(int person_id, bool set, bool propagate)
 			 person_id);
 		ret = ctsvc_query_exec(query);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("cts_query_exec() Failed(%d)", ret);
+			CTS_ERR("ctsvc_query_exec() Failed(%d)", ret);
 			return ret;
 		}
 	}
@@ -325,7 +329,7 @@ int ctsvc_db_insert_person(contacts_record_h record)
 
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("cts_query_exec Failed(%d)", ret);
+		CTS_ERR("ctsvc_query_exec Failed(%d)", ret);
 		free(status);
 		return ret;
 	}
@@ -383,7 +387,7 @@ static inline int __ctsvc_db_update_person_default(int person_id, int datatype)
 
 			ret = ctsvc_query_exec(query);
 			if (CONTACTS_ERROR_NONE != ret) {
-				CTS_ERR("cts_query_exec Failed(%d)", ret);
+				CTS_ERR("ctsvc_query_exec Failed(%d)", ret);
 				ctsvc_stmt_finalize(stmt);
 				return ret;
 			}
@@ -397,17 +401,13 @@ static inline int __ctsvc_db_update_person_default(int person_id, int datatype)
 				snprintf(query, sizeof(query),
 						"UPDATE "CTS_TABLE_PERSONS" SET image_thumbnail_path=? WHERE person_id=%d", person_id);
 				ret = ctsvc_query_prepare(query, &stmt);
-				if (NULL == stmt) {
-					free(image_thumbnail_path);
-					CTS_ERR("DB error : ctsvc_query_prepare() Failed(%d)", ret);
-					return ret;
-				}
+				RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
 				ctsvc_stmt_bind_text(stmt, 1, image_thumbnail_path);
 				ret = ctsvc_stmt_step(stmt);
 				ctsvc_stmt_finalize(stmt);
 				free(image_thumbnail_path);
 				if (CONTACTS_ERROR_NONE != ret) {
-					CTS_ERR("cts_query_exec Failed(%d)", ret);
+					CTS_ERR("ctsvc_stmt_step Failed(%d)", ret);
 					return ret;
 				}
 			}
@@ -593,6 +593,7 @@ int ctsvc_db_update_person(contacts_record_h record)
 		return CONTACTS_ERROR_NONE;
 }
 
+// This function will return group letter of the person
 void ctsvc_db_normalize_str_callback(sqlite3_context * context,
 		int argc, sqlite3_value ** argv)
 {
@@ -620,7 +621,6 @@ void ctsvc_db_normalize_str_callback(sqlite3_context * context,
 				sqlite3_result_null(context);
 				return;
 			}
-			CTS_VERBOSE("normalize index : %s, %s", display_name, dest);
 			sqlite3_result_text(context, dest, strlen(dest), SQLITE_TRANSIENT);
 			free(dest);
 			return;

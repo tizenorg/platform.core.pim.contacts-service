@@ -25,8 +25,6 @@
 #include <sys/un.h>
 #include <unistd.h>
 
-#include <account.h>
-
 #ifdef _CONTACTS_NATIVE
 #include <security-server.h>
 #endif
@@ -39,41 +37,55 @@
 #include "ctsvc_db_init.h"
 #include "ctsvc_setting.h"
 #include "ctsvc_db_access_control.h"
+#include "ctsvc_number_utils.h"
 
 static int ctsvc_connection = 0;
 static __thread int thread_connection = 0;
 
-API int contacts_connect2()
+#ifdef _CONTACTS_NATIVE
+void __ctsvc_addressbook_deleted_cb(const char* view_uri, void* user_data)
+{
+	// access control update
+	ctsvc_reset_all_client_access_info();
+}
+#endif
+
+API int contacts_connect()
 {
 	CTS_FN_CALL;
 	int ret;
 
 	ctsvc_mutex_lock(CTS_MUTEX_CONNECTION);
 	if (0 == ctsvc_connection) {
+#ifdef _CONTACTS_NATIVE
 		ret = ctsvc_socket_init();
 		if (ret != CONTACTS_ERROR_NONE) {
 			CTS_ERR("ctsvc_socket_init() Failed(%d)", ret);
 			ctsvc_mutex_unlock(CTS_MUTEX_CONNECTION);
 			return ret;
 		}
+#endif
 		ret = ctsvc_inotify_init();
 		if (ret != CONTACTS_ERROR_NONE) {
 			CTS_ERR("ctsvc_inotify_init() Failed(%d)", ret);
+#ifdef _CONTACTS_NATIVE
 			ctsvc_socket_final();
+#endif
 			ctsvc_mutex_unlock(CTS_MUTEX_CONNECTION);
 			return ret;
 		}
 		ctsvc_db_plugin_init();
 		ctsvc_view_uri_init();
 		ctsvc_register_vconf();
-		ret = account_connect();
-		if (ACCOUNT_ERROR_NONE != ret)
-			CTS_ERR("account_connect Failed(%d)", ret);
+#ifdef _CONTACTS_NATIVE
+		contacts_db_add_changed_cb(_contacts_address_book._uri, __ctsvc_addressbook_deleted_cb, NULL);
+#endif
 	}
 	else
 		CTS_DBG("System : Contacts service has been already connected");
 
 	ctsvc_connection++;
+
 	if (0 == thread_connection) {
 		ret = ctsvc_db_init();
 		if (ret != CONTACTS_ERROR_NONE) {
@@ -120,14 +132,15 @@ API int contacts_connect2()
 	return CONTACTS_ERROR_NONE;
 }
 
-API int contacts_disconnect2()
+API int contacts_disconnect()
 {
-	int ret;
 	ctsvc_mutex_lock(CTS_MUTEX_CONNECTION);
 
 	if (1 == thread_connection) {
 		ctsvc_db_deinit();
+#ifdef _CONTACTS_NATIVE
 		ctsvc_unset_client_access_info();
+#endif
 	}
 	else if (thread_connection <= 0) {
 		CTS_DBG("System : please call contacts_connect_on_thread(), thread_connection count is (%d)", thread_connection);
@@ -137,18 +150,22 @@ API int contacts_disconnect2()
 	thread_connection--;
 
 	if (1 == ctsvc_connection) {
+#ifdef _CONTACTS_NATIVE
 		ctsvc_socket_final();
+#endif
 		ctsvc_inotify_close();
 		ctsvc_deregister_vconf();
 		ctsvc_view_uri_deinit();
 		ctsvc_db_plugin_deinit();
-		ret = account_disconnect();
-		WARN_IF(ret != ACCOUNT_ERROR_NONE, "account_disconnect Fail(%d)", ret);
+		ctsvc_deinit_tapi_handle_for_cc();
+#ifdef _CONTACTS_NATIVE
+		contacts_db_remove_changed_cb(_contacts_address_book._uri, __ctsvc_addressbook_deleted_cb, NULL);
+#endif
 	}
 	else if (1 < ctsvc_connection)
 		CTS_DBG("System : connection count is %d", ctsvc_connection);
 	else {
-		CTS_DBG("System : please call contacts_connect2(), connection count is (%d)", ctsvc_connection);
+		CTS_DBG("System : please call contacts_connect(), connection count is (%d)", ctsvc_connection);
 		ctsvc_mutex_unlock(CTS_MUTEX_CONNECTION);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
@@ -158,13 +175,30 @@ API int contacts_disconnect2()
 	return CONTACTS_ERROR_NONE;
 }
 
+int ctsvc_contacts_internal_disconnect()
+{
+	ctsvc_mutex_lock(CTS_MUTEX_CONNECTION);
+
+	if (1 == thread_connection) {
+		ctsvc_db_deinit();
+		thread_connection--;
+
+		if (1 <= ctsvc_connection) {
+			ctsvc_connection--;
+		}
+	}
+
+	ctsvc_mutex_unlock(CTS_MUTEX_CONNECTION);
+	return CONTACTS_ERROR_NONE;
+}
+
 #ifdef _CONTACTS_NATIVE
 API int contacts_connect_with_flags(unsigned int flags)
 {
 	CTS_FN_CALL;
 	int ret = CONTACTS_ERROR_NONE;
 
-	ret = contacts_connect2();
+	ret = contacts_connect();
 	if (ret == CONTACTS_ERROR_NONE)
 		return ret;
 
@@ -174,7 +208,7 @@ API int contacts_connect_with_flags(unsigned int flags)
 		for (i=0;i<9;i++) {
 			usleep(waiting_time * 1000);
 			CTS_DBG("retry cnt=%d, ret=%x, %d",(i+1), ret, waiting_time);
-			ret = contacts_connect2();
+			ret = contacts_connect();
 			if (ret == CONTACTS_ERROR_NONE)
 				break;
 			if (6 < i)
@@ -193,25 +227,27 @@ API int contacts_connect_on_thread()
 	ctsvc_mutex_lock(CTS_MUTEX_CONNECTION);
 
 	if (0 == thread_connection) {
+#ifdef _CONTACTS_NATIVE
 		ret = ctsvc_socket_init();
 		if (ret != CONTACTS_ERROR_NONE) {
 			CTS_ERR("ctsvc_socket_init() Failed(%d)", ret);
 			ctsvc_mutex_unlock(CTS_MUTEX_CONNECTION);
 			return ret;
 		}
+#endif
 		ret = ctsvc_inotify_init();
 		if (ret != CONTACTS_ERROR_NONE) {
 			CTS_ERR("ctsvc_inotify_init() Failed(%d)", ret);
+#ifdef _CONTACTS_NATIVE
 			ctsvc_socket_final();
+#endif
 			ctsvc_mutex_unlock(CTS_MUTEX_CONNECTION);
 			return ret;
 		}
 		ctsvc_db_plugin_init();
 		ctsvc_view_uri_init();
 		ctsvc_register_vconf();
-		ret = account_connect();
-		if (ACCOUNT_ERROR_NONE != ret)
-			CTS_ERR("account_connect Failed(%d)", ret);
+		contacts_db_add_changed_cb(_contacts_address_book._uri, __ctsvc_addressbook_deleted_cb, NULL);
 		ret = ctsvc_db_init();
 		if (ret != CONTACTS_ERROR_NONE)
 		{
@@ -263,18 +299,21 @@ API int contacts_connect_on_thread()
 
 API int contacts_disconnect_on_thread()
 {
+	int ret;
 	ctsvc_mutex_lock(CTS_MUTEX_CONNECTION);
 
 	if (1 == thread_connection) {
 		ctsvc_db_deinit();
 		ctsvc_unset_client_access_info();
+#ifdef _CONTACTS_NATIVE
 		ctsvc_socket_final();
+#endif
 		ctsvc_inotify_close();
 		ctsvc_deregister_vconf();
 		ctsvc_view_uri_deinit();
 		ctsvc_db_plugin_deinit();
-		ret = account_disconnect();
-		WARN_IF(ret != ACCOUNT_ERROR_NONE, "account_disconnect Fail(%d)", ret);
+		ctsvc_deinit_tapi_handle_for_cc();
+		contacts_db_remove_changed_cb(_contacts_address_book._uri, __ctsvc_addressbook_deleted_cb, NULL);
 	}
 	else if (thread_connection <= 0) {
 		CTS_DBG("System : please call contacts_connect_on_thread(), connection count is (%d)", thread_connection);

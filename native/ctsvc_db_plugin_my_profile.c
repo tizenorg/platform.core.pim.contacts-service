@@ -34,7 +34,8 @@
 #include "ctsvc_localize_ch.h"
 #include "ctsvc_group.h"
 #include "ctsvc_notification.h"
-#include "ctsvc_localize.h"
+#include "ctsvc_localize_utils.h"
+#include "ctsvc_db_access_control.h"
 
 #include "ctsvc_db_plugin_contact_helper.h"
 
@@ -67,14 +68,14 @@ ctsvc_db_plugin_info_s ctsvc_db_plugin_my_profile = {
 
 static int __ctsvc_db_get_my_profile_base_info(int id, ctsvc_my_profile_s *my_profile)
 {
-	int ret, len;
+	int ret;
 	int i;
 	cts_stmt stmt = NULL;
 	char query[CTS_SQL_MAX_LEN] = {0};
 	char *temp;
 	char full_path[CTSVC_IMG_FULL_PATH_SIZE_MAX] = {0};
 
-	len = snprintf(query, sizeof(query),
+	snprintf(query, sizeof(query),
 			"SELECT my_profile_id, addressbook_id, changed_time, %s, image_thumbnail_path, uid "
 				"FROM "CTS_TABLE_MY_PROFILES" WHERE my_profile_id = %d",
 				ctsvc_get_display_column(), id);
@@ -100,7 +101,7 @@ static int __ctsvc_db_get_my_profile_base_info(int id, ctsvc_my_profile_s *my_pr
 	my_profile->display_name = SAFE_STRDUP(temp);
 	temp = ctsvc_stmt_get_text(stmt, i++);
 	if (temp) {
-		snprintf(full_path, sizeof(full_path), "%s/%s", CTS_IMG_FULL_LOCATION, temp);
+		snprintf(full_path, sizeof(full_path), "%s/%s", CTSVC_CONTACT_IMG_FULL_LOCATION, temp);
 		my_profile->image_thumbnail_path = strdup(full_path);
 	}
 	temp = ctsvc_stmt_get_text(stmt, i++);
@@ -112,12 +113,12 @@ static int __ctsvc_db_get_my_profile_base_info(int id, ctsvc_my_profile_s *my_pr
 
 static int __ctsvc_db_my_profile_get_data(int id, ctsvc_my_profile_s *my_profile)
 {
-	int ret, len;
+	int ret;
 	int datatype;
 	cts_stmt stmt = NULL;
 	char query[CTS_SQL_MAX_LEN] = {0};
 
-	len = snprintf(query, sizeof(query),
+	snprintf(query, sizeof(query),
 				"SELECT datatype, id, contact_id, is_default, data1, data2, "
 					"data3, data4, data5, data6, data7, data8, data9, data10, data11, data12 "
 					"FROM "CTS_TABLE_DATA" WHERE contact_id = %d AND is_my_profile = 1", id);
@@ -237,6 +238,12 @@ static int __ctsvc_db_my_profile_delete_record( int id )
 		CTS_ERR("ctsvc_query_get_first_int_result Failed(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
+	}
+
+	if (false == ctsvc_have_ab_write_permission(addressbook_id)) {
+		CTS_ERR("Does not have permission to delete this contact");
+		ctsvc_end_trans(false);
+		return CONTACTS_ERROR_PERMISSION_DENIED;
 	}
 
 	snprintf(query, sizeof(query), "UPDATE "CTS_TABLE_MY_PROFILES" "
@@ -579,19 +586,19 @@ static void __ctsvc_make_my_profile_display_name(ctsvc_my_profile_s *my_profile)
 					len += snprintf(temp_display + len, temp_display_len - len, "%s", name->suffix);
 				}
 
-				if(name->prefix && temp_display) {
-					display_len = SAFE_STRLEN(name->prefix) + temp_display_len + 2;
-					display = calloc(1, display_len);
-					snprintf(display, display_len , "%s %s", name->prefix, temp_display);
-					my_profile->display_name = display;
-					free(temp_display);
-				}
-				else if (temp_display) {
-					my_profile->display_name = temp_display;
-				}
-				else if (name->prefix) {
-					my_profile->display_name = strdup(name->prefix);
-				}
+			}
+			if (name->prefix && temp_display) {
+				display_len = SAFE_STRLEN(name->prefix) + temp_display_len + 2;
+				display = calloc(1, display_len);
+				snprintf(display, display_len , "%s %s", name->prefix, temp_display);
+				my_profile->display_name = display;
+				free(temp_display);
+			}
+			else if (temp_display) {
+				my_profile->display_name = temp_display;
+			}
+			else if (name->prefix) {
+				my_profile->display_name = strdup(name->prefix);
 			}
 		}
 
@@ -680,6 +687,13 @@ static int __ctsvc_db_my_profile_update_record( contacts_record_h record )
 		return ret;
 	}
 
+	if (false == ctsvc_have_ab_write_permission(my_profile->addressbook_id)) {
+		CTS_ERR("ctsvc_have_ab_write_permission fail : does not have permission(addressbook_id : %d)",
+					my_profile->addressbook_id);
+		ctsvc_end_trans(false);
+		return CONTACTS_ERROR_PERMISSION_DENIED;
+	}
+
 	__ctsvc_make_my_profile_display_name(my_profile);
 	__ctsvc_my_profile_check_default_data(my_profile);
 
@@ -696,7 +710,7 @@ static int __ctsvc_db_my_profile_update_record( contacts_record_h record )
 	if (my_profile->images) {
 		int ret = CONTACTS_ERROR_NONE;
 		contacts_record_h record_image = NULL;
-		unsigned int count = 0;
+		int count = 0;
 		ctsvc_image_s *image;
 
 		contacts_list_get_count((contacts_list_h)my_profile->images, &count);
@@ -717,7 +731,7 @@ static int __ctsvc_db_my_profile_update_record( contacts_record_h record )
 				ctsvc_record_set_property_flag((ctsvc_record_s *)my_profile, _contacts_my_profile.image_thumbnail_path, CTSVC_PROPERTY_FLAG_DIRTY);
 
 				if (ctsvc_contact_check_image_location(image->path))
-					my_profile->image_thumbnail_path = SAFE_STRDUP(image->path + strlen(CTS_IMG_FULL_LOCATION) + 1);
+					my_profile->image_thumbnail_path = SAFE_STRDUP(image->path + strlen(CTSVC_CONTACT_IMG_FULL_LOCATION) + 1);
 				else
 					my_profile->image_thumbnail_path = SAFE_STRDUP(image->path);
 			}
@@ -926,7 +940,7 @@ static int __ctsvc_db_my_profile_get_records_with_query( contacts_query_h query,
 			case CTSVC_PROPERTY_MY_PROFILE_IMAGE_THUMBNAIL:
 				temp = ctsvc_stmt_get_text(stmt, i);
 				if (temp) {
-					snprintf(full_path, sizeof(full_path), "%s/%s", CTS_IMG_FULL_LOCATION, temp);
+					snprintf(full_path, sizeof(full_path), "%s/%s", CTSVC_CONTACT_IMG_FULL_LOCATION, temp);
 					my_profile->image_thumbnail_path = strdup(full_path);
 				}
 				break;
@@ -1117,6 +1131,13 @@ static int __ctsvc_db_my_profile_insert_record( contacts_record_h record, int *i
 	ret = ctsvc_begin_trans();
 	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "ctsvc_begin_trans() Failed(%d)", ret);
 
+	if (false == ctsvc_have_ab_write_permission(my_profile->addressbook_id)) {
+		CTS_ERR("ctsvc_have_ab_write_permission fail : does not have permission(addressbook_id : %d)",
+					my_profile->addressbook_id);
+		ctsvc_end_trans(false);
+		return CONTACTS_ERROR_PERMISSION_DENIED;
+	}
+
 	snprintf(query, sizeof(query), "DELETE FROM "CTS_TABLE_MY_PROFILES" WHERE addressbook_id = %d AND deleted = 1", my_profile->addressbook_id);
 	ret = ctsvc_query_exec(query);
 	WARN_IF(CONTACTS_ERROR_NONE != ret, "Delete deleted my_profile of addressbook(%d) failed", my_profile->addressbook_id);
@@ -1149,7 +1170,7 @@ static int __ctsvc_db_my_profile_insert_record( contacts_record_h record, int *i
 
 	if (my_profile->images) {
 		ctsvc_image_s *image;
-		unsigned int count = 0;
+		int count = 0;
 
 		contacts_list_get_count((contacts_list_h)my_profile->images, &count);
 

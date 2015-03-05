@@ -33,19 +33,16 @@
 #include "ctsvc_notification.h"
 #include "ctsvc_db_access_control.h"
 
-static int __ctsvc_db_simple_contact_insert_record( contacts_record_h record, int *id );
 static int __ctsvc_db_simple_contact_get_record( int id, contacts_record_h* out_record );
-static int __ctsvc_db_simple_contact_update_record( contacts_record_h record );
-static int __ctsvc_db_simple_contact_delete_record( int id );
 static int __ctsvc_db_simple_contact_get_all_records( int offset, int limit, contacts_list_h* out_list );
 static int __ctsvc_db_simple_contact_get_records_with_query( contacts_query_h query, int offset, int limit, contacts_list_h* out_list );
 
 ctsvc_db_plugin_info_s ctsvc_db_plugin_simple_contact = {
 	.is_query_only = false,
-	.insert_record = __ctsvc_db_simple_contact_insert_record,
+	.insert_record = NULL,
 	.get_record = __ctsvc_db_simple_contact_get_record,
-	.update_record = __ctsvc_db_simple_contact_update_record,
-	.delete_record = __ctsvc_db_simple_contact_delete_record,
+	.update_record = NULL,
+	.delete_record = NULL,
 	.get_all_records = __ctsvc_db_simple_contact_get_all_records,
 	.get_records_with_query = __ctsvc_db_simple_contact_get_records_with_query,
 	.insert_records = NULL,
@@ -80,7 +77,7 @@ static int __ctsvc_db_simple_contact_value_set(cts_stmt stmt, contacts_record_h 
 
 	temp = ctsvc_stmt_get_text(stmt, i++);
 	if (temp) {
-		snprintf(full_path, sizeof(full_path), "%s/%s", CTS_IMG_FULL_LOCATION, temp);
+		snprintf(full_path, sizeof(full_path), "%s/%s", CTSVC_CONTACT_IMG_FULL_LOCATION, temp);
 		contact->image_thumbnail_path = strdup(full_path);
 	}
 
@@ -102,7 +99,6 @@ static int __ctsvc_db_simple_contact_value_set(cts_stmt stmt, contacts_record_h 
 static int __ctsvc_db_simple_contact_get_record( int id, contacts_record_h* out_record )
 {
 	int ret;
-	int len;
 	cts_stmt stmt = NULL;
 	char query[CTS_SQL_MAX_LEN] = {0};
 	contacts_record_h record;
@@ -110,7 +106,7 @@ static int __ctsvc_db_simple_contact_get_record( int id, contacts_record_h* out_
 	RETV_IF(NULL == out_record, CONTACTS_ERROR_INVALID_PARAMETER);
 	*out_record = NULL;
 
-	len = snprintf(query, sizeof(query),
+	snprintf(query, sizeof(query),
 				"SELECT contact_id, addressbook_id, person_id, changed_time, %s, "
 					"display_name_source, image_thumbnail_path, "
 					"ringtone_path, vibration, message_alert, uid, is_favorite, has_phonenumber, has_email "
@@ -141,155 +137,6 @@ static int __ctsvc_db_simple_contact_get_record( int id, contacts_record_h* out_
 	*out_record = record;
 
 	return CONTACTS_ERROR_NONE;
-}
-
-static int __ctsvc_db_simple_contact_get_default_image_id(int contact_id)
-{
-	int ret = 0;
-	int image_id = 0;
-	char query[CTS_SQL_MAX_LEN] = {0};
-
-	snprintf(query, sizeof(query),
-			"SELECT id FROM "CTS_TABLE_DATA" WHERE datatype=%d AND contact_id=%d AND is_default=1",
-			CTSVC_DATA_IMAGE, contact_id);
-
-	ret = ctsvc_query_get_first_int_result(query, &image_id);
-	if (CONTACTS_ERROR_NONE != ret)
-		return 0;
-	return image_id;
-}
-
-static int __ctsvc_db_simple_contact_update_record( contacts_record_h record )
-{
-	int ret;
-	int id;
-	char *set = NULL;
-	char query[CTS_SQL_MAX_LEN] = {0};
-	char image[CTS_SQL_MAX_LEN] = {0};
-	GSList *bind_text = NULL;
-	GSList *cursor = NULL;
-	ctsvc_simple_contact_s *contact = (ctsvc_simple_contact_s*)record;
-
-	RETVM_IF(NULL == contact, CONTACTS_ERROR_INVALID_PARAMETER,
-					"Invalid parameter : contact is NULL");
-	RETVM_IF(contact->addressbook_id <= 0, CONTACTS_ERROR_INVALID_PARAMETER,
-				"Invalid parameter : addressbook_id(%d) is mandatory field to insert contact record ",
-				contact->addressbook_id);
-	RETVM_IF(contact->contact_id < 0, CONTACTS_ERROR_INVALID_PARAMETER,
-				"Invalid parameter : ide(%d), This record is already inserted", contact->contact_id);
-
-	ret = ctsvc_begin_trans();
-	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "ctsvc_begin_trans() Failed(%d)", ret);
-
-	snprintf(query, sizeof(query),
-			"SELECT contact_id FROM "CTS_TABLE_CONTACTS" "
-				"WHERE contact_id = %d AND deleted = 0", contact->contact_id);
-	ret = ctsvc_query_get_first_int_result(query, &id);
-	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("Invalid Parameter : contact_id (%d) is not exist", contact->contact_id);
-		ctsvc_end_trans(false);
-		return ret;
-	}
-
-	//////////////////////////////////////////////////////////////////////
-	// This code will be removed
-	if (ctsvc_record_check_property_flag((ctsvc_record_s *)contact, _contacts_simple_contact.image_thumbnail_path, CTSVC_PROPERTY_FLAG_DIRTY)) {
-		int img_id;
-
-		if (contact->image_thumbnail_path) {
-			ret = ctsvc_have_file_read_permission(contact->image_thumbnail_path);
-			if (ret != CONTACTS_ERROR_NONE) {
-				CTS_ERR("ctsvc_have_file_read_permission Fail(%d)", ret);
-				ctsvc_end_trans(false);
-				return ret;
-			}
-		}
-
-		image[0] = '\0';
-		img_id = __ctsvc_db_simple_contact_get_default_image_id(contact->contact_id);
-
-		if (0 == img_id) {
-			img_id = ctsvc_db_get_next_id(CTS_TABLE_DATA);
-			ret = ctsvc_contact_add_image_file(contact->contact_id, img_id, contact->image_thumbnail_path,
-					image, sizeof(image));
-		}
-		else  {
-			ret = ctsvc_contact_update_image_file(contact->contact_id, img_id,
-					contact->image_thumbnail_path, image, sizeof(image));
-		}
-		if (*image) {
-			free(contact->image_thumbnail_path);
-			contact->image_thumbnail_path = strdup(image);
-		}
-	}
-	//////////////////////////////////////////////////////////////////////
-
-	do {
-		int len = 0;
-		int version;
-		char query_set[CTS_SQL_MIN_LEN] = {0, };
-		cts_stmt stmt = NULL;
-
-		version = ctsvc_get_next_ver();
-
-		if (CONTACTS_ERROR_NONE != (ret = ctsvc_db_create_set_query(record, &set, &bind_text))) break;
-		if (set && *set)
-			len = snprintf(query_set, sizeof(query_set), "%s, ", set);
-
-		len += snprintf(query_set+len, sizeof(query_set)-len, " changed_ver=%d, changed_time=%d", version, (int)time(NULL));
-
-		if (ctsvc_record_check_property_flag((ctsvc_record_s *)contact, _contacts_contact.image_thumbnail_path, CTSVC_PROPERTY_FLAG_DIRTY))
-			len += snprintf(query_set+len, sizeof(query_set)-len, ", image_changed_ver=%d", version);
-
-		snprintf(query, sizeof(query), "UPDATE %s SET %s WHERE contact_id = %d", CTS_TABLE_CONTACTS, query_set, contact->contact_id);
-
-		ret = ctsvc_query_prepare(query, &stmt);
-		if (NULL == stmt) {
-			CTS_ERR("DB error : ctsvc_query_prepare() Failed(%d)", ret);
-			break;
-		}
-
-		if (bind_text) {
-			int i = 0;
-			for (cursor=bind_text,i=1;cursor;cursor=cursor->next,i++) {
-				const char *text = cursor->data;
-				if (*text)
-					ctsvc_stmt_bind_text(stmt, i, text);
-			}
-		}
-
-		ret = ctsvc_stmt_step(stmt);
-		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("ctsvc_stmt_step() Failed(%d)", ret);
-			ctsvc_stmt_finalize(stmt);
-			break;
-		}
-		ctsvc_stmt_finalize(stmt);
-	} while (0);
-
-	CTSVC_RECORD_RESET_PROPERTY_FLAGS((ctsvc_record_s *)record);
-	CONTACTS_FREE(set);
-	if (bind_text) {
-		for (cursor=bind_text;cursor;cursor=cursor->next)
-			CONTACTS_FREE(cursor->data);
-		g_slist_free(bind_text);
-	}
-
-	if (ret < CONTACTS_ERROR_NONE) {
-		ctsvc_end_trans(false);
-		return ret;
-	}
-
-	ctsvc_set_contact_noti();
-	//ctsvc_update_person(contact);
-	ret = ctsvc_end_trans(true);
-
-	return CONTACTS_ERROR_NONE;
-}
-
-static int __ctsvc_db_simple_contact_delete_record( int id )
-{
-	return ctsvc_db_contact_delete(id);
 }
 
 static int __ctsvc_db_simple_contact_get_all_records( int offset, int limit,
@@ -407,7 +254,7 @@ static int __ctsvc_db_simple_contact_get_records_with_query( contacts_query_h qu
 			case CTSVC_PROPERTY_CONTACT_IMAGE_THUMBNAIL:
 				temp = ctsvc_stmt_get_text(stmt, i);
 				if (temp && *temp) {
-					snprintf(full_path, sizeof(full_path), "%s/%s", CTS_IMG_FULL_LOCATION, temp);
+					snprintf(full_path, sizeof(full_path), "%s/%s", CTSVC_CONTACT_IMG_FULL_LOCATION, temp);
 					contact->image_thumbnail_path = strdup(full_path);
 				}
 				break;
@@ -448,110 +295,6 @@ static int __ctsvc_db_simple_contact_get_records_with_query( contacts_query_h qu
 	ctsvc_list_reverse(list);
 
 	*out_list = (contacts_list_h)list;
-
-	return CONTACTS_ERROR_NONE;
-}
-
-static int __ctsvc_db_simple_contact_insert_record( contacts_record_h record, int *id)
-{
-	int version;
-	int ret;
-	char query[CTS_SQL_MAX_LEN] = {0};
-	char image[CTS_SQL_MAX_LEN] = {0};
-	ctsvc_simple_contact_s *contact = (ctsvc_simple_contact_s*)record;
-	cts_stmt stmt;
-
-	RETVM_IF(NULL == contact, CONTACTS_ERROR_INVALID_PARAMETER,
-					"Invalid parameter : contact is NULL");
-	RETVM_IF(contact->addressbook_id < 0, CONTACTS_ERROR_INVALID_PARAMETER,
-				"Invalid parameter : addressbook_id(%d) is mandatory field to insert contact record ", contact->addressbook_id);
-//	RETVM_IF(0 < contact->contact_id, CONTACTS_ERROR_INVALID_PARAMETER,
-//				"Invalid parameter : ide(%d), This record is already inserted", contact->contact_id);
-
-	ret = ctsvc_begin_trans();
-	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "ctsvc_begin_trans() Failed(%d)", ret);
-
-	ret = ctsvc_db_get_next_id(CTS_TABLE_CONTACTS);
-	if (ret < CONTACTS_ERROR_NONE) {
-		CTS_ERR("ctsvc_db_get_next_id() Failed(%d)", ret);
-		ctsvc_end_trans(false);
-		return ret;
-	}
-	contact->contact_id = ret;
-	if (id)
-		*id = ret;
-
-	if (contact->image_thumbnail_path) {
-		int image_id;
-		ret = ctsvc_have_file_read_permission(contact->image_thumbnail_path);
-		if (ret != CONTACTS_ERROR_NONE) {
-			CTS_ERR("ctsvc_have_file_read_permission Fail(%d)", ret);
-			ctsvc_end_trans(false);
-			return ret;
-		}
-
-		image[0] = '\0';
-		image_id = __ctsvc_db_simple_contact_get_default_image_id(contact->contact_id);
-		ret = ctsvc_contact_add_image_file(contact->contact_id, image_id, contact->image_thumbnail_path,
-				image, sizeof(image));
-		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("ctsvc_contact_add_image_file Failed(%d)", ret);
-			ctsvc_end_trans(false);
-			return ret;
-		}
-		free(contact->image_thumbnail_path);
-		contact->image_thumbnail_path = strdup(image);
-	}
-
-	version = ctsvc_get_next_ver();
-
-	ret = ctsvc_db_insert_person((contacts_record_h)contact);
-	if (ret < CONTACTS_ERROR_NONE) {
-		CTS_ERR("ctsvc_db_insert_person() Failed(%d)", ret);
-		ctsvc_end_trans(false);
-		return ret;
-	}
-	contact->person_id = ret;
-
-	snprintf(query, sizeof(query),
-		"INSERT INTO "CTS_TABLE_CONTACTS"(contact_id, person_id, addressbook_id, is_favorite, "
-			"created_ver, changed_ver, changed_time, "
-			"uid, ringtone_path, vibration, message_alert, image_thumbnail_path) "
-			"VALUES(%d, %d, %d, %d, %d, %d, %d, ?, ?, ?, ?, ?)",
-			contact->contact_id, contact->person_id, contact->addressbook_id, contact->is_favorite,
-			version, version, (int)time(NULL));
-
-	ret = ctsvc_query_prepare(query, &stmt);
-	if(NULL == stmt){
-		CTS_ERR("ctsvc_query_prepare() Failed(%d)", ret);
-		ctsvc_end_trans(false);
-		return ret;
-	}
-
-	if (contact->uid)
-		ctsvc_stmt_bind_text(stmt, 1, contact->uid);
-	if (contact->ringtone_path)
-		ctsvc_stmt_bind_text(stmt, 2, contact->ringtone_path);
-	if (contact->vibration)
-		ctsvc_stmt_bind_text(stmt, 3, contact->vibration);
-	if (contact->message_alert)
-		ctsvc_stmt_bind_text(stmt, 4, contact->message_alert);
-	if (contact->image_thumbnail_path)
-		ctsvc_stmt_bind_text(stmt, 5, contact->image_thumbnail_path);
-
-	ret = ctsvc_stmt_step(stmt);
-	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_stmt_step() Failed(%d)", ret);
-		ctsvc_stmt_finalize(stmt);
-		ctsvc_end_trans(false);
-		return ret;
-	}
-	ctsvc_stmt_finalize(stmt);
-
-	ctsvc_set_contact_noti();
-
-	ret = ctsvc_end_trans(true);
-	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_svc_end_trans() Failed(%d)", ret);
 
 	return CONTACTS_ERROR_NONE;
 }

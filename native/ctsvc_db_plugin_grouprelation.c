@@ -26,6 +26,7 @@
 #include "ctsvc_db_init.h"
 #include "ctsvc_db_query.h"
 #include "ctsvc_record.h"
+#include "ctsvc_db_access_control.h"
 
 static int __ctsvc_db_grouprelation_insert_record( contacts_record_h record, int *id );
 static int __ctsvc_db_grouprelation_get_record( int id, contacts_record_h* out_record );
@@ -90,6 +91,7 @@ static int __ctsvc_db_grouprelation_get_all_records( int offset, int limit, cont
 
 	len = snprintf(query, sizeof(query),
 			"SELECT group_id, contact_id, group_name FROM "CTSVC_DB_VIEW_GROUP_RELATION);
+
 	if (0 != limit) {
 		len += snprintf(query+len, sizeof(query)-len, " LIMIT %d", limit);
 		if (0 < offset)

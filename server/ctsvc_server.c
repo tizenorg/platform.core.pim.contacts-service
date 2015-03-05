@@ -25,6 +25,8 @@
 #include <sys/stat.h>
 #include <pims-ipc.h>
 #include <pims-ipc-svc.h>
+#include <unistd.h>	//getuid
+#include <grp.h>		//setgroups
 
 #include "ctsvc_internal.h"
 #include "ctsvc_db_init.h"
@@ -33,22 +35,26 @@
 #include "ctsvc_server_socket.h"
 #include "ctsvc_server_utils.h"
 #include "ctsvc_server_bg.h"
+#include "ctsvc_server_update.h"
 #include "ctsvc_db_access_control.h"
 
 #include "ctsvc_ipc_define.h"
 #include "ctsvc_ipc_server.h"
 #include "ctsvc_ipc_server2.h"
-#include "ctsvc_ipc_server_sim.h"
-
 #include "ctsvc_notify.h"
+
 static int __server_main(void)
 {
 	int ret;
 	pims_ipc_svc_init(CTSVC_IPC_SOCKET_PATH, CTS_SECURITY_FILE_GROUP, 0777);
 
 	do {
+		// register handle functions
+		// These functions will be called when requesting from client module depends on module name and function name (pims_ipc_call, ctsvc_ipc_call)
+		// pims_ipc_svc_register(MODULE_NAME, FUNCTION_NAME ...);
 		if (pims_ipc_svc_register(CTSVC_IPC_MODULE, CTSVC_IPC_SERVER_CONNECT, ctsvc_ipc_server_connect, NULL) != 0) break;
 		if (pims_ipc_svc_register(CTSVC_IPC_MODULE, CTSVC_IPC_SERVER_DISCONNECT, ctsvc_ipc_server_disconnect, NULL) != 0) break;
+		if (pims_ipc_svc_register(CTSVC_IPC_MODULE, CTSVC_IPC_SERVER_CHECK_PERMISSION, ctsvc_ipc_server_check_permission, NULL) != 0) break;
 
 		if (pims_ipc_svc_register(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_INSERT_RECORD, ctsvc_ipc_server_db_insert_record, NULL) != 0) break;
 		if (pims_ipc_svc_register(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_GET_RECORD, ctsvc_ipc_server_db_get_record, NULL) != 0) break;
@@ -68,6 +74,7 @@ static int __server_main(void)
 		if (pims_ipc_svc_register(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_SEARCH_RECORDS, ctsvc_ipc_server_db_search_records, NULL) != 0) break;
 		if (pims_ipc_svc_register(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_SEARCH_RECORDS_WITH_RANGE, ctsvc_ipc_server_db_search_records_with_range, NULL) != 0) break;
 		if (pims_ipc_svc_register(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_SEARCH_RECORDS_WITH_QUERY, ctsvc_ipc_server_db_search_records_with_query, NULL) != 0) break;
+		if (pims_ipc_svc_register(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_GET_STATUS, ctsvc_ipc_server_db_get_status, NULL) != 0) break;
 
 		if (pims_ipc_svc_register(CTSVC_IPC_ACTIVITY_MODULE, CTSVC_IPC_SERVER_ACTIVITY_DELETE_BY_CONTACT_ID, ctsvc_ipc_activity_delete_by_contact_id, NULL) != 0) break;
 		if (pims_ipc_svc_register(CTSVC_IPC_ACTIVITY_MODULE, CTSVC_IPC_SERVER_ACTIVITY_DELETE_BY_ACCOUNT_ID, ctsvc_ipc_activity_delete_by_account_id, NULL) != 0) break;
@@ -83,24 +90,21 @@ static int __server_main(void)
 		if (pims_ipc_svc_register(CTSVC_IPC_PERSON_MODULE, CTSVC_IPC_SERVER_PERSON_SET_DEFAULT_PROPERTY, ctsvc_ipc_person_set_default_property, NULL) != 0) break;
 		if (pims_ipc_svc_register(CTSVC_IPC_PERSON_MODULE, CTSVC_IPC_SERVER_PERSON_GET_DEFAULT_PROPERTY, ctsvc_ipc_person_get_default_property, NULL) != 0) break;
 
+#ifdef ENABLE_LOG_FEATURE
 		if (pims_ipc_svc_register(CTSVC_IPC_PHONELOG_MODULE, CTSVC_IPC_SERVER_PHONELOG_RESET_STATISTICS, ctsvc_ipc_phone_log_reset_statistics, NULL) != 0) break;
 		if (pims_ipc_svc_register(CTSVC_IPC_PHONELOG_MODULE, CTSVC_IPC_SERVER_PHONELOG_DELETE, ctsvc_ipc_phone_log_delete, NULL) != 0) break;
+#endif // ENABLE_LOG_FEATURE
 
-		/*
-			if (pims_ipc_svc_register(CTSVC_IPC_SIM_MODULE, CTSVC_IPC_SERVER_SIM_IMPORT_ALL_CONTACTS, ctsvc_ipc_sim_import_all_contacts, NULL) != 0) break;
-		*/
 		if (pims_ipc_svc_register(CTSVC_IPC_SETTING_MODULE, CTSVC_IPC_SERVER_SETTING_GET_NAME_DISPLAY_ORDER, ctsvc_ipc_setting_get_name_display_order, NULL) != 0) break;
 		if (pims_ipc_svc_register(CTSVC_IPC_SETTING_MODULE, CTSVC_IPC_SERVER_SETTING_SET_NAME_DISPLAY_ORDER, ctsvc_ipc_setting_set_name_display_order, NULL) != 0) break;
 		if (pims_ipc_svc_register(CTSVC_IPC_SETTING_MODULE, CTSVC_IPC_SERVER_SETTING_GET_NAME_SORTING_ORDER, ctsvc_ipc_setting_get_name_sorting_order, NULL) != 0) break;
 		if (pims_ipc_svc_register(CTSVC_IPC_SETTING_MODULE, CTSVC_IPC_SERVER_SETTING_SET_NAME_SORTING_ORDER, ctsvc_ipc_setting_set_name_sorting_order, NULL) != 0) break;
 
-		if (pims_ipc_svc_register(CTSVC_IPC_UTILS_MODULE, CTSVC_IPC_SERVER_UTILS_GET_INDEX_CHARACTERS, ctsvc_ipc_utils_get_index_characters, NULL) != 0) break;
-
 		pims_ipc_svc_init_for_publish(CTSVC_IPC_SOCKET_PATH_FOR_CHANGE_SUBSCRIPTION, CTS_SECURITY_FILE_GROUP, 0660);
 
-		ret = contacts_connect2();
+		ret = contacts_connect();
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("contacts_connect2 fail(%d)", ret);
+			CTS_ERR("contacts_connect fail(%d)", ret);
 			break;
 		}
 		ctsvc_set_client_access_info("contacts-service", NULL);
@@ -111,7 +115,10 @@ static int __server_main(void)
 		ret = ctsvc_server_init_configuration();
 		CTS_DBG("%d", ret);
 
-		pims_ipc_svc_run_main_loop(NULL);
+		GMainLoop* main_loop;
+		main_loop = g_main_loop_new(NULL, FALSE);
+
+		pims_ipc_svc_run_main_loop(main_loop);
 
 		ctsvc_server_final_configuration();
 
@@ -119,7 +126,7 @@ static int __server_main(void)
 
 		ctsvc_unset_client_access_info();
 
-		ret = contacts_disconnect2();
+		ret = contacts_disconnect();
 		if (CONTACTS_ERROR_NONE != ret)
 			CTS_DBG("%d", ret);
 
@@ -161,10 +168,19 @@ void ctsvc_create_rep_set_permission(const char* directory, mode_t mode)
 	}
 }
 
+
 int main(int argc, char *argv[])
 {
 	CTS_FN_CALL;
+	INFO("Start contacts-service");
 	int ret;
+
+	if (getuid() == 0) {			// root
+		gid_t glist[] = {CTS_SECURITY_FILE_GROUP};
+		ret = setgroups(1, glist);		// client and server should have same Groups
+		WARN_IF(ret <0, "setgroups Fail(%d)", ret);
+	}
+
 	ctsvc_server_check_schema();
 	if (2 <= argc && !strcmp(argv[1], "schema"))
 		return CONTACTS_ERROR_NONE;
@@ -202,10 +218,16 @@ int main(int argc, char *argv[])
 	ctsvc_create_file_set_permission(CTSVC_NOTI_PHONELOG_CHANGED, 0660);
 	ctsvc_create_file_set_permission(CTSVC_NOTI_SPEEDDIAL_CHANGED, 0660);
 
+	// update DB for compatability
+	ctsvc_server_db_update();
+
 	ret = ctsvc_server_socket_init();
 	CTS_DBG("%d", ret);
 
 	__server_main();
 
+	ctsvc_server_socket_deinit();
+
 	return 0;
 }
+

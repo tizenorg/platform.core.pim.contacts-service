@@ -28,6 +28,7 @@
 #include "ctsvc_schema.h"
 #include "ctsvc_sqlite.h"
 #include "ctsvc_notification.h"
+#include "ctsvc_number_utils.h"
 
 #include "ctsvc_db_init.h"
 #include "ctsvc_db_plugin_person_helper.h"
@@ -35,10 +36,12 @@
 #include "ctsvc_db_plugin_company_helper.h"
 #include "ctsvc_db_plugin_group_helper.h"
 
+#ifdef ENABLE_LOG_FEATURE
 #include "ctsvc_phonelog.h"
+#endif // ENABLE_LOG_FEATURE
 #include "ctsvc_person.h"
 
-#define CTSVC_QUERY_RETRY_TIME	8
+#define CTSVC_QUERY_RETRY_TIME	4
 #define CTSVC_QUERY_RETRY_INTERVAL	50*1000
 
 static __thread sqlite3 *ctsvc_db = NULL;
@@ -67,16 +70,22 @@ int ctsvc_db_open(void) {
 					ctsvc_db_normalize_str_callback, NULL, NULL);
 		RETVM_IF(SQLITE_OK != ret, CONTACTS_ERROR_DB,
 						"sqlite3_create_function() Failed(%d)", ret);
+#ifdef ENABLE_LOG_FEATURE
 		ret = sqlite3_create_function(ctsvc_db, "_PHONE_LOG_DELETE_", 1, SQLITE_UTF8, NULL,
 					ctsvc_db_phone_log_delete_callback, NULL, NULL);
 		RETVM_IF(SQLITE_OK != ret, CONTACTS_ERROR_DB,
 						"sqlite3_create_function() Failed(%d)", ret);
+#endif // ENABLE_LOG_FEATURE
 		ret = sqlite3_create_function(ctsvc_db, "_PERSON_DELETE_", 1, SQLITE_UTF8, NULL,
 					ctsvc_db_person_delete_callback, NULL, NULL);
 		RETVM_IF(SQLITE_OK != ret, CONTACTS_ERROR_DB,
 						"sqlite3_create_function() Failed(%d)", ret);
 		ret = sqlite3_create_function(ctsvc_db, "_GROUP_DELETE_", 1, SQLITE_UTF8, NULL,
 					ctsvc_db_group_delete_callback, NULL, NULL);
+		RETVM_IF(SQLITE_OK != ret, CONTACTS_ERROR_DB,
+						"sqlite3_create_function() Failed(%d)", ret);
+		ret = sqlite3_create_function(ctsvc_db, "_NUMBER_COMPARE_", 4, SQLITE_UTF8, NULL,
+					ctsvc_db_phone_number_equal_callback, NULL, NULL);
 		RETVM_IF(SQLITE_OK != ret, CONTACTS_ERROR_DB,
 						"sqlite3_create_function() Failed(%d)", ret);
 	}
@@ -148,7 +157,7 @@ int ctsvc_query_get_first_int_result(const char *query, int *result) {
 	}while(retry);
 
 	if (SQLITE_OK != ret) {
-		CTS_ERR("DB error : sqlite3_prepare_v2(%s) Failed(%s)", query, sqlite3_errmsg(ctsvc_db));
+		CTS_ERR("DB error : sqlite3_prepare_v2() Failed(%s)", sqlite3_errmsg(ctsvc_db));
 		if (ret == SQLITE_BUSY || ret == SQLITE_LOCKED)
 			return CONTACTS_ERROR_DB_LOCKED;
 		else
@@ -160,7 +169,8 @@ int ctsvc_query_get_first_int_result(const char *query, int *result) {
 	do {
 		ret = sqlite3_step(stmt);
 		if (ret != SQLITE_ROW && SQLITE_DONE != ret)
-			CTS_ERR("DB error : sqlite3_step() Failed(%d, %s)", ret, sqlite3_errmsg(ctsvc_db));
+			CTS_ERR("DB error : sqlite3_step() Failed(%d, %s, %d)", ret, sqlite3_errmsg(ctsvc_db),
+					sqlite3_extended_errcode(ctsvc_db));
 
 		if (ret == SQLITE_BUSY || ret == SQLITE_LOCKED) {
 			gettimeofday(&now, NULL);
@@ -175,13 +185,13 @@ int ctsvc_query_get_first_int_result(const char *query, int *result) {
 
 	if (SQLITE_ROW != ret) {
 		sqlite3_finalize(stmt);
-		CTS_DBG("query : %s", query);
 		if (SQLITE_DONE == ret) {
 			CTS_INFO("sqlite3_step() return with SQLITE_DONE (it means NO_DATA) (%d, %s)",
 				ret, sqlite3_errmsg(ctsvc_db));
 			return CONTACTS_ERROR_NO_DATA /*CONTACTS_ERR_DB_RECORD_NOT_FOUND*/;
 		}
-		CTS_ERR("sqlite3_step() Failed(%d, %s)", ret, sqlite3_errmsg(ctsvc_db));
+		CTS_ERR("sqlite3_step() Failed(%d, %s, %d)", ret, sqlite3_errmsg(ctsvc_db),
+				sqlite3_extended_errcode(ctsvc_db));
 		if (ret == SQLITE_BUSY || ret == SQLITE_LOCKED)
 			return CONTACTS_ERROR_DB_LOCKED;
 		else
@@ -196,48 +206,21 @@ int ctsvc_query_get_first_int_result(const char *query, int *result) {
 
 int ctsvc_query_exec(const char *query) {
 	int ret;
-	struct timeval from, now, diff;
-	bool retry = false;
+	cts_stmt stmt = NULL;
 	char *err_msg = NULL;
 
-	RETVM_IF(NULL == ctsvc_db, CONTACTS_ERROR_DB /*CTS_ERR_DB_NOT_OPENED*/, "DB error : Database is not opended");
-	CTS_DBG("query : %s", query);
+	RETVM_IF(NULL == ctsvc_db, CONTACTS_ERROR_DB, "DB error : Database is not opended");
 
-	gettimeofday(&from, NULL);
-	do {
-		ret = sqlite3_exec(ctsvc_db, query, NULL, NULL, &err_msg);
+	ret = ctsvc_query_prepare((char*)query, &stmt);
+	RETVM_IF(NULL == stmt, ret, "ctsvc_query_prepare fail(%d)", ret);
 
-		if (ret != SQLITE_OK)
-			CTS_ERR("DB error : sqlite3_exec() Failed(%d, %s)", ret, sqlite3_errmsg(ctsvc_db));
-
-		if (ret == SQLITE_BUSY || ret == SQLITE_LOCKED) {
-			gettimeofday(&now, NULL);
-			timersub(&now, &from, &diff);
-			retry = (diff.tv_sec < CTSVC_QUERY_RETRY_TIME)? true:false;
-			if (retry)
-				usleep(CTSVC_QUERY_RETRY_INTERVAL);
-		}
-		else
-			retry = false;
-	} while(retry);
-
-	if (SQLITE_OK != ret) {
-		CTS_ERR("sqlite3_exec(%s) Failed(%d, %s)", query, ret, err_msg);
-		sqlite3_free(err_msg);
-		switch (ret) {
-		case SQLITE_BUSY:
-		case SQLITE_LOCKED:
-			return CONTACTS_ERROR_DB_LOCKED /*CTS_ERR_DB_LOCK*/;
-		case SQLITE_IOERR:
-			return CONTACTS_ERROR_DB /*CTS_ERR_IO_ERR*/;
-		case SQLITE_FULL:
-			return CONTACTS_ERROR_FILE_NO_SPACE /*CTS_ERR_NO_SPACE*/;
-		default:
-			return CONTACTS_ERROR_DB;
-		}
+	ret = ctsvc_stmt_step(stmt);
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("ctsvc_stmt_step() Failed(%d, %s)", ret, err_msg);
 	}
+	ctsvc_stmt_finalize(stmt);
 
-	return CONTACTS_ERROR_NONE /*CTS_SUCCESS*/;
+	return ret;
 }
 
 int ctsvc_query_prepare(char *query, cts_stmt *stmt) {
@@ -247,7 +230,6 @@ int ctsvc_query_prepare(char *query, cts_stmt *stmt) {
 	*stmt = NULL;
 
 	RETVM_IF(NULL == ctsvc_db, CONTACTS_ERROR_DB, "DB error : Database is not opened");
-	CTS_DBG("prepare query : %s", query);
 
 	gettimeofday(&from, NULL);
 	do {
@@ -284,7 +266,8 @@ int ctsvc_stmt_get_first_int_result(cts_stmt stmt, int *result) {
 	do {
 		ret = sqlite3_step(stmt);
 		if (SQLITE_ROW != ret && SQLITE_DONE != ret)
-			CTS_ERR("sqlite3_step() Failed(%d, %s)", ret, sqlite3_errmsg(ctsvc_db));
+			CTS_ERR("sqlite3_step() Failed(%d, %s, %d)", ret, sqlite3_errmsg(ctsvc_db),
+					sqlite3_extended_errcode(ctsvc_db));
 
 		if (ret == SQLITE_BUSY || ret == SQLITE_LOCKED) {
 			gettimeofday(&now, NULL);
@@ -298,7 +281,8 @@ int ctsvc_stmt_get_first_int_result(cts_stmt stmt, int *result) {
 	}while(retry);
 
 	if (SQLITE_ROW != ret) {
-		CTS_ERR("sqlite3_step() Failed(%d, %s)", ret, sqlite3_errmsg(ctsvc_db));
+		CTS_ERR("sqlite3_step() Failed(%d, %s, %d)", ret, sqlite3_errmsg(ctsvc_db),
+					sqlite3_extended_errcode(ctsvc_db));
 		sqlite3_finalize(stmt);
 		if (SQLITE_DONE == ret)
 			return CONTACTS_ERROR_NO_DATA /*CONTACTS_ERR_DB_RECORD_NOT_FOUND*/;
@@ -324,7 +308,8 @@ int ctsvc_stmt_step(cts_stmt stmt) {
 		ret = sqlite3_step(stmt);
 
 		if (ret != SQLITE_ROW && ret != SQLITE_DONE)
-			CTS_ERR("DB error : sqlite3_step() Failed(%d, %s)", ret, sqlite3_errmsg(ctsvc_db));
+			CTS_ERR("DB error : sqlite3_step() Failed(%d, %s, %d)", ret,
+					sqlite3_errmsg(ctsvc_db), sqlite3_extended_errcode(ctsvc_db));
 
 		if (ret == SQLITE_BUSY || ret == SQLITE_LOCKED) {
 			gettimeofday(&now, NULL);
@@ -381,7 +366,7 @@ void ctsvc_stmt_finalize(cts_stmt stmt) {
 		return;
 
 	ret = sqlite3_finalize(stmt);
-	WARN_IF(ret != SQLITE_OK, "sqlite3_finalize Failed(%d, %s)",
-			ret, sqlite3_errmsg(ctsvc_db));
+	WARN_IF(ret != SQLITE_OK, "sqlite3_finalize Failed(%d, %s, %d)",
+			ret, sqlite3_errmsg(ctsvc_db), sqlite3_extended_errcode(ctsvc_db));
 }
 

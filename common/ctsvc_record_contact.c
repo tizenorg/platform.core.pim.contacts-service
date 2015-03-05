@@ -22,8 +22,10 @@
  */
 
 #include <glib.h>
+#include <unistd.h>
 
 #include "contacts.h"
+
 #include "ctsvc_internal.h"
 #include "ctsvc_list.h"
 #include "ctsvc_record.h"
@@ -37,6 +39,11 @@ static int __ctsvc_activity_get_str(contacts_record_h record, unsigned int prope
 static int __ctsvc_activity_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_activity_set_int(contacts_record_h record, unsigned int property_id, int value);
 static int __ctsvc_activity_set_str(contacts_record_h record, unsigned int property_id, const char* str );
+static int __ctsvc_activity_add_child_record(contacts_record_h record, unsigned int property_id, contacts_record_h child_record );
+static int __ctsvc_activity_remove_child_record(contacts_record_h record, unsigned int property_id, contacts_record_h child_record );
+static int __ctsvc_activity_get_child_record_count(contacts_record_h record, unsigned int property_id, int *count );
+static int __ctsvc_activity_get_child_record_at_p(contacts_record_h record, unsigned int property_id, int index, contacts_record_h* out_record );
+static int __ctsvc_activity_clone_child_record_list(contacts_record_h record, unsigned int property_id, contacts_list_h* out_list );
 
 static int __ctsvc_activity_photo_create(contacts_record_h *out_record);
 static int __ctsvc_activity_photo_destroy(contacts_record_h record, bool delete_child);
@@ -80,7 +87,7 @@ static int __ctsvc_contact_set_str(contacts_record_h record, unsigned int proper
 static int __ctsvc_contact_set_bool(contacts_record_h record, unsigned int property_id, bool value);
 static int __ctsvc_contact_clone_child_record_list(contacts_record_h record, unsigned int property_id, contacts_list_h* out_list );
 static int __ctsvc_contact_get_child_record_at_p(contacts_record_h record, unsigned int property_id, int index, contacts_record_h* out_record );
-static int __ctsvc_contact_get_child_record_count(contacts_record_h record, unsigned int property_id, unsigned int *count );
+static int __ctsvc_contact_get_child_record_count(contacts_record_h record, unsigned int property_id, int *count );
 static int __ctsvc_contact_add_child_record(contacts_record_h record, unsigned int property_id, contacts_record_h child_record );
 static int __ctsvc_contact_remove_child_record(contacts_record_h record, unsigned int property_id, contacts_record_h child_record );
 
@@ -219,6 +226,7 @@ static int __ctsvc_url_get_str_p(contacts_record_h record, unsigned int property
 static int __ctsvc_url_set_int(contacts_record_h record, unsigned int property_id, int value);
 static int __ctsvc_url_set_str(contacts_record_h record, unsigned int property_id, const char* str );
 
+static GHashTable *__ctsvc_temp_image_file_hash_table = NULL;
 
 ctsvc_record_plugin_cb_s name_plugin_cbs = {
 	.create = __ctsvc_name_create,
@@ -367,11 +375,11 @@ ctsvc_record_plugin_cb_s activity_plugin_cbs = {
 	.set_bool = NULL,
 	.set_lli = NULL,
 	.set_double = NULL,
-	.add_child_record = NULL,
-	.remove_child_record = NULL,
-	.get_child_record_count = NULL,
-	.get_child_record_at_p = NULL,
-	.clone_child_record_list = NULL,
+	.add_child_record = __ctsvc_activity_add_child_record,
+	.remove_child_record = __ctsvc_activity_remove_child_record,
+	.get_child_record_count = __ctsvc_activity_get_child_record_count,
+	.get_child_record_at_p = __ctsvc_activity_get_child_record_at_p,
+	.clone_child_record_list = __ctsvc_activity_clone_child_record_list,
 };
 
 ctsvc_record_plugin_cb_s activity_photo_plugin_cbs = {
@@ -871,6 +879,45 @@ static int __ctsvc_name_destroy(contacts_record_h record, bool delete_child)
 	return CONTACTS_ERROR_NONE;
 };
 
+static void __ctsvc_temp_image_hash_table_insert(char *filename)
+{
+	int count = 0;
+	if (NULL == __ctsvc_temp_image_file_hash_table)
+		__ctsvc_temp_image_file_hash_table = g_hash_table_new(g_str_hash, g_str_equal);
+
+	count = GPOINTER_TO_INT(g_hash_table_lookup(__ctsvc_temp_image_file_hash_table, filename));
+	g_hash_table_insert(__ctsvc_temp_image_file_hash_table, filename, GINT_TO_POINTER(count+1));
+}
+
+static void __ctsvc_temp_image_hash_table_remove(char *filename)
+{
+	int count = 0;
+
+	if (NULL == __ctsvc_temp_image_file_hash_table) {
+		if (unlink(filename) < 0) {
+			CTS_WARN("unlink Failed(%d)", errno);
+		}
+		return;
+	}
+
+	count = GPOINTER_TO_INT(g_hash_table_lookup(__ctsvc_temp_image_file_hash_table, filename));
+	if (count < 1) {
+		if (unlink(filename) < 0) {
+			CTS_WARN("unlink Failed(%d)", errno);
+		}
+	}
+	else if (1 == count) {
+		g_hash_table_remove(__ctsvc_temp_image_file_hash_table, filename);
+		if (0 == g_hash_table_size(__ctsvc_temp_image_file_hash_table)) {
+			g_hash_table_destroy(__ctsvc_temp_image_file_hash_table);
+			__ctsvc_temp_image_file_hash_table = NULL;
+		}
+	}
+	else {
+		g_hash_table_insert(__ctsvc_temp_image_file_hash_table, filename, GINT_TO_POINTER(count-1));
+	}
+}
+
 static int __ctsvc_company_destroy(contacts_record_h record, bool delete_child)
 {
 	ctsvc_company_s *company = (ctsvc_company_s*)record;
@@ -883,6 +930,8 @@ static int __ctsvc_company_destroy(contacts_record_h record, bool delete_child)
 	free(company->job_title);
 	free(company->role);
 	free(company->assistant_name);
+	if (company->logo && company->is_vcard)
+		__ctsvc_temp_image_hash_table_remove(company->logo);
 	free(company->logo);
 	free(company->location);
 	free(company->description);
@@ -912,6 +961,8 @@ static int __ctsvc_number_destroy(contacts_record_h record, bool delete_child)
 
 	free(number->label);
 	free(number->number);
+	free(number->normalized);
+	free(number->cleaned);
 	free(number->lookup);
 	free(number);
 
@@ -1077,6 +1128,8 @@ static int __ctsvc_image_destroy(contacts_record_h record, bool delete_child)
 	free(image->base.properties_flags);
 
 	free(image->label);
+	if (image->path && image->is_vcard)
+		__ctsvc_temp_image_hash_table_remove(image->path);
 	free(image->path);
 	free(image);
 
@@ -1256,7 +1309,7 @@ static int __ctsvc_contact_get_int(contacts_record_h record, unsigned int proper
 		*out = contact->link_mode;
 		break;
 	default:
-		ASSERT_NOT_REACHED("Invalid parameter : property_id(%d) is not supported in value(contact)", property_id);
+		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(contact)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
@@ -1279,8 +1332,11 @@ static int __ctsvc_simple_contact_get_int(contacts_record_h record, unsigned int
 	case CTSVC_PROPERTY_CONTACT_PERSON_ID:
 		*out = contact->person_id;
 		break;
+	case CTSVC_PROPERTY_CONTACT_CHANGED_TIME:
+		*out = contact->changed_time;
+		break;
 	default:
-		ASSERT_NOT_REACHED("Invalid parameter : property_id(%d) is not supported in value(simple contact)", property_id);
+		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(simple contact)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
@@ -1298,7 +1354,7 @@ static int __ctsvc_name_get_int(contacts_record_h record, unsigned int property_
 		*out = name->contact_id;
 		break;
 	default:
-		ASSERT_NOT_REACHED("Invalid parameter : property_id(%d) is not supported in value(name)", property_id);
+		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(name)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
@@ -1319,7 +1375,7 @@ static int __ctsvc_company_get_int(contacts_record_h record, unsigned int proper
 		*out = company->type;
 		break;
 	default:
-		ASSERT_NOT_REACHED("Invalid parameter : property_id(%d) is not supported in value(company)", property_id);
+		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(company)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
@@ -1337,7 +1393,7 @@ static int __ctsvc_note_get_int(contacts_record_h record, unsigned int property_
 		*out = note->contact_id;
 		break;
 	default:
-		ASSERT_NOT_REACHED("Invalid parameter : property_id(%d) is not supported in value(note)", property_id);
+		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(note)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
@@ -1358,7 +1414,7 @@ static int __ctsvc_number_get_int(contacts_record_h record, unsigned int propert
 		*out = number->type;
 		break;
 	default:
-		ASSERT_NOT_REACHED("Invalid parameter : property_id(%d) is not supported in value(number)", property_id);
+		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(number)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
@@ -1379,7 +1435,7 @@ static int __ctsvc_email_get_int(contacts_record_h record, unsigned int property
 		*out = email->type;
 		break;
 	default:
-		ASSERT_NOT_REACHED("Invalid parameter : property_id(%d) is not supported in value(email)", property_id);
+		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(email)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
@@ -1400,7 +1456,7 @@ static int __ctsvc_url_get_int(contacts_record_h record, unsigned int property_i
 		*out = url->type;
 		break;
 	default:
-		ASSERT_NOT_REACHED("Invalid parameter : property_id(%d) is not supported in value(url)", property_id);
+		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(url)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
@@ -1423,11 +1479,11 @@ static int __ctsvc_event_get_int(contacts_record_h record, unsigned int property
 	case CTSVC_PROPERTY_EVENT_DATE:
 		*out = event->date;
 		break;
-	case CTSVC_PROPERTY_EVENT_LUNAR_DATE:
-		*out = event->lunar_date;
+	case CTSVC_PROPERTY_EVENT_CALENDAR_TYPE:
+		*out = event->calendar_type;
 		break;
 	default:
-		ASSERT_NOT_REACHED("Invalid parameter : property_id(%d) is not supported in value(event)", property_id);
+		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(event)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
@@ -1445,7 +1501,7 @@ static int __ctsvc_nickname_get_int(contacts_record_h record, unsigned int prope
 		*out = nickname->contact_id;
 		break;
 	default:
-		ASSERT_NOT_REACHED("Invalid parameter : property_id(%d) is not supported in value(nickname)", property_id);
+		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(nickname)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
@@ -1466,7 +1522,7 @@ static int __ctsvc_address_get_int(contacts_record_h record, unsigned int proper
 		*out = address->type;
 		break;
 	default:
-		ASSERT_NOT_REACHED("Invalid parameter : property_id(%d) is not supported in value(address)", property_id);
+		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(address)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
@@ -1487,7 +1543,7 @@ static int __ctsvc_messenger_get_int(contacts_record_h record, unsigned int prop
 		*out = messenger->type;
 		break;
 	default:
-		ASSERT_NOT_REACHED("Invalid parameter : property_id(%d) is not supported in value(messenger)", property_id);
+		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(messenger)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
@@ -1508,7 +1564,7 @@ static int __ctsvc_group_relation_get_int(contacts_record_h record, unsigned int
 		*out = group->group_id;
 		break;
 	default:
-		ASSERT_NOT_REACHED("Invalid parameter : property_id(%d) is not supported in value(group)", property_id);
+		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(group)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
@@ -1529,11 +1585,87 @@ static int __ctsvc_activity_get_int(contacts_record_h record, unsigned int prope
 		*out = activity->timestamp;
 		break;
 	default:
-		ASSERT_NOT_REACHED("Invalid parameter : property_id(%d) is not supported in value(activity)", property_id);
+		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(activity)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
 }
+
+static int __ctsvc_activity_add_child_record(contacts_record_h record,
+		unsigned int property_id, contacts_record_h child_record )
+{
+	ctsvc_activity_s *s_activity = (ctsvc_activity_s *)record;
+	ctsvc_activity_photo_s *s_activity_photo = (ctsvc_activity_photo_s *)child_record;
+
+	RETVM_IF(property_id != CTSVC_PROPERTY_ACTIVITY_ACTIVITY_PHOTO, CONTACTS_ERROR_INVALID_PARAMETER, "property_id(%d) is not supported", property_id);
+	RETVM_IF(s_activity_photo->base.r_type != CTSVC_RECORD_ACTIVITY_PHOTO, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter: r_type(%d) is wrong", s_activity_photo->base.r_type);
+	s_activity_photo->id = 0;
+
+	return ctsvc_list_add_child((contacts_list_h)s_activity->photos, child_record);
+}
+
+static int __ctsvc_activity_remove_child_record(contacts_record_h record,
+		unsigned int property_id, contacts_record_h child_record )
+{
+	ctsvc_activity_s *s_activity = (ctsvc_activity_s *)record;
+	ctsvc_activity_photo_s *s_activity_photo = (ctsvc_activity_photo_s *)child_record;
+
+	RETVM_IF(property_id != CTSVC_PROPERTY_ACTIVITY_ACTIVITY_PHOTO, CONTACTS_ERROR_INVALID_PARAMETER, "property_id(%d) is not supported", property_id);
+
+	ctsvc_list_remove_child((contacts_list_h)s_activity->photos, child_record, (s_activity_photo->id?true:false));
+
+	return CONTACTS_ERROR_NONE;
+}
+
+static int __ctsvc_activity_get_child_record_count(contacts_record_h record,
+		unsigned int property_id, int *count )
+{
+	ctsvc_activity_s *s_activity = (ctsvc_activity_s *)record;
+	RETVM_IF(property_id != CTSVC_PROPERTY_ACTIVITY_ACTIVITY_PHOTO, CONTACTS_ERROR_INVALID_PARAMETER, "property_id(%d) is not supported", property_id);
+
+	if (s_activity->photos)
+		contacts_list_get_count((contacts_list_h)s_activity->photos, count);
+
+	return CONTACTS_ERROR_NONE;
+}
+
+static int __ctsvc_activity_get_child_record_at_p(contacts_record_h record,
+		unsigned int property_id, int index, contacts_record_h* out_record )
+{
+	int count = 0;
+	ctsvc_activity_s *s_activity = (ctsvc_activity_s *)record;
+
+	RETVM_IF(property_id != CTSVC_PROPERTY_ACTIVITY_ACTIVITY_PHOTO, CONTACTS_ERROR_INVALID_PARAMETER, "property_id(%d) is not supported", property_id);
+
+	if (s_activity->photos)
+		contacts_list_get_count((contacts_list_h)s_activity->photos, &count);
+
+	if (count < index) {
+		CTS_ERR("The index(%d) is greather than total length(%d)", index, count);
+		*out_record = NULL;
+		return CONTACTS_ERROR_NO_DATA;
+	}
+
+	return ctsvc_list_get_nth_record_p((contacts_list_h)s_activity->photos, index, out_record);
+}
+
+
+static int __ctsvc_activity_clone_child_record_list(contacts_record_h record,
+		unsigned int property_id, contacts_list_h* out_list )
+{
+	int count;
+	ctsvc_activity_s *s_activity = (ctsvc_activity_s *)record;
+
+	RETVM_IF(property_id != CTSVC_PROPERTY_ACTIVITY_ACTIVITY_PHOTO, CONTACTS_ERROR_INVALID_PARAMETER, "property_id(%d) is not supported", property_id);
+
+	contacts_list_get_count((contacts_list_h)s_activity->photos, &count);
+	if (count <= 0) {
+		*out_list = NULL;
+		return CONTACTS_ERROR_NO_DATA;
+	}
+	return ctsvc_list_clone((contacts_list_h)s_activity->photos, out_list);
+}
+
 
 static int __ctsvc_activity_photo_get_int(contacts_record_h record, unsigned int property_id, int *out)
 {
@@ -1550,7 +1682,7 @@ static int __ctsvc_activity_photo_get_int(contacts_record_h record, unsigned int
 		*out = photo->sort_index;
 		break;
 	default:
-		ASSERT_NOT_REACHED("Invalid parameter : property_id(%d) is not supported in value(activity)", property_id);
+		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(activity)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
@@ -1571,7 +1703,7 @@ static int __ctsvc_profile_get_int(contacts_record_h record, unsigned int proper
 		*out = profile->order;
 		break;
 	default:
-		ASSERT_NOT_REACHED("Invalid parameter : property_id(%d) is not supported in value(profile)", property_id);
+		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(profile)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
@@ -1592,7 +1724,7 @@ static int __ctsvc_relationship_get_int(contacts_record_h record, unsigned int p
 		*out = relationship->type;
 		break;
 	default:
-		ASSERT_NOT_REACHED("Invalid parameter : property_id(%d) is not supported in value(relationship)", property_id);
+		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(relationship)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
@@ -1613,7 +1745,7 @@ static int __ctsvc_image_get_int(contacts_record_h record, unsigned int property
 		*out = image->type;
 		break;
 	default:
-		ASSERT_NOT_REACHED("Invalid parameter : property_id(%d) is not supported in value(image)", property_id);
+		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(image)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
@@ -1634,7 +1766,7 @@ static int __ctsvc_extension_get_int(contacts_record_h record, unsigned int prop
 		*out = extension->data1;
 		break;
 	default:
-		ASSERT_NOT_REACHED("Invalid parameter : property_id(%d) is not supported in value(extension)", property_id);
+		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(extension)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
@@ -1653,21 +1785,24 @@ static int __ctsvc_contact_set_int(contacts_record_h record, unsigned int proper
 		contact->display_source_type = value;
 		break;
 	case CTSVC_PROPERTY_CONTACT_PERSON_ID:
+		RETVM_IF(contact->id > 0, CONTACTS_ERROR_INVALID_PARAMETER,
+				"Invalid parameter : property_id(%d) is a read-only value (contact)", property_id);
 		contact->person_id = value;
 		break;
 	case CTSVC_PROPERTY_CONTACT_CHANGED_TIME:
 		contact->changed_time = value;
 		break;
-/*
-		CTS_ERR("Invalid parameter : property_id(%d) is a read-only value (contact)", property_id);
-		return CONTACTS_ERROR_INVALID_PARAMETER;
-*/
 	case CTSVC_PROPERTY_CONTACT_ADDRESSBOOK_ID:
 		RETVM_IF(contact->id > 0, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (contact)", property_id);
 		contact->addressbook_id = value;
 		break;
 	case CTSVC_PROPERTY_CONTACT_LINK_MODE:
+		RETVM_IF(value != CONTACTS_CONTACT_LINK_MODE_NONE
+						&& value != CONTACTS_CONTACT_LINK_MODE_IGNORE_ONCE,
+				CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : link mode is in invalid range (%d)", value);
+		RETVM_IF(contact->id > 0, CONTACTS_ERROR_INVALID_PARAMETER,
+				"Invalid parameter : property_id(%d) is a read-only value (contact)", property_id);
 		contact->link_mode = value;
 		break;
 	default:
@@ -1691,10 +1826,6 @@ static int __ctsvc_simple_contact_set_int(contacts_record_h record, unsigned int
 	case CTSVC_PROPERTY_CONTACT_PERSON_ID:
 		contact->person_id = value;
 		break;
-/*
-		CTS_ERR("Invalid parameter : property_id(%d) is a read-only value (simple contact)", property_id);
-		return CONTACTS_ERROR_INVALID_PARAMETER;
-*/
 	case CTSVC_PROPERTY_CONTACT_ADDRESSBOOK_ID:
 		RETVM_IF(contact->contact_id > 0, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalide parameter : property_id(%d) is a read-only value (contact)", property_id);
@@ -1715,10 +1846,6 @@ static int __ctsvc_name_set_int(contacts_record_h record, unsigned int property_
 	case CTSVC_PROPERTY_NAME_ID:
 		name->id = value;
 		break;
-/*
-		CTS_ERR("Invalid parameter : property_id(%d) is a read-only value (name)", property_id);
-		return CONTACTS_ERROR_INVALID_PARAMETER;
-*/
 	case CTSVC_PROPERTY_NAME_CONTACT_ID:
 		RETVM_IF(name->id > 0, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (name)", property_id);
@@ -1739,16 +1866,16 @@ static int __ctsvc_company_set_int(contacts_record_h record, unsigned int proper
 	case CTSVC_PROPERTY_COMPANY_ID:
 		company->id = value;
 		break;
-/*
-		CTS_ERR("Invalid parameter : property_id(%d) is a read-only value (company)", property_id);
-		return CONTACTS_ERROR_INVALID_PARAMETER;
-*/
 	case CTSVC_PROPERTY_COMPANY_CONTACT_ID:
 		RETVM_IF(company->id > 0, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (company)", property_id);
 		company->contact_id = value;
 		break;
 	case CTSVC_PROPERTY_COMPANY_TYPE:
+		RETVM_IF(value < CONTACTS_COMPANY_TYPE_OTHER
+						|| value > CONTACTS_COMPANY_TYPE_WORK,
+				CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : company type is in invalid range (%d)", value);
+
 		company->type = value;
 		break;
 	default:
@@ -1766,10 +1893,6 @@ static int __ctsvc_note_set_int(contacts_record_h record, unsigned int property_
 	case CTSVC_PROPERTY_NOTE_ID:
 		note->id = value;
 		break;
-/*
-		CTS_ERR("Invalid parameter : property_id(%d) is a read-only value (note)", property_id);
-		return CONTACTS_ERROR_INVALID_PARAMETER;
-*/
 	case CTSVC_PROPERTY_NOTE_CONTACT_ID:
 		RETVM_IF(note->id > 0, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (note)", property_id);
@@ -1790,10 +1913,6 @@ static int __ctsvc_number_set_int(contacts_record_h record, unsigned int propert
 	case CTSVC_PROPERTY_NUMBER_ID:
 		number->id = value;
 		break;
-/*
-		CTS_ERR("Invalid parameter : property_id(%d) is a read-only value (number)", property_id);
-		return CONTACTS_ERROR_INVALID_PARAMETER;
-*/
 	case CTSVC_PROPERTY_NUMBER_CONTACT_ID:
 		RETVM_IF(number->id > 0, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (number)", property_id);
@@ -1816,16 +1935,16 @@ static int __ctsvc_email_set_int(contacts_record_h record, unsigned int property
 	switch(property_id) {
 	case CTSVC_PROPERTY_EMAIL_ID:
 		email->id = value;
-/*
-		CTS_ERR("Invalid parameter : property_id(%d) is a read-only value (email)", property_id);
-		return CONTACTS_ERROR_INVALID_PARAMETER;
-*/
 	case CTSVC_PROPERTY_EMAIL_CONTACT_ID:
 		RETVM_IF(email->id > 0, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (email)", property_id);
 		email->contact_id = value;
 		break;
 	case CTSVC_PROPERTY_EMAIL_TYPE:
+		RETVM_IF(value < CONTACTS_EMAIL_TYPE_OTHER
+						|| value > CONTACTS_EMAIL_TYPE_MOBILE,
+				CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : email type is in invalid range (%d)", value);
+
 		email->type = value;
 		break;
 	default:
@@ -1843,16 +1962,16 @@ static int __ctsvc_url_set_int(contacts_record_h record, unsigned int property_i
 	case CTSVC_PROPERTY_URL_ID:
 		url->id = value;
 		break;
-/*
-		CTS_ERR("Invalid parameter : property_id(%d) is a read-only value (url)", property_id);
-		return CONTACTS_ERROR_INVALID_PARAMETER;
-*/
 	case CTSVC_PROPERTY_URL_CONTACT_ID:
 		RETVM_IF(url->id > 0, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (url)", property_id);
 		url->contact_id = value;
 		break;
 	case CTSVC_PROPERTY_URL_TYPE:
+		RETVM_IF(value < CONTACTS_URL_TYPE_OTHER
+						|| value > CONTACTS_URL_TYPE_WORK ,
+				CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : url type is in invalid range (%d)", value);
+
 		url->type = value;
 		break;
 	default:
@@ -1870,23 +1989,22 @@ static int __ctsvc_event_set_int(contacts_record_h record, unsigned int property
 	case CTSVC_PROPERTY_EVENT_ID:
 		event->id = value;
 		break;
-/*
-		CTS_ERR("Invalid parameter : property_id(%d) is a read-only value (event)", property_id);
-		return CONTACTS_ERROR_INVALID_PARAMETER;
-*/
 	case CTSVC_PROPERTY_EVENT_CONTACT_ID:
 		RETVM_IF(event->id > 0, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (event)", property_id);
 		event->contact_id = value;
 		break;
 	case CTSVC_PROPERTY_EVENT_TYPE:
+		RETVM_IF(value < CONTACTS_EVENT_TYPE_OTHER
+						|| value > CONTACTS_EVENT_TYPE_ANNIVERSARY,
+				CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : event type is in invalid range (%d)", value);
 		event->type = value;
 		break;
 	case CTSVC_PROPERTY_EVENT_DATE:
 		event->date = value;
 		break;
-	case CTSVC_PROPERTY_EVENT_LUNAR_DATE:
-		event->lunar_date = value;
+	case CTSVC_PROPERTY_EVENT_CALENDAR_TYPE:
+		event->calendar_type = value;
 		break;
 	default:
 		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(event)", property_id);
@@ -1903,10 +2021,6 @@ static int __ctsvc_nickname_set_int(contacts_record_h record, unsigned int prope
 	case CTSVC_PROPERTY_NICKNAME_ID:
 		nickname->id = value;
 		break;
-/*
-		CTS_ERR("Invalid parameter : property_id(%d) is a read-only value (nickname)", property_id);
-		return CONTACTS_ERROR_INVALID_PARAMETER;
-*/
 	case CTSVC_PROPERTY_NICKNAME_CONTACT_ID:
 		RETVM_IF(nickname->id > 0, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (nickname)", property_id);
@@ -1927,16 +2041,15 @@ static int __ctsvc_address_set_int(contacts_record_h record, unsigned int proper
 	case CTSVC_PROPERTY_ADDRESS_ID:
 		address->id = value;
 		break;
-/*
-		CTS_ERR("Invalid parameter : property_id(%d) is a read-only value (address)", property_id);
-		return CONTACTS_ERROR_INVALID_PARAMETER;
-*/
 	case CTSVC_PROPERTY_ADDRESS_CONTACT_ID:
 		RETVM_IF(address->id > 0, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (address)", property_id);
 		address->contact_id = value;
 		break;
 	case CTSVC_PROPERTY_ADDRESS_TYPE:
+		RETVM_IF(value < CONTACTS_ADDRESS_TYPE_OTHER
+						|| value > CONTACTS_ADDRESS_TYPE_PARCEL,
+				CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : address type is %d", value);
 		address->type = value;
 		break;
 	default:
@@ -1954,16 +2067,16 @@ static int __ctsvc_messenger_set_int(contacts_record_h record, unsigned int prop
 	case CTSVC_PROPERTY_MESSENGER_ID:
 		messenger->id = value;
 		break;
-/*
-		CTS_ERR("Invalid parameter : property_id(%d) is a read-only value (messenger)", property_id);
-		return CONTACTS_ERROR_INVALID_PARAMETER;
-*/
 	case CTSVC_PROPERTY_MESSENGER_CONTACT_ID:
 		RETVM_IF(messenger->id > 0, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (messenger)", property_id);
 		messenger->contact_id = value;
 		break;
 	case CTSVC_PROPERTY_MESSENGER_TYPE:
+		RETVM_IF(value < CONTACTS_MESSENGER_TYPE_OTHER
+							|| value > CONTACTS_MESSENGER_TYPE_IRC,
+					CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : messenger type is in invalid range (%d)", value);
+
 		messenger->type = value;
 		break;
 	default:
@@ -1981,16 +2094,14 @@ static int __ctsvc_group_relation_set_int(contacts_record_h record, unsigned int
 	case CTSVC_PROPERTY_GROUP_RELATION_ID:
 		group->id = value;
 		break;
-/*
-		CTS_ERR("Invalid parameter : property_id(%d) is a read-only value (group relation)", property_id);
-		return CONTACTS_ERROR_INVALID_PARAMETER;
-*/
 	case CTSVC_PROPERTY_GROUP_RELATION_CONTACT_ID:
 		RETVM_IF(group->id > 0, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (group)", property_id);
 		group->contact_id = value;
 		break;
 	case CTSVC_PROPERTY_GROUP_RELATION_GROUP_ID:
+		RETVM_IF(group->id > 0, CONTACTS_ERROR_INVALID_PARAMETER,
+				"Invalid parameter : property_id(%d) is a read-only value (group)", property_id);
 		group->group_id = value;
 		break;
 	default:
@@ -2008,10 +2119,6 @@ static int __ctsvc_activity_set_int(contacts_record_h record, unsigned int prope
 	case CTSVC_PROPERTY_ACTIVITY_ID:
 		activity->id = value;
 		break;
-/*
-		CTS_ERR("Invalid parameter : property_id(%d) is a read-only value (activity)", property_id);
-		return CONTACTS_ERROR_INVALID_PARAMETER;
-*/
 	case CTSVC_PROPERTY_ACTIVITY_CONTACT_ID:
 		RETVM_IF(activity->id > 0, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (activity)", property_id);
@@ -2056,10 +2163,6 @@ static int __ctsvc_profile_set_int(contacts_record_h record, unsigned int proper
 	case CTSVC_PROPERTY_PROFILE_ID:
 		profile->id = value;
 		break;
-/*
-		CTS_ERR("Invalid parameter : property_id(%d) is a read-only value (profile)", property_id);
-		return CONTACTS_ERROR_INVALID_PARAMETER;
-*/
 	case CTSVC_PROPERTY_PROFILE_CONTACT_ID:
 		RETVM_IF(profile->id > 0, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (profile)", property_id);
@@ -2083,16 +2186,16 @@ static int __ctsvc_relationship_set_int(contacts_record_h record, unsigned int p
 	case CTSVC_PROPERTY_RELATIONSHIP_ID:
 		relationship->id = value;
 		break;
-/*
-		CTS_ERR("Invalid parameter : property_id(%d) is a read-only value (relationship)", property_id);
-		return CONTACTS_ERROR_INVALID_PARAMETER;
-*/
 	case CTSVC_PROPERTY_RELATIONSHIP_CONTACT_ID:
 		RETVM_IF(relationship->id > 0, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (relationship)", property_id);
 		relationship->contact_id = value;
 		break;
 	case CTSVC_PROPERTY_RELATIONSHIP_TYPE:
+		RETVM_IF(value < CONTACTS_RELATIONSHIP_TYPE_OTHER
+						|| value > CONTACTS_RELATIONSHIP_TYPE_CUSTOM,
+				CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : relationship type is in invalid range (%d)", value);
+
 		relationship->type = value;
 		break;
 	default:
@@ -2110,16 +2213,15 @@ static int __ctsvc_image_set_int(contacts_record_h record, unsigned int property
 	case CTSVC_PROPERTY_IMAGE_ID:
 		image->id = value;
 		break;
-/*
-		CTS_ERR("Invalid parameter : property_id(%d) is a read-only value (image)", property_id);
-		return CONTACTS_ERROR_INVALID_PARAMETER;
-*/
 	case CTSVC_PROPERTY_IMAGE_CONTACT_ID:
 		RETVM_IF(image->id > 0, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (image)", property_id);
 		image->contact_id = value;
 		break;
 	case CTSVC_PROPERTY_IMAGE_TYPE:
+		RETVM_IF(value < CONTACTS_IMAGE_TYPE_OTHER || CONTACTS_IMAGE_TYPE_CUSTOM < value,
+				CONTACTS_ERROR_INVALID_PARAMETER,
+				"Invalid parameter : image type is in invalid range (%d)", value);
 		image->type = value;
 		break;
 	default:
@@ -2137,10 +2239,6 @@ static int __ctsvc_extension_set_int(contacts_record_h record, unsigned int prop
 	case CTSVC_PROPERTY_EXTENSION_ID:
 		extension->id = value;
 		break;
-/*
-		CTS_ERR("Invalid parameter : property_id(%d) is a read-only value (extension)", property_id);
-		return CONTACTS_ERROR_INVALID_PARAMETER;
-*/
 	case CTSVC_PROPERTY_EXTENSION_CONTACT_ID:
 		RETVM_IF(extension->id > 0, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (extension)", property_id);
@@ -2254,7 +2352,7 @@ static int __ctsvc_contact_get_record_list_p(contacts_record_h record,
 }
 
 static int __ctsvc_contact_get_child_record_count(contacts_record_h record,
-		unsigned int property_id, unsigned int *count )
+		unsigned int property_id, int *count )
 {
 	int ret;
 	contacts_list_h list = NULL;
@@ -2274,7 +2372,7 @@ static int __ctsvc_contact_get_child_record_at_p(contacts_record_h record,
 		unsigned int property_id, int index, contacts_record_h* out_record )
 {
 	int ret;
-	unsigned int count;
+	int count;
 	contacts_list_h list = NULL;
 
 	ret = __ctsvc_contact_get_record_list_p(record, property_id, &list);
@@ -2295,7 +2393,7 @@ static int __ctsvc_contact_clone_child_record_list(contacts_record_h record,
 		unsigned int property_id, contacts_list_h* out_list )
 {
 	int ret;
-	unsigned int count;
+	int count;
 	contacts_list_h list = NULL;
 
 	ret = __ctsvc_contact_get_record_list_p(record, property_id, &list);
@@ -3203,6 +3301,10 @@ static int __ctsvc_company_set_str(contacts_record_h record, unsigned int proper
 		FREEandSTRDUP(company->role, str);
 		break;
 	case CTSVC_PROPERTY_COMPANY_LOGO:
+		if (company->logo && company->is_vcard && (NULL == str || 0 != strcmp(company->logo, str))) {
+			company->is_vcard = false;
+			__ctsvc_temp_image_hash_table_remove(company->logo);
+		}
 		FREEandSTRDUP(company->logo, str);
 		break;
 	case CTSVC_PROPERTY_COMPANY_LOCATION:
@@ -3495,6 +3597,10 @@ static int __ctsvc_image_set_str(contacts_record_h record, unsigned int property
 		FREEandSTRDUP(image->label, str);
 		break;
 	case CTSVC_PROPERTY_IMAGE_PATH:
+		if (image->path && image->is_vcard && (NULL == str || 0 != strcmp(image->path, str))) {
+			image->is_vcard = false;
+			__ctsvc_temp_image_hash_table_remove(image->path);
+		}
 		FREEandSTRDUP(image->path, str);
 		break;
 	default :
@@ -3622,8 +3728,8 @@ static int __ctsvc_event_get_bool(contacts_record_h record, unsigned int propert
 {
 	ctsvc_event_s *event = (ctsvc_event_s *)record;
 	switch (property_id) {
-	case CTSVC_PROPERTY_EVENT_IS_LUNAR:
-		*value = event->is_lunar;
+	case CTSVC_PROPERTY_EVENT_IS_LEAP_MONTH:
+		*value = event->is_leap_month;
 		break;
 	default:
 		CTS_ERR("Invalid parameter : property_id(0x%x) is not supported in value(event)", property_id);
@@ -3720,8 +3826,8 @@ static int __ctsvc_event_set_bool(contacts_record_h record, unsigned int propert
 	ctsvc_event_s *event = (ctsvc_event_s *)record;
 
 	switch(property_id) {
-	case CTSVC_PROPERTY_EVENT_IS_LUNAR:
-		event->is_lunar = value;
+	case CTSVC_PROPERTY_EVENT_IS_LEAP_MONTH:
+		event->is_leap_month = value;
 		break;
 	default:
 		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(event)", property_id);
@@ -3939,12 +4045,15 @@ static int __ctsvc_company_clone(contacts_record_h record, contacts_record_h *ou
 	out_data->contact_id = src_data->contact_id;
 	out_data->is_default = src_data->is_default;
 	out_data->type = src_data->type;
+	out_data->is_vcard = src_data->is_vcard;
 	out_data->label = SAFE_STRDUP(src_data->label);
 	out_data->name = SAFE_STRDUP(src_data->name);
 	out_data->department = SAFE_STRDUP(src_data->department);
 	out_data->job_title = SAFE_STRDUP(src_data->job_title);
 	out_data->role = SAFE_STRDUP(src_data->role);
 	out_data->assistant_name = SAFE_STRDUP(src_data->assistant_name);
+	if (src_data->logo && src_data->is_vcard)
+		__ctsvc_temp_image_hash_table_insert(src_data->logo);
 	out_data->logo = SAFE_STRDUP(src_data->logo);
 	out_data->location = SAFE_STRDUP(src_data->location);
 	out_data->description = SAFE_STRDUP(src_data->description);
@@ -3994,8 +4103,8 @@ static int __ctsvc_event_clone(contacts_record_h record, contacts_record_h *out_
 	out_data->type = src_data->type;
 	out_data->label = SAFE_STRDUP(src_data->label);
 	out_data->date = src_data->date;
-	out_data->is_lunar = src_data->is_lunar;
-	out_data->lunar_date = src_data->lunar_date;
+	out_data->calendar_type = src_data->calendar_type;
+	out_data->is_leap_month = src_data->is_leap_month;
 
 	CTSVC_RECORD_COPY_BASE(&(out_data->base), &(src_data->base));
 
@@ -4240,7 +4349,10 @@ static int __ctsvc_image_clone(contacts_record_h record, contacts_record_h *out_
 	out_data->id = src_data->id;
 	out_data->contact_id = src_data->contact_id;
 	out_data->type = src_data->type;
+	out_data->is_vcard = src_data->is_vcard;
 	out_data->label = SAFE_STRDUP(src_data->label);
+	if (src_data->path && src_data->is_vcard)
+		__ctsvc_temp_image_hash_table_insert(src_data->path);
 	out_data->path = SAFE_STRDUP(src_data->path);
 
 	CTSVC_RECORD_COPY_BASE(&(out_data->base), &(src_data->base));

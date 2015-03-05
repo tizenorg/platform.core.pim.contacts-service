@@ -18,6 +18,7 @@
  */
 
 #include <glib.h>
+#include <stdlib.h>
 #include <pims-ipc-data.h>
 #include <security-server.h>
 
@@ -50,7 +51,7 @@ static int __ctsvc_ipc_get_cookie_for_access_control(pims_ipc_data_h *indata)
 	// Access control : get cookie from security-server
 	cookie_size = security_server_get_cookie_size();
 	if (cookie_size <= 0) {
-		CTS_ERR("security_server_get_cookie_size");
+		CTS_ERR("security_server_get_cookie_size fail(%d)", cookie_size);
 		return CONTACTS_ERROR_SYSTEM;
 	}
 
@@ -89,7 +90,7 @@ static int __ctsvc_ipc_get_cookie_for_access_control(pims_ipc_data_h *indata)
 	else {
 		CTS_ERR("g_base64_encode fail");
 		pims_ipc_data_destroy(data);
-		return CONTACTS_ERROR_INTERNAL;
+		return CONTACTS_ERROR_SYSTEM;
 	}
 
 	*indata = data;
@@ -107,8 +108,14 @@ int ctsvc_ipc_connect_on_thread(void)
 	if (__contacts_ipc == NULL) {
 		__contacts_ipc = pims_ipc_create(CTSVC_IPC_SOCKET_PATH);
 		if (__contacts_ipc == NULL) {
-			CTS_ERR("pims_ipc_create() Failed(%d)", CONTACTS_ERROR_IPC_NOT_AVALIABLE);
-			return CONTACTS_ERROR_IPC_NOT_AVALIABLE;
+			if (errno == EACCES) {
+				CTS_ERR("pims_ipc_create() Failed(%d)", CONTACTS_ERROR_PERMISSION_DENIED);
+				return CONTACTS_ERROR_PERMISSION_DENIED;
+			}
+			else {
+				CTS_ERR("pims_ipc_create() Failed(%d)", CONTACTS_ERROR_IPC_NOT_AVALIABLE);
+				return CONTACTS_ERROR_IPC_NOT_AVALIABLE;
+			}
 		}
 	}
 	else {
@@ -188,7 +195,7 @@ pims_ipc_h ctsvc_get_ipc_handle()
 {
 	if(__contacts_ipc == NULL) {
 		if(__contacts_global_ipc == NULL ) {
-			ASSERT_NOT_REACHED("IPC haven't been initialized yet.");
+			CTS_ERR("IPC haven't been initialized yet.");
 			return NULL;
 		}
 		CTS_DBG("fallback to global ipc channel");
@@ -226,8 +233,14 @@ int ctsvc_ipc_connect(void)
 	if (__contacts_global_ipc == NULL) {
 		__contacts_global_ipc = pims_ipc_create(CTSVC_IPC_SOCKET_PATH);
 		if (__contacts_global_ipc == NULL) {
-			CTS_ERR("[GLOBAL_IPC_CHANNEL] pims_ipc_create() Failed(%d)", CONTACTS_ERROR_IPC_NOT_AVALIABLE);
-			return CONTACTS_ERROR_IPC_NOT_AVALIABLE;
+			if (errno == EACCES) {
+				CTS_ERR("[GLOBAL_IPC_CHANNEL] pims_ipc_create() Failed(%d)", CONTACTS_ERROR_PERMISSION_DENIED);
+				return CONTACTS_ERROR_PERMISSION_DENIED;
+			}
+			else {
+				CTS_ERR("[GLOBAL_IPC_CHANNEL] pims_ipc_create() Failed(%d)", CONTACTS_ERROR_IPC_NOT_AVALIABLE);
+				return CONTACTS_ERROR_IPC_NOT_AVALIABLE;
+			}
 		}
 	}
 	else {
@@ -356,5 +369,49 @@ int ctsvc_client_ipc_get_change_version(void)
 		return __contacts_global_change_version;
 
 	return __contacts_change_version;
+}
+
+int ctsvc_ipc_client_check_permission(int permission, bool *result)
+{
+	pims_ipc_data_h indata = NULL;
+	pims_ipc_data_h outdata = NULL;
+	int ret;
+
+	if (result)
+		*result = false;
+
+	indata = pims_ipc_data_create(0);
+	if (indata == NULL) {
+		CTS_ERR("ipc data created fail !");
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
+	}
+
+	ret = ctsvc_ipc_marshal_int(permission, indata);
+	if (ret != CONTACTS_ERROR_NONE) {
+		CTS_ERR("marshal fail");
+		pims_ipc_data_destroy(indata);
+		return ret;
+	}
+
+	if (ctsvc_ipc_call(CTSVC_IPC_MODULE, CTSVC_IPC_SERVER_CHECK_PERMISSION, indata, &outdata) != 0) {
+		CTS_ERR("ctsvc_ipc_call failed");
+		pims_ipc_data_destroy(indata);
+		return CONTACTS_ERROR_IPC;
+	}
+
+	pims_ipc_data_destroy(indata);
+
+	if (outdata) {
+		unsigned int size = 0;
+		ret = *(int*) pims_ipc_data_get(outdata,&size);
+
+		if (ret == CONTACTS_ERROR_NONE) {
+			if (result)
+				*result = *(bool*) pims_ipc_data_get(outdata, &size);
+		}
+		pims_ipc_data_destroy(outdata);
+	}
+
+	return ret;
 }
 

@@ -24,6 +24,7 @@
 #include "ctsvc_utils.h"
 #include "ctsvc_person.h"
 #include "ctsvc_notification.h"
+#include "ctsvc_db_access_control.h"
 #include "ctsvc_db_plugin_addressbook_helper.h"
 
 int ctsvc_addressbook_reset_internal_addressbook(void)
@@ -34,6 +35,16 @@ int ctsvc_addressbook_reset_internal_addressbook(void)
 
 	ret = ctsvc_begin_trans();
 	RETVM_IF(CONTACTS_ERROR_NONE > ret, ret, "DB error : ctsvc_begin_trans() Failed(%d)", ret);
+
+	ret = ctsvc_is_owner(0);
+	if (CONTACTS_ERROR_NONE != ret) {
+		if (CONTACTS_ERROR_PERMISSION_DENIED == ret)
+			CTS_ERR("Does not have permission of address_book (0)");
+		else
+			CTS_ERR("ctsvc_is_owner Fail(%d)", ret);
+		ctsvc_end_trans(false);
+		return ret;
+	}
 
 	snprintf(query, sizeof(query), "UPDATE %s SET deleted=1, person_id=0, "
 			"changed_ver = ((SELECT ver FROM cts_version) + 1) WHERE addressbook_id = %d",
@@ -122,7 +133,7 @@ int ctsvc_addressbook_delete(int account_id)
 			CTS_TABLE_ADDRESSBOOKS, account_id);
 	ret = ctsvc_query_get_first_int_result(query, &addressbook_id);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB error : ctsvc_query_exec() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_query_get_first_int_result() Failed(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
@@ -130,7 +141,7 @@ int ctsvc_addressbook_delete(int account_id)
 	if (addressbook_id == 0) {
 		ret = ctsvc_addressbook_reset_internal_addressbook();
 		if (ret == CONTACTS_ERROR_NONE)
-			ctsvc_end_trans(true);
+			ret = ctsvc_end_trans(true);
 		else
 			ctsvc_end_trans(false);
 		return ret;

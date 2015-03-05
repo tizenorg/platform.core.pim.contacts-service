@@ -1,5 +1,5 @@
 /*
- * Contacts Service Helper
+ * Contacts Service
  *
  * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
  *
@@ -19,10 +19,12 @@
 #ifndef __CTSVC_SERVER_SIM_H__
 #define __CTSVC_SERVER_SIM_H__
 
+#include <tapi_type.h>
+
 typedef struct {
 	int sim_index;
 	int contact_id;
-	int next_index;
+	int addressbook_id;
 	char *name;
 	char *number;
 	char *anr1;
@@ -35,11 +37,14 @@ typedef struct {
 	char *nickname;
 }sim_contact_s;
 
-int ctsvc_server_sim_initialize(void);
-int ctsvc_server_sim_finalize(void);
-int ctsvc_server_sim_import(void* data);
-bool ctsvc_server_sim_get_init_completed(void);
-void ctsvc_server_sim_destroy_contact_record(sim_contact_s *record);
+
+int ctsvc_server_sim_init(void);
+int ctsvc_server_sim_final(void);
+
+int ctsvc_server_sim_import_contact(void* data, int sim_slot_no);
+int ctsvc_server_sim_get_info_id_by_sim_slot_no(int sim_slot_no);
+int ctsvc_server_sim_get_sim_slot_no_by_info_id(int sim_info_id);
+int ctsvc_server_socket_get_sim_init_status(void* data, int sim_slot_no);
 
 #endif // __CTSVC_SERVER_SIM_H__
 

@@ -21,6 +21,7 @@
 #include <pims-ipc-data.h>
 
 #include "contacts.h"
+#include "contacts_phone_log_internal.h"
 #include "ctsvc_internal.h"
 #include "ctsvc_ipc_define.h"
 #include "ctsvc_client_ipc.h"
@@ -28,6 +29,10 @@
 
 API int contacts_phone_log_reset_statistics(void)
 {
+#ifndef ENABLE_LOG_FEATURE
+	return CONTACTS_ERROR_NOT_SUPPORTED;
+#endif // ENABLE_LOG_FEATURE
+
 	int ret = CONTACTS_ERROR_NONE;
 
 	pims_ipc_data_h indata = NULL;
@@ -46,12 +51,14 @@ API int contacts_phone_log_reset_statistics(void)
 	if (ctsvc_ipc_call(CTSVC_IPC_PHONELOG_MODULE, CTSVC_IPC_SERVER_PHONELOG_RESET_STATISTICS, indata, &outdata) != 0)
 	{
 		CTS_ERR("ctsvc_ipc_call failed");
+		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
 	}
 
 	pims_ipc_data_destroy(indata);
 
-	if (outdata) {
+	if (outdata)
+	{
 		// check result
 		unsigned int size = 0;
 		ret = *(int*) pims_ipc_data_get(outdata, &size);
@@ -66,10 +73,15 @@ API int contacts_phone_log_reset_statistics(void)
 	}
 
 	return ret;
+
 }
 
 API int contacts_phone_log_delete(contacts_phone_log_delete_e op, ...)
 {
+#ifndef ENABLE_LOG_FEATURE
+	return CONTACTS_ERROR_NOT_SUPPORTED;
+#endif // ENABLE_LOG_FEATURE
+
 	int ret = CONTACTS_ERROR_NONE;
 
 	pims_ipc_data_h indata = NULL;
@@ -99,8 +111,11 @@ API int contacts_phone_log_delete(contacts_phone_log_delete_e op, ...)
 		va_start(args, op);
 		number = va_arg(args, char *);
 		va_end(args);
-		RETV_IF(NULL == number, CONTACTS_ERROR_INVALID_PARAMETER);
-		ret = ctsvc_ipc_marshal_string( number, indata);
+		if (NULL == number) {
+			pims_ipc_data_destroy(indata);
+			return CONTACTS_ERROR_INVALID_PARAMETER;
+		}
+		ret = ctsvc_ipc_marshal_string(number, indata);
 		if (ret != CONTACTS_ERROR_NONE) {
 			CTS_ERR("ctsvc_ipc_marshal_string fail");
 			pims_ipc_data_destroy(indata);
@@ -112,7 +127,7 @@ API int contacts_phone_log_delete(contacts_phone_log_delete_e op, ...)
 		va_start(args, op);
 		extra_data1 = va_arg(args, int);
 		va_end(args);
-		ret = ctsvc_ipc_marshal_int( extra_data1, indata);
+		ret = ctsvc_ipc_marshal_int(extra_data1, indata);
 		if (ret != CONTACTS_ERROR_NONE) {
 			CTS_ERR("ctsvc_ipc_marshal_int fail");
 			pims_ipc_data_destroy(indata);

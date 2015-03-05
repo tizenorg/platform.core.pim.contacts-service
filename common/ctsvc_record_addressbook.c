@@ -24,6 +24,7 @@
 #include <glib.h>
 
 #include "contacts.h"
+
 #include "ctsvc_internal.h"
 #include "ctsvc_record.h"
 
@@ -35,7 +36,6 @@ static int __ctsvc_addressbook_get_str(contacts_record_h record, unsigned int pr
 static int __ctsvc_addressbook_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_addressbook_set_int(contacts_record_h record, unsigned int property_id, int value);
 static int __ctsvc_addressbook_set_str(contacts_record_h record, unsigned int property_id, const char* str);
-
 
 ctsvc_record_plugin_cb_s addressbook_plugin_cbs = {
 	.create = __ctsvc_addressbook_create,
@@ -114,7 +114,7 @@ static int __ctsvc_addressbook_get_str_real(contacts_record_h record,
 		*out_str = GET_STR(copy, addressbook->name);
 		break;
 	default :
-		ASSERT_NOT_REACHED("This field(%d) is not supported in value(addressbook)", property_id);
+		CTS_ERR("This field(%d) is not supported in value(addressbook)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
@@ -140,7 +140,7 @@ static int __ctsvc_addressbook_set_str(contacts_record_h record,
 		FREEandSTRDUP(addressbook->name, str);
 		break;
 	default :
-		ASSERT_NOT_REACHED("This field(%d) is not supported in value(addressbook)", property_id);
+		CTS_ERR("This field(%d) is not supported in value(addressbook)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
@@ -162,7 +162,7 @@ static int __ctsvc_addressbook_get_int(contacts_record_h record,
 		*out = addressbook->mode;
 		break;
 	default:
-		ASSERT_NOT_REACHED("Invalid parameter : property_id(%d) is not supported in value(addressbook)", property_id);
+		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(addressbook)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
@@ -177,11 +177,10 @@ static int __ctsvc_addressbook_set_int(contacts_record_h record,
 	case CTSVC_PROPERTY_ADDRESSBOOK_ID:
 		addressbook->id = value;
 		break;
-/*
-		ASSERT_NOT_REACHED("Invalid parameter : property_id(%d) is a read-only value (addressbook)", property_id);
-		return CONTACTS_ERROR_INVALID_PARAMETER;
-*/
 	case CTSVC_PROPERTY_ADDRESSBOOK_MODE:
+		RETVM_IF(value != CONTACTS_ADDRESS_BOOK_MODE_NONE
+						&& value != CONTACTS_ADDRESS_BOOK_MODE_READONLY,
+				CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : address_book mode is %d", value);
 		addressbook->mode = value;
 		break;
 	case CTSVC_PROPERTY_ADDRESSBOOK_ACCOUNT_ID:
@@ -190,7 +189,7 @@ static int __ctsvc_addressbook_set_int(contacts_record_h record,
 		addressbook->account_id = value;
 		break;
 	default:
-		ASSERT_NOT_REACHED("Invalid parameter : property_id(%d) is not supported in value(addressbook)", property_id);
+		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(addressbook)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;

@@ -29,10 +29,10 @@
 #include "ctsvc_record.h"
 #include "ctsvc_notification.h"
 
-static int __ctsvc_db_sdn_insert_record( contacts_record_h record, int *id );
+//static int __ctsvc_db_sdn_insert_record( contacts_record_h record, int *id );
 static int __ctsvc_db_sdn_get_record( int id, contacts_record_h* record );
-static int __ctsvc_db_sdn_update_record( contacts_record_h record );
-static int __ctsvc_db_sdn_delete_record( int id );
+//static int __ctsvc_db_sdn_update_record( contacts_record_h record );
+//static int __ctsvc_db_sdn_delete_record( int id );
 static int __ctsvc_db_sdn_get_all_records( int offset, int limit, contacts_list_h* out_list );
 static int __ctsvc_db_sdn_get_records_with_query( contacts_query_h query, int offset, int limit, contacts_list_h* out_list );
 //static int __ctsvc_db_sdn_insert_records(const contacts_list_h in_list, int **ids);
@@ -41,10 +41,10 @@ static int __ctsvc_db_sdn_get_records_with_query( contacts_query_h query, int of
 
 ctsvc_db_plugin_info_s ctsvc_db_plugin_sdn = {
 	.is_query_only = false,
-	.insert_record = __ctsvc_db_sdn_insert_record,
+	.insert_record = NULL,//__ctsvc_db_sdn_insert_record,
 	.get_record = __ctsvc_db_sdn_get_record,
-	.update_record = __ctsvc_db_sdn_update_record,
-	.delete_record = __ctsvc_db_sdn_delete_record,
+	.update_record = NULL,//__ctsvc_db_sdn_update_record,
+	.delete_record = NULL,//__ctsvc_db_sdn_delete_record,
 	.get_all_records = __ctsvc_db_sdn_get_all_records,
 	.get_records_with_query = __ctsvc_db_sdn_get_records_with_query,
 	.insert_records = NULL,//__ctsvc_db_sdn_insert_records,
@@ -73,6 +73,7 @@ static int __ctsvc_db_sdn_value_set(cts_stmt stmt, contacts_record_h *record)
 	sdn->name = SAFE_STRDUP(temp);
 	temp = ctsvc_stmt_get_text(stmt, i++);
 	sdn->number = SAFE_STRDUP(temp);
+	sdn->sim_slot_no = ctsvc_stmt_get_int(stmt, i++);
 
 	return CONTACTS_ERROR_NONE;
 }
@@ -80,7 +81,6 @@ static int __ctsvc_db_sdn_value_set(cts_stmt stmt, contacts_record_h *record)
 static int __ctsvc_db_sdn_get_record( int id, contacts_record_h* out_record )
 {
 	int ret;
-	int len;
 	cts_stmt stmt = NULL;
 	char query[CTS_SQL_MAX_LEN] = {0};
 	contacts_record_h record;
@@ -88,8 +88,8 @@ static int __ctsvc_db_sdn_get_record( int id, contacts_record_h* out_record )
 	RETV_IF(NULL == out_record, CONTACTS_ERROR_INVALID_PARAMETER);
 	*out_record = NULL;
 
-	len = snprintf(query, sizeof(query),
-				"SELECT id, name, number FROM "CTS_TABLE_SDN" WHERE id = %d", id);
+	snprintf(query, sizeof(query),
+				"SELECT id, name, number, sim_slot_no FROM "CTS_TABLE_SDN" WHERE id = %d", id);
 
 	ret = ctsvc_query_prepare(query, &stmt);
 	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
@@ -117,7 +117,7 @@ static int __ctsvc_db_sdn_get_record( int id, contacts_record_h* out_record )
 	return CONTACTS_ERROR_NONE;
 }
 
-
+#if 0
 static int __ctsvc_db_sdn_insert_record( contacts_record_h record, int *id )
 {
 	int ret;
@@ -132,13 +132,14 @@ static int __ctsvc_db_sdn_insert_record( contacts_record_h record, int *id )
 	char query[CTS_SQL_MAX_LEN] = {0};
 
 	snprintf(query, sizeof(query),
-			"INSERT INTO "CTS_TABLE_SDN"(name, number) VALUES(?, ?)");
+			"INSERT INTO "CTS_TABLE_SDN"(name, number, sim_slot_no) VALUES(?, ?, ?)");
 
 	ret = ctsvc_query_prepare(query, &stmt);
 	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
 
 	ctsvc_stmt_bind_text(stmt, 1, sdn->name);
 	ctsvc_stmt_bind_text(stmt, 2, sdn->number);
+	ctsvc_stmt_bind_int(stmt, 3, sdn->sim_slot_no);
 
 	ret = ctsvc_begin_trans();
 	if( ret < CONTACTS_ERROR_NONE ) {
@@ -261,6 +262,7 @@ static int __ctsvc_db_sdn_delete_record( int sdn_id )
 
 	return CONTACTS_ERROR_NONE;
 }
+#endif
 
 static int __ctsvc_db_sdn_get_all_records( int offset, int limit,
 	contacts_list_h* out_list )
@@ -272,7 +274,7 @@ static int __ctsvc_db_sdn_get_all_records( int offset, int limit,
 	contacts_list_h list;
 
 	len = snprintf(query, sizeof(query),
-				"SELECT id, name, number FROM "CTS_TABLE_SDN);
+				"SELECT id, name, number, sim_slot_no FROM "CTS_TABLE_SDN);
 
 	if (0 != limit) {
 		len += snprintf(query+len, sizeof(query)-len, " LIMIT %d", limit);
@@ -362,6 +364,9 @@ static int __ctsvc_db_sdn_get_records_with_query( contacts_query_h query, int of
 			case CTSVC_PROPERTY_SDN_NUMBER:
 				temp = ctsvc_stmt_get_text(stmt, i);
 				sdn->number = SAFE_STRDUP(temp);
+				break;
+			case CTSVC_PROPERTY_SDN_SIM_SLOT_NO:
+				sdn->sim_slot_no = ctsvc_stmt_get_int(stmt, i);
 				break;
 			default:
 				break;

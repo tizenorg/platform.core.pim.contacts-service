@@ -110,6 +110,8 @@ static gboolean __ctsvc_inotify_gio_cb(GIOChannel *src, GIOCondition cond, gpoin
 					else
 						break;
 				}
+				if (ie.len <= ret)
+					break;
 				ie.len -= ret;
 			}
 		}
@@ -234,6 +236,8 @@ static inline const char* __ctsvc_noti_get_file_path(const char *view_uri)
 		return CTSVC_NOTI_GROUP_RELATION_CHANGED;
 	case CTSVC_RECORD_ACTIVITY:
 		return CTSVC_NOTI_ACTIVITY_CHANGED;
+	case CTSVC_RECORD_ACTIVITY_PHOTO:
+		return CTSVC_NOTI_ACTIVITY_PHOTO_CHANGED;
 	case CTSVC_RECORD_PROFILE:
 		return CTSVC_NOTI_PROFILE_CHANGED;
 	case CTSVC_RECORD_RELATIONSHIP:
@@ -294,7 +298,7 @@ int ctsvc_inotify_subscribe(const char *view_uri,
 	if (same_noti) {
 		__ctsvc_inotify_watch(__inoti_fd, path);
 		CTS_ERR("The same callback(%s) is already exist", view_uri);
-		return CONTACTS_ERROR_SYSTEM;
+		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 
 	ret = __ctsvc_inotify_watch(__inoti_fd, path);

@@ -24,6 +24,7 @@
 #include <glib.h>
 
 #include "contacts.h"
+
 #include "ctsvc_internal.h"
 #include "ctsvc_record.h"
 #include "ctsvc_view.h"
@@ -102,6 +103,7 @@ static int __ctsvc_phonelog_clone(contacts_record_h record, contacts_record_h *o
 	out_data->log_type = src_data->log_type;
 	out_data->extra_data1 = src_data->extra_data1;
 	out_data->extra_data2 = SAFE_STRDUP(src_data->extra_data2);
+	out_data->sim_slot_no = src_data->sim_slot_no;
 
 	CTSVC_RECORD_COPY_BASE(&(out_data->base), &(src_data->base));
 
@@ -129,8 +131,11 @@ static int __ctsvc_phonelog_get_int(contacts_record_h record, unsigned int prope
 	case CTSVC_PROPERTY_PHONELOG_EXTRA_DATA1:
 		*out = phonelog->extra_data1;
 		break;
+	case CTSVC_PROPERTY_PHONELOG_SIM_SLOT_NO:
+		*out = phonelog->sim_slot_no;
+		break;
 	default:
-		ASSERT_NOT_REACHED("Invalid parameter : property_id(%d) is not supported in value(phonelog)", property_id);
+		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(phonelog)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
@@ -148,7 +153,7 @@ static int __ctsvc_phonelog_get_str_real(contacts_record_h record, unsigned int 
 		*out_str = GET_STR(copy, phonelog->extra_data2);
 		break;
 	default :
-		ASSERT_NOT_REACHED("Invalid parameter : property_id(%d) is not supported in value(phonelog)", property_id);
+		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(phonelog)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
@@ -172,10 +177,6 @@ static int __ctsvc_phonelog_set_int(contacts_record_h record, unsigned int prope
 	case CTSVC_PROPERTY_PHONELOG_ID:
 		phonelog->id = value;
 		break;
-/*
-		CTS_ERR("Invalid parameter : property_id(%d) is a read-only value (phonelog)", property_id);
-		return CONTACTS_ERROR_INVALID_PARAMETER;
-*/
 	case CTSVC_PROPERTY_PHONELOG_PERSON_ID:
 		RETVM_IF(phonelog->id > 0, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (phonelog)", property_id);
@@ -187,15 +188,31 @@ static int __ctsvc_phonelog_set_int(contacts_record_h record, unsigned int prope
 		phonelog->log_time = value;
 		break;
 	case CTSVC_PROPERTY_PHONELOG_LOG_TYPE:
-		phonelog->log_type = value;
+		if ((CONTACTS_PLOG_TYPE_NONE <= value
+					&& value <= CONTACTS_PLOG_TYPE_VIDEO_BLOCKED)
+				|| (CONTACTS_PLOG_TYPE_MMS_INCOMMING <= value
+					&& value <= CONTACTS_PLOG_TYPE_MMS_BLOCKED)
+				|| (CONTACTS_PLOG_TYPE_EMAIL_RECEIVED <= value
+					&& value <= CONTACTS_PLOG_TYPE_EMAIL_SENT)
+			)
+			phonelog->log_type = value;
+		else {
+			CTS_ERR("Invalid parameter : log type is in invalid range (%d)", value);
+			return CONTACTS_ERROR_INVALID_PARAMETER;
+		}
 		break;
 	case CTSVC_PROPERTY_PHONELOG_EXTRA_DATA1:
 		RETVM_IF(phonelog->id > 0, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (phonelog)", property_id);
 		phonelog->extra_data1 = value;
 		break;
+	case CTSVC_PROPERTY_PHONELOG_SIM_SLOT_NO:
+		RETVM_IF(phonelog->id > 0, CONTACTS_ERROR_INVALID_PARAMETER,
+			"Invalid parameter : property_id(%d) is a read-only value (phonelog)", property_id);
+		phonelog->sim_slot_no = value;
+		break;
 	default:
-		ASSERT_NOT_REACHED("Invalid parameter : property_id(%d) is not supported in value(phonelog)", property_id);
+		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(phonelog)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
@@ -215,7 +232,7 @@ static int __ctsvc_phonelog_set_str(contacts_record_h record, unsigned int prope
 		FREEandSTRDUP(phonelog->extra_data2, str);
 		break;
 	default :
-		ASSERT_NOT_REACHED("Invalid parameter : property_id(%d) is not supported in value(phonelog)", property_id);
+		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(phonelog)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;

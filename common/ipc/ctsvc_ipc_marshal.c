@@ -32,10 +32,14 @@ extern ctsvc_ipc_marshal_record_plugin_cb_s _ctsvc_ipc_record_my_profile_plugin_
 extern ctsvc_ipc_marshal_record_plugin_cb_s _ctsvc_ipc_record_addressbook_plugin_cb;
 extern ctsvc_ipc_marshal_record_plugin_cb_s _ctsvc_ipc_record_group_plugin_cb;
 extern ctsvc_ipc_marshal_record_plugin_cb_s _ctsvc_ipc_record_person_plugin_cb;
+#ifdef ENABLE_LOG_FEATURE
 extern ctsvc_ipc_marshal_record_plugin_cb_s _ctsvc_ipc_record_phonelog_plugin_cb;
+#endif // ENABLE_LOG_FEATURE
 extern ctsvc_ipc_marshal_record_plugin_cb_s _ctsvc_ipc_record_result_plugin_cb;
+#ifdef ENABLE_SIM_FEATURE
 extern ctsvc_ipc_marshal_record_plugin_cb_s _ctsvc_ipc_record_sdn_plugin_cb;
 extern ctsvc_ipc_marshal_record_plugin_cb_s _ctsvc_ipc_record_speeddial_plugin_cb;
+#endif // ENABLE_SIM_FEATURE
 extern ctsvc_ipc_marshal_record_plugin_cb_s _ctsvc_ipc_record_updated_info_plugin_cb;
 
 extern ctsvc_ipc_marshal_record_plugin_cb_s _ctsvc_ipc_record_simple_contact_plugin_cb;
@@ -82,12 +86,16 @@ static ctsvc_ipc_marshal_record_plugin_cb_s* __ctsvc_ipc_marshal_get_plugin_cb(c
 		return (&_ctsvc_ipc_record_my_profile_plugin_cb);
 	case CTSVC_RECORD_UPDATED_INFO:
 		return (&_ctsvc_ipc_record_updated_info_plugin_cb);
+#ifdef ENABLE_LOG_FEATURE
 	case CTSVC_RECORD_PHONELOG:
 		return (&_ctsvc_ipc_record_phonelog_plugin_cb);
+#endif // ENABLE_LOG_FEATURE
+#ifdef ENABLE_SIM_FEATURE
 	case CTSVC_RECORD_SPEEDDIAL:
 		return (&_ctsvc_ipc_record_speeddial_plugin_cb);
 	case CTSVC_RECORD_SDN:
 		return (&_ctsvc_ipc_record_sdn_plugin_cb);
+#endif // ENABLE_SIM_FEATURE
 	case CTSVC_RECORD_RESULT:
 		return (&_ctsvc_ipc_record_result_plugin_cb);
 	case CTSVC_RECORD_SIMPLE_CONTACT:
@@ -126,7 +134,6 @@ static ctsvc_ipc_marshal_record_plugin_cb_s* __ctsvc_ipc_marshal_get_plugin_cb(c
 		return (&_ctsvc_ipc_record_image_plugin_cb);
 	case CTSVC_RECORD_EXTENSION:
 		return (&_ctsvc_ipc_record_extension_plugin_cb);
-
 	default:
 		ASSERT_NOT_REACHED("Unimplemented IPC module (%d)", type);
 		return NULL;
@@ -194,7 +201,7 @@ static int __ctsvc_ipc_unmarshal_composite_filter(const pims_ipc_data_h ipc_data
 			com_filter = (ctsvc_composite_filter_s*)calloc(1,sizeof(ctsvc_composite_filter_s));
 			if (com_filter == NULL)
 			{
-				CTS_ERR("malloc fail");
+				CTS_ERR("calloc fail");
 				ret = CONTACTS_ERROR_OUT_OF_MEMORY;
 				goto ERROR_RETURN;
 			}
@@ -213,7 +220,7 @@ static int __ctsvc_ipc_unmarshal_composite_filter(const pims_ipc_data_h ipc_data
 			attr_filter = (ctsvc_attribute_filter_s*)calloc(1,sizeof(ctsvc_attribute_filter_s));
 			if (attr_filter == NULL)
 			{
-				CTS_ERR("malloc fail");
+				CTS_ERR("calloc fail");
 				ret = CONTACTS_ERROR_OUT_OF_MEMORY;
 				goto ERROR_RETURN;
 			}
@@ -585,7 +592,6 @@ int ctsvc_ipc_unmarshal_string(const pims_ipc_data_h ipc_data, char** ppbufchar)
 	{
 		*ppbufchar = SAFE_STRDUP(str);
 	}
-	CTS_VERBOSE("string set %s",*ppbufchar);
 
 	return ret;
 }
@@ -1083,7 +1089,7 @@ int ctsvc_ipc_marshal_query(const contacts_query_h query, pims_ipc_data_h ipc_da
 
 int ctsvc_ipc_unmarshal_list(const pims_ipc_data_h ipc_data, contacts_list_h* list)
 {
-	unsigned int count = 0;
+	int count = 0;
 	unsigned int deleted_count = 0;
 	contacts_record_h record;
 	int ret = CONTACTS_ERROR_NONE;
@@ -1097,7 +1103,7 @@ int ctsvc_ipc_unmarshal_list(const pims_ipc_data_h ipc_data, contacts_list_h* li
 		return CONTACTS_ERROR_OUT_OF_MEMORY;
 	}
 
-	if (ctsvc_ipc_unmarshal_unsigned_int(ipc_data,&(count)) != CONTACTS_ERROR_NONE)
+	if (ctsvc_ipc_unmarshal_int(ipc_data,&(count)) != CONTACTS_ERROR_NONE)
 	{
 		contacts_list_destroy(*list, true);
 		CTS_ERR("_ctsvc_ipc_unmarshal fail");
@@ -1122,10 +1128,10 @@ int ctsvc_ipc_unmarshal_list(const pims_ipc_data_h ipc_data, contacts_list_h* li
 		}
 	}
 
-	if (ctsvc_ipc_unmarshal_unsigned_int(ipc_data,&deleted_count) != CONTACTS_ERROR_NONE)
-	{
+	if (ctsvc_ipc_unmarshal_unsigned_int(ipc_data,&deleted_count) != CONTACTS_ERROR_NONE) {
 		CTS_ERR("_ctsvc_ipc_unmarshal fail");
-		return CONTACTS_ERROR_INVALID_PARAMETER;
+		ret = CONTACTS_ERROR_INVALID_PARAMETER;
+		goto ERROR_RETURN;
 	}
 
 	i = 0;
@@ -1161,15 +1167,15 @@ ERROR_RETURN:
 int ctsvc_ipc_unmarshal_child_list(const pims_ipc_data_h ipc_data, contacts_list_h* list)
 {
 	unsigned int i = 0;
-	unsigned int count = 0;
+	int count = 0;
 	unsigned int deleted_count = 0;
 	contacts_record_h record;
 
 	RETV_IF(NULL == list, CONTACTS_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == ipc_data, CONTACTS_ERROR_INVALID_PARAMETER);
 
-	if (ctsvc_ipc_unmarshal_unsigned_int(ipc_data,&(count)) != CONTACTS_ERROR_NONE) {
-		CTS_ERR("ctsvc_ipc_unmarshal_unsigned_int fail");
+	if (ctsvc_ipc_unmarshal_int(ipc_data,&(count)) != CONTACTS_ERROR_NONE) {
+		CTS_ERR("ctsvc_ipc_unmarshal_int fail");
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 
@@ -1208,7 +1214,7 @@ int ctsvc_ipc_unmarshal_child_list(const pims_ipc_data_h ipc_data, contacts_list
 
 int ctsvc_ipc_marshal_list(const contacts_list_h list, pims_ipc_data_h ipc_data)
 {
-	unsigned int count = 0;
+	int count = 0;
 	unsigned int deleted_count = 0;
 	contacts_record_h record;
 

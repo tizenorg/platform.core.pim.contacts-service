@@ -54,6 +54,7 @@ API int contacts_filter_create( const char* view_uri, contacts_filter_h* out_fil
 
 	RETV_IF(NULL == view_uri, CONTACTS_ERROR_INVALID_PARAMETER);
 	com_filter = (ctsvc_composite_filter_s *)calloc(1, sizeof(ctsvc_composite_filter_s));
+	RETV_IF(NULL == com_filter, CONTACTS_ERROR_OUT_OF_MEMORY);
 
 	com_filter->filter_type = CTSVC_FILTER_COMPOSITE;
 	com_filter->view_uri = strdup(view_uri);
@@ -174,6 +175,9 @@ API int contacts_filter_add_int( contacts_filter_h filter, unsigned int property
 	int ret;
 
 	RETV_IF(NULL == filter, CONTACTS_ERROR_INVALID_PARAMETER);
+	RETVM_IF(property_id == CTSVC_PROPERTY_PHONELOG_SIM_SLOT_NO &&
+			(match >= CONTACTS_MATCH_GREATER_THAN && match <= CONTACTS_MATCH_LESS_THAN_OR_EQUAL),
+			CONTACTS_ERROR_INVALID_PARAMETER, "Not support this condition");
 
 	com_filter = (ctsvc_composite_filter_s*)filter;
 	ret = __ctsvc_attribute_filter_create(com_filter, property_id, match, CTSVC_FILTER_INT, &int_filter);

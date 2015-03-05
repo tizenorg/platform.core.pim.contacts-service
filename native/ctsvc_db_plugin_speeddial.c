@@ -93,7 +93,7 @@ static int __ctsvc_db_speeddial_insert_record( contacts_record_h record, int *id
 	ret = ctsvc_db_change();
 	if (0 < ret) {
 		if (id)
-			*id  = ctsvc_db_get_last_insert_id();
+			*id  = speeddial->dial_number;
 		ctsvc_set_speed_noti();
 	}
 	else {
@@ -125,7 +125,7 @@ static int __ctsvc_db_speeddial_value_set(cts_stmt stmt, contacts_record_h *reco
 	temp = ctsvc_stmt_get_text(stmt, i++);
 	if (temp) {
 		char full_path[CTSVC_IMG_FULL_PATH_SIZE_MAX] = {0};
-		snprintf(full_path, sizeof(full_path), "%s/%s", CTS_IMG_FULL_LOCATION, temp);
+		snprintf(full_path, sizeof(full_path), "%s/%s", CTSVC_CONTACT_IMG_FULL_LOCATION, temp);
 		speeddial->image_thumbnail_path = strdup(full_path);
 	}
 
@@ -136,6 +136,7 @@ static int __ctsvc_db_speeddial_value_set(cts_stmt stmt, contacts_record_h *reco
 	temp = ctsvc_stmt_get_text(stmt, i++);
 	speeddial->number = SAFE_STRDUP(temp);
 	speeddial->dial_number = ctsvc_stmt_get_int(stmt, i++);
+	speeddial->id = speeddial->dial_number; // dial_number is an unique key
 
 	return CONTACTS_ERROR_NONE;
 }
@@ -402,6 +403,7 @@ static int __ctsvc_db_speeddial_get_records_with_query( contacts_query_h query,
 			switch(property_id) {
 			case CTSVC_PROPERTY_SPEEDDIAL_DIAL_NUMBER:
 				speeddial->dial_number = ctsvc_stmt_get_int(stmt, i);
+				speeddial->id = speeddial->dial_number; // dial_number is an unique key
 				break;
 			case CTSVC_PROPERTY_SPEEDDIAL_NUMBER_ID:
 				speeddial->number_id = ctsvc_stmt_get_int(stmt, i);
@@ -427,7 +429,7 @@ static int __ctsvc_db_speeddial_get_records_with_query( contacts_query_h query,
 			case CTSVC_PROPERTY_SPEEDDIAL_IMAGE_THUMBNAIL:
 				temp = ctsvc_stmt_get_text(stmt, i);
 				if (temp) {
-					snprintf(full_path, sizeof(full_path), "%s/%s", CTS_IMG_FULL_LOCATION, temp);
+					snprintf(full_path, sizeof(full_path), "%s/%s", CTSVC_CONTACT_IMG_FULL_LOCATION, temp);
 					speeddial->image_thumbnail_path = strdup(full_path);
 				}
 				break;

@@ -97,6 +97,13 @@ static int __ctsvc_db_group_insert_record( contacts_record_h record, int *id )
 	ret = ctsvc_begin_trans();
 	RETVM_IF( ret < CONTACTS_ERROR_NONE, ret,  "DB error : ctsvc_begin_trans() Failed(%d)", ret);
 
+	if (false == ctsvc_have_ab_write_permission(group->addressbook_id)) {
+		CTS_ERR("ctsvc_have_ab_write_permission fail : does not have permission(addressbook_id : %d)",
+					group->addressbook_id);
+		ctsvc_end_trans(false);
+		return CONTACTS_ERROR_PERMISSION_DENIED;
+	}
+
 	group_prio = __ctsvc_db_group_get_next_group_prio();
 	group->id = ctsvc_db_get_next_id(CTS_TABLE_GROUPS);
 	if (id)
@@ -237,6 +244,14 @@ static int __ctsvc_db_group_update_record( contacts_record_h record )
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 
+	if (false == ctsvc_have_ab_write_permission(addressbook_id)) {
+		CTS_ERR("ctsvc_have_ab_write_permission fail : does not have permission(addressbook_id : %d, group_id : %d)",
+					addressbook_id, group->id);
+		ctsvc_end_trans(false);
+		free(image);
+		return CONTACTS_ERROR_PERMISSION_DENIED;
+	}
+
 	if (ctsvc_record_check_property_flag((ctsvc_record_s *)group, _contacts_group.image_path, CTSVC_PROPERTY_FLAG_DIRTY)) {
 		bool same = false;
 		bool check_permission = 0;
@@ -370,6 +385,13 @@ static int __ctsvc_db_group_delete_record( int id )
 		return ret;
 	}
 
+	if (false == ctsvc_have_ab_write_permission(addressbook_id)) {
+		CTS_ERR("ctsvc_have_ab_write_permission fail : does not have permission(addressbook_id : %d, group_id : %d)",
+					addressbook_id, id);
+		ctsvc_end_trans(false);
+		return CONTACTS_ERROR_PERMISSION_DENIED;
+	}
+
 	snprintf(query, sizeof(query),
 				"SELECT COUNT(contact_id) FROM "CTS_TABLE_GROUP_RELATIONS" WHERE group_id = %d", id);
 	ret = ctsvc_query_get_first_int_result(query, &count);
@@ -451,7 +473,6 @@ static int __ctsvc_db_group_value_set(cts_stmt stmt, contacts_record_h *record)
 static int __ctsvc_db_group_get_record( int id, contacts_record_h *out_record )
 {
 	int ret;
-	int len;
 	cts_stmt stmt = NULL;
 	char query[CTS_SQL_MAX_LEN] = {0};
 	contacts_record_h record;
@@ -459,7 +480,7 @@ static int __ctsvc_db_group_get_record( int id, contacts_record_h *out_record )
 	RETV_IF(NULL == out_record, CONTACTS_ERROR_INVALID_PARAMETER);
 	*out_record = NULL;
 
-	len = snprintf(query, sizeof(query),
+	snprintf(query, sizeof(query),
 			"SELECT group_id, addressbook_id, group_name, extra_data, is_read_only, "
 				"ringtone_path, vibration, message_alert, image_thumbnail_path "
 				"FROM "CTS_TABLE_GROUPS" WHERE group_id = %d", id);
@@ -500,7 +521,10 @@ static int __ctsvc_db_group_get_all_records( int offset, int limit, contacts_lis
 	len = snprintf(query, sizeof(query),
 			"SELECT group_id, addressbook_id, group_name, extra_data, is_read_only, "
 				"ringtone_path, vibration, message_alert, image_thumbnail_path "
-				"FROM "CTS_TABLE_GROUPS" ORDER BY addressbook_id, group_prio");
+				"FROM "CTS_TABLE_GROUPS);
+
+
+	len += snprintf(query+len, sizeof(query)-len, " ORDER BY addressbook_id, group_prio");
 
 	if (0 != limit) {
 		len += snprintf(query+len, sizeof(query)-len, " LIMIT %d", limit);

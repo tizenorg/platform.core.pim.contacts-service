@@ -39,7 +39,7 @@ static int __ctsvc_my_profile_set_int(contacts_record_h record, unsigned int pro
 static int __ctsvc_my_profile_set_str(contacts_record_h record, unsigned int property_id, const char* str );
 static int __ctsvc_my_profile_clone_child_record_list(contacts_record_h record, unsigned int property_id, contacts_list_h* out_list );
 static int __ctsvc_my_profile_get_child_record_at_p(contacts_record_h record, unsigned int property_id, int index, contacts_record_h* out_record );
-static int __ctsvc_my_profile_get_child_record_count(contacts_record_h record, unsigned int property_id, unsigned int *count );
+static int __ctsvc_my_profile_get_child_record_count(contacts_record_h record, unsigned int property_id, int *count );
 static int __ctsvc_my_profile_add_child_record(contacts_record_h record, unsigned int property_id, contacts_record_h child_record );
 static int __ctsvc_my_profile_remove_child_record(contacts_record_h record, unsigned int property_id, contacts_record_h child_record );
 
@@ -178,7 +178,7 @@ static int __ctsvc_my_profile_get_int(contacts_record_h record, unsigned int pro
 		*out = my_profile->changed_time;
 		break;
 	default:
-		ASSERT_NOT_REACHED("Invalid parameter : property_id(%d) is not supported in value(my_profile)", property_id);
+		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(my_profile)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
@@ -293,7 +293,7 @@ static int __ctsvc_my_profile_get_record_list_p(contacts_record_h record,
 }
 
 static int __ctsvc_my_profile_get_child_record_count(contacts_record_h record,
-		unsigned int property_id, unsigned int *count )
+		unsigned int property_id, int *count )
 {
 	int ret;
 	contacts_list_h list = NULL;
@@ -313,7 +313,7 @@ static int __ctsvc_my_profile_get_child_record_at_p(contacts_record_h record,
 		unsigned int property_id, int index, contacts_record_h* out_record )
 {
 	int ret;
-	unsigned int count;
+	int count;
 	contacts_list_h list = NULL;
 
 	ret = __ctsvc_my_profile_get_record_list_p(record, property_id, &list);
@@ -336,7 +336,7 @@ static int __ctsvc_my_profile_clone_child_record_list(contacts_record_h record,
 		unsigned int property_id, contacts_list_h* out_list )
 {
 	int ret;
-	unsigned int count;
+	int count;
 	contacts_list_h list = NULL;
 
 	ret = __ctsvc_my_profile_get_record_list_p(record, property_id, &list);

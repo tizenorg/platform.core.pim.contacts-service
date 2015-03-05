@@ -112,6 +112,7 @@ static inline int __ctsvc_safe_read(int fd, char *buf, int buf_size)
 	return read_size;
 }
 
+#ifdef ENABLE_SIM_FEATURE
 static int __ctsvc_socket_handle_return(int fd, ctsvc_socket_msg_s *msg)
 {
 	CTS_FN_CALL;
@@ -162,15 +163,24 @@ static void __ctsvc_remove_invalid_msg(int fd, int size)
 	}
 }
 
-int ctsvc_request_sim_import(void)
+int ctsvc_request_sim_import(int sim_slot_no)
 {
 	int i, ret;
 	ctsvc_socket_msg_s msg = {0};
+	char src[64] = {0};
 
 	RETVM_IF(-1 == __ctsvc_sockfd, CONTACTS_ERROR_IPC, "socket is not connected");
 
 	msg.type = CTSVC_SOCKET_MSG_TYPE_REQUEST_IMPORT_SIM;
+
+	snprintf(src, sizeof(src), "%d", sim_slot_no);
+	msg.attach_num = 1;
+	msg.attach_sizes[0] = strlen(src);
+
 	ret = __ctsvc_safe_write(__ctsvc_sockfd, (char *)&msg, sizeof(msg));
+	RETVM_IF(-1 == ret, CONTACTS_ERROR_IPC, "__ctsvc_safe_write() Failed(errno = %d)", errno);
+
+	ret = __ctsvc_safe_write(__ctsvc_sockfd, src, msg.attach_sizes[0]);
 	RETVM_IF(-1 == ret, CONTACTS_ERROR_IPC, "__ctsvc_safe_write() Failed(errno = %d)", errno);
 
 	ret = __ctsvc_socket_handle_return(__ctsvc_sockfd, &msg);
@@ -183,16 +193,25 @@ int ctsvc_request_sim_import(void)
 	return msg.val;
 }
 
-int ctsvc_request_sim_get_initialization_status(bool *completed)
+int ctsvc_request_sim_get_initialization_status(int sim_slot_no, bool *completed)
 {
-	int ret =0;
+	int ret = 0;
 	ctsvc_socket_msg_s msg = {0};
 	char dest[CTSVC_SOCKET_MSG_SIZE] = {0};
+	char src[64] = {0};
 
 	RETVM_IF(-1 == __ctsvc_sockfd, CONTACTS_ERROR_IPC, "socket is not connected");
 
 	msg.type = CTSVC_SOCKET_MSG_TYPE_REQUEST_SIM_INIT_COMPLETE;
+
+	snprintf(src, sizeof(src), "%d", sim_slot_no);
+	msg.attach_num = 1;
+	msg.attach_sizes[0] = strlen(src);
+
 	ret = __ctsvc_safe_write(__ctsvc_sockfd, (char *)&msg, sizeof(msg));
+	RETVM_IF(-1 == ret, CONTACTS_ERROR_IPC, "__ctsvc_safe_write() Failed(errno = %d)", errno);
+
+	ret = __ctsvc_safe_write(__ctsvc_sockfd, src, msg.attach_sizes[0]);
 	RETVM_IF(-1 == ret, CONTACTS_ERROR_IPC, "__ctsvc_safe_write() Failed(errno = %d)", errno);
 
 	ret = __ctsvc_socket_handle_return(__ctsvc_sockfd, &msg);
@@ -211,3 +230,5 @@ int ctsvc_request_sim_get_initialization_status(bool *completed)
 
 	return msg.val;
 }
+
+#endif // ENABLE_SIM_FEATURE

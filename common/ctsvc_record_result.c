@@ -17,9 +17,16 @@
  *
  */
 #include "contacts.h"
+
 #include "ctsvc_internal.h"
 #include "ctsvc_record.h"
 #include "ctsvc_view.h"
+
+#ifdef _CONTACTS_IPC_SERVER
+#ifdef ENABLE_SIM_FEATURE
+#include "ctsvc_server_sim.h"
+#endif // ENABLE_SIM_FEATURE
+#endif
 
 static int __ctsvc_result_create(contacts_record_h* out_record);
 static int __ctsvc_result_destroy(contacts_record_h record, bool delete_child);
@@ -149,7 +156,7 @@ static int __ctsvc_result_get_str_real(contacts_record_h record, unsigned int pr
 				return CONTACTS_ERROR_NONE;
 			}
 			else {
-				ASSERT_NOT_REACHED("use another get_type API, (type : %d)", data->type);
+				CTS_ERR("use another get_type API, (type : %d)", data->type);
 				return CONTACTS_ERROR_INVALID_PARAMETER;
 			}
 		}
@@ -175,14 +182,14 @@ static int __ctsvc_result_get_int(contacts_record_h record, unsigned int propert
 	GSList *cursor;
 	//TODO: check the value type of property_id is int
 	for(cursor = result->values;cursor;cursor=cursor->next){
-	ctsvc_result_value_s *data = cursor->data;
+		ctsvc_result_value_s *data = cursor->data;
 		if (data->property_id == property_id) {
 			if (data->type == CTSVC_VIEW_DATA_TYPE_INT) {
 				*out_value = data->value.i;
 				return CONTACTS_ERROR_NONE;
 			}
 			else {
-				ASSERT_NOT_REACHED("use another get_type API, (type : %d)", data->type);
+				CTS_ERR("use another get_type API, (type : %d)", data->type);
 				return CONTACTS_ERROR_INVALID_PARAMETER;
 			}
 		}
@@ -202,11 +209,19 @@ static int __ctsvc_result_set_int(contacts_record_h record, unsigned int propert
 		data = cursor->data;
 		if (data->property_id == property_id) {
 			if (data->type == CTSVC_VIEW_DATA_TYPE_INT) {
+#ifdef _CONTACTS_IPC_SERVER
+#ifdef ENABLE_SIM_FEATURE
+
+				if (property_id == CTSVC_PROPERTY_PHONELOG_SIM_SLOT_NO)
+					data->value.i = ctsvc_server_sim_get_sim_slot_no_by_info_id(value);
+				else
+#endif // ENABLE_SIM_FEATURE
+#endif
 				data->value.i = value;
 				return CONTACTS_ERROR_NONE;
 			}
 			else {
-				ASSERT_NOT_REACHED("use another get_type API, (type : %d)", data->type);
+				CTS_ERR("use another get_type API, (type : %d)", data->type);
 				return CONTACTS_ERROR_INVALID_PARAMETER;
 			}
 		}
@@ -215,6 +230,13 @@ static int __ctsvc_result_set_int(contacts_record_h record, unsigned int propert
 	data = calloc(1, sizeof(ctsvc_result_value_s));
 	data->property_id = property_id;
 	data->type = CTSVC_VIEW_DATA_TYPE_INT;
+#ifdef _CONTACTS_IPC_SERVER
+#ifdef ENABLE_SIM_FEATURE
+	if (property_id == CTSVC_PROPERTY_PHONELOG_SIM_SLOT_NO)
+		data->value.i = ctsvc_server_sim_get_sim_slot_no_by_info_id(value);
+	else
+#endif // ENABLE_SIM_FEATURE
+#endif
 	data->value.i = value;
 	result->values = g_slist_append(result->values, (void*)data);
 	return CONTACTS_ERROR_NONE;
@@ -235,7 +257,7 @@ static int __ctsvc_result_set_lli(contacts_record_h record, unsigned int propert
 				return CONTACTS_ERROR_NONE;
 			}
 			else {
-				ASSERT_NOT_REACHED("use another get_type API, (type : %d)", data->type);
+				CTS_ERR("use another get_type API, (type : %d)", data->type);
 				return CONTACTS_ERROR_INVALID_PARAMETER;
 			}
 		}
@@ -263,7 +285,7 @@ static int __ctsvc_result_set_double(contacts_record_h record, unsigned int prop
 				return CONTACTS_ERROR_NONE;
 			}
 			else {
-				ASSERT_NOT_REACHED("use another get_type API, (type : %d)", data->type);
+				CTS_ERR("use another get_type API, (type : %d)", data->type);
 				return CONTACTS_ERROR_INVALID_PARAMETER;
 			}
 		}
@@ -292,7 +314,7 @@ static int __ctsvc_result_set_bool(contacts_record_h record, unsigned int proper
 				return CONTACTS_ERROR_NONE;
 			}
 			else {
-				ASSERT_NOT_REACHED("use another get_type API, (type : %d)", data->type);
+				CTS_ERR("use another get_type API, (type : %d)", data->type);
 				return CONTACTS_ERROR_INVALID_PARAMETER;
 			}
 		}
@@ -312,6 +334,7 @@ static int __ctsvc_result_set_str(contacts_record_h record, unsigned int propert
 	GSList *cursor;
 	ctsvc_result_value_s *data;
 	char *full_path = NULL;
+	int str_len;
 
 	// TODO: check the value type of property_id is int
 	for(cursor = result->values;cursor;cursor=cursor->next){
@@ -322,8 +345,9 @@ static int __ctsvc_result_set_str(contacts_record_h record, unsigned int propert
 				case CTSVC_PROPERTY_PERSON_IMAGE_THUMBNAIL:
 				case CTSVC_PROPERTY_CONTACT_IMAGE_THUMBNAIL:
 					if (str) {
-						full_path = calloc(1, strlen(CTS_IMG_FULL_LOCATION) + strlen(str) + 2);
-						sprintf(full_path, "%s/%s", CTS_IMG_FULL_LOCATION, str);
+						str_len = strlen(CTSVC_CONTACT_IMG_FULL_LOCATION) + strlen(str) + 2;
+						full_path = calloc(1, str_len);
+						snprintf(full_path, str_len, "%s/%s", CTSVC_CONTACT_IMG_FULL_LOCATION, str);
 					}
 					free(data->value.s);
 					data->value.s = full_path;
@@ -334,7 +358,7 @@ static int __ctsvc_result_set_str(contacts_record_h record, unsigned int propert
 				}
 			}
 			else {
-				ASSERT_NOT_REACHED("use another get_type API, (type : %d)", data->type);
+				CTS_ERR("use another get_type API, (type : %d)", data->type);
 				return CONTACTS_ERROR_INVALID_PARAMETER;
 			}
 		}
@@ -347,8 +371,9 @@ static int __ctsvc_result_set_str(contacts_record_h record, unsigned int propert
 	case CTSVC_PROPERTY_PERSON_IMAGE_THUMBNAIL:
 	case CTSVC_PROPERTY_CONTACT_IMAGE_THUMBNAIL:
 		if (str) {
-			full_path = calloc(1, strlen(CTS_IMG_FULL_LOCATION) + strlen(str) + 2);
-			sprintf(full_path, "%s/%s", CTS_IMG_FULL_LOCATION, str);
+			str_len = strlen(CTSVC_CONTACT_IMG_FULL_LOCATION) + strlen(str) + 2;
+			full_path = calloc(1, str_len);
+			snprintf(full_path, str_len, "%s/%s", CTSVC_CONTACT_IMG_FULL_LOCATION, str);
 		}
 		free(data->value.s);
 		data->value.s = full_path;
@@ -374,7 +399,7 @@ static int __ctsvc_result_get_bool(contacts_record_h record, unsigned int proper
 				return CONTACTS_ERROR_NONE;
 			}
 			else {
-				ASSERT_NOT_REACHED("use another get_type API, (type : %d)", data->type);
+				CTS_ERR("use another get_type API, (type : %d)", data->type);
 				return CONTACTS_ERROR_INVALID_PARAMETER;
 			}
 		}
@@ -395,7 +420,7 @@ static int __ctsvc_result_get_lli(contacts_record_h record, unsigned int propert
 				return CONTACTS_ERROR_NONE;
 				}
 			else {
-				ASSERT_NOT_REACHED("use another get_type API, (type : %d)", data->type);
+				CTS_ERR("use another get_type API, (type : %d)", data->type);
 				return CONTACTS_ERROR_INVALID_PARAMETER;
 			}
 		}
@@ -416,7 +441,7 @@ static int __ctsvc_result_get_double(contacts_record_h record, unsigned int prop
 				return CONTACTS_ERROR_NONE;
 				}
 			else {
-				ASSERT_NOT_REACHED("use another get_type API, (type : %d)", data->type);
+				CTS_ERR("use another get_type API, (type : %d)", data->type);
 				return CONTACTS_ERROR_INVALID_PARAMETER;
 			}
 		}

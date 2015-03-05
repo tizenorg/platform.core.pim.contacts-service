@@ -29,36 +29,84 @@ extern "C"
 #endif
 
 /**
- * @addtogroup CAPI_SOCIAL_CONTACTS_SVC_SIM_MODULE
+ * @file contacts_sim.h
+ */
+
+/**
+ * @ingroup CAPI_SOCIAL_CONTACTS_SVC_MODULE
+ * @defgroup CAPI_SOCIAL_CONTACTS_SVC_SIM_MODULE SIM
+ *
+ * @brief The contacts SIM API provides the set of definitions and interfaces that enable application developers to get/set data from/to SIM card.
+ *
+ * @section CAPI_SOCIAL_CONTACTS_SVC_SIM_MODULE_HEADER Required Header
+ *  \#include <contacts.h>
+ *
+ * @section CAPI_SOCIAL_CONTACTS_SVC_SIM_MODULE_FEATURE Related Features
+ * This API is related with the following features:\n
+ *  - http://tizen.org/feature/network.telephony\n
+ *
+ * It is recommended to design feature related codes in your application for reliability.\n
+ *
+ * You can check if a device supports the related features for this API by using @ref CAPI_SYSTEM_SYSTEM_INFO_MODULE, thereby controlling the procedure of your application.\n
+ *
+ * To ensure your application is only running on the device with specific features, please define the features in your manifest file using the manifest editor in the SDK.\n
+ *
+ * More details on featuring your application can be found from <a href="../org.tizen.mobile.native.appprogramming/html/ide_sdk_tools/feature_element.htm"><b>Feature Element</b>.</a>
+ * <BR>
  * @{
  */
 
 /**
- * @brief	Imports all contacts to Contacts Database from SIM.
+ * @brief Imports all contacts from SIM to Contacts Database.
  *
- * @return  0 on success, otherwise a negative error value.
- * @retval  #CONTACTS_ERROR_NONE	Successful
- * @retval  #CONTACTS_ERROR_DB		Database operation failure
+ * @since_tizen 2.3
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/contact.write
  *
- * @pre     This function requires an open connection to contacts service by contacts_connect2().
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
  *
- * @see  contacts_connect2()
+ * @retval  #CONTACTS_ERROR_NONE                Successful
+ * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ * @retval  #CONTACTS_ERROR_NO_DATA             Requested data does not exist
+ * @retval  #CONTACTS_ERROR_PERMISSION_DENIED   Permission denied. This application does not have the privilege to call this method.
+ * @retval  #CONTACTS_ERROR_NOT_SUPPORTED       Not supported
+ * @retval  #CONTACTS_ERROR_IPC                 Unknown IPC error
+ * @retval  #CONTACTS_ERROR_SYSTEM              Internal system module error
+ * @retval  #CONTACTS_ERROR_INTERNAL            Implementation Error, Temporary Use
+ *
+ * @pre     contacts_connect() should be called to open a connection to the contacts service.
+ *
+ * @see  contacts_connect()
  */
-API int contacts_sim_import_all_contacts(void);
+int contacts_sim_import_all_contacts(void);
 
 
 /**
- * @brief	check whether to complete sim initialize .
+ * @brief Checks whether SIM initialization is completed.
  *
- * @return  0 on success, otherwise a negative error value.
- * @retval  #CONTACTS_ERROR_NONE	Successful
- * @retval  #CONTACTS_ERROR_DB		Database operation failure
+ * @since_tizen 2.3
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/contact.read
  *
- * @pre     This function requires an open connection to contacts service by contacts_connect2().
+ * @param[out]  completed    @c true if SIM is initialized,
+ *                           otherwise @c false if SIM is not initialized
  *
- * @see  contacts_connect2()
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
+ * @retval  #CONTACTS_ERROR_NONE                Successful
+ * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ * @retval  #CONTACTS_ERROR_PERMISSION_DENIED   Permission denied. This application does not have the privilege to call this method.
+ * @retval  #CONTACTS_ERROR_NOT_SUPPORTED       Not supported
+ * @retval  #CONTACTS_ERROR_IPC                 Unknown IPC error
+ * @retval  #CONTACTS_ERROR_SYSTEM              Internal system module error
+ *
+ * @pre     contacts_connect() should be called to open a connection to the contacts service.
+ *
+ * @see  contacts_connect()
  */
-API int contacts_sim_get_initialization_status(bool *completed);
+int contacts_sim_get_initialization_status(bool *completed);
 
 /**
  * @}

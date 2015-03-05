@@ -37,12 +37,15 @@
 #include "ctsvc_group.h"
 #include "ctsvc_notification.h"
 #include "ctsvc_localize.h"
+#include "ctsvc_localize_utils.h"
 #include "ctsvc_person.h"
+#ifdef ENABLE_LOG_FEATURE
+#include "ctsvc_phonelog.h"
+#endif // ENABLE_LOG_FEATURE
+#include "ctsvc_db_access_control.h"
 
 #include "ctsvc_db_plugin_contact_helper.h"
 #include "ctsvc_db_plugin_person_helper.h"
-
-#define CTSVC_CONTACT_INITIAL_DATA_MAX_LEN 128
 
 static int __ctsvc_db_contact_insert_record( contacts_record_h record, int *id );
 static int __ctsvc_db_contact_get_record( int id, contacts_record_h* out_record );
@@ -75,14 +78,14 @@ ctsvc_db_plugin_info_s ctsvc_db_plugin_contact = {
 
 static int __ctsvc_db_get_contact_base_info(int id, ctsvc_contact_s *contact)
 {
-	int ret, len;
+	int ret;
 	int i;
 	cts_stmt stmt = NULL;
 	char query[CTS_SQL_MAX_LEN] = {0};
 	char *temp;
 	char full_path[CTSVC_IMG_FULL_PATH_SIZE_MAX] = {0};
 
-	len = snprintf(query, sizeof(query),
+	snprintf(query, sizeof(query),
 			"SELECT contact_id, addressbook_id, person_id, changed_time, changed_ver, link_mode, %s, "
 				"display_name_source, image_thumbnail_path, "
 				"ringtone_path, vibration, message_alert, "
@@ -117,7 +120,7 @@ static int __ctsvc_db_get_contact_base_info(int id, ctsvc_contact_s *contact)
 
 	temp = ctsvc_stmt_get_text(stmt, i++);
 	if (temp) {
-		snprintf(full_path, sizeof(full_path), "%s/%s", CTS_IMG_FULL_LOCATION, temp);
+		snprintf(full_path, sizeof(full_path), "%s/%s", CTSVC_CONTACT_IMG_FULL_LOCATION, temp);
 		contact->image_thumbnail_path = strdup(full_path);
 	}
 
@@ -143,12 +146,12 @@ static int __ctsvc_db_get_contact_base_info(int id, ctsvc_contact_s *contact)
 
 static int __ctsvc_db_get_data(int id, ctsvc_contact_s *contact)
 {
-	int ret, len;
+	int ret;
 	int datatype;
 	cts_stmt stmt = NULL;
 	char query[CTS_SQL_MAX_LEN] = {0};
 
-	len = snprintf(query, sizeof(query),
+	snprintf(query, sizeof(query),
 				"SELECT datatype, id, data.contact_id, is_default, data1, data2, "
 					"data3, data4, data5, data6, data7, data8, data9, data10, data11, data12 "
 					"FROM "CTS_TABLE_DATA", "CTSVC_DB_VIEW_CONTACT" "
@@ -216,7 +219,7 @@ static int __ctsvc_db_get_data(int id, ctsvc_contact_s *contact)
 			break;
 		}
 
-	}while(1 /*CTS_TRUE*/ == ctsvc_stmt_step(stmt));
+	}while(1 == ctsvc_stmt_step(stmt));
 
 	ctsvc_stmt_finalize(stmt);
 
@@ -442,7 +445,7 @@ static inline int __ctsvc_contact_update_grouprel(int contact_id, contacts_list_
 	ctsvc_group_relation_s *grouprel;
 	ctsvc_list_s *list = (ctsvc_list_s*)group_list;
 	int rel_changed = 0;
-	unsigned int count;
+	int count;
 	int ret;
 	GList *cursor;
 
@@ -480,209 +483,25 @@ static inline int __ctsvc_contact_update_grouprel(int contact_id, contacts_list_
 		return CONTACTS_ERROR_NONE;
 }
 
-static inline void __ctsvc_contact_get_initial(char *src, char *dest, int dest_size, bool pinyin )
+static bool __ctsvc_contact_check_token(char *src, char *dest, int len)
 {
-	int i, j=0;
-	bool bFirst = true;
-	int len = strlen(src);
-	for(i = 0; i < len && j < (dest_size-1);)
-	{
-		if (src[i] == ' ') {
-			bFirst=true;
-			i++;
-		} else if (bFirst) {
-			int char_len = ctsvc_check_utf8(src[i]);
-			int k;
-			for (k=0;k<char_len;k++)
-				dest[j++] = src[i++];
-			if (!pinyin)
-				dest[j++] = ' ';
-			bFirst = false;
+	bool had = false;
+	int i = 0;
+
+	for (i=0;i<len;i++) {
+		if (src[i] == '@' || src[i] == '.') {
+			dest[i] = ' ';
+			had = true;
 		}
 		else
-			i++;
+			dest[i] = src[i];
 	}
-	CTS_DBG("src(%s) dest(%s)", src, dest);
+	dest[i] = '\0';
+
+	return had;
 }
 
-static inline void __ctsvc_remove_space(char *src, char *dest, int dest_size)
-{
-	int len = strlen(src);
-	int i, j=0;
-
-	for(i=0; i < len && i < dest_size; i++) {
-		if (src[i] && src[i] != ' ') {
-			dest[j] = src[i];
-			j++;
-		}
-	}
-	dest[j] = '\0';
-}
-
-static inline int __ctsvc_contact_make_search_name(ctsvc_contact_s *contact, char **search_name) {
-	char *name = NULL;
-	char *temp_name = NULL;
-	int buf_size, ret;
-
-	if (contact->display_name) {
-		if (ctsvc_has_chinese(contact->display_name)) {
-			if (CTSVC_LANG_JAPANESE == ctsvc_check_language_type(contact->sort_name)) {
-				char *normalized_display_name=NULL;
-
-				ctsvc_normalize_str(contact->display_name, &normalized_display_name);
-				buf_size = SAFE_STRLEN(normalized_display_name) + strlen(contact->sort_name) + 2;
-				name = calloc(1, buf_size);
-				snprintf(name, buf_size, "%s %s", normalized_display_name, contact->sort_name);
-
-				free(normalized_display_name);
-			}
-			else {
-				pinyin_name_s *pinyinname;
-				int size, i, len;
-
-				ret = ctsvc_convert_chinese_to_pinyin(contact->display_name, &pinyinname, &size);
-
-				if (CONTACTS_ERROR_NONE == ret) {
-					char *name_nospace = calloc(1, CHINESE_PINYIN_SPELL_MAX_LEN);
-					char *temp_name = NULL;
-
-					ctsvc_normalize_str(contact->display_name, &name);
-
-					for(i=0; i<size; i++) {
-						__ctsvc_remove_space(pinyinname[i].pinyin_name, name_nospace, CHINESE_PINYIN_SPELL_MAX_LEN*(CHINESE_PINYIN_MAX_LEN+1));
-
-						buf_size = SAFE_STRLEN(name)
-											+ SAFE_STRLEN(pinyinname[i].pinyin_name)
-											+ SAFE_STRLEN(name_nospace)
-											+ SAFE_STRLEN(pinyinname[i].pinyin_initial)
-											+ 4;
-						temp_name = calloc(1, buf_size);
-						snprintf(temp_name, buf_size, "%s %s %s %s",
-								name, pinyinname[i].pinyin_name, name_nospace, pinyinname[i].pinyin_initial);
-
-						free(name);
-						name = temp_name;
-					}
-
-					len = ctsvc_check_utf8(contact->display_name[0]);
-					for(i=len; i < strlen(contact->display_name); i+=len) {
-						len = ctsvc_check_utf8(contact->display_name[i]);
-
-						buf_size = SAFE_STRLEN(name) + SAFE_STRLEN(&contact->display_name[i]) + 2;
-						temp_name = calloc(1, buf_size);
-
-						snprintf(temp_name, buf_size, "%s %s", name, &contact->display_name[i]);
-
-						free(name);
-						name = temp_name;
-					}
-
-					free(name_nospace);
-					free(pinyinname);
-				}
-				else {
-					char initial[CTSVC_CONTACT_INITIAL_DATA_MAX_LEN] = {0,};
-					char *normalized_display_name = NULL;
-
-					ctsvc_normalize_str(contact->display_name, &normalized_display_name);
-					__ctsvc_contact_get_initial(contact->display_name, initial, sizeof(initial), false);
-					buf_size = SAFE_STRLEN(normalized_display_name) + strlen(initial) + 2;
-					name = calloc(1, buf_size);
-					snprintf(name, buf_size, "%s %s", normalized_display_name, initial);
-
-					free(normalized_display_name);
-				}
-			}
-		}
-		else if (CTSVC_LANG_KOREAN == ctsvc_check_language_type(contact->display_name)) {
-			int count, i, j;
-			int full_len, chosung_len;
-			char *chosung = calloc(1, strlen(contact->display_name) * 5);
-			int total_len = strlen(contact->display_name);
-
-			count = ctsvc_get_chosung(contact->display_name, chosung, strlen(contact->display_name) * 5 );
-
-			ctsvc_normalize_str(contact->display_name, &name);
-
-			if (count > 0) {
-				for(i=0, j=0; i < total_len; i+=full_len, j+=chosung_len) {
-					full_len = ctsvc_check_utf8(contact->display_name[i]);
-					chosung_len = ctsvc_check_utf8(chosung[j]);
-
-					buf_size = SAFE_STRLEN(name) + SAFE_STRLEN(&contact->display_name[i]) + SAFE_STRLEN(&chosung[j]) + 3;
-					temp_name = calloc(1, buf_size);
-
-					snprintf(temp_name, buf_size, "%s %s %s", name, &contact->display_name[i], &chosung[j]);
-
-					free(name);
-					name = temp_name;
-				}
-			}
-			free(chosung);
-		}
-		else if (CTSVC_LANG_JAPANESE == ctsvc_check_language_type(contact->display_name)) {
-			ctsvc_convert_japanese_to_hiragana(contact->display_name, &name);
-		}
-		else {
-			char initial[CTSVC_CONTACT_INITIAL_DATA_MAX_LEN] = {0,};
-			char *normalized_display_name=NULL;
-
-			ctsvc_normalize_str(contact->display_name, &normalized_display_name);
-			__ctsvc_contact_get_initial(contact->display_name, initial, sizeof(initial), false);
-			buf_size = SAFE_STRLEN(normalized_display_name) + strlen(initial) + 2;
-			name = calloc(1, buf_size);
-			snprintf(name, buf_size, "%s %s", normalized_display_name, initial);
-
-			free(normalized_display_name);
-		}
-	}
-
-	// append phonetic name
-	if (contact->name) {
-		contacts_list_h name_list = (contacts_list_h)contact->name;
-		ctsvc_name_s *name_record;
-		contacts_list_first(name_list);
-		char *phonetic = NULL;
-		int temp_len = 0;
-
-		contacts_list_get_current_record_p(name_list, (contacts_record_h*)&name_record);
-		if (NULL != name_record) {
-			buf_size = SAFE_STRLEN(name_record->phonetic_first) + SAFE_STRLEN(name_record->phonetic_last) + SAFE_STRLEN(name_record->phonetic_middle);
-			if (buf_size > 0) {
-				buf_size += 3; // for space and null string
-				phonetic = calloc(1, buf_size);
-				if (name_record->phonetic_first)
-					temp_len += snprintf(phonetic, buf_size, "%s", name_record->phonetic_first);
-				if (name_record->phonetic_middle) {
-					if (temp_len)
-						temp_len += snprintf(phonetic + temp_len, buf_size - temp_len, " ");
-					temp_len += snprintf(phonetic + temp_len, buf_size - temp_len, "%s", name_record->phonetic_middle);
-				}
-				if (name_record->phonetic_last) {
-					if (temp_len)
-						temp_len += snprintf(phonetic + temp_len, buf_size - temp_len, " ");
-					temp_len += snprintf(phonetic + temp_len, buf_size - temp_len, "%s", name_record->phonetic_last);
-				}
-
-				if (name) {
-					buf_size = SAFE_STRLEN(name) + SAFE_STRLEN(phonetic) + 2;
-					temp_name = calloc(1, buf_size);
-					snprintf(temp_name, buf_size, "%s %s", name, phonetic);
-					free(name);
-					name = temp_name;
-					free(phonetic);
-				}
-				else
-					name = phonetic;
-			}
-		}
-	}
-
-	*search_name = name;
-	return CONTACTS_ERROR_NONE;
-}
-
-
+// Make search data by number, email, nicknames, address, note, messenger, relationship, company
 static inline int __ctsvc_contact_make_search_data(int contact_id, ctsvc_contact_s *contact,
 		char **search_name, char **search_number, char **search_data)
 {
@@ -690,7 +509,6 @@ static inline int __ctsvc_contact_make_search_data(int contact_id, ctsvc_contact
 
 	char *number = NULL;
 	char *data = NULL;
-	char *normalized_data = NULL;
 	char *temp_number=NULL;
 	char *temp_data=NULL;
 	int buf_size=0;
@@ -698,7 +516,7 @@ static inline int __ctsvc_contact_make_search_data(int contact_id, ctsvc_contact
 	if (contact == NULL)
 		return CONTACTS_ERROR_NO_DATA;
 
-	__ctsvc_contact_make_search_name(contact, search_name);
+	ctsvc_contact_make_search_name(contact, search_name);
 
 	if (contact->numbers) {
 		contacts_list_h number_list = (contacts_list_h)contact->numbers;
@@ -706,13 +524,13 @@ static inline int __ctsvc_contact_make_search_data(int contact_id, ctsvc_contact
 		contacts_list_first(number_list);
 		do {
 			contacts_list_get_current_record_p(number_list, (contacts_record_h*)&number_record);
-			if (NULL != number_record) {
-				buf_size = SAFE_STRLEN(number) + SAFE_STRLEN(number_record->lookup) + 3;
+			if (NULL != number_record && number_record->cleaned) {
+				buf_size = SAFE_STRLEN(number) + SAFE_STRLEN(number_record->cleaned) + SAFE_STRLEN(number_record->normalized) + 3;
 				temp_number = calloc(1, buf_size);
 				if (number)
-					snprintf(temp_number, buf_size, "%s %s ", SAFE_STR(number), number_record->lookup);
+					snprintf(temp_number, buf_size, "%s %s %s", SAFE_STR(number), number_record->cleaned, number_record->normalized);
 				else
-					snprintf(temp_number, buf_size, "%s ", number_record->lookup);
+					snprintf(temp_number, buf_size, "%s %s", number_record->cleaned, number_record->normalized);
 				free(number);
 				number = temp_number;
 			}
@@ -725,13 +543,17 @@ static inline int __ctsvc_contact_make_search_data(int contact_id, ctsvc_contact
 		contacts_list_first(email_list);
 		do {
 			contacts_list_get_current_record_p(email_list, (contacts_record_h*)&email);
-			if (NULL != email) {
-				buf_size = SAFE_STRLEN(data) + SAFE_STRLEN(email->email_addr) + 3;
+			if (NULL != email && email->email_addr) {
+				int len = strlen(email->email_addr);
+				char temp[len+1];
+				bool had = __ctsvc_contact_check_token(email->email_addr, temp, len);
+
+				buf_size = SAFE_STRLEN(data) + SAFE_STRLEN(email->email_addr) * (had?2:1) + 4;
 				temp_data = calloc(1, buf_size);
 				if (data)
-					snprintf(temp_data, buf_size, "%s %s ",data, email->email_addr);
+					snprintf(temp_data, buf_size, "%s %s %s",data, email->email_addr, (had?temp:""));
 				else
-					snprintf(temp_data, buf_size, "%s ",email->email_addr);
+					snprintf(temp_data, buf_size, "%s %s",email->email_addr, (had?temp:""));
 				free(data);
 				data = temp_data;
 			}
@@ -744,13 +566,17 @@ static inline int __ctsvc_contact_make_search_data(int contact_id, ctsvc_contact
 		contacts_list_first(nickname_list);
 		do {
 			contacts_list_get_current_record_p(nickname_list, (contacts_record_h*)&nickname);
-			if (NULL != nickname) {
-				buf_size = SAFE_STRLEN(data) + SAFE_STRLEN(nickname->nickname) + 3;
+			if (NULL != nickname && nickname->nickname) {
+				int len = strlen(nickname->nickname);
+				char temp[len+1];
+				bool had = __ctsvc_contact_check_token(nickname->nickname, temp, len);
+
+				buf_size = SAFE_STRLEN(data) + SAFE_STRLEN(nickname->nickname) * (had?2:1) + 4;
 				temp_data = calloc(1, buf_size);
 				if (data)
-					snprintf(temp_data, buf_size, "%s %s ", data, nickname->nickname);
+					snprintf(temp_data, buf_size, "%s %s %s", data, nickname->nickname, (had?temp:""));
 				else
-					snprintf(temp_data, buf_size, "%s ", nickname->nickname);
+					snprintf(temp_data, buf_size, "%s %s", nickname->nickname, (had?temp:""));
 				free(data);
 				data = temp_data;
 			}
@@ -764,32 +590,52 @@ static inline int __ctsvc_contact_make_search_data(int contact_id, ctsvc_contact
 		do {
 			contacts_list_get_current_record_p(address_list, (contacts_record_h*)&address);
 			if (NULL != address) {
-				len =0;
-				buf_size = SAFE_STRLEN(data)
-							+ SAFE_STRLEN(address->country)
+				bool had;
+				int str_len = SAFE_STRLEN(address->country)
 							+ SAFE_STRLEN(address->pobox)
 							+ SAFE_STRLEN(address->postalcode)
 							+ SAFE_STRLEN(address->region)
 							+ SAFE_STRLEN(address->locality)
 							+ SAFE_STRLEN(address->street)
-							+ SAFE_STRLEN(address->extended) + 9;
+							+ SAFE_STRLEN(address->extended);
+				len = 0;
+				buf_size = SAFE_STRLEN(data)
+							+ str_len * 2 + 16;
 				temp_data = calloc(1, buf_size);
+
+				char temp[str_len+1];
+
 				if(data)
 					len += snprintf(temp_data + len, buf_size - len, "%s ", data);
-				if (address->country)
-					len += snprintf(temp_data + len, buf_size - len, "%s ", address->country);
-				if (address->pobox)
-					len += snprintf(temp_data + len, buf_size - len, "%s ", address->pobox);
-				if (address->postalcode)
-					len += snprintf(temp_data + len, buf_size - len, "%s ", address->postalcode);
-				if (address->region)
-					len += snprintf(temp_data + len, buf_size - len, "%s ", address->region);
-				if (address->locality)
-					len += snprintf(temp_data + len, buf_size - len, "%s ", address->locality);
-				if (address->street)
-					len += snprintf(temp_data + len, buf_size - len, "%s ", address->street);
-				if (address->extended)
-					len += snprintf(temp_data + len, buf_size - len, "%s ", address->extended);
+
+				if (address->country) {
+					had = __ctsvc_contact_check_token(address->country, temp, SAFE_STRLEN(address->country));
+					len += snprintf(temp_data + len, buf_size - len, "%s %s ", address->country, had?temp:"");
+				}
+				if (address->pobox) {
+					had = __ctsvc_contact_check_token(address->pobox, temp, SAFE_STRLEN(address->pobox));
+					len += snprintf(temp_data + len, buf_size - len, "%s %s ", address->pobox, had?temp:"");
+				}
+				if (address->postalcode) {
+					had = __ctsvc_contact_check_token(address->postalcode, temp, SAFE_STRLEN(address->postalcode));
+					len += snprintf(temp_data + len, buf_size - len, "%s %s ", address->postalcode, had?temp:"");
+				}
+				if (address->region) {
+					had = __ctsvc_contact_check_token(address->region, temp, SAFE_STRLEN(address->region));
+					len += snprintf(temp_data + len, buf_size - len, "%s %s ", address->region, had?temp:"");
+				}
+				if (address->locality) {
+					had = __ctsvc_contact_check_token(address->locality, temp, SAFE_STRLEN(address->locality));
+					len += snprintf(temp_data + len, buf_size - len, "%s %s ", address->locality, had?temp:"");
+				}
+				if (address->street) {
+					had = __ctsvc_contact_check_token(address->street, temp, SAFE_STRLEN(address->street));
+					len += snprintf(temp_data + len, buf_size - len, "%s %s ", address->street, had?temp:"");
+				}
+				if (address->extended) {
+					had = __ctsvc_contact_check_token(address->extended, temp, SAFE_STRLEN(address->extended));
+					len += snprintf(temp_data + len, buf_size - len, "%s %s ", address->extended, had?temp:"");
+				}
 				free(data);
 				data = temp_data;
 			}
@@ -802,13 +648,17 @@ static inline int __ctsvc_contact_make_search_data(int contact_id, ctsvc_contact
 		contacts_list_first(note_list);
 		do {
 			contacts_list_get_current_record_p(note_list, (contacts_record_h*)&note);
-			if (NULL != note) {
-				buf_size = SAFE_STRLEN(data) + SAFE_STRLEN(note->note) + 3;
+			if (NULL != note && note->note) {
+				int len = strlen(note->note);
+				char temp[len+1];
+				bool had = __ctsvc_contact_check_token(note->note, temp, len);
+
+				buf_size = SAFE_STRLEN(data) + SAFE_STRLEN(note->note) * (had?2:1) + 4;
 				temp_data = calloc(1, buf_size);
 				if (data)
-					snprintf(temp_data, buf_size, "%s %s ",data, note->note);
+					snprintf(temp_data, buf_size, "%s %s %s",data, note->note, (had?temp:""));
 				else
-					snprintf(temp_data, buf_size, "%s",note->note);
+					snprintf(temp_data, buf_size, "%s %s",note->note, (had?temp:""));
 				free(data);
 				data = temp_data;
 			}
@@ -821,13 +671,17 @@ static inline int __ctsvc_contact_make_search_data(int contact_id, ctsvc_contact
 		contacts_list_first(messenger_list);
 		do {
 			contacts_list_get_current_record_p(messenger_list, (contacts_record_h*)&messenger);
-			if (NULL != messenger) {
-				buf_size = SAFE_STRLEN(data) + SAFE_STRLEN(messenger->im_id) + 3;
+			if (NULL != messenger && messenger->im_id) {
+				int len = strlen(messenger->im_id);
+				char temp[len+1];
+				bool had = __ctsvc_contact_check_token(messenger->im_id, temp, len);
+
+				buf_size = SAFE_STRLEN(data) + SAFE_STRLEN(messenger->im_id) * (had?2:1) + 4;
 				temp_data = calloc(1, buf_size);
 				if (data)
-					snprintf(temp_data, buf_size, "%s %s ",data, messenger->im_id);
+					snprintf(temp_data, buf_size, "%s %s %s",data, messenger->im_id, (had?temp:""));
 				else
-					snprintf(temp_data, buf_size, "%s",messenger->im_id);
+					snprintf(temp_data, buf_size, "%s %s",messenger->im_id, (had?temp:""));
 				free(data);
 				data = temp_data;
 			}
@@ -840,13 +694,17 @@ static inline int __ctsvc_contact_make_search_data(int contact_id, ctsvc_contact
 		contacts_list_first(relationship_list);
 		do {
 			contacts_list_get_current_record_p(relationship_list, (contacts_record_h*)&relationship);
-			if (NULL != relationship) {
-				buf_size = SAFE_STRLEN(data) + SAFE_STRLEN(relationship->name) + 3;
+			if (NULL != relationship && relationship->name) {
+				int len = strlen(relationship->name);
+				char temp[len+1];
+				bool had = __ctsvc_contact_check_token(relationship->name, temp, len);
+
+				buf_size = SAFE_STRLEN(data) + SAFE_STRLEN(relationship->name) * (had?2:1) + 4;
 				temp_data = calloc(1, buf_size);
 				if (data)
-					snprintf(temp_data, buf_size, "%s %s ",data, relationship->name);
+					snprintf(temp_data, buf_size, "%s %s %s",data, relationship->name, (had?temp:""));
 				else
-					snprintf(temp_data, buf_size, "%s",relationship->name);
+					snprintf(temp_data, buf_size, "%s %s",relationship->name, (had?temp:""));
 				free(data);
 				data = temp_data;
 			}
@@ -860,35 +718,55 @@ static inline int __ctsvc_contact_make_search_data(int contact_id, ctsvc_contact
 		do {
 			contacts_list_get_current_record_p(company_list, (contacts_record_h*)&company);
 			if (NULL != company) {
-				len =0;
-				buf_size = SAFE_STRLEN(data)
-							+ SAFE_STRLEN(company->name)
+				bool had;
+				int str_len = SAFE_STRLEN(company->name)
 							+ SAFE_STRLEN(company->department)
 							+ SAFE_STRLEN(company->job_title)
 							+ SAFE_STRLEN(company->role)
 							+ SAFE_STRLEN(company->assistant_name)
 							+ SAFE_STRLEN(company->location)
 							+ SAFE_STRLEN(company->description)
-							+ SAFE_STRLEN(company->phonetic_name)+ 10;
+							+ SAFE_STRLEN(company->phonetic_name);
+				len = 0;
+				buf_size = SAFE_STRLEN(data) + str_len * 2 + 18;
 				temp_data = calloc(1, buf_size);
+
+				char temp[str_len+1];
+
 				if(data)
 					len += snprintf(temp_data + len, buf_size - len, "%s ", data);
-				if (company->name)
-					len += snprintf(temp_data + len, buf_size - len, "%s ", company->name);
-				if (company->department)
-					len += snprintf(temp_data + len, buf_size - len, "%s ", company->department);
-				if (company->job_title)
-					len += snprintf(temp_data + len, buf_size - len, "%s ", company->job_title);
-				if (company->role)
-					len += snprintf(temp_data + len, buf_size - len, "%s ", company->role);
-				if (company->assistant_name)
-					len += snprintf(temp_data + len, buf_size - len, "%s ", company->assistant_name);
-				if (company->location)
-					len += snprintf(temp_data + len, buf_size - len, "%s ", company->location);
-				if (company->description)
-					len += snprintf(temp_data + len, buf_size - len, "%s ", company->description);
-				if (company->phonetic_name)
-					len += snprintf(temp_data + len, buf_size - len, "%s ", company->phonetic_name);
+				if (company->name) {
+					had = __ctsvc_contact_check_token(company->name, temp, SAFE_STRLEN(company->name));
+					len += snprintf(temp_data + len, buf_size - len, "%s %s ", company->name, had?temp:"");
+				}
+				if (company->department) {
+					had = __ctsvc_contact_check_token(company->department, temp, SAFE_STRLEN(company->department));
+					len += snprintf(temp_data + len, buf_size - len, "%s %s ", company->department, had?temp:"");
+				}
+				if (company->job_title) {
+					had = __ctsvc_contact_check_token(company->job_title, temp, SAFE_STRLEN(company->job_title));
+					len += snprintf(temp_data + len, buf_size - len, "%s %s ", company->job_title, had?temp:"");
+				}
+				if (company->role) {
+					had = __ctsvc_contact_check_token(company->role, temp, SAFE_STRLEN(company->role));
+					len += snprintf(temp_data + len, buf_size - len, "%s %s ", company->role, had?temp:"");
+				}
+				if (company->assistant_name) {
+					had = __ctsvc_contact_check_token(company->assistant_name, temp, SAFE_STRLEN(company->assistant_name));
+					len += snprintf(temp_data + len, buf_size - len, "%s %s ", company->assistant_name, had?temp:"");
+				}
+				if (company->location) {
+					had = __ctsvc_contact_check_token(company->location, temp, SAFE_STRLEN(company->location));
+					len += snprintf(temp_data + len, buf_size - len, "%s %s ", company->location, had?temp:"");
+				}
+				if (company->description) {
+					had = __ctsvc_contact_check_token(company->description, temp, SAFE_STRLEN(company->description));
+					len += snprintf(temp_data + len, buf_size - len, "%s %s ", company->description, had?temp:"");
+				}
+				if (company->phonetic_name) {
+					had = __ctsvc_contact_check_token(company->phonetic_name, temp, SAFE_STRLEN(company->phonetic_name));
+					len += snprintf(temp_data + len, buf_size - len, "%s %s ", company->phonetic_name, had?temp:"");
+				}
 
 				free(data);
 				data = temp_data;
@@ -898,9 +776,7 @@ static inline int __ctsvc_contact_make_search_data(int contact_id, ctsvc_contact
 
 	*search_number = number;
 	if (data) {
-		ctsvc_normalize_str(data, &normalized_data);
-		*search_data = normalized_data;
-		free(data);
+		*search_data = data;
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -942,18 +818,42 @@ static inline int __ctsvc_contact_refresh_lookup_data(int contact_id, ctsvc_cont
 			if (NULL != name_record
 					&& (name_record->last || name_record->first || name_record->addition || name_record->suffix)) {
 				char *normalized_name = NULL;
+
+				///////////////////////////////////////////////
+				// Make reverse display name (Last name first)
+				// Default			 : Prefix Last, First Middle(addition), Suffix
+				// Korean, Chinese : Prefix LastMiddleFirstSuffix
+				// Japanese 		 : Prefix Last Middle First Suffix
+				// reverse sort name does not include prefix
+				// 	But, if there is only prefix, reverse sort_name is prefix
+				//////////////////////////////////////////////
 				// make display name
 				temp_len = SAFE_STRLEN(name_record->first) + SAFE_STRLEN(name_record->addition)
 									+ SAFE_STRLEN(name_record->last)+ SAFE_STRLEN(name_record->suffix) + 1;
+				int reverse_lang_type = ctsvc_contact_get_name_language(name_record);
 				temp_name = calloc(1, temp_len);
-				if(name_record->last)
-					len += snprintf(temp_name + len, temp_len - len, "%s", name_record->last);
-				if(name_record->first)
-					len += snprintf(temp_name + len, temp_len - len, "%s", name_record->first);
-				if(name_record->addition)
-					len += snprintf(temp_name + len, temp_len - len, "%s", name_record->addition);
-				if(name_record->suffix)
-					len += snprintf(temp_name + len, temp_len - len, "%s", name_record->suffix);
+				if (reverse_lang_type == CTSVC_LANG_KOREAN ||
+					reverse_lang_type == CTSVC_LANG_CHINESE ||
+					reverse_lang_type == CTSVC_LANG_JAPANESE) {
+					if(name_record->last)
+						len += snprintf(temp_name + len, temp_len - len, "%s", name_record->last);
+					if(name_record->addition)
+						len += snprintf(temp_name + len, temp_len - len, "%s", name_record->addition);
+					if(name_record->first)
+						len += snprintf(temp_name + len, temp_len - len, "%s", name_record->first);
+					if(name_record->suffix)
+						len += snprintf(temp_name + len, temp_len - len, "%s", name_record->suffix);
+				}
+				else {
+					if(name_record->last)
+						len += snprintf(temp_name + len, temp_len - len, "%s", name_record->last);
+					if(name_record->first)
+						len += snprintf(temp_name + len, temp_len - len, "%s", name_record->first);
+					if(name_record->addition)
+						len += snprintf(temp_name + len, temp_len - len, "%s", name_record->addition);
+					if(name_record->suffix)
+						len += snprintf(temp_name + len, temp_len - len, "%s", name_record->suffix);
+				}
 
 				ctsvc_normalize_str(temp_name, &normalized_name);
 				snprintf(query, sizeof(query), "INSERT INTO %s(data_id, contact_id, name, type) "
@@ -996,11 +896,10 @@ static inline int __ctsvc_contact_refresh_lookup_data(int contact_id, ctsvc_cont
 		do {
 			contacts_list_get_current_record_p(number_list, (contacts_record_h*)&number_record);
 			if (NULL != number_record && number_record->number) {
-				char clean_num[CTSVC_NUMBER_MAX_LEN] = {0};
-				char normal_num[CTSVC_NUMBER_MAX_LEN] = {0};
-				ret = ctsvc_clean_number(number_record->number, clean_num, sizeof(clean_num));
-				if (ret <= 0)
+				if (NULL == number_record->cleaned)
 					continue;
+
+				// actually phone_lookup minmatch is not used
 				snprintf(query, sizeof(query), "INSERT INTO %s(data_id, contact_id, number, min_match) "
 								"VALUES(%d, %d, ?, ?)", CTS_TABLE_PHONE_LOOKUP, number_record->id,
 								contact_id);
@@ -1008,23 +907,18 @@ static inline int __ctsvc_contact_refresh_lookup_data(int contact_id, ctsvc_cont
 				ret = ctsvc_query_prepare(query, &stmt);
 				RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
 
-				if (*clean_num)
-					ctsvc_stmt_bind_text(stmt, 1, clean_num);
-				if (number_record->lookup)
-					ctsvc_stmt_bind_text(stmt, 2, number_record->lookup);
+				if (*number_record->cleaned)
+					ctsvc_stmt_bind_text(stmt, 1, number_record->cleaned);
 				ret = ctsvc_stmt_step(stmt);
 				if (CONTACTS_ERROR_NONE != ret) {
 					CTS_ERR("ctsvc_stmt_step() Failed(%d)", ret);
 					ctsvc_stmt_finalize(stmt);
 					return ret;
 				}
-				ret = ctsvc_normalize_number(clean_num, normal_num, sizeof(normal_num));
-				if (ret > 0 && strcmp(clean_num, normal_num) != 0) {
+				if (number_record->normalized && strcmp(number_record->cleaned, number_record->normalized) != 0) {
 					ctsvc_stmt_reset(stmt);
-					if (*normal_num)
-						ctsvc_stmt_bind_text(stmt, 1, normal_num);
-					if (number_record->lookup)
-						ctsvc_stmt_bind_text(stmt, 2, number_record->lookup);
+					if (*number_record->normalized)
+						ctsvc_stmt_bind_text(stmt, 1, number_record->normalized);
 					ret = ctsvc_stmt_step(stmt);
 					if (CONTACTS_ERROR_NONE != ret) {
 						CTS_ERR("ctsvc_stmt_step() Failed(%d)", ret);
@@ -1135,9 +1029,9 @@ static inline int __ctsvc_contact_update_search_data(int contact_id)
 
 	if (search_name)
 		ctsvc_stmt_bind_text(stmt, 1, search_name);
-	if(search_number)
+	if (search_number)
 		ctsvc_stmt_bind_text(stmt, 2, search_number);
-	if(search_data)
+	if (search_data)
 		ctsvc_stmt_bind_text(stmt, 3, search_data);
 
 	ret = ctsvc_stmt_step(stmt);
@@ -1198,6 +1092,12 @@ static int __ctsvc_db_contact_update_record( contacts_record_h record )
 		return ret;
 	}
 
+	if (false == ctsvc_have_ab_write_permission(contact->addressbook_id)) {
+		CTS_ERR("Does not have permission to update this contact");
+		ctsvc_end_trans(false);
+		return CONTACTS_ERROR_PERMISSION_DENIED;
+	}
+
 	if (current_version != contact->changed_ver)
 		is_invalid = true;
 	__ctsvc_contact_check_default_data(contact);
@@ -1224,7 +1124,7 @@ static int __ctsvc_db_contact_update_record( contacts_record_h record )
 	if (contact->images) {
 		int ret = CONTACTS_ERROR_NONE;
 		contacts_record_h record_image = NULL;
-		unsigned int count = 0;
+		int count = 0;
 		ctsvc_image_s *image;
 
 		contacts_list_get_count((contacts_list_h)contact->images, &count);
@@ -1246,7 +1146,7 @@ static int __ctsvc_db_contact_update_record( contacts_record_h record )
 				ctsvc_record_set_property_flag((ctsvc_record_s *)contact, _contacts_contact.image_thumbnail_path, CTSVC_PROPERTY_FLAG_DIRTY);
 
 				if (ctsvc_contact_check_image_location(image->path))
-					contact->image_thumbnail_path = SAFE_STRDUP(image->path + strlen(CTS_IMG_FULL_LOCATION) + 1);
+					contact->image_thumbnail_path = SAFE_STRDUP(image->path + strlen(CTSVC_CONTACT_IMG_FULL_LOCATION) + 1);
 				else
 					contact->image_thumbnail_path = SAFE_STRDUP(image->path);
 			}
@@ -1259,8 +1159,10 @@ static int __ctsvc_db_contact_update_record( contacts_record_h record )
 				ctsvc_record_set_property_flag((ctsvc_record_s *)contact, _contacts_contact.image_thumbnail_path, CTSVC_PROPERTY_FLAG_DIRTY);
 			}
 			else {
-				int index = _contacts_contact.image_thumbnail_path & 0x000000FF;
-				((ctsvc_record_s *)record)->properties_flags[index] = 0;
+				if (((ctsvc_record_s *)record)->properties_flags) {
+					int index = _contacts_contact.image_thumbnail_path & 0x000000FF;
+					((ctsvc_record_s *)record)->properties_flags[index] = 0;
+				}
 			}
 		}
 	}
@@ -1271,7 +1173,7 @@ static int __ctsvc_db_contact_update_record( contacts_record_h record )
 		ctsvc_contact_s* temp_contact;
 		contacts_record_create(_contacts_contact._uri, (contacts_record_h*)&temp_contact);
 		ret = __ctsvc_db_get_data(contact->id, temp_contact);
-		ctsvc_make_contact_display_name(temp_contact);
+		ctsvc_contact_make_display_name(temp_contact);
 
 		FREEandSTRDUP(contact->display_name, temp_contact->display_name);
 		FREEandSTRDUP(contact->reverse_display_name, temp_contact->reverse_display_name);
@@ -1290,7 +1192,7 @@ static int __ctsvc_db_contact_update_record( contacts_record_h record )
 		contacts_record_destroy((contacts_record_h)temp_contact, true);
 	}
 	else
-		ctsvc_make_contact_display_name(contact);
+		ctsvc_contact_make_display_name(contact);
 
 	do {
 		char query[CTS_SQL_MAX_LEN] = {0};
@@ -1428,15 +1330,15 @@ static int __ctsvc_db_contact_get_all_records( int offset, int limit, contacts_l
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_db_contact_get_changed_ver(ctsvc_contact_s *contact,
-					      int contact_id)
+static int __ctsvc_db_contact_get_changed_ver(int contact_id, ctsvc_contact_s *contact)
 {
 	int ret;
 	int version;
 	char query[CTS_SQL_MAX_LEN] = {0};
 
 	snprintf(query, sizeof(query),
-			"SELECT changed_ver FROM "CTS_TABLE_CONTACTS" WHERE contact_id = %d AND deleted = 0", contact_id);
+			"SELECT changed_ver FROM "CTS_TABLE_CONTACTS
+				" WHERE contact_id = %d AND deleted = 0", contact_id);
 	ret = ctsvc_query_get_first_int_result(query, &version);
 	if (CONTACTS_ERROR_NONE == ret)
 		contact->changed_ver = version;
@@ -1533,7 +1435,7 @@ static int __ctsvc_db_contact_get_records_with_query( contacts_query_h query, in
 			case CTSVC_PROPERTY_CONTACT_IMAGE_THUMBNAIL:
 				temp = ctsvc_stmt_get_text(stmt, i);
 				if (temp && *temp) {
-					snprintf(full_path, sizeof(full_path), "%s/%s", CTS_IMG_FULL_LOCATION, temp);
+					snprintf(full_path, sizeof(full_path), "%s/%s", CTSVC_CONTACT_IMG_FULL_LOCATION, temp);
 					contact->image_thumbnail_path = strdup(full_path);
 				}
 				break;
@@ -1572,7 +1474,7 @@ static int __ctsvc_db_contact_get_records_with_query( contacts_query_h query, in
 			}
 		}
 		// get changed_ver
-		ret = __ctsvc_db_contact_get_changed_ver(contact, contact_id);
+		ret = __ctsvc_db_contact_get_changed_ver(contact_id, contact);
 		if (CONTACTS_ERROR_NONE != ret) {
 			CTS_ERR("__ctsvc_db_contact_get_changed_ver Failed(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
@@ -1831,7 +1733,7 @@ static inline int __ctsvc_contact_insert_grouprel(int contact_id, contacts_list_
 	CTS_FN_CALL;
 	ctsvc_group_relation_s *grouprel;
 	int rel_changed = 0;
-	unsigned int count;
+	int count;
 	int ret;
 
 	RETV_IF(NULL == group_list, CONTACTS_ERROR_INVALID_PARAMETER);
@@ -1847,7 +1749,7 @@ static inline int __ctsvc_contact_insert_grouprel(int contact_id, contacts_list_
 
 		RETVM_IF(grouprel->group_id <= 0, CONTACTS_ERROR_INVALID_PARAMETER, "group_id(%d) invalid", grouprel->group_id);
 		if (grouprel->group_id) {
-			int ret = ctsvc_group_add_contact_in_transaction(grouprel->group_id, contact_id);
+			ret = ctsvc_group_add_contact_in_transaction(grouprel->group_id, contact_id);
 			RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "ctsvc_db_group_set_relation() Failed(%d)", ret);
 			if (0 < ret)
 				rel_changed += ret;
@@ -1863,21 +1765,41 @@ static inline int __ctsvc_contact_insert_grouprel(int contact_id, contacts_list_
 inline static int __ctsvc_find_person_to_link_with_number(const char *number, int addressbook_id, int *person_id)
 {
 	int ret;
+	cts_stmt stmt = NULL;
 	char query[CTS_SQL_MIN_LEN] = {0};
-	char minmatch[CTSVC_NUMBER_MAX_LEN] = {0};
-	char normal_num[CTSVC_NUMBER_MAX_LEN] = {0};
+	int number_len = SAFE_STRLEN(number);
+	char clean_num[number_len+1];
 
-	ret = ctsvc_normalize_number(number, normal_num, sizeof(normal_num));
+	ret = ctsvc_clean_number(number, clean_num, sizeof(clean_num), true);
 	if (0 < ret) {
-		ret = ctsvc_get_minmatch_number(normal_num, minmatch, CTSVC_NUMBER_MAX_LEN, ctsvc_get_phonenumber_min_match_digit());
+		char normal_num[sizeof(clean_num)+20];
+		ret = ctsvc_normalize_number(clean_num, normal_num, sizeof(normal_num), true);
+		char minmatch[sizeof(normal_num)+1];
+		if (0 < ret)
+			ret = ctsvc_get_minmatch_number(normal_num, minmatch, sizeof(minmatch), ctsvc_get_phonenumber_min_match_digit());
+
 		snprintf(query, sizeof(query),
 				"SELECT C.person_id FROM "CTS_TABLE_CONTACTS" C, "CTS_TABLE_DATA" D "
 				"ON C.contact_id=D.contact_id AND D.datatype=%d AND C.deleted = 0 "
-				"AND C.addressbook_id <> %d "
-				"WHERE D.data4='%s' AND D.is_my_profile = 0",
-				CTSVC_DATA_NUMBER, addressbook_id, minmatch);
-		ret = ctsvc_query_get_first_int_result(query, person_id);
-		CTS_DBG("%s", query);
+				"AND C.addressbook_id <> %d AND D.is_my_profile = 0 "
+				"WHERE D.data4 = ?",
+				// Below condition takes long time, so omit the condition
+				// AND _NUMBER_COMPARE_(D.data5, ?, NULL, NULL)
+				CTSVC_DATA_NUMBER, addressbook_id);
+
+		ret = ctsvc_query_prepare(query, &stmt);
+		RETVM_IF(NULL == stmt, ret, "ctsvc_query_prepare fail(%d)", ret);
+		ctsvc_stmt_bind_text(stmt, 1, minmatch);
+//		ctsvc_stmt_bind_text(stmt, 2, normal_num);
+		ret = ctsvc_stmt_step(stmt);
+		if (1 == ret) {
+			*person_id = ctsvc_stmt_get_int(stmt, 0);
+			ret = CONTACTS_ERROR_NONE;
+		}
+		else if (CONTACTS_ERROR_NONE == ret) {
+			ret = CONTACTS_ERROR_NO_DATA;
+		}
+		ctsvc_stmt_finalize(stmt);
 		CTS_DBG("result ret(%d) person_id(%d)", ret, *person_id);
 		return ret;
 	}
@@ -1888,21 +1810,34 @@ inline static int __ctsvc_find_person_to_link_with_number(const char *number, in
 inline static int __ctsvc_find_person_to_link_with_email(const char *email_addr, int addressbook_id, int *person_id)
 {
 	int ret;
+	cts_stmt stmt = NULL;
 	char query[CTS_SQL_MIN_LEN] = {0};
 
 	snprintf(query, sizeof(query),
 			"SELECT C.person_id FROM "CTS_TABLE_CONTACTS" C, "CTS_TABLE_DATA" D "
-			"ON C.contact_id=D.contact_id AND D.datatype=%d AND C.deleted = 0 "
+			"ON C.contact_id=D.contact_id AND D.datatype=%d AND C.deleted = 0 AND D.is_my_profile = 0 "
 			"AND C.addressbook_id <> %d "
-			"WHERE D.data3='%s' AND D.is_my_profile = 0",
-			CTSVC_DATA_EMAIL, addressbook_id, email_addr);
-	ret = ctsvc_query_get_first_int_result(query, person_id);
-	CTS_DBG("%s", query);
+			"WHERE D.data3 = ?",
+			CTSVC_DATA_EMAIL, addressbook_id);
+
+	ret = ctsvc_query_prepare(query, &stmt);
+	RETVM_IF(NULL == stmt, ret, "ctsvc_query_prepare fail(%d)", ret);
+
+	ctsvc_stmt_bind_text(stmt, 1, email_addr);
+	ret = ctsvc_stmt_step(stmt);
+	if (1 == ret) {
+		*person_id = ctsvc_stmt_get_int(stmt, 0);
+		ret = CONTACTS_ERROR_NONE;
+	}
+	else if (CONTACTS_ERROR_NONE == ret) {
+		ret = CONTACTS_ERROR_NO_DATA;
+	}
+
+	ctsvc_stmt_finalize(stmt);
 	CTS_DBG("result ret(%d) person_id(%d)", ret, *person_id);
 
 	return ret;
 }
-
 
 inline static int __ctsvc_find_person_to_link(contacts_record_h record, int addressbook_id, int *person_id)
 {
@@ -1961,6 +1896,13 @@ static int __ctsvc_db_contact_insert_record( contacts_record_h record, int *id)
 	ret = ctsvc_begin_trans();
 	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "ctsvc_begin_trans() Failed(%d)", ret);
 
+	if (false == ctsvc_have_ab_write_permission(contact->addressbook_id)) {
+		CTS_ERR("ctsvc_have_ab_write_permission fail : does not have permission(addressbook_id : %d)",
+					contact->addressbook_id);
+		ctsvc_end_trans(false);
+		return CONTACTS_ERROR_PERMISSION_DENIED;
+	}
+
 	ret = ctsvc_db_get_next_id(CTS_TABLE_CONTACTS);
 	if (ret < CONTACTS_ERROR_NONE) {
 		CTS_ERR("ctsvc_db_get_next_id() Failed(%d)", ret);
@@ -1971,7 +1913,7 @@ static int __ctsvc_db_contact_insert_record( contacts_record_h record, int *id)
 	if (id)
 		*id = ret;
 
-	ctsvc_make_contact_display_name(contact);
+	ctsvc_contact_make_display_name(contact);
 	__ctsvc_contact_check_default_data(contact);
 
 	//Insert Data
@@ -1989,7 +1931,7 @@ static int __ctsvc_db_contact_insert_record( contacts_record_h record, int *id)
 
 	if (contact->images) {
 		ctsvc_image_s *image;
-		unsigned int count = 0;
+		int count = 0;
 
 		contacts_list_get_count((contacts_list_h)contact->images, &count);
 
@@ -2014,7 +1956,22 @@ static int __ctsvc_db_contact_insert_record( contacts_record_h record, int *id)
 
 	version = ctsvc_get_next_ver();
 
-	if (auto_link_enabled) {
+	if (contact->person_id) {
+		int id;
+
+		snprintf(query,sizeof(query),
+					"SELECT contact_id FROM "CTSVC_DB_VIEW_CONTACT" "
+						"WHERE person_id = %d", contact->person_id);
+		ret = ctsvc_query_get_first_int_result(query, &id);
+		if (CONTACTS_ERROR_NONE != ret) {
+			CTS_ERR("Invalid person_id(%d)", contact->person_id);
+			ctsvc_end_trans(false);
+			return CONTACTS_ERROR_INVALID_PARAMETER;
+		}
+
+		auto_linked = true;
+	}
+	else if (auto_link_enabled) {
 		ret = __ctsvc_find_person_to_link((contacts_record_h)contact, contact->addressbook_id, &person_id);
 		CTS_DBG("__ctsvc_find_person_to_link return %d , person_id(%d)", ret, person_id);
 		if (ret == CONTACTS_ERROR_NONE && person_id > 0) {
@@ -2118,6 +2075,22 @@ static int __ctsvc_db_contact_insert_record( contacts_record_h record, int *id)
 	if (auto_linked)
 		ctsvc_person_aggregate(contact->person_id);
 
+#ifdef ENABLE_LOG_FEATURE
+	// update phonelog
+	if (contact->numbers) {
+		int count;
+		ret = contacts_list_get_count((contacts_list_h)contact->numbers, &count);
+		contacts_list_first((contacts_list_h)contact->numbers);
+		if (count > 0) {
+			ctsvc_number_s *number_record;
+			do {
+				contacts_list_get_current_record_p((contacts_list_h)contact->numbers, (contacts_record_h*)&number_record);
+				if (number_record->number)
+					ctsvc_db_phone_log_update_person_id(number_record->number, -1, contact->person_id, false);
+			} while(CONTACTS_ERROR_NONE == contacts_list_next((contacts_list_h)contact->numbers));
+		}
+	}
+#endif // ENABLE_LOG_FEATURE
 	if (rel_changed)
 		ctsvc_set_group_rel_noti();
 	ctsvc_set_contact_noti();
@@ -2134,6 +2107,7 @@ static int __ctsvc_db_contact_replace_record( contacts_record_h record, int cont
 	int ret, len;
 	int rel_changed = 0;
 	int person_id;
+	int addressbook_id;
 	char query[CTS_SQL_MAX_LEN] = {0};
 	ctsvc_contact_s *contact = (ctsvc_contact_s*)record;
 	cts_stmt stmt = NULL;
@@ -2143,18 +2117,38 @@ static int __ctsvc_db_contact_replace_record( contacts_record_h record, int cont
 	RETVM_IF(ret, ret, "ctsvc_begin_trans() Failed(%d)", ret);
 
 	snprintf(query, sizeof(query),
-		"SELECT person_id FROM "CTS_TABLE_CONTACTS" "
+		"SELECT addressbook_id, person_id FROM "CTS_TABLE_CONTACTS" "
 		"WHERE contact_id = %d AND deleted = 0", contact_id);
-	ret = ctsvc_query_get_first_int_result(query, &person_id);
-	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("The index(%d) is Invalid. %d Record(s) is(are) not found", contact->id, ret);
+	ret = ctsvc_query_prepare(query, &stmt);
+	if (NULL == stmt) {
+		CTS_ERR("DB errror : ctsvc_query_prepare fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
+	}
+	ret = ctsvc_stmt_step(stmt);
+	if (1 != ret) {
+		CTS_ERR("The contact_id(%d) is Invalid(%d)", contact_id, ret);
+		ctsvc_stmt_finalize(stmt);
+		ctsvc_end_trans(false);
+		if (CONTACTS_ERROR_NONE == ret)
+			return CONTACTS_ERROR_NO_DATA;
+		else
+			return ret;
+	}
+
+	addressbook_id = ctsvc_stmt_get_int(stmt, 0);
+	person_id = ctsvc_stmt_get_int(stmt, 1);
+	ctsvc_stmt_finalize(stmt);
+
+	if (false == ctsvc_have_ab_write_permission(addressbook_id)) {
+		CTS_ERR("Does not have permission to replace this contact (addressbook_id : %d, contact_id : %d", addressbook_id, contact_id);
+		ctsvc_end_trans(false);
+		return CONTACTS_ERROR_PERMISSION_DENIED;
 	}
 
 	contact->id = contact_id;
 	contact->person_id = person_id;
-	ctsvc_make_contact_display_name(contact);
+	ctsvc_contact_make_display_name(contact);
 	__ctsvc_contact_check_default_data(contact);
 
 	//remove current child data
@@ -2196,7 +2190,7 @@ static int __ctsvc_db_contact_replace_record( contacts_record_h record, int cont
 	if (contact->images) {
 		int ret = CONTACTS_ERROR_NONE;
 		contacts_record_h record_image = NULL;
-		unsigned int count = 0;
+		int count = 0;
 		ctsvc_image_s *image;
 
 		contacts_list_get_count((contacts_list_h)contact->images, &count);
@@ -2217,7 +2211,7 @@ static int __ctsvc_db_contact_replace_record( contacts_record_h record, int cont
 				ctsvc_record_set_property_flag((ctsvc_record_s *)contact, _contacts_contact.image_thumbnail_path, CTSVC_PROPERTY_FLAG_DIRTY);
 
 				if (ctsvc_contact_check_image_location(image->path))
-					contact->image_thumbnail_path = SAFE_STRDUP(image->path + strlen(CTS_IMG_FULL_LOCATION) + 1);
+					contact->image_thumbnail_path = SAFE_STRDUP(image->path + strlen(CTSVC_CONTACT_IMG_FULL_LOCATION) + 1);
 				else
 					contact->image_thumbnail_path = SAFE_STRDUP(image->path);
 			}
@@ -2229,8 +2223,10 @@ static int __ctsvc_db_contact_replace_record( contacts_record_h record, int cont
 				ctsvc_record_set_property_flag((ctsvc_record_s *)contact, _contacts_contact.image_thumbnail_path, CTSVC_PROPERTY_FLAG_DIRTY);
 			}
 			else {
-				int index = _contacts_contact.image_thumbnail_path & 0x000000FF;
-				((ctsvc_record_s *)record)->properties_flags[index] = 0;
+				if (((ctsvc_record_s *)record)->properties_flags) {
+					int index = _contacts_contact.image_thumbnail_path & 0x000000FF;
+					((ctsvc_record_s *)record)->properties_flags[index] = 0;
+				}
 			}
 		}
 	}

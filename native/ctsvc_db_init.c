@@ -23,6 +23,7 @@
 #include <glib.h>
 
 #include "contacts.h"
+
 #include "ctsvc_internal.h"
 #include "ctsvc_schema.h"
 #include "ctsvc_sqlite.h"
@@ -32,19 +33,21 @@
 #include "ctsvc_notification.h"
 #include "ctsvc_db_access_control.h"
 
-#define MODULE_NAME_DB "DB"
-
 extern ctsvc_db_plugin_info_s ctsvc_db_plugin_addressbook;
 extern ctsvc_db_plugin_info_s ctsvc_db_plugin_contact;
 extern ctsvc_db_plugin_info_s ctsvc_db_plugin_my_profile;
 extern ctsvc_db_plugin_info_s ctsvc_db_plugin_simple_contact;
 extern ctsvc_db_plugin_info_s ctsvc_db_plugin_group;
 extern ctsvc_db_plugin_info_s ctsvc_db_plugin_person;
+#ifdef ENABLE_LOG_FEATURE
 extern ctsvc_db_plugin_info_s ctsvc_db_plugin_phonelog;
+#endif // ENABLE_LOG_FEATURE
+#ifdef ENABLE_SIM_FEATURE
 extern ctsvc_db_plugin_info_s ctsvc_db_plugin_speeddial;
 extern ctsvc_db_plugin_info_s ctsvc_db_plugin_sdn;
-
+#endif // ENABLE_SIM_FEATURE
 extern ctsvc_db_plugin_info_s ctsvc_db_plugin_activity;
+extern ctsvc_db_plugin_info_s ctsvc_db_plugin_activity_photo;
 extern ctsvc_db_plugin_info_s ctsvc_db_plugin_address;
 extern ctsvc_db_plugin_info_s ctsvc_db_plugin_company;
 extern ctsvc_db_plugin_info_s ctsvc_db_plugin_email;
@@ -62,6 +65,10 @@ extern ctsvc_db_plugin_info_s ctsvc_db_plugin_extension;
 extern ctsvc_db_plugin_info_s ctsvc_db_plugin_profile;
 
 
+#ifdef _CONTACTS_NATIVE
+static int __ctsvc_db_view_ref_count = 0;
+#endif
+
 static GHashTable *__ctsvc_db_view_hash_table = NULL;
 
 #ifdef _CONTACTS_IPC_SERVER
@@ -73,65 +80,72 @@ typedef struct {
 	const char * const table_name;
 	int read_permission;
 	int write_permission;
+	bool need_ab_access_control;
 }db_table_info_s;
 
 static const db_table_info_s __db_tables[] = {
-	{CTSVC_VIEW_URI_ADDRESSBOOK,	CTS_TABLE_ADDRESSBOOKS, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_WRITE},
-	{CTSVC_VIEW_URI_GROUP,			CTS_TABLE_GROUPS, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_WRITE},
-	{CTSVC_VIEW_URI_PERSON,			CTSVC_DB_VIEW_PERSON, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_WRITE},
-	{CTSVC_VIEW_URI_SIMPLE_CONTACT, CTSVC_DB_VIEW_CONTACT, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_WRITE},
-	{CTSVC_VIEW_URI_CONTACT,		CTSVC_DB_VIEW_CONTACT, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_WRITE},
-	{CTSVC_VIEW_URI_MY_PROFILE,	CTSVC_DB_VIEW_MY_PROFILE, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_WRITE},
-	{CTSVC_VIEW_URI_ACTIVITY,		CTSVC_DB_VIEW_ACTIVITY, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_WRITE},
-	{CTSVC_VIEW_URI_PHONELOG,		CTS_TABLE_PHONELOGS, CTSVC_PERMISSION_PHONELOG_READ, CTSVC_PERMISSION_PHONELOG_WRITE},
-	{CTSVC_VIEW_URI_SPEEDDIAL,		CTSVC_DB_VIEW_SPEEDIDAL, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_WRITE},
-	{CTSVC_VIEW_URI_SDN,				CTS_TABLE_SDN, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_WRITE},
+	{CTSVC_VIEW_URI_ADDRESSBOOK,	CTS_TABLE_ADDRESSBOOKS, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_WRITE, true},
+	{CTSVC_VIEW_URI_GROUP,			CTS_TABLE_GROUPS, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_WRITE, true},
+	{CTSVC_VIEW_URI_PERSON,			CTSVC_DB_VIEW_PERSON, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_WRITE, true},
+	{CTSVC_VIEW_URI_SIMPLE_CONTACT, CTSVC_DB_VIEW_CONTACT, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_WRITE, true},
+	{CTSVC_VIEW_URI_CONTACT,		CTSVC_DB_VIEW_CONTACT, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_WRITE, true},
+	{CTSVC_VIEW_URI_MY_PROFILE,	CTSVC_DB_VIEW_MY_PROFILE, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_WRITE, true},
+	{CTSVC_VIEW_URI_ACTIVITY,		CTSVC_DB_VIEW_ACTIVITY, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_WRITE, true},
+	{CTSVC_VIEW_URI_ACTIVITY_PHOTO,CTSVC_DB_VIEW_ACTIVITY_PHOTOS, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_WRITE, true},
+	{CTSVC_VIEW_URI_PHONELOG,		CTS_TABLE_PHONELOGS, CTSVC_PERMISSION_PHONELOG_READ, CTSVC_PERMISSION_PHONELOG_WRITE, false},
+	{CTSVC_VIEW_URI_SPEEDDIAL,		CTSVC_DB_VIEW_SPEEDIDAL, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_WRITE, false},
+	{CTSVC_VIEW_URI_SDN,				CTS_TABLE_SDN, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_WRITE, false},
 
-	{CTSVC_VIEW_URI_NAME,			CTSVC_DB_VIEW_NAME, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_WRITE},
-	{CTSVC_VIEW_URI_COMPANY,		CTSVC_DB_VIEW_COMPANY, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_WRITE},
-	{CTSVC_VIEW_URI_NUMBER,			CTSVC_DB_VIEW_NUMBER, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_WRITE},
-	{CTSVC_VIEW_URI_EMAIL,			CTSVC_DB_VIEW_EMAIL, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_WRITE},
-	{CTSVC_VIEW_URI_URL,			CTSVC_DB_VIEW_URL, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_WRITE},
-	{CTSVC_VIEW_URI_ADDRESS,		CTSVC_DB_VIEW_ADDRESS, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_WRITE},
-	{CTSVC_VIEW_URI_PROFILE,		CTSVC_DB_VIEW_PROFILE, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_WRITE},
-	{CTSVC_VIEW_URI_RELATIONSHIP,	CTSVC_DB_VIEW_RELATIONSHIP, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_WRITE},
-	{CTSVC_VIEW_URI_IMAGE,			CTSVC_DB_VIEW_IMAGE, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_WRITE},
-	{CTSVC_VIEW_URI_NOTE,			CTSVC_DB_VIEW_NOTE, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_WRITE},
-	{CTSVC_VIEW_URI_NICKNAME,		CTSVC_DB_VIEW_NICKNAME, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_WRITE},
-	{CTSVC_VIEW_URI_EVENT,			CTSVC_DB_VIEW_EVENT, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_WRITE},
-	{CTSVC_VIEW_URI_MESSENGER,		CTSVC_DB_VIEW_MESSENGER, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_WRITE},
-	{CTSVC_VIEW_URI_GROUP_RELATION, CTSVC_DB_VIEW_GROUP_RELATION, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_WRITE},
-	{CTSVC_VIEW_URI_EXTENSION,		CTSVC_DB_VIEW_EXTENSION, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_WRITE},
+	{CTSVC_VIEW_URI_NAME,			CTSVC_DB_VIEW_NAME, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_WRITE, true},
+	{CTSVC_VIEW_URI_COMPANY,		CTSVC_DB_VIEW_COMPANY, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_WRITE, true},
+	{CTSVC_VIEW_URI_NUMBER,			CTSVC_DB_VIEW_NUMBER, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_WRITE, true},
+	{CTSVC_VIEW_URI_EMAIL,			CTSVC_DB_VIEW_EMAIL, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_WRITE, true},
+	{CTSVC_VIEW_URI_URL,			CTSVC_DB_VIEW_URL, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_WRITE, true},
+	{CTSVC_VIEW_URI_ADDRESS,		CTSVC_DB_VIEW_ADDRESS, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_WRITE, true},
+	{CTSVC_VIEW_URI_PROFILE,		CTSVC_DB_VIEW_PROFILE, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_WRITE, true},
+	{CTSVC_VIEW_URI_RELATIONSHIP,	CTSVC_DB_VIEW_RELATIONSHIP, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_WRITE, true},
+	{CTSVC_VIEW_URI_IMAGE,			CTSVC_DB_VIEW_IMAGE, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_WRITE, true},
+	{CTSVC_VIEW_URI_NOTE,			CTSVC_DB_VIEW_NOTE, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_WRITE, true},
+	{CTSVC_VIEW_URI_NICKNAME,		CTSVC_DB_VIEW_NICKNAME, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_WRITE, true},
+	{CTSVC_VIEW_URI_EVENT,			CTSVC_DB_VIEW_EVENT, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_WRITE, true},
+	{CTSVC_VIEW_URI_MESSENGER,		CTSVC_DB_VIEW_MESSENGER, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_WRITE, true},
+	{CTSVC_VIEW_URI_GROUP_RELATION, CTSVC_DB_VIEW_GROUP_RELATION, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_WRITE, true},
+	{CTSVC_VIEW_URI_EXTENSION,		CTSVC_DB_VIEW_EXTENSION, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_WRITE, true},
 
 // Do not support get_all_records, get_records_with_query, get_count, get_count_with_query
-//	{CTSVC_VIEW_URI_GROUPS_UPDATED_INFO, CTSVC_DB_VIEW_GROUPS_UPDATED_INFO},
-//	{CTSVC_VIEW_URI_GROUPS_MEMBER_UPDATED_INFO, CTSVC_DB_VIEW_GROUPS_MEMBER_UPDATED_INFO},
-//	{CTSVC_VIEW_URI_CONTACTS_UPDATED_INFO, CTSVC_DB_VIEW_CONTACTS_UPDATED_INFO},
-//	{CTSVC_VIEW_URI_MY_PROFILE_UPDATED_INFO, NULL},
-//	{CTSVC_VIEW_URI_GROUPRELS_UPDATED_INFO, NULL},
+//	{CTSVC_VIEW_URI_GROUPS_UPDATED_INFO, CTSVC_DB_VIEW_GROUPS_UPDATED_INFO, false},
+//	{CTSVC_VIEW_URI_GROUPS_MEMBER_UPDATED_INFO, CTSVC_DB_VIEW_GROUPS_MEMBER_UPDATED_INFO, false},
+//	{CTSVC_VIEW_URI_CONTACTS_UPDATED_INFO, CTSVC_DB_VIEW_CONTACTS_UPDATED_INFO, false},
+//	{CTSVC_VIEW_URI_MY_PROFILE_UPDATED_INFO, NULL, false},
+//	{CTSVC_VIEW_URI_GROUPRELS_UPDATED_INFO, NULL, false},
 
-	{CTSVC_VIEW_URI_READ_ONLY_PERSON_CONTACT, CTSVC_DB_VIEW_PERSON_CONTACT, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_NONE},
-	{CTSVC_VIEW_URI_READ_ONLY_PERSON_NUMBER, CTSVC_DB_VIEW_PERSON_NUMBER, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_NONE},
-	{CTSVC_VIEW_URI_READ_ONLY_PERSON_EMAIL, CTSVC_DB_VIEW_PERSON_EMAIL, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_NONE},
-	{CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP, CTSVC_DB_VIEW_PERSON_GROUP, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_NONE},
-	{CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP_ASSIGNED, CTSVC_DB_VIEW_PERSON_GROUP_ASSIGNED, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_NONE},
-	{CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP_NOT_ASSIGNED, CTSVC_DB_VIEW_PERSON_GROUP_NOT_ASSIGNED, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_NONE},
-	{CTSVC_VIEW_URI_READ_ONLY_PERSON_PHONELOG, CTSVC_DB_VIEW_PERSON_PHONELOG, CTSVC_PERMISSION_CONTACT_READ|CTSVC_PERMISSION_PHONELOG_READ, CTSVC_PERMISSION_CONTACT_NONE},
-	{CTSVC_VIEW_URI_READ_ONLY_PERSON_USAGE, CTSVC_DB_VIEW_PERSON_USAGE, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_NONE},
+	{CTSVC_VIEW_URI_READ_ONLY_PERSON_CONTACT, CTSVC_DB_VIEW_PERSON_CONTACT, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_NONE, true},
+	{CTSVC_VIEW_URI_READ_ONLY_PERSON_NUMBER, CTSVC_DB_VIEW_PERSON_NUMBER, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_NONE, true},
+	{CTSVC_VIEW_URI_READ_ONLY_PERSON_EMAIL, CTSVC_DB_VIEW_PERSON_EMAIL, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_NONE, true},
+	{CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP, CTSVC_DB_VIEW_PERSON_GROUP, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_NONE, true},
+	{CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP_ASSIGNED, CTSVC_DB_VIEW_PERSON_GROUP_ASSIGNED, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_NONE, true},
+	{CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP_NOT_ASSIGNED, CTSVC_DB_VIEW_PERSON_GROUP_NOT_ASSIGNED, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_NONE, true},
+	{CTSVC_VIEW_URI_READ_ONLY_PERSON_PHONELOG, CTSVC_DB_VIEW_PERSON_PHONELOG, CTSVC_PERMISSION_CONTACT_READ|CTSVC_PERMISSION_PHONELOG_READ, CTSVC_PERMISSION_CONTACT_NONE, false},
+	{CTSVC_VIEW_URI_READ_ONLY_PERSON_USAGE, CTSVC_DB_VIEW_PERSON_USAGE, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_NONE, true},
 
-	{CTSVC_VIEW_URI_READ_ONLY_CONTACT_NUMBER, CTSVC_DB_VIEW_CONTACT_NUMBER, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_NONE},
-	{CTSVC_VIEW_URI_READ_ONLY_CONTACT_EMAIL, CTSVC_DB_VIEW_CONTACT_EMAIL, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_NONE},
-	{CTSVC_VIEW_URI_READ_ONLY_CONTACT_GROUP, CTSVC_DB_VIEW_CONTACT_GROUP, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_NONE},
-	{CTSVC_VIEW_URI_READ_ONLY_CONTACT_ACTIVITY, CTSVC_DB_VIEW_CONTACT_ACTIVITY, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_NONE},
+	{CTSVC_VIEW_URI_READ_ONLY_CONTACT_NUMBER, CTSVC_DB_VIEW_CONTACT_NUMBER, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_NONE, true},
+	{CTSVC_VIEW_URI_READ_ONLY_CONTACT_EMAIL, CTSVC_DB_VIEW_CONTACT_EMAIL, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_NONE, true},
+	{CTSVC_VIEW_URI_READ_ONLY_CONTACT_GROUP, CTSVC_DB_VIEW_CONTACT_GROUP, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_NONE, true},
+	{CTSVC_VIEW_URI_READ_ONLY_CONTACT_ACTIVITY, CTSVC_DB_VIEW_CONTACT_ACTIVITY, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_NONE, true},
 
-	{CTSVC_VIEW_URI_READ_ONLY_PHONELOG_NUMBER, CTSVC_DB_VIEW_PHONELOG_NUMBER, CTSVC_PERMISSION_PHONELOG_READ, CTSVC_PERMISSION_CONTACT_NONE},
-	{CTSVC_VIEW_URI_READ_ONLY_PHONELOG_STAT, CTS_TABLE_PHONELOG_STAT, CTSVC_PERMISSION_PHONELOG_READ, CTSVC_PERMISSION_CONTACT_NONE},
+	{CTSVC_VIEW_URI_READ_ONLY_PHONELOG_STAT, CTS_TABLE_PHONELOG_STAT, CTSVC_PERMISSION_PHONELOG_READ, CTSVC_PERMISSION_CONTACT_NONE, false},
+
 };
 
 // this function is called in mutex lock
 int ctsvc_db_plugin_init()
 {
 	int i;
+
+#ifdef _CONTACTS_NATIVE
+	__ctsvc_db_view_ref_count++;
+#endif
+
 	if (__ctsvc_db_view_hash_table) {
 		return CONTACTS_ERROR_NONE;
 	}
@@ -148,6 +162,12 @@ int ctsvc_db_plugin_init()
 
 int ctsvc_db_plugin_deinit()
 {
+#ifdef _CONTACTS_NATIVE
+	__ctsvc_db_view_ref_count--;
+	if (__ctsvc_db_view_ref_count != 0)
+		return;
+#endif
+
 	if (!__ctsvc_db_view_hash_table) {
 		return CONTACTS_ERROR_NONE;
 	}
@@ -169,7 +189,7 @@ int ctsvc_db_get_table_name(const char *view_uri, const char **out_table)
 		}
 	}
 	else
-		CTS_ERR("Please check contact_connect2()");
+		CTS_ERR("Please check contact_connect()");
 
 	return CONTACTS_ERROR_INVALID_PARAMETER;
 }
@@ -185,7 +205,7 @@ int ctsvc_required_read_permission(const char *view_uri)
 		}
 	}
 	else
-		CTS_ERR("Please check contact_connect2()");
+		CTS_ERR("Please check contact_connect()");
 
 	return CTSVC_PERMISSION_CONTACT_NONE;
 }
@@ -201,9 +221,25 @@ int ctsvc_required_write_permission(const char *view_uri)
 		}
 	}
 	else
-		CTS_ERR("Please check contact_connect2()");
+		CTS_ERR("Please check contact_connect()");
 
 	return CTSVC_PERMISSION_CONTACT_NONE;
+}
+
+bool ctsvc_should_ab_access_control(const char *view_uri)
+{
+	db_table_info_s* db_view_info = NULL;
+
+	if(__ctsvc_db_view_hash_table){
+		db_view_info = g_hash_table_lookup(__ctsvc_db_view_hash_table, view_uri);
+		if (db_view_info) {
+			return db_view_info->need_ab_access_control;
+		}
+	}
+	else
+		CTS_ERR("Please check contact_connect()");
+
+	return false;
 }
 
 ctsvc_db_plugin_info_s* ctsvc_db_get_plugin_info(ctsvc_record_type_e type)
@@ -245,6 +281,8 @@ ctsvc_db_plugin_info_s* ctsvc_db_get_plugin_info(ctsvc_record_type_e type)
 		return &ctsvc_db_plugin_grouprelation;
 	case CTSVC_RECORD_ACTIVITY:
 		return &ctsvc_db_plugin_activity;
+	case CTSVC_RECORD_ACTIVITY_PHOTO:
+		return &ctsvc_db_plugin_activity_photo;
 	case CTSVC_RECORD_PROFILE:
 		return &ctsvc_db_plugin_profile;
 	case CTSVC_RECORD_RELATIONSHIP:
@@ -253,12 +291,16 @@ ctsvc_db_plugin_info_s* ctsvc_db_get_plugin_info(ctsvc_record_type_e type)
 		return &ctsvc_db_plugin_image;
 	case CTSVC_RECORD_EXTENSION:
 		return &ctsvc_db_plugin_extension;
+#ifdef ENABLE_LOG_FEATURE
 	case CTSVC_RECORD_PHONELOG:
 		return &ctsvc_db_plugin_phonelog;
+#endif // ENABLE_LOG_FEATURE
+#ifdef ENABLE_SIM_FEATURE
 	case CTSVC_RECORD_SPEEDDIAL:
 		return &ctsvc_db_plugin_speeddial;
 	case CTSVC_RECORD_SDN:
 		return &ctsvc_db_plugin_sdn;
+#endif // ENABLE_SIM_FEATURE
 	case CTSVC_RECORD_UPDATED_INFO:
 	case CTSVC_RECORD_RESULT:
 	default:
@@ -347,7 +389,8 @@ static int __ctsvc_db_create_views()
 					"data2, "
 					"data3, "
 					"data4, "
-					"data5 "
+					"data5, "
+					"data6 "
 			"FROM "CTS_TABLE_DATA", "CTSVC_DB_VIEW_CONTACT" "
 			"ON "CTS_TABLE_DATA".contact_id = "CTSVC_DB_VIEW_CONTACT".contact_id "
 			"WHERE datatype = %d AND is_my_profile = 0 ",
@@ -609,6 +652,19 @@ static int __ctsvc_db_create_views()
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Failed(%d)", ret);
 
+	// CTSVC_DB_VIEW_ACTIVITY_PHOTOS
+	snprintf(query, sizeof(query),
+		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_ACTIVITY_PHOTOS" AS "
+			"SELECT "CTS_TABLE_ACTIVITY_PHOTOS".id, "
+					"activity_id, "
+					"photo_url, "
+					"sort_index "
+			"FROM "CTS_TABLE_ACTIVITY_PHOTOS", "CTSVC_DB_VIEW_ACTIVITY" "
+			"ON "CTS_TABLE_ACTIVITY_PHOTOS".activity_id = "CTSVC_DB_VIEW_ACTIVITY".id");
+	ret = ctsvc_query_exec(query);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Failed(%d)", ret);
+
+#ifdef ENABLE_SIM_FEATURE
 	// CTSVC_DB_VIEW_SPEEDIDAL
 	snprintf(query, sizeof(query),
 		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_SPEEDIDAL" AS "
@@ -623,7 +679,9 @@ static int __ctsvc_db_create_views()
 					"data.data1 type, "
 					"data.data2 label, "
 					"data.data3 number, "
+					"data.data4 minmatch, "
 					"data.data5 normalized_number, "
+					"data.data6 cleaned_number, "
 					"speeddials.speed_number  "
 			"FROM "CTS_TABLE_PERSONS", "CTS_TABLE_CONTACTS" AS name_contacts, "
 					CTSVC_DB_VIEW_CONTACT" AS temp_contacts, "
@@ -635,45 +693,8 @@ static int __ctsvc_db_create_views()
 			"ORDER BY speeddials.speed_number");
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Failed(%d)", ret);
-#if 0
-	// CTSVC_DB_VIEW_CONTACTS_UPDATED_INFO
-	snprintf(query, sizeof(query),
-		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_CONTACTS_UPDATED_INFO" AS "
-			"SELECT %d, contact_id, changed_ver version, addressbook_id "
-				"FROM "CTS_TABLE_CONTACTS" "
-				"WHERE changed_ver == created_ver "
-			"UNION SELECT %d, contact_id, changed_ver version, addressbook_id "
-				"FROM "CTS_TABLE_CONTACTS" "
-				"WHERE changed_ver > created_ver "
-			"UNION SELECT %d, contact_id, deleted_ver version, addressbook_id "
-				"FROM "CTS_TABLE_DELETEDS,
-				CONTACTS_CHANGE_INSERTED, CONTACTS_CHANGE_UPDATED, CONTACTS_CHANGE_DELETED);
-	ret = ctsvc_query_exec(query);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Failed(%d)", ret);
+#endif // ENABLE_SIM_FEATURE
 
-	// CTSVC_DB_VIEW_GROUPS_UPDATED_INFO
-	snprintf(query, sizeof(query),
-		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_GROUPS_UPDATED_INFO" AS "
-			"SELECT %d, group_id, changed_ver version, addressbook_id "
-				"FROM "CTS_TABLE_GROUPS" "
-				"WHERE changed_ver == created_ver "
-			"UNION SELECT %d, group_id, changed_ver version, addressbook_id "
-				"FROM "CTS_TABLE_GROUPS" "
-				"WHERE changed_ver > created_ver "
-			"UNION SELECT %d, group_id, deleted_ver version, addressbook_id "
-				"FROM "CTS_TABLE_GROUP_DELETEDS,
-				CONTACTS_CHANGE_INSERTED, CONTACTS_CHANGE_UPDATED, CONTACTS_CHANGE_DELETED);
-	ret = ctsvc_query_exec(query);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Failed(%d)", ret);
-
-	// CTSVC_DB_VIEW_GROUPS_MEMBER_UPDATED_INFO
-	snprintf(query, sizeof(query),
-		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_GROUPS_MEMBER_UPDATED_INFO" AS "
-			"SELECT group_id, member_changed_ver version, addressbook_id "
-				"FROM "CTS_TABLE_GROUPS);
-	ret = ctsvc_query_exec(query);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Failed(%d)", ret);
-#endif
 
 	// CTSVC_DB_VIEW_PERSON_CONTACT
 	snprintf(query, sizeof(query),
@@ -701,7 +722,8 @@ static int __ctsvc_db_create_views()
 								"data2 label, "
 								"data3 number, "
 								"data4 minmatch, "
-								"data5 normalized_number "
+								"data5 normalized_number, "
+								"data6 cleaned_number "
 					"FROM "CTS_TABLE_DATA" WHERE datatype = %d AND is_my_profile = 0) temp_data "
 			"ON temp_data.contact_id = "CTSVC_DB_VIEW_PERSON_CONTACT".contact_id",
 				CTSVC_DATA_NUMBER);
@@ -724,54 +746,38 @@ static int __ctsvc_db_create_views()
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Failed(%d)", ret);
 
+#ifdef ENABLE_LOG_FEATURE
 	// CTSVC_DB_VIEW_PERSON_PHONELOG
 	snprintf(query, sizeof(query),
 		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_PERSON_PHONELOG" AS "
-			"SELECT C.id phonelog_id, "
-					"F.display_name, F.reverse_display_name, "
-					"F.display_name_language, "
-					"F.reverse_display_name_language, "
-					"F.sort_name, F.reverse_sort_name, "
-					"F.sortkey, F.reverse_sortkey, "
-					"F.image_thumbnail_path, "
-					"C.number address, "
-					"C.normal_num, "
-					"C.log_type, "
-					"C.log_time, "
-					"C.data1, "
-					"C.data2, "
-					"C.person_id id, "
-					"C.number_type address_type "
-			"FROM (SELECT A.id, A.number, A.normal_num, A.log_type, A.log_time, A.data1, A.data2, "
-						"MIN(B.person_id) person_id, B.data1 number_type "
-					"FROM "CTS_TABLE_PHONELOGS" A "
-						"LEFT JOIN (SELECT G.person_id person_id, G.contact_id contact_id, "
-									"H.datatype datatype, H.data1 data1, H.data4 data4 "
-								"FROM "CTSVC_DB_VIEW_CONTACT" G, "CTS_TABLE_DATA" H "
-								"ON H.datatype = %d AND G.contact_id = H.contact_id AND H.is_my_profile = 0 ) B "
-						"ON A.minmatch = B.data4 "
-							"AND (A.person_id = B.person_id "
-								"OR A.person_id IS NULL "
-								"OR NOT EXISTS (SELECT id FROM "CTS_TABLE_DATA" "
-												"WHERE datatype = %d AND is_my_profile = 0 "
-													"AND contact_id IN(SELECT contact_id "
-																		"FROM "CTSVC_DB_VIEW_CONTACT" "
-																		"WHERE person_id = A.person_id) "
-													"AND A.minmatch = data4)) "
-					"GROUP BY A.id) C "
-				"LEFT JOIN (SELECT D.person_id, D.display_name, D.reverse_display_name, "
-							"D.display_name_language, "
-							"D.reverse_display_name_language, "
-							"D.sort_name, D.reverse_sort_name, "
-							"D.sortkey, D.reverse_sortkey, "
-							"E.image_thumbnail_path "
-							"FROM "CTS_TABLE_CONTACTS" D, "CTS_TABLE_PERSONS" E "
-							"ON E.name_contact_id = D.contact_id) F "
-			"ON C.person_id = F.person_id "
-			"ORDER BY C.log_time DESC",
-			CTSVC_DATA_NUMBER, CTSVC_DATA_NUMBER);
+			"SELECT L.id phonelog_id, "
+					"C.display_name, "
+					"C.reverse_display_name, "
+					"C.display_name_language, "
+					"C.reverse_display_name_language, "
+					"C.sort_name, C.reverse_sort_name, "
+					"C.sortkey, C.reverse_sortkey, "
+					"P.image_thumbnail_path, "
+					"L.number address, "
+					"L.normal_num, "
+					"L.minmatch, "
+					"L.clean_num, "
+					"L.log_type, "
+					"L.log_time, "
+					"L.data1, "
+					"L.data2, "
+					"L.sim_id, "
+					"L.person_id id, "
+					"L.number_type address_type "
+			"FROM "CTS_TABLE_PHONELOGS" L "
+					"LEFT JOIN "CTS_TABLE_PERSONS" P "
+						"ON P.person_id = L.person_id "
+					"LEFT JOIN "CTS_TABLE_CONTACTS" C "
+						"ON P.name_contact_id = C.contact_id AND C.deleted = 0 "
+			"ORDER BY L.log_time DESC");
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Failed(%d)", ret);
+#endif // ENABLE_LOG_FEATURE
 
 	// CTSVC_DB_VIEW_PERSON_USAGE
 	snprintf(query, sizeof(query),
@@ -833,7 +839,8 @@ static int __ctsvc_db_create_views()
 								"data2 label, "
 								"data3 number, "
 								"data4 minmatch, "
-								"data5 normalized_number "
+								"data5 normalized_number, "
+								"data6 cleaned_number "
 					"FROM "CTS_TABLE_DATA" WHERE datatype = %d AND is_my_profile = 0) temp_data "
 			"ON temp_data.contact_id = "CTSVC_DB_VIEW_CONTACT".contact_id",
 				CTSVC_DATA_NUMBER);
@@ -898,18 +905,11 @@ static int __ctsvc_db_create_views()
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Failed(%d)", ret);
 
-	//CTSVC_DB_VIEW_PHONELOG_NUMBER
-	snprintf(query, sizeof(query),
-		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_PHONELOG_NUMBER" AS "
-			"SELECT DISTINCT number FROM "CTS_TABLE_PHONELOGS" "
-			"WHERE log_type < %d", CONTACTS_PLOG_TYPE_EMAIL_RECEIVED);
-	ret = ctsvc_query_exec(query);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Failed(%d)", ret);
-
 	__ctsvc_db_view_already_created = true;
 
 	return CONTACTS_ERROR_NONE;
 }
+
 #endif
 
 int ctsvc_db_init()

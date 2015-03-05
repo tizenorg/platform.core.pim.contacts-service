@@ -29,6 +29,7 @@
 #include "ctsvc_db_query.h"
 #include "ctsvc_list.h"
 #include "ctsvc_notification.h"
+#include "ctsvc_db_access_control.h"
 
 static int __ctsvc_db_address_insert_record( contacts_record_h record, int *id );
 static int __ctsvc_db_address_get_record( int id, contacts_record_h* out_record );
@@ -80,7 +81,7 @@ static int __ctsvc_db_address_insert_record( contacts_record_h record, int *id )
 	ret = ctsvc_query_get_first_int_result(query, &addressbook_id);
 	if (CONTACTS_ERROR_NONE != ret) {
 		ctsvc_end_trans(false);
-		if (CONTACTS_ERROR_NO_DATA) {
+		if (CONTACTS_ERROR_NO_DATA == ret) {
 			CTS_ERR("No data : contact_id (%d) is not exist", address->contact_id);
 			return CONTACTS_ERROR_INVALID_PARAMETER;
 		}
@@ -88,6 +89,12 @@ static int __ctsvc_db_address_insert_record( contacts_record_h record, int *id )
 			CTS_ERR("ctsvc_query_get_first_int_result Fail(%d)", ret);
 			return ret;
 		}
+	}
+
+	if (false == ctsvc_have_ab_write_permission(addressbook_id)) {
+		CTS_ERR("Does not have permission to update this address record : addresbook_id(%d)", addressbook_id);
+		ctsvc_end_trans(false);
+		return CONTACTS_ERROR_PERMISSION_DENIED;
 	}
 
 	ret = ctsvc_db_address_insert(record, address->contact_id, false, id);
@@ -138,6 +145,12 @@ static int __ctsvc_db_address_update_record( contacts_record_h record )
 		return ret;
 	}
 
+	if (false == ctsvc_have_ab_write_permission(addressbook_id)) {
+		CTS_ERR("Does not have permission to update this address record : addresbook_id(%d)", addressbook_id);
+		ctsvc_end_trans(false);
+		return CONTACTS_ERROR_PERMISSION_DENIED;
+	}
+
 	ret = ctsvc_db_address_update(record, false);
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("update record failed(%d)", ret);
@@ -164,24 +177,45 @@ static int __ctsvc_db_address_delete_record( int id )
 {
 	int ret;
 	int contact_id;
+	cts_stmt stmt = NULL;
+	int addressbook_id;
 	char query[CTS_SQL_MIN_LEN] = {0};
 
 	ret = ctsvc_begin_trans();
 	RETVM_IF(ret, ret, "ctsvc_begin_trans() Failed(%d)", ret);
 
 	snprintf(query, sizeof(query),
-			"SELECT contact_id FROM "CTSVC_DB_VIEW_CONTACT" "
+			"SELECT contact_id, addressbook_id FROM "CTSVC_DB_VIEW_CONTACT" "
 				"WHERE contact_id = (SELECT contact_id FROM "CTS_TABLE_DATA" WHERE id = %d)", id);
-	ret = ctsvc_query_get_first_int_result(query, &contact_id);
-	if (CONTACTS_ERROR_NONE != ret ) {
-		CTS_ERR("No data : id (%d)", id);
+	ret = ctsvc_query_prepare(query, &stmt);
+	if (NULL == stmt) {
+		CTS_ERR("DB error :ctsvc_query_prepare Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
+	}
+	ret = ctsvc_stmt_step(stmt);
+	if (1 != ret) {
+		CTS_ERR("The id(%d) is Invalid(%d)", id, ret);
+		ctsvc_stmt_finalize(stmt);
+		ctsvc_end_trans(false);
+		if (CONTACTS_ERROR_NONE == ret)
+			return CONTACTS_ERROR_NO_DATA;
+		else
+			return ret;
+	}
+
+	contact_id = ctsvc_stmt_get_int(stmt, 0);
+	addressbook_id = ctsvc_stmt_get_int(stmt, 1);
+	ctsvc_stmt_finalize(stmt);
+
+	if (false == ctsvc_have_ab_write_permission(addressbook_id)) {
+		CTS_ERR("Does not have permission to delete this address record : addresbook_id(%d)", addressbook_id);
+		return CONTACTS_ERROR_PERMISSION_DENIED;
 	}
 
 	ret = ctsvc_db_address_delete(id, false);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB error : ctsvc_query_exec() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_db_address_delete() Failed(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
@@ -254,6 +288,7 @@ static int __ctsvc_db_address_get_all_records( int offset, int limit, contacts_l
 						"ON "CTS_TABLE_DATA".contact_id = "CTSVC_DB_VIEW_CONTACT".contact_id "
 						"WHERE datatype=%d AND is_my_profile=0 ",
 						CTSVC_DATA_POSTAL);
+
 	if (0 != limit) {
 		len += snprintf(query+len, sizeof(query)-len, " LIMIT %d", limit);
 		if (0 < offset)

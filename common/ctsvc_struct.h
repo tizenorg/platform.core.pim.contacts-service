@@ -32,9 +32,9 @@
 
 #include "contacts_views.h"
 
-#define CTSVC_IMG_FULL_PATH_SIZE_MAX 1024
-#define CTSVC_NUMBER_MAX_LEN 512
-#define CTS_IMG_FULL_LOCATION tzplatform_mkpath(TZ_USER_DATA,"contacts-svc/img")
+#define CTSVC_IMG_FULL_PATH_SIZE_MAX 1024		// current max length file path is 256
+#define CTSVC_IMG_FULL_LOCATION tzplatform_mkpath(TZ_USER_DATA,"contacts-svc/img")
+#define CTSVC_CONTACT_IMG_FULL_LOCATION tzplatform_mkpath(TZ_USER_DATA,"contacts-svc/img/contact")
 
 #define SAFE_STR(src) (src)?src:""
 #define SAFE_STRDUP(src) (src)?strdup(src):NULL
@@ -62,6 +62,14 @@ enum {
 	CTSVC_DATA_NOTE = 12,
 	CTSVC_DATA_IMAGE = 13,
 	CTSVC_DATA_EXTENSION = 100
+};
+
+enum {
+	CTSVC_PERMISSION_CONTACT_NONE = 0x0,
+	CTSVC_PERMISSION_CONTACT_READ = 0x1,
+	CTSVC_PERMISSION_CONTACT_WRITE = 0x2,
+	CTSVC_PERMISSION_PHONELOG_READ = 0x4,
+	CTSVC_PERMISSION_PHONELOG_WRITE = 0x8,
 };
 
 typedef enum {
@@ -130,7 +138,7 @@ typedef int (*__ctsvc_record_set_double_cb)(contacts_record_h record, unsigned i
 
 typedef int (*__ctsvc_record_add_child_record_cb)(contacts_record_h record, unsigned int property_id, contacts_record_h child_record);
 typedef int (*__ctsvc_record_remove_child_record_cb)(contacts_record_h record, unsigned int property_id, contacts_record_h child_record);
-typedef int (*__ctsvc_record_get_child_record_count_cb)(contacts_record_h record, unsigned int property_id, unsigned int *count);
+typedef int (*__ctsvc_record_get_child_record_count_cb)(contacts_record_h record, unsigned int property_id, int *count);
 typedef int (*__ctsvc_record_get_child_record_at_p_cb)(contacts_record_h record, unsigned int property_id, int index, contacts_record_h* out_record);
 typedef int (*__ctsvc_record_clone_child_record_list_cb)(contacts_record_h record, unsigned int property_id, contacts_list_h* out_list);
 
@@ -294,7 +302,9 @@ typedef struct {
 	int type;
 	char *label;
 	char *number;
-	char *lookup;		// internally used
+	char *cleaned;		// internally used
+	char *normalized;	// internally used
+	char *lookup;		// internally used : for min match
 }ctsvc_number_s;
 
 typedef struct {
@@ -339,8 +349,8 @@ typedef struct {
 	int type;
 	char *label;
 	int date;
-	bool is_lunar;
-	int lunar_date;
+	bool is_leap_month;
+	int calendar_type;
 }ctsvc_event_s;
 
 typedef struct {
@@ -395,6 +405,7 @@ typedef struct {
 
 typedef struct {
 	ctsvc_record_s base;
+	bool is_vcard;
 	bool is_default;
 	int id;
 	int contact_id;
@@ -435,6 +446,7 @@ typedef struct {
 	int id;
 	int contact_id;
 	bool is_default;
+	bool is_vcard;
 	int type;
 	char *label;
 	char *name;
@@ -457,6 +469,7 @@ typedef struct {
 	int log_type;
 	int extra_data1; /* duration, message_id */
 	char *extra_data2; /*short message*/
+	int sim_slot_no;
 }ctsvc_phonelog_s;
 
 typedef struct {
@@ -550,6 +563,7 @@ typedef struct {
 	int id;
 	char *name;
 	char *number;
+	int sim_slot_no;
 }ctsvc_sdn_s;
 
 typedef struct {
@@ -564,6 +578,7 @@ typedef struct {
 
 typedef struct {
 	ctsvc_record_s base;
+	int id;
 	int number_id;
 	int person_id;
 	char *display_name;

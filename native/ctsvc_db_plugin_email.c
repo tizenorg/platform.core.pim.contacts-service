@@ -23,6 +23,7 @@
 #include "ctsvc_sqlite.h"
 #include "ctsvc_utils.h"
 #include "ctsvc_db_init.h"
+#include "ctsvc_db_access_control.h"
 #include "ctsvc_db_plugin_contact_helper.h"
 #include "ctsvc_db_plugin_email_helper.h"
 #include "ctsvc_record.h"
@@ -83,7 +84,7 @@ static int __ctsvc_db_email_update_person_has_email(int person_id, bool has_emai
 			has_email, person_id);
 
 	ret = ctsvc_query_exec(query);
-	WARN_IF(CONTACTS_ERROR_NONE != ret, "cts_query_exec() Failed(%d)", ret);
+	WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_query_exec() Failed(%d)", ret);
 	return ret;
 }
 
@@ -97,7 +98,7 @@ static int __ctsvc_db_email_update_default(int email_id, int contact_id, bool is
 			is_default, is_primary_default, email_id);
 	ret = ctsvc_query_exec(query);
 
-	WARN_IF(CONTACTS_ERROR_NONE != ret, "cts_query_exec() Failed(%d)", ret);
+	WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_query_exec() Failed(%d)", ret);
 	return ret;
 }
 
@@ -154,7 +155,7 @@ static int __ctsvc_db_email_set_primary_default(int email_id, bool is_primary_de
 			"UPDATE "CTS_TABLE_DATA" SET is_primary_default = %d WHERE id = %d",
 			is_primary_default, email_id);
 	ret = ctsvc_query_exec(query);
-	WARN_IF(CONTACTS_ERROR_NONE != ret, "cts_query_exec() Failed(%d)", ret);
+	WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_query_exec() Failed(%d)", ret);
 	return ret;
 }
 
@@ -199,6 +200,12 @@ static int __ctsvc_db_email_insert_record( contacts_record_h record, int *id )
 	person_id = ctsvc_stmt_get_int(stmt, 1);
 	ctsvc_stmt_finalize(stmt);
 
+	if (false == ctsvc_have_ab_write_permission(addressbook_id)) {
+		CTS_ERR("Does not have permission to update this email record : addresbook_id(%d)", addressbook_id);
+		ctsvc_end_trans(false);
+		return CONTACTS_ERROR_PERMISSION_DENIED;
+	}
+
 	old_default_email_id = __ctsvc_db_email_get_default_email_id(email->contact_id);
 	if (0 == old_default_email_id)
 		email->is_default = true;
@@ -217,7 +224,7 @@ static int __ctsvc_db_email_insert_record( contacts_record_h record, int *id )
 
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("cts_query_exec() Failed(%d)", ret);
+		CTS_ERR("ctsvc_query_exec() Failed(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
@@ -250,14 +257,13 @@ static int __ctsvc_db_email_insert_record( contacts_record_h record, int *id )
 static int __ctsvc_db_email_get_record( int id, contacts_record_h* out_record )
 {
 	int ret;
-	int len;
 	cts_stmt stmt = NULL;
 	char query[CTS_SQL_MAX_LEN] = {0};
 
 	RETV_IF(NULL == out_record, CONTACTS_ERROR_INVALID_PARAMETER);
 	*out_record = NULL;
 
-	len = snprintf(query, sizeof(query),
+	snprintf(query, sizeof(query),
 			"SELECT id, data.contact_id, is_default, data1, data2, data3 "
 				"FROM "CTS_TABLE_DATA", "CTSVC_DB_VIEW_CONTACT" "
 				"ON "CTS_TABLE_DATA".contact_id = "CTSVC_DB_VIEW_CONTACT".contact_id "
@@ -307,6 +313,12 @@ static int __ctsvc_db_email_update_record( contacts_record_h record )
 		return ret;
 	}
 
+	if (false == ctsvc_have_ab_write_permission(addressbook_id)) {
+		CTS_ERR("Does not have permission to update this email record : addresbook_id(%d)", addressbook_id);
+		ctsvc_end_trans(false);
+		return CONTACTS_ERROR_PERMISSION_DENIED;
+	}
+
 	ret = ctsvc_db_email_update(record, false);
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("update record failed(%d)", ret);
@@ -351,6 +363,7 @@ static int __ctsvc_db_email_delete_record( int id )
 	char query[CTS_SQL_MAX_LEN] = {0};
 	bool has_email = false;
 	cts_stmt stmt = NULL;
+	int addressbook_id;
 
 	ret = ctsvc_begin_trans();
 	if (CONTACTS_ERROR_NONE != ret) {
@@ -359,7 +372,7 @@ static int __ctsvc_db_email_delete_record( int id )
 	}
 
 	snprintf(query, sizeof(query),
-			"SELECT contact_id, person_id FROM "CTSVC_DB_VIEW_CONTACT " "
+			"SELECT contact_id, person_id, addressbook_id FROM "CTSVC_DB_VIEW_CONTACT " "
 			"WHERE contact_id = (SELECT contact_id FROM "CTS_TABLE_DATA" WHERE id = %d)", id);
 
 	ret = ctsvc_query_prepare(query, &stmt);
@@ -381,7 +394,14 @@ static int __ctsvc_db_email_delete_record( int id )
 	}
 	contact_id = ctsvc_stmt_get_int(stmt, 0);
 	person_id = ctsvc_stmt_get_int(stmt, 1);
+	addressbook_id = ctsvc_stmt_get_int(stmt, 2);
 	ctsvc_stmt_finalize(stmt);
+
+	if (false == ctsvc_have_ab_write_permission(addressbook_id)) {
+		CTS_ERR("Does not have permission to delete this email record : addresbook_id(%d)", addressbook_id);
+		ctsvc_end_trans(false);
+		return CONTACTS_ERROR_PERMISSION_DENIED;
+	}
 
 	snprintf(query, sizeof(query),
 			"SELECT is_default, is_primary_default FROM "CTS_TABLE_DATA" WHERE id = %d", id);
@@ -424,7 +444,7 @@ static int __ctsvc_db_email_delete_record( int id )
 
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("cts_query_exec() Failed(%d)", ret);
+		CTS_ERR("ctsvc_query_exec() Failed(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
@@ -468,6 +488,7 @@ static int __ctsvc_db_email_get_all_records( int offset, int limit, contacts_lis
 				"ON "CTS_TABLE_DATA".contact_id = "CTSVC_DB_VIEW_CONTACT".contact_id "
 				"WHERE datatype = %d AND is_my_profile=0 ",
 				CTSVC_DATA_EMAIL);
+
 	if (0 != limit) {
 		len += snprintf(query+len, sizeof(query)-len, " LIMIT %d", limit);
 		if (0 < offset)

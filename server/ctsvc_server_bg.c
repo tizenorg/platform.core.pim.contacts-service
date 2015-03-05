@@ -28,6 +28,7 @@
 #include "ctsvc_schema.h"
 #include "ctsvc_sqlite.h"
 #include "ctsvc_server_bg.h"
+#include "ctsvc_server_utils.h"
 #include "ctsvc_utils.h"
 #include "ctsvc_db_plugin_addressbook_helper.h"
 #include "ctsvc_db_access_control.h"
@@ -35,6 +36,8 @@
 #define CTSVC_SERVER_BG_DELETE_COUNT 50
 #define CTSVC_SERVER_BG_DELETE_STEP_TIME 1
 #define CTSVC_SERVER_BG_DELETE_THREAD "ctsvc_server_bg_delete"
+
+#define CTSVC_SERVER_BG_BASE_CPU_USAGE		10  // Delete contacts when cpu usage is under the value
 
 typedef enum
 {
@@ -308,6 +311,73 @@ static bool  __ctsvc_server_db_delete_run(__ctsvc_delete_data_s* data)
 	return __ctsvc_server_bg_contact_delete_step(ret, data);
 }
 
+typedef struct {
+	unsigned long int cpu_work_time;
+	unsigned long int cpu_total_time;
+}process_stat;
+
+static process_stat* __ctsvc_get_cpu_stat()
+{
+	int i;
+	int ret;
+	long unsigned int cpu_time[10];
+	process_stat *result = NULL;
+
+	FILE *fstat = fopen("/proc/stat", "r");
+	if (fstat == NULL) {
+		return NULL;
+	}
+	memset(cpu_time, 0x0, sizeof(cpu_time));
+	ret = fscanf(fstat, "%*s %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu",
+			&cpu_time[0], &cpu_time[1], &cpu_time[2], &cpu_time[3],
+			&cpu_time[4], &cpu_time[5], &cpu_time[6], &cpu_time[7],
+			&cpu_time[8], &cpu_time[9]);
+	fclose(fstat);
+
+	if (ret < 0) {
+		return NULL;
+	}
+
+	result = calloc(1, sizeof(process_stat));
+	for(i=0; i < 10;i++) {
+		if (i < 3)
+			result->cpu_work_time += cpu_time[i];
+		result->cpu_total_time += cpu_time[i];
+	}
+
+	return result;
+}
+
+static bool __ctsvc_cpu_is_busy()
+{
+	unsigned long int total_time_diff;
+	unsigned long int work_time_diff;
+	process_stat *result1 = NULL;
+	process_stat *result2 = NULL;
+	double cpu_usage;
+
+	result1 = __ctsvc_get_cpu_stat();
+	sleep(1);
+	result2 = __ctsvc_get_cpu_stat();
+	if (result1 == NULL || result2 == NULL) {
+		free(result1);
+		free(result2);
+		return false;
+	}
+
+	total_time_diff = result2->cpu_total_time - result1->cpu_total_time;
+	work_time_diff = result2->cpu_work_time - result1->cpu_work_time;
+
+	free(result1);
+	free(result2);
+
+	cpu_usage = ((double)work_time_diff/(double)total_time_diff) * 100;
+	CTS_INFO("cpu usage : %.2lf (%ld/%ld)", cpu_usage, work_time_diff, total_time_diff);
+	if (cpu_usage > CTSVC_SERVER_BG_BASE_CPU_USAGE)
+		return true;
+	return false;
+}
+
 static gpointer __ctsvc_server_bg_delete(gpointer user_data)
 {
 	CTS_FN_CALL;
@@ -322,16 +392,21 @@ static gpointer __ctsvc_server_bg_delete(gpointer user_data)
 		}
 		callback_data->step = STEP_1;
 
-		ret = contacts_connect2();
+		ret = contacts_connect();
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("contacts_connect2() fail(%d)", ret);
+			CTS_ERR("contacts_connect() fail(%d)", ret);
 			free(callback_data);
 			continue;
 		}
 		ctsvc_set_client_access_info("contacts-service", NULL);
 
 		while(1) {
-			sleep(CTSVC_SERVER_BG_DELETE_STEP_TIME); // sleep 1 sec.
+//			sleep(CTSVC_SERVER_BG_DELETE_STEP_TIME); // sleep 1 sec.
+			if (__ctsvc_cpu_is_busy()) {				// sleep 1 sec in function
+				CTS_ERR("Now CPU is busy.. waiting");
+				sleep(CTSVC_SERVER_BG_DELETE_STEP_TIME*59); // sleep 60 sec(1 min) totally
+				continue;
+			}
 			if (__ctsvc_server_db_delete_run(callback_data) == false) {
 				CTS_DBG("end");
 				free(callback_data);
@@ -341,9 +416,9 @@ static gpointer __ctsvc_server_bg_delete(gpointer user_data)
 
 		ctsvc_unset_client_access_info();
 
-		ret = contacts_disconnect2();
+		ret = contacts_disconnect();
 		if (CONTACTS_ERROR_NONE != ret)
-			CTS_ERR("contacts_disconnect2 Fail(%d)", ret);
+			CTS_ERR("contacts_disconnect Fail(%d)", ret);
 
 		g_mutex_lock(&__ctsvc_server_bg_delete_mutex);
 		CTS_DBG("wait");
@@ -371,6 +446,9 @@ void ctsvc_server_bg_delete_start()
 
 static void __ctsvc_server_addressbook_deleted_cb(const char *view_uri, void *data)
 {
+	// access control update
+	ctsvc_reset_all_client_access_info();
+
 	ctsvc_server_bg_delete_start();
 }
 
@@ -411,9 +489,9 @@ void ctsvc_server_bg_remove_cb()
 {
 	int ret;
 	ret = contacts_db_remove_changed_cb(_contacts_address_book._uri, __ctsvc_server_addressbook_deleted_cb, NULL);
-	CTS_DBG("call contacts_db_remove_changed_cb (_contacts_address_book): return (%d)", ret);
+	CTS_ERR("call contacts_db_remove_changed_cb (_contacts_address_book): return (%d)", ret);
 	ret = contacts_db_remove_changed_cb(_contacts_contact._uri, __ctsvc_server_contact_deleted_cb, NULL);
-	CTS_DBG("call contacts_db_remove_changed_cb (_contacts_contact) : return (%d)", ret);
+	CTS_ERR("call contacts_db_remove_changed_cb (_contacts_contact) : return (%d)", ret);
 
 	if (account) {
 		account_unsubscribe_notification(account);		// unsubscirbe & destroy

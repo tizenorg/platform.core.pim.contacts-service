@@ -1,5 +1,5 @@
 /*
- * Contacts Service Helper
+ * Contacts Service
  *
  * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
  *
@@ -24,9 +24,12 @@
 int ctsvc_server_db_open(sqlite3 **db);
 int ctsvc_server_db_close(void);
 int ctsvc_server_update_sort(int prev_sort_primary, int prev_sort_secondary, int new_sort_primary, int new_sort_secondary);
-int ctsvc_server_insert_sdn_contact(const char *name, const char *number);
-int ctsvc_server_delete_sdn_contact(void);
+int ctsvc_server_insert_sdn_contact(const char *name, const char *number, int sim_slot_no);
+int ctsvc_server_delete_sdn_contact(int sim_slot_no);
 int ctsvc_server_update_collation();
+int ctsvc_server_update_sort_name();
+
+int ctsvc_server_get_sim_id(const char *unique_id, int *sim_id);
 
 #endif // __CTSVC_SERVER_SQLITE_H__
 

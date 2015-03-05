@@ -36,9 +36,9 @@
 #define CTSVC_IPC_SETTING_MODULE               "ctsvc_ipc_setting_module"
 #define CTSVC_IPC_UTILS_MODULE               "ctsvc_ipc_utils_module"
 
-
 #define CTSVC_IPC_SERVER_CONNECT                      "connect"
 #define CTSVC_IPC_SERVER_DISCONNECT                   "disconnect"
+#define CTSVC_IPC_SERVER_CHECK_PERMISSION				"check_permission"
 
 #define CTSVC_IPC_SERVER_DB_INSERT_RECORD             "insert_record"
 #define CTSVC_IPC_SERVER_DB_GET_RECORD                "get_record"
@@ -58,6 +58,9 @@
 #define CTSVC_IPC_SERVER_DB_SEARCH_RECORDS            "search_records"
 #define CTSVC_IPC_SERVER_DB_SEARCH_RECORDS_WITH_RANGE		"search_records_with_range"
 #define CTSVC_IPC_SERVER_DB_SEARCH_RECORDS_WITH_QUERY    "search_records_with_query"
+#define CTSVC_IPC_SERVER_DB_GET_STATUS					"get_db_status"
+#define CTSVC_IPC_SERVER_DB_STATUS_CHANGED			"db_status_changed"
+
 
 #define CTSVC_IPC_SERVER_ACTIVITY_DELETE_BY_CONTACT_ID   "activity_delete_by_contact_id"
 #define CTSVC_IPC_SERVER_ACTIVITY_DELETE_BY_ACCOUNT_ID   "activity_delete_by_account_id"
@@ -80,8 +83,6 @@
 #define CTSVC_IPC_SERVER_SETTING_SET_NAME_DISPLAY_ORDER "setting_set_name_display_order"
 #define CTSVC_IPC_SERVER_SETTING_GET_NAME_SORTING_ORDER "setting_get_name_sorting_order"
 #define CTSVC_IPC_SERVER_SETTING_SET_NAME_SORTING_ORDER "setting_set_name_sorting_order"
-
-#define CTSVC_IPC_SERVER_UTILS_GET_INDEX_CHARACTERS		"utils_get_index_characters"
 
 #define CTSVC_IPC_SERVER_SIM_IMPORT_ALL_CONTACTS		"sim_import_all_contacts"
 

@@ -54,10 +54,14 @@ extern ctsvc_record_plugin_cb_s profile_plugin_cbs;
 extern ctsvc_record_plugin_cb_s nickname_plugin_cbs;
 extern ctsvc_record_plugin_cb_s email_plugin_cbs;
 extern ctsvc_record_plugin_cb_s result_plugin_cbs;
+#ifdef ENABLE_SIM_FEATURE
 extern ctsvc_record_plugin_cb_s sdn_plugin_cbs;
 extern ctsvc_record_plugin_cb_s speeddial_plugin_cbs;
+#endif // ENABLE_SIM_FEATURE
 extern ctsvc_record_plugin_cb_s extension_plugin_cbs;
+#ifdef ENABLE_LOG_FEATURE
 extern ctsvc_record_plugin_cb_s phonelog_plugin_cbs;
+#endif // ENABLE_LOG_FEATURE
 
 static const ctsvc_record_plugin_cb_s *__ctsvc_record_get_plugin_cb(int r_type)
 {
@@ -108,12 +112,16 @@ static const ctsvc_record_plugin_cb_s *__ctsvc_record_get_plugin_cb(int r_type)
 		return &image_plugin_cbs;
 	case CTSVC_RECORD_EXTENSION:
 		return &extension_plugin_cbs;
+#ifdef ENABLE_LOG_FEATURE
 	case CTSVC_RECORD_PHONELOG:
 		return &phonelog_plugin_cbs;
+#endif // ENABLE_LOG_FEATURE
+#ifdef ENABLE_SIM_FEATURE
 	case CTSVC_RECORD_SPEEDDIAL:
 		return &speeddial_plugin_cbs;
 	case CTSVC_RECORD_SDN:
 		return &sdn_plugin_cbs;
+#endif // ENABLE_SIM_FEATURE
 	case CTSVC_RECORD_UPDATED_INFO:
 		return &updated_info_plugin_cbs;
 	case CTSVC_RECORD_RESULT:
@@ -124,9 +132,11 @@ static const ctsvc_record_plugin_cb_s *__ctsvc_record_get_plugin_cb(int r_type)
 }
 
 #define __INVALID_PARAMETER_ERROR_HANDLING() \
-		ASSERT_NOT_REACHED("Invalid parameter: Operation restricted."); \
+		CTS_ERR("Invalid parameter: Operation restricted."); \
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 
+// This function is used for view_uri which is able to CRUD.
+// The view_uri's property should be sequencial value because it is used to find index at the below logic.
 bool ctsvc_record_check_property_flag(const ctsvc_record_s* s_record, unsigned int property_id, contacts_property_flag_e flag)
 {
 	int index = property_id & 0x000000FF;
@@ -169,7 +179,7 @@ int ctsvc_record_set_property_flag(ctsvc_record_s* _record, int property_id, con
 
 		_record->properties_flags = calloc(count, sizeof(char));
 		_record->property_max_count = count;
-		RETVM_IF(NULL == _record->properties_flags, CONTACTS_ERROR_INTERNAL, "calloc Failed");
+		RETVM_IF(NULL == _record->properties_flags, CONTACTS_ERROR_OUT_OF_MEMORY, "calloc Failed");
 	}
 	_record->property_flag |= flag;
 	_record->properties_flags[index] |= flag;
@@ -180,7 +190,7 @@ int ctsvc_record_set_property_flag(ctsvc_record_s* _record, int property_id, con
 #define __CHECK_READ_ONLY_PROPERTY() \
 	if( CTSVC_READ_ONLY_CHECK(property_id, CTSVC_READ_ONLY_PROPERTY) ) \
 	{ \
-		ASSERT_NOT_REACHED("Invalid parameter: Don't try to change read-only property.(0x%0x)", property_id); \
+		CTS_ERR("Invalid parameter: Don't try to change read-only property.(0x%0x)", property_id); \
 		return CONTACTS_ERROR_INVALID_PARAMETER; \
 	}
 
@@ -377,6 +387,7 @@ int ctsvc_record_set_str( contacts_record_h record, unsigned int property_id, co
 		ret = s_record->plugin_cbs->set_str(record, property_id, str);
 		if (CONTACTS_ERROR_NONE == ret)
 			ctsvc_record_set_property_flag(s_record, property_id, CTSVC_PROPERTY_FLAG_DIRTY);
+
 		return ret;
 	}
 
@@ -433,6 +444,12 @@ API int contacts_record_set_int( contacts_record_h record, unsigned int property
 
 	__CHECK_READ_ONLY_PROPERTY();
 
+#ifdef _CONTACTS_IPC_CLIENT
+	if (CTSVC_RECORD_RESULT == ((ctsvc_record_s*)record)->r_type) {
+		CTS_ERR("Can not set int to result record");
+		return CONTACTS_ERROR_INVALID_PARAMETER;
+	}
+#endif
 	return ctsvc_record_set_int(record, property_id, value);
 }
 
@@ -451,7 +468,6 @@ int ctsvc_record_set_int( contacts_record_h record, unsigned int property_id, in
 	}
 	__INVALID_PARAMETER_ERROR_HANDLING();
 }
-
 
 API int contacts_record_set_lli( contacts_record_h record, unsigned int property_id, long long int value )
 {
@@ -513,6 +529,7 @@ API int	contacts_record_add_child_record( contacts_record_h record,
 	ctsvc_record_s *s_record;
 
 	RETV_IF(NULL == record, CONTACTS_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == child_record, CONTACTS_ERROR_INVALID_PARAMETER);
 	s_record = (ctsvc_record_s *)record;
 
 	if (s_record->plugin_cbs && s_record->plugin_cbs->add_child_record)
@@ -527,6 +544,7 @@ API int	contacts_record_remove_child_record( contacts_record_h record,
 	ctsvc_record_s *s_record;
 
 	RETV_IF(NULL == record, CONTACTS_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == child_record, CONTACTS_ERROR_INVALID_PARAMETER);
 	s_record = (ctsvc_record_s *)record;
 
 	if (s_record->plugin_cbs && s_record->plugin_cbs->remove_child_record)
@@ -536,7 +554,7 @@ API int	contacts_record_remove_child_record( contacts_record_h record,
 }
 
 API int contacts_record_get_child_record_count( contacts_record_h record,
-		unsigned int property_id, unsigned int *count )
+		unsigned int property_id, int *count )
 {
 	ctsvc_record_s *s_record;
 
@@ -611,5 +629,4 @@ int ctsvc_record_set_projection_flags( contacts_record_h record, const unsigned 
 
 	return CONTACTS_ERROR_NONE;
 }
-
 

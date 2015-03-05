@@ -28,155 +28,224 @@ extern "C"
 {
 #endif
 
+/**
+ * @file contacts_filter.h
+ */
 
 /**
- * @addtogroup CAPI_SOCIAL_CONTACTS_SVC_FILTER_MODULE
+ * @ingroup CAPI_SOCIAL_CONTACTS_SVC_MODULE
+ * @defgroup CAPI_SOCIAL_CONTACTS_SVC_FILTER_MODULE Filter
+ *
+ * @brief The contacts Filter API provides the set of definitions and interfaces that enable application developers to make filters to set query.
+ *
+ * @section CAPI_SOCIAL_CONTACTS_SVC_CONTACTS_FILTER_HEADER Required Header
+ *  \#include <contacts.h>
+ *
+ * <BR>
  * @{
  */
 
+/**
+ * @brief Enumeration for Contacts match string flags.
+ *
+ * @since_tizen 2.3
+ *
+ */
 typedef enum
 {
-	CONTACTS_MATCH_EXACTLY,		/**< case-sensitive */
-	CONTACTS_MATCH_FULLSTRING,		/**< . */
-	CONTACTS_MATCH_CONTAINS,		/**< . */
-	CONTACTS_MATCH_STARTSWITH,		/**< . */
-	CONTACTS_MATCH_ENDSWITH,		/**< . */
-	CONTACTS_MATCH_EXISTS			/**< . */
+    CONTACTS_MATCH_EXACTLY,         /**< Full string, case-sensitive */
+    CONTACTS_MATCH_FULLSTRING,      /**< Full string, case-insensitive */
+    CONTACTS_MATCH_CONTAINS,        /**< Sub string, case-insensitive */
+    CONTACTS_MATCH_STARTSWITH,      /**< Start with, case-insensitive */
+    CONTACTS_MATCH_ENDSWITH,        /**< End with, case-insensitive */
+    CONTACTS_MATCH_EXISTS           /**< IS NOT NULL */
 } contacts_match_str_flag_e;
 
+/**
+ * @brief Enumeration for Contacts match int flags.
+ *
+ * @since_tizen 2.3
+ *
+ */
 typedef enum
 {
-	CONTACTS_MATCH_EQUAL,					/**< . */
-	CONTACTS_MATCH_GREATER_THAN,			/**< . */
-	CONTACTS_MATCH_GREATER_THAN_OR_EQUAL,	/**< . */
-	CONTACTS_MATCH_LESS_THAN,				/**< . */
-	CONTACTS_MATCH_LESS_THAN_OR_EQUAL,		/**< . */
-	CONTACTS_MATCH_NOT_EQUAL,				/**< this flag can yield poor performance */
-	CONTACTS_MATCH_NONE,					/**< . */
+    CONTACTS_MATCH_EQUAL,                   /**< '=' */
+    CONTACTS_MATCH_GREATER_THAN,            /**< '>' */
+    CONTACTS_MATCH_GREATER_THAN_OR_EQUAL,   /**< '>=' */
+    CONTACTS_MATCH_LESS_THAN,               /**< '<' */
+    CONTACTS_MATCH_LESS_THAN_OR_EQUAL,      /**< '<=' */
+    CONTACTS_MATCH_NOT_EQUAL,               /**< '<>', this flag can yield poor performance */
+    CONTACTS_MATCH_NONE,                    /**< IS NULL */
 } contacts_match_int_flag_e;
 
+/**
+ * @brief Enumeration for Contacts filter operators.
+ *
+ * @since_tizen 2.3
+ *
+ */
 typedef enum {
-	CONTACTS_FILTER_OPERATOR_AND,	/**< . */
-	CONTACTS_FILTER_OPERATOR_OR		/**< . */
+    CONTACTS_FILTER_OPERATOR_AND,   /**< AND */
+    CONTACTS_FILTER_OPERATOR_OR     /**< OR */
 } contacts_filter_operator_e;
 
 
 /**
- * @brief   Creates a handle to filter.
+ * @brief Creates a filter.
  *
- * @remarks		@a filter must be released with contacts_filter_destroy() by you.
+ * @since_tizen 2.3
  *
- * @param[in]   view_uri			The view URI of a filter
- * @param[out]  filter				The filter handle
+ * @remarks You must release @a filter using contacts_filter_destroy().
  *
- * @return  0 on success, otherwise a negative error value.
+ * @param[in]   view_uri            The view URI of a filter
+ * @param[out]  filter              The filter handle
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
  * @retval  #CONTACTS_ERROR_NONE                Successful
  * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
  * @retval  #CONTACTS_ERROR_OUT_OF_MEMORY       Out of memory
+ * @retval  #CONTACTS_ERROR_NOT_SUPPORTED       Not supported
+ *
+ * @pre     contacts_connect() should be called to initialize
  *
  * @see contacts_filter_destroy()
  */
-API int contacts_filter_create( const char* view_uri, contacts_filter_h* filter );
+int contacts_filter_create( const char* view_uri, contacts_filter_h* filter );
 
 /**
- * @brief   Destroys a filter handle.
+ * @brief Destroys a filter.
+ *
+ * @since_tizen 2.3
  *
  * @param[in]   filter    The filter handle
  *
- * @return  0 on success, otherwise a negative error value.
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
  * @retval  #CONTACTS_ERROR_NONE                Successful
  * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
  *
  * @see contacts_filter_create()
  */
-API int contacts_filter_destroy( contacts_filter_h filter );
+int contacts_filter_destroy( contacts_filter_h filter );
 
 /**
- * @brief		Adds a condition for string type property
+ * @brief Adds a condition for a string type property.
  *
- * @param[in]   filter			The filter handle
- * @param[in]   property_id		The property ID to add a condition
- * @param[in]   match			The match flag
- * @param[in]   match_value		The match value
+ * @since_tizen 2.3
  *
- * @return  0 on success, otherwise a negative error value.
+ * @param[in]   filter          The filter handle
+ * @param[in]   property_id     The property ID to add a condition
+ * @param[in]   match           The match flag
+ * @param[in]   match_value     The match value
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
  * @retval  #CONTACTS_ERROR_NONE                Successful
  * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ * @retval  #CONTACTS_ERROR_NOT_SUPPORTED       Not supported
  *
  * @see contacts_filter_add_operator()
  */
-API int contacts_filter_add_str( contacts_filter_h filter, unsigned int property_id, contacts_match_str_flag_e match, const char* match_value );
+int contacts_filter_add_str( contacts_filter_h filter, unsigned int property_id, contacts_match_str_flag_e match, const char* match_value );
 
 /**
- * @brief		Adds a condition for integer type property
+ * @brief Adds a condition for an integer type property.
  *
- * @param[in]   filter			The filter handle
- * @param[in]   property_id		The property ID to add a condition
- * @param[in]   match			The match flag
- * @param[in]   match_value		The match value
+ * @since_tizen 2.3
  *
- * @return  0 on success, otherwise a negative error value.
+ * @param[in]   filter          The filter handle
+ * @param[in]   property_id     The property ID to add a condition
+ * @param[in]   match           The match flag
+ * @param[in]   match_value     The match value
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
  * @retval  #CONTACTS_ERROR_NONE                Successful
  * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ * @retval  #CONTACTS_ERROR_NOT_SUPPORTED       Not supported
  *
  * @see contacts_filter_add_operator()
  */
-API int contacts_filter_add_int( contacts_filter_h filter, unsigned int property_id, contacts_match_int_flag_e match, int match_value );
+int contacts_filter_add_int( contacts_filter_h filter, unsigned int property_id, contacts_match_int_flag_e match, int match_value );
 
 /**
- * @brief		Adds a condition for long long int type property
+ * @brief Adds a condition for a long int type property.
  *
- * @param[in]   filter			The filter handle
- * @param[in]   property_id		The property ID to add a condition
- * @param[in]   match			The match flag
- * @param[in]   match_value		The match value
+ * @since_tizen 2.3
  *
- * @return  0 on success, otherwise a negative error value.
+ * @param[in]   filter          The filter handle
+ * @param[in]   property_id     The property ID to add a condition
+ * @param[in]   match           The match flag
+ * @param[in]   match_value     The match value
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
  * @retval  #CONTACTS_ERROR_NONE                Successful
  * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ * @retval  #CONTACTS_ERROR_NOT_SUPPORTED       Not supported
  *
  * @see contacts_filter_add_operator()
  */
-API int contacts_filter_add_lli( contacts_filter_h filter, unsigned int property_id, contacts_match_int_flag_e match, long long int match_value );
+int contacts_filter_add_lli( contacts_filter_h filter, unsigned int property_id, contacts_match_int_flag_e match, long long int match_value );
 
 /**
- * @brief		Adds a condition for double type property
+ * @brief Adds a condition for a double type property.
  *
- * @param[in]   filter			The filter handle
- * @param[in]   property_id		The property ID to add a condition
- * @param[in]   match			The match flag
- * @param[in]   match_value		The match value
+ * @since_tizen 2.3
  *
- * @return  0 on success, otherwise a negative error value.
+ * @param[in]   filter          The filter handle
+ * @param[in]   property_id     The property ID to add a condition
+ * @param[in]   match           The match flag
+ * @param[in]   match_value     The match value
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
  * @retval  #CONTACTS_ERROR_NONE                Successful
  * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ * @retval  #CONTACTS_ERROR_NOT_SUPPORTED       Not supported
  *
  * @see contacts_filter_add_operator()
  */
-API int contacts_filter_add_double( contacts_filter_h filter, unsigned int property_id, contacts_match_int_flag_e match, double match_value );
+int contacts_filter_add_double( contacts_filter_h filter, unsigned int property_id, contacts_match_int_flag_e match, double match_value );
 
 /**
- * @brief		Adds a condition for boolean type property
+ * @brief Adds a condition for a boolean type property.
  *
- * @param[in]   filter			The filter handle
- * @param[in]   property_id		The property ID to add a condition
- * @param[in]   match_value		The match value
+ * @since_tizen 2.3
  *
- * @return  0 on success, otherwise a negative error value.
+ * @param[in]   filter          The filter handle
+ * @param[in]   property_id     The property ID to add a condition
+ * @param[in]   match_value     The match value
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
  * @retval  #CONTACTS_ERROR_NONE                Successful
  * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ * @retval  #CONTACTS_ERROR_NOT_SUPPORTED       Not supported
  *
  * @see contacts_filter_add_operator()
  */
-API int contacts_filter_add_bool( contacts_filter_h filter, unsigned int property_id, bool match_value );
+int contacts_filter_add_bool( contacts_filter_h filter, unsigned int property_id, bool match_value );
 
 /**
- * @brief		Adds a operator between conditions
+ * @brief Adds an operator between conditions.
  *
- * @param[in]   filter			The filter handle
- * @param[in]   operator_type	The operator type
+ * @since_tizen 2.3
  *
- * @return  0 on success, otherwise a negative error value.
+ * @param[in]   filter          The filter handle
+ * @param[in]   operator_type   The operator type
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
  * @retval  #CONTACTS_ERROR_NONE                Successful
  * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
  *
@@ -184,22 +253,25 @@ API int contacts_filter_add_bool( contacts_filter_h filter, unsigned int propert
  * @see contacts_filter_add_int()
  * @see contacts_filter_add_bool()
  */
-API int contacts_filter_add_operator( contacts_filter_h filter, contacts_filter_operator_e operator_type );
+int contacts_filter_add_operator( contacts_filter_h filter, contacts_filter_operator_e operator_type );
 
 /**
- * @brief		Adds a filter handle to filter handle.
+ * @brief Adds a filter to a given filter.
  *
- * @param[in]   parent_filter			The parent filter handle
- * @param[in]   child_filter			The child filter handle
+ * @since_tizen 2.3
  *
- * @return  0 on success, otherwise a negative error value.
+ * @param[in]   parent_filter       The parent filter handle
+ * @param[in]   child_filter        The child filter handle
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
  * @retval  #CONTACTS_ERROR_NONE                Successful
  * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
  *
  * @see contacts_filter_add_operator()
  */
-API int contacts_filter_add_filter(contacts_filter_h parent_filter, contacts_filter_h child_filter);
-
+int contacts_filter_add_filter(contacts_filter_h parent_filter, contacts_filter_h child_filter);
 
 /**
  * @}

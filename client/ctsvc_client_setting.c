@@ -187,7 +187,15 @@ API int contacts_setting_add_name_display_order_changed_cb(
 	contacts_setting_name_display_order_changed_cb cb, void* user_data)
 {
 	GSList *l;
+	int ret;
+	bool result = false;
 	ctsvc_name_display_order_changed_cb_info_s *cb_info;
+
+	RETVM_IF(cb == NULL, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : callback is NULL");
+
+	ret = ctsvc_ipc_client_check_permission(CTSVC_PERMISSION_CONTACT_READ, &result);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_ipc_client_check_permission fail (%d)", ret);
+	RETVM_IF(result == false, CONTACTS_ERROR_PERMISSION_DENIED, "Permission denied (contact read)");
 
 	ctsvc_mutex_lock(CTS_MUTEX_PIMS_IPC_PUBSUB);
 
@@ -205,7 +213,7 @@ API int contacts_setting_add_name_display_order_changed_cb(
 		ctsvc_name_display_order_changed_cb_info_s *cb_info = l->data;
 		if (cb_info->cb == cb && cb_info->user_data == user_data) {
 			CTS_ERR("The same callback(%s) is already exist");
-			return CONTACTS_ERROR_SYSTEM;
+			return CONTACTS_ERROR_INVALID_PARAMETER;
 		}
 	}
 
@@ -221,6 +229,8 @@ API int contacts_setting_add_name_display_order_changed_cb(
 API int contacts_setting_remove_name_display_order_changed_cb(
 	contacts_setting_name_display_order_changed_cb cb, void* user_data)
 {
+	RETVM_IF(cb == NULL, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : callback is NULL");
+
 	ctsvc_mutex_lock(CTS_MUTEX_PIMS_IPC_PUBSUB);
 
 	if (__setting_name_display_order_subscribe_list) {
@@ -274,7 +284,15 @@ API int contacts_setting_add_name_sorting_order_changed_cb(
 	contacts_setting_name_sorting_order_changed_cb cb, void* user_data)
 {
 	GSList *l;
+	int ret;
+	bool result = false;
 	ctsvc_name_sorting_order_changed_cb_info_s *cb_info;
+
+	RETVM_IF(cb == NULL, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : callback is NULL");
+
+	ret = ctsvc_ipc_client_check_permission(CTSVC_PERMISSION_CONTACT_READ, &result);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_ipc_client_check_permission fail (%d)", ret);
+	RETVM_IF(result == false, CONTACTS_ERROR_PERMISSION_DENIED, "Permission denied (contact read)");
 
 	ctsvc_mutex_lock(CTS_MUTEX_PIMS_IPC_PUBSUB);
 
@@ -292,7 +310,7 @@ API int contacts_setting_add_name_sorting_order_changed_cb(
 		ctsvc_name_sorting_order_changed_cb_info_s *cb_info = l->data;
 		if (cb_info->cb == cb && cb_info->user_data == user_data) {
 			CTS_ERR("The same callback(%s) is already exist");
-			return CONTACTS_ERROR_SYSTEM;
+			return CONTACTS_ERROR_INVALID_PARAMETER;
 		}
 	}
 
@@ -308,6 +326,8 @@ API int contacts_setting_add_name_sorting_order_changed_cb(
 API int contacts_setting_remove_name_sorting_order_changed_cb(
 	contacts_setting_name_sorting_order_changed_cb cb, void* user_data)
 {
+	RETVM_IF(cb == NULL, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : callback is NULL");
+
 	ctsvc_mutex_lock(CTS_MUTEX_PIMS_IPC_PUBSUB);
 
 	if (__setting_name_sorting_order_subscribe_list) {

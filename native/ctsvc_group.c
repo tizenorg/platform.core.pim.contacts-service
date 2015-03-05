@@ -97,6 +97,8 @@ int ctsvc_group_add_contact_in_transaction(int group_id, int contact_id)
 API int contacts_group_add_contact(int group_id, int contact_id)
 {
 	int ret;
+	int addressbook_id;
+	char query[CTS_SQL_MAX_LEN] = {0};
 
 	RETVM_IF(!ctsvc_have_permission(CTSVC_PERMISSION_CONTACT_WRITE), CONTACTS_ERROR_PERMISSION_DENIED,
 				"Permission denied : contact write (group)");
@@ -106,6 +108,21 @@ API int contacts_group_add_contact(int group_id, int contact_id)
 	/* BEGIN_TRANSACTION */
 	ret = ctsvc_begin_trans();
 	RETVM_IF(ret, ret, "contacts_svc_begin_trans() Failed(%d)", ret);
+
+	snprintf(query, sizeof(query),
+			"SELECT addressbook_id from "CTSVC_DB_VIEW_CONTACT"  WHERE contact_id = %d", contact_id);
+	ret = ctsvc_query_get_first_int_result(query, &addressbook_id);
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("No data : contact_id (%d) is not exist", contact_id);
+		ctsvc_end_trans(false);
+		return ret;
+	}
+
+	if (false == ctsvc_have_ab_write_permission(addressbook_id)) {
+		CTS_ERR("Does not have permission to get this group record : addresbook_id(%d)", addressbook_id);
+		ctsvc_end_trans(false);
+		return CONTACTS_ERROR_PERMISSION_DENIED;
+	}
 
 	/* DOING JOB */
 	do {
@@ -178,6 +195,9 @@ int ctsvc_group_remove_contact_in_transaction(int group_id, int contact_id)
 API int contacts_group_remove_contact(int group_id, int contact_id)
 {
 	int ret;
+	int addressbook_id;
+	char query[CTS_SQL_MAX_LEN] = {0};
+
 	RETVM_IF(!ctsvc_have_permission(CTSVC_PERMISSION_CONTACT_WRITE), CONTACTS_ERROR_PERMISSION_DENIED,
 				"Permission denied : contact write (group)");
 	RETVM_IF( group_id <= 0, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid Parameter: group_id should be greater than 0");
@@ -186,6 +206,21 @@ API int contacts_group_remove_contact(int group_id, int contact_id)
 	/* BEGIN_TRANSACTION */
 	ret = ctsvc_begin_trans();
 	RETVM_IF(ret, ret, "contacts_svc_begin_trans() Failed(%d)", ret);
+
+	snprintf(query, sizeof(query),
+			"SELECT addressbook_id from "CTSVC_DB_VIEW_CONTACT"  WHERE contact_id = %d", contact_id);
+	ret = ctsvc_query_get_first_int_result(query, &addressbook_id);
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("No data : contact_id (%d) is not exist", contact_id);
+		ctsvc_end_trans(false);
+		return ret;
+	}
+
+	if (false == ctsvc_have_ab_write_permission(addressbook_id)) {
+		CTS_ERR("Does not have permission to get this group record : addresbook_id(%d)", addressbook_id);
+		ctsvc_end_trans(false);
+		return CONTACTS_ERROR_PERMISSION_DENIED;
+	}
 
 	/* DOING JOB */
 	do {
@@ -234,6 +269,20 @@ API int contacts_group_set_group_order(int group_id, int previous_group_id, int 
 
 	RETVM_IF(!ctsvc_have_permission(CTSVC_PERMISSION_CONTACT_WRITE), CONTACTS_ERROR_PERMISSION_DENIED,
 				"Permission denied : contact write (group)");
+
+	snprintf(query, sizeof(query),
+			"SELECT addressbook_id from "CTS_TABLE_GROUPS"  WHERE group_id = %d", group_id);
+	ret = ctsvc_query_get_first_int_result(query, &addressbook_id);
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("No data : group_id (%d) is not exist", group_id);
+		return ret;
+	}
+
+	if (false == ctsvc_have_ab_write_permission(addressbook_id)) {
+		CTS_ERR("Does not have permission to get this group record : addresbook_id(%d)", addressbook_id);
+		return CONTACTS_ERROR_PERMISSION_DENIED;
+	}
+
 	snprintf(query, sizeof(query), "SELECT group_prio, addressbook_id FROM "CTS_TABLE_GROUPS" WHERE group_id = ?");
 
 	ret = ctsvc_query_prepare(query, &stmt);

@@ -1,12 +1,13 @@
 [Unit]
 Description=Start the Contacts service helper service
+After=tizen-runtime.target
+Requires=tizen-runtime.target
 
 [Service]
+Type=simple
 ExecStart=/usr/bin/contacts-service-ipcd
-Nice=5
 Restart=always
-RestartSec=2
+RestartSec=1
 
 [Install]
-WantedBy=tizen-middleware.target
-
+WantedBy=multi-user.target

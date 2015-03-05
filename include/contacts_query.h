@@ -29,96 +29,139 @@ extern "C"
 #endif
 
 /**
- * @addtogroup CAPI_SOCIAL_CONTACTS_SVC_QUERY_MODULE
+ * @file contacts_query.h
+ */
+
+/**
+ * @ingroup CAPI_SOCIAL_CONTACTS_SVC_MODULE
+ * @defgroup CAPI_SOCIAL_CONTACTS_SVC_QUERY_MODULE Query
+ *
+ * @brief The contacts Query API provides the set of definitions and interfaces that enable application developers to make query to get list.
+ *
+ * @section CAPI_SOCIAL_CONTACTS_SVC_CONTACTS_QUERY_HEADER Required Header
+ *  \#include <contacts.h>
+ *
+ * <BR>
  * @{
  */
 
 /**
- * @brief   Creates a query handle.
+ * @brief Creates a query.
  *
- * @remarks		@a query must be released with contacts_query_destroy() by you.
+ * @since_tizen 2.3
  *
- * @param[in]   view_uri			The view URI of a query
- * @param[out]  query				The filter handle
+ * @remarks You must release @a query using contacts_query_destroy().
  *
- * @return  0 on success, otherwise a negative error value.
+ * @param[in]   view_uri            The view URI of a query
+ * @param[out]  query               The filter handle
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
  * @retval  #CONTACTS_ERROR_NONE                Successful
  * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
  * @retval  #CONTACTS_ERROR_OUT_OF_MEMORY       Out of memory
+ * @retval  #CONTACTS_ERROR_NOT_SUPPORTED       Not supported
+ *
+ * @pre     contacts_connect() should be called to initialize
  *
  * @see contacts_query_destroy()
  */
-API int contacts_query_create( const char* view_uri, contacts_query_h* query );
+int contacts_query_create( const char* view_uri, contacts_query_h* query );
 
 /**
- * @brief   Destroys a query handle.
+ * @brief Destroys a query.
+ *
+ * @since_tizen 2.3
  *
  * @param[in]   query    The query handle
  *
- * @return  0 on success, otherwise a negative error value.
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
  * @retval  #CONTACTS_ERROR_NONE                Successful
  * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
  *
  * @see contacts_query_create()
  */
-API int contacts_query_destroy( contacts_query_h query );
+int contacts_query_destroy( contacts_query_h query );
 
 /**
- * @brief		Adds property IDs for projection.
+ * @brief Adds property IDs for projection.
  *
- * @param[in]   filter				The filter handle
- * @param[in]   property_id_array	The property ID array
- * @param[in]   count				The number of property IDs
+ * @since_tizen 2.3
  *
- * @return  0 on success, otherwise a negative error value.
+ * @param[in]   query              The query handle
+ * @param[in]   property_id_array   The property ID array
+ * @param[in]   count               The number of property IDs
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
+ * @retval  #CONTACTS_ERROR_NONE                Successful
+ * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ * @retval  #CONTACTS_ERROR_NOT_SUPPORTED       Not supported
+ */
+int contacts_query_set_projection(contacts_query_h query, unsigned int property_id_array[], int count);
+
+/**
+ * @brief Sets the "distinct" option for projection.
+ *
+ * @since_tizen 2.3
+ *
+ * @param[in]   query           The query handle
+ * @param[in]   set             Set @c true to set the distinct option for projection,
+ *                              otherwise @c false to unset the distinct option
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
  * @retval  #CONTACTS_ERROR_NONE                Successful
  * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
  */
-API int contacts_query_set_projection(contacts_query_h query, unsigned int property_id_array[], int count);
+int contacts_query_set_distinct(contacts_query_h query, bool set);
 
 /**
- * @brief		Set distinct option  for projection.
+ * @brief Sets a filter for query.
  *
- * @param[in]   query				The query handle
- * @param[in]   set				Set or unset
+ * @since_tizen 2.3
  *
- * @return  0 on success, otherwise a negative error value.
- * @retval  #CONTACTS_ERROR_NONE                Successful
- * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
- */
-API int contacts_query_set_distinct(contacts_query_h query, bool set);
-
-/**
- * @brief		Set a filter handle to query handle.
+ * @param[in]   query           The query handle
+ * @param[in]   filter          The filter handle
  *
- * @param[in]   query			The query handle
- * @param[in]   filter			The filter handle
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
  *
- * @return  0 on success, otherwise a negative error value.
  * @retval  #CONTACTS_ERROR_NONE                Successful
  * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
  *
  * @see contacts_filter_create()
  */
-API int contacts_query_set_filter(contacts_query_h query, contacts_filter_h filter);
+int contacts_query_set_filter(contacts_query_h query, contacts_filter_h filter);
 
 /**
- * @brief		Sets sort mode.
+ * @brief Sets a sort mode for query.
  *
- * @param[in]   query			The query handle
- * @param[in]   property_id		The property ID to sort
- * @param[in]   is_ascending	Ascending or decending
+ * @since_tizen 2.3
  *
- * @return  0 on success, otherwise a negative error value.
+ * @param[in]   query           The query handle
+ * @param[in]   property_id     The property ID to sort
+ * @param[in]   is_ascending    Set @c true for ascending sort mode,
+ *                              otherwise @c false for descending sort mode
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
  * @retval  #CONTACTS_ERROR_NONE                Successful
  * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ * @retval  #CONTACTS_ERROR_NOT_SUPPORTED       Not supported
  */
-API int contacts_query_set_sort(contacts_query_h query, unsigned int property_id, bool is_ascending);
-
+int contacts_query_set_sort(contacts_query_h query, unsigned int property_id, bool is_ascending);
 
 /**
  * @}
  */
+
 
 #ifdef __cplusplus
 }

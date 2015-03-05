@@ -84,7 +84,6 @@ static int __ctsvc_db_addressbook_value_set(cts_stmt stmt, contacts_record_h *re
 static int __ctsvc_db_addressbook_get_record( int id, contacts_record_h* out_record )
 {
 	int ret;
-	int len;
 	cts_stmt stmt = NULL;
 	char query[CTS_SQL_MAX_LEN] = {0};
 	contacts_record_h record;
@@ -92,7 +91,7 @@ static int __ctsvc_db_addressbook_get_record( int id, contacts_record_h* out_rec
 	RETV_IF(NULL == out_record, CONTACTS_ERROR_INVALID_PARAMETER);
 	*out_record = NULL;
 
-	len = snprintf(query, sizeof(query),
+	snprintf(query, sizeof(query),
 				"SELECT addressbook_id, addressbook_name, account_id, mode, last_sync_ver "
 				"FROM "CTS_TABLE_ADDRESSBOOKS" WHERE addressbook_id = %d", id);
 
@@ -128,6 +127,7 @@ static int __ctsvc_db_addressbook_insert_record( contacts_record_h record, int *
 	int ret;
 	cts_stmt stmt = NULL;
 	char query[CTS_SQL_MAX_LEN] = {0};
+	char *smack = NULL;
 	ctsvc_addressbook_s *addressbook = (ctsvc_addressbook_s*)record;
 
 	RETV_IF(NULL == record, CONTACTS_ERROR_INVALID_PARAMETER);
@@ -157,11 +157,18 @@ static int __ctsvc_db_addressbook_insert_record( contacts_record_h record, int *
 		}
 	}
 
+	ret = account_connect();
+	if (ACCOUNT_ERROR_NONE != ret) {
+		CTS_ERR("account_connect Failed(%d)", ret);
+		ctsvc_end_trans(false);
+		return CONTACTS_ERROR_SYSTEM;
+	}
 	// check account_id validation
 	ret = account_create(&account);
 	if (ACCOUNT_ERROR_NONE != ret) {
 		CTS_ERR("account_create() Failed(%d)", ret);
 		ctsvc_end_trans(false);
+		account_disconnect();
 		return CONTACTS_ERROR_SYSTEM;
 	}
 	ret = account_query_account_by_account_id(addressbook->account_id, &account);
@@ -170,14 +177,18 @@ static int __ctsvc_db_addressbook_insert_record( contacts_record_h record, int *
 		ret = account_destroy(account);
 		WARN_IF(ret != ACCOUNT_ERROR_NONE, "account_destroy Fail(%d)", ret);
 		ctsvc_end_trans(false);
+		account_disconnect();
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	ret = account_destroy(account);
 	WARN_IF(ret != ACCOUNT_ERROR_NONE, "account_destroy Fail(%d)", ret);
 
+	ret = account_disconnect();
+	WARN_IF(ret != ACCOUNT_ERROR_NONE, "account_disconnect Fail(%d)", ret);
+
 	snprintf(query, sizeof(query),
-			"INSERT INTO %s(addressbook_name, account_id, mode) "
-			"VALUES(?, %d, %d)",
+			"INSERT INTO %s(addressbook_name, account_id, mode, smack_label) "
+			"VALUES(?, %d, %d, ?)",
 			CTS_TABLE_ADDRESSBOOKS, addressbook->account_id, addressbook->mode);
 
 	ret = ctsvc_query_prepare(query, &stmt);
@@ -188,6 +199,10 @@ static int __ctsvc_db_addressbook_insert_record( contacts_record_h record, int *
 	}
 
 	ctsvc_stmt_bind_text(stmt, 1, addressbook->name);
+
+	smack = ctsvc_get_client_smack_label();
+	if (smack)
+		ctsvc_stmt_bind_text(stmt, 2, smack);
 
 	/* DOING JOB */
 	do {
@@ -208,6 +223,7 @@ static int __ctsvc_db_addressbook_insert_record( contacts_record_h record, int *
 		if(ret < CONTACTS_ERROR_NONE )
 		{
 			CTS_ERR("DB error : ctsvc_end_trans() Failed(%d)", ret);
+			free(smack);
 			return ret;
 		}
 		//addressbook->id = index;
@@ -219,6 +235,7 @@ static int __ctsvc_db_addressbook_insert_record( contacts_record_h record, int *
 
 	/* ROLLBACK TRANSACTION */
 	ctsvc_end_trans(false);
+	free(smack);
 	return ret;
 }
 
@@ -238,6 +255,16 @@ static int __ctsvc_db_addressbook_update_record( contacts_record_h record )
 
 	ret = ctsvc_begin_trans();
 	RETVM_IF(ret, ret, "ctsvc_begin_trans() Failed(%d)", ret);
+
+	ret = ctsvc_is_owner(addressbook->id);
+	if (CONTACTS_ERROR_NONE != ret) {
+		if (CONTACTS_ERROR_PERMISSION_DENIED == ret)
+			CTS_ERR("Does not have permission of address_book (%d)", addressbook->id);
+		else
+			CTS_ERR("ctsvc_is_owner Fail(%d)", ret);
+		ctsvc_end_trans(false);
+		return ret;
+	}
 
 	do {
 		char query[CTS_SQL_MAX_LEN] = {0};
@@ -302,6 +329,16 @@ static int __ctsvc_db_addressbook_delete_record( int addressbook_id )
 	int ret = ctsvc_begin_trans();
 	RETVM_IF(CONTACTS_ERROR_NONE > ret, ret, "DB error : ctsvc_begin_trans() Failed(%d)", ret);
 
+	ret = ctsvc_is_owner(addressbook_id);
+	if (CONTACTS_ERROR_NONE != ret) {
+		if (CONTACTS_ERROR_PERMISSION_DENIED == ret)
+			CTS_ERR("Does not have permission to delete address_book (%d)", addressbook_id);
+		else
+			CTS_ERR("ctsvc_is_owner Fail(%d)", ret);
+		ctsvc_end_trans(false);
+		return ret;
+	}
+
 	snprintf(query, sizeof(query), "DELETE FROM %s WHERE addressbook_id = %d",
 			CTS_TABLE_ADDRESSBOOKS, addressbook_id);
 
@@ -359,7 +396,10 @@ static int __ctsvc_db_addressbook_get_all_records( int offset, int limit,
 
 	len = snprintf(query, sizeof(query),
 				"SELECT addressbook_id, addressbook_name, account_id, mode, last_sync_ver "
-				"FROM "CTS_TABLE_ADDRESSBOOKS" ORDER BY account_id, addressbook_id");
+				"FROM "CTS_TABLE_ADDRESSBOOKS);
+
+	len += snprintf(query+len, sizeof(query)-len,
+				" ORDER BY account_id, addressbook_id");
 
 	if (0 != limit) {
 		len += snprintf(query+len, sizeof(query)-len, " LIMIT %d", limit);

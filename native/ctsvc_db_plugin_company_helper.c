@@ -106,7 +106,7 @@ int ctsvc_db_company_insert(contacts_record_h record, int contact_id, bool is_my
 
 		__ctsvc_company_bind_stmt(stmt, company, 1);
 		if (company->logo) {
-			char image[CTS_SQL_MAX_LEN] = {0};
+			char image[CTSVC_IMG_FULL_PATH_SIZE_MAX] = {0};
 			ret = ctsvc_have_file_read_permission(company->logo);
 			if (ret != CONTACTS_ERROR_NONE) {
 				CTS_ERR("ctsvc_have_file_read_permission Fail(%d)", ret);
@@ -250,7 +250,7 @@ int ctsvc_db_company_update(contacts_record_h record, int contact_id, bool is_my
 
 		// add new logo file
 		if (!same && company->logo) {
-			char dest[CTS_SQL_MAX_LEN] = {0};
+			char dest[CTSVC_IMG_FULL_PATH_SIZE_MAX] = {0};
 			if (false == check_permission) {
 				ret = ctsvc_have_file_read_permission(company->logo);
 				if (ret != CONTACTS_ERROR_NONE) {
@@ -306,6 +306,8 @@ int ctsvc_db_company_delete(int id, bool is_my_profile)
 	return CONTACTS_ERROR_NONE;
 }
 
+// Whenever deleting company record in data table, this function will be called
+// in order to delete company logo image file
 void ctsvc_db_company_delete_callback(sqlite3_context *context, int argc, sqlite3_value ** argv)
 {
 	int ret;
@@ -321,7 +323,9 @@ void ctsvc_db_company_delete_callback(sqlite3_context *context, int argc, sqlite
 		char full_path[CTSVC_IMG_FULL_PATH_SIZE_MAX] = {0};
 		snprintf(full_path, sizeof(full_path), "%s/%s", CTS_LOGO_IMAGE_LOCATION, logo_path);
 		ret = unlink(full_path);
-		WARN_IF(ret < 0, "unlink(%s) Failed(%d)", full_path, errno);
+		if (ret < 0) {
+			CTS_WARN("unlink Failed(%d)", errno);
+		}
 	}
 
 	return;

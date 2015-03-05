@@ -45,8 +45,8 @@ static int __ctsvc_ipc_unmarshal_event(pims_ipc_data_h ipc_data, const char* vie
 		if (ctsvc_ipc_unmarshal_int(ipc_data, &event_p->type) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_string(ipc_data, &event_p->label) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_int(ipc_data, &event_p->date) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_unmarshal_bool(ipc_data, &event_p->is_lunar) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_unmarshal_int(ipc_data, &event_p->lunar_date) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_unmarshal_int(ipc_data, &event_p->calendar_type) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_unmarshal_bool(ipc_data, &event_p->is_leap_month) != CONTACTS_ERROR_NONE) break;
 
 		return CONTACTS_ERROR_NONE;
 	} while(0);
@@ -67,8 +67,8 @@ static int __ctsvc_ipc_marshal_event(const contacts_record_h record, pims_ipc_da
 		if (ctsvc_ipc_marshal_int((event_p->type),ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_string((event_p->label),ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_int((event_p->date),ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_bool((event_p->is_lunar),ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_int((event_p->lunar_date),ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_int((event_p->calendar_type),ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_bool((event_p->is_leap_month),ipc_data) != CONTACTS_ERROR_NONE) break;
 
 		return CONTACTS_ERROR_NONE;
 	} while(0);

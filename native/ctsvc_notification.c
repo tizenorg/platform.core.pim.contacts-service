@@ -21,6 +21,7 @@
 #include <sys/stat.h>
 
 #include "contacts.h"
+#include "contacts_db_status.h"
 #include "ctsvc_internal.h"
 #include "ctsvc_notify.h"
 #include "ctsvc_notification.h"
@@ -34,6 +35,7 @@ static TLS bool group_change = false;
 static TLS bool group_rel_change = false;
 static TLS bool person_change = false;
 static TLS bool activity_change = false;
+static TLS bool activity_photo_change = false;
 static TLS bool address_change = false;
 static TLS bool data_change = false;
 static TLS bool event_change = false;
@@ -266,6 +268,15 @@ static inline void __ctsvc_noti_publish_activity_change(void)
 	}
 }
 
+static inline void __ctsvc_noti_publish_activity_photo_change(void)
+{
+	int fd = open(CTSVC_NOTI_ACTIVITY_PHOTO_CHANGED, O_TRUNC | O_RDWR);
+	if (0 <= fd) {
+		close(fd);
+		activity_photo_change = false;
+	}
+}
+
 void ctsvc_nofitication_cancel(void)
 {
 	contact_change = false;
@@ -277,6 +288,7 @@ void ctsvc_nofitication_cancel(void)
 	group_rel_change = false;
 	person_change = false;
 	activity_change = false;
+	activity_photo_change = false;
 	address_change = false;
 	data_change = false;
 	event_change = false;
@@ -337,6 +349,11 @@ void ctsvc_set_person_noti(void)
 void ctsvc_set_activity_noti(void)
 {
 	activity_change = true;
+}
+
+void ctsvc_set_activity_photo_noti(void)
+{
+	activity_photo_change = true;
 }
 
 void ctsvc_set_address_noti(void)
@@ -425,6 +442,7 @@ void ctsvc_notification_send()
 	if (group_rel_change) __ctsvc_noti_publish_group_rel_change();
 	if (person_change) __ctsvc_noti_publish_person_change();
 	if (activity_change) __ctsvc_noti_publish_activity_change();
+	if (activity_photo_change) __ctsvc_noti_publish_activity_photo_change();
 	if (address_change) __ctsvc_noti_publish_address_change();
 	if (data_change) __ctsvc_noti_publish_data_change();
 	if (company_change) __ctsvc_noti_publish_company_change();
@@ -442,11 +460,12 @@ void ctsvc_notification_send()
 	if (profile_change) __ctsvc_noti_publish_profile_change();
 }
 
+// Whenever deleting data table record, this function will be called
+// in order to set notification
 void ctsvc_db_data_delete_callback(sqlite3_context * context,
 		int argc, sqlite3_value ** argv)
 {
 	CTS_FN_CALL;
-	int id;
 	int datatype;
 
 	if (argc > 2) {
@@ -454,9 +473,7 @@ void ctsvc_db_data_delete_callback(sqlite3_context * context,
 		return;
 	}
 
-	id = sqlite3_value_int(argv[0]);
 	datatype = sqlite3_value_int(argv[1]);
-	CTS_DBG("id : %d, datatype : %d", id, datatype);
 
 	switch(datatype) {
 	case CTSVC_DATA_NAME:
@@ -508,3 +525,16 @@ void ctsvc_db_data_delete_callback(sqlite3_context * context,
 	CTS_FN_END;
 }
 
+API int contacts_db_add_status_changed_cb(
+		contacts_db_status_changed_cb cb, void* user_data)
+{
+	CTS_ERR("Please use contacts-service2 instead of contacts-service3");
+	return CONTACTS_ERROR_INTERNAL;
+}
+
+API int contacts_db_remove_status_changed_cb(
+		contacts_db_status_changed_cb cb, void* user_data)
+{
+	CTS_ERR("Please use contacts-service2 instead of contacts-service3");
+	return CONTACTS_ERROR_INTERNAL;
+}

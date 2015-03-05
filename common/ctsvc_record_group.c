@@ -129,7 +129,7 @@ static int __ctsvc_group_get_int(contacts_record_h record, unsigned int property
 		*out = group->addressbook_id;
 		break;
 	default:
-		ASSERT_NOT_REACHED("Invalid parameter : property_id(%d) is not supported in value(group)", property_id);
+		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(group)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
@@ -159,7 +159,7 @@ static int __ctsvc_group_get_str_real(contacts_record_h record, unsigned int pro
 		*out_str = GET_STR(copy, group->extra_data);
 		break;
 	default :
-		ASSERT_NOT_REACHED("Invalid parameter : property_id(%d) is not supported in value(group)", property_id);
+		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(group)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
@@ -183,17 +183,13 @@ static int __ctsvc_group_set_int(contacts_record_h record, unsigned int property
 	case CTSVC_PROPERTY_GROUP_ID:
 		group->id = value;
 		break;
-/*
-		ASSERT_NOT_REACHED("Invalid parameter : property_id(%d) is a read-only value (group)", property_id);
-		return CONTACTS_ERROR_INVALID_PARAMETER;
-*/
 	case CTSVC_PROPERTY_GROUP_ADDRESSBOOK_ID:
 		RETVM_IF(group->id > 0, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (group)", property_id);
 		group->addressbook_id = value;
 		break;
 	default:
-		ASSERT_NOT_REACHED("Invalid parameter : property_id(%d) is not supported in value(group)", property_id);
+		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(group)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
@@ -223,7 +219,7 @@ static int __ctsvc_group_set_str(contacts_record_h record, unsigned int property
 		FREEandSTRDUP(group->extra_data, str);
 		break;
 	default :
-		ASSERT_NOT_REACHED("Invalid parameter : property_id(%d) is not supported in value(group)", property_id);
+		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(group)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
@@ -237,7 +233,7 @@ static int __ctsvc_group_get_bool(contacts_record_h record, unsigned int propert
 		*value = group->is_read_only;
 		break;
 	default:
-		ASSERT_NOT_REACHED("Invalid parameter : property_id(%d) is not supported in value(group)", property_id);
+		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(group)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
@@ -254,7 +250,7 @@ static int __ctsvc_group_set_bool(contacts_record_h record, unsigned int propert
 		group->is_read_only = value;
 		break;
 	default:
-		ASSERT_NOT_REACHED("Invalid parameter : property_id(%d) is not supported in value(group)", property_id);
+		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(group)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;

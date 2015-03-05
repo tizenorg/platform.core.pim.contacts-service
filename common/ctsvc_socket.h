@@ -24,6 +24,8 @@
 #ifndef __TIZEN_SOCIAL_CTSVC_SOCKET_H__
 #define __TIZEN_SOCIAL_CTSVC_SOCKET_H__
 
+#include "contacts.h"
+
 #define CTSVC_SOCKET_PATH "/tmp/.contacts-svc.sock"
 #define CTSVC_SOCKET_MSG_SIZE 1024
 
@@ -44,8 +46,10 @@ typedef struct{
 	int attach_sizes[CTSVC_SOCKET_MSG_REQUEST_MAX_ATTACH];
 }ctsvc_socket_msg_s;
 
-int ctsvc_request_sim_import(void);
-int ctsvc_request_sim_get_initialization_status(bool* completed);
+#ifdef ENABLE_SIM_FEATURE
+int ctsvc_request_sim_import(int sim_slot_no);
+int ctsvc_request_sim_get_initialization_status(int sim_slot_no, bool* completed);
+#endif // ENABLE_SIM_FEATURE
 
 int ctsvc_socket_init(void);
 void ctsvc_socket_final(void);

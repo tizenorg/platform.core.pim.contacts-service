@@ -29,53 +29,64 @@ extern "C"
 #endif
 
 /**
- * @addtogroup CAPI_SOCIAL_CONTACTS_SVC_PHONELOG_MODULE
+ * @file contacts_phone_log.h
+ */
+
+/**
+ * @ingroup CAPI_SOCIAL_CONTACTS_SVC_MODULE
+ * @defgroup CAPI_SOCIAL_CONTACTS_SVC_PHONELOG_MODULE Phone log
+ *
+ * @brief The contacts phone log API provides the set of definitions and interfaces that enable application developers to reset phone log count.
+ *
+ * @section CAPI_SOCIAL_CONTACTS_SVC_PHONELOG_MODULE_HEADER Required Header
+ *  \#include <contacts.h>
+ *
+ * @section CAPI_SOCIAL_CONTACTS_SVC_PHONELOG_MODULE_FEATURE Related Features
+ * This API is related with the following features:\n
+ *  - http://tizen.org/feature/network.telephony\n
+ *
+ * It is recommended to design feature related codes in your application for reliability.\n
+ *
+ * You can check if a device supports the related features for this API by using @ref CAPI_SYSTEM_SYSTEM_INFO_MODULE, thereby controlling the procedure of your application.\n
+ *
+ * To ensure your application is only running on the device with specific features, please define the features in your manifest file using the manifest editor in the SDK.\n
+ *
+ * More details on featuring your application can be found from <a href="../org.tizen.mobile.native.appprogramming/html/ide_sdk_tools/feature_element.htm"><b>Feature Element</b>.</a>
+ *
+ * <BR>
  * @{
  */
 
-/**
- * @brief	Resets a phonelog's count.
- * @details The count of all type of phonelog will be 0.
- *
- * @return  0 on success, otherwise a negative error value.
- * @retval  #CONTACTS_ERROR_NONE	Successful
- * @retval  #CONTACTS_ERROR_DB	Database operation failure
- *
- * @pre     This function requires an open connection to contacts service by contacts_connect2().
- *
- * @see  contacts_connect2()
- */
-API int contacts_phone_log_reset_statistics(void);
-
-typedef enum {
-	CONTACTS_PHONE_LOG_DELETE_BY_ADDRESS,		/**< . */
-	CONTACTS_PHONE_LOG_DELETE_BY_MESSAGE_EXTRA_DATA1,	/**< . */
-	CONTACTS_PHONE_LOG_DELETE_BY_EMAIL_EXTRA_DATA1,	/**< . */
-} contacts_phone_log_delete_e;
 
 /**
- * @brief	Delete phone log with extra_data1
+ * @brief   Resets the phone log's count.
+ * @details The number of all types in the phone log will be @c 0.
  *
- * @param[in]	op 				operation #contacts_phone_log_delete_e
- * @param[in]	address (optional)	Address to delete (number, email,  etc)
- * @param[in]	extra_data1 (optional)	extra_data1 to delete
+ * @since_tizen 2.3
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/callhistory.write
  *
- * @return  0 on success, otherwise a negative error value.
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
  * @retval  #CONTACTS_ERROR_NONE                Successful
- * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
-  * @par example
- * @code
- contacts_phone_log_delete(CONTACTS_PHONE_LOG_DELETE_BY_ADDRESS, "0123456789");
- contacts_phone_log_delete(CONTACTS_PHONE_LOG_DELETE_BY_MESSAGE_EXTRA_DATA1,  2);
- contacts_phone_log_delete(CONTACTS_PHONE_LOG_DELETE_BY_EMAIL_EXTRA_DATA1,  1);
- * @endcode
+ * @retval  #CONTACTS_ERROR_OUT_OF_MEMORY       Out of memory
+ * @retval  #CONTACTS_ERROR_FILE_NO_SPACE       FS Full
+ * @retval  #CONTACTS_ERROR_DB                  Database operation failure
+ * @retval  #CONTACTS_ERROR_IPC                 IPC error
+ * @retval  #CONTACTS_ERROR_PERMISSION_DENIED   Permission denied. This application does not have the privilege to call this method.
+ * @retval  #CONTACTS_ERROR_NOT_SUPPORTED       Not supported
+ *
+ * @pre     contacts_connect() should be called to open a connection to the contacts service.
+ *
+ * @see  contacts_connect()
  */
-API int contacts_phone_log_delete(contacts_phone_log_delete_e op, ...);
+int contacts_phone_log_reset_statistics(void);
+
 
 /**
  * @}
  */
-
 
 #ifdef __cplusplus
 }

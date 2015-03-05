@@ -2,12 +2,12 @@
 
 prefix=@PREFIX@
 exec_prefix=@EXEC_PREFIX@
-libdir=@LIB_INSTALL_DIR@
+libdir=@LIBDIR@
 includedir=@INCLUDEDIR@
 
 Name: @TARGET@
 Description: @PROJECT_NAME@ library
-Version: @VERSION@
+Version: @FULLVER@
 Requires: glib-2.0 @PC_REQUIRED@
 Libs: -L${libdir} -l@CLIENT@
 Cflags: -I${includedir}

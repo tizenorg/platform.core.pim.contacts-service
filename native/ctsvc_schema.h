@@ -20,16 +20,17 @@
  * limitations under the License.
  *
  */
-#include <tzplatform_config.h>
 
 #ifndef __TIZEN_SOCIAL_CTSVC_SCHEMA_H__
 #define __TIZEN_SOCIAL_CTSVC_SCHEMA_H__
 
-#define CTSVC_DB_PATH tzplatform_mkpath(TZ_USER_DB,".contacts-svc.db")
-#define CTSVC_DB_JOURNAL_PATH tzplatform_mkpath(TZ_USER_DB,".contacts-svc.db-journal")
+#include <tzplatform_config.h>
+
+#define CTSVC_DB_PATH tzplatform_mkpath(TZ_USER_DB,"/.contacts-svc.db")
+#define CTSVC_DB_JOURNAL_PATH tzplatform_mkpath(TZ_USER_DB,"/.contacts-svc.db-journal")
 
 // For Security
-#define CTS_SECURITY_FILE_GROUP 6005
+#define CTS_SECURITY_FILE_GROUP 5000
 #define CTS_SECURITY_DEFAULT_PERMISSION 0660
 #define CTS_SECURITY_DIR_DEFAULT_PERMISSION 0770
 
@@ -57,6 +58,8 @@
 #define CTS_TABLE_NAME_LOOKUP "name_lookup"
 #define CTS_TABLE_PHONE_LOOKUP "phone_lookup"
 #define CTS_TABLE_SEARCH_INDEX "search_index"
+#define CTS_TABLE_SIM_INFO "sim_info"
+
 #define CTS_TABLE_ACTIVITIES "activities"
 #define CTS_TABLE_ACTIVITY_PHOTOS "activity_photos"
 
@@ -82,6 +85,7 @@
 #define CTSVC_DB_VIEW_EXTENSION					"view_extension"
 
 #define CTSVC_DB_VIEW_ACTIVITY					"view_activity"
+#define CTSVC_DB_VIEW_ACTIVITY_PHOTOS			"view_activity_photos"
 #define CTSVC_DB_VIEW_SPEEDIDAL					"view_speeddial"
 
 //#define CTSVC_DB_VIEW_GROUPS_UPDATED_INFO		"view_group_changes"
@@ -103,8 +107,6 @@
 #define CTSVC_DB_VIEW_CONTACT_GROUP			"view_contact_group"
 
 #define CTSVC_DB_VIEW_CONTACT_ACTIVITY			"view_contact_activity"
-
-#define CTSVC_DB_VIEW_PHONELOG_NUMBER			"view_phonelog_number"
 
 /////////////////////////////////////////////////////////////////////////////////
 

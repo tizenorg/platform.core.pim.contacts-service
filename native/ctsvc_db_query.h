@@ -24,6 +24,8 @@
 #ifndef __TIZEN_SOCIAL_CTSVC_DB_QUERY_H__
 #define __TIZEN_SOCIAL_CTSVC_DB_QUERY_H__
 
+#include "contacts.h"
+#include "contacts_db_status.h"
 #include "ctsvc_struct.h"
 #include "ctsvc_sqlite.h"
 
@@ -35,6 +37,8 @@ int ctsvc_db_replace_records(contacts_list_h list, int ids[], unsigned int count
 int ctsvc_db_make_get_records_query_stmt(ctsvc_query_s *s_query, int offset, int limit, cts_stmt *stmt);
 int ctsvc_db_create_set_query(contacts_record_h record, char **set, GSList **bind_text);
 int ctsvc_db_update_record_with_set_query(const char *set, GSList *bind_text, const char *table, int id);
+
+void ctsvc_db_set_status(contacts_db_status_e status);
 
 #endif /*  __TIZEN_SOCIAL_CTSVC_DB_QUERY_H__ */
 

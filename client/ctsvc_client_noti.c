@@ -25,6 +25,7 @@
 #include "ctsvc_internal.h"
 #include "ctsvc_ipc_define.h"
 #include "ctsvc_mutex.h"
+#include "ctsvc_client_ipc.h"
 
 typedef struct
 {
@@ -60,7 +61,9 @@ static void __ctsvc_db_subscriber_callback(pims_ipc_h ipc, pims_ipc_data_h data,
 		GSList *l;
 		for (l = info->callbacks;l;l=l->next) {
 			db_callback_info_s *cb_info = l->data;
-			cb_info->cb(info->view_uri, str, cb_info->user_data);
+			if (cb_info->cb) {
+				cb_info->cb(info->view_uri, str, cb_info->user_data);
+			}
 		}
 	}
 }
@@ -123,6 +126,26 @@ API int contacts_db_add_changed_cb_with_info(const char* view_uri,
 	GSList *it = NULL;
 	subscribe_info_s *info = NULL;
 	db_callback_info_s *cb_info;
+	bool result = false;
+	int ret;
+
+	RETVM_IF(view_uri == NULL, CONTACTS_ERROR_INVALID_PARAMETER, "view_uri is NULL");
+	RETVM_IF(cb == NULL, CONTACTS_ERROR_INVALID_PARAMETER, "cb is NULL");
+
+	if (strncmp(view_uri, CTSVC_VIEW_URI_PHONELOG, strlen(CTSVC_VIEW_URI_PHONELOG)) == 0) {
+		ret = ctsvc_ipc_client_check_permission(CTSVC_PERMISSION_PHONELOG_READ, &result);
+		RETVM_IF(ret != CONTACTS_ERROR_NONE, ret, "ctsvc_ipc_client_check_permission fail (%d)", ret);
+		RETVM_IF(result == false, CONTACTS_ERROR_PERMISSION_DENIED, "Permission denied (phonelog read)");
+	}
+	else if (strncmp(view_uri, CTSVC_VIEW_URI_PERSON, strlen(CTSVC_VIEW_URI_PERSON)) == 0) {
+		ret = ctsvc_ipc_client_check_permission(CTSVC_PERMISSION_CONTACT_READ, &result);
+		RETVM_IF(ret != CONTACTS_ERROR_NONE, ret, "ctsvc_ipc_client_check_permission fail (%d)", ret);
+		RETVM_IF(result == false, CONTACTS_ERROR_PERMISSION_DENIED, "Permission denied (contact read)");
+	}
+	else {
+		CTS_ERR("We support this API for only %s and %s", CTSVC_VIEW_URI_PERSON, CTSVC_VIEW_URI_PHONELOG);
+		return CONTACTS_ERROR_INVALID_PARAMETER;
+	}
 
 	ctsvc_mutex_lock(CTS_MUTEX_PIMS_IPC_PUBSUB);
 
@@ -180,6 +203,15 @@ API int contacts_db_remove_changed_cb_with_info(const char* view_uri,
 {
 	GSList *it = NULL;
 	subscribe_info_s *info = NULL;
+
+	RETVM_IF(view_uri == NULL, CONTACTS_ERROR_INVALID_PARAMETER, "view_uri is NULL");
+	RETVM_IF(cb == NULL, CONTACTS_ERROR_INVALID_PARAMETER, "cb is NULL");
+
+	if (strcmp(view_uri, CTSVC_VIEW_URI_PHONELOG) != 0 &&
+			strcmp(view_uri, CTSVC_VIEW_URI_PERSON) != 0) {
+		CTS_ERR("We support this API for only %s and %s", CTSVC_VIEW_URI_PERSON, CTSVC_VIEW_URI_PHONELOG);
+		return CONTACTS_ERROR_INVALID_PARAMETER;
+	}
 
 	ctsvc_mutex_lock(CTS_MUTEX_PIMS_IPC_PUBSUB);
 

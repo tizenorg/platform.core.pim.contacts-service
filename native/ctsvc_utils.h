@@ -33,4 +33,6 @@ int ctsvc_get_transaction_ver(void);
 int ctsvc_utils_copy_image(const char *dir, const char *src, const char *file);
 void ctsvc_utils_make_image_file_name(int parent_id, int id, char *src_img, char *dest, int dest_size);
 
+int SAFE_SNPRINTF(char **buf, int *buf_size, int len, const char *src);
+
 #endif /* __TIZEN_SOCIAL_CTSVC_UTILS_H__ */

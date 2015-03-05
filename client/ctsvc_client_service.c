@@ -42,8 +42,13 @@ API int contacts_connect_with_flags(unsigned int flags)
 	CTS_FN_CALL;
 	int ret = CONTACTS_ERROR_NONE;
 
-	ret = contacts_connect2();
-	if (ret == CONTACTS_ERROR_NONE)
+	// If new flag is defined, errer check should be updated
+	RETVM_IF(flags & 0x11111110, CONTACTS_ERROR_INVALID_PARAMETER, "flags is invalid");
+
+	ret = contacts_connect();
+	if (ret == CONTACTS_ERROR_PERMISSION_DENIED)
+		return ret;
+	else if (ret == CONTACTS_ERROR_NONE)
 		return ret;
 
 	if (flags & CONTACTS_CONNECT_FLAG_RETRY) {
@@ -52,7 +57,7 @@ API int contacts_connect_with_flags(unsigned int flags)
 		for (i=0;i<9;i++) {
 			usleep(waiting_time * 1000);
 			CTS_DBG("retry cnt=%d, ret=%x, %d",(i+1), ret, waiting_time);
-			ret = contacts_connect2();
+			ret = contacts_connect();
 			if (ret == CONTACTS_ERROR_NONE)
 				break;
 			if (6 < i)
@@ -65,7 +70,7 @@ API int contacts_connect_with_flags(unsigned int flags)
 	return ret;
 }
 
-API int contacts_connect2()
+API int contacts_connect(void)
 {
 	CTS_FN_CALL;
 	int ret;
@@ -106,7 +111,7 @@ API int contacts_connect2()
 	return CONTACTS_ERROR_NONE;
 }
 
-API int contacts_disconnect2()
+API int contacts_disconnect(void)
 {
 	int ret;
 
@@ -130,9 +135,9 @@ API int contacts_disconnect2()
 	else if (1 < ctsvc_connection)
 		CTS_DBG("System : connection count is %d", ctsvc_connection);
 	else {
-		CTS_DBG("System : please call contacts_connect2(), connection count is (%d)", ctsvc_connection);
+		CTS_DBG("System : please call contacts_connect(), connection count is (%d)", ctsvc_connection);
 		ctsvc_mutex_unlock(CTS_MUTEX_CONNECTION);
-		return CONTACTS_ERROR_INVALID_PARAMETER;
+		return CONTACTS_ERROR_DB;
 	}
 
 	ctsvc_connection--;
@@ -141,7 +146,7 @@ API int contacts_disconnect2()
 	return CONTACTS_ERROR_NONE;
 }
 
-API int contacts_connect_on_thread()
+API int contacts_connect_on_thread(void)
 {
 	int ret;
 
@@ -183,7 +188,7 @@ API int contacts_connect_on_thread()
 	return CONTACTS_ERROR_NONE;
 }
 
-API int contacts_disconnect_on_thread()
+API int contacts_disconnect_on_thread(void)
 {
 	int ret;
 
@@ -210,7 +215,7 @@ API int contacts_disconnect_on_thread()
 	else {
 		CTS_DBG("System : please call contacts_connect_on_thread(), connection count is (%d)", ctsvc_connection_on_thread);
 		ctsvc_mutex_unlock(CTS_MUTEX_CONNECTION);
-		return CONTACTS_ERROR_INVALID_PARAMETER;
+		return CONTACTS_ERROR_DB;
 	}
 
 	ctsvc_connection_on_thread--;
@@ -219,3 +224,4 @@ API int contacts_disconnect_on_thread()
 
 	return CONTACTS_ERROR_NONE;
 }
+

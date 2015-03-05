@@ -123,7 +123,7 @@ int ctsvc_db_extension_insert(contacts_record_h record, int contact_id, bool is_
 
 		ret = ctsvc_stmt_step(stmt);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("DB error : ctsvc_query_exec() Failed(%d)", ret);
+			CTS_ERR("DB error : ctsvc_stmt_step() Failed(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
 			return ret;
 		}

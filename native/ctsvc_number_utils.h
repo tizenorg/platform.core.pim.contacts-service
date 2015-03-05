@@ -19,9 +19,17 @@
 #ifndef __TIZEN_SOCIAL_CTSVC_NUMBER_UTILS_H__
 #define __TIZEN_SOCIAL_CTSVC_NUMBER_UTILS_H__
 
-int ctsvc_clean_number(const char *src, char *dest, int dest_size);
-int ctsvc_normalize_number(const char *src, char *dest, int dest_size);
+#include <sqlite3.h>
+
+char* ctsvc_get_network_cc(bool reload);
+
+int ctsvc_clean_number(const char *src, char *dest, int dest_size, bool replace_alphabet);
+int ctsvc_normalize_number(const char *src, char *dest, int dest_size, bool replace_alphabet);
 int ctsvc_get_minmatch_number(const char *src, char *dest, int dest_size, int min_match);
 bool ctsvc_is_phonenumber(const char* src);
+void ctsvc_db_phone_number_equal_callback(sqlite3_context * context, int argc, sqlite3_value ** argv);
+
+void* ctsvc_init_tapi_handle_for_cc(void);
+void ctsvc_deinit_tapi_handle_for_cc(void);
 
 #endif /*  __TIZEN_SOCIAL_CTSVC_NUMBER_UTILS_H__ */

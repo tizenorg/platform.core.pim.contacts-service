@@ -117,7 +117,7 @@ static int __ctsvc_updated_info_get_int(contacts_record_h record, unsigned int p
 		*out = updated_info->last_changed_type;
 		break;
 	default:
-		ASSERT_NOT_REACHED("This field(%d) is not supported in value(updated_info)", property_id);
+		CTS_ERR("This field(%d) is not supported in value(updated_info)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
@@ -135,6 +135,9 @@ static int __ctsvc_updated_info_set_int(contacts_record_h record, unsigned int p
 		updated_info->addressbook_id = value;
 		break;
 	case CTSVC_PROPERTY_UPDATE_INFO_TYPE:
+		RETVM_IF(value < CONTACTS_CHANGE_INSERTED
+						|| value > CONTACTS_CHANGE_DELETED,
+				CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : update info type is in invalid range (%d)", value);
 		updated_info->changed_type = value;
 		break;
 	case CTSVC_PROPERTY_UPDATE_INFO_VERSION:
@@ -144,7 +147,7 @@ static int __ctsvc_updated_info_set_int(contacts_record_h record, unsigned int p
 		updated_info->last_changed_type = value;
 		break;
 	default:
-		ASSERT_NOT_REACHED("This field(%d) is not supported in value(updated_info)", property_id);
+		CTS_ERR("This field(%d) is not supported in value(updated_info)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
@@ -159,7 +162,7 @@ static int __ctsvc_updated_info_get_bool(contacts_record_h record, unsigned int 
 		*out = updated_info->image_changed;
 		break;
 	default:
-		ASSERT_NOT_REACHED("This field(%d) is not supported in value(updated_info)", property_id);
+		CTS_ERR("This field(%d) is not supported in value(updated_info)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
@@ -174,7 +177,7 @@ static int __ctsvc_updated_info_set_bool(contacts_record_h record, unsigned int 
 		updated_info->image_changed = value;
 		break;
 	default:
-		ASSERT_NOT_REACHED("This field(%d) is not supported in value(updated_info)", property_id);
+		CTS_ERR("This field(%d) is not supported in value(updated_info)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;

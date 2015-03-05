@@ -41,6 +41,7 @@
 #include "ctsvc_struct.h"
 #include "ctsvc_normalize.h"
 #include "ctsvc_localize.h"
+#include "ctsvc_localize_utils.h"
 #include "ctsvc_setting.h"
 
 #ifdef _CONTACTS_IPC_SERVER
@@ -234,11 +235,11 @@ static inline bool ctsvc_check_available_image_space(void){
 	int ret;
 	struct statfs buf;
 	long long size;
-	ret = statfs(CTS_IMG_FULL_LOCATION, &buf);
+	ret = statfs(CTSVC_IMG_FULL_LOCATION, &buf);
 
 	RETVM_IF(ret!=0, false, "statfs Failed(%d)", ret);
 
-	size = buf.f_bavail * (buf.f_bsize);
+	size = (long long)buf.f_bavail * (buf.f_bsize);
 
 	if (size > 1024*1024) // if available space to copy a image is larger than 1M
 		return true;
@@ -320,7 +321,7 @@ static bool __ctsvc_image_util_supported_jpeg_colorspace_cb(image_util_colorspac
 
 	// temporary code
 	if (colorspace == IMAGE_UTIL_COLORSPACE_YV12 || colorspace == IMAGE_UTIL_COLORSPACE_I420) {
-		info->ret = CONTACTS_ERROR_INTERNAL;
+		info->ret = CONTACTS_ERROR_SYSTEM;
 		return true;
 	}
 
@@ -330,7 +331,7 @@ static bool __ctsvc_image_util_supported_jpeg_colorspace_cb(image_util_colorspac
 	CTS_DBG("colorspace %d src : %s, dest : %s", colorspace, info->src, info->dest);
 	ret = image_util_decode_jpeg( info->src, colorspace, &img_source, &width, &height, &size_decode );
 	if (ret!=IMAGE_UTIL_ERROR_NONE) {
-		info->ret = CONTACTS_ERROR_INTERNAL;
+		info->ret = CONTACTS_ERROR_SYSTEM;
 		return true;
 	}
 
@@ -354,7 +355,7 @@ static bool __ctsvc_image_util_supported_jpeg_colorspace_cb(image_util_colorspac
 		if (image_size<=0 || width <=0 || height <= 0) {
 			free(img_source);
 			CTS_ERR("image size error(%d)", image_size);
-			info->ret = CONTACTS_ERROR_INTERNAL;
+			info->ret = CONTACTS_ERROR_SYSTEM;
 			return false;
 		}
 
@@ -385,7 +386,7 @@ static bool __ctsvc_image_util_supported_jpeg_colorspace_cb(image_util_colorspac
 			CTS_ERR("image_util_resize failed(%d)", ret);
 			free( img_target );
 			free( img_source );
-			info->ret = CONTACTS_ERROR_INTERNAL;
+			info->ret = CONTACTS_ERROR_SYSTEM;
 			return false;
 		}
 		free( img_source );
@@ -401,12 +402,13 @@ static bool __ctsvc_image_util_supported_jpeg_colorspace_cb(image_util_colorspac
 		int rotated_width, rotated_height;
 		unsigned char *img_rotate = 0;
 		img_rotate = malloc( size_decode );
-		ret = image_util_rotate(img_rotate, &rotated_width, &rotated_height,
+		ret= image_util_rotate(img_rotate, &rotated_width, &rotated_height,
 					rotation, img_target, resized_width, resized_height, colorspace);
 		free(img_target);
 		if (IMAGE_UTIL_ERROR_NONE != ret) {
 			CTS_ERR("image_util_rotate failed(%d)", ret);
-			info->ret = CONTACTS_ERROR_INTERNAL;
+			info->ret = CONTACTS_ERROR_SYSTEM;
+			free(img_rotate);
 			return false;
 		}
 		resized_width = rotated_width;
@@ -419,20 +421,20 @@ static bool __ctsvc_image_util_supported_jpeg_colorspace_cb(image_util_colorspac
 	free( img_target );
 	if(ret != IMAGE_UTIL_ERROR_NONE) {
 		CTS_ERR("image_util_encode_jpeg failed(%d)", ret);
-		info->ret = CONTACTS_ERROR_INTERNAL;
+		info->ret = CONTACTS_ERROR_SYSTEM;
 		return false;
 	}
 
 	dest_fd = open(info->dest, O_RDONLY);
 	if (dest_fd < 0) {
-		CTS_ERR("System : Open(dest:%s) Failed(%d)", info->dest, errno);
+		CTS_ERR("System : Open Failed(%d)", errno);
 		info->ret = CONTACTS_ERROR_SYSTEM;
 		return false;
 	}
 
 	ret = fchown(dest_fd, getuid(), CTS_SECURITY_FILE_GROUP);
 	if (0 != ret) {
-		CTS_ERR("fchown(%s) Failed(%d)", info->dest, errno);
+		CTS_ERR("fchown Failed(%d)", errno);
 		info->ret = CONTACTS_ERROR_SYSTEM;
 		close(dest_fd);
 		return false;
@@ -440,7 +442,7 @@ static bool __ctsvc_image_util_supported_jpeg_colorspace_cb(image_util_colorspac
 
 	ret = fchmod(dest_fd, CTS_SECURITY_IMAGE_PERMISSION);
 	if (0 != ret) {
-		CTS_ERR("fchmod(%s) Failed(%d)", info->dest, errno);
+		CTS_ERR("fchmod Failed(%d)", errno);
 		info->ret = CONTACTS_ERROR_SYSTEM;
 		close(dest_fd);
 		return false;
@@ -454,12 +456,12 @@ static bool __ctsvc_image_util_supported_jpeg_colorspace_cb(image_util_colorspac
 static int __ctsvc_resize_and_copy_image(const char *src, const char *dest)
 {
 	int ret;
-	image_info info = {.src = src, .dest = dest, ret = CONTACTS_ERROR_INTERNAL};
+	image_info info = {.src = src, .dest = dest, ret = CONTACTS_ERROR_SYSTEM};
 
 	ret = image_util_foreach_supported_jpeg_colorspace(__ctsvc_image_util_supported_jpeg_colorspace_cb, &info);
 
 	if (ret != IMAGE_UTIL_ERROR_NONE)
-		return CONTACTS_ERROR_INVALID_PARAMETER;
+		return CONTACTS_ERROR_SYSTEM;
 
 	return info.ret;
 }
@@ -492,7 +494,7 @@ int ctsvc_utils_copy_image(const char *dir, const char *src, const char *file)
 	RETVM_IF(src_fd < 0, CONTACTS_ERROR_SYSTEM, "System : Open(src:%s) Failed(%d)", src, errno);
 	dest_fd = open(dest, O_WRONLY|O_CREAT|O_TRUNC, 0660);
 	if (dest_fd < 0) {
-		CTS_ERR("Open(dest:%s) Failed(%d)", dest, errno);
+		CTS_ERR("Open Failed(%d)", errno);
 		close(src_fd);
 		return CONTACTS_ERROR_SYSTEM;
 	}
@@ -505,7 +507,7 @@ int ctsvc_utils_copy_image(const char *dir, const char *src, const char *file)
 			else {
 				CTS_ERR("write() Failed(%d)", errno);
 				if (ENOSPC == errno)
-					ret = CONTACTS_ERROR_SYSTEM;			// No space
+					ret = CONTACTS_ERROR_FILE_NO_SPACE;	// No space
 				else
 					ret = CONTACTS_ERROR_SYSTEM;			// IO error
 				close(src_fd);
@@ -517,11 +519,13 @@ int ctsvc_utils_copy_image(const char *dir, const char *src, const char *file)
 	}
 
 	ret = fchown(dest_fd, getuid(), CTS_SECURITY_FILE_GROUP);
-	if (0 != ret)
-		CTS_ERR("fchown(%s) Failed(%d)", dest, ret);
+	if (0 != ret) {
+		CTS_ERR("fchown() Failed(%d)", ret);
+	}
 	ret = fchmod(dest_fd, CTS_SECURITY_IMAGE_PERMISSION);
-	if (0 != ret)
-		CTS_ERR("fchmod(%s) Failed(%d)", dest, ret);
+	if (0 != ret) {
+		CTS_ERR("fchmod() Failed(%d)", ret);
+	}
 	close(src_fd);
 	close(dest_fd);
 
@@ -555,6 +559,7 @@ int ctsvc_get_current_version( int* out_current_version ){
 		int version = 0;
 		const char *query = "SELECT ver FROM "CTS_TABLE_VERSION;
 		ret = ctsvc_query_get_first_int_result(query, &version);
+		RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_query_get_first_int_result() Failed(%d)", ret);
 		*out_current_version = version;
 	}
 	else
@@ -567,112 +572,33 @@ int ctsvc_get_transaction_ver(void)
 	return transaction_ver;
 }
 
-static int __ctsvc_get_language_index(const char *locale, char ***index, int *count)
+int SAFE_SNPRINTF(char **buf, int *buf_size, int len, const char *src)
 {
-	ULocaleData* uld;
-	USet *indexChars;
-	UErrorCode error = U_ZERO_ERROR;
-	int32_t itemCount;
-	int32_t j;
-	char **temp;
+	int remain;
+	int temp_len;
 
-	uld = ulocdata_open(locale, &error);
-	indexChars = uset_openEmpty();
+	if (len < 0)
+		return -1;
 
-	ulocdata_getExemplarSet(uld, indexChars, 0, ULOCDATA_ES_INDEX, &error);
-	ulocdata_close(uld);
-	CTS_VERBOSE("locale : %s\n", locale);
-
-	if (U_FAILURE(error))
-		return 0;
-
-	if (error == U_USING_DEFAULT_WARNING)
-		uset_clear(indexChars);
-
-	itemCount = uset_size(indexChars);
-	CTS_VERBOSE("Size of USet : %d\n", itemCount);
-
-	temp = (char **)calloc(itemCount, sizeof(char*));
-	for (j = 0; j < itemCount; j++){
-		UChar ch[2] = {0};
-		char dest[10];
-		int size;
-		ch[0] = uset_charAt(indexChars, j);
-		u_strToUTF8(dest, sizeof(dest)-1, &size, ch, -1, &error);
-		CTS_VERBOSE("[%d] len : %d, %s\n", j+1, size, dest);
-		temp[j] = strdup(dest);
+	remain = *buf_size - len;
+	if (remain > strlen(src) + 1) {
+		temp_len = snprintf((*buf)+len, remain, "%s", src);
+		return temp_len;
 	}
-	*count = (int)itemCount;
-	*index = (char **)temp;
-	uset_clear(indexChars);
-	return 0;
-}
-
-API int contacts_utils_get_index_characters(char **index_string)
-{
-	const char *first;
-	const char *second;
-	int lang_first;
-	int lang_second = 0;
-	char **first_list = NULL;
-	char **second_list = NULL;
-	char list[1024] = {0,};
-	int i;
-	int first_len = 0;
-	int second_len = 0;
-
-	RETV_IF(NULL == index_string, CONTACTS_ERROR_INVALID_PARAMETER);
-	char temp[5];
-
-	sprintf(list, "#");
-	strcat(list, ":");
-
-	i = 0;
-	sprintf(temp, "%d", i);
-	strcat(list, temp);
-	for (i=1;i<10;i++) {
-		sprintf(temp, ";%d", i);
-		strcat(list, temp);
-	}
-	strcat(list, ":");
-
-	first = vconf_get_str(VCONFKEY_LANGSET);
-	if (NULL == first) {
-		CTS_ERR("vconf_get_str(%s) Fail", VCONFKEY_LANGSET);
-		lang_first = CTSVC_LANG_ENGLISH;
-		first = ctsvc_get_language_locale(lang_first);
-	}
-	else
-		lang_first = ctsvc_get_language_type(first);
-	__ctsvc_get_language_index(first, &first_list, &first_len);
-	for (i=0;i<first_len;i++) {
-		strcat(list, first_list[i]);
-		if (i != (first_len-1))
-			strcat(list, ";");
-		free(first_list[i]);
-	}
-	free(first_list);
-
-	if (lang_first != CTSVC_LANG_ENGLISH)
-		lang_second = CTSVC_LANG_ENGLISH;
-
-	if (lang_second > 0) {
-		second = ctsvc_get_language_locale(lang_second);
-		__ctsvc_get_language_index(second, &second_list, &second_len);
-	}
-
-	if (0 < second_len) {
-		strcat(list, ":");
-		for (i=0;i<second_len;i++) {
-			strcat(list, second_list[i]);
-			if (i != (second_len-1))
-				strcat(list, ";");
-			free(second_list[i]);
+	else {
+		char *temp;
+		while(1) {
+			temp = realloc(*buf, *buf_size*2);
+			if (NULL == temp)
+				return -1;
+			*buf = temp;
+			*buf_size = *buf_size * 2;
+			remain = *buf_size - len;
+			if (remain > strlen(src) + 1)
+				break;
 		}
+		temp_len = snprintf((*buf)+len, remain, "%s", src);
+		return temp_len;
 	}
-	free(second_list);
-
-	*index_string = strdup(list);
-	return CONTACTS_ERROR_NONE;
 }
 

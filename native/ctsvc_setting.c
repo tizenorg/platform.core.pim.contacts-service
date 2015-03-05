@@ -37,6 +37,10 @@
 #include "ctsvc_server_change_subject.h"
 #endif
 
+#ifdef _CONTACTS_NATIVE
+static int __ctsvc_vconf_ref_count = 0;
+#endif
+
 static int primary_sort = -1;
 static int secondary_sort = -1;
 
@@ -138,7 +142,7 @@ static void ctsvc_vconf_sorting_order_cb(keynode_t *key, void *data)
 #endif
 }
 
-void ctscts_set_sort_memory(int sort_type)
+void ctsvc_set_sort_memory(int sort_type)
 {
 	primary_sort = sort_type;
 	secondary_sort = CTSVC_SORT_WESTERN;
@@ -147,12 +151,18 @@ void ctscts_set_sort_memory(int sort_type)
 static void ctsvc_vconf_sort_change_cb(keynode_t *key, void *data)
 {
 	int sort = vconf_keynode_get_int(key);
-	ctscts_set_sort_memory(sort);
+	ctsvc_set_sort_memory(sort);
 }
 
 int ctsvc_register_vconf(void)
 {
 	int ret;
+
+#ifdef _CONTACTS_NATIVE
+	__ctsvc_vconf_ref_count++;
+	if (__ctsvc_vconf_ref_count != 1)
+		return;
+#endif
 
 	// display order
 	ret = vconf_get_int(CTSVC_VCONF_DISPLAY_ORDER, &name_display_order);
@@ -183,7 +193,7 @@ int ctsvc_register_vconf(void)
 
 	ret = vconf_get_int(ctsvc_get_default_sort_vconfkey(), &primary_sort);
 	WARN_IF(ret < 0, "vconf_get_int() Failed(%d)", ret);
-	ctscts_set_sort_memory(primary_sort);
+	ctsvc_set_sort_memory(primary_sort);
 
 	ret = vconf_notify_key_changed(ctsvc_get_default_sort_vconfkey(),
 			ctsvc_vconf_sort_change_cb, NULL);
@@ -195,6 +205,12 @@ int ctsvc_register_vconf(void)
 void ctsvc_deregister_vconf(void)
 {
 	int ret;
+
+#ifdef _CONTACTS_NATIVE
+	__ctsvc_vconf_ref_count--;
+	if (__ctsvc_vconf_ref_count != 0)
+		return;
+#endif
 
 	ret = vconf_ignore_key_changed(CTSVC_VCONF_DISPLAY_ORDER, ctsvc_vconf_display_order_cb);
 	RETM_IF(ret<0,"vconf_ignore_key_changed(display order) Failed(%d)", ret);
@@ -221,7 +237,7 @@ int ctsvc_get_primary_sort(void)
 		int ret;
 		ret = vconf_get_int(ctsvc_get_default_sort_vconfkey(), &primary_sort);
 		WARN_IF(ret < 0, "vconf_get_int() Failed(%d)", ret);
-		ctscts_set_sort_memory(primary_sort);
+		ctsvc_set_sort_memory(primary_sort);
 	}
 	return primary_sort;
 }

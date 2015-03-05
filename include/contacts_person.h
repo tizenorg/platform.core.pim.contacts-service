@@ -29,128 +29,217 @@ extern "C"
 #endif
 
 /**
- * @addtogroup CAPI_SOCIAL_CONTACTS_SVC_PERSON_MODULE
+ * @file contacts_person.h
+ */
+
+/**
+ * @ingroup CAPI_SOCIAL_CONTACTS_SVC_MODULE
+ * @defgroup CAPI_SOCIAL_CONTACTS_SVC_PERSON_MODULE Person
+ *
+ * @brief The contacts person API provides the set of definitions and interfaces that enable application developers to link/unlink person and contact.
+ *
+ * @section CAPI_SOCIAL_CONTACTS_SVC_PERSON_MODULE_HEADER Required Header
+ *  \#include <contacts.h>
+ *
+ * <BR>
  * @{
  */
 
 /**
- * @brief	Links a person to a person.
+ * @brief Links a person to another person.
  *
- * @param[in]	base_person_id		The base person ID
- * @param[in]	person_id			The person ID to be linked
+ * @since_tizen 2.3
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/contact.write
  *
- * @return  0 on success, otherwise a negative error value.
- * @retval  #CONTACTS_ERROR_NONE	Successful
- * @retval  #CONTACTS_ERROR_DB	Database operation failure
+ * @param[in]   base_person_id      The base person ID
+ * @param[in]   person_id           The person ID to link to
  *
- * @pre     This function requires an open connection to contacts service by contacts_connect2().
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
  *
- * @see  contacts_connect2()
+ * @retval  #CONTACTS_ERROR_NONE                Successful
+ * @retval  #CONTACTS_ERROR_OUT_OF_MEMORY       Out of memory
+ * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ * @retval  #CONTACTS_ERROR_FILE_NO_SPACE       FS Full
+ * @retval  #CONTACTS_ERROR_PERMISSION_DENIED   Permission denied. This application does not have the privilege to call this method.
+ * @retval  #CONTACTS_ERROR_DB                  Database operation failure
+ * @retval  #CONTACTS_ERROR_IPC                 IPC error
+ *
+ * @pre     contacts_connect() should be called to open a connection to the contacts service.
+ *
+ * @see  contacts_connect()
  */
-API int contacts_person_link_person(int base_person_id, int person_id);
+int contacts_person_link_person(int base_person_id, int person_id);
 
 /**
- * @brief	Unlinks a contact from a person.
+ * @brief Unlinks a contact from a person.
  *
- * @param[in]	person_id				The person ID
- * @param[in]	contact_id				The contact ID to unlink
- * @param[out]	unliked_person_id		The person ID generated
+ * @since_tizen 2.3
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/contact.write
  *
- * @return  0 on success, otherwise a negative error value.
- * @retval  #CONTACTS_ERROR_NONE	Successful
- * @retval  #CONTACTS_ERROR_DB	Database operation failure
+ * @param[in]   person_id               The person ID
+ * @param[in]   contact_id              The contact ID to unlink
+ * @param[out]  unlinked_person_id       The person ID generated
  *
- * @pre     This function requires an open connection to contacts service by contacts_connect2().
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
  *
- * @see  contacts_connect2()
+ * @retval  #CONTACTS_ERROR_NONE                Successful
+ * @retval  #CONTACTS_ERROR_OUT_OF_MEMORY       Out of memory
+ * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ * @retval  #CONTACTS_ERROR_FILE_NO_SPACE       FS Full
+ * @retval  #CONTACTS_ERROR_NO_DATA             Requested data does not exist
+ * @retval  #CONTACTS_ERROR_PERMISSION_DENIED   Permission denied. This application does not have the privilege to call this method.
+ * @retval  #CONTACTS_ERROR_DB                  Database operation failure
+ * @retval  #CONTACTS_ERROR_IPC                 IPC error
+ *
+ * @pre     contacts_connect() should be called to open a connection to the contacts service.
+ *
+ * @see  contacts_connect()
  */
-API int contacts_person_unlink_contact(int person_id, int contact_id, int* unlinked_person_id);
+int contacts_person_unlink_contact(int person_id, int contact_id, int* unlinked_person_id);
 
 /**
- * @brief	Resets a person's usage count.
- * @details The person is no longer in the most frequent contacted person list.
+ * @brief Resets a person's usage count.
  *
- * @param[in]	person_id			The person ID
- * @param[in]	type				The type to reset
+ * @details The person is no longer in the most frequently contacted person list.
  *
- * @return  0 on success, otherwise a negative error value.
- * @retval  #CONTACTS_ERROR_NONE	Successful
- * @retval  #CONTACTS_ERROR_DB	Database operation failure
+ * @since_tizen 2.3
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/contact.write
  *
- * @pre     This function requires an open connection to contacts service by contacts_connect2().
+ * @param[in]   person_id           The person ID
+ * @param[in]   type                The type to reset
  *
- * @see  contacts_connect2()
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
+ * @retval  #CONTACTS_ERROR_NONE                Successful
+ * @retval  #CONTACTS_ERROR_OUT_OF_MEMORY       Out of memory
+ * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ * @retval  #CONTACTS_ERROR_FILE_NO_SPACE       FS Full
+ * @retval	#CONTACTS_ERROR_PERMISSION_DENIED   Permission denied. This application does not have the privilege to call this method.
+ * @retval  #CONTACTS_ERROR_DB                  Database operation failure
+ * @retval  #CONTACTS_ERROR_IPC                 IPC error
+
+ *
+ * @pre     contacts_connect() should be called to open a connection to the contacts service.
+ *
+ * @see  contacts_connect()
  */
-API int contacts_person_reset_usage(int person_id, contacts_usage_type_e type);
+int contacts_person_reset_usage(int person_id, contacts_usage_type_e type);
 
 /**
- * @brief	Sets a favorite person place between a previous person and a next person.
+ * @brief Sets the order of a (favorite) contact.
  *
- * @param[in]	person_id				The person ID to move
- * @param[in]	previous_person_id		The previous person ID
- * @param[in]	next_person_id			The back person ID
+ * @since_tizen 2.3
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/contact.write
  *
- * @return  0 on success, otherwise a negative error value.
- * @retval  #CONTACTS_ERROR_NONE	Successful
- * @retval  #CONTACTS_ERROR_DB	Database operation failure
+ * @param[in]   person_id               The person ID to move
+ * @param[in]   previous_person_id      The previous person ID
+ * @param[in]   next_person_id          The back person ID
  *
- * @pre     This function requires an open connection to contacts service by contacts_connect2().
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
  *
- * @see  contacts_connect2()
- */
-API int contacts_person_set_favorite_order(int person_id, int previous_person_id, int next_person_id);
+ * @retval  #CONTACTS_ERROR_NONE                Successful
+ * @retval  #CONTACTS_ERROR_OUT_OF_MEMORY       Out of memory
+ * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ * @retval  #CONTACTS_ERROR_FILE_NO_SPACE       FS Full
+ * @retval  #CONTACTS_ERROR_PERMISSION_DENIED   Permission denied. This application does not have the privilege to call this method.
+ * @retval  #CONTACTS_ERROR_DB                  Database operation failure
+ * @retval  #CONTACTS_ERROR_IPC                 IPC error
 
+ *
+ * @pre     contacts_connect() should be called to open a connection to the contacts service.
+ *
+ * @see  contacts_connect()
+ */
+int contacts_person_set_favorite_order(int person_id, int previous_person_id, int next_person_id);
+
+/**
+ * @brief Enumeration for Contacts person properties.
+ *
+ * @since_tizen 2.3
+ *
+ */
 typedef enum {
-	CONTACTS_PERSON_PROPERTY_NAME_CONTACT,		/**< . */
-	CONTACTS_PERSON_PROPERTY_NUMBER,				/**< . */
-	CONTACTS_PERSON_PROPERTY_EMAIL,				/**< . */
-	CONTACTS_PERSON_PROPERTY_IMAGE,				/**< . */
+    CONTACTS_PERSON_PROPERTY_NAME_CONTACT,      /**< Default contacts record */
+    CONTACTS_PERSON_PROPERTY_NUMBER,            /**< Default number record */
+    CONTACTS_PERSON_PROPERTY_EMAIL,             /**< Default email record */
+    CONTACTS_PERSON_PROPERTY_IMAGE,             /**< Default image record */
 } contacts_person_property_e;
 
 /**
- * @brief	Sets a default property for a record.
+ * @brief Sets a record's default property.
  *
- * @remarks @a id can be contact_id, number_id, email_id, image_id
+ * @since_tizen 2.3
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/contact.write
  *
- * @param[in]	property				#contacts_person_property_e
- * @param[in]	person_id				The person ID
- * @param[in]	id						The record id
+ * @remarks @a id can be contact_id, number_id, email_id, image_id.
  *
- * @return  0 on success, otherwise a negative error value.
- * @retval  #CONTACTS_ERROR_NONE	Successful
- * @retval  #CONTACTS_ERROR_DB	Database operation failure
+ * @param[in]   property            #contacts_person_property_e
+ * @param[in]   person_id           The person ID
+ * @param[in]   id                  The record ID
  *
- * @pre     This function requires an open connection to contacts service by contacts_connect2().
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
  *
- * @see  contacts_connect2()
+ * @retval  #CONTACTS_ERROR_NONE                Successful
+ * @retval  #CONTACTS_ERROR_OUT_OF_MEMORY       Out of memory
+ * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ * @retval  #CONTACTS_ERROR_FILE_NO_SPACE       FS Full
+ * @retval  #CONTACTS_ERROR_NO_DATA             Requested data does not exist
+ * @retval  #CONTACTS_ERROR_PERMISSION_DENIED   Permission denied. This application does not have the privilege to call this method.
+ * @retval  #CONTACTS_ERROR_DB                  Database operation failure
+ * @retval  #CONTACTS_ERROR_IPC                 IPC error
+
+ *
+ * @pre     contacts_connect() should be called to open a connection to the contacts service.
+ *
+ * @see  contacts_connect()
  */
-API int contacts_person_set_default_property(contacts_person_property_e property, int person_id,
-		int id);
+int contacts_person_set_default_property(contacts_person_property_e property, int person_id,
+        int id);
 
 /**
- * @brief	Gets a default property for a record.
+ * @brief Gets a default property for a record.
  *
- * @remarks @a id can be contact_id, number_id, email_id, image_id
+ * @since_tizen 2.3
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/contact.read
  *
- * @param[in]	property				#contacts_person_property_e
- * @param[in]	person_id				The person ID
- * @param[out]	id						The record id of the property to be set as default
+ * @remarks @a id can be contact_id, number_id, email_id, image_id.
+ *
+ * @param[in]   property            #contacts_person_property_e
+ * @param[in]   person_id           The person ID
+ * @param[out]  id                  The record ID of the property to be set as default
 
- * @return  0 on success, otherwise a negative error value.
- * @retval  #CONTACTS_ERROR_NONE	Successful
- * @retval  #CONTACTS_ERROR_DB	Database operation failure
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
  *
- * @pre     This function requires an open connection to contacts service by contacts_connect2().
+ * @retval  #CONTACTS_ERROR_NONE                Successful
+ * @retval  #CONTACTS_ERROR_OUT_OF_MEMORY       Out of memory
+ * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ * @retval  #CONTACTS_ERROR_NO_DATA             Requested data does not exist
+ * @retval  #CONTACTS_ERROR_PERMISSION_DENIED   Permission denied. This application does not have the privilege to call this method.
+ * @retval  #CONTACTS_ERROR_DB                  Database operation failure
+ * @retval  #CONTACTS_ERROR_IPC                 IPC error
  *
- * @see  contacts_connect2()
+ * @pre     contacts_connect() should be called to open a connection to the contacts service.
+ *
+ * @see  contacts_connect()
  */
-API int contacts_person_get_default_property(contacts_person_property_e property, int person_id,
-		int *id);
+int contacts_person_get_default_property(contacts_person_property_e property, int person_id,
+        int *id);
 
 /**
  * @}
  */
-
 
 #ifdef __cplusplus
 }

@@ -64,6 +64,8 @@ API int contacts_query_create( const char* view_uri, contacts_query_h* out_query
 	RETV_IF(NULL == view_uri || NULL == out_query, CONTACTS_ERROR_INVALID_PARAMETER);
 
 	query = (ctsvc_query_s *)calloc(1, sizeof(ctsvc_query_s));
+	RETV_IF(NULL == query, CONTACTS_ERROR_OUT_OF_MEMORY);
+
 	query->view_uri = strdup(view_uri);
 	query->properties = (property_info_s *)ctsvc_view_get_all_property_infos(view_uri, &query->property_count);
 	*out_query = (contacts_query_h)query;

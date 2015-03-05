@@ -20,10 +20,9 @@
 #ifndef __CTSVC_DB_PLUGIN_GROUP_HELPER_H__
 #define __CTSVC_DB_PLUGIN_GROUP_HELPER_H__
 
-#include <tzplatform_config.h>
-
 #include "contacts.h"
 #include "ctsvc_sqlite.h"
+#include <tzplatform_config.h>
 
 #define CTS_GROUP_IMAGE_LOCATION tzplatform_mkpath(TZ_USER_DATA,"contacts-svc/img/group")
 

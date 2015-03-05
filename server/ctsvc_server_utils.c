@@ -1,5 +1,5 @@
 /*
- * Contacts Service Helper
+ * Contacts Service
  *
  * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
  *
@@ -17,99 +17,108 @@
  *
  */
 #include <malloc.h>
-#include <contacts.h>
 #include <vconf.h>
 #include <vconf-keys.h>
+#include <ITapiPhonebook.h>
+#include <TapiUtility.h>
+
+#include "contacts.h"
 
 #include "ctsvc_internal.h"
 #include "ctsvc_setting.h"
 #include "ctsvc_server_utils.h"
+#ifdef ENABLE_SIM_FEATURE
 #include "ctsvc_server_sim.h"
+#endif // ENABLE_SIM_FEATURE
 #include "ctsvc_server_sqlite.h"
 #include "ctsvc_localize.h"
 #include "ctsvc_normalize.h"
-
-static const char *CTSVC_SERVER_VCONF_TAPI_SIM_PB_INIT = VCONFKEY_TELEPHONY_SIM_PB_INIT;
-static const char *CTSVC_SERVER_VCONF_SYSTEM_LANGUAGE = VCONFKEY_LANGSET;
-
 
 static int system_language = -1;
 
 inline int ctsvc_server_set_default_sort(int sort)
 {
 	int ret = vconf_set_int(ctsvc_get_default_sort_vconfkey(), sort);
-	RETVM_IF(ret<0, CONTACTS_ERROR_INTERNAL, "vconf_set_int() Failed(%d)", ret);
-	ctscts_set_sort_memory(sort);
+	RETVM_IF(ret<0, CONTACTS_ERROR_SYSTEM, "vconf_set_int() Failed(%d)", ret);
+	ctsvc_set_sort_memory(sort);
 	return CONTACTS_ERROR_NONE;
 }
 
-static void ctsvc_server_change_language_cb(keynode_t *key, void *data)
+static void __ctsvc_server_change_language_cb(keynode_t *key, void *data)
 {
 	int ret = -1;
 	int new_primary_sort, new_secondary_sort;
 	int old_primary_sort, old_secondary_sort;
-	const char *langset;
+	char *new_langset = NULL;
+	char *langset = NULL;
 
-	old_primary_sort = ctsvc_get_primary_sort();
-	if (old_primary_sort < 0) {
-		RETM_IF(ret<0, "ctsvc_get_primary_sort() Fail(%d)", ret);
+	new_langset = vconf_keynode_get_str(key);
+	langset = ctsvc_get_langset();
+	INFO("%s --> %s", langset, new_langset);
+	if (strcmp(langset, new_langset) != 0) {
+		bool sort_name_update = false;
+		old_primary_sort = ctsvc_get_primary_sort();
+		if (old_primary_sort < 0) {
+			RETM_IF(ret<0, "ctsvc_get_primary_sort() Fail(%d)", ret);
+		}
+		old_secondary_sort = ctsvc_get_secondary_sort();
+		if (old_secondary_sort < 0) {
+			RETM_IF(ret<0, "ctsvc_get_secondary_sort() Fail(%d)", ret);
+		}
+
+		if (strncmp(langset, "zh", strlen("zh")) == 0 ||
+			strncmp(langset, "ko", strlen("ko")) == 0 ||
+			strncmp(langset, "ja", strlen("ja")) == 0 ||
+			strncmp(new_langset, "zh", strlen("zh")) == 0 ||
+			strncmp(new_langset, "ko", strlen("ko")) == 0 ||
+			strncmp(new_langset, "ja", strlen("ja")) == 0) {
+			sort_name_update = true;
+		}
+		ctsvc_set_langset(strdup(new_langset));
+		langset = new_langset;
+
+		system_language = ctsvc_get_language_type(langset);
+		new_primary_sort = ctsvc_get_sort_type_from_language(system_language);
+		if (new_primary_sort == CTSVC_SORT_OTHERS)
+			new_primary_sort = CTSVC_SORT_WESTERN;
+
+		new_secondary_sort = CTSVC_SORT_WESTERN;
+
+		if (sort_name_update) {
+		   ctsvc_server_set_default_sort(new_primary_sort);
+			ctsvc_server_update_sort_name();
+		}
+		else {
+			if (new_primary_sort != old_primary_sort)
+				ret = ctsvc_server_update_sort(old_primary_sort, old_secondary_sort, new_primary_sort, new_secondary_sort);
+
+			ctsvc_server_update_collation();
+		}
 	}
-	old_secondary_sort = ctsvc_get_secondary_sort();
-	if (old_secondary_sort < 0) {
-		RETM_IF(ret<0, "ctsvc_get_secondary_sort() Fail(%d)", ret);
-	}
-
-	langset = vconf_keynode_get_str(key);
-	system_language = ctsvc_get_language_type(langset);
-	new_primary_sort = ctsvc_get_sort_type_from_language(system_language);
-	if (new_primary_sort == CTSVC_SORT_OTHERS)
-		new_primary_sort = CTSVC_SORT_WESTERN;
-
-	new_secondary_sort = CTSVC_SORT_WESTERN;
-
-	if (new_primary_sort != old_primary_sort)
-		ret = ctsvc_server_update_sort(old_primary_sort, old_secondary_sort, new_primary_sort, new_secondary_sort);
 }
 
-static void ctsvc_server_update_collation_cb(keynode_t *key, void *data)
-{
-	ctsvc_server_update_collation();
-}
-
-static void ctsvc_server_tapi_sim_complete_cb(keynode_t *key, void *data)
-{
-	int ret, init_stat;
-	init_stat = vconf_keynode_get_int(key);
-	if (VCONFKEY_TELEPHONY_SIM_PB_INIT_COMPLETED == init_stat) {
-		ret = ctsvc_server_sim_initialize();
-		WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_server_sim_initialize() Failed(%d)", ret);
-
-		vconf_ignore_key_changed(CTSVC_SERVER_VCONF_TAPI_SIM_PB_INIT, ctsvc_server_tapi_sim_complete_cb);
-	}
-}
 void ctsvc_server_final_configuration(void)
 {
 	int ret = -1;
 
-	ret = vconf_ignore_key_changed(CTSVC_SERVER_VCONF_SYSTEM_LANGUAGE, ctsvc_server_change_language_cb);
-	RETM_IF(ret<0,"vconf_ignore_key_changed(%s) Failed(%d)",CTSVC_SERVER_VCONF_SYSTEM_LANGUAGE,ret);
+	ret = vconf_ignore_key_changed(VCONFKEY_LANGSET, __ctsvc_server_change_language_cb);
+	RETM_IF(ret<0,"vconf_ignore_key_changed(%s) Failed(%d)", VCONFKEY_LANGSET, ret);
 
-	ret = vconf_ignore_key_changed(VCONFKEY_REGIONFORMAT, ctsvc_server_update_collation_cb);
-	RETM_IF(ret<0,"vconf_ignore_key_changed(%s) Failed(%d)",VCONFKEY_REGIONFORMAT,ret);
-
-	ctsvc_server_sim_finalize();
+#ifdef ENABLE_SIM_FEATURE
+	ctsvc_server_sim_final();
+#endif // ENABLE_SIM_FEATURE
 }
 
 int ctsvc_server_init_configuration(void)
 {
-	int ret, sim_stat=-1;
+	int ret;
 	char *langset = NULL;
 	int sort_type;
 
-	langset = vconf_get_str(CTSVC_SERVER_VCONF_SYSTEM_LANGUAGE);
-	WARN_IF(NULL == langset, "vconf_get_str(%s) return NULL", CTSVC_SERVER_VCONF_SYSTEM_LANGUAGE);
+	langset = vconf_get_str(VCONFKEY_LANGSET);
+	WARN_IF(NULL == langset, "language setting is return NULL");
+	ctsvc_set_langset(langset);
 	system_language = ctsvc_get_language_type(langset);
-	free(langset);
 
 	ret = vconf_get_int(ctsvc_get_default_sort_vconfkey(), &sort_type);
 	if (ret < 0 || sort_type == CTSVC_SORT_OTHERS) {
@@ -120,30 +129,15 @@ int ctsvc_server_init_configuration(void)
 	}
 	ctsvc_server_set_default_sort(sort_type);
 
-	ret = vconf_notify_key_changed(CTSVC_SERVER_VCONF_SYSTEM_LANGUAGE,
-			ctsvc_server_change_language_cb, NULL);
+	ret = vconf_notify_key_changed(VCONFKEY_LANGSET,
+			__ctsvc_server_change_language_cb, NULL);
 	RETVM_IF(ret<0, CONTACTS_ERROR_SYSTEM, "vconf_notify_key_changed(%s) Failed(%d)",
-			CTSVC_SERVER_VCONF_SYSTEM_LANGUAGE, ret);
+			VCONFKEY_LANGSET, ret);
 
-	ret = vconf_notify_key_changed(VCONFKEY_REGIONFORMAT,
-			ctsvc_server_update_collation_cb, NULL);
-	RETVM_IF(ret<0, CONTACTS_ERROR_SYSTEM, "vconf_notify_key_changed(%s) Failed(%d)",
-			VCONFKEY_REGIONFORMAT, ret);
-
-	ret = ctsvc_server_delete_sdn_contact();
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_server_delete_sdn_contact() Failed(%d)", ret);
-
-	ret = vconf_get_int(CTSVC_SERVER_VCONF_TAPI_SIM_PB_INIT, &sim_stat);
-	if (VCONFKEY_TELEPHONY_SIM_PB_INIT_COMPLETED == sim_stat) {
-		ret = ctsvc_server_sim_initialize();
-		WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_server_sim_initialize() Failed(%d)", ret);
-	}
-	else {
-		ret = vconf_notify_key_changed(CTSVC_SERVER_VCONF_TAPI_SIM_PB_INIT,
-				ctsvc_server_tapi_sim_complete_cb, NULL);
-		RETVM_IF(ret<0, CONTACTS_ERROR_SYSTEM, "vconf_notify_key_changed(%s) Failed(%d)",
-				CTSVC_SERVER_VCONF_TAPI_SIM_PB_INIT, ret);
-	}
+#ifdef ENABLE_SIM_FEATURE
+	ret = ctsvc_server_sim_init();
+	RETVM_IF(ret !=CONTACTS_ERROR_NONE, ret, "ctsvc_server_sim_init Failed(%d)", ret);
+#endif // ENABLE_SIM_FEATURE
 
 	return CONTACTS_ERROR_NONE;
 }

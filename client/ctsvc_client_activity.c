@@ -47,6 +47,7 @@ API int contacts_activity_delete_by_contact_id(int contact_id)
 	if (ret != CONTACTS_ERROR_NONE)
 	{
 		CTS_ERR("marshal fail");
+		pims_ipc_data_destroy(indata);
 		return ret;
 	}
 
@@ -98,6 +99,7 @@ API int contacts_activity_delete_by_account_id(int account_id)
 	if (ret != CONTACTS_ERROR_NONE)
 	{
 		CTS_ERR("marshal fail");
+		pims_ipc_data_destroy(indata);
 		return ret;
 	}
 
@@ -127,4 +129,3 @@ API int contacts_activity_delete_by_account_id(int account_id)
 
 	return ret;
 }
-

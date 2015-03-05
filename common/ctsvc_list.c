@@ -43,7 +43,7 @@ API int contacts_list_create( contacts_list_h* out_list )
 	return CONTACTS_ERROR_NONE;
 }
 
-API int contacts_list_get_count( contacts_list_h list, unsigned int *count )
+API int contacts_list_get_count( contacts_list_h list, int *count )
 {
 	ctsvc_list_s *list_s;
 
@@ -61,7 +61,6 @@ int ctsvc_list_add_child( contacts_list_h list, contacts_record_h child_record )
 {
 	ctsvc_list_s *s_list;
 	ctsvc_record_s *s_record;
-	bool is_first = false;
 
 	RETV_IF(NULL == list || NULL == child_record, CONTACTS_ERROR_INVALID_PARAMETER);
 	s_list = (ctsvc_list_s *)list;
@@ -69,7 +68,6 @@ int ctsvc_list_add_child( contacts_list_h list, contacts_record_h child_record )
 
 	if (-1 == s_list->l_type) {
 		s_list->l_type = s_record->r_type;
-		is_first = true;
 	}
 	else if (s_list->l_type != s_record->r_type)
 		return CONTACTS_ERROR_INVALID_PARAMETER;
@@ -87,7 +85,6 @@ API int contacts_list_add( contacts_list_h list, contacts_record_h child_record 
 {
 	ctsvc_list_s *s_list;
 	ctsvc_record_s *s_record;
-	bool is_first = false;
 
 	RETV_IF(NULL == list || NULL == child_record, CONTACTS_ERROR_INVALID_PARAMETER);
 	s_list = (ctsvc_list_s *)list;
@@ -95,7 +92,6 @@ API int contacts_list_add( contacts_list_h list, contacts_record_h child_record 
 
 	if (-1 == s_list->l_type) {
 		s_list->l_type = s_record->r_type;
-		is_first = true;
 	}
 	else if (s_list->l_type != s_record->r_type)
 		return CONTACTS_ERROR_INVALID_PARAMETER;
@@ -113,7 +109,6 @@ int ctsvc_list_prepend( contacts_list_h list, contacts_record_h child_record )
 {
 	ctsvc_list_s *s_list;
 	ctsvc_record_s *s_record;
-	bool is_first = false;
 
 	RETV_IF(NULL == list || NULL == child_record, CONTACTS_ERROR_INVALID_PARAMETER);
 	s_list = (ctsvc_list_s *)list;
@@ -121,7 +116,6 @@ int ctsvc_list_prepend( contacts_list_h list, contacts_record_h child_record )
 
 	if (-1 == s_list->l_type) {
 		s_list->l_type = s_record->r_type;
-		is_first = true;
 	}
 	else if (s_list->l_type != s_record->r_type)
 		return CONTACTS_ERROR_INVALID_PARAMETER;
@@ -166,7 +160,7 @@ int ctsvc_list_remove_child( contacts_list_h list, contacts_record_h record, boo
 
 	for (cursor=s_list->records;cursor;cursor=cursor->next) {
 		ctsvc_record_s *data = (ctsvc_record_s *)cursor->data;
-		if (data == s_record){
+		if (data == s_record) {
 			s_list->count--;
 			if (s_list->cursor == cursor)
 				s_list->cursor = cursor->next;
@@ -235,7 +229,6 @@ int ctsvc_list_get_nth_record_p( contacts_list_h list, int index, contacts_recor
 {
 	GList *cursor = NULL;
 	ctsvc_list_s *list_s;
-	ctsvc_record_s *data;
 	int i, j;
 
 	RETV_IF(NULL == record, CONTACTS_ERROR_INVALID_PARAMETER);
@@ -245,7 +238,6 @@ int ctsvc_list_get_nth_record_p( contacts_list_h list, int index, contacts_recor
 	list_s = (ctsvc_list_s *)list;
 
 	for (i=0,j=0,cursor=list_s->records;cursor;cursor=cursor->next, i++) {
-		data = (ctsvc_record_s *)cursor->data;
 		if (j == index) {
 			*record = (contacts_record_h)cursor->data;
 			return CONTACTS_ERROR_NONE;
@@ -325,8 +317,8 @@ API int contacts_list_destroy( contacts_list_h list, bool delete_child )
 	if (delete_child) {
 		for(cursor = s_list->records;cursor;cursor=cursor->next)
 			contacts_record_destroy((contacts_record_h)(cursor->data), true);
-		g_list_free(s_list->records);
 	}
+	g_list_free(s_list->records);
 
 	for(cursor = s_list->deleted_records;cursor;cursor=cursor->next)
 		contacts_record_destroy((contacts_record_h)(cursor->data), true);
@@ -339,7 +331,6 @@ API int contacts_list_destroy( contacts_list_h list, bool delete_child )
 int ctsvc_list_clone(contacts_list_h list, contacts_list_h* out_list)
 {
 	ctsvc_list_s *list_s;
-	ctsvc_record_s *data;
 	contacts_record_h new_record;
 	contacts_list_h new_list;
 	GList *cursor = NULL;
@@ -351,17 +342,23 @@ int ctsvc_list_clone(contacts_list_h list, contacts_list_h* out_list)
 
 	contacts_list_create(&new_list);
 	for(cursor = list_s->records;cursor;cursor=cursor->next) {
-		data = (ctsvc_record_s *)cursor->data;
 		err = contacts_record_clone((contacts_record_h)cursor->data, &new_record);
-		RETVM_IF(CONTACTS_ERROR_NONE != err, err,"contacts_record_clone() Failed(%d)", err);
+		if (CONTACTS_ERROR_NONE != err) {
+			CTS_ERR("contacts_record_clone() Failed(%d)", err);
+			contacts_list_destroy(new_list, true);
+			return err;
+		}
 		ctsvc_list_prepend(new_list, new_record);
 	}
 	ctsvc_list_reverse(new_list);
 
 	for(cursor = list_s->deleted_records;cursor;cursor=cursor->next) {
-		data = (ctsvc_record_s *)cursor->data;
 		err = contacts_record_clone((contacts_record_h)cursor->data, &new_record);
-		RETVM_IF(CONTACTS_ERROR_NONE != err, err,"contacts_record_clone() Failed(%d)", err);
+		if (CONTACTS_ERROR_NONE != err) {
+			CTS_ERR("contacts_record_clone() Failed(%d)", err);
+			contacts_list_destroy(new_list, true);
+			return err;
+		}
 		((ctsvc_list_s*)new_list)->deleted_records = g_list_prepend(((ctsvc_list_s*)new_list)->deleted_records, new_record);
 	}
 	if (((ctsvc_list_s*)new_list)->deleted_records)

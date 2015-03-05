@@ -1,5 +1,5 @@
 /*
- * Contacts Service Helper
+ * Contacts Service
  *
  * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
  *
@@ -33,11 +33,15 @@
 #include "ctsvc_sqlite.h"
 #include "ctsvc_socket.h"
 #include "ctsvc_server_socket.h"
+#ifdef ENABLE_SIM_FEATURE
 #include "ctsvc_server_sim.h"
+#endif
+
+static int sockfd = -1;
 
 static inline int __ctsvc_server_socket_safe_write(int fd, char *buf, int buf_size)
 {
-	int ret, writed=0;
+	int ret, writed = 0;
 	while (buf_size) {
 		ret = write(fd, buf+writed, buf_size);
 		if (-1 == ret) {
@@ -55,7 +59,7 @@ static inline int __ctsvc_server_socket_safe_write(int fd, char *buf, int buf_si
 
 static inline int __ctsvc_server_socket_safe_read(int fd, char *buf, int buf_size)
 {
-	int ret, read_size=0;
+	int ret, read_size = 0;
 	while (buf_size) {
 		ret = read(fd, buf+read_size, buf_size);
 		if (-1 == ret) {
@@ -99,25 +103,72 @@ int ctsvc_server_socket_return(GIOChannel *src, int value, int attach_num, int *
 	return CONTACTS_ERROR_NONE;
 }
 
-static void __ctsvc_server_socket_import_sim(GIOChannel *src)
+#ifdef ENABLE_SIM_FEATURE
+static void __ctsvc_server_socket_import_sim(GIOChannel *src, int size)
 {
 	CTS_FN_CALL;
 	int ret;
+	gsize len = 0;
+	GError *gerr = NULL;
+	char receiver[CTS_SQL_MAX_LEN] = {0};
 
-	ret = ctsvc_server_sim_import(src);
+	if (size > 0) {
+		g_io_channel_read_chars(src, receiver, size, &len, &gerr);
+		if (gerr) {
+			CTS_ERR("g_io_channel_read_chars() Failed(%s)", gerr->message);
+			g_error_free(gerr);
+			return;
+		}
+		CTS_DBG("Receiver = %s(%d), read_size = %d", receiver, len, size);
+	}
+
+	if (len) {
+		receiver[len] = '\0';
+		CTS_DBG("sim_id %d", atoi(receiver));
+		ret = ctsvc_server_sim_import_contact(src, atoi(receiver));
+	}
+	else {
+		ret = ctsvc_server_sim_import_contact(src, 0);
+	}
+
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_server_sim_import() Failed(%d)", ret);
+		CTS_ERR("ctsvc_server_sim_import_contact() Failed(%d)", ret);
 		ctsvc_server_socket_return(src, ret, 0, NULL);
 	}
 }
 
-static void __ctsvc_server_socket_get_sim_init_status(GIOChannel *src)
+static void __ctsvc_server_socket_get_sim_init_status(GIOChannel *src, int size)
 {
 	CTS_FN_CALL;
 
 	int ret;
-	ret = ctsvc_server_socket_return_sim_int(src, ctsvc_server_sim_get_init_completed());
-	RETM_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_server_socket_return_sim_int() Failed(%d)", ret);
+	gsize len = 0;
+	GError *gerr = NULL;
+	char receiver[CTS_SQL_MAX_LEN] = {0};
+
+	if (size > 0) {
+		g_io_channel_read_chars(src, receiver, size, &len, &gerr);
+		if (gerr) {
+			CTS_ERR("g_io_channel_read_chars() Failed(%s)", gerr->message);
+			g_error_free(gerr);
+			return;
+		}
+		CTS_DBG("Receiver = %s(%d), read_size = %d", receiver, len, size);
+	}
+
+	if (len) {
+		receiver[len] = '\0';
+		CTS_DBG("sim_id : %d", atoi(receiver));
+		ret = ctsvc_server_socket_get_sim_init_status(src, atoi(receiver));
+	}
+	else {
+		ret = ctsvc_server_socket_get_sim_init_status(src, 0);
+	}
+
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("ctsvc_server_socket_get_sim_init_status() Failed(%d)", ret);
+		ctsvc_server_socket_return(src, ret, 0, NULL);
+	}
 }
 
 int ctsvc_server_socket_return_sim_int(GIOChannel *src, int value)
@@ -129,7 +180,7 @@ int ctsvc_server_socket_return_sim_int(GIOChannel *src, int value)
 
 	str_len = snprintf(count_str, sizeof(count_str), "%d", value);
 	ret = ctsvc_server_socket_return(src, CONTACTS_ERROR_NONE, 1, &str_len);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, CONTACTS_ERROR_SYSTEM, "ctsvc_server_socket_return() Failed(%d)", ret);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_server_socket_return() Failed(%d)", ret);
 	CTS_DBG("count_str : %s", count_str);
 	ret = __ctsvc_server_socket_safe_write(g_io_channel_unix_get_fd(src), count_str, str_len);
 	RETVM_IF(-1 == ret, CONTACTS_ERROR_SYSTEM, "__ctsvc_server_socket_safe_write() Failed(errno = %d)", errno);
@@ -137,13 +188,32 @@ int ctsvc_server_socket_return_sim_int(GIOChannel *src, int value)
 	return CONTACTS_ERROR_NONE;
 }
 
+static void __ctsvc_server_socket_read_flush(GIOChannel *src, int size)
+{
+	gsize len;
+	GError *gerr = NULL;
+	char receiver[CTS_SQL_MAX_LEN] = {0};
+
+	if (size <= 0)
+		return;
+
+	g_io_channel_read_chars(src, receiver, size, &len, &gerr);
+	if (gerr) {
+		CTS_ERR("g_io_channel_read_chars() Failed(%s)", gerr->message);
+		g_error_free(gerr);
+	}
+}
+#endif // ENABLIE_SIM_FEATURE
+
 static gboolean __ctsvc_server_socket_request_handler(GIOChannel *src, GIOCondition condition,
 		gpointer data)
 {
 	int ret;
 	int fd;
+#ifdef ENABLE_SIM_FEATURE
 	bool have_read_permission = false;
 	bool have_write_permission = false;
+#endif // ENABLE_SIM_FEATURE
 
 	ctsvc_socket_msg_s msg = {0};
 	CTS_FN_CALL;
@@ -159,28 +229,39 @@ static gboolean __ctsvc_server_socket_request_handler(GIOChannel *src, GIOCondit
 
 	CTS_DBG("attach number = %d", msg.attach_num);
 
-	if (SECURITY_SERVER_API_SUCCESS == security_server_check_privilege_by_sockfd(fd, "contacts-service::svc", "r"))
+#ifdef ENABLE_SIM_FEATURE
+	if (SECURITY_SERVER_API_SUCCESS == (ret = security_server_check_privilege_by_sockfd(fd, "contacts-service::svc", "r")))
 		have_read_permission = true;
-	if (SECURITY_SERVER_API_SUCCESS == security_server_check_privilege_by_sockfd(fd, "contacts-service::svc", "w"))
+	else
+		INFO("fd(%d) : does not have contact read permission (%d)", fd, ret);
+
+	if (SECURITY_SERVER_API_SUCCESS == (ret = security_server_check_privilege_by_sockfd(fd, "contacts-service::svc", "w")))
 		have_write_permission = true;
+	else
+		INFO("fd(%d) : does not have contact write permission (%d)", fd, ret);
+#endif // ENABLE_SIM_FEATURE
 
 	switch (msg.type) {
+#ifdef ENABLE_SIM_FEATURE
 	case CTSVC_SOCKET_MSG_TYPE_REQUEST_IMPORT_SIM:
 		if (!have_write_permission) {
 			CTS_ERR("write permission denied");
+			__ctsvc_server_socket_read_flush(src, msg.attach_sizes[0]);		// sim_id
 			ctsvc_server_socket_return(src, CONTACTS_ERROR_PERMISSION_DENIED, 0, NULL);
 			return TRUE;
 		}
-		__ctsvc_server_socket_import_sim(src);
+		__ctsvc_server_socket_import_sim(src, msg.attach_sizes[0]);
 		break;
 	case CTSVC_SOCKET_MSG_TYPE_REQUEST_SIM_INIT_COMPLETE:
 		if (!have_read_permission) {
 			CTS_ERR("read permission denied");
+			__ctsvc_server_socket_read_flush(src, msg.attach_sizes[0]);		// sim_id
 			ctsvc_server_socket_return(src, CONTACTS_ERROR_PERMISSION_DENIED, 0, NULL);
 			return TRUE;
 		}
-		__ctsvc_server_socket_get_sim_init_status(src);
+		__ctsvc_server_socket_get_sim_init_status(src, msg.attach_sizes[0]);
 		break;
+#endif // ENABLE_SIM_FEATURE
 	default:
 		CTS_ERR("Unknown request type(%d)", msg.type);
 		break;
@@ -212,7 +293,7 @@ int ctsvc_server_socket_init(void)
 {
 	CTS_FN_CALL;
 
-	int sockfd, ret;
+	int ret;
 	struct sockaddr_un addr;
 	GIOChannel *gio;
 
@@ -237,7 +318,11 @@ int ctsvc_server_socket_init(void)
 		CTS_ERR("chmod(%s) Failed(%d)", CTSVC_SOCKET_PATH, ret);
 
 	ret = listen(sockfd, 30);
-	RETVM_IF(-1 == ret, CONTACTS_ERROR_SYSTEM, "listen() Failed(errno = %d)", errno);
+	if (-1 == ret) {
+		close(sockfd);
+		CTS_ERR("listen() Failed(errno = %d)", errno);
+		return CONTACTS_ERROR_SYSTEM;
+	}
 
 	gio = g_io_channel_unix_new(sockfd);
 	g_io_add_watch(gio, G_IO_IN, __ctsvc_server_socket_handler, (gpointer)sockfd);
@@ -245,3 +330,9 @@ int ctsvc_server_socket_init(void)
 	return CONTACTS_ERROR_NONE;
 }
 
+int ctsvc_server_socket_deinit(void)
+{
+	if (sockfd != -1)
+		close(sockfd);
+	return CONTACTS_ERROR_NONE;
+}

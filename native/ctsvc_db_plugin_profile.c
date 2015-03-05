@@ -23,6 +23,7 @@
 #include "ctsvc_sqlite.h"
 #include "ctsvc_utils.h"
 #include "ctsvc_db_init.h"
+#include "ctsvc_db_access_control.h"
 #include "ctsvc_db_plugin_contact_helper.h"
 #include "ctsvc_db_plugin_profile_helper.h"
 #include "ctsvc_record.h"
@@ -78,7 +79,7 @@ static int __ctsvc_db_profile_insert_record( contacts_record_h record, int *id )
 	ret = ctsvc_query_get_first_int_result(query, &addressbook_id);
 	if (CONTACTS_ERROR_NONE != ret) {
 		ctsvc_end_trans(false);
-		if (CONTACTS_ERROR_NO_DATA) {
+		if (CONTACTS_ERROR_NO_DATA == ret) {
 			CTS_ERR("No data : contact_id (%d) is not exist", profile->contact_id);
 			return CONTACTS_ERROR_INVALID_PARAMETER;
 		}
@@ -86,6 +87,12 @@ static int __ctsvc_db_profile_insert_record( contacts_record_h record, int *id )
 			CTS_ERR("ctsvc_query_get_first_int_result Fail(%d)", ret);
 			return ret;
 		}
+	}
+
+	if (false == ctsvc_have_ab_write_permission(addressbook_id)) {
+		CTS_ERR("Does not have permission to update this profile record : addressbook_id(%d)", addressbook_id);
+		ctsvc_end_trans(false);
+		return CONTACTS_ERROR_PERMISSION_DENIED;
 	}
 
 	ret = ctsvc_db_profile_insert(record, profile->contact_id, false, id);
@@ -116,14 +123,13 @@ static int __ctsvc_db_profile_insert_record( contacts_record_h record, int *id )
 static int __ctsvc_db_profile_get_record( int id, contacts_record_h* out_record )
 {
 	int ret;
-	int len;
 	cts_stmt stmt = NULL;
 	char query[CTS_SQL_MAX_LEN] = {0};
 
 	RETV_IF(NULL == out_record, CONTACTS_ERROR_INVALID_PARAMETER);
 	*out_record = NULL;
 
-	len = snprintf(query, sizeof(query),
+	snprintf(query, sizeof(query),
 			"SELECT id, data.contact_id, is_default, data1, data2, "
 				"data3, data4, data5, data6, data7, data8, data9, data10, data11, data12 "
 				"FROM "CTS_TABLE_DATA", "CTSVC_DB_VIEW_CONTACT" "
@@ -174,6 +180,12 @@ static int __ctsvc_db_profile_update_record( contacts_record_h record )
 		return ret;
 	}
 
+	if (false == ctsvc_have_ab_write_permission(addressbook_id)) {
+		CTS_ERR("Does not have permission to update this profile record : addressbook_id(%d)", addressbook_id);
+		ctsvc_end_trans(false);
+		return CONTACTS_ERROR_PERMISSION_DENIED;
+	}
+
 	ret = ctsvc_db_profile_update(record, false);
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("Update record Failed(%d)", ret);
@@ -204,6 +216,8 @@ static int __ctsvc_db_profile_delete_record( int id )
 	int ret;
 	int contact_id;
 	char query[CTS_SQL_MAX_LEN] = {0};
+	cts_stmt stmt = NULL;
+	int addressbook_id;
 
 	ret = ctsvc_begin_trans();
 	if (CONTACTS_ERROR_NONE != ret) {
@@ -212,13 +226,33 @@ static int __ctsvc_db_profile_delete_record( int id )
 	}
 
 	snprintf(query, sizeof(query),
-			"SELECT contact_id FROM "CTSVC_DB_VIEW_CONTACT " "
-			"WHERE contact_id = (SELECT contact_id FROM "CTS_TABLE_DATA" WHERE id = %d)", id);
-	ret = ctsvc_query_get_first_int_result(query, &contact_id);
-	if( ret != CONTACTS_ERROR_NONE ) {
-		CTS_ERR("The id(%d) is Invalid(%d)", id, ret);
+			"SELECT contact_id, addressbook_id FROM "CTSVC_DB_VIEW_CONTACT " "
+				"WHERE contact_id = (SELECT contact_id FROM "CTS_TABLE_DATA" WHERE id = %d)", id);
+	ret = ctsvc_query_prepare(query, &stmt);
+	if (NULL == stmt) {
+		CTS_ERR("DB error : ctsvc_query_prepare Fail(%d", ret);
 		ctsvc_end_trans(false);
 		return ret;
+	}
+	ret = ctsvc_stmt_step(stmt);
+	if (1 != ret) {
+		CTS_ERR("The id(%d) is Invalid(%d)", id, ret);
+		ctsvc_stmt_finalize(stmt);
+		ctsvc_end_trans(false);
+		if (CONTACTS_ERROR_NONE == ret)
+			return CONTACTS_ERROR_NO_DATA;
+		else
+			return ret;
+	}
+
+	contact_id = ctsvc_stmt_get_int(stmt, 0);
+	addressbook_id = ctsvc_stmt_get_int(stmt, 1);
+	ctsvc_stmt_finalize(stmt);
+
+	if (false == ctsvc_have_ab_write_permission(addressbook_id)) {
+		CTS_ERR("Does not have permission to delete this profile record : addressbook_id(%d)", addressbook_id);
+		ctsvc_end_trans(false);
+		return CONTACTS_ERROR_PERMISSION_DENIED;
 	}
 
 	ret = ctsvc_db_profile_delete(id, false);
@@ -262,6 +296,7 @@ static int __ctsvc_db_profile_get_all_records( int offset, int limit, contacts_l
 				"ON "CTS_TABLE_DATA".contact_id = "CTSVC_DB_VIEW_CONTACT".contact_id "
 				"WHERE datatype = %d AND is_my_profile=0 ",
 				CTSVC_DATA_PROFILE);
+
 	if (0 != limit) {
 		len += snprintf(query+len, sizeof(query)-len, " LIMIT %d", limit);
 		if (0 < offset)

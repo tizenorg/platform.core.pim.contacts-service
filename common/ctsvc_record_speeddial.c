@@ -96,6 +96,7 @@ static int __ctsvc_speeddial_clone(contacts_record_h record, contacts_record_h *
     RETVM_IF(NULL == out_data, CONTACTS_ERROR_OUT_OF_MEMORY,
 			 "Out of memeory : calloc(ctsvc_speeddial_s) Failed(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
 
+	out_data->id = src_data->id;
 	out_data->dial_number = src_data->dial_number;
 	out_data->number_id = src_data->number_id;
 	out_data->person_id = src_data->person_id;
@@ -129,7 +130,7 @@ static int __ctsvc_speeddial_get_int(contacts_record_h record, unsigned int prop
 		*out = speeddial->person_id;
 		break;
 	default:
-		ASSERT_NOT_REACHED("This field(%d) is not supported in value(speeddial)", property_id);
+		CTS_ERR("This field(%d) is not supported in value(speeddial)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
@@ -153,7 +154,7 @@ static int __ctsvc_speeddial_get_str_real(contacts_record_h record, unsigned int
 		*out_str = GET_STR(copy, speeddial->label);
 		break;
 	default :
-		ASSERT_NOT_REACHED("This field(%d) is not supported in value(speeddial)", property_id);
+		CTS_ERR("This field(%d) is not supported in value(speeddial)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
@@ -180,18 +181,16 @@ static int __ctsvc_speeddial_set_int(contacts_record_h record, unsigned int prop
 	case CTSVC_PROPERTY_SPEEDDIAL_PERSON_ID:
 		speeddial->person_id = value;
 		break;
-/*
-		CTS_ERR("The field(%d) is a read-only value (speeddial)", property_id);
-		return CONTACTS_ERROR_INVALID_PARAMETER;
-*/
 	case CTSVC_PROPERTY_SPEEDDIAL_DIAL_NUMBER:
+		RETVM_IF(speeddial->id > 0, CONTACTS_ERROR_INVALID_PARAMETER,
+				"Invalid parameter : property_id(%d) is a read-only value (speeddial)", property_id);
 		speeddial->dial_number = value;
 		break;
 	case CTSVC_PROPERTY_SPEEDDIAL_NUMBER_ID:
 		speeddial->number_id = value;
 		break;
 	default:
-		ASSERT_NOT_REACHED("This field(%d) is not supported in value(speeddial)", property_id);
+		CTS_ERR("This field(%d) is not supported in value(speeddial)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
@@ -215,9 +214,8 @@ static int __ctsvc_speeddial_set_str(contacts_record_h record, unsigned int prop
 		FREEandSTRDUP(speeddial->label, str);
 		break;
 	default :
-		ASSERT_NOT_REACHED("This field(%d) is not supported in value(speeddial)", property_id);
+		CTS_ERR("This field(%d) is not supported in value(speeddial)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
 }
-

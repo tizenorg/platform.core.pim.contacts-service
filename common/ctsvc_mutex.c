@@ -27,9 +27,9 @@
 typedef struct {
 	int (* lock) (pthread_mutex_t *mutex);
 	int (* unlock) (pthread_mutex_t *mutex);
-}ctsvc_mutex_fns;
+}cts_mutex_fns;
 
-static ctsvc_mutex_fns __ctsvc_mutex_funtions =
+static cts_mutex_fns __ctsvc_mutex_funtions =
 {
 	pthread_mutex_lock,
 	pthread_mutex_unlock
@@ -41,6 +41,9 @@ static pthread_mutex_t trans_mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t ipc_mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t ipc_pubsub_mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t access_control_mutex = PTHREAD_MUTEX_INITIALIZER;
+
+static int __old_type = 0;
+static int __defered_ref = 0;
 
 static inline pthread_mutex_t* __ctsvc_mutex_get_mutex(int type)
 {
@@ -78,6 +81,18 @@ void ctsvc_mutex_lock(int type)
 	int ret;
 	pthread_mutex_t *mutex;
 
+	// If user use pthread_cancel, lock can be occured
+	// protect it, call pthread_set_canceltype as PTHREAD_CANCEL_DEFERRED
+	// But, if another module call PTHREAD_CANCEL_ASYNCHRONOUS,
+	// it can be occured again
+	// So, Do not use the pthread_cancel with contacts_service API
+	if (__defered_ref == 0)
+		pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, &__old_type);
+	else
+		pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, NULL);
+
+	__defered_ref++;
+
 	mutex = __ctsvc_mutex_get_mutex(type);
 
 	if (__ctsvc_mutex_funtions.lock) {
@@ -96,6 +111,11 @@ void ctsvc_mutex_unlock(int type)
 	if (__ctsvc_mutex_funtions.unlock) {
 		ret = __ctsvc_mutex_funtions.unlock(mutex);
 		WARN_IF(ret, "mutex_unlock Failed(%d)", ret);
+	}
+
+	__defered_ref--;
+	if (__defered_ref == 0) {
+		pthread_setcanceltype(__old_type, NULL);
 	}
 }
 

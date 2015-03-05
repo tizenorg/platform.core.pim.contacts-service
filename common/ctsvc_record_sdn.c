@@ -96,6 +96,7 @@ static int __ctsvc_sdn_clone(contacts_record_h record, contacts_record_h *out_re
 	out_data->id = src_data->id;
 	out_data->name = SAFE_STRDUP(src_data->name);
 	out_data->number = SAFE_STRDUP(src_data->number);
+	out_data->sim_slot_no = src_data->sim_slot_no;
 
 	CTSVC_RECORD_COPY_BASE(&(out_data->base), &(src_data->base));
 
@@ -111,8 +112,11 @@ static int __ctsvc_sdn_get_int(contacts_record_h record, unsigned int property_i
 	case CTSVC_PROPERTY_SDN_ID:
 		*out = sdn->id;
 		break;
+	case CTSVC_PROPERTY_SDN_SIM_SLOT_NO:
+		*out = sdn->sim_slot_no;
+		break;
 	default:
-		ASSERT_NOT_REACHED("This field(%d) is not supported in value(sdn)", property_id);
+		CTS_ERR("This field(%d) is not supported in value(sdn)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
@@ -130,7 +134,7 @@ static int __ctsvc_sdn_get_str_real(contacts_record_h record, unsigned int prope
 		*out_str = GET_STR(copy, sdn->number);
 		break;
 	default :
-		ASSERT_NOT_REACHED("This field(%d) is not supported in value(sdn)", property_id);
+		CTS_ERR("This field(%d) is not supported in value(sdn)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
@@ -154,12 +158,11 @@ static int __ctsvc_sdn_set_int(contacts_record_h record, unsigned int property_i
 	case CTSVC_PROPERTY_SDN_ID:
 		sdn->id = value;
 		break;
-/*
-		ASSERT_NOT_REACHED("The field(%d) is a read-only value (sdn)", property_id);
-		return CONTACTS_ERROR_INVALID_PARAMETER;
-*/
+	case CTSVC_PROPERTY_SDN_SIM_SLOT_NO:
+		sdn->sim_slot_no = value;
+		break;
 	default:
-		ASSERT_NOT_REACHED("This field(%d) is not supported in value(sdn)", property_id);
+		CTS_ERR("This field(%d) is not supported in value(sdn)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
@@ -177,7 +180,7 @@ static int __ctsvc_sdn_set_str(contacts_record_h record, unsigned int property_i
 		FREEandSTRDUP(sdn->number, str);
 		break;
 	default :
-		ASSERT_NOT_REACHED("This field(%d) is not supported in value(sdn)", property_id);
+		CTS_ERR("This field(%d) is not supported in value(sdn)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;

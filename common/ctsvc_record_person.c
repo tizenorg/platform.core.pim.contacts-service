@@ -133,7 +133,7 @@ static int __ctsvc_person_get_int(contacts_record_h record, unsigned int propert
 		*out = person->link_count;
 		break;
 	default:
-		ASSERT_NOT_REACHED("This field(%d) is not supported in value(person)", property_id);
+		CTS_ERR("This field(%d) is not supported in value(person)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
@@ -168,7 +168,7 @@ static int __ctsvc_person_get_str_real(contacts_record_h record, unsigned int pr
 		*out_str = GET_STR(copy, person->addressbook_ids);
 		break;
 	default :
-		ASSERT_NOT_REACHED("This field(%d) is not supported in value(person)", property_id);
+		CTS_ERR("This field(%d) is not supported in value(person)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
@@ -198,7 +198,7 @@ static int __ctsvc_person_get_bool(contacts_record_h record, unsigned int proper
 		*value = person->has_email;
 		break;
 	default:
-		ASSERT_NOT_REACHED("This field(%d) is not supported in value(company)", property_id);
+		CTS_ERR("This field(%d) is not supported in value(company)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
@@ -219,7 +219,7 @@ static int __ctsvc_person_set_int(contacts_record_h record, unsigned int propert
 		person->link_count = value;
 		break;
 	default:
-		ASSERT_NOT_REACHED("This field(0x%0x) is not supported in value(person)", property_id);
+		CTS_ERR("This field(0x%0x) is not supported in value(person)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
@@ -249,7 +249,7 @@ static int __ctsvc_person_set_str(contacts_record_h record, unsigned int propert
 		FREEandSTRDUP(person->message_alert, str);
 		break;
 	default :
-		ASSERT_NOT_REACHED("This field(%d) is not supported in value(person)", property_id);
+		CTS_ERR("This field(%d) is not supported in value(person)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
@@ -266,7 +266,7 @@ static int __ctsvc_person_set_bool(contacts_record_h record, unsigned int proper
 		}
 		break;
 	default:
-		ASSERT_NOT_REACHED("This field(%d) is not supported in value(person)", property_id);
+		CTS_ERR("This field(%d) is not supported in value(person)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;

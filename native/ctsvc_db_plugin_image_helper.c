@@ -47,7 +47,7 @@ int ctsvc_db_image_get_value_from_stmt(cts_stmt stmt, contacts_record_h *record,
 	temp = ctsvc_stmt_get_text(stmt, start_count++);
 	if (temp) {
 		char full_path[CTSVC_IMG_FULL_PATH_SIZE_MAX] = {0};
-		snprintf(full_path, sizeof(full_path), "%s/%s", CTS_IMG_FULL_LOCATION, temp);
+		snprintf(full_path, sizeof(full_path), "%s/%s", CTSVC_CONTACT_IMG_FULL_LOCATION, temp);
 		image->path = strdup(full_path);
 	}
 
@@ -73,8 +73,7 @@ static int __ctsvc_db_image_reset_default(int image_id, int contact_id)
 			"UPDATE "CTS_TABLE_DATA" SET is_default=0, is_primary_default=0 WHERE id != %d AND contact_id = %d AND datatype=%d",
 			image_id, contact_id, CTSVC_DATA_IMAGE);
 	ret = ctsvc_query_exec(query);
-
-	WARN_IF(CONTACTS_ERROR_NONE != ret, "cts_query_exec() Failed(%d)", ret);
+	WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_query_exec() Failed(%d)", ret);
 	return ret;
 }
 
@@ -84,7 +83,7 @@ int ctsvc_db_image_insert(contacts_record_h record, int contact_id, bool is_my_p
 	int image_id;
 	cts_stmt stmt = NULL;
 	char query[CTS_SQL_MAX_LEN] = {0};
-	char image_path[CTS_SQL_MAX_LEN] = {0};
+	char image_path[CTSVC_IMG_FULL_PATH_SIZE_MAX] = {0};
 	ctsvc_image_s *image = (ctsvc_image_s *)record;
 
 	// These check should be done in client side
@@ -107,9 +106,9 @@ int ctsvc_db_image_insert(contacts_record_h record, int contact_id, bool is_my_p
 	image->path = strdup(image_path);
 
 	snprintf(query, sizeof(query),
-			"INSERT INTO "CTS_TABLE_DATA"(id, contact_id, is_my_profile, datatype, is_default, data1, data2, data3) "
-			"VALUES(%d, %d, %d, %d, %d, %d, ?, ?)",
-			image_id, contact_id, is_my_profile, CTSVC_DATA_IMAGE, image->is_default, image->type);
+			"INSERT INTO "CTS_TABLE_DATA"(id, contact_id, is_my_profile, datatype, is_default, is_primary_default, data1, data2, data3) "
+			"VALUES(%d, %d, %d, %d, %d, %d, %d, ?, ?)",
+			image_id, contact_id, is_my_profile, CTSVC_DATA_IMAGE, image->is_default, image->is_default, image->type);
 
 	ret = ctsvc_query_prepare(query, &stmt);
 	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
@@ -118,7 +117,7 @@ int ctsvc_db_image_insert(contacts_record_h record, int contact_id, bool is_my_p
 
 	ret = ctsvc_stmt_step(stmt);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB error : ctsvc_query_exec() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_stmt_step() Failed(%d)", ret);
 		ctsvc_stmt_finalize(stmt);
 		return ret;
 	}
@@ -158,7 +157,7 @@ int ctsvc_db_image_update(contacts_record_h record, int contact_id, bool is_my_p
 	RETV_IF(ret != CONTACTS_ERROR_NONE, ret);
 
 	if (ctsvc_record_check_property_flag((ctsvc_record_s *)record, _contacts_image.path, CTSVC_PROPERTY_FLAG_DIRTY)) {
-		char image_path[CTS_SQL_MAX_LEN] = {0};
+		char image_path[CTSVC_IMG_FULL_PATH_SIZE_MAX] = {0};
 		if (image->path) {
 			ret = ctsvc_have_file_read_permission(image->path);
 			if (ret != CONTACTS_ERROR_NONE) {
@@ -215,6 +214,8 @@ int ctsvc_db_image_delete(int id, bool is_my_profile)
 	return CONTACTS_ERROR_NONE;
 }
 
+// Whenever deleting image recode in data table, this funcion will be called
+// in order to delete the image file
 void ctsvc_db_image_delete_callback(sqlite3_context *context, int argc, sqlite3_value ** argv)
 {
 	int ret;

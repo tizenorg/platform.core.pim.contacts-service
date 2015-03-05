@@ -19,6 +19,11 @@
 
 #include <stdlib.h>
 
+#include "contacts.h"
+#ifdef ENABLE_LOG_FEATURE
+#include "contacts_phone_log_internal.h"
+#endif //ENABLE_LOG_FEATURE
+
 #include "ctsvc_service.h"
 #include "ctsvc_db_init.h"
 
@@ -742,6 +747,7 @@ ERROR_RETURN:
 	return;
 }
 
+#ifdef ENABLE_LOG_FEATURE
 void ctsvc_ipc_phone_log_reset_statistics(pims_ipc_h ipc, pims_ipc_data_h indata, pims_ipc_data_h *outdata, void *userdata)
 {
 	int ret = contacts_phone_log_reset_statistics();
@@ -824,13 +830,13 @@ ERROR_RETURN:
 		*outdata = pims_ipc_data_create(0);
 		if (!*outdata) {
 			CTS_ERR("pims_ipc_data_create fail");
-			return;
+			goto DATA_FREE;
 		}
 		if (pims_ipc_data_put(*outdata, (void*)&ret, sizeof(int)) != 0) {
 			pims_ipc_data_destroy(*outdata);
 			*outdata = NULL;
 			CTS_ERR("pims_ipc_data_put fail");
-			return;
+			goto DATA_FREE;
 		}
 		if (ret == CONTACTS_ERROR_NONE) {
 			int transaction_ver = ctsvc_get_transaction_ver();
@@ -838,11 +844,16 @@ ERROR_RETURN:
 				pims_ipc_data_destroy(*outdata);
 				*outdata = NULL;
 				CTS_ERR("ctsvc_ipc_marshal_int fail");
-				return;
+				goto DATA_FREE;
 			}
 		}
 	}
+DATA_FREE:
+	free(number);
+
+	return;
 }
+#endif // ENABLE_LOG_FEATURE
 
 void ctsvc_ipc_setting_get_name_display_order(pims_ipc_h ipc, pims_ipc_data_h indata,
 		pims_ipc_data_h *outdata, void *userdata)
@@ -991,44 +1002,6 @@ ERROR_RETURN:
 		CTS_ERR("outdata is NULL");
 	}
 
-	return;
-}
-
-void ctsvc_ipc_utils_get_index_characters(pims_ipc_h ipc, pims_ipc_data_h indata,
-		pims_ipc_data_h *outdata, void *userdata)
-{
-	int ret = CONTACTS_ERROR_NONE;
-	char *indexs = NULL;
-
-	ret = contacts_utils_get_index_characters(&indexs);
-
-	if (outdata) {
-		*outdata = pims_ipc_data_create(0);
-		if (!*outdata) {
-			CTS_ERR("pims_ipc_data_create fail");
-			free(indexs);
-			return;
-		}
-		if (pims_ipc_data_put(*outdata, (void*)&ret, sizeof(int)) != 0) {
-			pims_ipc_data_destroy(*outdata);
-			*outdata = NULL;
-			CTS_ERR("pims_ipc_data_put fail (return value)");
-			free(indexs);
-			return;
-		}
-		ret = ctsvc_ipc_marshal_string(indexs, *outdata);
-		if (ret != CONTACTS_ERROR_NONE) {
-			CTS_ERR("ctsvc_ipc_marshal_string fail");
-			pims_ipc_data_destroy(*outdata);
-			free(indexs);
-			return;
-		}
-	}
-	else {
-		CTS_ERR("outdata is NULL");
-	}
-
-	free(indexs);
 	return;
 }
 

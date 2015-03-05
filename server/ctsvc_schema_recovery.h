@@ -1,5 +1,5 @@
 /*
- * Contacts Service Helper
+ * Contacts Service
  *
  * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
  *
@@ -20,6 +20,7 @@
 #define __CTSVC_SERVER_SCHEMA_RECOVERY_H__
 
 int ctsvc_server_check_schema();
+
 #endif // __CTSVC_SERVER_SCHEMA_RECOVERY_H__
 
 

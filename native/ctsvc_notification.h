@@ -32,6 +32,7 @@ void ctsvc_set_group_rel_noti(void);
 void ctsvc_set_person_noti(void);
 void ctsvc_set_data_noti(void);
 void ctsvc_set_activity_noti(void);
+void ctsvc_set_activity_photo_noti(void);
 void ctsvc_set_address_noti(void);
 void ctsvc_set_event_noti(void);
 void ctsvc_set_messenger_noti(void);

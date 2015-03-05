@@ -28,312 +28,440 @@ extern "C"
 {
 #endif
 
+/**
+ * @file contacts_record.h
+ */
 
 /**
- * @addtogroup CAPI_SOCIAL_CONTACTS_SVC_RECORD_MODULE
+ * @ingroup CAPI_SOCIAL_CONTACTS_SVC_MODULE
+ * @defgroup CAPI_SOCIAL_CONTACTS_SVC_RECORD_MODULE Record
+ *
+ * @brief The contacts record API provides the set of the definitions and interfaces that enable application developers to get/set data from/to contacts record handle.
+ *
+ * @section CAPI_SOCIAL_CONTACTS_SVC_RECORD_MODULE_HEADER Required Header
+ *  \#include <contacts.h>
+ *
+ * <BR>
  * @{
  */
 
+
 /**
- * @brief Creates a handle to the record.
+ * @brief Creates a record.
  *
- * @remarks @a record must be released with contacts_record_destroy() by you.
+ * @since_tizen 2.3
  *
- * @param[in]	view_uri	The view uri
- * @param[out]	record    	The record handle
+ * @remarks You must release @a record using contacts_record_destroy().
  *
- * @return  0 on success, otherwise a negative error value.
+ * @param[in]   view_uri    The view URI
+ * @param[out]  record      The record handle
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
  * @retval  #CONTACTS_ERROR_NONE                Successful
  * @retval  #CONTACTS_ERROR_OUT_OF_MEMORY       Out of memory
+ * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ * @retval  #CONTACTS_ERROR_NOT_SUPPORTED       Not supported
+ *
+ * @pre     contacts_connect() should be called to initialize.
+ *
+ * @see contacts_record_destroy()
+ */
+int contacts_record_create( const char* view_uri, contacts_record_h* record );
+
+/**
+ * @brief Destroys a record and releases its all resources.
+ *
+ * @since_tizen 2.3
+ *
+ * @param[in]   record         The record handle
+ * @param[in]   delete_child   Set @c true to destroy child records automatically,
+ *                             otherwise set @c false to not destroy child records automatically
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
+ * @retval  #CONTACTS_ERROR_NONE                    Successful
+ * @retval  #CONTACTS_ERROR_INVALID_PARAMETER       Invalid parameter
+ *
+ * @see contacts_record_create()
+ */
+int contacts_record_destroy( contacts_record_h record, bool delete_child );
+
+/**
+ * @brief Makes a clone of a record.
+ *
+ * @since_tizen 2.3
+ *
+ * @remarks You must release @a cloned_record using contacts_record_destroy().
+ *
+ * @param[in]   record              The record handle
+ * @param[out]  cloned_record       The cloned record handle
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
+ * @retval  #CONTACTS_ERROR_NONE                    Successful
+ * @retval  #CONTACTS_ERROR_OUT_OF_MEMORY           Out of memory
  * @retval  #CONTACTS_ERROR_INVALID_PARAMETER       Invalid parameter
  *
  * @see contacts_record_destroy()
  */
-API int contacts_record_create( const char* view_uri, contacts_record_h* record );
+int contacts_record_clone( contacts_record_h record, contacts_record_h* cloned_record );
 
 /**
- * @brief Destroys a record handle and releases all its resources.
+ * @brief Gets a string from the record handle.
  *
- * @param[in]	record  	The record handle
+ * @since_tizen 2.3
  *
- * @return  0 on success, otherwise a negative error value.
- * @retval  #CONTACTS_ERROR_NONE                    Successful
- * @retval  #CONTACTS_ERROR_INVALID_PARAMETER       Invalid parameter
+ * @remarks You must release @a value using free().
  *
- * @see contacts_list_create()
- */
-API int contacts_record_destroy( contacts_record_h record, bool delete_child );
-
-/**
- * @brief	Makes a clone of a record handle.
+ * @param[in]   record          The record handle
+ * @param[in]   property_id     The property ID
+ * @param[out]  value           The value to be returned
  *
- * @remarks @a cloned_record must be released with contacts_record_destroy() by you.
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
  *
- * @param[in]	record  			The record handle
- * @param[out]	cloned_record    	The cloned record handle
- *
- * @return  0 on success, otherwise a negative error value.
- * @retval  #CONTACTS_ERROR_NONE                    Successful
- * @retval  #CONTACTS_ERROR_INVALID_PARAMETER       Invalid parameter
- *
- * @see contacts_record_destroy()
- */
-API int contacts_record_clone( contacts_record_h record, contacts_record_h* cloned_record );
-
-/**
- * @brief	Gets a string from a record handle.
- *
- * @remarks   @a value must be released with free() by you.
- *
- * @param[in]   record			The record handle
- * @param[in]   property_id		The property ID
- * @param[out]  value  			The value to be returned
- *
- * @return 0 on success, otherwise a negative error value.
  * @retval  #CONTACTS_ERROR_NONE                 Successful
  * @retval  #CONTACTS_ERROR_INVALID_PARAMETER    Invalid parameter
+ * @retval  #CONTACTS_ERROR_NOT_SUPPORTED       Not supported
  *
  * @see contacts_record_get_str_p()
  * @see contacts_record_set_str()
  */
-API int	contacts_record_get_str( contacts_record_h record, unsigned int property_id, char** value );
+int contacts_record_get_str( contacts_record_h record, unsigned int property_id, char** value );
 
 /**
- * @brief	Gets a string pointer from a record handle.
+ * @brief Gets a string pointer from the record handle.
  *
- * @remarks   @a value MUST NOT be released by you.
+ * @since_tizen 2.3
  *
- * @param[in]   record			The record handle
- * @param[in]   property_id		The property ID
- * @param[out]  value  			The value to be returned
+ * @remarks You MUST NOT release @a value.
  *
- * @return 0 on success, otherwise a negative error value.
+ * @param[in]   record          The record handle
+ * @param[in]   property_id     The property ID
+ * @param[out]  value           The value to be returned
+ *
+ * @return @c 0 on success,
+ *         otherwise a negative error value
+ *
  * @retval  #CONTACTS_ERROR_NONE                 Successful
  * @retval  #CONTACTS_ERROR_INVALID_PARAMETER    Invalid parameter
+ * @retval  #CONTACTS_ERROR_NOT_SUPPORTED       Not supported
  *
  * @see contacts_record_get_str()
  * @see contacts_record_set_str()
  */
-API int	contacts_record_get_str_p( contacts_record_h record, unsigned int property_id, char** value );
+int contacts_record_get_str_p( contacts_record_h record, unsigned int property_id, char** value );
 
 /**
- * @brief   Sets a string to a record handle.
+ * @brief Sets a string to a record.
  *
- * @param[in]	record			The record handle
- * @param[in]	property_id		The property ID
- * @param[in]	value  			The value to set
+ * @since_tizen 2.3
  *
- * @return      0 on success, otherwise a negative error value.
+ * @param[in]   record          The record handle
+ * @param[in]   property_id     The property ID
+ * @param[in]   value           The value to set
+ *
+ * @return      @c 0 on success,
+ *              otherwise a negative error value
+ *
  * @retval      #CONTACTS_ERROR_NONE                    Successful
  * @retval      #CONTACTS_ERROR_INVALID_PARAMETER       Invalid parameter
+ * @retval      #CONTACTS_ERROR_NOT_SUPPORTED           Not supported
  *
  * @see contacts_record_get_str()
  * @see contacts_record_get_str_p()
  */
-API int	contacts_record_set_str( contacts_record_h record, unsigned int property_id, const char* value );
+int contacts_record_set_str( contacts_record_h record, unsigned int property_id, const char* value );
 
 /**
- * @brief   Gets a integer from a record handle.
+ * @brief Gets a record's integer value.
  *
- * @param[in]   record			The record handle
- * @param[in]   property_id		The property ID
- * @param[out]  value  			The value to be returned
+ * @since_tizen 2.3
  *
- * @return 0 on success, otherwise a negative error value.
+ * @param[in]   record          The record handle
+ * @param[in]   property_id     The property ID
+ * @param[out]  value           The value to be returned
+ *
+ * @return @c 0 on success,
+ *         otherwise a negative error value
+ *
  * @retval  #CONTACTS_ERROR_NONE                Successful
  * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ * @retval  #CONTACTS_ERROR_NOT_SUPPORTED       Not supported
  *
  * @see contacts_record_set_int()
  */
-API int	contacts_record_get_int( contacts_record_h record, unsigned int property_id, int* value );
+int contacts_record_get_int( contacts_record_h record, unsigned int property_id, int* value );
 
 /**
- * @brief   Sets a integer to a record handle.
+ * @brief Sets an integer value to a record.
  *
- * @param[in]	record			The record handle
- * @param[in]	property_id		The property ID
- * @param[in]	value  			The value to set
+ * @since_tizen 2.3
  *
- * @return      0 on success, otherwise a negative error value.
+ * @param[in]   record          The record handle
+ * @param[in]   property_id     The property ID
+ * @param[in]   value           The value to set
+ *
+ * @return      @c 0 on success,
+ *              otherwise a negative error value
+ *
  * @retval      #CONTACTS_ERROR_NONE                    Successful
  * @retval      #CONTACTS_ERROR_INVALID_PARAMETER       Invalid parameter
+ * @retval      #CONTACTS_ERROR_NOT_SUPPORTED           Not supported
  *
  * @see contacts_record_get_int()
  */
-API int	contacts_record_set_int( contacts_record_h record, unsigned int property_id, int value );
+int contacts_record_set_int( contacts_record_h record, unsigned int property_id, int value );
 
 /**
- * @brief   Gets a long integer from a record handle.
+ * @brief Gets a record's long integer value.
  *
- * @param[in]   record			The record handle
- * @param[in]   property_id		The property ID
- * @param[out]  value  			The value to be returned
+ * @since_tizen 2.3
  *
- * @return 0 on success, otherwise a negative error value.
+ * @param[in]   record          The record handle
+ * @param[in]   property_id     The property ID
+ * @param[out]  value           The value to be returned
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
  * @retval  #CONTACTS_ERROR_NONE                Successful
  * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ * @retval  #CONTACTS_ERROR_NOT_SUPPORTED       Not supported
  *
  * @see contacts_record_set_lli()
  */
-API int	contacts_record_get_lli( contacts_record_h record, unsigned int property_id, long long int *value );
+int contacts_record_get_lli( contacts_record_h record, unsigned int property_id, long long int *value );
 
 /**
- * @brief   Sets a long integer to a record handle.
+ * @brief Sets a long long integer value to a record.
  *
- * @param[in]	record			The record handle
- * @param[in]	property_id		The property ID
- * @param[in]	value  			The value to set
+ * @since_tizen 2.3
  *
- * @return      0 on success, otherwise a negative error value.
+ * @param[in]   record          The record handle
+ * @param[in]   property_id     The property ID
+ * @param[in]   value           The value to set
+ *
+ * @return      @c 0 on success,
+ *              otherwise a negative error value
+ *
  * @retval      #CONTACTS_ERROR_NONE                    Successful
  * @retval      #CONTACTS_ERROR_INVALID_PARAMETER       Invalid parameter
+ * @retval      #CONTACTS_ERROR_NOT_SUPPORTED           Not supported
  *
  * @see contacts_record_get_lli()
  */
-API int	contacts_record_set_lli( contacts_record_h record, unsigned int property_id, long long int value );
+int contacts_record_set_lli( contacts_record_h record, unsigned int property_id, long long int value );
 
 /**
- * @brief   Gets a boolean from a record handle.
+ * @brief Gets a record's boolean value.
  *
- * @param[in]   record			The record handle
- * @param[in]   property_id		The property ID
- * @param[out]  value  			The value to be returned
+ * @since_tizen 2.3
  *
- * @return 0 on success, otherwise a negative error value.
+ * @param[in]   record          The record handle
+ * @param[in]   property_id     The property ID
+ * @param[out]  value           The value to be returned
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
  * @retval  #CONTACTS_ERROR_NONE                Successful
  * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ * @retval  #CONTACTS_ERROR_NOT_SUPPORTED       Not supported
  *
  * @see contacts_record_set_bool()
  */
-API int	contacts_record_get_bool( contacts_record_h record, unsigned int property_id, bool *value );
+int contacts_record_get_bool( contacts_record_h record, unsigned int property_id, bool *value );
 
 /**
- * @brief   Sets a boolean to the record handle.
+ * @brief Sets a boolean value to a record.
  *
- * @param[in]	record			The record handle
- * @param[in]	property_id		The property ID
- * @param[in]	value  			The value to set
+ * @since_tizen 2.3
  *
- * @return      0 on success, otherwise a negative error value.
+ * @param[in]   record          The record handle
+ * @param[in]   property_id     The property ID
+ * @param[in]   value           The value to set
+ *
+ * @return      @c 0 on success,
+ *              otherwise a negative error value
+ *
  * @retval      #CONTACTS_ERROR_NONE                    Successful
  * @retval      #CONTACTS_ERROR_INVALID_PARAMETER       Invalid parameter
+ * @retval      #CONTACTS_ERROR_NOT_SUPPORTED           Not supported
  *
  * @see contacts_record_get_bool()
  */
-API int	contacts_record_set_bool( contacts_record_h record, unsigned int property_id, bool value );
+int contacts_record_set_bool( contacts_record_h record, unsigned int property_id, bool value );
 
 /**
- * @brief   Gets a double from a record handle.
+ * @brief Gets a record's double value.
  *
- * @param[in]   record			The record handle
- * @param[in]   property_id		The property ID
- * @param[out]  value  			The value to be returned
+ * @since_tizen 2.3
  *
- * @return 0 on success, otherwise a negative error value.
+ * @param[in]   record          The record handle
+ * @param[in]   property_id     The property ID
+ * @param[out]  value           The value to be returned
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
  * @retval  #CONTACTS_ERROR_NONE                Successful
  * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ * @retval  #CONTACTS_ERROR_NOT_SUPPORTED       Not supported
  *
- * @see contacts_record_set_bool()
+ * @see contacts_record_set_double()
  */
-API int	contacts_record_get_double( contacts_record_h record, unsigned int property_id, double *value );
+int contacts_record_get_double( contacts_record_h record, unsigned int property_id, double *value );
 
 /**
- * @brief   Sets a double to the record handle.
+ * @brief Sets a double value to a record.
  *
- * @param[in]	record			The record handle
- * @param[in]	property_id		The property ID
- * @param[in]	value  			The value to set
+ * @since_tizen 2.3
  *
- * @return      0 on success, otherwise a negative error value.
+ * @param[in]   record          The record handle
+ * @param[in]   property_id     The property ID
+ * @param[in]   value           The value to set
+ *
+ * @return      @c 0 on success,
+ *              otherwise a negative error value
+ *
  * @retval      #CONTACTS_ERROR_NONE                    Successful
  * @retval      #CONTACTS_ERROR_INVALID_PARAMETER       Invalid parameter
+ * @retval      #CONTACTS_ERROR_NOT_SUPPORTED           Not supported
  *
- * @see contacts_record_get_bool()
+ * @see contacts_record_get_double()
  */
-API int	contacts_record_set_double( contacts_record_h record, unsigned int property_id, double value );
+int contacts_record_set_double( contacts_record_h record, unsigned int property_id, double value );
 
 /**
- * @brief       Adds a child record handle to a parent record handle.
+ * @brief Adds a child record to the parent record.
  *
- * @param[in]	record          The parent record handle
- * @param[in]	property_id		The property ID
- * @param[in]	child_record	The child record handle to be added to parent record handle
+ * @since_tizen 2.3
  *
- * @return  0 on success, otherwise a negative error value.
+ * @param[in]   record          The parent record handle
+ * @param[in]   property_id     The property ID
+ * @param[in]   child_record    The child record handle to be added to parent record handle
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
  * @retval  #CONTACTS_ERROR_NONE                    Successful
  * @retval  #CONTACTS_ERROR_INVALID_PARAMETER       Invalid parameter
+ * @retval  #CONTACTS_ERROR_NOT_SUPPORTED       Not supported
  *
  * @see contacts_record_remove_child_record()
  */
-API int	contacts_record_add_child_record( contacts_record_h record, unsigned int property_id, contacts_record_h child_record );
+int contacts_record_add_child_record( contacts_record_h record, unsigned int property_id, contacts_record_h child_record );
 
 /**
- * @brief       Removes a child record handle from a parent record handle.
+ * @brief Removes a child record from the parent record.
  *
- * @param[in]	record          The parent record handle
- * @param[in]	property_id		The property ID
- * @param[in]	child_record	The child record handle to be removed from parent record handle
+ * @since_tizen 2.3
  *
- * @return  0 on success, otherwise a negative error value.
+ * @param[in]   record          The parent record handle
+ * @param[in]   property_id     The property ID
+ * @param[in]   child_record    The child record handle to be removed from parent record handle
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
  * @retval  #CONTACTS_ERROR_NONE                    Successful
  * @retval  #CONTACTS_ERROR_INVALID_PARAMETER       Invalid parameter
+ * @retval  #CONTACTS_ERROR_NOT_SUPPORTED       Not supported
  *
  * @see contacts_record_add_child_record()
  */
-API int	contacts_record_remove_child_record( contacts_record_h record, unsigned int property_id, contacts_record_h child_record );
+int contacts_record_remove_child_record( contacts_record_h record, unsigned int property_id, contacts_record_h child_record );
 
 /**
- * @brief   Gets a number of child record handle from a parent record handle.
+ * @brief Gets the number of child records of a parent record.
  *
- * @param[in]	record          The parent record handle
- * @param[in]	property_id		The property ID
- * @param[out]	count			The child record count
+ * @since_tizen 2.3
  *
- * @return 0 on success, otherwise a negative error value.
+ * @param[in]   record          The parent record handle
+ * @param[in]   property_id     The property ID
+ * @param[out]  count           The child record count
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
  * @retval  #CONTACTS_ERROR_NONE                Successful
  * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ * @retval  #CONTACTS_ERROR_NOT_SUPPORTED       Not supported
  *
  * @see contacts_record_add_child_record()
  * @see contacts_record_remove_child_record()
  */
-API int contacts_record_get_child_record_count( contacts_record_h record, unsigned int property_id, unsigned int *count );
+int contacts_record_get_child_record_count( contacts_record_h record, unsigned int property_id, int *count );
 
 /**
- * @brief	Gets a child record handle pointer from a parent record handle.
+ * @brief Gets a child record handle pointer from the parent record.
  *
- * @remarks   @a child_record MUST NOT be released by you. \n It is released when the parent record handle destroyed.
+ * @since_tizen 2.3
  *
- * @param[in]   record			The record handle
- * @param[in]   property_id		The property ID
- * @param[in]   index			The index of child record
- * @param[out]  child_record  	The child record handle pointer to be returned
+ * @remarks You MUST NOT release @a child_record. It is released when the parent record is destroyed.
  *
- * @return 0 on success, otherwise a negative error value.
+ * @param[in]   record          The record handle
+ * @param[in]   property_id     The property ID
+ * @param[in]   index           The index of child record
+ * @param[out]  child_record    The child record handle pointer
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
  * @retval  #CONTACTS_ERROR_NONE                 Successful
  * @retval  #CONTACTS_ERROR_INVALID_PARAMETER    Invalid parameter
+ * @retval  #CONTACTS_ERROR_NO_DATA
+ * @retval  #CONTACTS_ERROR_NOT_SUPPORTED       Not supported
  *
  * @see contacts_record_add_child_record()
  * @see contacts_record_remove_child_record()
  * @see contacts_record_get_child_record_count()
  */
-API int contacts_record_get_child_record_at_p( contacts_record_h record, unsigned int property_id, int index, contacts_record_h* child_record );
+int contacts_record_get_child_record_at_p( contacts_record_h record, unsigned int property_id, int index, contacts_record_h* child_record );
 
 /**
- * @brief	Makes a clone of a child record list handle from a parent record handle.
+ * @brief Clones a child record list of the given parent record.
  *
- * @remarks   @a cloned_list MUST be released with contacts_list_destroy() by you.
+ * @since_tizen 2.3
  *
- * @param[in]   record			The record handle
- * @param[in]   property_id		The property ID
- * @param[out]  cloned_list  	The cloned list handle
+ * @remarks You must release @a cloned_list using contacts_list_destroy().
  *
- * @return 0 on success, otherwise a negative error value.
+ * @param[in]   record          The record handle
+ * @param[in]   property_id     The property ID
+ * @param[out]  cloned_list     The cloned list handle
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
  * @retval  #CONTACTS_ERROR_NONE                 Successful
  * @retval  #CONTACTS_ERROR_INVALID_PARAMETER    Invalid parameter
+ * @retval  #CONTACTS_ERROR_NOT_SUPPORTED       Not supported
  *
  * @see contacts_list_destroy()
  */
-API int contacts_record_clone_child_record_list( contacts_record_h record, unsigned int property_id, contacts_list_h* cloned_list );
+int contacts_record_clone_child_record_list( contacts_record_h record, unsigned int property_id, contacts_list_h* cloned_list );
+
+/**
+ * @brief Gets URI string from a record.
+ *
+ * @since_tizen 2.3
+ *
+ * @param[in]   record			The record handle
+ * @param[out]  view_uri 			The URI of record
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
+ * @retval  #CONTACTS_ERROR_NONE                 Successful
+ * @retval  #CONTACTS_ERROR_INVALID_PARAMETER    Invalid parameter
+ * @retval  #CONTACTS_ERROR_NOT_SUPPORTED       Not supported
+ */
+int contacts_record_get_uri_p( contacts_record_h record, const char** view_uri );
 
 /**
  * @}

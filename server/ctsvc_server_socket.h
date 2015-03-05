@@ -1,5 +1,5 @@
 /*
- * Contacts Service Helper
+ * Contacts Service
  *
  * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
  *
@@ -22,6 +22,7 @@
 #include <glib.h>
 
 int ctsvc_server_socket_init(void);
+int ctsvc_server_socket_deinit(void);
 int ctsvc_server_socket_return(GIOChannel *src, int value, int attach_num, int *attach_size);
 int ctsvc_server_socket_return_sim_int(GIOChannel *src, int value);
 

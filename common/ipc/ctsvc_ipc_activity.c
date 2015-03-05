@@ -34,8 +34,8 @@ ctsvc_ipc_marshal_record_plugin_cb_s _ctsvc_ipc_record_activity_plugin_cb = {
 
 static int __ctsvc_ipc_unmarshal_activity(pims_ipc_data_h ipc_data, const char* view_uri, contacts_record_h record)
 {
-	RETV_IF(ipc_data==NULL,CONTACTS_ERROR_NO_DATA);
-	RETV_IF(record==NULL,CONTACTS_ERROR_NO_DATA);
+	RETV_IF(ipc_data==NULL,CONTACTS_ERROR_INTERNAL);
+	RETV_IF(record==NULL,CONTACTS_ERROR_INTERNAL);
 
 	ctsvc_activity_s* activity_p = (ctsvc_activity_s*) record;
 

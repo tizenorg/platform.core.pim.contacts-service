@@ -1,5 +1,5 @@
 /*
- * Contacts Service Helper
+ * Contacts Service
  *
  * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
  *
@@ -21,7 +21,8 @@
 #include <sys/stat.h>
 #include <db-util.h>
 #include <sqlite3.h>
-#include <contacts.h>
+
+#include "contacts.h"
 
 #include "ctsvc_internal.h"
 #include "ctsvc_server_sqlite.h"

@@ -112,7 +112,7 @@ int ctsvc_db_profile_insert(contacts_record_h record, int contact_id, bool is_my
 
 	ret = ctsvc_stmt_step(stmt);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB error : ctsvc_query_exec() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_stmt_step() Failed(%d)", ret);
 		ctsvc_stmt_finalize(stmt);
 		return ret;
 	}
@@ -173,7 +173,7 @@ int ctsvc_db_profile_delete(int id, bool is_my_profile)
 	char query[CTS_SQL_MIN_LEN] = {0};
 
 	snprintf(query, sizeof(query), "DELETE FROM "CTS_TABLE_DATA" WHERE id = %d AND datatype = %d",
-			id, CTSVC_DATA_URL);
+			id, CTSVC_DATA_PROFILE);
 
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_query_exec() Failed(%d)", ret);

@@ -45,7 +45,6 @@ static int __ctsvc_ipc_unmarshal_number(pims_ipc_data_h ipc_data, const char* vi
 		if (ctsvc_ipc_unmarshal_int(ipc_data, &number_p->type) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_string(ipc_data, &number_p->label) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_string(ipc_data, &number_p->number) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_unmarshal_string(ipc_data, &number_p->lookup) != CONTACTS_ERROR_NONE) break;
 
 		return CONTACTS_ERROR_NONE;
 
@@ -68,7 +67,6 @@ static int __ctsvc_ipc_marshal_number(const contacts_record_h record, pims_ipc_d
 		if (ctsvc_ipc_marshal_int((number_p->type),ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_string((number_p->label),ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_string((number_p->number),ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_string((number_p->lookup),ipc_data) != CONTACTS_ERROR_NONE) break;
 
 		return CONTACTS_ERROR_NONE;
 	} while(0);

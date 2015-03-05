@@ -29,40 +29,74 @@ extern "C"
 #endif
 
 /**
- * @addtogroup CAPI_SOCIAL_CONTACTS_SVC_ACTIVITY_MODULE
+ * @file contacts_activity.h
+ */
+
+/**
+ * @ingroup CAPI_SOCIAL_CONTACTS_SVC_MODULE
+ * @defgroup CAPI_SOCIAL_CONTACTS_SVC_ACTIVITY_MODULE Activity
+ *
+ * @brief The contacts activity API provides the set of definitions and interfaces that enable application developers to delete activities by @a contact_id and @a account_id. \n
+ *        For more details, see @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_activity.
+ *
+ * @section CAPI_SOCIAL_CONTACTS_SVC_ACTIVITY_MODULE_HEADER Required Header
+ *  \#include <contacts.h>
+ *
+ * <BR>
  * @{
  */
 
 /**
- * @brief	Deletes activity record from the contacts database by contact id.
+ * @brief Deletes an activity record from the contacts database by contact ID.
  *
- * @param[in]	contact_id		The contact ID to delete
+ * @since_tizen 2.3
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/contact.write
  *
- * @return  0 on success, otherwise a negative error value.
- * @retval  #CONTACTS_ERROR_NONE	Successful
- * @retval  #CONTACTS_ERROR_DB	Database operation failure
+ * @param[in]  contact_id  The contact ID to delete
  *
- * @pre     This function requires an open connection to contacts service by contacts_connect2().
+ * @return  @c 0 on success,
+ *          otherwise a negative error value (#contacts_error_e)
  *
- * @see  contacts_connect2()
+ * @retval  #CONTACTS_ERROR_NONE                  Successful
+ * @retval  #CONTACTS_ERROR_OUT_OF_MEMORY         Out of memory
+ * @retval  #CONTACTS_ERROR_INVALID_PARAMETER     Invalid parameter
+ * @retval  #CONTACTS_ERROR_FILE_NO_SPACE         FS Full
+ * @retval  #CONTACTS_ERROR_PERMISSION_DENIED     Permission denied. This application does not have the privilege to call this method.
+ * @retval  #CONTACTS_ERROR_DB                    Database operation failure
+ * @retval  #CONTACTS_ERROR_IPC                   IPC error
+ *
+ * @pre     contacts_connect() should be called to open a connection to the contacts service.
+ *
+ * @see  contacts_connect()
  */
-API int contacts_activity_delete_by_contact_id(int contact_id);
+int contacts_activity_delete_by_contact_id(int contact_id);
 
 /**
- * @brief	Deletes activity record from the contacts database by account id.
+ * @brief Deletes an activity record from the contacts database by account ID.
  *
- * @param[in]	account_id		The account ID to delete
+ * @since_tizen 2.3
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/contact.write
  *
- * @return  0 on success, otherwise a negative error value.
- * @retval  #CONTACTS_ERROR_NONE	Successful
- * @retval  #CONTACTS_ERROR_DB	Database operation failure
+ * @param[in]  account_id    The account ID to delete
  *
- * @pre     This function requires an open connection to contacts service by contacts_connect2().
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
  *
- * @see  contacts_connect2()
+ * @retval  #CONTACTS_ERROR_NONE                Successful
+ * @retval  #CONTACTS_ERROR_OUT_OF_MEMORY       Out of memory
+ * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ * @retval  #CONTACTS_ERROR_FILE_NO_SPACE       FS Full
+ * @retval  #CONTACTS_ERROR_PERMISSION_DENIED   Permission denied. This application does not have the privilege to call this method.
+ * @retval  #CONTACTS_ERROR_DB                  Database operation failure
+ * @retval  #CONTACTS_ERROR_IPC                 IPC error
+ *
+ * @pre     contacts_connect() should be called to open a connection to the contacts service.
+ *
+ * @see  contacts_connect()
  */
-API int contacts_activity_delete_by_account_id(int account_id);
-
+int contacts_activity_delete_by_account_id(int account_id);
 
 /**
  * @}

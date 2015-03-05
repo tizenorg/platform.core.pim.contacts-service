@@ -30,62 +30,102 @@ extern "C"
 #endif
 
 /**
- * @addtogroup CAPI_SOCIAL_CONTACTS_SVC_GROUP_MODULE
+ * @file contacts_group.h
+ */
+
+/**
+ * @ingroup CAPI_SOCIAL_CONTACTS_SVC_MODULE
+ * @defgroup CAPI_SOCIAL_CONTACTS_SVC_GROUP_MODULE Group
+ *
+ * @brief The contacts group API provides the set of definitions and interfaces that enable application developers to add/remove contact as group member.
+ *
+ * @section CAPI_SOCIAL_CONTACTS_SVC_GROUP_MODULE_HEADER Required Header
+ *  \#include <contacts.h>
+ *
+ * <BR>
  * @{
  */
 
 /**
- * @brief       Adds a contact and a group relationship to the contacts database.
+ * @brief Adds a contact and a group relationship to the contacts database.
+ *
+ * @since_tizen 2.3
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/contact.write
  *
  * @param[in]   group_id       The group ID
  * @param[in]   contact_id     The contact ID
  *
- * @return  0 on success, otherwise a negative error value.
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
  * @retval  #CONTACTS_ERROR_NONE                Successful
+ * @retval  #CONTACTS_ERROR_OUT_OF_MEMORY       Out of memory
  * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
- * @retval  #CONTACTS_ERROR_DB           		Database operation failure
+ * @retval  #CONTACTS_ERROR_DB                  Database operation failure
+ * @retval  #CONTACTS_ERROR_IPC                 IPC error
+ * @retval  #CONTACTS_ERROR_PERMISSION_DENIED   Permission denied. This application does not have the privilege to call this method.
  *
- * @pre   This function requires an open connection to contacts service by contacts_connect2().
+ * @pre   contacts_connect() should be called to open a connection to the contacts service.
  *
- * @see contacts_connect2()
+ * @see contacts_connect()
  * @see contacts_group_remove_contact()
  */
-API int contacts_group_add_contact(int group_id, int contact_id);
+int contacts_group_add_contact(int group_id, int contact_id);
 
 /**
- * @brief       Removes a contact and a group relationship from the contacts database.
+ * @brief Removes a contact and a group relationship from the contacts database.
+ *
+ * @since_tizen 2.3
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/contact.write
  *
  * @param[in]   group_id       The group ID
  * @param[in]   contact_id     The contact ID
  *
- * @return  0 on success, otherwise a negative error value.
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
  * @retval  #CONTACTS_ERROR_NONE                Successful
+ * @retval  #CONTACTS_ERROR_OUT_OF_MEMORY       Out of memory
  * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
- * @retval  #CONTACTS_ERROR_DB           		Database operation failure
+ * @retval  #CONTACTS_ERROR_DB                  Database operation failure
+ * @retval  #CONTACTS_ERROR_IPC                 IPC error
+ * @retval  #CONTACTS_ERROR_PERMISSION_DENIED   Permission denied. This application does not have the privilege to call this method.
  *
- * @pre   This function requires an open connection to contacts service by contacts_connect2().
+ * @pre   contacts_connect() should be called to open a connection to the contacts service.
  *
- * @see contacts_connect2()
+ * @see contacts_connect()
  * @see contacts_group_add_contact()
  */
-API int contacts_group_remove_contact(int group_id, int contact_id);
+int contacts_group_remove_contact(int group_id, int contact_id);
 
 /**
- * @brief	Sets a group place between a previous group and a next group.
+ * @brief Sets a group between the previous group and the next group.
  *
- * @param[in]	group_id				The group ID to move
- * @param[in]	previous_group_id		The previous group ID
- * @param[in]	next_group_id			The back group ID
+ * @since_tizen 2.3
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/contact.write
  *
- * @return  0 on success, otherwise a negative error value.
- * @retval  #CONTACTS_ERROR_NONE	Successful
- * @retval  #CONTACTS_ERROR_DB	Database operation failure
+ * @param[in]   group_id                The group ID to move
+ * @param[in]   previous_group_id       The previous group ID
+ * @param[in]   next_group_id           The back group ID
  *
- * @pre     This function requires an open connection to contacts service by contacts_connect2().
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
  *
- * @see  contacts_connect2()
+ * @retval  #CONTACTS_ERROR_NONE                Successful
+ * @retval  #CONTACTS_ERROR_OUT_OF_MEMORY       Out of memory
+ * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ * @retval  #CONTACTS_ERROR_DB                  Database operation failure
+ * @retval  #CONTACTS_ERROR_IPC                 IPC error
+ * @retval  #CONTACTS_ERROR_PERMISSION_DENIED   Permission denied. This application does not have the privilege to call this method.
+ *
+ * @pre     contacts_connect() should be called to open a connection to the contacts service.
+ *
+ * @see  contacts_connect()
  */
-API int contacts_group_set_group_order(int group_id, int previous_group_id, int next_group_id);
+int contacts_group_set_group_order(int group_id, int previous_group_id, int next_group_id);
 
 
 /**

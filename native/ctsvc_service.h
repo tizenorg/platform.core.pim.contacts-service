@@ -24,6 +24,7 @@
 #ifndef __TIZEN_SOCIAL_CTSVC_SERVICE_H__
 #define __TIZEN_SOCIAL_CTSVC_SERVICE_H__
 
+int ctsvc_contacts_internal_disconnect();
 
 #endif /*  __TIZEN_SOCIAL_CTSVC_SERVICE_H__ */
 

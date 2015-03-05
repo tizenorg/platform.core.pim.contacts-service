@@ -17,7 +17,6 @@
  *
  */
 #include <stdio.h>
-#include <badge.h>
 
 #include "contacts.h"
 #include "ctsvc_internal.h"
@@ -32,9 +31,15 @@
 #include "ctsvc_db_init.h"
 #include "ctsvc_notification.h"
 #include "ctsvc_setting.h"
+#include "ctsvc_db_access_control.h"
+#include "ctsvc_localize_utils.h"
+#include "ctsvc_phonelog.h"
 
 #ifdef _CONTACTS_IPC_SERVER
 #include "ctsvc_server_change_subject.h"
+#ifdef ENABLE_SIM_FEATURE
+#include "ctsvc_server_sim.h"
+#endif // ENABLE_SIM_FEATURE
 #endif
 
 static int __ctsvc_db_phonelog_insert_record( contacts_record_h record, int *id );
@@ -85,14 +90,17 @@ static int __ctsvc_db_phonelog_value_set(cts_stmt stmt, contacts_record_h *recor
 	phonelog->extra_data1 = ctsvc_stmt_get_int(stmt, i++);
 	temp = ctsvc_stmt_get_text(stmt, i++);
 	phonelog->extra_data2 = SAFE_STRDUP(temp);
-
+#ifdef _CONTACTS_IPC_SERVER
+#ifdef ENABLE_SIM_FEATURE
+	phonelog->sim_slot_no = ctsvc_server_sim_get_sim_slot_no_by_info_id(ctsvc_stmt_get_int(stmt, i++));
+#endif // ENABLE_SIM_FEATURE
+#endif
 	return CONTACTS_ERROR_NONE;
 }
 
 static int __ctsvc_db_phonelog_get_record( int id, contacts_record_h* out_record )
 {
 	int ret;
-	int len;
 	cts_stmt stmt = NULL;
 	char query[CTS_SQL_MAX_LEN] = {0};
 	contacts_record_h record;
@@ -100,8 +108,8 @@ static int __ctsvc_db_phonelog_get_record( int id, contacts_record_h* out_record
 	RETV_IF(NULL == out_record, CONTACTS_ERROR_INVALID_PARAMETER);
 	*out_record = NULL;
 
-	len = snprintf(query, sizeof(query),
-			"SELECT id, number, person_id, log_type, log_time, data1, data2 "
+	snprintf(query, sizeof(query),
+			"SELECT id, number, person_id, log_type, log_time, data1, data2, sim_id "
 			"FROM "CTS_TABLE_PHONELOGS" WHERE id = %d", id);
 
 	ret = ctsvc_query_prepare(query, &stmt);
@@ -210,7 +218,7 @@ static int __ctsvc_db_phonelog_delete_record( int id )
 
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("cts_query_exec() Failed(%d)", ret);
+		CTS_ERR("ctsvc_query_exec() Failed(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
@@ -237,7 +245,8 @@ static int __ctsvc_db_phonelog_get_all_records( int offset, int limit,
 	contacts_list_h list;
 
 	len = snprintf(query, sizeof(query),
-			"SELECT id, number, person_id, log_type, log_time, data1, data2 FROM "CTS_TABLE_PHONELOGS);
+			"SELECT id, number, person_id, log_type, log_time, data1, data2, sim_id "
+					"FROM "CTS_TABLE_PHONELOGS);
 
 	if (0 != limit) {
 		len += snprintf(query+len, sizeof(query)-len, " LIMIT %d", limit);
@@ -341,6 +350,11 @@ static int __ctsvc_db_phonelog_get_records_with_query( contacts_query_h query, i
 				temp = ctsvc_stmt_get_text(stmt, i);
 				phonelog->extra_data2 = SAFE_STRDUP(temp);
 				break;
+#ifdef ENABLE_SIM_FEATURE
+			case CTSVC_PROPERTY_PHONELOG_SIM_SLOT_NO:
+				phonelog->sim_slot_no = ctsvc_server_sim_get_sim_slot_no_by_info_id(ctsvc_stmt_get_int(stmt, i));
+				break;
+#endif // ENABLE_SIM_FEATURE
 			default:
 				break;
 			}
@@ -401,17 +415,15 @@ static int  __ctsvc_db_phonelog_insert(ctsvc_phonelog_s *phonelog, int *id)
 {
 	int ret;
 	cts_stmt stmt = NULL;
-	char normal_num[CTSVC_NUMBER_MAX_LEN] = {0};
 	char query[CTS_SQL_MAX_LEN] = {0};
-	char minmatch[CTSVC_NUMBER_MAX_LEN] = {0};
 
-	RETVM_IF(phonelog->log_type <= CONTACTS_PLOG_TYPE_NONE
-			|| CONTACTS_PLOG_TYPE_MAX <= phonelog->log_type,
-			CONTACTS_ERROR_INVALID_PARAMETER, "phonelog type(%d) is invaid", phonelog->log_type);
+	RETVM_IF((phonelog->log_type < CONTACTS_PLOG_TYPE_NONE
+			|| CONTACTS_PLOG_TYPE_EMAIL_SENT < phonelog->log_type)
+			, CONTACTS_ERROR_INVALID_PARAMETER, "phonelog type(%d) is invaid", phonelog->log_type);
 
 	snprintf(query, sizeof(query), "INSERT INTO "CTS_TABLE_PHONELOGS"("
-			"number, normal_num, minmatch, person_id, log_type, log_time, data1, data2) "
-			"VALUES(?, ?, ?, ?, %d, %d, %d, ?)",
+			"number, normal_num, minmatch, clean_num, person_id, log_type,log_time, data1, data2, sim_id) "
+			"VALUES(?, ?, ?, ?, ?, %d, %d, %d, ?, ?)",
 			phonelog->log_type, phonelog->log_time, phonelog->extra_data1);
 
 	ret = ctsvc_query_prepare(query, &stmt);
@@ -420,20 +432,38 @@ static int  __ctsvc_db_phonelog_insert(ctsvc_phonelog_s *phonelog, int *id)
 	if (phonelog->address) {
 		ctsvc_stmt_bind_text(stmt, 1, phonelog->address);
 		if (phonelog->log_type < CONTACTS_PLOG_TYPE_EMAIL_RECEIVED) {
-			ret = ctsvc_normalize_number(phonelog->address, normal_num, sizeof(normal_num));
-			ctsvc_stmt_bind_text(stmt, 2, normal_num);
+			char clean_num[strlen(phonelog->address) + 1];
+			ret = ctsvc_clean_number(phonelog->address, clean_num, sizeof(clean_num), true);
 			if (0 < ret) {
-				ret = ctsvc_get_minmatch_number(normal_num, minmatch, CTSVC_NUMBER_MAX_LEN, ctsvc_get_phonenumber_min_match_digit());
-				ctsvc_stmt_bind_text(stmt, 3, minmatch);
+				char normal_num[sizeof(clean_num) + 20];
+				ctsvc_stmt_bind_copy_text(stmt, 4, clean_num, strlen(clean_num));
+				ret = ctsvc_normalize_number(clean_num, normal_num, sizeof(normal_num), true);
+				if (0 < ret) {
+					char minmatch[sizeof(normal_num) + 1];
+					ctsvc_stmt_bind_copy_text(stmt, 2, normal_num, strlen(normal_num));
+					ret = ctsvc_get_minmatch_number(normal_num, minmatch, sizeof(minmatch), ctsvc_get_phonenumber_min_match_digit());
+					ctsvc_stmt_bind_copy_text(stmt, 3, minmatch, strlen(minmatch));
+				}
 			}
 		}
 	}
 
 	if (0 < phonelog->person_id)
-		ctsvc_stmt_bind_int(stmt, 4, phonelog->person_id);
+		ctsvc_stmt_bind_int(stmt, 5, phonelog->person_id);
 
 	if (phonelog->extra_data2)
-		ctsvc_stmt_bind_text(stmt, 5, phonelog->extra_data2);
+		ctsvc_stmt_bind_text(stmt, 6, phonelog->extra_data2);
+
+#ifdef ENABLE_SIM_FEATURE
+	if (phonelog->sim_slot_no >= 0) {
+		int sim_info_id;
+		sim_info_id = ctsvc_server_sim_get_info_id_by_sim_slot_no(phonelog->sim_slot_no);
+		if (sim_info_id > 0)
+			ctsvc_stmt_bind_int(stmt, 7, sim_info_id);
+	}
+	else
+#endif // ENABLE_SIM_FEATURE
+		ctsvc_stmt_bind_int(stmt, 7, -1);
 
 	ret = ctsvc_stmt_step(stmt);
 	if (CONTACTS_ERROR_NONE != ret) {
@@ -444,6 +474,9 @@ static int  __ctsvc_db_phonelog_insert(ctsvc_phonelog_s *phonelog, int *id)
 	if (id)
 		*id = ctsvc_db_get_last_insert_id();
 	ctsvc_stmt_finalize(stmt);
+
+	// update phonelog
+	ctsvc_db_phone_log_update_person_id(phonelog->address, phonelog->person_id, -1, false);
 
 	ctsvc_set_phonelog_noti();
 	return CONTACTS_ERROR_NONE;
@@ -477,38 +510,12 @@ static int __ctsvc_db_phonelog_insert_record( contacts_record_h record, int *id 
 	// add id for subscribe
 	ctsvc_change_subject_add_changed_phone_log_id(CONTACTS_CHANGE_INSERTED, *id);
 #endif
+
 	ret = ctsvc_end_trans(true);
-	if (ret < CONTACTS_ERROR_NONE)
-	{
+	if (ret < CONTACTS_ERROR_NONE) {
 		CTS_ERR("DB error : ctsvc_end_trans() Failed(%d)", ret);
 		return ret;
 	}
-	else
-	{
-		// set missed call Badge number to Apptray
-		if(phonelog->log_type == CONTACTS_PLOG_TYPE_VOICE_INCOMMING_UNSEEN || phonelog->log_type == CONTACTS_PLOG_TYPE_VIDEO_INCOMMING_UNSEEN) {
-
-		#define PHONE_PACKAGE_NAME		"org.tizen.phone"
-			unsigned int call_cnt = 0;
-			bool	bBadgeExist = FALSE;
-			badge_error_e err;
-
-			err = badge_is_existing(PHONE_PACKAGE_NAME, &bBadgeExist);
-			if(err == BADGE_ERROR_NONE && bBadgeExist == FALSE)
-			{
-				err = badge_create(PHONE_PACKAGE_NAME, PHONE_PACKAGE_NAME);
-				if(err != BADGE_ERROR_NONE)
-				{
-					CTS_ERR("Fail to badge_create : %d", err);
-					return CONTACTS_ERROR_NONE; // ignore badge error
-				}
-			}
-
-			badge_get_count(PHONE_PACKAGE_NAME, &call_cnt);
-			call_cnt++;
-			badge_set_count(PHONE_PACKAGE_NAME, call_cnt);
-		}
-		return CONTACTS_ERROR_NONE;
-	}
+	return CONTACTS_ERROR_NONE;
 }
 

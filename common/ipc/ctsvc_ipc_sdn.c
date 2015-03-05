@@ -42,6 +42,7 @@ static int __ctsvc_ipc_unmarshal_sdn(pims_ipc_data_h ipc_data, const char* view_
 		if (ctsvc_ipc_unmarshal_int(ipc_data, &sdn_p->id) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_string(ipc_data, &sdn_p->name) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_string(ipc_data, &sdn_p->number) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_unmarshal_int(ipc_data, &sdn_p->sim_slot_no) != CONTACTS_ERROR_NONE) break;
 
 		return CONTACTS_ERROR_NONE;
 	} while(0);
@@ -59,6 +60,7 @@ static int __ctsvc_ipc_marshal_sdn(const contacts_record_h record, pims_ipc_data
 		if (ctsvc_ipc_marshal_int((sdn_p->id),ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_string((sdn_p->name),ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_string((sdn_p->number),ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_int((sdn_p->sim_slot_no),ipc_data) != CONTACTS_ERROR_NONE) break;
 
 		return CONTACTS_ERROR_NONE;
 	} while(0);

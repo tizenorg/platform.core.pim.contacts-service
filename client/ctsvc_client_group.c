@@ -48,12 +48,14 @@ API int contacts_group_add_contact(int group_id, int contact_id)
 	if (ret != CONTACTS_ERROR_NONE)
 	{
 		CTS_ERR("marshal fail");
+		pims_ipc_data_destroy(indata);
 		return ret;
 	}
 	ret = ctsvc_ipc_marshal_int( contact_id, indata);
 	if (ret != CONTACTS_ERROR_NONE)
 	{
 		CTS_ERR("marshal fail");
+		pims_ipc_data_destroy(indata);
 		return ret;
 	}
 
@@ -61,6 +63,7 @@ API int contacts_group_add_contact(int group_id, int contact_id)
 	if (ctsvc_ipc_call(CTSVC_IPC_GROUP_MODULE, CTSVC_IPC_SERVER_GROUP_ADD_CONTACT, indata, &outdata) != 0)
 	{
 		CTS_ERR("ctsvc_ipc_call failed");
+		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
 	}
 
@@ -106,12 +109,14 @@ API int contacts_group_remove_contact(int group_id, int contact_id)
 	if (ret != CONTACTS_ERROR_NONE)
 	{
 		CTS_ERR("marshal fail");
+		pims_ipc_data_destroy(indata);
 		return ret;
 	}
 	ret = ctsvc_ipc_marshal_int( contact_id, indata);
 	if (ret != CONTACTS_ERROR_NONE)
 	{
 		CTS_ERR("marshal fail");
+		pims_ipc_data_destroy(indata);
 		return ret;
 	}
 
@@ -119,6 +124,7 @@ API int contacts_group_remove_contact(int group_id, int contact_id)
 	if (ctsvc_ipc_call(CTSVC_IPC_GROUP_MODULE, CTSVC_IPC_SERVER_GROUP_REMOVE_CONTACT, indata, &outdata) != 0)
 	{
 		CTS_ERR("ctsvc_ipc_call failed");
+		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
 	}
 

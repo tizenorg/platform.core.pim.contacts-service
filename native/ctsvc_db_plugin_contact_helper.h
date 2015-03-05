@@ -23,17 +23,20 @@
 #include "ctsvc_struct.h"
 #include "ctsvc_sqlite.h"
 
-int ctsvc_db_contact_update_changed_time(int contact_id);
-
 int ctsvc_contact_add_image_file(int parent_id, int img_id,
 		char *src_img, char *dest_name, int dest_size);
 int ctsvc_contact_update_image_file(int parent_id, int img_id,
 		char *src_img, char *dest_name, int dest_size);
-void ctsvc_make_contact_display_name(ctsvc_contact_s *contact);
-
-int ctsvc_db_contact_delete(int contact_id);
 int ctsvc_contact_delete_image_file_with_path(const unsigned char* image_path);
 
+void ctsvc_contact_make_display_name(ctsvc_contact_s *contact);
+int ctsvc_contact_make_search_name(ctsvc_contact_s *contact, char **search_name);
+int ctsvc_contact_get_name_language(const ctsvc_name_s *name);
+
+int ctsvc_db_contact_update_changed_time(int contact_id);
+int ctsvc_contact_update_display_name(int contact_id, contacts_display_name_source_type_e changed_record_type);
+
+int ctsvc_db_contact_delete(int contact_id);
 int ctsvc_db_contact_get( int id, contacts_record_h* out_record );
 
 int ctsvc_get_data_info_name(cts_stmt stmt, contacts_list_h name_list);
@@ -86,7 +89,5 @@ int ctsvc_contact_insert_data_nickname(contacts_list_h nickname_list, int contac
 int ctsvc_contact_insert_data_relationship(contacts_list_h relationship_list, int contact_id, bool is_my_profile);
 int ctsvc_contact_insert_data_image(contacts_list_h image_list, int contact_id, bool is_my_profile);
 int ctsvc_contact_insert_data_extension(contacts_list_h extension_list, int contact_id, bool is_my_profile);
-
-int ctsvc_contact_update_display_name(int contact_id, contacts_display_name_source_type_e changed_record_type);
 
 #endif // __CTSVC_DB_PLUGIN_CONTACT_HELPER_H__

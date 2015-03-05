@@ -30,6 +30,8 @@ API int contacts_db_add_changed_cb( const char* view_uri, contacts_db_changed_cb
 
 	RETVM_IF(NULL == view_uri, CONTACTS_ERROR_INVALID_PARAMETER,
 			"Invalid parameter : view_uri is null");
+	RETVM_IF(NULL == cb, CONTACTS_ERROR_INVALID_PARAMETER,
+			"Invalid parameter : callback is null");
 
 	ret = ctsvc_inotify_subscribe(view_uri, cb, user_data);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret,
@@ -45,6 +47,8 @@ API int contacts_db_remove_changed_cb( const char* view_uri, contacts_db_changed
 
 	RETVM_IF(NULL == view_uri, CONTACTS_ERROR_INVALID_PARAMETER,
 			"Invalid parameter : view_uri is null");
+	RETVM_IF(NULL == cb, CONTACTS_ERROR_INVALID_PARAMETER,
+			"Invalid parameter : callback is null");
 
 	ret = ctsvc_inotify_unsubscribe(view_uri, cb, user_data);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret,

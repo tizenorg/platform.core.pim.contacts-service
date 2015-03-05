@@ -23,6 +23,7 @@
 #include "ctsvc_sqlite.h"
 #include "ctsvc_db_plugin_person_helper.h"
 #include "ctsvc_db_init.h"
+#include "ctsvc_db_access_control.h"
 #include "ctsvc_utils.h"
 #include "ctsvc_list.h"
 #include "ctsvc_db_query.h"
@@ -75,6 +76,7 @@ static int __ctsvc_db_person_get_record( int id, contacts_record_h* out_record )
 	contacts_record_h record;
 
 	*out_record = NULL;
+
 	snprintf(query, sizeof(query),
 		"SELECT persons.person_id, "
 				"%s, "
@@ -339,6 +341,8 @@ static int __ctsvc_db_person_delete_record( int id )
 	int person_id;
 	char query[CTS_SQL_MAX_LEN] = {0};
 	int version;
+	int *addressbook_ids = NULL;
+	int count;
 
 	ret = ctsvc_begin_trans();
 	RETVM_IF(ret, ret, "DB error : ctsvc_begin_trans() Failed(%d)", ret);
@@ -369,9 +373,41 @@ static int __ctsvc_db_person_delete_record( int id )
 
 	rel_changed = ctsvc_db_change();
 
-	// images are deleted by db trigger callback function in ctsvc_db_contact_delete_callback
+	ret = ctsvc_get_write_permitted_addressbook_ids(&addressbook_ids, &count);
+	if (CONTACTS_ERROR_INTERNAL == ret) {
+		CTS_ERR("ctsvc_get_write_permitted_addressbook_ids() Failed(%d)", ret);
+		ctsvc_end_trans(false);
+		return ret;
+	}
+
+	if (addressbook_ids && count > 0) {
+		int i;
+		int len = snprintf(query, sizeof(query),
+				"UPDATE "CTS_TABLE_CONTACTS" SET deleted = 1, person_id = 0, changed_ver = %d "
+					"WHERE person_id = %d AND (",
+				version, id);
+
+		for (i=0;i<count;i++) {
+			if(i == 0)
+				len += snprintf(query+len, sizeof(query) + len, "addressbook_id = %d ", addressbook_ids[i]);
+			else
+				len += snprintf(query+len, sizeof(query) + len, "OR addressbook_id = %d ", addressbook_ids[i]);
+		}
+		len += snprintf(query+len, sizeof(query)-len, " ) ");
+
+		ret = ctsvc_query_exec(query);
+		if (CONTACTS_ERROR_NONE != ret) {
+			CTS_ERR("ctsvc_query_exec() Failed(%d)", ret);
+			ctsvc_end_trans(false);
+			free(addressbook_ids);
+			return ret;
+		}
+	}
+	free(addressbook_ids);
+
+	// access control logic should be enabled
 	snprintf(query, sizeof(query),
-			"UPDATE "CTS_TABLE_CONTACTS" SET deleted = 1, person_id = 0, changed_ver = %d WHERE person_id = %d",
+			"UPDATE "CTS_TABLE_CONTACTS" SET person_id = 0, changed_ver = %d WHERE person_id = %d",
 			version, id);
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
@@ -380,6 +416,7 @@ static int __ctsvc_db_person_delete_record( int id )
 		return ret;
 	}
 
+	// images are deleted by db trigger callback function in ctsvc_db_image_delete_callback
 	snprintf(query, sizeof(query), "DELETE FROM "CTS_TABLE_PERSONS" WHERE person_id = %d", id);
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
@@ -411,22 +448,24 @@ static int __ctsvc_db_person_get_all_records( int offset, int limit, contacts_li
 	contacts_list_h list;
 
 	len = snprintf(query, sizeof(query),
-			"SELECT person_id, "
-					"%s, "
-					"_NORMALIZE_INDEX_(%s), "
-					"name_contact_id, "
-					"image_thumbnail_path, "
-					"ringtone_path, "
-					"vibration, "
-					"message_alert, "
-					"status, "
-					"link_count, "
-					"addressbook_ids, "
-					"has_phonenumber, "
-					"has_email, "
-					"is_favorite "
-			"FROM "CTSVC_DB_VIEW_PERSON" ORDER BY %s",
-				ctsvc_get_display_column(), ctsvc_get_sort_name_column(), ctsvc_get_sort_column());
+		"SELECT person_id, "
+				"%s, "
+				"_NORMALIZE_INDEX_(%s), "
+				"name_contact_id, "
+				"image_thumbnail_path, "
+				"ringtone_path, "
+				"vibration, "
+				"message_alert, "
+				"status, "
+				"link_count, "
+				"addressbook_ids, "
+				"has_phonenumber, "
+				"has_email, "
+				"is_favorite "
+		"FROM "CTSVC_DB_VIEW_PERSON,
+			ctsvc_get_display_column(), ctsvc_get_sort_name_column());
+
+	len += snprintf(query+len, sizeof(query)-len, " ORDER BY %s", ctsvc_get_sort_column());
 
 	if (0 != limit) {
 		len += snprintf(query+len, sizeof(query)-len, " LIMIT %d", limit);
@@ -534,7 +573,7 @@ static int __ctsvc_db_person_get_records_with_query( contacts_query_h query, int
 			case CTSVC_PROPERTY_PERSON_IMAGE_THUMBNAIL:
 				temp = ctsvc_stmt_get_text(stmt, i);
 				if (temp && *temp) {
-					snprintf(full_path, sizeof(full_path), "%s/%s", CTS_IMG_FULL_LOCATION, temp);
+					snprintf(full_path, sizeof(full_path), "%s/%s", CTSVC_CONTACT_IMG_FULL_LOCATION, temp);
 					person->image_thumbnail_path = strdup(full_path);
 				}
 				break;

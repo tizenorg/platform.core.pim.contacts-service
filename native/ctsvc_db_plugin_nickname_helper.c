@@ -76,7 +76,7 @@ int ctsvc_db_nickname_insert(contacts_record_h record, int contact_id, bool is_m
 
 	ret = ctsvc_stmt_step(stmt);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB error : ctsvc_query_exec() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_stmt_step() Failed(%d)", ret);
 		ctsvc_stmt_finalize(stmt);
 		return ret;
 	}

@@ -20,6 +20,7 @@
 
 --PRAGMA journal_mode = PERSIST;
 --PRAGMA journal_mode = TRUNCATE;
+PRAGMA user_version = 101;
 
 CREATE TABLE persons
 (
@@ -53,10 +54,11 @@ CREATE TABLE addressbooks
 	account_id			INTEGER,
 	mode						INTEGER, -- permission
 	last_sync_ver	INTEGER,
+	smack_label		TEXT NOT NULL,		-- smack label
 	UNIQUE(addressbook_name)
 );
 
-insert into addressbooks(addressbook_id, addressbook_name, mode, account_id) values(0, 'http://tizen.org/addressbook/phone', 0, 0);
+INSERT INTO addressbooks(addressbook_id, addressbook_name, mode, account_id, smack_label) values(0, 'http://tizen.org/addressbook/phone', 0, 0, 'org.tizen.contacts');
 
 CREATE TRIGGER trg_addressbook_del AFTER DELETE ON addressbooks
  BEGIN
@@ -83,8 +85,8 @@ CREATE TABLE contacts
 	reverse_display_name_language		INTEGER,
 	sort_name			TEXT,
 	reverse_sort_name		TEXT,
-	sortkey				TEXT COLLATE NOCASE,
-	reverse_sortkey			TEXT COLLATE NOCASE,
+	sortkey				TEXT,
+	reverse_sortkey			TEXT,
 	created_ver			INTEGER NOT NULL,
 	changed_ver			INTEGER NOT NULL,
 	changed_time			INTEGER NOT NULL,
@@ -142,7 +144,7 @@ CREATE TRIGGER trg_contacts_update AFTER UPDATE ON contacts
 		DELETE FROM group_relations WHERE old.addressbook_id != -1 AND contact_id = old.contact_id;
 		DELETE FROM persons WHERE person_id = old.person_id AND link_count = 1;
 		UPDATE persons SET dirty=1 WHERE person_id = old.person_id AND link_count > 1;
-		DELETE FROM speeddials WHERE number_id = (SELECT id FROM data WHERE data.contact_id = old.contact_id AND datatype = 8);
+		DELETE FROM speeddials WHERE number_id IN (SELECT id FROM data WHERE data.contact_id = old.contact_id AND datatype = 8);
 	END;
 
 CREATE TABLE contact_deleteds
@@ -165,7 +167,8 @@ CREATE TABLE sdn
 (
 	id				INTEGER PRIMARY KEY AUTOINCREMENT,
 	name				TEXT,
-	number				TEXT
+	number				TEXT,
+	sim_slot_no		INTEGER
 );
 
 CREATE TABLE data
@@ -247,9 +250,9 @@ INSERT INTO groups(addressbook_id, group_name, extra_data, is_read_only, created
 
 CREATE TRIGGER trg_groups_del AFTER DELETE ON groups
  BEGIN
-   UPDATE contacts SET changed_ver=((SELECT ver FROM cts_version) + 1) WHERE deleted = 0 AND contact_id IN (SELECT contact_id FROM group_relations WHERE group_id=old.group_id);
-   DELETE FROM group_relations WHERE group_id = old.group_id;
-   SELECT _GROUP_DELETE_(old.image_thumbnail_path);
+	UPDATE contacts SET changed_ver=((SELECT ver FROM cts_version) + 1) WHERE deleted = 0 AND contact_id IN (SELECT contact_id FROM group_relations WHERE group_id=old.group_id);
+	DELETE FROM group_relations WHERE group_id = old.group_id;
+	SELECT _GROUP_DELETE_(old.image_thumbnail_path);
  END;
 
 CREATE TRIGGER trg_groups_del2 AFTER DELETE ON groups
@@ -294,22 +297,22 @@ CREATE INDEX favorites_idx1 ON favorites(favorite_prio);
 CREATE INDEX favorites_idx2 ON favorites(person_id);
 
 
---CREATE TRIGGER trg_favorites_del BEFORE DELETE ON favorites
---	BEGIN
---		UPDATE contacts SET is_favorite = 0 WHERE person_id = old.person_id;
---	END;
---CREATE TRIGGER trg_favorites_insert AFTER INSERT ON favorites
---	BEGIN
---		UPDATE contacts SET is_favorite = 1 WHERE person_id = new.person_id;
---	END;
-
+CREATE TABLE sim_info
+(
+	sim_id			INTEGER PRIMARY KEY AUTOINCREMENT,
+	unique_id		TEXT NOT NULL,		-- iccid
+	UNIQUE(unique_id)
+);
 
 CREATE TABLE phonelogs
 (
 	id				INTEGER PRIMARY KEY AUTOINCREMENT,
 	number				TEXT,
+	number_type			INTEGER,
 	normal_num			TEXT,
+	clean_num				TEXT,
 	minmatch				TEXT,
+	sim_id			INTEGER,
 	person_id			INTEGER, --person_id
 	log_type			INTEGER,
 	log_time			INTEGER,
@@ -323,23 +326,6 @@ CREATE TRIGGER trg_phonelogs_del AFTER DELETE ON phonelogs
 	BEGIN
 		SELECT _PHONE_LOG_DELETE_(old.id);
 	END;
-
---CREATE TRIGGER trg_phonelogs_del AFTER DELETE ON phonelogs
---	WHEN old.log_type = 2 OR old.log_type = 4
---		BEGIN
---			DELETE FROM phonelog_accumulation WHERE log_time < (old.log_time - 3456000); -- 40 days
---			INSERT INTO phonelog_accumulation VALUES(NULL, 1, old.log_time, old.data1);
---		END;
-
---CREATE TABLE phonelog_accumulation
---(
---	id				INTEGER PRIMARY KEY AUTOINCREMENT,
---	log_cnt			INTEGER,
---	log_time			INTEGER,
---	duration			INTEGER
---);
---INSERT INTO phonelog_accumulation VALUES(1, 0, NULL, 0);
---INSERT INTO phonelog_accumulation VALUES(2, 0, NULL, 0); --total
 
 CREATE TABLE phonelog_stat
 (

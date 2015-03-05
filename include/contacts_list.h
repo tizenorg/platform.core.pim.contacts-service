@@ -29,149 +29,215 @@ extern "C"
 #endif
 
 /**
- * @addtogroup CAPI_SOCIAL_CONTACTS_SVC_LIST_MODULE
+ * @file contacts_list.h
+ */
+
+/**
+ * @ingroup CAPI_SOCIAL_CONTACTS_SVC_MODULE
+ * @defgroup CAPI_SOCIAL_CONTACTS_SVC_LIST_MODULE List
+ *
+ * @brief The contacts record API provides the set of definitions and interfaces that enable application developers to get/set records list data.
+ *
+ * @section CAPI_SOCIAL_CONTACTS_SVC_LIST_MODULE_HEADER Required Header
+ *  \#include <contacts.h>
+ *
+ * <BR>
  * @{
  */
 
+
 /**
- * @brief Creates a handle to the contacts list.
+ * @brief Creates a contacts list.
  *
- * @remarks @a contacts_list must be released with contacts_list_destroy() by you.
+ * @since_tizen 2.3
+ *
+ * @remarks You must release @a contacts_list using contacts_list_destroy().
  *
  * @param[out]  contacts_list    The contacts list handle
  *
- * @return  0 on success, otherwise a negative error value.
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
  * @retval  #CONTACTS_ERROR_NONE                Successful
  * @retval  #CONTACTS_ERROR_OUT_OF_MEMORY       Out of memory
- * @retval  #CONTACTS_ERROR_INVALID_PARAMETER       Invalid parameter
+ * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
  *
  * @see contacts_list_destroy()
  */
-API int contacts_list_create( contacts_list_h* contacts_list );
+int contacts_list_create( contacts_list_h* contacts_list );
 
 /**
- * @brief Destroys a contacts list handle and releases all its resources.
+ * @brief Destroys a contacts list and releases its all resources.
+ *
+ * @since_tizen 2.3
  *
  * @param[in]   contacts_list  The contacts list handle
+ * @param[in]   delete_child   Set @c true to destroy child records automatically,
+ *                             otherwise set @c false to not destroy child records automatically
  *
- * @return  0 on success, otherwise a negative error value.
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
  * @retval  #CONTACTS_ERROR_NONE                    Successful
  * @retval  #CONTACTS_ERROR_INVALID_PARAMETER       Invalid parameter
  *
  * @see contacts_list_create()
  */
-API int contacts_list_destroy( contacts_list_h contacts_list, bool delete_child );
+int contacts_list_destroy( contacts_list_h contacts_list, bool delete_child );
 
 /**
- * @brief      Retrieves count of contact entity from a contacts list.
+ * @brief Retrieves the number of contact entities from a contacts list.
  *
- * @param[in]	contacts_list				The contacts list handle
- * @param[out]	count						The count of contact entity
+ * @since_tizen 2.3
  *
- * @return  0 on success, otherwise a negative error value.
+ * @param[in]   contacts_list           The contacts list handle
+ * @param[out]  count                   The count of contact entity
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
  * @retval  #CONTACTS_ERROR_NONE                Successful
  * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
  *
  * @see contacts_list_add()
  */
-API int contacts_list_get_count( contacts_list_h contacts_list, unsigned int *count );
+int contacts_list_get_count( contacts_list_h contacts_list, int *count );
 
 /**
- * @brief      Adds a record handle to contacts list handle.
+ * @brief Adds a record to a contacts list.
  *
- * @param[in]	contacts_list				The contacts list handle
- * @param[in]	record						The record handle
+ * @since_tizen 2.3
  *
- * @return  0 on success, otherwise a negative error value.
+ * @remarks Same kind of record can be added.
+ *
+ * @param[in]   contacts_list           The contacts list handle
+ * @param[in]   record                  The record handle
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
  * @retval  #CONTACTS_ERROR_NONE                Successful
  * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
  *
  * @see contacts_list_remove()
  */
-API int contacts_list_add( contacts_list_h contacts_list, contacts_record_h record );
+int contacts_list_add( contacts_list_h contacts_list, contacts_record_h record );
 
 /**
- * @brief      Removes a record handle to contacts list handle.
- * @details    If the record is current record then current record is changed the next record.\n
- * If the record is the last record then current record will be NULL.
+ * @brief Removes a record from the contacts list.
  *
- * @param[in]	contacts_list				The contacts list handle
- * @param[in]	record						The record handle
+ * @details If the record is current record, then current record is changed the next record.\n
+ *          If the record is the last record, then current record will be @c NULL.
  *
- * @return  0 on success, otherwise a negative error value.
+ * @since_tizen 2.3
+ *
+ * @param[in]   contacts_list           The contacts list handle
+ * @param[in]   record                  The record handle
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
  * @retval  #CONTACTS_ERROR_NONE                Successful
  * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ * @retval  #CONTACTS_ERROR_NO_DATA             Requested data does not exist
  *
  * @see contacts_list_add()
  */
-API int contacts_list_remove( contacts_list_h contacts_list, contacts_record_h record );
+int contacts_list_remove( contacts_list_h contacts_list, contacts_record_h record );
 
 /**
- * @brief		Retrieves a record handle from contacts list handle.
- * @details		The default current record is the first record
- * @remarks		The @a record handle MUST NOT destroyed by you.
- * It is destroyed automatically when the @a contacts_list is destroyed.
+ * @brief Retrieves a record from the contacts list.
  *
- * @param[in]	contacts_list				The contacts list handle
- * @param[out]	record						The record handle
+ * @details The default current record is the first record.
  *
- * @return  0 on success, otherwise a negative error value.
+ * @since_tizen 2.3
+ *
+ * @remarks You MUST NOT destroy the @a record.
+ *          It is destroyed automatically when the @a contacts_list is destroyed.
+ *
+ * @param[in]   contacts_list           The contacts list handle
+ * @param[out]  record                  The record handle
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
  * @retval  #CONTACTS_ERROR_NONE                Successful
  * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ * @retval  #CONTACTS_ERROR_NO_DATA             Requested data does not exist
  */
-API int contacts_list_get_current_record_p( contacts_list_h contacts_list, contacts_record_h* record );
+int contacts_list_get_current_record_p( contacts_list_h contacts_list, contacts_record_h* record );
 
 /**
- * @brief		Moves a contacts list to previous position.
+ * @brief Moves a contacts list to the previous position.
  *
- * @param[in]	contacts_list				The contacts list handle
+ * @since_tizen 2.3
  *
- * @return  0 on success, otherwise a negative error value.
+ * @param[in]  contacts_list    The contacts list handle
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
  * @retval  #CONTACTS_ERROR_NONE                Successful
  * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ * @retval  #CONTACTS_ERROR_NO_DATA             Requested data does not exist
  *
  * @see contacts_list_next()
  */
-API int contacts_list_prev( contacts_list_h contacts_list );
+int contacts_list_prev( contacts_list_h contacts_list );
 
 /**
- * @brief		Moves a contacts list to next position.
+ * @brief Moves a contacts list to the next position.
  *
- * @param[in]	contacts_list				The contacts list handle
+ * @since_tizen 2.3
  *
- * @return  0 on success, otherwise a negative error value.
+ * @param[in]  contacts_list      The contacts list handle
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
  * @retval  #CONTACTS_ERROR_NONE                Successful
  * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ * @retval  #CONTACTS_ERROR_NO_DATA             Requested data does not exist
  *
  * @see contacts_list_prev()
  */
-API int contacts_list_next( contacts_list_h contacts_list );
+int contacts_list_next( contacts_list_h contacts_list );
 
 /**
- * @brief		Moves a contacts list to the first position.
+ * @brief Moves a contacts list to the first position.
  *
- * @param[in]	contacts_list				The contacts list handle
+ * @since_tizen 2.3
  *
- * @return  0 on success, otherwise a negative error value.
+ * @param[in]  contacts_list   The contacts list handle
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
  * @retval  #CONTACTS_ERROR_NONE                Successful
  * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ * @retval  #CONTACTS_ERROR_NO_DATA             Requested data does not exist
  *
  * @see contacts_list_last()
  */
-API int contacts_list_first( contacts_list_h contacts_list );
+int contacts_list_first( contacts_list_h contacts_list );
 
 /**
- * @brief		Moves a contacts lis tto the last position.
+ * @brief Moves a contacts list to the last position.
  *
- * @param[in]	contacts_list				The contacts list handle
+ * @since_tizen 2.3
  *
- * @return  0 on success, otherwise a negative error value.
+ * @param[in]  contacts_list    The contacts list handle
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
  * @retval  #CONTACTS_ERROR_NONE                Successful
  * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ * @retval  #CONTACTS_ERROR_NO_DATA             Requested data does not exist
  *
  * @see contacts_list_first()
  */
-API int contacts_list_last( contacts_list_h contacts_list );
+int contacts_list_last( contacts_list_h contacts_list );
 
 /**
  * @}

@@ -29,450 +29,1082 @@ extern "C"
 #endif
 
 /**
- * @addtogroup CAPI_SOCIAL_CONTACTS_SVC_DATABASE_MODULE
+ * @file contacts_db.h
+ */
+
+/**
+ * @ingroup CAPI_SOCIAL_CONTACTS_SVC_MODULE
+ * @defgroup CAPI_SOCIAL_CONTACTS_SVC_DATABASE_MODULE Database
+ *
+ * @brief The contacts database API provides the set of definitions and interfaces that enable application developers to handle contacts database.
+ *
+ * @section CAPI_SOCIAL_CONTACTS_SVC_DATABASE_MODULE_HEADER Required Header
+ *  \#include <contacts.h>
+ *
+ * <BR>
  * @{
  */
 
+/**
+ * @brief Enumeration for contact change state.
+ *
+ * @since_tizen 2.3
+ *
+ */
 typedef enum
 {
-	CONTACTS_CHANGE_INSERTED,	/**< . */
-	CONTACTS_CHANGE_UPDATED,	/**< . */
-	CONTACTS_CHANGE_DELETED,	/**< . */
-//	CONTACTS_CHANGE_BULK_INSERTED,
-//	CONTACTS_CHANGE_BULK_DELETED
+	CONTACTS_CHANGE_INSERTED,	/**< Inserted */
+	CONTACTS_CHANGE_UPDATED,	/**< Updated */
+	CONTACTS_CHANGE_DELETED,	/**< Deleted */
 } contacts_changed_e;
 
 /**
- * @brief       Called when designated view changes.
+ * @brief Called when the designated view changes.
  *
- * @param[in]   view_uri	The view uri
- * @param[in]   user_data	The user data passed from the callback registration function
+ * @since_tizen 2.3
+ *
+ * @param[in]   view_uri    The view URI
+ * @param[in]   user_data   The user data passed from the callback registration function
+ *
+ * @pre		The callback must be registered using contacts_db_add_changed_cb.
  *
  * @see contacts_db_add_changed_cb()
  */
 typedef void (*contacts_db_changed_cb)(const char* view_uri, void* user_data);
 
 /**
- * @brief The callback function to get the result of insert batch operation.
+ * @brief Inserts a record to the contacts database.
+ *
+ * @since_tizen 2.3
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/contact.write
+ * @privilege %http://tizen.org/privilege/callhistory.write
+ *
+ * @remarks
+ * %http://tizen.org/privilege/contact.write is needed for record which is created with @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_address_book, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_contact, \n @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_group, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_my_profile,
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_name, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_number, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_email, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_address, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_note, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_url, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_event, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_image, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_company, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_nickname, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_messenger, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_extension, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_profile, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_relationship, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_activity, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_activity_photo, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_speeddial. \n\n
+ * %http://tizen.org/privilege/callhistory.write is needed for record which is created with @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_phone_log.
+ *
+ * @param[in]   record                 The record handle
+ * @param[out]  id                     The ID of inserted record
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
+ * @retval  #CONTACTS_ERROR_NONE                Successful
+ * @retval  #CONTACTS_ERROR_OUT_OF_MEMORY       Out of memory
+ * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ * @retval  #CONTACTS_ERROR_FILE_NO_SPACE       FS Full
+ * @retval  #CONTACTS_ERROR_NO_DATA             Requested data does not exist
+ * @retval  #CONTACTS_ERROR_PERMISSION_DENIED   Permission denied. This application does not have the privilege to call this method.
+ * @retval  #CONTACTS_ERROR_NOT_SUPPORTED       Not supported
+ * @retval  #CONTACTS_ERROR_DB                  Database operation failure
+ * @retval  #CONTACTS_ERROR_IPC                 IPC error
+ *
+ * @pre     contacts_connect() should be called to open a connection to the contacts service.
+ * @post 	contacts_db_changed_cb() callback wil be called upon success.
+ *
+ * @see contacts_connect()
+ * @see contacts_db_update_record()
+ * @see contacts_db_delete_record()
+ * @see contacts_db_get_record()
+ */
+int contacts_db_insert_record( contacts_record_h record, int *id );
+
+/**
+ * @brief Gets a record from the contacts database.
+ *
+ * @details This function creates a new contact handle from the contacts database by the given @a record_id. \n
+ *          @a record will be created, which is filled with contact information.
+ *
+ * @since_tizen 2.3
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/contact.read
+ * @privilege %http://tizen.org/privilege/callhistory.read
+ *
+ * @remarks %http://tizen.org/privilege/contact.read is needed for record which is related to @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_address_book, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_person, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_contact, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_simple_contact, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_group, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_my_profile, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_name, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_number, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_email, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_address, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_note, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_url, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_event, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_image, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_company, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_nickname, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_messenger, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_extension, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_profile, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_relationship, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_activity, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_activity_photo, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_speeddial, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_sdn. \n\n
+ * %http://tizen.org/privilege/callhistory.read	is needed for record which is related to @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_phone_log.
+ *
+ * @remarks You must release @a record using contacts_record_destroy().
+ *
+ * @param[in]   view_uri    The view URI of a record
+ * @param[in]   record_id   The record ID to get from database
+ * @param[out]  record      The record handle associated with the record ID
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
+ * @retval  #CONTACTS_ERROR_NONE                Successful
+ * @retval  #CONTACTS_ERROR_OUT_OF_MEMORY       Out of memory
+ * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ * @retval  #CONTACTS_ERROR_FILE_NO_SPACE       FS Full
+ * @retval  #CONTACTS_ERROR_NO_DATA             Requested data does not exist
+ * @retval  #CONTACTS_ERROR_PERMISSION_DENIED   Permission denied. This application does not have the privilege to call this method.
+ * @retval  #CONTACTS_ERROR_NOT_SUPPORTED       Not supported
+ * @retval  #CONTACTS_ERROR_DB                  Database operation failure
+ * @retval  #CONTACTS_ERROR_IPC                 IPC error
+ *
+ * @pre     contacts_connect() should be called to open a connection to the contacts service.
+ *
+ * @see contacts_connect()
+ * @see contacts_record_destroy()
+ */
+int contacts_db_get_record( const char* view_uri, int record_id, contacts_record_h* record );
+
+/**
+ * @brief Updates a record in the contacts database.
+ *
+ * @since_tizen 2.3
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/contact.write
+ * @privilege %http://tizen.org/privilege/callhistory.write
+ *
+ * @remarks %http://tizen.org/privilege/contact.write is needed for record which is related to @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_address_book, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_contact, \n @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_group, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_my_profile,
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_name, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_number, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_email, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_address, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_note, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_url, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_event, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_image, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_company, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_nickname, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_messenger, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_extension, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_profile, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_relationship, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_activity, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_activity_photo, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_speeddial. \n\n
+ * %http://tizen.org/privilege/callhistory.write is needed for record which is related to @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_phone_log.
+ *
+ * @param[in]   record          The record handle
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
+ * @retval  #CONTACTS_ERROR_NONE                Successful
+ * @retval  #CONTACTS_ERROR_OUT_OF_MEMORY       Out of memory
+ * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ * @retval  #CONTACTS_ERROR_FILE_NO_SPACE       FS Full
+ * @retval  #CONTACTS_ERROR_NO_DATA             Requested data does not exist
+ * @retval  #CONTACTS_ERROR_PERMISSION_DENIED   Permission denied. This application does not have the privilege to call this method.
+ * @retval  #CONTACTS_ERROR_NOT_SUPPORTED       Not supported
+ * @retval  #CONTACTS_ERROR_DB                  Database operation failure
+ * @retval  #CONTACTS_ERROR_IPC                 IPC error
+ *
+ * @pre     contacts_connect() should be called to open a connection to the contacts service.
+ * @post 	contacts_db_changed_cb() callback wil be called upon success.
+ *
+ * @see contacts_connect()
+ * @see contacts_db_insert_record()
+ * @see contacts_db_delete_record()
+ * @see contacts_db_get_record()
+ */
+int contacts_db_update_record( contacts_record_h record );
+
+/**
+ * @brief Deletes a record from the contacts database with related child records.
+ *
+ * @since_tizen 2.3
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/contact.write
+ * @privilege %http://tizen.org/privilege/callhistory.write
+ *
+ * @remarks %http://tizen.org/privilege/contact.write is needed for record which is related to @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_address_book, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_contact, \n @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_group, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_my_profile,
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_name, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_number, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_email, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_address, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_note, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_url, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_event, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_image, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_company, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_nickname, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_messenger, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_extension, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_profile, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_relationship, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_activity, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_activity_photo, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_speeddial. \n\n
+ * %http://tizen.org/privilege/callhistory.write is needed for record which is related to @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_phone_log.
+ *
+ * @param[in]   view_uri    The view URI of a record
+ * @param[in]   record_id   The record ID to delete
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
+ * @retval  #CONTACTS_ERROR_NONE                Successful
+ * @retval  #CONTACTS_ERROR_OUT_OF_MEMORY       Out of memory
+ * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ * @retval  #CONTACTS_ERROR_FILE_NO_SPACE       FS Full
+ * @retval  #CONTACTS_ERROR_NO_DATA             Requested data does not exist
+ * @retval  #CONTACTS_ERROR_PERMISSION_DENIED   Permission denied. This application does not have the privilege to call this method.
+ * @retval  #CONTACTS_ERROR_NOT_SUPPORTED       Not supported
+ * @retval  #CONTACTS_ERROR_DB                  Database operation failure
+ * @retval  #CONTACTS_ERROR_IPC                 IPC error
+ *
+ * @pre     contacts_connect() should be called to open a connection to the contacts service.
+ * @post 	contacts_db_changed_cb() callback wil be called upon success.
+ *
+ * @see contacts_connect()
+ * @see contacts_db_insert_record()
+ */
+int contacts_db_delete_record( const char* view_uri, int record_id );
+
+/**
+ * @brief Replaces an id-identified record with the given record.
+ *
+ * @details Now, this API supports only _contacts_contact view_uri.
+ *
+ * @since_tizen 2.3
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/contact.write
+ *
+ * @remarks The write-once value of @a record is not replaced.\n
+ * This API works only for @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_contact
+ *
+ * @param[in]   record                The new record handle to replace
+ * @param[in]   id                    The DB record ID to be replaced
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
+ * @retval  #CONTACTS_ERROR_NONE                Successful
+ * @retval  #CONTACTS_ERROR_OUT_OF_MEMORY       Out of memory
+ * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ * @retval  #CONTACTS_ERROR_FILE_NO_SPACE       FS Full
+ * @retval  #CONTACTS_ERROR_NO_DATA             Requested data does not exist
+ * @retval  #CONTACTS_ERROR_PERMISSION_DENIED   Permission denied. This application does not have the privilege to call this method.
+ * @retval  #CONTACTS_ERROR_NOT_SUPPORTED       Not supported
+ * @retval  #CONTACTS_ERROR_DB                  Database operation failure
+ * @retval  #CONTACTS_ERROR_IPC                 IPC error
+ *
+ * @pre     contacts_connect() should be called to open a connection to the contacts service.
+ * @post 	contacts_db_changed_cb() callback wil be called upon success.
+ *
+ * @see contacts_connect()
+ * @see contacts_db_update_record()
+ * @see contacts_db_delete_record()
+ * @see contacts_db_get_record()
+ */
+int contacts_db_replace_record( contacts_record_h record, int id );
+
+/**
+ * @brief Retrieves all records and returns the results list.
+ *
+ * @since_tizen 2.3
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/contact.read
+ *@privilege  %http://tizen.org/privilege/callhistory.read
+ *
+ * @remarks You must release @a record_list using contacts_list_destroy(). \n
+ * %http://tizen.org/privilege/contact.read is needed for record which is related to @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_address_book, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_person, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_contact, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_simple_contact, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_group, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_my_profile, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_name, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_number, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_email, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_address, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_note, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_url, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_event, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_image, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_company, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_nickname, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_messenger, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_extension, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_profile, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_relationship, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_activity, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_activity_photo, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_speeddial, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_sdn and all read-only views except views which are related to phone log. \n\n
+ * %http://tizen.org/privilege/callhistory.read is needed for record which is related to @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_phone_log, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_phone_log_stat. \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_person_phone_log view is needed both privileges.
+ *
+ * @param[in]   view_uri        The view URI to get records
+ * @param[in]   offset          The index from which to get results
+ * @param[in]   limit           The number to limit results(value 0 is used for all records)
+ * @param[out]  record_list     The record list
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
+ * @retval  #CONTACTS_ERROR_NONE                Successful
+ * @retval  #CONTACTS_ERROR_OUT_OF_MEMORY       Out of memory
+ * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ * @retval  #CONTACTS_ERROR_FILE_NO_SPACE       FS Full
+ * @retval  #CONTACTS_ERROR_NO_DATA             Requested data does not exist
+ * @retval  #CONTACTS_ERROR_PERMISSION_DENIED   Permission denied. This application does not have the privilege to call this method.
+ * @retval  #CONTACTS_ERROR_NOT_SUPPORTED       Not supported
+ * @retval  #CONTACTS_ERROR_DB                  Database operation failure
+ * @retval  #CONTACTS_ERROR_IPC                 IPC error
+ *
+ * @pre    contacts_connect() should be called to open a connection to the contacts service.
+ *
+ * @see contacts_connect()
+ * @see contacts_list_destroy()
+ */
+int contacts_db_get_all_records( const char* view_uri, int offset, int limit, contacts_list_h* record_list );
+
+/**
+ * @brief Uses a query to find records.
+ *
+ * @since_tizen 2.3
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/contact.read
+ * @privilege  %http://tizen.org/privilege/callhistory.read
+ *
+ * @remarks You must release @a record_list using contacts_list_destroy(). \n
+ * %http://tizen.org/privilege/contact.read	is needed for record which is related to @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_address_book, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_person, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_contact, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_simple_contact, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_group, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_my_profile, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_name, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_number, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_email, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_address, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_note, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_url, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_event, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_image, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_company, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_nickname, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_messenger, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_extension, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_profile, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_relationship, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_activity, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_activity_photo, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_speeddial, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_sdn and all read-only views except views which are related to phone log. \n\n
+ * %http://tizen.org/privilege/callhistory.read	is needed for record which is related to @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_phone_log, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_phone_log_stat. \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_person_phone_log view is needed both privileges.
+ *
+ * @param[in]   query           The query to filter the results
+ * @param[in]   offset          The index from which to get results
+ * @param[in]   limit           The number to limit results(value 0 is used for get all records)
+ * @param[out]  record_list     The record list
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
+ * @retval  #CONTACTS_ERROR_NONE                Successful
+ * @retval  #CONTACTS_ERROR_OUT_OF_MEMORY       Out of memory
+ * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ * @retval  #CONTACTS_ERROR_FILE_NO_SPACE       FS Full
+ * @retval  #CONTACTS_ERROR_NO_DATA             Requested data does not exist
+ * @retval  #CONTACTS_ERROR_PERMISSION_DENIED   Permission denied. This application does not have the privilege to call this method.
+ * @retval  #CONTACTS_ERROR_NOT_SUPPORTED       Not supported
+ * @retval  #CONTACTS_ERROR_DB                  Database operation failure
+ * @retval  #CONTACTS_ERROR_IPC                 IPC error
+ *
+ * @pre    contacts_connect() should be called to open a connection to the contacts service.
+ *
+ * @see contacts_connect()
+ * @see contacts_list_destroy()
+ */
+int contacts_db_get_records_with_query( contacts_query_h query, int offset, int limit, contacts_list_h* record_list );
+
+/**
+ * @brief Inserts multiple records to the contacts database.
+ *
+ * @since_tizen 2.3
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/contact.write
+ * @privilege %http://tizen.org/privilege/callhistory.write
+ *
+ * @remarks %http://tizen.org/privilege/contact.write is needed for record which is related to @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_address_book, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_contact, \n @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_group, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_my_profile,
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_name, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_number, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_email, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_address, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_note, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_url, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_event, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_image, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_company, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_nickname, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_messenger, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_extension, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_profile, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_relationship, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_activity, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_activity_photo, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_speeddial. \n\n
+ * %http://tizen.org/privilege/callhistory.write is needed for record which is related to @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_phone_log.
+ *
+ * @param[in]    record_list         The record list handle
+ * @param[out]   ids                 The IDs of inserted records
+ * @param[out]   count               The number of IDs
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
+ * @retval  #CONTACTS_ERROR_NONE                Successful
+ * @retval  #CONTACTS_ERROR_OUT_OF_MEMORY       Out of memory
+ * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ * @retval  #CONTACTS_ERROR_FILE_NO_SPACE       FS Full
+ * @retval  #CONTACTS_ERROR_NO_DATA             Requested data does not exist
+ * @retval  #CONTACTS_ERROR_PERMISSION_DENIED   Permission denied. This application does not have the privilege to call this method.
+ * @retval  #CONTACTS_ERROR_NOT_SUPPORTED       Not supported
+ * @retval  #CONTACTS_ERROR_DB                  Database operation failure
+ * @retval  #CONTACTS_ERROR_IPC                 IPC error
+ *
+ * @pre     contacts_connect() should be called to open a connection to the contacts service.
+ * @post 	contacts_db_changed_cb() callback wil be called upon success.
+ *
+ * @see contacts_connect()
+ * @see contacts_db_update_records()
+ * @see contacts_db_delete_records()
+ */
+int contacts_db_insert_records( contacts_list_h record_list, int **ids, int *count);
+
+/**
+ * @brief Updates multiple records in the contacts database.
+ *
+ * @since_tizen 2.3
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/contact.write
+ * @privilege %http://tizen.org/privilege/callhistory.write
+ *
+ * @remarks %http://tizen.org/privilege/contact.write is needed for record which is related to @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_address_book, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_contact, \n @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_group, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_my_profile,
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_name, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_number, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_email, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_address, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_note, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_url, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_event, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_image, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_company, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_nickname, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_messenger, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_extension, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_profile, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_relationship, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_activity, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_activity_photo, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_speeddial. \n\n
+ * %http://tizen.org/privilege/callhistory.write is needed for record which is related to @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_phone_log.
+ *
+ * @param[in]   record_list       The record list handle
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
+ * @retval  #CONTACTS_ERROR_NONE                Successful
+ * @retval  #CONTACTS_ERROR_OUT_OF_MEMORY       Out of memory
+ * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ * @retval  #CONTACTS_ERROR_FILE_NO_SPACE       FS Full
+ * @retval  #CONTACTS_ERROR_NO_DATA             Requested data does not exist
+ * @retval  #CONTACTS_ERROR_PERMISSION_DENIED   Permission denied. This application does not have the privilege to call this method.
+ * @retval  #CONTACTS_ERROR_NOT_SUPPORTED       Not supported
+ * @retval  #CONTACTS_ERROR_DB                  Database operation failure
+ * @retval  #CONTACTS_ERROR_IPC                 IPC error
+ *
+ * @pre     contacts_connect() should be called to open a connection to the contacts service.
+ * @post 	contacts_db_changed_cb() callback wil be called upon success.
+ *
+ * @see contacts_connect()
+ * @see contacts_db_insert_records()
+ * @see contacts_db_delete_records()
+ */
+int contacts_db_update_records( contacts_list_h record_list);
+
+/**
+ * @brief Deletes multiple records in the contacts database with related child records.
+ *
+ * @since_tizen 2.3
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/contact.write
+ * @privilege %http://tizen.org/privilege/callhistory.write
+ *
+ * @remarks %http://tizen.org/privilege/contact.write is needed for record which is related to @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_address_book, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_contact, \n @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_group, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_my_profile,
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_name, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_number, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_email, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_address, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_note, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_url, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_event, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_image, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_company, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_nickname, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_messenger, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_extension, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_profile, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_relationship, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_activity, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_activity_photo, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_speeddial. \n\n
+ * %http://tizen.org/privilege/callhistory.write is needed for record which is related to @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_phone_log.
+ *
+ * @param[in]   view_uri            The view URI of records
+ * @param[in]   record_id_array     The record IDs to delete
+ * @param[in]   count               The size of record ID array
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
+ * @retval  #CONTACTS_ERROR_NONE                Successful
+ * @retval  #CONTACTS_ERROR_OUT_OF_MEMORY       Out of memory
+ * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ * @retval  #CONTACTS_ERROR_FILE_NO_SPACE       FS Full
+ * @retval  #CONTACTS_ERROR_NO_DATA             Requested data does not exist
+ * @retval  #CONTACTS_ERROR_PERMISSION_DENIED   Permission denied. This application does not have the privilege to call this method.
+ * @retval  #CONTACTS_ERROR_NOT_SUPPORTED       Not supported
+ * @retval  #CONTACTS_ERROR_DB                  Database operation failure
+ * @retval  #CONTACTS_ERROR_IPC                 IPC error
+ *
+ * @pre     contacts_connect() should be called to open a connection to the contacts service.
+ * @post 	contacts_db_changed_cb() callback wil be called upon success.
+ *
+ * @see contacts_connect()
+ * @see contacts_db_insert_records()
+ * @see contacts_db_update_records()
+ */
+int contacts_db_delete_records(const char* view_uri, int record_id_array[], int count);
+
+/**
+ * @brief Replaces database records identified by given ids with a given record list.
+ *
+ * @since_tizen 2.3
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/contact.write
+ *
+ * @remarks The write-once value of record is not replaced.\n
+ * This API works only for @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_contact
+ *
+ * @param[in]   list          			      The new record list handle to replace
+ * @param[in]   record_id_array		The record IDs to replace
+ * @param[in]   count				The size of record ID array
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
+ * @retval  #CONTACTS_ERROR_NONE                Successful
+ * @retval  #CONTACTS_ERROR_OUT_OF_MEMORY       Out of memory
+ * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ * @retval  #CONTACTS_ERROR_FILE_NO_SPACE       FS Full
+ * @retval  #CONTACTS_ERROR_NO_DATA             Requested data does not exist
+ * @retval  #CONTACTS_ERROR_PERMISSION_DENIED   Permission denied. This application does not have the privilege to call this method.
+ * @retval  #CONTACTS_ERROR_NOT_SUPPORTED       Not supported
+ * @retval  #CONTACTS_ERROR_DB                  Database operation failure
+ * @retval  #CONTACTS_ERROR_IPC                 IPC error
+ *
+ * @pre     contacts_connect() should be called to open a connection to the contacts service.
+ * @post 	contacts_db_changed_cb() callback wil be called upon success.
+ *
+ * @see contacts_connect()
+ * @see contacts_db_update_record()
+ * @see contacts_db_delete_record()
+ * @see contacts_db_get_record()
+ */
+int contacts_db_replace_records( contacts_list_h list, int record_id_array[], int count );
+
+/**
+ * @brief Gets the current contacts database version.
+ *
+ * @since_tizen 2.3
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/contact.read
+ * @privilege %http://tizen.org/privilege/callhistory.read
+ *
+ * @param[out]  contacts_db_version    The contacts database version
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
+ * @retval  #CONTACTS_ERROR_NONE                Successful
+ * @retval  #CONTACTS_ERROR_OUT_OF_MEMORY       Out of memory
+ * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ * @retval  #CONTACTS_ERROR_PERMISSION_DENIED   Permission denied. This application does not have the privilege to call this method.
+ * @retval  #CONTACTS_ERROR_NO_DATA             Requested data does not exist
+ * @retval  #CONTACTS_ERROR_DB                  Database operation failure
+ * @retval  #CONTACTS_ERROR_IPC                 IPC error
+ *
+ * @pre     contacts_connect() should be called to open a connection to the contacts service.
+ *
+ * @see contacts_connect()
+ * @see contacts_db_get_changes_by_version()
+ */
+int contacts_db_get_current_version( int* contacts_db_version );
+
+/**
+ * @brief Registers a callback function to be invoked when a record changes.
+ *
+ * @since_tizen 2.3
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/contact.read
+ * @privilege %http://tizen.org/privilege/callhistory.read
+ *
+ * @remarks %http://tizen.org/privilege/contact.read is needed for record which is related to @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_address_book, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_person, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_contact, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_simple_contact, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_group, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_my_profile, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_name, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_number, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_email, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_address, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_note, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_url, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_event, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_image, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_company, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_nickname, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_messenger, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_extension, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_profile, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_relationship, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_activity, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_activity_photo, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_speeddial. \n\n
+ * %http://tizen.org/privilege/callhistory.read	is needed for record which is related to @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_phone_log.
+ * If successive change notification produced on the view_uri are identical,
+ * then they are coalesced into a single notification if the older notification has not yet been called
+ * because default main loop is doing something.
+ * But, it means that a callback function is not called to reliably count of change.
+ *
+ * @param[in]   view_uri    The view URI of records whose changes are monitored
+ * @param[in]   callback    The callback function to register
+ * @param[in]   user_data   The user data to be passed to the callback function
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
+ * @retval  #CONTACTS_ERROR_NONE                Successful
+ * @retval  #CONTACTS_ERROR_OUT_OF_MEMORY       Out of memory
+ * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ * @retval  #CONTACTS_ERROR_PERMISSION_DENIED   Permission denied. This application does not have the privilege to call this method.
+ * @retval  #CONTACTS_ERROR_NOT_SUPPORTED       Not supported
+ * @retval  #CONTACTS_ERROR_SYSTEM              System error
+ *
+ * @pre		contacts_connect() should be called to open a connection to the contacts service.
+ * @post		contacts_db_changed_cb() will be invoked when the designated view changes.
+ *
+ * @see contacts_connect()
+ * @see contacts_db_changed_cb()
+ * @see contacts_db_remove_changed_cb()
+ */
+int contacts_db_add_changed_cb( const char* view_uri, contacts_db_changed_cb callback, void* user_data );
+
+/**
+ * @brief Unregisters a callback function.
+ *
+ * @since_tizen 2.3
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/contact.read
+ * @privilege %http://tizen.org/privilege/callhistory.read
+ *
+ * @remarks %http://tizen.org/privilege/contact.read is needed for record which is related to @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_address_book, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_person, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_contact, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_simple_contact, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_group, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_my_profile, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_name, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_number, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_email, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_address, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_note, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_url, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_event, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_image, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_company, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_nickname, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_messenger, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_extension, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_profile, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_relationship, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_activity, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_activity_photo, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_speeddial. \n\n
+ * %http://tizen.org/privilege/callhistory.read is needed for record which is related to @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_phone_log.
+ *
+ * @param[in]   view_uri    The view URI of records whose changes are monitored
+ * @param[in]   callback    The callback function to register
+ * @param[in]   user_data   The user data to be passed to the callback function
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
+ * @retval  #CONTACTS_ERROR_NONE                Successful
+ * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ * @retval  #CONTACTS_ERROR_PERMISSION_DENIED   Permission denied. This application does not have the privilege to call this method.
+ * @retval  #CONTACTS_ERROR_NO_DATA             Requested data does not exist
+ * @retval  #CONTACTS_ERROR_NOT_SUPPORTED       Not supported
+ * @retval  #CONTACTS_ERROR_SYSTEM              System error
+ *
+ * @pre		contacts_connect() should be called to open a connection to the contacts service.
+ *
+ * @see contacts_connect()
+ * @see contacts_db_changed_cb()
+ * @see contacts_db_add_changed_cb()
+ */
+int contacts_db_remove_changed_cb( const char* view_uri, contacts_db_changed_cb callback, void* user_data );
+
+/**
+ * @brief Retrieves records changes since the given database version.
+ *
+ * @details This function will find all changed records since the given @a contacts_db_version. \n
+ *          Now, support @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_contact_updated_info, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_group_updated_info \n
+ *          @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_my_profile_updated_info and @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_grouprel_updated_info.
+ *
+ * @since_tizen 2.3
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/contact.read
+ *
+ * @remarks You must release @a record_list using contacts_list_destroy().
+ *
+ * @param[in]   view_uri                    The view URI to get records
+ * @param[in]   address_book_id             The address book ID to filter
+ * @param[in]   contacts_db_version         The contacts database version
+ * @param[out]  change_record_list          The record list
+ * @param[out]  current_contacts_db_version The current contacts database version
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
+ * @retval  #CONTACTS_ERROR_NONE                Successful
+ * @retval  #CONTACTS_ERROR_OUT_OF_MEMORY       Out of memory
+ * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ * @retval  #CONTACTS_ERROR_FILE_NO_SPACE       FS Full
+ * @retval  #CONTACTS_ERROR_NO_DATA             Requested data does not exist
+ * @retval  #CONTACTS_ERROR_PERMISSION_DENIED   Permission denied. This application does not have the privilege to call this method.
+ * @retval  #CONTACTS_ERROR_NOT_SUPPORTED       Not supported
+ * @retval  #CONTACTS_ERROR_DB                  Database operation failure
+ * @retval  #CONTACTS_ERROR_IPC                 IPC error
+ *
+ * @pre    contacts_connect() should be called to open a connection to the contacts service.
+ *
+ * @see contacts_connect()
+ * @see contacts_list_destroy()
+ */
+int contacts_db_get_changes_by_version( const char* view_uri, int address_book_id, int contacts_db_version,
+                        contacts_list_h* change_record_list, int* current_contacts_db_version );
+
+/**
+ * @brief Finds records based on a given keyword.
+ *
+ * @since_tizen 2.3
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/contact.read
+ *
+ * @remarks You must release @a record_list using contacts_list_destroy(). \n
+ * This API works only for @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_person, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_person_contact, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_person_grouprel, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_person_group_assigned \n
+ * and @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_person_group_not_assigned.
+ *
+ * @param[in]   view_uri        The view URI to get records
+ * @param[in]   keyword         The keyword
+ * @param[in]   offset          The index from which to get results
+ * @param[in]   limit           The number to limit results(value 0 is used for get all records)
+ * @param[out]  record_list     The record list
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
+ * @retval  #CONTACTS_ERROR_NONE                Successful
+ * @retval  #CONTACTS_ERROR_OUT_OF_MEMORY       Out of memory
+ * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ * @retval  #CONTACTS_ERROR_PERMISSION_DENIED   Permission denied. This application does not have the privilege to call this method.
+ * @retval  #CONTACTS_ERROR_NOT_SUPPORTED       Not supported
+ * @retval  #CONTACTS_ERROR_DB                  Database operation failure
+ * @retval  #CONTACTS_ERROR_IPC                 IPC error
+ *
+ * @pre    contacts_connect() should be called to open a connection to the contacts service.
+ *
+ * @see contacts_connect()
+ * @see contacts_list_destroy()
+ */
+int contacts_db_search_records(const char* view_uri, const char *keyword, int offset, int limit, contacts_list_h* record_list);
+
+/**
+ * @brief Finds records based on given query and keyword.
+ *
+ * @since_tizen 2.3
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/contact.read
+ *
+ * @remarks You must release @a record_list using contacts_list_destroy(). \n
+ * This API works only for @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_person, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_person_contact, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_person_grouprel, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_person_group_assigned \n
+ * and @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_person_group_not_assigned
+ *
+ * @param[in]   query           The query handle to filter
+ * @param[in]   keyword         The keyword
+ * @param[in]   offset          The index from which to get results
+ * @param[in]   limit           The number to limit results(value 0 used for get all records)
+ * @param[out]  record_list     The record list
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
+ * @retval  #CONTACTS_ERROR_NONE                Successful
+ * @retval  #CONTACTS_ERROR_OUT_OF_MEMORY       Out of memory
+ * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ * @retval  #CONTACTS_ERROR_FILE_NO_SPACE       FS Full
+ * @retval  #CONTACTS_ERROR_PERMISSION_DENIED   Permission denied. This application does not have the privilege to call this method.
+ * @retval  #CONTACTS_ERROR_NOT_SUPPORTED       Not supported
+ * @retval  #CONTACTS_ERROR_DB                  Database operation failure
+ * @retval  #CONTACTS_ERROR_IPC                 IPC error
+ *
+ * @pre    contacts_connect() should be called to open a connection to the contacts service.
+ *
+ * @see contacts_connect()
+ * @see contacts_list_destroy()
+ */
+int contacts_db_search_records_with_query(contacts_query_h query, const char *keyword, int offset, int limit, contacts_list_h* record_list);
+
+/**
+ * @brief Finds records based on a keyword and range.
+ *
+ * @since_tizen 2.3
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/contact.read
+ *
+ * @remarks You must release @a record_list using contacts_list_destroy(). \n
+ * This API works only for @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_person, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_person_contact, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_person_grouprel, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_person_group_assigned, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_person_group_not_assigned. These views can search records with range @ref CONTACTS_SEARCH_RANGE_NAME, @ref CONTACTS_SEARCH_RANGE_NUMBER, @ref CONTACTS_SEARCH_RANGE_DATA. \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_person_number can search records with @ref CONTACTS_SEARCH_RANGE_NAME and @ref CONTACTS_SEARCH_RANGE_NUMBER.\n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_person_email can search records with @ref CONTACTS_SEARCH_RANGE_NAME and @ref CONTACTS_SEARCH_RANGE_EMAIL. \n
+ *
+ * @param[in]   view_uri        The view URI
+ * @param[in]   keyword         The keyword
+ * @param[in]   offset          The index from which to get results
+ * @param[in]   limit           The number to limit results(value 0 is used for get all records)
+ * @param[in]   range           The search range
+ * @param[out]  record_list     The record list
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
+ * @retval  #CONTACTS_ERROR_NONE                Successful
+ * @retval  #CONTACTS_ERROR_OUT_OF_MEMORY       Out of memory
+ * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ * @retval  #CONTACTS_ERROR_PERMISSION_DENIED   Permission denied. This application does not have the privilege to call this method.
+ * @retval  #CONTACTS_ERROR_NOT_SUPPORTED       Not supported
+ * @retval  #CONTACTS_ERROR_DB                  Database operation failure
+ * @retval  #CONTACTS_ERROR_IPC                 IPC error
+ *
+ * @pre    contacts_connect() should be called to open a connection to the contacts service.
+ *
+ * @see contacts_connect()
+ * @see contacts_list_destroy()
+ */
+int contacts_db_search_records_with_range(const char* view_uri, const char *keyword, int offset, int limit, int range, contacts_list_h* record_list);
+
+/**
+ * @brief Gets the number of records in a specific view.
+ *
+ * @since_tizen 2.3
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/contact.read
+ * @privilege %http://tizen.org/privilege/callhistory.read
+ *
+ * @remarks %http://tizen.org/privilege/contact.read	is needed for record which is related to @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_address_book, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_person, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_contact, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_simple_contact, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_group, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_my_profile, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_name, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_number, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_email, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_address, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_note, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_url, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_event, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_image, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_company, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_nickname, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_messenger, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_extension, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_profile, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_relationship, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_activity, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_activity_photo, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_speeddial, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_sdn and all read-only views except views which is related to phone log. \n\n
+ * %http://tizen.org/privilege/callhistory.read is needed for record which is related to @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_phone_log, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_phone_log_stat. \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_person_phone_log view is needed both privilege.
+ *
+ * @param[in]   view_uri        The view URI
+ * @param[out]  count           The count of records
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
+ * @retval  #CONTACTS_ERROR_NONE                Successful
+ * @retval  #CONTACTS_ERROR_OUT_OF_MEMORY       Out of memory
+ * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ * @retval  #CONTACTS_ERROR_NO_DATA             Requested data does not exist
+ * @retval  #CONTACTS_ERROR_PERMISSION_DENIED   Permission denied. This application does not have the privilege to call this method.
+ * @retval  #CONTACTS_ERROR_NOT_SUPPORTED       Not supported
+ * @retval  #CONTACTS_ERROR_DB                  Database operation failure
+ * @retval  #CONTACTS_ERROR_IPC                 IPC error
+ *
+ * @pre    contacts_connect() should be called to open a connection to the contacts service.
+ *
+ * @see contacts_connect()
+ */
+int contacts_db_get_count( const char* view_uri, int *count);
+
+/**
+ * @brief Gets the number of records matching a query.
+ *
+ * @since_tizen 2.3
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/contact.read
+ * @privilege %http://tizen.org/privilege/callhistory.read
+ *
+ * @remarks %http://tizen.org/privilege/contact.read is needed for record which is related to @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_address_book, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_person, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_contact, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_simple_contact, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_group, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_my_profile, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_name, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_number, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_email, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_address, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_note, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_url, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_event, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_image, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_company, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_nickname, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_messenger, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_extension, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_profile, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_relationship, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_activity, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_activity_photo, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_speeddial, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_sdn and all read-only views except views which is related to phone log. \n\n
+ * %http://tizen.org/privilege/callhistory.read is needed for record which is related to @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_phone_log, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_phone_log_stat. \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_person_phone_log view is needed both privilege.
+ *
+ * @param[in]   query           The query handle
+ * @param[out]  count           The count of records
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
+ * @retval  #CONTACTS_ERROR_NONE                Successful
+ * @retval  #CONTACTS_ERROR_OUT_OF_MEMORY       Out of memory
+ * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ * @retval  #CONTACTS_ERROR_NO_DATA             Requested data does not exist
+ * @retval  #CONTACTS_ERROR_PERMISSION_DENIED   Permission denied. This application does not have the privilege to call this method.
+ * @retval  #CONTACTS_ERROR_NOT_SUPPORTED       Not supported
+ * @retval  #CONTACTS_ERROR_DB                  Database operation failure
+ * @retval  #CONTACTS_ERROR_IPC                 IPC error
+ *
+ * @pre    contacts_connect() should be called to open a connection to the contacts service.
+ *
+ * @see contacts_connect()
+ */
+int contacts_db_get_count_with_query( contacts_query_h query, int *count);
+
+/**
+ * @brief Gets the last successful changed contacts database version on the current connection.
+ *
+ * @since_tizen 2.3
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/contact.read
+ * @privilege %http://tizen.org/privilege/callhistory.read
+ *
+ * @param[out]  last_change_version    The database version
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
+ * @retval  #CONTACTS_ERROR_NONE                Successful
+ * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ * @retval  #CONTACTS_ERROR_DB                  Database operation failure
+ * @retval  #CONTACTS_ERROR_PERMISSION_DENIED   Permission denied. This application does not have the privilege to call this method.
+ *
+ * @pre     contacts_connect() should be called to open a connection to the contacts service.
+ *
+ * @see contacts_connect()
+ * @see contacts_db_get_current_version()
+ */
+int contacts_db_get_last_change_version(int* last_change_version);
+
+/**
+ * @internal
+ * @brief Called to get the result of an insert batch operation.
+ *
+ * @since_tizen 2.3
  *
  * @param[in]   error     		Error code for batch operation
  * @param[in]   ids     		IDs of inserted records
  * @param[in]   count     	The number of ids
  * @param[in]   user_data	The user data passed from the batch operation
  *
- * @return  @c true to continue with the next iteration of the loop or @c false to break out of the loop.
+ * @return  @c True to continue with the next iteration of the loop or @c false to break out of the loop
  *
- * @pre contacts_db_insert_records() will invoke this callback.
+ * @pre contacts_db_insert_records_async() will invoke this callback.
  *
- * @see contacts_db_insert_records()
+ * @see contacts_db_insert_records_async()
  */
-typedef void (*contacts_db_insert_result_cb)( int error, int *ids, unsigned int count, void *user_data);
+typedef void (*contacts_db_insert_result_cb)( int error, int *ids, int count, void *user_data);
 
 /**
- * @brief The callback function to get the result of batch operation.
+ * @internal
+ * @brief Called to get the result of a batch operation.
+ *
+ * @since_tizen 2.3
  *
  * @param[in]   error     		Error code for batch operation
  * @param[in]   user_data		The user data passed from the batch operation
  *
- * @return  @c true to continue with the next iteration of the loop or @c false to break out of the loop.
+ * @return  @c True to continue with the next iteration of the loop or @c false to break out of the loop
  *
- * @pre contacts_db_update_records() will invoke this callback.
+ * @pre contacts_db_update_records_async() will invoke this callback.
  *
- * @see contacts_db_update_records()
+ * @see contacts_db_update_records_async()
+ * @see contacts_db_delete_records_async()
+ * @see contacts_db_replace_records_async()
  */
 typedef void (*contacts_db_result_cb)( int error, void *user_data);
 
 /**
- * @brief   Inserts a record to the contacts database.
+ * @internal
+ * @brief Inserts multiple records to the contacts database as a batch operation.
  *
- * @param[in]   record                 The record handle
+ * @since_tizen 2.3
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/contact.write
+ * @privilege  %http://tizen.org/privilege/callhistory.write
  *
- * @return  0 on success, otherwise a negative error value.
- * @retval  #CONTACTS_ERROR_NONE                Successful
- * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
- * @retval  #CONTACTS_ERROR_DB           		Database operation failure
- *
- * @pre     This function requires an open connection to contacts service by contacts_connect2().
- *
- * @see contacts_connect2()
- * @see contacts_db_update_record()
- * @see contacts_db_delete_record()
- * @see contacts_db_get_record()
- */
-API int contacts_db_insert_record( contacts_record_h record, int *id );
-
-/**
- * @brief   Gets a record from the contacts database.
- *
- * @details This function creates a new contact handle from the contacts database by the given @a record_id. \n
- * @a contact will be created, which is filled with contact information.
- *
- * @remarks  @a record must be released with contacts_record_destroy() by you.
- *
- * @param[in]   view_uri	The view URI of a record
- * @param[in]   record_id	The record ID to get from database
- * @param[out]  record		The record handle associated with the record ID
- *
- * @return  0 on success, otherwise a negative error value.
- * @retval  #CONTACTS_ERROR_NONE                Successful
- * @retval  #CONTACTS_ERROR_INVALID_PARAMETER	Invalid parameter
- * @retval  #CONTACTS_ERROR_DB					Database operation failure
- *
- * @pre     This function requires an open connection to contacts service by contacts_connect2().
- *
- * @see contacts_connect2()
- * @see contacts_record_destroy()
- */
-API int contacts_db_get_record( const char* view_uri, int record_id, contacts_record_h* record );
-
-/**
- * @brief Updates a record to the contacts database.
- *
- * @param[in]   record          The record handle
- *
- * @return  0 on success, otherwise a negative error value.
- * @retval  #CONTACTS_ERROR_NONE                Successful
- * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
- * @retval  #CONTACTS_ERROR_DB       		    Database operation failure
- *
- * @pre     This function requires an open connection to contacts service by contacts_connect2().
- *
- * @see contacts_connect2()
- * @see contacts_db_insert_record()
- * @see contacts_db_delete_record()
- * @see contacts_db_get_record()
- */
-API int contacts_db_update_record( contacts_record_h record );
-
-/**
- * @brief Deletes a record from the contacts database.
- *
- * @param[in]   view_uri	The view URI of a record
- * @param[in]   record_id	The record ID to delete
- *
- * @return  0 on success, otherwise a negative error value.
- * @retval  #CONTACTS_ERROR_NONE                Successful
- * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
- * @retval  #CONTACTS_ERROR_DB		           Database operation failure
- *
- * @pre     This function requires an open connection to contacts service by contacts_connect2().
- *
- * @see contacts_connect2()
- * @see contacts_db_insert_record()
- */
-API int contacts_db_delete_record( const char* view_uri, int record_id );
-
-/**
- * @brief   Replace the record to the contacts database related to id.
- *
- * @remarks     @the write once value of record is not replaced.
- *
- * @param[in]   record                The new record handle to replace
- * @param[in]   id               	  The db record ID to replace
- *
- * @return  0 on success, otherwise a negative error value.
- * @retval  #CONTACTS_ERROR_NONE                Successful
- * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
- * @retval  #CONTACTS_ERROR_DB           		Database operation failure
- *
- * @pre     This function requires an open connection to contacts service by contacts_connect2().
- *
- * @see contacts_connect2()
- * @see contacts_db_update_record()
- * @see contacts_db_delete_record()
- * @see contacts_db_get_record()
- */
-API int contacts_db_replace_record( contacts_record_h record, int id );
-
-/**
- * @brief       Retrieves all record as a list
- *
- * @remarks     @a record_list must be released with contacts_list_destroy() by you.
- *
- * @param[in]   view_uri		The view URI to get records
- * @param[in]   offset			The index to get results from which index
- * @param[in]   limit			The number to limit results
- * @param[out]  record_list		The record list
- *
- * @return  0 on success, otherwise a negative error value.
- * @retval  #CONTACTS_ERROR_NONE				Successful
- * @retval  #CONTACTS_ERROR_OUT_OF_MEMORY		Out of memory
- * @retval  #CONTACTS_ERROR_INVALID_PARAMETER	Invalid parameter
- * @retval  #CONTACTS_ERROR_DB					Database operation failure
- *
- * @pre    This function requires an open connection to contacts service by contacts_connect2().
- *
- * @see contacts_connect2()
- * @see contacts_list_destroy()
- */
-API int contacts_db_get_all_records( const char* view_uri, int offset, int limit, contacts_list_h* record_list );
-
-/**
- * @brief       Retrieves records with a query handle
- *
- * @remarks     @a record_list must be released with contacts_list_destroy() by you.
- *
- * @param[in]   query			The query handle to filter
- * @param[in]   offset			The index to get results from which index
- * @param[in]   limit			The number to limit results
- * @param[out]  record_list		The record list
- *
- * @return  0 on success, otherwise a negative error value.
- * @retval  #CONTACTS_ERROR_NONE				Successful
- * @retval  #CONTACTS_ERROR_OUT_OF_MEMORY		Out of memory
- * @retval  #CONTACTS_ERROR_INVALID_PARAMETER	Invalid parameter
- * @retval  #CONTACTS_ERROR_DB					Database operation failure
- *
- * @pre    This function requires an open connection to contacts service by contacts_connect2().
- *
- * @see contacts_connect2()
- * @see contacts_list_destroy()
- */
-API int contacts_db_get_records_with_query( contacts_query_h query, int offset, int limit, contacts_list_h* record_list );
-
-/**
- * @brief   Inserts multiple records as batch operation to the contacts database.
- *
- * @param[in]   record_list			The record list handle
- * @param[out]   ids				IDs of inserted records
- * @param[out]   count				The number of ids
- *
- * @return  0 on success, otherwise a negative error value.
- * @retval  #CONTACTS_ERROR_NONE                Successful
- * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
- * @retval  #CONTACTS_ERROR_DB           		Database operation failure
- *
- * @pre     This function requires an open connection to contacts service by contacts_connect2().
- *
- * @see contacts_connect2()
- * @see contacts_db_update_records()
- * @see contacts_db_delete_records()
- * @see contacts_db_result_cb()
- */
-API int contacts_db_insert_records( contacts_list_h record_list, int **ids, unsigned int *count);
-
-/**
- * @brief   Inserts multiple records as batch operation to the contacts database.
- *
- * @remarks     @The purpose of async API is for UI not to create thread.
- * If you have to display progress during DB operation, you can use this API.
+ * @remarks The purpose of async API is for the UI not to create a thread.
+ * If you have to display progress during the DB operation, you can use this API.
  * The callback function will be called in main loop.
- * Do not use this API in thread.
- * During executint this API, you can not call the other DB operation API.
+ * Do not use this API in a thread.
+ * During the execution of this API, you can not call the other DB operation APIs.
+ * %http://tizen.org/privilege/contact.write is needed for record which is related to @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_address_book, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_contact, \n @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_group, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_my_profile,
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_name, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_number, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_email, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_address, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_note, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_url, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_event, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_image, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_company, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_nickname, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_messenger, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_extension, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_profile, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_relationship, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_activity, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_activity_photo, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_speeddial. \n\n
+ * %http://tizen.org/privilege/callhistory.write is needed for record which is related to @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_phone_log.
  *
  * @param[in]   record_list			The record list handle
- * @param[in]   callback			The callback function to invoke which lets you know result of batch operation
+ * @param[in]   callback			The callback function to inform about the batch operation result
  * @param[in]   user_data			The user data to be passed to the callback function
  *
- * @return  0 on success, otherwise a negative error value.
+ * @return  @c 0 on sucess,
+ *          otherwise a negative error value (#contacts_error_e)
+ *
  * @retval  #CONTACTS_ERROR_NONE                Successful
  * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
  * @retval  #CONTACTS_ERROR_DB           		Database operation failure
+ * @retval  #CONTACTS_ERROR_PERMISSION_DENIED   Permission denied
+ * @retval  #CONTACTS_ERROR_NOT_SUPPORTED       Not supported
  *
- * @pre     This function requires an open connection to contacts service by contacts_connect2().
+ * @pre     contacts_connect() should be called to open a connection to the contacts service.
  *
- * @see contacts_connect2()
+ * @post		contacts_db_insert_result_cb() callback will be called
+ *
+ * @see contacts_connect()
  * @see contacts_db_insert_records()
  * @see contacts_db_update_records_async()
  * @see contacts_db_delete_records_async()
- * @see contacts_db_insert_result_cb()
  */
-API int contacts_db_insert_records_async( contacts_list_h record_list, contacts_db_insert_result_cb callback, void *user_data);
+int contacts_db_insert_records_async( contacts_list_h record_list, contacts_db_insert_result_cb callback, void *user_data);
 
 /**
- * @brief   Updates multiple records as batch operation to the contacts database.
+ * @internal
+ * @brief Updates multiple records in the contacts database as a batch operation.
+ *
+ * @since_tizen 2.3
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/contact.write
+ * @privilege %http://tizen.org/privilege/callhistory.write
+ *
+ * @remarks %http://tizen.org/privilege/contact.write is needed for record which is related to @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_address_book, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_contact, \n @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_group, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_my_profile,
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_name, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_number, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_email, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_address, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_note, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_url, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_event, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_image, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_company, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_nickname, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_messenger, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_extension, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_profile, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_relationship, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_activity, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_activity_photo, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_speeddial. \n\n
+ * %http://tizen.org/privilege/callhistory.write is needed for record which is related to @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_phone_log.
  *
  * @param[in]   record_list			The record list handle
- *
- * @return  0 on success, otherwise a negative error value.
- * @retval  #CONTACTS_ERROR_NONE                Successful
- * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
- * @retval  #CONTACTS_ERROR_DB           		Database operation failure
- *
- * @pre     This function requires an open connection to contacts service by contacts_connect2().
- *
- * @see contacts_connect2()
- * @see contacts_db_insert_records()
- * @see contacts_db_delete_records()
- * @see contacts_db_result_cb()
- */
-API int contacts_db_update_records( contacts_list_h record_list);
-
-/**
- * @brief   Updates multiple records as batch operation to the contacts database.
- *
- * @param[in]   record_list			The record list handle
- * @param[in]   callback			The callback function to invoke which lets you know result of batch operation
+ * @param[in]   callback			The callback function to inform about the batch operation result
  * @param[in]   user_data			The user data to be passed to the callback function
  *
- * @return  0 on success, otherwise a negative error value.
+ * @return  0 on success, otherwise a negative error value
  * @retval  #CONTACTS_ERROR_NONE                Successful
  * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
  * @retval  #CONTACTS_ERROR_DB           		Database operation failure
+ * @retval  #CONTACTS_ERROR_PERMISSION_DENIED   Permission denied
+ * @retval  #CONTACTS_ERROR_NOT_SUPPORTED       Not supported
  *
- * @pre     This function requires an open connection to contacts service by contacts_connect2().
+ * @pre     contacts_connect() should be called to open a connection to the contacts service.
+ * @post		contacts_db_result_cb() callback will be called
  *
- * @see contacts_connect2()
+ * @see contacts_connect()
  * @see contacts_db_update_records()
  * @see contacts_db_insert_records_async()
  * @see contacts_db_delete_records_async()
- * @see contacts_db_result_cb()
  */
-API int contacts_db_update_records_async( contacts_list_h record_list, contacts_db_result_cb callback, void *user_data);
+int contacts_db_update_records_async( contacts_list_h record_list, contacts_db_result_cb callback, void *user_data);
 
 /**
- * @brief   Deletes multiple records as batch operation to the contacts database.
+ * @internal
+ * @brief Deletes multiple records with related child records in the contacts database as a batch operation.
+ *
+ * @since_tizen 2.3
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/contact.write
+ * @privilege %http://tizen.org/privilege/callhistory.write
+ *
+ * @remarks %http://tizen.org/privilege/contact.write is needed for record which is related to @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_address_book, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_contact, \n @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_group, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_my_profile,
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_name, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_number, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_email, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_address, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_note, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_url, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_event, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_image, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_company, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_nickname, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_messenger, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_extension, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_profile, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_relationship, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_activity, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_activity_photo, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_speeddial. \n\n
+ * %http://tizen.org/privilege/callhistory.write is needed for record which is related to @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_phone_log.
  *
  * @param[in]   view_uri			The view URI of records
  * @param[in]   record_id_array		The record IDs to delete
- * @param[in]   count				The number of record ID array
- *
- * @return  0 on success, otherwise a negative error value.
- * @retval  #CONTACTS_ERROR_NONE                Successful
- * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
- * @retval  #CONTACTS_ERROR_DB           		Database operation failure
- *
- * @pre     This function requires an open connection to contacts service by contacts_connect2().
- *
- * @see contacts_connect2()
- * @see contacts_db_insert_records()
- * @see contacts_db_update_records()
- * @see contacts_db_result_cb()
- */
-API int contacts_db_delete_records(const char* view_uri, int record_id_array[], int count);
-
-/**
- * @brief   Deletes multiple records as batch operation to the contacts database.
- *
- * @param[in]   view_uri			The view URI of records
- * @param[in]   record_id_array		The record IDs to delete
- * @param[in]   count				The number of record ID array
- * @param[in]   callback			The callback function to invoke which lets you know result of batch operation
+ * @param[in]   count				The size of record ID array
+ * @param[in]   callback			The callback function to inform about the batch operation result
  * @param[in]   user_data			The user data to be passed to the callback function
  *
- * @return  0 on success, otherwise a negative error value.
+ * @return  @c 0 on sucess,
+ *          otherwise a negative error value (#contacts_error_e)
+ *
  * @retval  #CONTACTS_ERROR_NONE                Successful
  * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
  * @retval  #CONTACTS_ERROR_DB           		Database operation failure
+ * @retval  #CONTACTS_ERROR_PERMISSION_DENIED   Permission denied
+ * @retval  #CONTACTS_ERROR_NOT_SUPPORTED       Not supported
  *
- * @pre     This function requires an open connection to contacts service by contacts_connect2().
+ * @pre     contacts_connect() should be called to open a connection to the contacts service.
+ * @post		contacts_db_result_cb() callback will be called
  *
- * @see contacts_connect2()
+ * @see contacts_connect()
  * @see contacts_db_delete_records()
  * @see contacts_db_insert_records_async()
  * @see contacts_db_update_records_async()
- * @see contacts_db_result_cb()
  */
-API int contacts_db_delete_records_async(const char* view_uri, int record_id_array[], int count, contacts_db_result_cb callback, void *user_data);
+int contacts_db_delete_records_async(const char* view_uri, int record_id_array[], int count, contacts_db_result_cb callback, void *user_data);
 
 /**
- * @brief   Replace the record to the contacts database related to id.
+ * @internal
+ * @brief Replaces database records identified by given ids with a given record list, asynchronously.
  *
- * @param[in]   record          			      The new record list handle to replace
+ * @since_tizen 2.3
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/contact.write
+ *
+ * @remarks the write-once value of record is not replaced.\n
+ * This API works only for @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_contact
+ *
+ * @param[in]   list  			      The new record list handle to replace
  * @param[in]   record_id_array		The record IDs to replace
- * @param[in]   count				The number of record ID array
- *
- * @return  0 on success, otherwise a negative error value.
- * @retval  #CONTACTS_ERROR_NONE                Successful
- * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
- * @retval  #CONTACTS_ERROR_DB           		Database operation failure
- *
- * @pre     This function requires an open connection to contacts service by contacts_connect2().
- *
- * @see contacts_connect2()
- * @see contacts_db_update_record()
- * @see contacts_db_delete_record()
- * @see contacts_db_get_record()
- */
-API int contacts_db_replace_records( contacts_list_h list, int record_id_array[], unsigned int count );
-
-/**
- * @brief   Replace the record to the contacts database related to id.
- *
- * @param[in]   record          			      The new record list handle to replace
- * @param[in]   record_id_array		The record IDs to replace
- * @param[in]   count				The number of record ID array
- * @param[in]   callback			The callback function to invoke which lets you know result of batch operation
+ * @param[in]   count				The size of record ID array
+ * @param[in]   callback			The callback function to inform about the batch operation result
  * @param[in]   user_data			The user data to be passed to the callback function
  *
- * @return  0 on success, otherwise a negative error value.
+ * @return  @c 0 on sucess,
+ *          otherwise a negative error value (#contacts_error_e)
+ *
  * @retval  #CONTACTS_ERROR_NONE                Successful
  * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
  * @retval  #CONTACTS_ERROR_DB           		Database operation failure
+ * @retval  #CONTACTS_ERROR_PERMISSION_DENIED   Permission denied
+ * @retval  #CONTACTS_ERROR_NOT_SUPPORTED       Not supported
  *
- * @pre     This function requires an open connection to contacts service by contacts_connect2().
+ * @pre     contacts_connect() should be called to open a connection to the contacts service.
+ * @post		contacts_db_result_cb() callback will be called
  *
- * @see contacts_connect2()
+ * @see contacts_connect()
  * @see contacts_db_replace_record()
  * @see contacts_db_update_record_async()
  * @see contacts_db_delete_records_async()
- * @see contacts_db_get_record()
  */
-API int contacts_db_replace_records_async( contacts_list_h list, int record_id_array[], unsigned int count, contacts_db_result_cb callback, void *user_data );
-
-/**
- * @brief	Gets the current contacts database version.
- *
- * @param[out]  contacts_db_version    The contacts database version
- *
- * @return  0 on success, otherwise a negative error value.
- * @retval  #CONTACTS_ERROR_NONE				Successful
- * @retval	#CONTACTS_ERROR_INVALID_PARAMETER	Invalid parameter
- * @retval  #CONTACTS_ERROR_DB					Database operation failure
- *
- * @pre     This function requires an open connection to the contacts service by contacts_connect2().
- *
- * @see contacts_connect2()
- * @see contacts_db_get_changes_by_version()
- */
-API int contacts_db_get_current_version( int* contacts_db_version );
-
-/**
- * @brief       Registers a callback function to be invoked when the record changes.
- *
- * @param[in]   view_uri	The view URI of record to subscribe to changing notifications
- * @param[in]   callback	The callback function to register
- * @param[in]	user_data	The user data to be passed to the callback function
- *
- * @return  0 on success, otherwise a negative error value.
- * @retval	#CONTACTS_ERROR_NONE                Successful
- * @retval	#CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
- *
- * @pre		This function requires an open connection to the contacts service by contacts_connect2().
- * @post	contacts_db_changed_cb() will be invoked when the designated view changes.
- *
- * @see contacts_connect2()
- * @see contacts_db_changed_cb()
- * @see contacts_db_remove_changed_cb()
- */
-API int contacts_db_add_changed_cb( const char* view_uri, contacts_db_changed_cb callback, void* user_data );
-
-/**
- * @brief       Unregisters a callback function.
- *
- * @param[in]   view_uri	The view URI of record to subscribe to changing notifications
- * @param[in]   callback	The callback function to register
- * @param[in]	user_data	The user data to be passed to the callback function
- *
- * @return  0 on success, otherwise a negative error value.
- * @retval	#CONTACTS_ERROR_NONE                Successful
- * @retval	#CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
- *
- * @pre		This function requires an open connection to the contacts service by contacts_connect2().
- *
- * @see contacts_connect2()
- * @see contacts_db_changed_cb()
- * @see contacts_db_add_changed_cb()
- */
-API int contacts_db_remove_changed_cb( const char* view_uri, contacts_db_changed_cb callback, void* user_data );
+int contacts_db_replace_records_async( contacts_list_h list, int record_id_array[], int count, contacts_db_result_cb callback, void *user_data );
 
 #ifndef _CONTACTS_NATIVE
 
 /**
- * @brief       Called when designated view changes.
+ * @internal
+ * @brief Called when the designated view changes.
  *
- * @param[in]   view_uri	The view uri, now support only _contacts_person and _contacts_phone_log
- * @param[in]   changes	It includes changes information ("type:id," string is repeated. You should parse it)
+ * @since_tizen 2.3
+ *
+ * @param[in]   view_uri	The view URI, only _contacts_person and _contacts_phone_log are now supported
+ * @param[in]   changes	It includes changes information ("type:id," string is repeated, you should parse it)
  * @param[in]   user_data	The user data passed from the callback registration function
  *
  * @see contacts_db_add_changed_cb_with_info()
@@ -481,199 +1113,68 @@ API int contacts_db_remove_changed_cb( const char* view_uri, contacts_db_changed
 typedef void (*contacts_db_change_cb_with_info)(const char* view_uri, char *changes, void* user_data);
 
 /**
- * @brief       Registers a callback function.
+ * @internal
+ * @brief Registers a callback function.
+ * @details Now, support only _contacts_person and _contacts_phone_log view_uri.
  *
- * @param[in]   view_uri	The view URI of record to subscribe to changing notifications
+ * @since_tizen 2.3
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/contact.read
+ * @privilege %http://tizen.org/privilege/callhistory.read
+ *
+ * @remarks %http://tizen.org/privilege/contact.read is needed to get notification whenever record which is related to @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_person is changed, \n
+ * %http://tizen.org/privilege/callhistory.read is needed to get notification whenever record which is related to @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_phone_log is changed.
+ *
+ * @param[in]   view_uri	The view URI of records whose changes are monitored
  * @param[in]   callback	The callback function to register
  * @param[in]	user_data	The user data to be passed to the callback function
  *
- * @return  0 on success, otherwise a negative error value.
+ * @return  @c 0 on sucess,
+ *          otherwise a negative error value (#contacts_error_e)
+ *
  * @retval	#CONTACTS_ERROR_NONE                Successful
+ * @retval  #CONTACTS_ERROR_OUT_OF_MEMORY   		Out of memory
  * @retval	#CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ * @retval  #CONTACTS_ERROR_IPC           		IPC error
+ * @retval  #CONTACTS_ERROR_PERMISSION_DENIED   Permission denied
+ * @retval  #CONTACTS_ERROR_NOT_SUPPORTED       Not supported
  *
- * @pre		This function requires an open connection to the contacts service by contacts_connect2().
+ * @pre		contacts_connect() should be called to open a connection to the contacts service.
+ * @post		contacts_db_change_cb_with_info() callback will be called
  *
- * @see contacts_connect2()
+ * @see contacts_connect()
  * @see contacts_db_changed_cb_with_info()
  * @see contacts_db_remove_changed_cb_with_info()
  */
-
-API int contacts_db_add_changed_cb_with_info(const char* view_uri, contacts_db_change_cb_with_info callback, void* user_data);
+int contacts_db_add_changed_cb_with_info(const char* view_uri, contacts_db_change_cb_with_info callback, void* user_data);
 
 /**
- * @brief       Unregisters a callback function.
+ * @internal
+ * @brief Unregisters a callback function.
+ * @details Now, support only _contacts_person and _contacts_phone_log view_uri.
  *
- * @param[in]   view_uri	The view URI of record to subscribe to changing notifications
+ * @since_tizen 2.3
+ *
+ * @param[in]   view_uri	The view URI of records whose changes are monitored
  * @param[in]   callback	The callback function to register
  * @param[in]	user_data	The user data to be passed to the callback function
  *
- * @return  0 on success, otherwise a negative error value.
+ * @return  @c 0 on sucess,
+ *          otherwise a negative error value (#contacts_error_e)
+ *
  * @retval	#CONTACTS_ERROR_NONE                Successful
  * @retval	#CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ * @retval  #CONTACTS_ERROR_NOT_SUPPORTED       Not supported
  *
- * @pre		This function requires an open connection to the contacts service by contacts_connect2().
+ * @pre		contacts_connect() should be called to open a connection to the contacts service.
  *
- * @see contacts_connect2()
+ * @see contacts_connect()
  * @see contacts_db_changed_cb_with_info()
  * @see contacts_db_add_changed_cb_with_info()
  */
+int contacts_db_remove_changed_cb_with_info(const char* view_uri, contacts_db_change_cb_with_info callback, void* user_data);
 
-API int contacts_db_remove_changed_cb_with_info(const char* view_uri, contacts_db_change_cb_with_info callback, void* user_data);
 #endif
-
-/**
- * @brief       Retrieves records with the contacts database version.
- *
- * @details		This function will find all changed records since the given @a contacts_db_version
- *
- * @remarks     @a change_record_list must be released with contacts_list_destroy() by you.
- *
- * @param[in]   view_uri					The view URI to get records
- * @param[in]   address_book_id				The address book ID to filter
- * @param[in]   contacts_db_version			The contacts database version
- * @param[out]  record_list					The record list
- * @param[out]  current_contacts_db_version	The current contacts database version
- *
- * @return  0 on success, otherwise a negative error value.
- * @retval  #CONTACTS_ERROR_NONE				Successful
- * @retval  #CONTACTS_ERROR_OUT_OF_MEMORY		Out of memory
- * @retval  #CONTACTS_ERROR_INVALID_PARAMETER	Invalid parameter
- * @retval  #CONTACTS_ERROR_DB					Database operation failure
- *
- * @pre    This function requires an open connection to contacts service by contacts_connect2().
- *
- * @see contacts_connect2()
- * @see contacts_list_destroy()
- */
-API int contacts_db_get_changes_by_version( const char* view_uri, int address_book_id, int contacts_db_version,
-							contacts_list_h* change_record_list, int* current_contacts_db_version );
-
-/**
- * @brief       Retrieves records with a keyword
- *
- * @remarks     @a record_list must be released with contacts_list_destroy() by you. \n
- * This API works only for \ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_person and \ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_person_grouprel.
- *
- * @param[in]   view_uri			The view URI to get records
- * @param[in]   keyword			Thekeyword
- * @param[in]   offset			The index to get results from which index
- * @param[in]   limit			The number to limit results
- * @param[out]  record_list		The record list
- *
- * @return  0 on success, otherwise a negative error value.
- * @retval  #CONTACTS_ERROR_NONE				Successful
- * @retval  #CONTACTS_ERROR_OUT_OF_MEMORY		Out of memory
- * @retval  #CONTACTS_ERROR_INVALID_PARAMETER	Invalid parameter
- * @retval  #CONTACTS_ERROR_DB					Database operation failure
- *
- * @pre    This function requires an open connection to contacts service by contacts_connect2().
- *
- * @see contacts_connect2()
- * @see contacts_list_destroy()
- */
-API int contacts_db_search_records(const char* view_uri, const char *keyword, int offset, int limit, contacts_list_h* record_list);
-
-/**
- * @brief       Retrieves records with a query handle and a keyword
- *
- * @remarks     @a record_list must be released with contacts_list_destroy() by you. \n
- * This API works only for \ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_person and \ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_person_grouprel.
- *
- * @param[in]   query			The query handle to filter
- * @param[in]   keyword			Thekeyword
- * @param[in]   offset			The index to get results from which index
- * @param[in]   limit			The number to limit results
- * @param[out]  record_list		The record list
- *
- * @return  0 on success, otherwise a negative error value.
- * @retval  #CONTACTS_ERROR_NONE				Successful
- * @retval  #CONTACTS_ERROR_OUT_OF_MEMORY		Out of memory
- * @retval  #CONTACTS_ERROR_INVALID_PARAMETER	Invalid parameter
- * @retval  #CONTACTS_ERROR_DB					Database operation failure
- *
- * @pre    This function requires an open connection to contacts service by contacts_connect2().
- *
- * @see contacts_connect2()
- * @see contacts_list_destroy()
- */
-API int contacts_db_search_records_with_query(contacts_query_h query, const char *keyword, int offset, int limit, contacts_list_h* record_list);
-
-/**
- * @brief       Retrieves records with a keyword in range
- *
- * @remarks     @a record_list must be released with contacts_list_destroy() by you. \n
- * This API works only for \ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_person and \ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_person_grouprel.
- *
- * @param[in]   view_uri			The view URI to get records
- * @param[in]   keyword			Thekeyword
- * @param[in]   offset			The index to get results from which index
- * @param[in]   limit			The number to limit results
- * @param[in]   range			The search range
- * @param[out]  record_list		The record list
- *
- * @return  0 on success, otherwise a negative error value.
- * @retval  #CONTACTS_ERROR_NONE				Successful
- * @retval  #CONTACTS_ERROR_OUT_OF_MEMORY		Out of memory
- * @retval  #CONTACTS_ERROR_INVALID_PARAMETER	Invalid parameter
- * @retval  #CONTACTS_ERROR_DB					Database operation failure
- *
- * @pre    This function requires an open connection to contacts service by contacts_connect2().
- *
- * @see contacts_connect2()
- * @see contacts_list_destroy()
- */
-API int contacts_db_search_records_with_range(const char* view_uri, const char *keyword, int offset, int limit, int range, contacts_list_h* record_list);
-
-/**
- * @brief       Gets records count of a specific view
- *
- * @param[in]   view_uri		The view URI to get records
- * @param[out]  count			The count of records
- *
- * @return  0 on success, otherwise a negative error value.
- * @retval  #CONTACTS_ERROR_NONE				Successful
- * @retval  #CONTACTS_ERROR_INVALID_PARAMETER	Invalid parameter
- * @retval  #CONTACTS_ERROR_DB					Database operation failure
- *
- * @pre    This function requires an open connection to contacts service by contacts_connect2().
- *
- * @see contacts_connect2()
- */
-API int contacts_db_get_count( const char* view_uri, int *count);
-
-/**
- * @brief       Gets records count with a query handle
- *
- * @param[in]   query			The query handle to filter
- * @param[out]  count			The count of records
- *
- * @return  0 on success, otherwise a negative error value.
- * @retval  #CONTACTS_ERROR_NONE				Successful
- * @retval  #CONTACTS_ERROR_INVALID_PARAMETER	Invalid parameter
- * @retval  #CONTACTS_ERROR_DB					Database operation failure
- *
- * @pre    This function requires an open connection to contacts service by contacts_connect2().
- *
- * @see contacts_connect2()
- */
-API int contacts_db_get_count_with_query( contacts_query_h query, int *count);
-
-/**
- * @brief   Gets the last change contacts database version on current connection.
- *
- * @param[out]  last_change_version    The contacts database version on current connection
- *
- * @return  0 on success, otherwise a negative error value.
- * @retval  #CONTACTS_ERROR_NONE                Successful
- * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
- * @retval  #CONTACTS_ERROR_DB_FAILED           Database operation failure
- *
- * @pre     This function requires an open connection to the contacts service by contacts_connect2().
- *
- * @see contacts_connect2()
- * @see contacts_db_get_current_version()
- */
-API int contacts_db_get_last_change_version(int* last_change_version);
 
 /**
  * @}

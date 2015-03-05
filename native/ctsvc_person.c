@@ -28,6 +28,10 @@
 #include "ctsvc_db_plugin_contact_helper.h"
 #include "ctsvc_db_access_control.h"
 
+#ifdef ENABLE_LOG_FEATURE
+#include "ctsvc_phonelog.h"
+#endif // ENABLE_LOG_FEATURE
+
 #ifdef _CONTACTS_IPC_SERVER
 #include "ctsvc_server_change_subject.h"
 #endif
@@ -531,6 +535,11 @@ void ctsvc_db_person_delete_callback(sqlite3_context * context,
 	person_id = sqlite3_value_int(argv[0]);
 	ctsvc_change_subject_add_changed_person_id(CONTACTS_CHANGE_DELETED, person_id);
 
+#ifdef ENABLE_LOG_FEATURE
+	// update phonelog
+	// CASE : do not know the proper new person_id
+	ctsvc_db_phone_log_update_person_id(NULL, person_id, -1, false);
+#endif // ENABLE_LOG_FEATURE
 	sqlite3_result_null(context);
 	return;
 #endif
@@ -538,7 +547,7 @@ void ctsvc_db_person_delete_callback(sqlite3_context * context,
 
 inline static const char* __ctsvc_get_image_filename(const char* src)
 {
-	const char* dir = CTS_IMG_FULL_LOCATION;
+	const char* dir = CTSVC_CONTACT_IMG_FULL_LOCATION;
 	int pos=0;
 	while (dir[pos]==src[pos]) {
 		pos++;
@@ -712,12 +721,12 @@ int ctsvc_person_aggregate(int person_id)
 	contacts_record_destroy((contacts_record_h)person, true);
 
 	snprintf(query, sizeof(query),
-			"SELECT contact_id, contacts.addressbook_id, %s, display_name_source, "
+			"SELECT contact_id, contacts.addressbook_id, display_name_source, "
 				"image_thumbnail_path, ringtone_path, vibration, message_alert, is_favorite "
 			"FROM %s "
 			"WHERE person_id = %d AND contacts.deleted = 0 "
 			"ORDER BY contact_id",
-			ctsvc_get_display_column(), CTS_TABLE_CONTACTS, person_id);
+			CTS_TABLE_CONTACTS, person_id);
 	ret = ctsvc_query_prepare(query, &stmt);
 	if (NULL == stmt) {
 		CTS_ERR("DB error : ctsvc_query_prepare() Failed(%d)", ret);
@@ -725,6 +734,7 @@ int ctsvc_person_aggregate(int person_id)
 		free(ringtone_path);
 		free(vibration);
 		free(message_alert);
+		free(status);
 		return ret;
 	}
 
@@ -736,7 +746,6 @@ int ctsvc_person_aggregate(int person_id)
 		int contact_id;
 		int addressbook_id;
 		int contact_display_name_source_type = CONTACTS_DISPLAY_NAME_SOURCE_TYPE_INVALID;
-		char *contact_display_name = NULL;
 		char *contact_ringtone_path = NULL;
 		char *contact_image_thumbnail_path = NULL;
 		char *contact_vibration = NULL;
@@ -747,8 +756,6 @@ int ctsvc_person_aggregate(int person_id)
 
 		contact_id = ctsvc_stmt_get_int(stmt, i++);
 		addressbook_id = ctsvc_stmt_get_int(stmt, i++);
-		temp = ctsvc_stmt_get_text(stmt, i++);
-		contact_display_name = SAFE_STRDUP(temp);
 		contact_display_name_source_type = ctsvc_stmt_get_int(stmt, i++);
 		temp = ctsvc_stmt_get_text(stmt, i++);
 		if (temp)
@@ -767,10 +774,13 @@ int ctsvc_person_aggregate(int person_id)
 			display_name_source_type = contact_display_name_source_type;
 			name_contact_id = contact_id;
 		}
-		else if (contact_display_name_source_type == display_name_source_type){
+		else if (contact_display_name_source_type == display_name_source_type) {
 			if (name_contact_id != person_name_contact_id && person_name_contact_id != 0)
 				name_contact_id = person_name_contact_id;
+			else if (person_name_contact_id == 0 && name_contact_id == 0)
+				name_contact_id = contact_id;
 		}
+
 		addr_len = snprintf(addr, sizeof(addr), "%d%s", addressbook_id, ADDRESSBOOK_ID_DELIM);
 		if (NULL == addressbook_ids)
 			addressbook_ids = calloc(addressbooks_len+1, sizeof(char));
@@ -791,14 +801,17 @@ int ctsvc_person_aggregate(int person_id)
 		temp_str = contact_ringtone_path;
 		if (!ringtone_path && temp_str && strlen(temp_str))
 			ringtone_path = SAFE_STRDUP(temp_str);
+		free(contact_ringtone_path);
 
 		temp_str = contact_vibration;
 		if (!vibration && temp_str && strlen(temp_str))
 			vibration = SAFE_STRDUP(temp_str);
+		free(contact_vibration);
 
 		temp_str = contact_message_alert;
-		if (!contact_message_alert && temp_str && strlen(temp_str))
-			contact_message_alert = SAFE_STRDUP(temp_str);
+		if (!message_alert && temp_str && strlen(temp_str))
+			message_alert = SAFE_STRDUP(temp_str);
+		free(contact_message_alert);
 
 		if (is_favorite)
 			person_is_favorite = true;
@@ -825,6 +838,7 @@ int ctsvc_person_aggregate(int person_id)
 		free(ringtone_path);
 		free(vibration);
 		free(message_alert);
+		free(status);
 		return ret;
 	}
 
@@ -850,6 +864,7 @@ int ctsvc_person_aggregate(int person_id)
 		free(ringtone_path);
 		free(vibration);
 		free(message_alert);
+		free(status);
 		return ret;
 	}
 
@@ -860,6 +875,7 @@ int ctsvc_person_aggregate(int person_id)
 	free(ringtone_path);
 	free(vibration);
 	free(message_alert);
+	free(status);
 
 	if (!person_is_favorite) {
 		snprintf(query, sizeof(query),
@@ -983,6 +999,14 @@ API int contacts_person_link_person(int base_person_id, int person_id)
 	if (default_image_id)
 		__ctsvc_put_person_default_image(base_person_id, default_image_id);
 
+#ifdef ENABLE_LOG_FEATURE
+	// update phonelog
+	// Updating phonelog person_id before deleting person
+	// Because, when deleting, ctsvc_db_person_delete_callback will be called
+	// the logic takes more time to find proper person_id (base_person_id)
+	ctsvc_db_phone_log_update_person_id(NULL, person_id, base_person_id, true);
+#endif // ENABLE_LOG_FEATURE
+
 	snprintf(query, sizeof(query), "DELETE FROM %s WHERE person_id = %d",
 			CTS_TABLE_PERSONS, person_id);
 	ret = ctsvc_query_exec(query);
@@ -1046,7 +1070,11 @@ static int __ctsvc_update_primary_default_data(int person_id)
 					CTS_TABLE_DATA, contact_id, CTSVC_DATA_NUMBER);
 
 			ret = ctsvc_query_prepare(query, &stmt_number);
-			RETVM_IF(NULL == stmt_number, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
+			if (NULL == stmt_number) {
+				CTS_ERR("DB error : ctsvc_query_prepare() Failed(%d)", ret);
+				ctsvc_stmt_finalize(stmt);
+				return ret;
+			}
 
 			if( 1 == ctsvc_stmt_step(stmt_number) ) {
 				int default_number_id = ctsvc_stmt_get_int(stmt_number, 0);
@@ -1083,7 +1111,11 @@ static int __ctsvc_update_primary_default_data(int person_id)
 					CTS_TABLE_DATA, contact_id, CTSVC_DATA_EMAIL);
 
 			ret = ctsvc_query_prepare(query, &stmt_email);
-			RETVM_IF(NULL == stmt_email, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
+			if (NULL == stmt_email) {
+				CTS_ERR("DB error : ctsvc_query_prepare() Failed(%d)", ret);
+				ctsvc_stmt_finalize(stmt);
+				return ret;
+			}
 
 			if( 1 == ctsvc_stmt_step(stmt_email))	{
 				int default_email_id = ctsvc_stmt_get_int(stmt_email, 0);
@@ -1120,7 +1152,11 @@ static int __ctsvc_update_primary_default_data(int person_id)
 					CTS_TABLE_DATA, contact_id, CTSVC_DATA_IMAGE);
 
 			ret = ctsvc_query_prepare(query, &stmt_image);
-			RETVM_IF(NULL == stmt_image, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
+			if (NULL == stmt_image) {
+				CTS_ERR("DB error : ctsvc_query_prepare() Failed(%d)", ret);
+				ctsvc_stmt_finalize(stmt);
+				return ret;
+			}
 
 			if( 1 == ctsvc_stmt_step(stmt_image))	{
 				int default_image_id = ctsvc_stmt_get_int(stmt_image, 0);
@@ -1186,6 +1222,7 @@ API int contacts_person_unlink_contact(int person_id, int contact_id, int* out_p
 	if (CONTACTS_ERROR_NONE > id) {
 		CTS_ERR("ctsvc_db_insert_person() Failed(%d)", id);
 		ctsvc_end_trans(false);
+		contacts_record_destroy(record, true);
 		return id;
 	}
 
@@ -1198,6 +1235,7 @@ API int contacts_person_unlink_contact(int person_id, int contact_id, int* out_p
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("ctsvc_query_exec() Failed(%d)", ret);
 		ctsvc_end_trans(false);
+		contacts_record_destroy(record, true);
 		return ret;
 	}
 
@@ -1211,6 +1249,7 @@ API int contacts_person_unlink_contact(int person_id, int contact_id, int* out_p
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("ctsvc_query_exec() Failed(%d)", ret);
 		ctsvc_end_trans(false);
+		contacts_record_destroy(record, true);
 		return ret;
 	}
 
@@ -1219,6 +1258,7 @@ API int contacts_person_unlink_contact(int person_id, int contact_id, int* out_p
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("ctsvc_person_aggregate(%d) Failed(%d)", person_id, ret);
 		ctsvc_end_trans(false);
+		contacts_record_destroy(record, true);
 		return ret;
 	}
 
@@ -1229,11 +1269,18 @@ API int contacts_person_unlink_contact(int person_id, int contact_id, int* out_p
 		if (CONTACTS_ERROR_NONE != ret) {
 			CTS_ERR("ctsvc_query_exec() Failed(%d)", ret);
 			ctsvc_end_trans(false);
+			contacts_record_destroy(record, true);
 			return ret;
 		}
 	}
+	contacts_record_destroy(record, true);
 
 	__ctsvc_update_primary_default_data(person_id);
+
+#ifdef ENABLE_LOG_FEATURE
+	// update phonelog
+	ctsvc_db_phone_log_update_person_id(NULL, person_id, id, false);
+#endif // ENABLE_LOG_FEATURE
 
 	if (out_person_id)
 		*out_person_id = id;
@@ -1263,6 +1310,10 @@ int ctsvc_person_do_garbage_collection(void)
 		int person_id;
 		person_id = ctsvc_stmt_get_int(stmt, 0);
 		ctsvc_person_aggregate(person_id);
+#ifdef ENABLE_LOG_FEATURE
+		// update phonelog
+		ctsvc_db_phone_log_update_person_id(NULL, person_id, -1, false);
+#endif // ENABLE_LOG_FEATURE
 	}
 	ctsvc_stmt_finalize(stmt);
 

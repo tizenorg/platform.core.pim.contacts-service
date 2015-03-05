@@ -38,6 +38,7 @@ static int __ctsvc_ipc_unmarshal_speeddial(pims_ipc_data_h ipc_data, const char*
 
 	ctsvc_speeddial_s* speeddial_p = (ctsvc_speeddial_s*) record;
 	do {
+		if (ctsvc_ipc_unmarshal_int(ipc_data, &speeddial_p->id) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_int(ipc_data, &speeddial_p->number_id) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_int(ipc_data, &speeddial_p->person_id) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_string(ipc_data, &speeddial_p->display_name) != CONTACTS_ERROR_NONE) break;
@@ -60,6 +61,7 @@ static int __ctsvc_ipc_marshal_speeddial(const contacts_record_h record, pims_ip
 	RETV_IF(ipc_data==NULL,CONTACTS_ERROR_NO_DATA);
 	RETV_IF(speeddial_p==NULL,CONTACTS_ERROR_NO_DATA);
 	do {
+		if (ctsvc_ipc_marshal_int((speeddial_p->id),ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_int((speeddial_p->number_id),ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_int((speeddial_p->person_id),ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_string((speeddial_p->display_name),ipc_data) != CONTACTS_ERROR_NONE) break;

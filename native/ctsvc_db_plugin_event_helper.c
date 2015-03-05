@@ -43,19 +43,19 @@ int ctsvc_db_event_insert(contacts_record_h record, int contact_id, bool is_my_p
 
 	snprintf(query, sizeof(query),
 		"INSERT INTO "CTS_TABLE_DATA"(contact_id, is_my_profile, datatype, data1, data2, data3, data4, data5) "
-									"VALUES(%d, %d, %d, %d, ?, ?, %d, ?)",
-			contact_id, is_my_profile, CTSVC_DATA_EVENT, event->type, event->is_lunar);
+									"VALUES(%d, %d, %d, %d, ?, ?, ?, %d)",
+			contact_id, is_my_profile, CTSVC_DATA_EVENT, event->type, event->is_leap_month);
 	ret = ctsvc_query_prepare(query, &stmt);
 	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
 
 	if (event->label)
 		ctsvc_stmt_bind_text(stmt, 1, event->label);
 	ctsvc_stmt_bind_int(stmt, 2, event->date);
-	ctsvc_stmt_bind_int(stmt, 3, event->lunar_date);
+	ctsvc_stmt_bind_int(stmt, 3, event->calendar_type);
 
 	ret = ctsvc_stmt_step(stmt);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB error : ctsvc_query_exec() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_stmt_step() Failed(%d)", ret);
 		ctsvc_stmt_finalize(stmt);
 		return ret;
 	}
@@ -89,8 +89,8 @@ int ctsvc_db_event_get_value_from_stmt(cts_stmt stmt, contacts_record_h *record,
 	temp = ctsvc_stmt_get_text(stmt, start_count++);
 	event->label = SAFE_STRDUP(temp);
 	event->date = ctsvc_stmt_get_int(stmt, start_count++);
-	event->is_lunar = ctsvc_stmt_get_int(stmt, start_count++);
-	event->lunar_date = ctsvc_stmt_get_int(stmt, start_count++);
+	event->calendar_type = ctsvc_stmt_get_int(stmt, start_count++);
+	event->is_leap_month = ctsvc_stmt_get_int(stmt, start_count++);
 
 	*record = (contacts_record_h)event;
 

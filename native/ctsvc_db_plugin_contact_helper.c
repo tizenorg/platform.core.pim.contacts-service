@@ -34,9 +34,10 @@
 #include "ctsvc_normalize.h"
 #include "ctsvc_setting.h"
 #include "ctsvc_localize.h"
+#include "ctsvc_localize_utils.h"
 #include "ctsvc_localize_ch.h"
 #include "ctsvc_notification.h"
-#include "ctsvc_localize.h"
+#include "ctsvc_db_access_control.h"
 
 #include "ctsvc_db_plugin_contact_helper.h"
 #include "ctsvc_db_plugin_company_helper.h"
@@ -56,6 +57,12 @@
 
 #include "ctsvc_person.h"
 #include "ctsvc_group.h"
+
+#ifdef ENABLE_LOG_FEATURE
+#include "ctsvc_phonelog.h"
+#endif // ENABLE_LOG_FEATURE
+
+#define CTSVC_CONTACT_INITIAL_DATA_MAX_LEN 128
 
 int ctsvc_contact_add_image_file(int parent_id, int img_id,
 		char *src_img, char *dest, int dest_size)
@@ -83,7 +90,7 @@ int ctsvc_contact_add_image_file(int parent_id, int img_id,
 	snprintf(dest, dest_size, "%d_%d-%d%s", parent_id, img_id, version, lower_ext);
 	free(lower_ext);
 
-	ret = ctsvc_utils_copy_image(CTS_IMG_FULL_LOCATION, src_img, dest);
+	ret = ctsvc_utils_copy_image(CTSVC_CONTACT_IMG_FULL_LOCATION, src_img, dest);
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("ctsvc_utils_copy_image() Failed(%d)", ret);
 		dest[0] = '\0';
@@ -116,14 +123,14 @@ static int __ctsvc_contact_get_current_image_file(int image_id, char *dest, int 
 
 	tmp_path = ctsvc_stmt_get_text(stmt, 0);
 	if (tmp_path) {
-		snprintf(dest, dest_size, "%s/%s", CTS_IMG_FULL_LOCATION, tmp_path);
+		snprintf(dest, dest_size, "%s/%s", CTSVC_CONTACT_IMG_FULL_LOCATION, tmp_path);
 	}
 	ctsvc_stmt_finalize(stmt);
 	return CONTACTS_ERROR_NONE;
 }
 
 // check that the image file under location or not
-// we should check CTS_IMG_FULL_LOCATION, CTSVC_VCARD_IMAGE_LOCATION, CTS_GROUP_IMAGE_LOCATION, CTS_LOGO_IMAGE_LOCATION
+// we should check CTSVC_CONTACT_IMG_FULL_LOCATION, CTSVC_VCARD_IMAGE_LOCATION, CTS_GROUP_IMAGE_LOCATION, CTS_LOGO_IMAGE_LOCATION
 bool ctsvc_contact_check_image_location(const char *path)
 {
 	int len;
@@ -137,10 +144,10 @@ bool ctsvc_contact_check_image_location(const char *path)
 		return false;
 
 	len = (int)(slash-path);
-	if (len != strlen(CTS_IMG_FULL_LOCATION))
+	if (len != strlen(CTSVC_CONTACT_IMG_FULL_LOCATION))
 		return false;
 
-	if (strncmp(path, CTS_IMG_FULL_LOCATION, len) == 0)
+	if (strncmp(path, CTSVC_CONTACT_IMG_FULL_LOCATION, len) == 0)
 		return true;
 
 	return false;
@@ -158,7 +165,7 @@ int ctsvc_contact_update_image_file(int parent_id, int img_id,
 			"__ctsvc_contact_get_current_image_file() Failed(%d)", ret);
 	if (*dest) {
 		if (src_img && strcmp(dest, src_img) == 0) {
-			snprintf(dest_name, dest_size, "%s", src_img + strlen(CTS_IMG_FULL_LOCATION) + 1);
+			snprintf(dest_name, dest_size, "%s", src_img + strlen(CTSVC_CONTACT_IMG_FULL_LOCATION) + 1);
 			return CONTACTS_ERROR_NONE;
 		}
 
@@ -186,7 +193,7 @@ int ctsvc_db_contact_update_changed_time(int contact_id)
 			CTS_TABLE_CONTACTS, ctsvc_get_next_ver(), (int)time(NULL), contact_id);
 
 	ret = ctsvc_query_exec(query);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "cts_query_exec() Failed(%d)", ret);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_query_exec() Failed(%d)", ret);
 
 	ctsvc_set_contact_noti();
 
@@ -199,9 +206,11 @@ int ctsvc_contact_delete_image_file_with_path(const unsigned char* image_path)
 
 	if (image_path) {
 		char full_path[CTSVC_IMG_FULL_PATH_SIZE_MAX] = {0};
-		snprintf(full_path, sizeof(full_path), "%s/%s", CTS_IMG_FULL_LOCATION, image_path);
+		snprintf(full_path, sizeof(full_path), "%s/%s", CTSVC_CONTACT_IMG_FULL_LOCATION, image_path);
 		ret = unlink(full_path);
-		WARN_IF(ret < 0, "unlink(%s) Failed(%d)", full_path, errno);
+		if (ret < 0) {
+			CTS_WARN("unlink Failed(%d)", errno);
+		}
 	}
 
 	return CONTACTS_ERROR_NONE;
@@ -247,6 +256,13 @@ int ctsvc_db_contact_delete(int contact_id)
 	person_id = ctsvc_stmt_get_int(stmt, 1);
 	CTS_DBG("addressbook_id : %d, person_id : %d", addressbook_id, person_id);
 	ctsvc_stmt_finalize(stmt);
+	stmt = NULL;
+
+	if (false == ctsvc_have_ab_write_permission(addressbook_id)) {
+		CTS_ERR("Does not have permission to delete this contact");
+		ctsvc_end_trans(false);
+		return CONTACTS_ERROR_PERMISSION_DENIED;
+	}
 
 	version = ctsvc_get_next_ver();
 	snprintf(query, sizeof(query),
@@ -276,8 +292,14 @@ int ctsvc_db_contact_delete(int contact_id)
 	WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_query_get_first_int_result() Failed(%d)", ret);
 	// set dirty bit to person by trigger : person will be aggregated in ctsvc_person_aggregate
 
-	if (1 < link_count)
+	if (1 < link_count) {
 		ctsvc_person_aggregate(person_id);
+
+#ifdef ENABLE_LOG_FEATURE
+		// update phonelog
+		ctsvc_db_phone_log_update_person_id(NULL, person_id, -1, false);
+#endif // ENABLE_LOG_FEATURE
+	}
 	else
 		ctsvc_set_person_noti();
 
@@ -295,7 +317,240 @@ int ctsvc_db_contact_delete(int contact_id)
 		return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_make_phonetic_name(ctsvc_name_s* name, char** phonetic, bool reverse)
+static inline void __ctsvc_contact_get_initial(char *src, char *dest, int dest_size, bool pinyin )
+{
+	int i, j=0;
+	bool bFirst = true;
+	int len = strlen(src);
+	for(i = 0; i < len && j < (dest_size-1);)
+	{
+		if (src[i] == ' ') {
+			bFirst=true;
+			i++;
+		} else if (bFirst) {
+			int char_len = ctsvc_check_utf8(src[i]);
+			int k;
+			for (k=0;k<char_len && j < (dest_size-1) ;k++)
+				dest[j++] = src[i++];
+			if (!pinyin && j < (dest_size-1))
+				dest[j++] = ' ';
+			bFirst = false;
+		}
+		else
+			i++;
+	}
+}
+
+static inline void __ctsvc_remove_space(char *src, char *dest, int dest_size)
+{
+	int len = strlen(src);
+	int i, j=0;
+
+	for(i=0; i < len && i < dest_size; i++) {
+		if (src[i] && src[i] != ' ') {
+			dest[j] = src[i];
+			j++;
+		}
+	}
+	dest[j] = '\0';
+}
+
+/* make search name to insert search_index table name column
+ * korean : display_name, chosung, phonetic
+ * japanese : dislay_name(hiragana), phonetic
+ *				if display_name is chinese and sort_name(phonetic) is japanese,
+ *					then search_name is normalized_name and sort_name (phonetic)
+ * chinese : display_name, pinyin name, pinyin initial, phonetic
+ * others : display_name, phonetic
+ */
+int ctsvc_contact_make_search_name(ctsvc_contact_s *contact, char **search_name) {
+	char *name = NULL;
+	char *temp_name = NULL;
+	int buf_size, ret;
+
+	if (contact->display_name) {
+		if (ctsvc_has_chinese(contact->display_name)) {
+			if (CTSVC_LANG_JAPANESE == ctsvc_check_language_type(contact->sort_name)) {
+				char *normalized_display_name=NULL;
+
+				ctsvc_normalize_str(contact->display_name, &normalized_display_name);
+				if (normalized_display_name) {
+					buf_size = SAFE_STRLEN(normalized_display_name) + strlen(contact->sort_name) + 2;
+					name = calloc(1, buf_size);
+					snprintf(name, buf_size, "%s %s", normalized_display_name, contact->sort_name);
+					free(normalized_display_name);
+				}
+			}
+			else {
+				char *langset = ctsvc_get_langset();
+				if (strncmp(langset, "zh_CN", strlen("zh_CN")) == 0) {
+					pinyin_name_s *pinyinname;
+					int size, i, len;
+
+					ret = ctsvc_convert_chinese_to_pinyin(contact->display_name, &pinyinname, &size);
+					if (CONTACTS_ERROR_NONE == ret) {
+						int name_len = (CHINESE_PINYIN_SPELL_MAX_LEN*strlen(contact->display_name)+1) * sizeof(char);
+						char *name_nospace = calloc(1, name_len);
+						char *temp_name = NULL;
+
+						ctsvc_normalize_str(contact->display_name, &name);
+						if (name) {
+							for(i=0; i<size; i++) {
+								__ctsvc_remove_space(pinyinname[i].pinyin_name, name_nospace, name_len);
+
+								buf_size = SAFE_STRLEN(name)
+													+ SAFE_STRLEN(pinyinname[i].pinyin_name)
+													+ SAFE_STRLEN(name_nospace)
+													+ SAFE_STRLEN(pinyinname[i].pinyin_initial)
+													+ 4;
+								temp_name = calloc(1, buf_size);
+								snprintf(temp_name, buf_size, "%s %s %s %s",
+										name, pinyinname[i].pinyin_name, name_nospace, pinyinname[i].pinyin_initial);
+								free(name);
+								name = temp_name;
+							}
+						}
+
+						len = ctsvc_check_utf8(contact->display_name[0]);
+						for(i=len; i < strlen(contact->display_name); i+=len) {
+							len = ctsvc_check_utf8(contact->display_name[i]);
+
+							buf_size = SAFE_STRLEN(name) + SAFE_STRLEN(&contact->display_name[i]) + 2;
+							temp_name = calloc(1, buf_size);
+
+							snprintf(temp_name, buf_size, "%s %s", name, &contact->display_name[i]);
+
+							free(name);
+							name = temp_name;
+						}
+
+						free(name_nospace);
+						ctsvc_pinyin_free(pinyinname, size);
+					}
+					else {
+						char initial[CTSVC_CONTACT_INITIAL_DATA_MAX_LEN] = {0,};
+						char *normalized_display_name = NULL;
+
+						ctsvc_normalize_str(contact->display_name, &normalized_display_name);
+						if (normalized_display_name) {
+							__ctsvc_contact_get_initial(contact->display_name, initial, sizeof(initial), false);
+							buf_size = SAFE_STRLEN(normalized_display_name) + strlen(initial) + 2;
+							name = calloc(1, buf_size);
+							snprintf(name, buf_size, "%s %s", normalized_display_name, initial);
+
+							free(normalized_display_name);
+						}
+					}
+				}
+				else {
+					char initial[CTSVC_CONTACT_INITIAL_DATA_MAX_LEN] = {0,};
+					char *normalized_display_name = NULL;
+
+					ctsvc_normalize_str(contact->display_name, &normalized_display_name);
+					if (normalized_display_name) {
+						__ctsvc_contact_get_initial(contact->display_name, initial, sizeof(initial), false);
+						buf_size = SAFE_STRLEN(normalized_display_name) + strlen(initial) + 2;
+						name = calloc(1, buf_size);
+						snprintf(name, buf_size, "%s %s", normalized_display_name, initial);
+
+						free(normalized_display_name);
+					}
+				}
+			}
+		}
+		else if (ctsvc_has_korean(contact->display_name)) {
+			// 'a가' should be searched by 'ㄱ'
+			int count, i, j;
+			int full_len, chosung_len;
+			char *chosung = calloc(1, strlen(contact->display_name) * 5);
+			int total_len = strlen(contact->display_name);
+
+			count = ctsvc_get_chosung(contact->display_name, chosung, strlen(contact->display_name) * 5 );
+
+			ctsvc_normalize_str(contact->display_name, &name);
+
+			if (count > 0) {
+				for(i=0, j=0; i < total_len; i+=full_len, j+=chosung_len) {
+					full_len = ctsvc_check_utf8(contact->display_name[i]);
+					chosung_len = ctsvc_check_utf8(chosung[j]);
+
+					buf_size = SAFE_STRLEN(name) + SAFE_STRLEN(&contact->display_name[i]) + SAFE_STRLEN(&chosung[j]) + 3;
+					temp_name = calloc(1, buf_size);
+
+					snprintf(temp_name, buf_size, "%s %s %s", name, &contact->display_name[i], &chosung[j]);
+
+					free(name);
+					name = temp_name;
+				}
+			}
+			free(chosung);
+		}
+		else if (CTSVC_LANG_JAPANESE == ctsvc_check_language_type(contact->display_name)) {
+			ctsvc_convert_japanese_to_hiragana(contact->display_name, &name);
+		}
+		else {
+			// Insert 'ABO Â' for 'ÂBC'
+			char initial[CTSVC_CONTACT_INITIAL_DATA_MAX_LEN] = {0,};
+			char *normalized_display_name=NULL;
+
+			ctsvc_normalize_str(contact->display_name, &normalized_display_name);
+			if (normalized_display_name) {
+				__ctsvc_contact_get_initial(contact->display_name, initial, sizeof(initial), false);
+				buf_size = SAFE_STRLEN(normalized_display_name) + strlen(initial) + 2;
+				name = calloc(1, buf_size);
+				snprintf(name, buf_size, "%s %s", normalized_display_name, initial);
+
+				free(normalized_display_name);
+			}
+		}
+	}
+
+	// append phonetic name
+	if (contact->name) {
+		contacts_list_h name_list = (contacts_list_h)contact->name;
+		ctsvc_name_s *name_record;
+		contacts_list_first(name_list);
+		char *phonetic = NULL;
+		int temp_len = 0;
+
+		contacts_list_get_current_record_p(name_list, (contacts_record_h*)&name_record);
+		if (NULL != name_record) {
+			buf_size = SAFE_STRLEN(name_record->phonetic_first) + SAFE_STRLEN(name_record->phonetic_last) + SAFE_STRLEN(name_record->phonetic_middle);
+			if (buf_size > 0) {
+				buf_size += 3; // for space and null string
+				phonetic = calloc(1, buf_size);
+				if (name_record->phonetic_first)
+					temp_len += snprintf(phonetic, buf_size, "%s", name_record->phonetic_first);
+				if (name_record->phonetic_middle) {
+					if (temp_len)
+						temp_len += snprintf(phonetic + temp_len, buf_size - temp_len, " ");
+					temp_len += snprintf(phonetic + temp_len, buf_size - temp_len, "%s", name_record->phonetic_middle);
+				}
+				if (name_record->phonetic_last) {
+					if (temp_len)
+						temp_len += snprintf(phonetic + temp_len, buf_size - temp_len, " ");
+					temp_len += snprintf(phonetic + temp_len, buf_size - temp_len, "%s", name_record->phonetic_last);
+				}
+
+				if (name) {
+					buf_size = SAFE_STRLEN(name) + SAFE_STRLEN(phonetic) + 2;
+					temp_name = calloc(1, buf_size);
+					snprintf(temp_name, buf_size, "%s %s", name, phonetic);
+					free(name);
+					name = temp_name;
+					free(phonetic);
+				}
+				else
+					name = phonetic;
+			}
+		}
+	}
+
+	*search_name = name;
+	return CONTACTS_ERROR_NONE;
+}
+
+static int __ctsvc_make_phonetic_name(ctsvc_name_s* name, char** phonetic, contacts_name_display_order_e order)
 {
 	int len = SAFE_STRLEN(name->phonetic_first) + SAFE_STRLEN(name->phonetic_last) + SAFE_STRLEN(name->phonetic_middle);
 	if( len > 0 )
@@ -304,8 +559,7 @@ static int __ctsvc_make_phonetic_name(ctsvc_name_s* name, char** phonetic, bool 
 		*phonetic = calloc(1, len);
 
 		int temp_len = 0;
-		if( reverse == false )
-		{
+		if ( order == CONTACTS_NAME_DISPLAY_ORDER_FIRSTLAST ) {
 			if (name->phonetic_first)
 				temp_len += snprintf(*phonetic, len, "%s", name->phonetic_first);
 			if (name->phonetic_middle) {
@@ -319,8 +573,7 @@ static int __ctsvc_make_phonetic_name(ctsvc_name_s* name, char** phonetic, bool 
 				temp_len += snprintf(*phonetic + temp_len, len - temp_len, "%s", name->phonetic_last);
 			}
 		}
-		else
-		{
+		else {
 			if (name->phonetic_last)
 				temp_len += snprintf(*phonetic, len, "%s", name->phonetic_last);
 			if (name->phonetic_middle) {
@@ -339,9 +592,326 @@ static int __ctsvc_make_phonetic_name(ctsvc_name_s* name, char** phonetic, bool 
 	return len;
 }
 
-void ctsvc_make_contact_display_name(ctsvc_contact_s *contact)
+static inline int __ctsvc_get_sort_name_to_pinyin(const char *display_name, char **sort_name) {
+	int ret;
+	int size;
+	pinyin_name_s *pinyinname = NULL;
+	*sort_name = NULL;
+
+	if (false == ctsvc_has_chinese(display_name))
+		return CONTACTS_ERROR_INVALID_PARAMETER;
+
+	ret = ctsvc_convert_chinese_to_pinyin(display_name, &pinyinname, &size);
+
+	if (ret == CONTACTS_ERROR_NONE) {
+		char temp[strlen(display_name) * 2 + strlen(pinyinname[0].pinyin_name)];
+		int pinyin_index = 0;
+		int name_index = 0;
+		int temp_index = 0;
+
+		while(1) {
+			int pinyin_len = 0;
+			int name_len = 0;
+
+			if (pinyinname[0].pinyin_name[pinyin_index] == '\0') {
+				if (display_name[name_index] != '\0') {
+					temp[temp_index] = ' ';
+					temp_index++;
+					name_len = ctsvc_check_utf8(display_name[name_index]);
+					if (name_len > 0) {
+						memcpy(&(temp[temp_index]), &(display_name[name_index]), name_len);
+						temp_index += name_len;
+						name_index += name_len;
+					}
+				}
+				break;
+			}
+			pinyin_len = ctsvc_check_utf8(pinyinname[0].pinyin_name[pinyin_index]);
+			if (pinyin_len <= 0)
+				break;
+			memcpy(&(temp[temp_index]), &(pinyinname[0].pinyin_name[pinyin_index]), pinyin_len);
+			temp_index += pinyin_len;
+
+			if (pinyinname[0].pinyin_name[pinyin_index] == ' ') {
+				name_len = ctsvc_check_utf8(display_name[name_index]);
+				if (name_len <= 0)
+					break;
+
+				if (name_len == 1 && display_name[name_index] == ' ') {
+					temp[temp_index] = ' ';
+					temp_index++;
+					pinyin_index++;
+				}
+				memcpy(&(temp[temp_index]), &(display_name[name_index]), name_len);
+				temp_index += name_len;
+				name_index += name_len;
+				temp[temp_index] = ' ';
+				temp_index++;
+			}
+
+			pinyin_index += pinyin_len;
+		}
+		temp[temp_index] = '\0';
+		*sort_name = strdup(temp);
+		ctsvc_pinyin_free(pinyinname, size);
+	}
+	return ret;
+}
+
+void ctsvc_contact_make_sortkey(ctsvc_contact_s *contact)
 {
-	int ret, len;
+	char *sortkey = NULL;
+	char *phonetic = NULL;
+	int sort_type = -1;
+
+	if (contact->display_source_type == CONTACTS_DISPLAY_NAME_SOURCE_TYPE_NAME) {
+		if ( contact->name->count > 0 && contact->name->records != NULL
+				&& contact->name->records->data != NULL ) {
+			ctsvc_name_s *name = (ctsvc_name_s *)contact->name->records->data;
+			__ctsvc_make_phonetic_name(name, &phonetic, CONTACTS_NAME_DISPLAY_ORDER_FIRSTLAST);
+		}
+	}
+
+	if (phonetic)
+		sort_type = ctsvc_get_name_sort_type(phonetic);
+	else if (contact->sort_name)
+		sort_type = ctsvc_get_name_sort_type(contact->sort_name);
+	else
+		sort_type = CTSVC_SORT_OTHERS;
+
+	WARN_IF(sort_type < 0, "ctsvc_get_name_sort_type Failed(%d)", sort_type);
+	char *langset =	ctsvc_get_langset();
+
+	switch (sort_type) {
+	case CTSVC_SORT_CJK:
+		{
+			if (strncmp(langset, "zh_CN", strlen("zh_CN")) == 0) { // chinese to pinyin
+				char *pinyin = NULL;
+				if (phonetic)
+					__ctsvc_get_sort_name_to_pinyin(phonetic, &pinyin);
+				else
+					__ctsvc_get_sort_name_to_pinyin(contact->sort_name, &pinyin);
+
+				if (pinyin) {
+					free(contact->sort_name);
+					contact->sort_name = pinyin;
+					sort_type = CTSVC_SORT_WESTERN;
+				}
+			}
+			else if (strncmp(langset, "ko_KR", strlen("ko_KR")) == 0) {
+					sort_type = CTSVC_SORT_KOREAN;
+			}
+		}
+		break;
+	case CTSVC_SORT_JAPANESE:
+		{
+			char *hiragana = NULL;
+			ctsvc_convert_japanese_to_hiragana(contact->sort_name, &hiragana);
+
+			if (hiragana) {
+				free(contact->sort_name);
+				contact->sort_name = hiragana;
+			}
+			break;
+		}
+	default:
+		{
+			if( phonetic )
+				FREEandSTRDUP(contact->sort_name, phonetic);
+		}
+		break;
+	}
+
+	free(phonetic);
+	phonetic = NULL;
+
+	if (ctsvc_get_primary_sort() == sort_type)
+		contact->display_name_language = CTSVC_SORT_PRIMARY;
+	else if (ctsvc_get_secondary_sort() == sort_type)
+		contact->display_name_language = CTSVC_SORT_SECONDARY;
+	else if (sort_type < 0)
+		contact->display_name_language = CTSVC_SORT_OTHERS;
+	else
+		contact->display_name_language = sort_type;
+
+	// check reverse sort_name, reverser_display_name_language
+	// make reverse phonetic name
+	if (contact->display_source_type == CONTACTS_DISPLAY_NAME_SOURCE_TYPE_NAME) {
+		if ( contact->name->count > 0 && contact->name->records != NULL
+				&& contact->name->records->data != NULL ) {
+			ctsvc_name_s *name = (ctsvc_name_s *)contact->name->records->data;
+			__ctsvc_make_phonetic_name(name, &phonetic, CONTACTS_NAME_DISPLAY_ORDER_LASTFIRST);
+		}
+	}
+
+	if (phonetic)
+		sort_type = ctsvc_get_name_sort_type(phonetic);
+	else if (contact->reverse_sort_name)
+		sort_type = ctsvc_get_name_sort_type(contact->reverse_sort_name);
+	else
+		sort_type = CTSVC_SORT_OTHERS;
+
+	WARN_IF( sort_type < 0, "ctsvc_get_name_sort_type Failed(%d)", sort_type);
+
+	switch (sort_type)
+	{
+	case CTSVC_SORT_CJK:
+		{
+			if (strncmp(langset, "zh_CN", strlen("zh_CN")) == 0) {
+				char *pinyin = NULL;
+				if (phonetic)
+					__ctsvc_get_sort_name_to_pinyin(phonetic, &pinyin);
+				else
+					__ctsvc_get_sort_name_to_pinyin(contact->reverse_sort_name, &pinyin);
+
+				if (pinyin) {
+					free(contact->reverse_sort_name);
+					contact->reverse_sort_name = pinyin;
+					sort_type = CTSVC_SORT_WESTERN;
+				}
+			}
+			else if (strncmp(langset, "ko_KR", strlen("ko_KR")) == 0) {
+					sort_type = CTSVC_SORT_KOREAN;
+			}
+		}
+		break;
+	case CTSVC_SORT_JAPANESE:
+		{
+			char *hiragana = NULL;
+			ctsvc_convert_japanese_to_hiragana(contact->reverse_sort_name, &hiragana);
+
+			if (hiragana) {
+				free(contact->reverse_sort_name);
+				contact->reverse_sort_name = hiragana;
+			}
+		}
+		break;
+	default:
+		{
+			if( phonetic )
+				FREEandSTRDUP(contact->reverse_sort_name, phonetic);
+		}
+		break;
+	}
+
+	free(phonetic);
+	phonetic = NULL;
+
+	if (ctsvc_get_primary_sort() == sort_type)
+		contact->reverse_display_name_language = CTSVC_SORT_PRIMARY;
+	else if (ctsvc_get_secondary_sort() == sort_type)
+		contact->reverse_display_name_language = CTSVC_SORT_SECONDARY;
+	else if (sort_type < 0)
+		contact->reverse_display_name_language = CTSVC_SORT_OTHERS;
+	else
+		contact->reverse_display_name_language = sort_type;
+
+	if (contact->sort_name) {
+		sort_type = ctsvc_collation_str(contact->sort_name, &sortkey);
+		if (CONTACTS_ERROR_NONE == sort_type)
+			contact->sortkey = sortkey;
+		else
+			free(sortkey);
+	}
+
+	sortkey = NULL;
+
+	if (contact->reverse_sort_name) {
+		sort_type = ctsvc_collation_str(contact->reverse_sort_name, &sortkey);
+		if (CONTACTS_ERROR_NONE == sort_type)
+			contact->reverse_sortkey = sortkey;
+		else
+			free(sortkey);
+	}
+}
+
+static bool __ctsvc_contact_check_name_has_korean(const ctsvc_name_s *name)
+{
+	if (name->first && ctsvc_has_korean(name->first))
+		return true;
+	else if (name->last && ctsvc_has_korean(name->last))
+		return true;
+	else if (name->addition && ctsvc_has_korean(name->addition))
+		return true;
+	else if (name->prefix && ctsvc_has_korean(name->prefix))
+		return true;
+	else if (name->suffix && ctsvc_has_korean(name->suffix))
+		return true;
+
+	return false;
+}
+
+static bool __ctsvc_contact_check_name_has_japanese(const ctsvc_name_s *name)
+{
+	if (name->first && ctsvc_check_language_type(name->first) == CTSVC_LANG_JAPANESE)
+		return true;
+	else if (name->addition && ctsvc_check_language_type(name->addition) == CTSVC_LANG_JAPANESE)
+		return true;
+	else if (name->last && ctsvc_check_language_type(name->last) == CTSVC_LANG_JAPANESE)
+		return true;
+
+	return false;
+}
+
+static bool __ctsvc_contact_check_name_has_chinese(const ctsvc_name_s *name)
+{
+	if (name->first && ctsvc_check_language_type(name->first) == CTSVC_LANG_CHINESE)
+		return true;
+	else if (name->addition && ctsvc_check_language_type(name->addition) == CTSVC_LANG_CHINESE)
+		return true;
+	else if (name->last && ctsvc_check_language_type(name->last) == CTSVC_LANG_CHINESE)
+		return true;
+
+	return false;
+}
+
+int ctsvc_contact_get_name_language(const ctsvc_name_s *name)
+{
+	int lang = -1;
+	if (__ctsvc_contact_check_name_has_korean(name))
+		lang = CTSVC_LANG_KOREAN;
+	else if (__ctsvc_contact_check_name_has_japanese(name))
+		lang = CTSVC_LANG_JAPANESE;
+	else if (__ctsvc_contact_check_name_has_chinese(name))
+		lang = CTSVC_LANG_CHINESE;
+	else {
+		if (name->last)
+			lang =  ctsvc_check_language_type(name->last);
+		else if (name->first)
+			lang =  ctsvc_check_language_type(name->first);
+		else if (name->addition)
+			lang =  ctsvc_check_language_type(name->addition);
+	}
+
+	return lang;
+}
+
+char * __ctsvc_remove_first_space(char *src)
+{
+	if(src == NULL ||SAFE_STRLEN(src) == 0)
+		return NULL;
+
+	int name_len = (SAFE_STRLEN(src)+1)*sizeof(char);
+	char *name_nospace = NULL;
+	name_nospace = calloc(1, name_len);
+
+	int len = strlen(src);
+	int i =0;
+
+	for(i=0; i < len && i < name_len; i++) {
+		if (src[i] && src[i] != ' ') {
+			strncpy(name_nospace, src+i, name_len);
+			break;
+		}
+	}
+	return name_nospace;
+}
+// Make display_name, sort_name, sortkey of the contact by name record
+// If the contact record does not have name record,
+// we use company, nickname, number, email record in order
+void ctsvc_contact_make_display_name(ctsvc_contact_s *contact)
+{
+	int len;
 	ctsvc_name_s *name = NULL;
 
 	free(contact->display_name);
@@ -382,7 +952,7 @@ void ctsvc_make_contact_display_name(ctsvc_contact_s *contact)
 		///////////////////////////////////////////////
 		// Make reverse display name (Last name first)
 		// Default         : Prefix Last, First Middle(addition), Suffix
-		// Korean, Chinese : Prefix LastFirstMiddleSuffix
+		// Korean, Chinese : Prefix LastMiddleFirstSuffix
 		// Japanese        : Prefix Last Middle First Suffix
 		// reverse sort name does not include prefix
 		//    But, if there is only prefix, reverse sort_name is prefix
@@ -396,13 +966,12 @@ void ctsvc_make_contact_display_name(ctsvc_contact_s *contact)
 			temp_display = calloc(1, temp_display_len);
 			len=0;
 
+			// get language type
+			reverse_lang_type = ctsvc_contact_get_name_language(name);
 			if(name->last) {
-				len += snprintf(temp_display + len, temp_display_len - len, "%s", name->last);
-
-				if (reverse_lang_type < 0) {
-					reverse_lang_type = ctsvc_check_language_type(temp_display);
-				}
-
+				char * temp = __ctsvc_remove_first_space(name->last);
+				len += snprintf(temp_display + len, temp_display_len - len, "%s", temp);
+				free(temp);
 				if (reverse_lang_type != CTSVC_LANG_KOREAN &&
 						reverse_lang_type != CTSVC_LANG_CHINESE &&
 						reverse_lang_type != CTSVC_LANG_JAPANESE) {
@@ -411,34 +980,39 @@ void ctsvc_make_contact_display_name(ctsvc_contact_s *contact)
 				}
 			}
 
-			if (reverse_lang_type < 0) {
-				if (*temp_display) {
-					reverse_lang_type = ctsvc_check_language_type(temp_display);
-				}
-				else if (name->first) {
-					reverse_lang_type = ctsvc_check_language_type(name->first);
-				}
-				else if (name->addition) {
-					reverse_lang_type = ctsvc_check_language_type(name->addition);
-				}
-			}
-
 			if(reverse_lang_type == CTSVC_LANG_JAPANESE) {
 				// make temp_display name Prefix - Last - Middle - First - Suffix
 				if(name->addition) {
+					char * temp = __ctsvc_remove_first_space(name->addition);
 					if (*temp_display)
 						len += snprintf(temp_display + len, temp_display_len - len, " ");
-					len += snprintf(temp_display + len, temp_display_len - len, "%s", name->addition);
+					len += snprintf(temp_display + len, temp_display_len - len, "%s", temp);
+					free(temp);
 				}
 
 				if(name->first) {
+					char * temp = __ctsvc_remove_first_space(name->first);
 					if (*temp_display)
 						len += snprintf(temp_display + len, temp_display_len - len, " ");
-					len += snprintf(temp_display + len, temp_display_len - len, "%s", name->first);
+					len += snprintf(temp_display + len, temp_display_len - len, "%s", temp);
+					free(temp);
+				}
+			}
+			else if (reverse_lang_type == CTSVC_LANG_CHINESE || reverse_lang_type == CTSVC_LANG_KOREAN) {
+				if(name->addition) {
+					char * temp = __ctsvc_remove_first_space(name->addition);
+					len += snprintf(temp_display + len, temp_display_len - len, "%s", temp);
+					free(temp);
+				}
+
+				if(name->first) {
+					char * temp = __ctsvc_remove_first_space(name->first);
+					len += snprintf(temp_display + len, temp_display_len - len, "%s", temp);
+					free(temp);
 				}
 			}
 			else {
-				// make temp_display name Prefix - Last - First -Middle - Suffix
+				// make temp_display name Prefix - Last - First - Middle - Suffix
 				if(name->first) {
 					if (*temp_display) {
 						if (reverse_lang_type < 0) {
@@ -449,7 +1023,9 @@ void ctsvc_make_contact_display_name(ctsvc_contact_s *contact)
 								reverse_lang_type != CTSVC_LANG_CHINESE)
 							len += snprintf(temp_display + len, temp_display_len - len, " ");
 					}
-					len += snprintf(temp_display + len, temp_display_len - len, "%s", name->first);
+					char * temp = __ctsvc_remove_first_space(name->first);
+					len += snprintf(temp_display + len, temp_display_len - len, "%s", temp);
+					free(temp);
 				}
 
 				if(name->addition) {
@@ -462,7 +1038,9 @@ void ctsvc_make_contact_display_name(ctsvc_contact_s *contact)
 								reverse_lang_type != CTSVC_LANG_CHINESE)
 							len += snprintf(temp_display + len, temp_display_len - len, " ");
 					}
-					len += snprintf(temp_display + len, temp_display_len - len, "%s", name->addition);
+					char * temp = __ctsvc_remove_first_space(name->addition);
+					len += snprintf(temp_display + len, temp_display_len - len, "%s", temp);
+					free(temp);
 				}
 			}
 
@@ -478,14 +1056,18 @@ void ctsvc_make_contact_display_name(ctsvc_contact_s *contact)
 								reverse_lang_type != CTSVC_LANG_CHINESE)
 						len += snprintf(temp_display + len, temp_display_len - len, ", ");
 				}
-				len += snprintf(temp_display + len, temp_display_len - len, "%s", name->suffix);
+				char * temp = __ctsvc_remove_first_space(name->suffix);
+				len += snprintf(temp_display + len, temp_display_len - len, "%s", temp);
+				free(temp);
 			}
 		}
 
 		if(name->prefix && temp_display) {
 			display_len = SAFE_STRLEN(name->prefix) + temp_display_len + 2;
 			display = calloc(1, display_len);
-			snprintf(display, display_len , "%s %s", name->prefix, temp_display);
+			char * temp = __ctsvc_remove_first_space(name->prefix);
+			snprintf(display, display_len , "%s %s", temp, temp_display);
+			free(temp);
 			contact->reverse_display_name = display;
 			contact->reverse_sort_name = temp_display;
 		}
@@ -507,7 +1089,8 @@ void ctsvc_make_contact_display_name(ctsvc_contact_s *contact)
 		//    But, if there is only prefix, sort_name is prefix
 		//////////////////////////////////////////////
 		if (reverse_lang_type == CTSVC_LANG_KOREAN ||
-			reverse_lang_type == CTSVC_LANG_CHINESE) {
+			reverse_lang_type == CTSVC_LANG_CHINESE ||
+			reverse_lang_type == CTSVC_LANG_JAPANESE) {
 			contact->display_name = strdup(contact->reverse_display_name);
 			contact->sort_name = SAFE_STRDUP(contact->reverse_sort_name);
 		}
@@ -525,19 +1108,25 @@ void ctsvc_make_contact_display_name(ctsvc_contact_s *contact)
 				len = 0;
 
 				if(name->first) {
-					len += snprintf(temp_display + len, temp_display_len - len, "%s", name->first);
+					char * temp = __ctsvc_remove_first_space(name->first);
+					len += snprintf(temp_display + len, temp_display_len - len, "%s", temp);
+					free(temp);
 				}
 
 				if(name->addition) {
+					char * temp = __ctsvc_remove_first_space(name->addition);
 					if (*temp_display)
 						len += snprintf(temp_display + len, temp_display_len - len, " ");
-					len += snprintf(temp_display + len, temp_display_len - len, "%s", name->addition);
+					len += snprintf(temp_display + len, temp_display_len - len, "%s", temp);
+					free(temp);
 				}
 
 				if(name->last) {
+					char * temp = __ctsvc_remove_first_space(name->last);
 					if (*temp_display)
 						len += snprintf(temp_display + len, temp_display_len - len, " ");
-					len += snprintf(temp_display + len, temp_display_len - len, "%s", name->last);
+					len += snprintf(temp_display + len, temp_display_len - len, "%s", temp);
+					free(temp);
 				}
 
 				if(name->suffix) {
@@ -548,7 +1137,9 @@ void ctsvc_make_contact_display_name(ctsvc_contact_s *contact)
 						else
 							len += snprintf(temp_display + len, temp_display_len - len, ", ");
 					}
-					len += snprintf(temp_display + len, temp_display_len - len, "%s", name->suffix);
+					char * temp = __ctsvc_remove_first_space(name->suffix);
+					len += snprintf(temp_display + len, temp_display_len - len, "%s", temp);
+					free(temp);
 				}
 			}
 
@@ -637,128 +1228,8 @@ void ctsvc_make_contact_display_name(ctsvc_contact_s *contact)
 	}
 
 	// make sortkey
-	if (ctsvc_record_check_property_flag((ctsvc_record_s *)contact, _contacts_contact.display_name, CTSVC_PROPERTY_FLAG_DIRTY)) {
-		char *sortkey = NULL;
-		char *phonetic = NULL;
-		len = 0;
-		if (contact->display_source_type == CONTACTS_DISPLAY_NAME_SOURCE_TYPE_NAME) {
-			len = __ctsvc_make_phonetic_name(name, &phonetic, false);
-		}
-
-		if (contact->sort_name)
-		{
-			ret = ctsvc_get_name_sort_type(contact->sort_name);
-			WARN_IF( ret < 0, "ctsvc_get_name_sort_type Failed(%d)", ret);
-		}
-		else
-		{
-			ret = CTSVC_SORT_OTHERS;
-		}
-
-		switch (ret)
-		{
-		case CTSVC_SORT_CJK:
-			if (phonetic && ctsvc_get_name_sort_type(phonetic) == CTSVC_SORT_JAPANESE) {
-				ret = CTSVC_SORT_JAPANESE;
-				FREEandSTRDUP(contact->sort_name, phonetic);
-			}
-			else {
-				pinyin_name_s *pinyinname = NULL;
-				int size;
-
-				if (ctsvc_convert_chinese_to_pinyin(contact->display_name, &pinyinname, &size) == CONTACTS_ERROR_NONE) {
-					FREEandSTRDUP(contact->sort_name, pinyinname[0].pinyin_name);
-					free(pinyinname);
-				}
-				ret = CTSVC_SORT_WESTERN;
-			}
-			break;
-		case CTSVC_SORT_JAPANESE:
-			free(contact->sort_name);
-			contact->sort_name = NULL;
-			ctsvc_convert_japanese_to_hiragana(contact->display_name, &contact->sort_name);
-			break;
-		}
-
-		free(phonetic);
-		phonetic = NULL;
-
-		if (ctsvc_get_primary_sort() == ret)
-			contact->display_name_language = CTSVC_SORT_PRIMARY;
-		else if (ctsvc_get_secondary_sort() == ret)
-			contact->display_name_language = CTSVC_SORT_SECONDARY;
-		else
-			contact->display_name_language = ret;
-
-		// check reverse sort_name, reverser_display_name_language
-		len = 0;
-		// make reverse phonetic name
-		if (contact->display_source_type == CONTACTS_DISPLAY_NAME_SOURCE_TYPE_NAME) {
-			len = __ctsvc_make_phonetic_name(name, &phonetic, true);
-		}
-
-		if (contact->reverse_sort_name)
-		{
-			ret = ctsvc_get_name_sort_type(contact->reverse_sort_name);
-			WARN_IF( ret < 0, "ctsvc_get_name_sort_type Failed(%d)", ret);
-		}
-		else
-		{
-			ret = CTSVC_SORT_OTHERS;
-		}
-
-		switch (ret)
-		{
-		case CTSVC_SORT_CJK:
-			if (phonetic && ctsvc_get_name_sort_type(phonetic) == CTSVC_SORT_JAPANESE) {
-				ret = CTSVC_SORT_JAPANESE;
-				FREEandSTRDUP(contact->reverse_sort_name, phonetic);
-			}
-			else {
-				pinyin_name_s *pinyinname = NULL;
-				int size;
-
-				if (ctsvc_convert_chinese_to_pinyin(contact->reverse_display_name, &pinyinname, &size) == CONTACTS_ERROR_NONE) {
-					FREEandSTRDUP(contact->reverse_sort_name, pinyinname[0].pinyin_name);
-					free(pinyinname);
-				}
-				ret = CTSVC_SORT_WESTERN;
-			}
-			break;
-		case CTSVC_SORT_JAPANESE:
-			free(contact->reverse_sort_name);
-			contact->reverse_sort_name = NULL;
-			ctsvc_convert_japanese_to_hiragana(contact->reverse_display_name, &contact->reverse_sort_name);
-			break;
-		}
-
-		free(phonetic);
-		phonetic = NULL;
-
-		if (ctsvc_get_primary_sort() == ret)
-			contact->reverse_display_name_language = CTSVC_SORT_PRIMARY;
-		else if (ctsvc_get_secondary_sort() == ret)
-			contact->reverse_display_name_language = CTSVC_SORT_SECONDARY;
-		else
-			contact->reverse_display_name_language = ret;
-
-		if (contact->sort_name) {
-			ret = ctsvc_collation_str(contact->sort_name, &sortkey);
-			if (CONTACTS_ERROR_NONE == ret)
-				contact->sortkey = sortkey;
-			else
-				free(sortkey);
-		}
-		sortkey = NULL;
-
-		if (contact->reverse_sort_name) {
-			ret = ctsvc_collation_str(contact->reverse_sort_name, &sortkey);
-			if (CONTACTS_ERROR_NONE == ret)
-				contact->reverse_sortkey = sortkey;
-			else
-				free(sortkey);
-		}
-	}
+	if (ctsvc_record_check_property_flag((ctsvc_record_s *)contact, _contacts_contact.display_name, CTSVC_PROPERTY_FLAG_DIRTY))
+		ctsvc_contact_make_sortkey(contact);
 
 	return;
 }
@@ -766,7 +1237,7 @@ void ctsvc_make_contact_display_name(ctsvc_contact_s *contact)
 int ctsvc_get_data_info_name(cts_stmt stmt, contacts_list_h name_list)
 {
 	int ret;
-	unsigned int count;
+	int count;
 	contacts_record_h record;
 
 	ret = contacts_list_get_count(name_list, &count);
@@ -913,7 +1384,7 @@ bool ctsvc_contact_check_default_number(contacts_list_h number_list)
 {
 	bool has_default = false;
 	ctsvc_number_s* number;
-	unsigned int count;
+	int count;
 	int ret;
 
 	RETV_IF(NULL == number_list, false);
@@ -952,7 +1423,7 @@ bool ctsvc_contact_check_default_email(contacts_list_h email_list)
 {
 	bool has_default = false;
 	ctsvc_email_s* email;
-	unsigned int count;
+	int count;
 	int ret;
 
 	RETV_IF(NULL == email_list, false);
@@ -991,7 +1462,7 @@ bool ctsvc_contact_check_default_image(contacts_list_h image_list)
 {
 	bool has_default = false;
 	ctsvc_image_s* image;
-	unsigned int count;
+	int count;
 	int ret;
 
 	RETV_IF(NULL == image_list, false);
@@ -1032,7 +1503,7 @@ bool ctsvc_contact_check_default_address(contacts_list_h address_list)
 {
 	bool has_default = false;
 	ctsvc_address_s* address;
-	unsigned int count;
+	int count;
 	int ret;
 
 	RETV_IF(NULL == address_list, false);
@@ -1113,7 +1584,7 @@ int ctsvc_contact_update_data_company(contacts_list_h company_list, int contact_
 	CTS_FN_CALL;
 	int ret = CONTACTS_ERROR_NONE;
 	contacts_record_h record = NULL;
-	unsigned int count = 0;
+	int count = 0;
 	ctsvc_list_s *list = (ctsvc_list_s*)company_list;
 	ctsvc_company_s *company;
 	GList *cursor;
@@ -1157,7 +1628,7 @@ int ctsvc_contact_update_data_note(contacts_list_h note_list, int contact_id, bo
 	CTS_FN_CALL;
 	int ret = CONTACTS_ERROR_NONE;
 	contacts_record_h record = NULL;
-	unsigned int count = 0;
+	int count = 0;
 	ctsvc_list_s *list = (ctsvc_list_s*)note_list;
 	ctsvc_note_s *note;
 	GList *cursor;
@@ -1199,7 +1670,7 @@ int ctsvc_contact_update_data_event(contacts_list_h event_list, int contact_id, 
 	CTS_FN_CALL;
 	int ret = CONTACTS_ERROR_NONE;
 	contacts_record_h record = NULL;
-	unsigned int count = 0;
+	int count = 0;
 	ctsvc_list_s *list = (ctsvc_list_s*)event_list;
 	ctsvc_event_s *event;
 	GList *cursor;
@@ -1241,7 +1712,7 @@ int ctsvc_contact_update_data_messenger(contacts_list_h messenger_list, int cont
 	CTS_FN_CALL;
 	int ret = CONTACTS_ERROR_NONE;
 	contacts_record_h record = NULL;
-	unsigned int count = 0;
+	int count = 0;
 	ctsvc_list_s *list = (ctsvc_list_s*)messenger_list;
 	ctsvc_messenger_s *messenger;
 	GList *cursor;
@@ -1283,7 +1754,7 @@ int ctsvc_contact_update_data_address(contacts_list_h address_list, int contact_
 	CTS_FN_CALL;
 	int ret = CONTACTS_ERROR_NONE;
 	contacts_record_h record = NULL;
-	unsigned int count = 0;
+	int count = 0;
 	ctsvc_list_s *list = (ctsvc_list_s*)address_list;
 	ctsvc_address_s *address;
 	GList *cursor;
@@ -1326,7 +1797,7 @@ int ctsvc_contact_update_data_url(contacts_list_h url_list, int contact_id, bool
 	CTS_FN_CALL;
 	int ret = CONTACTS_ERROR_NONE;
 	contacts_record_h record = NULL;
-	unsigned int count = 0;
+	int count = 0;
 	ctsvc_list_s *list = (ctsvc_list_s*)url_list;
 	ctsvc_url_s *url;
 	GList *cursor;
@@ -1368,7 +1839,7 @@ int ctsvc_contact_update_data_profile(contacts_list_h profile_list, int contact_
 	CTS_FN_CALL;
 	int ret = CONTACTS_ERROR_NONE;
 	contacts_record_h record = NULL;
-	unsigned int count = 0;
+	int count = 0;
 	ctsvc_list_s *list = (ctsvc_list_s*)profile_list;
 	ctsvc_profile_s *profile;
 	GList *cursor;
@@ -1409,7 +1880,7 @@ int ctsvc_contact_update_data_relationship(contacts_list_h relationship_list, in
 	CTS_FN_CALL;
 	int ret = CONTACTS_ERROR_NONE;
 	contacts_record_h record = NULL;
-	unsigned int count = 0;
+	int count = 0;
 	ctsvc_list_s *list = (ctsvc_list_s*)relationship_list;
 	ctsvc_relationship_s *relationship;
 	GList *cursor;
@@ -1451,7 +1922,7 @@ int ctsvc_contact_update_data_image(contacts_list_h image_list, int contact_id, 
 	CTS_FN_CALL;
 	int ret = CONTACTS_ERROR_NONE;
 	contacts_record_h record = NULL;
-	unsigned int count = 0;
+	int count = 0;
 	ctsvc_list_s *list = (ctsvc_list_s*)image_list;
 	ctsvc_image_s *image;
 	GList *cursor;
@@ -1495,7 +1966,7 @@ int ctsvc_contact_update_data_nickname(contacts_list_h nickname_list, int contac
 	CTS_FN_CALL;
 	int ret = CONTACTS_ERROR_NONE;
 	contacts_record_h record = NULL;
-	unsigned int count = 0;
+	int count = 0;
 	ctsvc_list_s *list = (ctsvc_list_s*)nickname_list;
 	ctsvc_nickname_s *nickname;
 	GList *cursor;
@@ -1537,7 +2008,7 @@ int ctsvc_contact_update_data_extension(contacts_list_h extension_list, int cont
 	CTS_FN_CALL;
 	int ret = CONTACTS_ERROR_NONE;
 	contacts_record_h record = NULL;
-	unsigned int count = 0;
+	int count = 0;
 	ctsvc_list_s *list = (ctsvc_list_s*)extension_list;
 	ctsvc_extension_s *extension;
 	GList *cursor;
@@ -1582,7 +2053,7 @@ int ctsvc_contact_update_data_number(contacts_list_h number_list,
 	CTS_FN_CALL;
 	int ret = CONTACTS_ERROR_NONE;
 	contacts_record_h record = NULL;
-	unsigned int count = 0;
+	int count = 0;
 	ctsvc_list_s *list = (ctsvc_list_s*)number_list;
 	ctsvc_number_s *number;
 	GList *cursor;
@@ -1632,7 +2103,7 @@ int ctsvc_contact_update_data_email(contacts_list_h email_list,
 	CTS_FN_CALL;
 	int ret = CONTACTS_ERROR_NONE;
 	contacts_record_h record = NULL;
-	unsigned int count = 0;
+	int count = 0;
 	ctsvc_list_s *list = (ctsvc_list_s*)email_list;
 	ctsvc_email_s *email;
 	GList *cursor;
@@ -1700,7 +2171,7 @@ int ctsvc_contact_insert_data_number(contacts_list_h number_list, int contact_id
 	CTS_FN_CALL;
 	int ret = CONTACTS_ERROR_NONE;
 	contacts_record_h record;
-	unsigned int count = 0;
+	int count = 0;
 
 	RETV_IF(NULL == number_list, CONTACTS_ERROR_INVALID_PARAMETER);
 	ret = contacts_list_get_count(number_list, &count);
@@ -1725,7 +2196,7 @@ int ctsvc_contact_insert_data_email(contacts_list_h email_list, int contact_id, 
 	CTS_FN_CALL;
 	int ret = CONTACTS_ERROR_NONE;
 	contacts_record_h record;
-	unsigned int count = 0;
+	int count = 0;
 
 	RETV_IF(NULL == email_list, CONTACTS_ERROR_INVALID_PARAMETER);
 	ret = contacts_list_get_count(email_list, &count);
@@ -1750,7 +2221,7 @@ int ctsvc_contact_insert_data_profile(contacts_list_h profile_list, int contact_
 	CTS_FN_CALL;
 	int ret = CONTACTS_ERROR_NONE;
 	contacts_record_h record;
-	unsigned int count = 0;
+	int count = 0;
 
 	RETV_IF(NULL == profile_list, CONTACTS_ERROR_INVALID_PARAMETER);
 	ret = contacts_list_get_count(profile_list, &count);
@@ -1775,7 +2246,7 @@ int ctsvc_contact_insert_data_company(contacts_list_h company_list, int contact_
 	CTS_FN_CALL;
 	int ret = CONTACTS_ERROR_NONE;
 	contacts_record_h record = NULL;
-	unsigned int count = 0;
+	int count = 0;
 
 	RETV_IF(NULL == company_list, CONTACTS_ERROR_INVALID_PARAMETER);
 	ret = contacts_list_get_count(company_list, &count);
@@ -1800,7 +2271,7 @@ int ctsvc_contact_insert_data_note(contacts_list_h note_list, int contact_id, bo
 	CTS_FN_CALL;
 	int ret = CONTACTS_ERROR_NONE;
 	contacts_record_h record = NULL;
-	unsigned int count = 0;
+	int count = 0;
 
 	RETV_IF(NULL == note_list, CONTACTS_ERROR_INVALID_PARAMETER);
 	ret = contacts_list_get_count(note_list, &count);
@@ -1826,7 +2297,7 @@ int ctsvc_contact_insert_data_event(contacts_list_h event_list, int contact_id, 
 	CTS_FN_CALL;
 	int ret = CONTACTS_ERROR_NONE;
 	contacts_record_h record;
-	unsigned int count = 0;
+	int count = 0;
 
 	RETV_IF(NULL == event_list, CONTACTS_ERROR_INVALID_PARAMETER);
 	ret = contacts_list_get_count(event_list, &count);
@@ -1851,7 +2322,7 @@ int ctsvc_contact_insert_data_messenger(contacts_list_h messenger_list, int cont
 	CTS_FN_CALL;
 	int ret = CONTACTS_ERROR_NONE;
 	contacts_record_h record;
-	unsigned int count = 0;
+	int count = 0;
 
 	RETV_IF(NULL == messenger_list, CONTACTS_ERROR_INVALID_PARAMETER);
 	ret = contacts_list_get_count(messenger_list, &count);
@@ -1876,7 +2347,7 @@ int ctsvc_contact_insert_data_address(contacts_list_h address_list, int contact_
 	CTS_FN_CALL;
 	int ret = CONTACTS_ERROR_NONE;
 	contacts_record_h record;
-	unsigned int count = 0;
+	int count = 0;
 
 	RETV_IF(NULL == address_list, CONTACTS_ERROR_INVALID_PARAMETER);
 	ret = contacts_list_get_count(address_list, &count);
@@ -1901,7 +2372,7 @@ int ctsvc_contact_insert_data_url(contacts_list_h url_list, int contact_id, bool
 	CTS_FN_CALL;
 	int ret = CONTACTS_ERROR_NONE;
 	contacts_record_h record;
-	unsigned int count = 0;
+	int count = 0;
 
 	RETV_IF(NULL == url_list, CONTACTS_ERROR_INVALID_PARAMETER);
 	ret = contacts_list_get_count(url_list, &count);
@@ -1926,7 +2397,7 @@ int ctsvc_contact_insert_data_nickname(contacts_list_h nickname_list, int contac
 	CTS_FN_CALL;
 	int ret = CONTACTS_ERROR_NONE;
 	contacts_record_h record;
-	unsigned int count = 0;
+	int count = 0;
 
 	RETV_IF(NULL == nickname_list, CONTACTS_ERROR_INVALID_PARAMETER);
 	ret = contacts_list_get_count(nickname_list, &count);
@@ -1951,7 +2422,7 @@ int ctsvc_contact_insert_data_relationship(contacts_list_h relationship_list, in
 	CTS_FN_CALL;
 	int ret = CONTACTS_ERROR_NONE;
 	contacts_record_h record;
-	unsigned int count = 0;
+	int count = 0;
 
 	RETV_IF(NULL == relationship_list, CONTACTS_ERROR_INVALID_PARAMETER);
 	ret = contacts_list_get_count(relationship_list, &count);
@@ -1976,7 +2447,7 @@ int ctsvc_contact_insert_data_image(contacts_list_h image_list, int contact_id, 
 	CTS_FN_CALL;
 	int ret = CONTACTS_ERROR_NONE;
 	contacts_record_h record;
-	unsigned int count = 0;
+	int count = 0;
 
 	RETV_IF(NULL == image_list, CONTACTS_ERROR_INVALID_PARAMETER);
 	ret = contacts_list_get_count(image_list, &count);
@@ -2001,7 +2472,7 @@ int ctsvc_contact_insert_data_extension(contacts_list_h extension_list, int cont
 	CTS_FN_CALL;
 	int ret = CONTACTS_ERROR_NONE;
 	contacts_record_h record;
-	unsigned int count = 0;
+	int count = 0;
 
 	RETV_IF(NULL == extension_list, CONTACTS_ERROR_INVALID_PARAMETER);
 	ret = contacts_list_get_count(extension_list, &count);
@@ -2035,7 +2506,7 @@ int ctsvc_contact_update_display_name(int contact_id, contacts_display_name_sour
 		cts_stmt stmt = NULL;
 		char query[CTS_SQL_MAX_LEN] = {0};
 		ctsvc_contact_s *contact = (ctsvc_contact_s *)record;
-		ctsvc_make_contact_display_name(contact);
+		ctsvc_contact_make_display_name(contact);
 
 		snprintf(query, sizeof(query), "UPDATE "CTS_TABLE_CONTACTS" SET "
 				"display_name=?, reverse_display_name=?, display_name_source=%d, "

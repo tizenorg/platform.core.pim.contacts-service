@@ -43,5 +43,7 @@ int ctsvc_ipc_call_async(char *module, char *function, pims_ipc_h data_in, pims_
 void ctsvc_client_ipc_set_change_version(int version);
 int ctsvc_client_ipc_get_change_version(void);
 
+int ctsvc_ipc_client_check_permission(int permission, bool *result);
+
 #endif /*  __TIZEN_SOCIAL_CTSVC_CLIENT_IPC_H__ */
 

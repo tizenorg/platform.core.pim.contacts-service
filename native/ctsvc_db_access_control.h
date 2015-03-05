@@ -20,20 +20,18 @@
 #ifndef __TIZEN_SOCIAL_CTSVC_DB_ACCESS_CONTROL_H__
 #define __TIZEN_SOCIAL_CTSVC_DB_ACCESS_CONTROL_H__
 
-
-enum {
-	CTSVC_PERMISSION_CONTACT_NONE = 0x0,
-	CTSVC_PERMISSION_CONTACT_READ = 0x1,
-	CTSVC_PERMISSION_CONTACT_WRITE = 0x2,
-	CTSVC_PERMISSION_PHONELOG_READ = 0x4,
-	CTSVC_PERMISSION_PHONELOG_WRITE = 0x8,
-};
-
 int ctsvc_have_file_read_permission(const char *path);
 
 void ctsvc_set_client_access_info(const char *smack_label, const char *cookie);
 void ctsvc_unset_client_access_info(void);
+void ctsvc_reset_all_client_access_info(void);
 
 bool ctsvc_have_permission(int permission);
+char* ctsvc_get_client_smack_label(void);
+
+int ctsvc_get_write_permitted_addressbook_ids(int **addressbook_ids, int *count);
+bool ctsvc_have_ab_write_permission(int addressbook_id);
+int ctsvc_is_owner(int addressbook_id);
+
 
 #endif // __TIZEN_SOCIAL_CTSVC_DB_ACCESS_CONTROL_H__
