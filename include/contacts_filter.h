@@ -48,7 +48,7 @@ extern "C"
 /**
  * @brief Enumeration for Contacts match string flags.
  *
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  *
  */
 typedef enum
@@ -64,7 +64,7 @@ typedef enum
 /**
  * @brief Enumeration for Contacts match int flags.
  *
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  *
  */
 typedef enum
@@ -81,7 +81,7 @@ typedef enum
 /**
  * @brief Enumeration for Contacts filter operators.
  *
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  *
  */
 typedef enum {
@@ -93,7 +93,7 @@ typedef enum {
 /**
  * @brief Creates a filter.
  *
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  *
  * @remarks You must release @a filter using contacts_filter_destroy().
  *
@@ -117,7 +117,7 @@ int contacts_filter_create( const char* view_uri, contacts_filter_h* filter );
 /**
  * @brief Destroys a filter.
  *
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  *
  * @param[in]   filter    The filter handle
  *
@@ -134,7 +134,7 @@ int contacts_filter_destroy( contacts_filter_h filter );
 /**
  * @brief Adds a condition for a string type property.
  *
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  *
  * @param[in]   filter          The filter handle
  * @param[in]   property_id     The property ID to add a condition
@@ -155,7 +155,7 @@ int contacts_filter_add_str( contacts_filter_h filter, unsigned int property_id,
 /**
  * @brief Adds a condition for an integer type property.
  *
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  *
  * @param[in]   filter          The filter handle
  * @param[in]   property_id     The property ID to add a condition
@@ -176,7 +176,7 @@ int contacts_filter_add_int( contacts_filter_h filter, unsigned int property_id,
 /**
  * @brief Adds a condition for a long int type property.
  *
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  *
  * @param[in]   filter          The filter handle
  * @param[in]   property_id     The property ID to add a condition
@@ -197,7 +197,7 @@ int contacts_filter_add_lli( contacts_filter_h filter, unsigned int property_id,
 /**
  * @brief Adds a condition for a double type property.
  *
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  *
  * @param[in]   filter          The filter handle
  * @param[in]   property_id     The property ID to add a condition
@@ -218,7 +218,7 @@ int contacts_filter_add_double( contacts_filter_h filter, unsigned int property_
 /**
  * @brief Adds a condition for a boolean type property.
  *
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  *
  * @param[in]   filter          The filter handle
  * @param[in]   property_id     The property ID to add a condition
@@ -238,7 +238,7 @@ int contacts_filter_add_bool( contacts_filter_h filter, unsigned int property_id
 /**
  * @brief Adds an operator between conditions.
  *
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  *
  * @param[in]   filter          The filter handle
  * @param[in]   operator_type   The operator type
@@ -258,7 +258,7 @@ int contacts_filter_add_operator( contacts_filter_h filter, contacts_filter_oper
 /**
  * @brief Adds a filter to a given filter.
  *
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  *
  * @param[in]   parent_filter       The parent filter handle
  * @param[in]   child_filter        The child filter handle

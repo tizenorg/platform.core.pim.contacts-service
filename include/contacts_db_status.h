@@ -40,7 +40,7 @@ extern "C"
 /**
  * @brief Enumeration for contact DB status.
  *
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  *
  */
 
@@ -52,7 +52,7 @@ typedef enum {
 /**
  * @brief  Gets the current status of server.
  *
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  *
  * @param[in]  status  The current status of server
  *
@@ -72,7 +72,7 @@ int contacts_db_get_status(contacts_db_status_e *status);
 /**
  * @brief  Called when contacts-service server status changes.
  *
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  *
  * @param[in]  status       The current status of server
  * @param[in]  user_data    The user data passed from the callback registration function
@@ -87,7 +87,7 @@ typedef void (*contacts_db_status_changed_cb)(contacts_db_status_e status, void*
 /**
  * @brief  Registers a callback function.
  *
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  *
  * @param[in]  callback     The callback function to register
  * @param[in]  user_data    The user data to be passed to the callback function
@@ -109,7 +109,7 @@ int contacts_db_add_status_changed_cb(contacts_db_status_changed_cb callback, vo
 /**
  * @brief  Unregisters a callback function.
  *
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  *
  * @param[in]  callback   The callback function to register
  * @param[in]  user_data  The user data to be passed to the callback function

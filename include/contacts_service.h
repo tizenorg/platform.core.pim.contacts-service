@@ -48,7 +48,7 @@ extern "C"
 /**
  * @brief Connects to the contacts service.
  *
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  *
  * @remarks Connection opening is necessary to access the contacts server such as fetching, inserting, or updating records.\n
  *          The execution of contacts_connect() and contacts_disconnect() could slow down your application. So it is not recommended to call them frequently.
@@ -70,7 +70,7 @@ int contacts_connect(void);
 /**
  * @brief Disconnects from the contacts service.
  *
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  *
  * @remarks If there is no opened connection, this function returns #CONTACTS_ERROR_DB.
  *
@@ -89,7 +89,7 @@ int contacts_disconnect(void);
 /**
  * @brief Connects to the contacts service with a connection on another thread.
  *
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  *
  * @remarks Opening connection is necessary to access the contact server and to perform operations such as fetching, inserting, or updating records.\n
  *          On multiple thread environment with contacts_connect(), request can be failed in one thread, while another request is working by the connection in the other thread.
@@ -114,7 +114,7 @@ int contacts_connect_on_thread(void);
 /**
  * @brief Disconnects from the contacts service.
  *
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  *
  * @return  @c 0 on success,
  *          otherwise a negative error value
@@ -132,7 +132,7 @@ int contacts_disconnect_on_thread(void);
 /**
  * @brief Definition for contacts_connect_with_flags(). If it is called the API with this flag, then retry to call contacts_connect() for several times.
  *
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  *
  * @see contacts_connect_with_flags()
  */
@@ -141,7 +141,7 @@ int contacts_disconnect_on_thread(void);
 /**
  * @brief Definition for default flag of contacts_connect_with_flags().
  *
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  *
  * @see contacts_connect_with_flags()
  */
@@ -150,7 +150,7 @@ int contacts_disconnect_on_thread(void);
 /**
  * @brief Connects to the contacts service.
  *
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  *
  * @param[in]   flags	connection flag
  *

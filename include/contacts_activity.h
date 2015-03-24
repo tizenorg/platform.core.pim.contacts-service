@@ -49,7 +49,7 @@ extern "C"
 /**
  * @brief Deletes an activity record from the contacts database by contact ID.
  *
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @privlevel public
  * @privilege %http://tizen.org/privilege/contact.write
  *
@@ -75,7 +75,7 @@ int contacts_activity_delete_by_contact_id(int contact_id);
 /**
  * @brief Deletes an activity record from the contacts database by account ID.
  *
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @privlevel public
  * @privilege %http://tizen.org/privilege/contact.write
  *
