@@ -48,7 +48,7 @@ extern "C"
 /**
  * @brief Enumeration for contact change state.
  *
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  *
  */
 typedef enum
@@ -61,7 +61,7 @@ typedef enum
 /**
  * @brief Called when the designated view changes.
  *
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  *
  * @param[in]   view_uri    The view URI
  * @param[in]   user_data   The user data passed from the callback registration function
@@ -75,7 +75,7 @@ typedef void (*contacts_db_changed_cb)(const char* view_uri, void* user_data);
 /**
  * @brief Inserts a record to the contacts database.
  *
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @privlevel public
  * @privilege %http://tizen.org/privilege/contact.write
  * @privilege %http://tizen.org/privilege/callhistory.write
@@ -121,7 +121,7 @@ int contacts_db_insert_record( contacts_record_h record, int *id );
  * @details This function creates a new contact handle from the contacts database by the given @a record_id. \n
  *          @a record will be created, which is filled with contact information.
  *
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @privlevel public
  * @privilege %http://tizen.org/privilege/contact.read
  * @privilege %http://tizen.org/privilege/callhistory.read
@@ -164,7 +164,7 @@ int contacts_db_get_record( const char* view_uri, int record_id, contacts_record
 /**
  * @brief Updates a record in the contacts database.
  *
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @privlevel public
  * @privilege %http://tizen.org/privilege/contact.write
  * @privilege %http://tizen.org/privilege/callhistory.write
@@ -205,7 +205,7 @@ int contacts_db_update_record( contacts_record_h record );
 /**
  * @brief Deletes a record from the contacts database with related child records.
  *
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @privlevel public
  * @privilege %http://tizen.org/privilege/contact.write
  * @privilege %http://tizen.org/privilege/callhistory.write
@@ -247,7 +247,7 @@ int contacts_db_delete_record( const char* view_uri, int record_id );
  *
  * @details Now, this API supports only _contacts_contact view_uri.
  *
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @privlevel public
  * @privilege %http://tizen.org/privilege/contact.write
  *
@@ -283,7 +283,7 @@ int contacts_db_replace_record( contacts_record_h record, int id );
 /**
  * @brief Retrieves all records and returns the results list.
  *
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @privlevel public
  * @privilege %http://tizen.org/privilege/contact.read
  *@privilege  %http://tizen.org/privilege/callhistory.read
@@ -327,7 +327,7 @@ int contacts_db_get_all_records( const char* view_uri, int offset, int limit, co
 /**
  * @brief Uses a query to find records.
  *
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @privlevel public
  * @privilege %http://tizen.org/privilege/contact.read
  * @privilege  %http://tizen.org/privilege/callhistory.read
@@ -371,7 +371,7 @@ int contacts_db_get_records_with_query( contacts_query_h query, int offset, int 
 /**
  * @brief Inserts multiple records to the contacts database.
  *
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @privlevel public
  * @privilege %http://tizen.org/privilege/contact.write
  * @privilege %http://tizen.org/privilege/callhistory.write
@@ -413,7 +413,7 @@ int contacts_db_insert_records( contacts_list_h record_list, int **ids, int *cou
 /**
  * @brief Updates multiple records in the contacts database.
  *
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @privlevel public
  * @privilege %http://tizen.org/privilege/contact.write
  * @privilege %http://tizen.org/privilege/callhistory.write
@@ -453,7 +453,7 @@ int contacts_db_update_records( contacts_list_h record_list);
 /**
  * @brief Deletes multiple records in the contacts database with related child records.
  *
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @privlevel public
  * @privilege %http://tizen.org/privilege/contact.write
  * @privilege %http://tizen.org/privilege/callhistory.write
@@ -495,7 +495,7 @@ int contacts_db_delete_records(const char* view_uri, int record_id_array[], int 
 /**
  * @brief Replaces database records identified by given ids with a given record list.
  *
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @privlevel public
  * @privilege %http://tizen.org/privilege/contact.write
  *
@@ -532,7 +532,7 @@ int contacts_db_replace_records( contacts_list_h list, int record_id_array[], in
 /**
  * @brief Gets the current contacts database version.
  *
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @privlevel public
  * @privilege %http://tizen.org/privilege/contact.read
  * @privilege %http://tizen.org/privilege/callhistory.read
@@ -560,7 +560,7 @@ int contacts_db_get_current_version( int* contacts_db_version );
 /**
  * @brief Registers a callback function to be invoked when a record changes.
  *
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @privlevel public
  * @privilege %http://tizen.org/privilege/contact.read
  * @privilege %http://tizen.org/privilege/callhistory.read
@@ -604,7 +604,7 @@ int contacts_db_add_changed_cb( const char* view_uri, contacts_db_changed_cb cal
 /**
  * @brief Unregisters a callback function.
  *
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @privlevel public
  * @privilege %http://tizen.org/privilege/contact.read
  * @privilege %http://tizen.org/privilege/callhistory.read
@@ -647,7 +647,7 @@ int contacts_db_remove_changed_cb( const char* view_uri, contacts_db_changed_cb 
  *          Now, support @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_contact_updated_info, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_group_updated_info \n
  *          @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_my_profile_updated_info and @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_grouprel_updated_info.
  *
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @privlevel public
  * @privilege %http://tizen.org/privilege/contact.read
  *
@@ -683,7 +683,7 @@ int contacts_db_get_changes_by_version( const char* view_uri, int address_book_i
 /**
  * @brief Finds records based on a given keyword.
  *
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @privlevel public
  * @privilege %http://tizen.org/privilege/contact.read
  *
@@ -719,7 +719,7 @@ int contacts_db_search_records(const char* view_uri, const char *keyword, int of
 /**
  * @brief Finds records based on given query and keyword.
  *
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @privlevel public
  * @privilege %http://tizen.org/privilege/contact.read
  *
@@ -756,7 +756,7 @@ int contacts_db_search_records_with_query(contacts_query_h query, const char *ke
 /**
  * @brief Finds records based on a keyword and range.
  *
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @privlevel public
  * @privilege %http://tizen.org/privilege/contact.read
  *
@@ -795,7 +795,7 @@ int contacts_db_search_records_with_range(const char* view_uri, const char *keyw
 /**
  * @brief Gets the number of records in a specific view.
  *
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @privlevel public
  * @privilege %http://tizen.org/privilege/contact.read
  * @privilege %http://tizen.org/privilege/callhistory.read
@@ -834,7 +834,7 @@ int contacts_db_get_count( const char* view_uri, int *count);
 /**
  * @brief Gets the number of records matching a query.
  *
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @privlevel public
  * @privilege %http://tizen.org/privilege/contact.read
  * @privilege %http://tizen.org/privilege/callhistory.read
@@ -873,7 +873,7 @@ int contacts_db_get_count_with_query( contacts_query_h query, int *count);
 /**
  * @brief Gets the last successful changed contacts database version on the current connection.
  *
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  * @privlevel public
  * @privilege %http://tizen.org/privilege/contact.read
  * @privilege %http://tizen.org/privilege/callhistory.read
@@ -894,7 +894,6 @@ int contacts_db_get_count_with_query( contacts_query_h query, int *count);
  * @see contacts_db_get_current_version()
  */
 int contacts_db_get_last_change_version(int* last_change_version);
-
 
 /**
  * @}

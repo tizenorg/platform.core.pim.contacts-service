@@ -48,7 +48,7 @@ extern "C"
 /**
  * @brief Creates a query.
  *
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  *
  * @remarks You must release @a query using contacts_query_destroy().
  *
@@ -72,7 +72,7 @@ int contacts_query_create( const char* view_uri, contacts_query_h* query );
 /**
  * @brief Destroys a query.
  *
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  *
  * @param[in]   query    The query handle
  *
@@ -89,7 +89,7 @@ int contacts_query_destroy( contacts_query_h query );
 /**
  * @brief Adds property IDs for projection.
  *
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  *
  * @param[in]   query              The query handle
  * @param[in]   property_id_array   The property ID array
@@ -107,7 +107,7 @@ int contacts_query_set_projection(contacts_query_h query, unsigned int property_
 /**
  * @brief Sets the "distinct" option for projection.
  *
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  *
  * @param[in]   query           The query handle
  * @param[in]   set             Set @c true to set the distinct option for projection,
@@ -124,7 +124,7 @@ int contacts_query_set_distinct(contacts_query_h query, bool set);
 /**
  * @brief Sets a filter for query.
  *
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  *
  * @param[in]   query           The query handle
  * @param[in]   filter          The filter handle
@@ -142,7 +142,7 @@ int contacts_query_set_filter(contacts_query_h query, contacts_filter_h filter);
 /**
  * @brief Sets a sort mode for query.
  *
- * @since_tizen 2.3
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
  *
  * @param[in]   query           The query handle
  * @param[in]   property_id     The property ID to sort
