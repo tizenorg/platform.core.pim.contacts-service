@@ -48,7 +48,7 @@ extern "C"
 /**
  * @brief Links a person to another person.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
  * @privlevel public
  * @privilege %http://tizen.org/privilege/contact.write
  *
@@ -75,7 +75,7 @@ int contacts_person_link_person(int base_person_id, int person_id);
 /**
  * @brief Unlinks a contact from a person.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
  * @privlevel public
  * @privilege %http://tizen.org/privilege/contact.write
  *
@@ -106,7 +106,7 @@ int contacts_person_unlink_contact(int person_id, int contact_id, int* unlinked_
  *
  * @details The person is no longer in the most frequently contacted person list.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
  * @privlevel public
  * @privilege %http://tizen.org/privilege/contact.write
  *
@@ -134,7 +134,7 @@ int contacts_person_reset_usage(int person_id, contacts_usage_type_e type);
 /**
  * @brief Sets the order of a (favorite) contact.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
  * @privlevel public
  * @privilege %http://tizen.org/privilege/contact.write
  *
@@ -163,7 +163,7 @@ int contacts_person_set_favorite_order(int person_id, int previous_person_id, in
 /**
  * @brief Enumeration for Contacts person properties.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
  *
  */
 typedef enum {
@@ -176,7 +176,7 @@ typedef enum {
 /**
  * @brief Sets a record's default property.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
  * @privlevel public
  * @privilege %http://tizen.org/privilege/contact.write
  *
@@ -209,7 +209,7 @@ int contacts_person_set_default_property(contacts_person_property_e property, in
 /**
  * @brief Gets a default property for a record.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
  * @privlevel public
  * @privilege %http://tizen.org/privilege/contact.read
  *
