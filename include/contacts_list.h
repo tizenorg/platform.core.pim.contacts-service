@@ -49,7 +49,7 @@ extern "C"
 /**
  * @brief Creates a contacts list.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
  *
  * @remarks You must release @a contacts_list using contacts_list_destroy().
  *
@@ -69,7 +69,7 @@ int contacts_list_create( contacts_list_h* contacts_list );
 /**
  * @brief Destroys a contacts list and releases its all resources.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
  *
  * @param[in]   contacts_list  The contacts list handle
  * @param[in]   delete_child   Set @c true to destroy child records automatically,
@@ -88,7 +88,7 @@ int contacts_list_destroy( contacts_list_h contacts_list, bool delete_child );
 /**
  * @brief Retrieves the number of contact entities from a contacts list.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
  *
  * @param[in]   contacts_list           The contacts list handle
  * @param[out]  count                   The count of contact entity
@@ -106,7 +106,7 @@ int contacts_list_get_count( contacts_list_h contacts_list, int *count );
 /**
  * @brief Adds a record to a contacts list.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
  *
  * @remarks Same kind of record can be added.
  *
@@ -129,7 +129,7 @@ int contacts_list_add( contacts_list_h contacts_list, contacts_record_h record )
  * @details If the record is current record, then current record is changed the next record.\n
  *          If the record is the last record, then current record will be @c NULL.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
  *
  * @param[in]   contacts_list           The contacts list handle
  * @param[in]   record                  The record handle
@@ -150,7 +150,7 @@ int contacts_list_remove( contacts_list_h contacts_list, contacts_record_h recor
  *
  * @details The default current record is the first record.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
  *
  * @remarks You MUST NOT destroy the @a record.
  *          It is destroyed automatically when the @a contacts_list is destroyed.
@@ -170,7 +170,7 @@ int contacts_list_get_current_record_p( contacts_list_h contacts_list, contacts_
 /**
  * @brief Moves a contacts list to the previous position.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
  *
  * @param[in]  contacts_list    The contacts list handle
  *
@@ -188,7 +188,7 @@ int contacts_list_prev( contacts_list_h contacts_list );
 /**
  * @brief Moves a contacts list to the next position.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
  *
  * @param[in]  contacts_list      The contacts list handle
  *
@@ -206,7 +206,7 @@ int contacts_list_next( contacts_list_h contacts_list );
 /**
  * @brief Moves a contacts list to the first position.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
  *
  * @param[in]  contacts_list   The contacts list handle
  *
@@ -224,7 +224,7 @@ int contacts_list_first( contacts_list_h contacts_list );
 /**
  * @brief Moves a contacts list to the last position.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
  *
  * @param[in]  contacts_list    The contacts list handle
  *

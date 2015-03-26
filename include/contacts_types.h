@@ -85,7 +85,7 @@ _CONTACTS_HANDLE( contacts_query_h )
  *          \n Example : CTS_NUM_TYPE_HOME|CTS_NUM_TYPE_VOICE
  *          \n Exceptionally, CTS_NUM_TYPE_CUSTOM is exclusive.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
  *
  */
 typedef enum {
@@ -113,7 +113,7 @@ typedef enum {
 /**
  * @brief Enumeration for Contact email type.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
  *
  */
 typedef enum {
@@ -127,7 +127,7 @@ typedef enum {
 /**
  * @brief Enumeration for Contact company type.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
  *
  */
 typedef enum {
@@ -139,7 +139,7 @@ typedef enum {
 /**
  * @brief Enumeration for Contact address type.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
  *
  */
 typedef enum {
@@ -156,7 +156,7 @@ typedef enum {
 /**
  * @brief Enumeration for Contact URL type.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
  *
  */
 typedef enum {
@@ -169,7 +169,7 @@ typedef enum {
 /**
  * @brief Enumeration for Contact messenger type.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
  *
  */
 typedef enum{
@@ -190,7 +190,7 @@ typedef enum{
 /**
  * @brief Enumeration for Call history type.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
  *
  */
 typedef enum {
@@ -223,7 +223,7 @@ typedef enum {
 /**
  * @brief Enumeration for Contact event type.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
  *
  */
 typedef enum {
@@ -236,7 +236,7 @@ typedef enum {
 /**
  * @brief Enumeration for Contact event calendar type.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
  *
  */
 typedef enum {
@@ -247,7 +247,7 @@ typedef enum {
 /**
  * @brief Enumeration of Contact image type
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
  *
  */
 typedef enum {
@@ -258,7 +258,7 @@ typedef enum {
 /**
  * @brief Enumeration for usage type.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
  *
  */
 typedef enum {
@@ -270,7 +270,7 @@ typedef enum {
 /**
  * @brief Enumeration for Contact display name source type.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
  *
  */
 typedef enum {
@@ -285,7 +285,7 @@ typedef enum {
 /**
  * @brief Enumeration for Address book mode.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
  *
  */
 typedef enum {
@@ -296,7 +296,7 @@ typedef enum {
 /**
  * @brief Enumeration for link mode when inserting contact.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
  *
  */
 typedef enum{
@@ -307,7 +307,7 @@ typedef enum{
 /**
  * @brief Enumeration for Contact relationship type.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
  *
  */
 typedef enum {
@@ -332,7 +332,7 @@ typedef enum {
 /**
  * @brief Enumeration for Contact search range.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
  *
  */
 typedef enum {

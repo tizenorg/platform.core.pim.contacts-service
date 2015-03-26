@@ -39,7 +39,7 @@ extern "C"
 /**
  * @brief Enumeration for contacts errors.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.3.1 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
  *
  */
 typedef enum
