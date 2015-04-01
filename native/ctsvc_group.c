@@ -100,8 +100,6 @@ API int contacts_group_add_contact(int group_id, int contact_id)
 	int addressbook_id;
 	char query[CTS_SQL_MAX_LEN] = {0};
 
-	RETVM_IF(!ctsvc_have_permission(CTSVC_PERMISSION_CONTACT_WRITE), CONTACTS_ERROR_PERMISSION_DENIED,
-				"Permission denied : contact write (group)");
 	RETVM_IF( group_id <= 0, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid Parameter: group_id should be greater than 0");
 	RETVM_IF( contact_id <= 0, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid Parameter: contact_id should be greater than 0");
 
@@ -198,8 +196,6 @@ API int contacts_group_remove_contact(int group_id, int contact_id)
 	int addressbook_id;
 	char query[CTS_SQL_MAX_LEN] = {0};
 
-	RETVM_IF(!ctsvc_have_permission(CTSVC_PERMISSION_CONTACT_WRITE), CONTACTS_ERROR_PERMISSION_DENIED,
-				"Permission denied : contact write (group)");
 	RETVM_IF( group_id <= 0, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid Parameter: group_id should be greater than 0");
 	RETVM_IF( contact_id <= 0, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid Parameter: contact_id should be greater than 0");
 
@@ -266,9 +262,6 @@ API int contacts_group_set_group_order(int group_id, int previous_group_id, int 
 	double prio;
 	cts_stmt stmt;
 	char query[CTS_SQL_MAX_LEN] = {0};
-
-	RETVM_IF(!ctsvc_have_permission(CTSVC_PERMISSION_CONTACT_WRITE), CONTACTS_ERROR_PERMISSION_DENIED,
-				"Permission denied : contact write (group)");
 
 	snprintf(query, sizeof(query),
 			"SELECT addressbook_id from "CTS_TABLE_GROUPS"  WHERE group_id = %d", group_id);

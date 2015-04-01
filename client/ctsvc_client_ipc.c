@@ -20,7 +20,6 @@
 #include <glib.h>
 #include <stdlib.h>
 #include <pims-ipc-data.h>
-#include <security-server.h>
 
 #include "ctsvc_client_ipc.h"
 
@@ -41,67 +40,9 @@ static pims_ipc_h __contacts_global_ipc = NULL;
 static __thread int __contacts_change_version = 0;
 static int __contacts_global_change_version = 0;
 
-static int __ctsvc_ipc_get_cookie_for_access_control(pims_ipc_data_h *indata)
-{
-	int ret;
-	size_t cookie_size = 0;
-	pims_ipc_data_h data;
-	char *buf;
-
-	// Access control : get cookie from security-server
-	cookie_size = security_server_get_cookie_size();
-	if (cookie_size <= 0) {
-		CTS_ERR("security_server_get_cookie_size fail(%d)", cookie_size);
-		return CONTACTS_ERROR_SYSTEM;
-	}
-
-	char cookie[cookie_size];
-	cookie[0] = '\0';
-	ret = security_server_request_cookie(cookie, cookie_size);
-	if(ret < 0) {
-		CTS_ERR("security_server_request_cookie fail (%d)", ret);
-		return CONTACTS_ERROR_SYSTEM;
-	}
-
-	// Access control : put cookie to indata
-	data = pims_ipc_data_create(0);
-	if (data == NULL) {
-		CTS_ERR("ipc data created fail!");
-		return CONTACTS_ERROR_OUT_OF_MEMORY;
-	}
-
-	ret = ctsvc_ipc_marshal_unsigned_int(cookie_size, data);
-	if (ret != CONTACTS_ERROR_NONE) {
-		CTS_ERR("ctsvc_ipc_marshal_int fail");
-		pims_ipc_data_destroy(data);
-		return ret;
-	}
-
-	buf = g_base64_encode((const guchar *)cookie, cookie_size);
-	if (buf) {
-		ret = ctsvc_ipc_marshal_string(buf, data);
-		if (ret != CONTACTS_ERROR_NONE) {
-			CTS_ERR("ctsvc_ipc_marshal_string fail");
-			pims_ipc_data_destroy(data);
-			return ret;
-		}
-		free(buf);
-	}
-	else {
-		CTS_ERR("g_base64_encode fail");
-		pims_ipc_data_destroy(data);
-		return CONTACTS_ERROR_SYSTEM;
-	}
-
-	*indata = data;
-
-	return CONTACTS_ERROR_NONE;
-}
-
 int ctsvc_ipc_connect_on_thread(void)
 {
 	int ret = CONTACTS_ERROR_NONE;
-	pims_ipc_data_h indata = NULL;
 	pims_ipc_data_h outdata = NULL;
 
 	// ipc create
@@ -123,21 +64,12 @@ int ctsvc_ipc_connect_on_thread(void)
 		return CONTACTS_ERROR_NONE;
 	}
 
-	ret = __ctsvc_ipc_get_cookie_for_access_control(&indata);
-	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("__ctsvc_ipc_get_cookie_for_access_control fail (%d)", ret);
-		goto DATA_FREE;
-	}
-
 	// ipc call
-	if (pims_ipc_call(__contacts_ipc, CTSVC_IPC_MODULE, CTSVC_IPC_SERVER_CONNECT, indata, &outdata) != 0) {
+	if (pims_ipc_call(__contacts_ipc, CTSVC_IPC_MODULE, CTSVC_IPC_SERVER_CONNECT, NULL, &outdata) != 0) {
 		CTS_ERR("pims_ipc_call failed");
-		pims_ipc_data_destroy(indata);
 		ret = CONTACTS_ERROR_IPC;
 		goto DATA_FREE;
 	}
-
-	pims_ipc_data_destroy(indata);
 
 	if (outdata) {
 		unsigned int size = 0;
@@ -226,7 +158,6 @@ bool ctsvc_ipc_is_busy()
 int ctsvc_ipc_connect(void)
 {
 	int ret = CONTACTS_ERROR_NONE;
-	pims_ipc_data_h indata = NULL;
 	pims_ipc_data_h outdata = NULL;
 
 	// ipc create
@@ -248,21 +179,12 @@ int ctsvc_ipc_connect(void)
 		return CONTACTS_ERROR_NONE;
 	}
 
-	ret = __ctsvc_ipc_get_cookie_for_access_control(&indata);
-	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("__ctsvc_ipc_get_cookie_for_access_control fail (%d)", ret);
-		goto DATA_FREE;
-	}
-
 	// ipc call
-	if (pims_ipc_call(__contacts_global_ipc, CTSVC_IPC_MODULE, CTSVC_IPC_SERVER_CONNECT, indata, &outdata) != 0) {
+	if (pims_ipc_call(__contacts_global_ipc, CTSVC_IPC_MODULE, CTSVC_IPC_SERVER_CONNECT, NULL, &outdata) != 0) {
 		CTS_ERR("[GLOBAL_IPC_CHANNEL] pims_ipc_call failed");
-		pims_ipc_data_destroy(indata);
 		ret = CONTACTS_ERROR_IPC;
 		goto DATA_FREE;
 	}
-
-	pims_ipc_data_destroy(indata);
 
 	if (outdata) {
 		unsigned int size = 0;

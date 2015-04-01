@@ -26,12 +26,13 @@
 
 #include "ctsvc_service.h"
 #include "ctsvc_db_init.h"
+#include "ctsvc_db_access_control.h"
+
 
 #include "ctsvc_ipc_marshal.h"
 #include "ctsvc_internal.h"
 #include "ctsvc_ipc_server.h"
 #include "ctsvc_utils.h"
-
 
 void ctsvc_ipc_activity_delete_by_contact_id(pims_ipc_h ipc, pims_ipc_data_h indata, pims_ipc_data_h *outdata, void *userdata)
 {
@@ -53,6 +54,10 @@ void ctsvc_ipc_activity_delete_by_contact_id(pims_ipc_h ipc, pims_ipc_data_h ind
 		goto ERROR_RETURN;
 	}
 
+	if (!ctsvc_have_permission(ipc, CTSVC_PERMISSION_CONTACT_WRITE)) {
+		ret = CONTACTS_ERROR_PERMISSION_DENIED;
+		goto ERROR_RETURN;
+	}
 	ret = contacts_activity_delete_by_contact_id(contact_id);
 
 
@@ -112,6 +117,10 @@ void ctsvc_ipc_activity_delete_by_account_id(pims_ipc_h ipc, pims_ipc_data_h ind
 		goto ERROR_RETURN;
 	}
 
+	if (!ctsvc_have_permission(ipc, CTSVC_PERMISSION_CONTACT_WRITE)) {
+		ret = CONTACTS_ERROR_PERMISSION_DENIED;
+		goto ERROR_RETURN;
+	}
 	ret = contacts_activity_delete_by_account_id(account_id);
 
 ERROR_RETURN:
@@ -174,6 +183,11 @@ void ctsvc_ipc_group_add_contact(pims_ipc_h ipc, pims_ipc_data_h indata, pims_ip
 	else
 	{
 		CTS_ERR("ctsvc_ipc_group_add_contact fail");
+		goto ERROR_RETURN;
+	}
+
+	if (!ctsvc_have_permission(ipc, CTSVC_PERMISSION_CONTACT_WRITE)) {
+		ret = CONTACTS_ERROR_PERMISSION_DENIED;
 		goto ERROR_RETURN;
 	}
 
@@ -241,6 +255,12 @@ void ctsvc_ipc_group_remove_contact(pims_ipc_h ipc, pims_ipc_data_h indata, pims
 		CTS_ERR("ctsvc_ipc_group_remove_contact fail");
 		goto ERROR_RETURN;
 	}
+
+	if (!ctsvc_have_permission(ipc, CTSVC_PERMISSION_CONTACT_WRITE)) {
+		ret = CONTACTS_ERROR_PERMISSION_DENIED;
+		goto ERROR_RETURN;
+	}
+
 
 	ret = contacts_group_remove_contact(group_id, contact_id);
 
@@ -314,6 +334,11 @@ void ctsvc_ipc_group_set_group_order(pims_ipc_h ipc, pims_ipc_data_h indata, pim
 		goto ERROR_RETURN;
 	}
 
+	if (!ctsvc_have_permission(ipc, CTSVC_PERMISSION_CONTACT_WRITE)) {
+		ret = CONTACTS_ERROR_PERMISSION_DENIED;
+		goto ERROR_RETURN;
+	}
+
 	ret = contacts_group_set_group_order(group_id, previous_group_id, next_group_id );
 
 ERROR_RETURN:
@@ -378,6 +403,11 @@ void ctsvc_ipc_person_link_person(pims_ipc_h ipc, pims_ipc_data_h indata, pims_i
 		goto ERROR_RETURN;
 	}
 
+	if (!ctsvc_have_permission(ipc, CTSVC_PERMISSION_CONTACT_WRITE)) {
+		ret = CONTACTS_ERROR_PERMISSION_DENIED;
+		goto ERROR_RETURN;
+	}
+
 	ret = contacts_person_link_person(base_person_id, person_id);
 
 ERROR_RETURN:
@@ -438,6 +468,11 @@ void ctsvc_ipc_person_unlink_contact(pims_ipc_h ipc, pims_ipc_data_h indata, pim
 	else
 	{
 		CTS_ERR("ctsvc_ipc_person_link_person fail");
+		goto ERROR_RETURN;
+	}
+
+	if (!ctsvc_have_permission(ipc, CTSVC_PERMISSION_CONTACT_WRITE)) {
+		ret = CONTACTS_ERROR_PERMISSION_DENIED;
 		goto ERROR_RETURN;
 	}
 
@@ -514,6 +549,11 @@ void ctsvc_ipc_person_reset_usage(pims_ipc_h ipc, pims_ipc_data_h indata, pims_i
 		goto ERROR_RETURN;
 	}
 
+	if (!ctsvc_have_permission(ipc, CTSVC_PERMISSION_CONTACT_WRITE)) {
+		ret = CONTACTS_ERROR_PERMISSION_DENIED;
+		goto ERROR_RETURN;
+	}
+
 	ret = contacts_person_reset_usage(person_id, type);
 
 ERROR_RETURN:
@@ -581,6 +621,11 @@ void ctsvc_ipc_person_set_favorite_order(pims_ipc_h ipc, pims_ipc_data_h indata,
 	else
 	{
 		CTS_ERR("ctsvc_ipc_person_link_person fail");
+		goto ERROR_RETURN;
+	}
+
+	if (!ctsvc_have_permission(ipc, CTSVC_PERMISSION_CONTACT_WRITE)) {
+		ret = CONTACTS_ERROR_PERMISSION_DENIED;
 		goto ERROR_RETURN;
 	}
 
@@ -717,6 +762,11 @@ void ctsvc_ipc_person_get_default_property(pims_ipc_h ipc, pims_ipc_data_h indat
 		goto ERROR_RETURN;
 	}
 
+	if (!ctsvc_have_permission(ipc, CTSVC_PERMISSION_CONTACT_READ)) {
+		ret = CONTACTS_ERROR_PERMISSION_DENIED;
+		goto ERROR_RETURN;
+	}
+
 	ret = contacts_person_get_default_property(op, person_id, &id );
 
 ERROR_RETURN:
@@ -750,8 +800,16 @@ ERROR_RETURN:
 #ifdef ENABLE_LOG_FEATURE
 void ctsvc_ipc_phone_log_reset_statistics(pims_ipc_h ipc, pims_ipc_data_h indata, pims_ipc_data_h *outdata, void *userdata)
 {
-	int ret = contacts_phone_log_reset_statistics();
+	int ret;
 
+	if (!ctsvc_have_permission(ipc, CTSVC_PERMISSION_PHONELOG_WRITE)) {
+		ret = CONTACTS_ERROR_PERMISSION_DENIED;
+		goto ERROR_RETURN;
+	}
+
+	ret = contacts_phone_log_reset_statistics();
+
+ERROR_RETURN:
 	if (outdata)
 	{
 		*outdata = pims_ipc_data_create(0);
@@ -792,6 +850,11 @@ void ctsvc_ipc_phone_log_delete(pims_ipc_h ipc, pims_ipc_data_h indata,
 	int extra_data1;
 	char *number = NULL;
 	contacts_phone_log_delete_e op;
+
+	if (!ctsvc_have_permission(ipc, CTSVC_PERMISSION_PHONELOG_WRITE)) {
+		ret = CONTACTS_ERROR_PERMISSION_DENIED;
+		goto ERROR_RETURN;
+	}
 
 	if (indata) {
 		ret = ctsvc_ipc_unmarshal_int(indata, (int*)&op);
@@ -861,8 +924,14 @@ void ctsvc_ipc_setting_get_name_display_order(pims_ipc_h ipc, pims_ipc_data_h in
 	int ret = CONTACTS_ERROR_NONE;
 	contacts_name_display_order_e order;
 
+	if (!ctsvc_have_permission(ipc, CTSVC_PERMISSION_CONTACT_READ)) {
+		ret = CONTACTS_ERROR_PERMISSION_DENIED;
+		goto ERROR_RETURN;
+	}
+
 	ret = contacts_setting_get_name_display_order(&order);
 
+ERROR_RETURN:
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
 		if (!*outdata) {
@@ -895,8 +964,14 @@ void ctsvc_ipc_setting_get_name_sorting_order(pims_ipc_h ipc, pims_ipc_data_h in
 	int ret = CONTACTS_ERROR_NONE;
 	contacts_name_sorting_order_e order;
 
+	if (!ctsvc_have_permission(ipc, CTSVC_PERMISSION_CONTACT_READ)) {
+		ret = CONTACTS_ERROR_PERMISSION_DENIED;
+		goto ERROR_RETURN;
+	}
+
 	ret = contacts_setting_get_name_sorting_order(&order);
 
+ERROR_RETURN:
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
 		if (!*outdata) {
@@ -941,6 +1016,11 @@ void ctsvc_ipc_setting_set_name_display_order(pims_ipc_h ipc,
 		goto ERROR_RETURN;
 	}
 
+	if (!ctsvc_have_permission(ipc, CTSVC_PERMISSION_CONTACT_WRITE)) {
+		ret = CONTACTS_ERROR_PERMISSION_DENIED;
+		goto ERROR_RETURN;
+	}
+
 	ret = contacts_setting_set_name_display_order((contacts_name_display_order_e)order);
 
 ERROR_RETURN:
@@ -979,6 +1059,11 @@ void ctsvc_ipc_setting_set_name_sorting_order(pims_ipc_h ipc,
 	}
 	else {
 		CTS_ERR("ctsvc_ipc_person_set_default_property fail");
+		goto ERROR_RETURN;
+	}
+
+	if (!ctsvc_have_permission(ipc, CTSVC_PERMISSION_CONTACT_WRITE)) {
+		ret = CONTACTS_ERROR_PERMISSION_DENIED;
 		goto ERROR_RETURN;
 	}
 

@@ -24,7 +24,14 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <errno.h>
-#include <security-server.h>
+#include <pims-ipc-svc.h>
+
+#ifdef ENABLE_SIM_FEATURE
+#include <cynara-client.h>
+#include <cynara-error.h>
+#include <cynara-session.h>
+#include <cynara-creds-socket.h>
+#endif
 
 #include "contacts.h"
 #include "ctsvc_internal.h"
@@ -34,10 +41,24 @@
 #include "ctsvc_socket.h"
 #include "ctsvc_server_socket.h"
 #ifdef ENABLE_SIM_FEATURE
+#include "ctsvc_mutex.h"
 #include "ctsvc_server_sim.h"
+#include "ctsvc_db_access_control.h"
 #endif
 
+
+
+
 static int sockfd = -1;
+
+#ifdef ENABLE_SIM_FEATURE
+struct client_info {
+	char *smack;
+	char *uid;
+	char *client_session;
+};
+static GHashTable *_client_info_table = NULL; // key : socket_fd, value : struct client_info*
+#endif
 
 static inline int __ctsvc_server_socket_safe_write(int fd, char *buf, int buf_size)
 {
@@ -205,6 +226,57 @@ static void __ctsvc_server_socket_read_flush(GIOChannel *src, int size)
 }
 #endif // ENABLIE_SIM_FEATURE
 
+
+#ifdef ENABLE_SIM_FEATURE
+static cynara *_cynara = NULL;
+static int _ctsvc_server_initialize_cynara()
+{
+	int ret;
+	ctsvc_mutex_lock(CTS_MUTEX_CYNARA);
+	ret = cynara_initialize(&_cynara, NULL);
+	ctsvc_mutex_unlock(CTS_MUTEX_CYNARA);
+	if (CYNARA_API_SUCCESS != ret) {
+		char errmsg[1024];
+		cynara_strerror(ret, errmsg, sizeof(errmsg));
+		CTS_ERR("cynara_initialize() Fail(%d,%s)", ret, errmsg);
+		return CONTACTS_ERROR_SYSTEM;
+	}
+	return CONTACTS_ERROR_NONE;
+}
+#endif
+
+#ifdef ENABLE_SIM_FEATURE
+static void _ctsvc_server_finalize_cynara()
+{
+	int ret;
+
+	ctsvc_mutex_lock(CTS_MUTEX_CYNARA);
+	ret = cynara_finish(_cynara);
+	_cynara = NULL;
+	ctsvc_mutex_unlock(CTS_MUTEX_CYNARA);
+	if (CYNARA_API_SUCCESS != ret) {
+		char errmsg[1024];
+		cynara_strerror(ret, errmsg, sizeof(errmsg));
+		CTS_ERR("cynara_finish() Fail(%d,%s)", ret, errmsg);
+	}
+}
+#endif
+
+#ifdef ENABLE_SIM_FEATURE
+static bool _ctsvc_server_check_privilege(struct client_info *info, const char *privilege)
+{
+	RETVM_IF(NULL == info, false, "info is NULL");
+
+	ctsvc_mutex_lock(CTS_MUTEX_CYNARA);
+	int ret = cynara_check(_cynara, info->smack, info->client_session, info->uid, privilege);
+	ctsvc_mutex_unlock(CTS_MUTEX_CYNARA);
+	if (CYNARA_API_ACCESS_ALLOWED == ret)
+		return true;
+
+	return false;
+}
+#endif
+
 static gboolean __ctsvc_server_socket_request_handler(GIOChannel *src, GIOCondition condition,
 		gpointer data)
 {
@@ -217,28 +289,35 @@ static gboolean __ctsvc_server_socket_request_handler(GIOChannel *src, GIOCondit
 
 	ctsvc_socket_msg_s msg = {0};
 	CTS_FN_CALL;
+	fd = g_io_channel_unix_get_fd(src);
 
 	if (G_IO_HUP & condition) {
-		close(g_io_channel_unix_get_fd(src));
+#ifdef ENABLE_SIM_FEATURE
+		ctsvc_mutex_lock(CTS_MUTEX_SOCKET_CLIENT_INFO);
+		if (_client_info_table)
+			g_hash_table_remove(_client_info_table, GINT_TO_POINTER(fd));
+		ctsvc_mutex_unlock(CTS_MUTEX_SOCKET_CLIENT_INFO);
+#endif
+		close(fd);
 		return FALSE;
 	}
 
-	fd = g_io_channel_unix_get_fd(src);
 	ret = __ctsvc_server_socket_safe_read(fd, (char *)&msg, sizeof(msg));
 	RETVM_IF(-1 == ret, TRUE, "__ctsvc_server_socket_safe_read() Failed(errno = %d)", errno);
 
 	CTS_DBG("attach number = %d", msg.attach_num);
 
 #ifdef ENABLE_SIM_FEATURE
-	if (SECURITY_SERVER_API_SUCCESS == (ret = security_server_check_privilege_by_sockfd(fd, "contacts-service::svc", "r")))
-		have_read_permission = true;
-	else
-		INFO("fd(%d) : does not have contact read permission (%d)", fd, ret);
+	ctsvc_mutex_lock(CTS_MUTEX_SOCKET_CLIENT_INFO);
+	struct client_info *info = g_hash_table_lookup(_client_info_table, GINT_TO_POINTER(fd));
+	have_read_permission = _ctsvc_server_check_privilege(info, CTSVC_PRIVILEGE_CONTACT_READ);
+	if (!have_read_permission)
+		INFO("fd(%d) : does not have contact read permission", fd);
 
-	if (SECURITY_SERVER_API_SUCCESS == (ret = security_server_check_privilege_by_sockfd(fd, "contacts-service::svc", "w")))
-		have_write_permission = true;
-	else
-		INFO("fd(%d) : does not have contact write permission (%d)", fd, ret);
+	have_write_permission = _ctsvc_server_check_privilege(info, CTSVC_PRIVILEGE_CONTACT_WRITE);
+	if (!have_write_permission)
+		INFO("fd(%d) : does not have contact write permission", fd);
+	ctsvc_mutex_unlock(CTS_MUTEX_SOCKET_CLIENT_INFO);
 #endif // ENABLE_SIM_FEATURE
 
 	switch (msg.type) {
@@ -269,10 +348,75 @@ static gboolean __ctsvc_server_socket_request_handler(GIOChannel *src, GIOCondit
 	return TRUE;
 }
 
+#ifdef ENABLE_SIM_FEATURE
+static void _ctsvc_server_destroy_client_info(gpointer p)
+{
+	struct client_info *info = p;
+
+	if (NULL == info)
+		return;
+	free(info->smack);
+	free(info->uid);
+	free(info->client_session);
+	free(info);
+}
+#endif
+
+#ifdef ENABLE_SIM_FEATURE
+static int _ctsvc_server_create_client_info(int fd, struct client_info **p_info)
+{
+	int ret;
+	pid_t pid;
+	char errmsg[1024];
+
+	struct client_info *info = calloc(1, sizeof(struct client_info));
+	if (NULL == info) {
+		CTS_ERR("calloc() return NULL");
+		return CONTACTS_ERROR_SYSTEM;
+	}
+
+	ret = cynara_creds_socket_get_client(fd, CLIENT_METHOD_SMACK, &(info->smack));
+	if (CYNARA_API_SUCCESS != ret) {
+		//cynara_strerror(ret, errmsg, sizeof(errmsg));
+		CTS_ERR("cynara_creds_socket_get_client() Fail(%d,%s)", ret, errmsg);
+		_ctsvc_server_destroy_client_info(info);
+		return CONTACTS_ERROR_SYSTEM;
+	}
+
+	ret = cynara_creds_socket_get_user(fd, USER_METHOD_UID, &(info->uid));
+	if (CYNARA_API_SUCCESS != ret) {
+		//cynara_strerror(ret, errmsg, sizeof(errmsg));
+		CTS_ERR("cynara_creds_socket_get_user() Fail(%d,%s)", ret, errmsg);
+		_ctsvc_server_destroy_client_info(info);
+		return CONTACTS_ERROR_SYSTEM;
+	}
+
+	ret = cynara_creds_socket_get_pid(fd, &pid);
+	if (CYNARA_API_SUCCESS != ret) {
+		//cynara_strerror(ret, errmsg, sizeof(errmsg));
+		CTS_ERR("cynara_creds_socket_get_pid() Fail(%d,%s)", ret, errmsg);
+		_ctsvc_server_destroy_client_info(info);
+		return CONTACTS_ERROR_SYSTEM;
+	}
+
+	info->client_session = cynara_session_from_pid(pid);
+	if (NULL == info->client_session) {
+		CTS_ERR("cynara_session_from_pid() return NULL");
+		_ctsvc_server_destroy_client_info(info);
+		return CONTACTS_ERROR_SYSTEM;
+	}
+	*p_info = info;
+
+	return CONTACTS_ERROR_NONE;
+}
+#endif
+
+
 static gboolean __ctsvc_server_socket_handler(GIOChannel *src,
 		GIOCondition condition, gpointer data)
 {
 	CTS_FN_CALL;
+	int ret;
 
 	GIOChannel *channel;
 	int client_sockfd, sockfd = (int)data;
@@ -281,6 +425,17 @@ static gboolean __ctsvc_server_socket_handler(GIOChannel *src,
 
 	client_sockfd = accept(sockfd, (struct sockaddr *)&clientaddr, &client_len);
 	RETVM_IF(-1 == client_sockfd, TRUE, "accept() Failed(errno = %d)", errno);
+
+#ifdef ENABLE_SIM_FEATURE
+	if (NULL == _client_info_table)
+		_client_info_table = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, _ctsvc_server_destroy_client_info);
+	struct client_info *info = NULL;
+	ret = _ctsvc_server_create_client_info(client_sockfd, &info);
+	if (CONTACTS_ERROR_NONE != ret)
+		CTS_ERR("_create_client_info() Fail(%d)", ret);
+	else
+		g_hash_table_insert(_client_info_table, GINT_TO_POINTER(client_sockfd), info);
+#endif
 
 	channel = g_io_channel_unix_new(client_sockfd);
 	g_io_add_watch(channel, G_IO_IN|G_IO_HUP, __ctsvc_server_socket_request_handler, NULL);
@@ -296,6 +451,10 @@ int ctsvc_server_socket_init(void)
 	int ret;
 	struct sockaddr_un addr;
 	GIOChannel *gio;
+
+#ifdef ENABLE_SIM_FEATURE
+	_ctsvc_server_initialize_cynara();
+#endif
 
 	unlink(CTSVC_SOCKET_PATH);
 
@@ -332,6 +491,9 @@ int ctsvc_server_socket_init(void)
 
 int ctsvc_server_socket_deinit(void)
 {
+#ifdef ENABLE_SIM_FEATURE
+	_ctsvc_server_finalize_cynara();
+#endif
 	if (sockfd != -1)
 		close(sockfd);
 	return CONTACTS_ERROR_NONE;

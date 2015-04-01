@@ -22,7 +22,7 @@ SET(PC_REQUIRED "capi-base-common")
 SET(EXTRA_CFLAGS "${EXTRA_CFLAGS} -I${SRC_INCLUDE_DIR}")
 
 INCLUDE(FindPkgConfig)
-pkg_check_modules(pkgs REQUIRED glib-2.0 capi-base-common vconf dlog db-util icu-i18n security-server libtzplatform-config)
+pkg_check_modules(pkgs REQUIRED glib-2.0 capi-base-common vconf dlog db-util icu-i18n libtzplatform-config)
 
 FOREACH(flag ${pkgs_CFLAGS})
 	SET(EXTRA_CFLAGS "${EXTRA_CFLAGS} ${flag}")

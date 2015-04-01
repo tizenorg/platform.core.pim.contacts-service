@@ -190,6 +190,10 @@ pkg_check_modules(ctsvc_server_pkgs REQUIRED
 	libexif
 	libsmack
 	icu-i18n
+	cynara-client
+	cynara-plugin
+	cynara-session
+	cynara-creds-socket
 )
 
 FOREACH(flag ${ctsvc_server_pkgs_CFLAGS})
