@@ -24,7 +24,8 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <errno.h>
-#include <security-server.h>
+#include <cynara-client.h>
+#include <cynara-creds-socket.h>
 
 #include "contacts.h"
 #include "ctsvc_internal.h"
@@ -35,6 +36,7 @@
 #include "ctsvc_server_socket.h"
 #ifdef ENABLE_SIM_FEATURE
 #include "ctsvc_server_sim.h"
+#include "ctsvc_db_access_control.h"
 #endif
 
 static int sockfd = -1;
@@ -230,15 +232,13 @@ static gboolean __ctsvc_server_socket_request_handler(GIOChannel *src, GIOCondit
 	CTS_DBG("attach number = %d", msg.attach_num);
 
 #ifdef ENABLE_SIM_FEATURE
-	if (SECURITY_SERVER_API_SUCCESS == (ret = security_server_check_privilege_by_sockfd(fd, "contacts-service::svc", "r")))
-		have_read_permission = true;
-	else
-		INFO("fd(%d) : does not have contact read permission (%d)", fd, ret);
+	have_read_permission = ctsvc_check_priviliege(fd, CTSVC_PRIVILIEGE_CALLHISTORY_READ);
+	if (!have_read_permission)
+		INFO("fd(%d) : does not have contact read permission", fd);
 
-	if (SECURITY_SERVER_API_SUCCESS == (ret = security_server_check_privilege_by_sockfd(fd, "contacts-service::svc", "w")))
-		have_write_permission = true;
-	else
-		INFO("fd(%d) : does not have contact write permission (%d)", fd, ret);
+	have_write_permission = ctsvc_check_priviliege(fd, CTSVC_PRIVILIEGE_CALLHISTORY_WRITE);
+	if (!have_write_permission)
+		INFO("fd(%d) : does not have contact write permission", fd);
 #endif // ENABLE_SIM_FEATURE
 
 	switch (msg.type) {

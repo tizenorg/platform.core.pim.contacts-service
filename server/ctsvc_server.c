@@ -107,7 +107,7 @@ static int __server_main(void)
 			CTS_ERR("contacts_connect fail(%d)", ret);
 			break;
 		}
-		ctsvc_set_client_access_info("contacts-service", NULL);
+		ctsvc_set_client_access_info(0, "contacts-service");
 
 		ctsvc_server_bg_add_cb();
 		ctsvc_server_bg_delete_start();
