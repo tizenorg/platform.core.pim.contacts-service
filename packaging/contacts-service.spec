@@ -1,6 +1,6 @@
 Name:       contacts-service
 Summary:    Contacts Service
-Version:    0.12.27
+Version:    0.12.28
 Release:    1
 Group:      Social & Content/Pim
 License:    Apache-2.0
@@ -22,7 +22,9 @@ BuildRequires:  pkgconfig(pims-ipc)
 BuildRequires:  pkgconfig(accounts-svc)
 BuildRequires:  pkgconfig(libexif)
 BuildRequires:  pkgconfig(libsmack)
-BuildRequires:  pkgconfig(security-server)
+BuildRequires:  pkgconfig(cynara-client)
+BuildRequires:  pkgconfig(cynara-creds-socket)
+BuildRequires:  pkgconfig(cynara-session)
 BuildRequires:  pkgconfig(libtzplatform-config)
 Requires(post): /usr/bin/sqlite3, /bin/chmod, /bin/chown
 Requires(post): /usr/bin/vconftool
