@@ -398,7 +398,7 @@ static gpointer __ctsvc_server_bg_delete(gpointer user_data)
 			free(callback_data);
 			continue;
 		}
-		ctsvc_set_client_access_info("contacts-service", NULL);
+		ctsvc_set_client_access_info(NULL, CTSVC_SMACK_LABEL_CONTACTS_SERVICE);
 
 		while(1) {
 //			sleep(CTSVC_SERVER_BG_DELETE_STEP_TIME); // sleep 1 sec.

@@ -24,7 +24,7 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <errno.h>
-#include <security-server.h>
+#include <pims-ipc-svc.h>
 
 #include "contacts.h"
 #include "ctsvc_internal.h"
@@ -35,9 +35,11 @@
 #include "ctsvc_server_socket.h"
 #ifdef ENABLE_SIM_FEATURE
 #include "ctsvc_server_sim.h"
+#include "ctsvc_db_access_control.h"
 #endif
 
 static int sockfd = -1;
+static GHashTable *_client_info_table = NULL;
 
 static inline int __ctsvc_server_socket_safe_write(int fd, char *buf, int buf_size)
 {
@@ -217,28 +219,29 @@ static gboolean __ctsvc_server_socket_request_handler(GIOChannel *src, GIOCondit
 
 	ctsvc_socket_msg_s msg = {0};
 	CTS_FN_CALL;
+	fd = g_io_channel_unix_get_fd(src);
 
 	if (G_IO_HUP & condition) {
-		close(g_io_channel_unix_get_fd(src));
+		if (_client_info_table)
+			g_hash_table_remove(_client_info_table, GINT_TO_POINTER(fd));
+		close(fd);
 		return FALSE;
 	}
 
-	fd = g_io_channel_unix_get_fd(src);
 	ret = __ctsvc_server_socket_safe_read(fd, (char *)&msg, sizeof(msg));
 	RETVM_IF(-1 == ret, TRUE, "__ctsvc_server_socket_safe_read() Failed(errno = %d)", errno);
 
 	CTS_DBG("attach number = %d", msg.attach_num);
 
 #ifdef ENABLE_SIM_FEATURE
-	if (SECURITY_SERVER_API_SUCCESS == (ret = security_server_check_privilege_by_sockfd(fd, "contacts-service::svc", "r")))
-		have_read_permission = true;
-	else
-		INFO("fd(%d) : does not have contact read permission (%d)", fd, ret);
+	pims_ipc_client_info_h client_info = g_hash_table_lookup(_client_info_table, GINT_TO_POINTER(fd));
+	have_read_permission = pims_ipc_svc_check_privilege(client_info, CTSVC_PRIVILEGE_CONTACT_READ);
+	if (!have_read_permission)
+		INFO("fd(%d) : does not have contact read permission", fd);
 
-	if (SECURITY_SERVER_API_SUCCESS == (ret = security_server_check_privilege_by_sockfd(fd, "contacts-service::svc", "w")))
-		have_write_permission = true;
-	else
-		INFO("fd(%d) : does not have contact write permission (%d)", fd, ret);
+	have_write_permission = pims_ipc_svc_check_privilege(client_info, CTSVC_PRIVILEGE_CONTACT_WRITE);
+	if (!have_write_permission)
+		INFO("fd(%d) : does not have contact write permission", fd);
 #endif // ENABLE_SIM_FEATURE
 
 	switch (msg.type) {
@@ -273,6 +276,7 @@ static gboolean __ctsvc_server_socket_handler(GIOChannel *src,
 		GIOCondition condition, gpointer data)
 {
 	CTS_FN_CALL;
+	int ret;
 
 	GIOChannel *channel;
 	int client_sockfd, sockfd = (int)data;
@@ -281,6 +285,17 @@ static gboolean __ctsvc_server_socket_handler(GIOChannel *src,
 
 	client_sockfd = accept(sockfd, (struct sockaddr *)&clientaddr, &client_len);
 	RETVM_IF(-1 == client_sockfd, TRUE, "accept() Failed(errno = %d)", errno);
+
+#ifdef ENABLE_SIM_FEATURE
+	if (NULL == _client_info_table)
+		_client_info_table = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, pims_ipc_svc_destroy_client_info);
+	pims_ipc_client_info_h client_info = NULL;
+	ret = pims_ipc_svc_create_client_info(client_sockfd, &client_info);
+	if (0 != ret)
+		CTS_ERR("pims_ipc_svc_create_client_info() Fail(%d)", ret);
+	else
+		g_hash_table_insert(_client_info_table, GINT_TO_POINTER(client_sockfd), client_info);
+#endif
 
 	channel = g_io_channel_unix_new(client_sockfd);
 	g_io_add_watch(channel, G_IO_IN|G_IO_HUP, __ctsvc_server_socket_request_handler, NULL);

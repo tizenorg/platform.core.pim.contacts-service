@@ -18,8 +18,7 @@
  */
 
 #include <stdlib.h>
-#include <security-server.h>
-
+#include <pims-ipc-svc.h>
 #include "contacts.h"
 
 #include "ctsvc_service.h"
@@ -37,73 +36,35 @@ void ctsvc_ipc_server_connect(pims_ipc_h ipc, pims_ipc_data_h indata, pims_ipc_d
 {
 	CTS_FN_CALL;
 	int ret = CONTACTS_ERROR_NONE;
-	size_t cookie_size = 0;
-	char *smack_label = NULL;
-	char *cookie = NULL;
-	char *buf = NULL;
-	gsize buf_len;
-
-	if (indata) {
-		// Access control : get cookie from indata
-		ret = ctsvc_ipc_unmarshal_unsigned_int(indata, &cookie_size);
-		if (ret != CONTACTS_ERROR_NONE) {
-			CTS_ERR("ctsvc_ipc_marshal_int fail");
-			goto ERROR_RETURN;
-		}
-
-		if (cookie_size <= 0) {
-			CTS_ERR("cookie size is %d", cookie_size);
-			ret = CONTACTS_ERROR_IPC;
-			goto ERROR_RETURN;
-		}
-
-		ret = ctsvc_ipc_unmarshal_string(indata, &buf);
-		if (ret != CONTACTS_ERROR_NONE) {
-			CTS_ERR("ctsvc_ipc_unmarshal_string fail");
-			goto ERROR_RETURN;
-		}
-		cookie = (char*)g_base64_decode((const gchar*)buf, &buf_len);
-
-		smack_label = security_server_get_smacklabel_cookie(cookie);
-		if (NULL == smack_label) {
-			CTS_ERR("security_server_get_smacklabel_cookie fail");
-			ret = CONTACTS_ERROR_SYSTEM;
-			goto ERROR_RETURN;
-		}
-	}
-	else {
-		CTS_ERR("There is no indata fail");
-		ret = CONTACTS_ERROR_SYSTEM;
-		goto ERROR_RETURN;
-	}
 
 	ret = contacts_connect();
 
-	if (CONTACTS_ERROR_NONE == ret)
-		ctsvc_set_client_access_info(smack_label, cookie);
+	if (CONTACTS_ERROR_NONE == ret) {
+		char *smack = NULL;
+		pims_ipc_client_info_h client_info = pims_ipc_svc_find_client_info(ipc);
+		if (0 != pims_ipc_svc_get_smack_label(client_info, &smack))
+			CTS_ERR("pims_ipc_svc_get_smack_label() Fail()");
+		ctsvc_set_client_access_info(ipc, smack);
+		free(smack);
+	}
 
-ERROR_RETURN:
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
 		if (!*outdata) {
 			CTS_ERR("pims_ipc_data_create fail");
-			goto DATA_FREE;
+			return;
 		}
 
 		if (pims_ipc_data_put(*outdata,(void*)&ret,sizeof(int)) != 0) {
 			pims_ipc_data_destroy(*outdata);
 			*outdata = NULL;
 			CTS_ERR("pims_ipc_data_put fail");
-			goto DATA_FREE;
+			return;
 		}
 	}
 	else {
 		CTS_ERR("outdata is NULL");
 	}
-DATA_FREE:
-	free(smack_label);
-	free(cookie);
-	free(buf);
 }
 
 void ctsvc_ipc_server_disconnect(pims_ipc_h ipc, pims_ipc_data_h indata, pims_ipc_data_h *outdata, void *userdata)
@@ -158,7 +119,7 @@ void ctsvc_ipc_server_check_permission(pims_ipc_h ipc, pims_ipc_data_h indata,
 		goto ERROR_RETURN;
 	}
 
-	result = ctsvc_have_permission(permission);
+	result = ctsvc_have_permission(ipc, permission);
 
 ERROR_RETURN:
 	*outdata = pims_ipc_data_create(0);
@@ -203,6 +164,11 @@ void ctsvc_ipc_server_db_insert_record(pims_ipc_h ipc, pims_ipc_data_h indata, p
 	else
 	{
 		CTS_ERR("ctsvc_ipc_server_db_insert_record fail");
+		goto ERROR_RETURN;
+	}
+
+	if (!ctsvc_have_permission(ipc, ctsvc_required_write_permission(((ctsvc_record_s *)record)->view_uri))) {
+		ret = CONTACTS_ERROR_PERMISSION_DENIED;
 		goto ERROR_RETURN;
 	}
 
@@ -305,6 +271,11 @@ void ctsvc_ipc_server_db_get_record(pims_ipc_h ipc, pims_ipc_data_h indata, pims
 		goto ERROR_RETURN;
 	}
 
+	if (!ctsvc_have_permission(ipc, ctsvc_required_read_permission(view_uri))) {
+		ret = CONTACTS_ERROR_PERMISSION_DENIED;
+		goto ERROR_RETURN;
+	}
+
 	ret = contacts_db_get_record(view_uri,id,&record);
 
 ERROR_RETURN:
@@ -369,6 +340,11 @@ void ctsvc_ipc_server_db_update_record(pims_ipc_h ipc, pims_ipc_data_h indata, p
 	else
 	{
 		CTS_ERR("ctsvc_ipc_server_db_insert_record fail");
+		goto ERROR_RETURN;
+	}
+
+	if (!ctsvc_have_permission(ipc, ctsvc_required_write_permission(((ctsvc_record_s *)record)->view_uri))) {
+		ret = CONTACTS_ERROR_PERMISSION_DENIED;
 		goto ERROR_RETURN;
 	}
 
@@ -460,6 +436,11 @@ void ctsvc_ipc_server_db_delete_record(pims_ipc_h ipc, pims_ipc_data_h indata, p
 		goto ERROR_RETURN;
 	}
 
+	if (!ctsvc_have_permission(ipc, ctsvc_required_write_permission(view_uri))) {
+		ret = CONTACTS_ERROR_PERMISSION_DENIED;
+		goto ERROR_RETURN;
+	}
+
 	ret = contacts_db_delete_record(view_uri,id);
 
 	if (outdata)
@@ -544,6 +525,12 @@ void ctsvc_ipc_server_db_replace_record(pims_ipc_h ipc, pims_ipc_data_h indata,
 		CTS_ERR("ctsvc_ipc_server_db_replace_record fail");
 		goto ERROR_RETURN;
 	}
+
+	if (!ctsvc_have_permission(ipc, ctsvc_required_write_permission(((ctsvc_record_s *)record)->view_uri))) {
+		ret = CONTACTS_ERROR_PERMISSION_DENIED;
+		goto ERROR_RETURN;
+	}
+
 
 	ret = contacts_db_replace_record(record, id);
 
@@ -633,6 +620,11 @@ void ctsvc_ipc_server_db_get_all_records(pims_ipc_h ipc, pims_ipc_data_h indata,
 	else
 	{
 		CTS_ERR("ctsvc_ipc_server_db_insert_record fail");
+		goto ERROR_RETURN;
+	}
+
+	if (!ctsvc_have_permission(ipc, ctsvc_required_read_permission(view_uri))) {
+		ret = CONTACTS_ERROR_PERMISSION_DENIED;
 		goto ERROR_RETURN;
 	}
 
@@ -743,6 +735,11 @@ void ctsvc_ipc_server_db_get_records_with_query(pims_ipc_h ipc, pims_ipc_data_h 
 		goto ERROR_RETURN;
 	}
 
+	if (!ctsvc_have_permission(ipc, ctsvc_required_read_permission(((ctsvc_query_s *)query)->view_uri))) {
+		ret = CONTACTS_ERROR_PERMISSION_DENIED;
+		goto ERROR_RETURN;
+	}
+
 	ret = contacts_db_get_records_with_query(query,offset,limit,&list);
 
 	if (outdata)
@@ -838,6 +835,11 @@ void ctsvc_ipc_server_db_get_count(pims_ipc_h ipc, pims_ipc_data_h indata, pims_
 		goto ERROR_RETURN;
 	}
 
+	if (!ctsvc_have_permission(ipc, ctsvc_required_read_permission(view_uri))) {
+		ret = CONTACTS_ERROR_PERMISSION_DENIED;
+		goto ERROR_RETURN;
+	}
+
 	ret = contacts_db_get_count(view_uri,&count);
 
 	if (outdata)
@@ -921,6 +923,11 @@ void ctsvc_ipc_server_db_get_count_with_query(pims_ipc_h ipc, pims_ipc_data_h in
 	else
 	{
 		CTS_ERR("ctsvc_ipc_server_db_insert_record fail");
+		goto ERROR_RETURN;
+	}
+
+	if (!ctsvc_have_permission(ipc, ctsvc_required_read_permission(((ctsvc_query_s *)query)->view_uri))) {
+		ret = CONTACTS_ERROR_PERMISSION_DENIED;
 		goto ERROR_RETURN;
 	}
 
@@ -1014,6 +1021,24 @@ void ctsvc_ipc_server_db_insert_records(pims_ipc_h ipc, pims_ipc_data_h indata,
 	{
 		CTS_ERR("ctsvc_ipc_server_db_insert_record fail");
 		goto ERROR_RETURN;
+	}
+
+	if (list) {
+		contacts_record_h record = NULL;
+		contacts_list_first(list);
+		do {
+			ret = contacts_list_get_current_record_p(list, &record);
+			if (CONTACTS_ERROR_NONE != ret) {
+				CTS_ERR("contacts_list_get_current_record_p is faild(%d)", ret);
+				goto ERROR_RETURN;
+			}
+
+			if (!ctsvc_have_permission(ipc, ctsvc_required_write_permission(((ctsvc_record_s *)record)->view_uri))) {
+				ret = CONTACTS_ERROR_PERMISSION_DENIED;
+				goto ERROR_RETURN;
+			}
+		} while (CONTACTS_ERROR_NONE == contacts_list_next(list));
+		contacts_list_first(list);
 	}
 
 	ret = ctsvc_db_insert_records(list, &ids, &id_count);
@@ -1125,6 +1150,24 @@ void ctsvc_ipc_server_db_update_records(pims_ipc_h ipc, pims_ipc_data_h indata,
 		goto ERROR_RETURN;
 	}
 
+	if (list) {
+		contacts_record_h record = NULL;
+		contacts_list_first(list);
+		do {
+			ret = contacts_list_get_current_record_p(list, &record);
+			if (CONTACTS_ERROR_NONE != ret) {
+				CTS_ERR("contacts_list_get_current_record_p is faild(%d)", ret);
+				goto ERROR_RETURN;
+			}
+
+			if (!ctsvc_have_permission(ipc, ctsvc_required_write_permission(((ctsvc_record_s *)record)->view_uri))) {
+				ret = CONTACTS_ERROR_PERMISSION_DENIED;
+				goto ERROR_RETURN;
+			}
+		} while (CONTACTS_ERROR_NONE == contacts_list_next(list));
+		contacts_list_first(list);
+	}
+
 	ret = contacts_db_update_records(list);
 
 	if (outdata)
@@ -1234,6 +1277,11 @@ void ctsvc_ipc_server_db_delete_records(pims_ipc_h ipc, pims_ipc_data_h indata,
 		goto ERROR_RETURN;
 	}
 
+	if (!ctsvc_have_permission(ipc, ctsvc_required_write_permission(uri))) {
+		ret = CONTACTS_ERROR_PERMISSION_DENIED;
+		goto ERROR_RETURN;
+	}
+
 	ret = contacts_db_delete_records(uri, ids, count);
 
 	if (outdata)
@@ -1337,6 +1385,24 @@ void ctsvc_ipc_server_db_replace_records(pims_ipc_h ipc, pims_ipc_data_h indata,
 		goto ERROR_RETURN;
 	}
 
+	if (list) {
+		contacts_record_h record = NULL;
+		contacts_list_first(list);
+		do {
+			ret = contacts_list_get_current_record_p(list, &record);
+			if (CONTACTS_ERROR_NONE != ret) {
+				CTS_ERR("contacts_list_get_current_record_p is faild(%d)", ret);
+				goto ERROR_RETURN;
+			}
+
+			if (!ctsvc_have_permission(ipc, ctsvc_required_write_permission(((ctsvc_record_s *)record)->view_uri))) {
+				ret = CONTACTS_ERROR_PERMISSION_DENIED;
+				goto ERROR_RETURN;
+			}
+		} while (CONTACTS_ERROR_NONE == contacts_list_next(list));
+		contacts_list_first(list);
+	}
+
 	ret = ctsvc_db_replace_records(list, ids, count);
 
 	if (outdata) {
@@ -1428,6 +1494,11 @@ void ctsvc_ipc_server_db_get_changes_by_version(pims_ipc_h ipc, pims_ipc_data_h 
 		goto ERROR_RETURN;
 	}
 
+	if (!ctsvc_have_permission(ipc, CTSVC_PERMISSION_CONTACT_READ)) {
+		ret = CONTACTS_ERROR_PERMISSION_DENIED;
+		goto ERROR_RETURN;
+	}
+
 	ret = contacts_db_get_changes_by_version(view_uri, address_book_id,contacts_db_version,&record_list,&current_contacts_db_version);
 
 	if (outdata)
@@ -1513,8 +1584,15 @@ void ctsvc_ipc_server_db_get_current_version(pims_ipc_h ipc, pims_ipc_data_h ind
 	int ret = CONTACTS_ERROR_NONE;
 	int contacts_db_version = 0;
 
+	if (!ctsvc_have_permission(ipc, CTSVC_PERMISSION_CONTACT_READ) &&
+			!ctsvc_have_permission(ipc, CTSVC_PERMISSION_PHONELOG_READ)) {
+		ret = CONTACTS_ERROR_PERMISSION_DENIED;
+		goto ERROR_RETURN;
+	}
+
 	ret = contacts_db_get_current_version(&contacts_db_version);
 
+ERROR_RETURN:
 	if (outdata)
 	{
 		*outdata = pims_ipc_data_create(0);
@@ -1591,6 +1669,11 @@ void ctsvc_ipc_server_db_search_records(pims_ipc_h ipc, pims_ipc_data_h indata, 
 	else
 	{
 		CTS_ERR("ctsvc_ipc_server_db_insert_record fail");
+		goto ERROR_RETURN;
+	}
+
+	if (!ctsvc_have_permission(ipc, ctsvc_required_read_permission(view_uri))) {
+		ret = CONTACTS_ERROR_PERMISSION_DENIED;
 		goto ERROR_RETURN;
 	}
 
@@ -1707,6 +1790,11 @@ void ctsvc_ipc_server_db_search_records_with_range(pims_ipc_h ipc, pims_ipc_data
 		goto ERROR_RETURN;
 	}
 
+	if (!ctsvc_have_permission(ipc, ctsvc_required_read_permission(view_uri))) {
+		ret = CONTACTS_ERROR_PERMISSION_DENIED;
+		goto ERROR_RETURN;
+	}
+
 	ret = contacts_db_search_records_with_range(view_uri, keyword, offset,limit,range, &list);
 
 	if (outdata) {
@@ -1807,6 +1895,13 @@ void ctsvc_ipc_server_db_search_records_with_query(pims_ipc_h ipc, pims_ipc_data
 		CTS_ERR("ctsvc_ipc_server_db_insert_record fail");
 		goto ERROR_RETURN;
 	}
+
+
+	if (!ctsvc_have_permission(ipc, ctsvc_required_read_permission(((ctsvc_query_s *)query)->view_uri))) {
+		ret = CONTACTS_ERROR_PERMISSION_DENIED;
+		goto ERROR_RETURN;
+	}
+
 
 	ret = contacts_db_search_records_with_query(query, keyword, offset,limit,&list);
 

@@ -40,8 +40,6 @@
 API int contacts_phone_log_reset_statistics()
 {
 	char query[CTS_SQL_MIN_LEN] = {0};
-	RETVM_IF(!ctsvc_have_permission(CTSVC_PERMISSION_PHONELOG_WRITE), CONTACTS_ERROR_PERMISSION_DENIED,
-				"Permission denied : contact write (phonelog)");
 	snprintf(query, sizeof(query),"DELETE FROM "CTS_TABLE_PHONELOG_STAT);
 	return ctsvc_query_exec(query);
 }
@@ -54,8 +52,6 @@ API int contacts_phone_log_delete(contacts_phone_log_delete_e op, ...)
 	char *number = NULL;
 	va_list args;
 
-	RETVM_IF(!ctsvc_have_permission(CTSVC_PERMISSION_PHONELOG_WRITE), CONTACTS_ERROR_PERMISSION_DENIED,
-				"Permission denied : contact write (phonelog)");
 	switch(op) {
 	case CONTACTS_PHONE_LOG_DELETE_BY_ADDRESS:
 		va_start(args, op);
