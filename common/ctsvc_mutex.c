@@ -41,6 +41,8 @@ static pthread_mutex_t trans_mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t ipc_mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t ipc_pubsub_mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t access_control_mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t socket_client_info_mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t cynara_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 static int __old_type = 0;
 static int __defered_ref = 0;
@@ -67,6 +69,12 @@ static inline pthread_mutex_t* __ctsvc_mutex_get_mutex(int type)
 		break;
 	case CTS_MUTEX_ACCESS_CONTROL:
 		ret_val = &access_control_mutex;
+		break;
+	case CTS_MUTEX_SOCKET_CLIENT_INFO:
+		ret_val = &socket_client_info_mutex;
+		break;
+	case CTS_MUTEX_CYNARA:
+		ret_val = &cynara_mutex;
 		break;
 	default:
 		CTS_ERR("unknown type(%d)", type);
