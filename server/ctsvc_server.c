@@ -102,12 +102,14 @@ static int __server_main(void)
 
 		pims_ipc_svc_init_for_publish(CTSVC_IPC_SOCKET_PATH_FOR_CHANGE_SUBSCRIPTION, CTS_SECURITY_FILE_GROUP, 0660);
 
+		ctsvc_cynara_initialize();
+
 		ret = contacts_connect();
 		if (CONTACTS_ERROR_NONE != ret) {
 			CTS_ERR("contacts_connect fail(%d)", ret);
 			break;
 		}
-		ctsvc_set_client_access_info("contacts-service", NULL);
+		ctsvc_set_client_access_info(0, "contacts-service");
 
 		ctsvc_server_bg_add_cb();
 		ctsvc_server_bg_delete_start();
@@ -129,6 +131,8 @@ static int __server_main(void)
 		ret = contacts_disconnect();
 		if (CONTACTS_ERROR_NONE != ret)
 			CTS_DBG("%d", ret);
+
+		ctsvc_cynara_finalize();
 
 		pims_ipc_svc_deinit_for_publish();
 
