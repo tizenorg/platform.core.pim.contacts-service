@@ -30,8 +30,8 @@
 
 typedef struct {
 	unsigned int thread_id;
-	char *smack_label;
-	int permission;
+	pims_ipc_h ipc;
+	char *smack;
 	int *write_list;
 	int write_list_count;
 }ctsvc_permission_info_s;
@@ -100,7 +100,7 @@ int ctsvc_have_file_read_permission(const char *path)
 		return CONTACTS_ERROR_INTERNAL;
 	}
 
-	smack_label = find->smack_label;
+	smack_label = find->smack;
 	permission = smack_have_access(smack_label, file_label, "r");
 	free(file_label);
 	 if (permission == 0) {
@@ -120,15 +120,13 @@ int ctsvc_have_file_read_permission(const char *path)
 }
 
 // this function is called in mutex lock
-static void __ctsvc_set_permission_info(unsigned int thread_id, const char *cookie)
+static void __ctsvc_set_permission_info(ctsvc_permission_info_s *info)
 {
 	int ret;
 	int count;
 	int write_index;
 	cts_stmt stmt;
 	char query[CTS_SQL_MAX_LEN] = {0};
-	ctsvc_permission_info_s *find = NULL;
-	const char *smack_label;
 	bool smack_enabled = false;
 
 	if (__ctsvc_have_smack() == 1)
@@ -136,47 +134,16 @@ static void __ctsvc_set_permission_info(unsigned int thread_id, const char *cook
 	else
 		INFO("SAMCK disabled");
 
-	find = __ctsvc_find_access_info(thread_id);
-	if (!find) {
-		CTS_ERR("does not have access info of the thread");
-		return;
-	}
-	smack_label = find->smack_label;
-
-	if (!find->permission) {		// check once
-		// contacts-service daemon has all permission
-		// Or, if smack is disabled, client has all permission
-		if ((smack_label && 0 == strcmp(smack_label, "contacts-service")) || !smack_enabled) {
-			find->permission |= CTSVC_PERMISSION_CONTACT_READ;
-			find->permission |= CTSVC_PERMISSION_CONTACT_WRITE;
-			find->permission |= CTSVC_PERMISSION_PHONELOG_READ;
-			find->permission |= CTSVC_PERMISSION_PHONELOG_WRITE;
-		}
-		else if (cookie && smack_label) {
-			if (1 == (ret = smack_have_access(smack_label, "contacts-service::svc", "r")))
-				find->permission |= CTSVC_PERMISSION_CONTACT_READ;
-			else
-				INFO("Thread(0x%x) : does not have contact read permission (%d)", thread_id, ret);
-			if (1 == (ret = smack_have_access(smack_label, "contacts-service::svc", "w")))
-				find->permission |= CTSVC_PERMISSION_CONTACT_WRITE;
-			else
-				INFO("Thread(0x%x) : does not have contact write permission (%d)", thread_id, ret);
-			if (1 == (ret = smack_have_access(smack_label, "contacts-service::phonelog", "r")))
-				find->permission |= CTSVC_PERMISSION_PHONELOG_READ;
-			else
-				INFO("Thread(0x%x) : does not have phone-log read permission (%d)", thread_id, ret);
-			if (1 == (ret = smack_have_access(smack_label, "contacts-service::phonelog", "w")))
-				find->permission |= CTSVC_PERMISSION_PHONELOG_WRITE;
-			else
-				INFO("Thread(0x%x) : does not have phone-log write permission (%d)", thread_id, ret);
-		}
-	}
-	INFO("Thread(0x%x), info(%p), permission:%d", thread_id, find, find->permission);
-
 	// white listing : core module
-	free(find->write_list);
-	find->write_list = NULL;
-	find->write_list_count = 0;
+	free(info->write_list);
+	info->write_list = NULL;
+	info->write_list_count = 0;
+
+	// don't have write permission
+	if (smack_enabled) {
+		if (!ctsvc_have_permission(info->ipc, CTSVC_PERMISSION_CONTACT_WRITE))
+			return;
+	}
 
 	snprintf(query, sizeof(query),
 			"SELECT count(addressbook_id) FROM "CTS_TABLE_ADDRESSBOOKS);
@@ -185,11 +152,9 @@ static void __ctsvc_set_permission_info(unsigned int thread_id, const char *cook
 		CTS_ERR("DB error : ctsvc_query_get_first_int_result() Failed(%d)", ret);
 		return;
 	}
-
-	if (find->permission & CTSVC_PERMISSION_CONTACT_WRITE) {
-		find->write_list = calloc(count, sizeof(int));
-		find->write_list_count = 0;
-	}
+	info->write_list = calloc(count, sizeof(int));
+	RETM_IF(NULL == info->write_list, "calloc() Fail");
+	info->write_list_count = 0;
 
 	snprintf(query, sizeof(query),
 			"SELECT addressbook_id, mode, smack_label FROM "CTS_TABLE_ADDRESSBOOKS);
@@ -215,25 +180,16 @@ static void __ctsvc_set_permission_info(unsigned int thread_id, const char *cook
 		mode = ctsvc_stmt_get_int(stmt, 1);
 		temp = ctsvc_stmt_get_text(stmt, 2);
 
-		if (smack_label && ((0 == strcmp(temp, smack_label)) || (0 == strcmp(smack_label, "contacts-service")))) {
-			if (find->permission & CTSVC_PERMISSION_CONTACT_WRITE)
-				find->write_list[write_index++] = id;
-			continue;
-		}
-		else {
-			switch(mode) {
-			case CONTACTS_ADDRESS_BOOK_MODE_NONE:
-				if (find->permission & CTSVC_PERMISSION_CONTACT_WRITE)
-					find->write_list[write_index++] = id;
-				break;
-			default:
-				break;
-			};
-		}
+		if (!smack_enabled) // smack disabled
+			info->write_list[write_index++] = id;
+		else if (NULL == info->ipc) // contacts-service daemon
+			info->write_list[write_index++] = id;
+		else if (info->smack && temp && 0 == strcmp(temp, info->smack)) // owner
+			info->write_list[write_index++] = id;
+		else if (CONTACTS_ADDRESS_BOOK_MODE_NONE == mode)
+			info->write_list[write_index++] = id;
 	}
-
-	if (find->permission & CTSVC_PERMISSION_CONTACT_WRITE)
-		find->write_list_count = write_index;
+	info->write_list_count = write_index;
 	ctsvc_stmt_finalize(stmt);
 }
 
@@ -244,7 +200,7 @@ void ctsvc_unset_client_access_info()
 	ctsvc_mutex_lock(CTS_MUTEX_ACCESS_CONTROL);
 	find = __ctsvc_find_access_info(pthread_self());
 	if (find) {
-		free(find->smack_label);
+		free(find->smack);
 		free(find->write_list);
 		__thread_list = g_list_remove(__thread_list, find);
 		free(find);
@@ -261,9 +217,8 @@ static void __ctsvc_client_disconnected_cb(pims_ipc_h ipc, void *user_data)
 	ctsvc_mutex_lock(CTS_MUTEX_ACCESS_CONTROL);
 	info = (ctsvc_permission_info_s*)user_data;
 	if (info) {
-		INFO("Thread(0x%x), info(%p), permission:%d",
-							info->thread_id, info, info->permission);
-		free(info->smack_label);
+		INFO("Thread(0x%x), info(%p)", info->thread_id, info);
+		free(info->smack);
 		free(info->write_list);
 		__thread_list = g_list_remove(__thread_list, info);
 		free(info);
@@ -276,8 +231,7 @@ static void __ctsvc_client_disconnected_cb(pims_ipc_h ipc, void *user_data)
 	ctsvc_contacts_internal_disconnect();
 }
 
-// Set access permission info per thread(client)
-void ctsvc_set_client_access_info(const char *smack_label, const char *cookie)
+void ctsvc_set_client_access_info(pims_ipc_h ipc, const char *smack)
 {
 	unsigned int thread_id;
 	ctsvc_permission_info_s *info = NULL;
@@ -290,14 +244,16 @@ void ctsvc_set_client_access_info(const char *smack_label, const char *cookie)
 		__thread_list  = g_list_append(__thread_list, info);
 	}
 	info->thread_id = thread_id;
-	FREEandSTRDUP(info->smack_label, smack_label);
-	__ctsvc_set_permission_info(thread_id, cookie);
+	info->ipc = ipc;
 
-	if (strcmp(smack_label, "contacts-service") != 0)
+	FREEandSTRDUP(info->smack, smack);
+	WARN_IF(NULL == info->smack, "strdup() Fail");
+	__ctsvc_set_permission_info(info);
+
+	if (info->ipc)
 		pims_ipc_svc_set_client_disconnected_cb(__ctsvc_client_disconnected_cb, info);
 
 	ctsvc_mutex_unlock(CTS_MUTEX_ACCESS_CONTROL);
-
 }
 
 // Whenever changing addressbook this function will be called
@@ -309,43 +265,37 @@ void ctsvc_reset_all_client_access_info()
 	for (cursor=__thread_list;cursor;cursor=cursor->next) {
 		ctsvc_permission_info_s *info = (ctsvc_permission_info_s *)cursor->data;
 		if (info == NULL) continue;
-		__ctsvc_set_permission_info(info->thread_id, NULL);
+		__ctsvc_set_permission_info(info);
 	}
 	ctsvc_mutex_unlock(CTS_MUTEX_ACCESS_CONTROL);
 }
 
-bool ctsvc_have_permission(int permission)
+bool ctsvc_have_permission(pims_ipc_h ipc, int permission)
 {
-	ctsvc_permission_info_s *find = NULL;
-	unsigned int thread_id;
-
 	have_smack = __ctsvc_have_smack();
 	if (have_smack != 1)		// smack disable
 		return true;
 
-	ctsvc_mutex_lock(CTS_MUTEX_ACCESS_CONTROL);
-	thread_id = (unsigned int)pthread_self();
-	find = __ctsvc_find_access_info(thread_id);
-	if (!find) {
-		ctsvc_mutex_unlock(CTS_MUTEX_ACCESS_CONTROL);
-		return false;
-	}
-
-	if (CTSVC_PERMISSION_CONTACT_NONE == permission) {
-		ctsvc_mutex_unlock(CTS_MUTEX_ACCESS_CONTROL);
-		return false;
-	}
-
-	if ((find->permission & permission) == permission) {
-		ctsvc_mutex_unlock(CTS_MUTEX_ACCESS_CONTROL);
+	if (NULL == ipc) // contacts-service daemon
 		return true;
-	}
 
-	CTS_ERR("Thread(0x%x), Does not have permission %d, this module has permission %d",
-			thread_id, permission, find->permission);
-	ctsvc_mutex_unlock(CTS_MUTEX_ACCESS_CONTROL);
+	if ((CTSVC_PERMISSION_CONTACT_READ & permission) &&
+			!pims_ipc_svc_check_privilege(ipc, CTSVC_PRIVILEGE_CONTACT_READ))
+		return false;
 
-	return false;
+	if ((CTSVC_PERMISSION_CONTACT_WRITE & permission) &&
+			!pims_ipc_svc_check_privilege(ipc, CTSVC_PRIVILEGE_CONTACT_WRITE))
+		return false;
+
+	if ((CTSVC_PERMISSION_PHONELOG_READ & permission) &&
+			!pims_ipc_svc_check_privilege(ipc, CTSVC_PRIVILEGE_CALLHISTORY_READ))
+		return false;
+
+	if ((CTSVC_PERMISSION_PHONELOG_WRITE & permission) &&
+			!pims_ipc_svc_check_privilege(ipc, CTSVC_PRIVILEGE_CALLHISTORY_WRITE))
+		return false;
+
+	return true;
 }
 
 bool ctsvc_have_ab_write_permission(int addressbook_id)
@@ -418,8 +368,10 @@ char* ctsvc_get_client_smack_label()
 
 	ctsvc_mutex_lock(CTS_MUTEX_ACCESS_CONTROL);
 	find = __ctsvc_find_access_info(pthread_self());
-	if (find)
-		smack = strdup(find->smack_label);
+	if (find && find->smack) {
+		smack = strdup(find->smack);
+		WARN_IF(NULL == smack, "strdup() Fail");
+	}
 	ctsvc_mutex_unlock(CTS_MUTEX_ACCESS_CONTROL);
 	return smack;
 }
