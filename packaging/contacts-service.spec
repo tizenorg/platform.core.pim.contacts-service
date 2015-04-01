@@ -1,6 +1,6 @@
 Name:       contacts-service
 Summary:    Contacts Service
-Version:    0.12.27
+Version:    0.12.28
 Release:    1
 Group:      Social & Content/Pim
 License:    Apache-2.0
@@ -22,8 +22,10 @@ BuildRequires:  pkgconfig(pims-ipc)
 BuildRequires:  pkgconfig(accounts-svc)
 BuildRequires:  pkgconfig(libexif)
 BuildRequires:  pkgconfig(libsmack)
-BuildRequires:  pkgconfig(security-server)
 BuildRequires:  pkgconfig(libtzplatform-config)
+BuildRequires:  pkgconfig(cynara-client)
+BuildRequires:  pkgconfig(cynara-session)
+BuildRequires:  pkgconfig(cynara-creds-socket)
 Requires(post): /usr/bin/sqlite3, /bin/chmod, /bin/chown
 Requires(post): /usr/bin/vconftool
 Requires(post): /sbin/ldconfig
@@ -59,13 +61,11 @@ export FFLAGS="$FFLAGS -DTIZEN_ENGINEER_MODE"
 
 MAJORVER=`echo %{version} | awk 'BEGIN {FS="."}{print $1}'`
 %cmake . -DTZ_SYS_ETC=%TZ_SYS_ETC \
-	-DENABLE_SIM_FEATURE:BOOL=ON \
-	-DENABLE_LOG_FEATURE:BOOL=ON \
-	-DMAJORVER=${MAJORVER} \
-	-DFULLVER=%{version}
-
+-DENABLE_SIM_FEATURE:BOOL=ON \
+-DENABLE_LOG_FEATURE:BOOL=ON \
+-DMAJORVER=${MAJORVER} \
+-DFULLVER=%{version}
 %__make %{?_smp_mflags}
-
 
 %install
 rm -rf %{buildroot}

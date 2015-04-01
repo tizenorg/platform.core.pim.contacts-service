@@ -30,8 +30,6 @@ API int contacts_activity_delete_by_contact_id(int contact_id)
 {
 	char query[CTS_SQL_MAX_LEN] = {0};
 
-	RETVM_IF(!ctsvc_have_permission(CTSVC_PERMISSION_CONTACT_WRITE), CONTACTS_ERROR_PERMISSION_DENIED,
-				"Permission denied : contact write (contact activity)");
 	RETV_IF(contact_id <= 0, CONTACTS_ERROR_INVALID_PARAMETER);
 
 	snprintf(query, sizeof(query), "DELETE FROM "CTS_TABLE_ACTIVITIES" WHERE contact_id = %d", contact_id);
@@ -57,8 +55,6 @@ API int contacts_activity_delete_by_account_id(int account_id)
 {
 	char query[CTS_SQL_MAX_LEN] = {0};
 
-	RETVM_IF(!ctsvc_have_permission(CTSVC_PERMISSION_CONTACT_WRITE), CONTACTS_ERROR_PERMISSION_DENIED,
-				"Permission denied : contact write (contact activity)");
 	RETV_IF(account_id < 0, CONTACTS_ERROR_INVALID_PARAMETER);
 
 	snprintf(query, sizeof(query), "DELETE FROM %s WHERE contact_id IN "

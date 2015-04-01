@@ -927,8 +927,6 @@ API int contacts_person_link_person(int base_person_id, int person_id)
 	bool is_favorite = false;
 	double favorite_prio = 0.0;
 
-	RETVM_IF(!ctsvc_have_permission(CTSVC_PERMISSION_CONTACT_WRITE), CONTACTS_ERROR_PERMISSION_DENIED,
-				"Permission denied : contact write (person)");
 	RETVM_IF(base_person_id == person_id, CONTACTS_ERROR_INVALID_PARAMETER,
 		"Invalid parameter : base_person_id(%d), person_id(%d)", base_person_id, person_id);
 
@@ -1185,8 +1183,6 @@ API int contacts_person_unlink_contact(int person_id, int contact_id, int* out_p
 	bool is_favorite = false;
 	double priority = 0.0;
 
-	RETVM_IF(!ctsvc_have_permission(CTSVC_PERMISSION_CONTACT_WRITE), CONTACTS_ERROR_PERMISSION_DENIED,
-				"Permission denied : contact write (person)");
 	RETVM_IF(person_id <= 0 || contact_id <= 0 , CONTACTS_ERROR_INVALID_PARAMETER,
 		"Invalid parameter : person_id(%d), person_id(%d)", person_id, person_id);
 
@@ -1325,8 +1321,6 @@ API int contacts_person_reset_usage(int person_id, contacts_usage_type_e type)
 	int ret ;
 	char query[CTS_SQL_MAX_LEN] = {0};
 
-	RETVM_IF(!ctsvc_have_permission(CTSVC_PERMISSION_CONTACT_WRITE), CONTACTS_ERROR_PERMISSION_DENIED,
-				"Permission denied : contact write (person)");
 	RETVM_IF(person_id <= 0, CONTACTS_ERROR_INVALID_PARAMETER,"contact_id should be greater than 0");
 
 	snprintf(query, sizeof(query),
@@ -1361,9 +1355,6 @@ API int contacts_person_set_favorite_order(int person_id, int front_person_id, i
 	double prio;
 	cts_stmt stmt;
 	char query[CTS_SQL_MAX_LEN] = {0};
-
-	RETVM_IF(!ctsvc_have_permission(CTSVC_PERMISSION_CONTACT_WRITE), CONTACTS_ERROR_PERMISSION_DENIED,
-				"Permission denied : contact write");
 
 	snprintf(query, sizeof(query), "SELECT favorite_prio FROM "CTS_TABLE_FAVORITES" WHERE person_id = ?");
 
@@ -1420,8 +1411,6 @@ API int contacts_person_set_default_property(contacts_person_property_e property
 {
 	int ret;
 
-	RETVM_IF(!ctsvc_have_permission(CTSVC_PERMISSION_CONTACT_WRITE), CONTACTS_ERROR_PERMISSION_DENIED,
-				"Permission denied : contact write (person)");
 	ret = ctsvc_begin_trans();
 	RETVM_IF(ret < CONTACTS_ERROR_NONE, CONTACTS_ERROR_DB, "ctsvc_begin_trans() Failed(%d)", ret);
 
@@ -1465,8 +1454,6 @@ API int contacts_person_get_default_property(contacts_person_property_e property
 
 	RETVM_IF(person_id <= 0 || id == NULL, CONTACTS_ERROR_INVALID_PARAMETER,"id should be greater than 0");
 	*id = 0;
-	RETVM_IF(!ctsvc_have_permission(CTSVC_PERMISSION_CONTACT_READ), CONTACTS_ERROR_PERMISSION_DENIED,
-				"Permission denied : contact read (contact)");
 
 	switch(property) {
 	case CONTACTS_PERSON_PROPERTY_NAME_CONTACT:
