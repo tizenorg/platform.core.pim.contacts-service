@@ -20,9 +20,18 @@
 #ifndef __TIZEN_SOCIAL_CTSVC_DB_ACCESS_CONTROL_H__
 #define __TIZEN_SOCIAL_CTSVC_DB_ACCESS_CONTROL_H__
 
+#define CTSVC_PRIVILEGE_CALLHISTORY_READ "http://tizen.org/privilege/callhistory.read"
+#define CTSVC_PRIVILEGE_CALLHISTORY_WRITE "http://tizen.org/privilege/callhistory.write"
+#define CTSVC_PRIVILEGE_CONTACT_READ "http://tizen.org/privilege/contact.read"
+#define CTSVC_PRIVILEGE_CONTACT_WRITE "http://tizen.org/privilege/contact.write"
+
+int ctsvc_cynara_initialize(void);
+void ctsvc_cynara_finalize(void);
+bool ctsvc_check_privilege(int fd, const char *privilege);
+
 int ctsvc_have_file_read_permission(const char *path);
 
-void ctsvc_set_client_access_info(const char *smack_label, const char *cookie);
+void ctsvc_set_client_access_info(int fd, const char *smack);
 void ctsvc_unset_client_access_info(void);
 void ctsvc_reset_all_client_access_info(void);
 
