@@ -225,9 +225,3 @@ API int contacts_disconnect_on_thread(void)
 	return CONTACTS_ERROR_NONE;
 }
 
-// TODO: Remove
-API int contacts_connect2(void)
-{return CONTACTS_ERROR_NOT_SUPPORTED;}
-API int contacts_disconnect2(void)
-{return CONTACTS_ERROR_NOT_SUPPORTED;}
-

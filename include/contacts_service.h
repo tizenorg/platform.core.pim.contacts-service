@@ -173,11 +173,6 @@ int contacts_disconnect_on_thread(void);
  */
 int contacts_connect_with_flags(unsigned int flags);
 
-// TODO: Remove
-int contacts_connect2(void);
-int contacts_disconnect2(void);
-
-
 /**
  * @}
  */
