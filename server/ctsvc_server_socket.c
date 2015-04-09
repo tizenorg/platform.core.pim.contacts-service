@@ -236,10 +236,9 @@ static int _ctsvc_server_initialize_cynara()
 	ret = cynara_initialize(&_cynara, NULL);
 	ctsvc_mutex_unlock(CTS_MUTEX_CYNARA);
 	if (CYNARA_API_SUCCESS != ret) {
-		//char errmsg[1024];
-		//cynara_strerror(ret, errmsg, sizeof(errmsg));
-		//CTS_ERR("cynara_initialize() Fail(%d,%s)", ret, errmsg);
-		CTS_ERR("cynara_initialize() Fail(%d)", ret);
+		char errmsg[1024] = {0};
+		cynara_strerror(ret, errmsg, sizeof(errmsg));
+		CTS_ERR("cynara_initialize() Fail(%d,%s)", ret, errmsg);
 		return CONTACTS_ERROR_SYSTEM;
 	}
 	return CONTACTS_ERROR_NONE;
@@ -256,10 +255,9 @@ static void _ctsvc_server_finalize_cynara()
 	_cynara = NULL;
 	ctsvc_mutex_unlock(CTS_MUTEX_CYNARA);
 	if (CYNARA_API_SUCCESS != ret) {
-		//char errmsg[1024];
-		//cynara_strerror(ret, errmsg, sizeof(errmsg));
-		//CTS_ERR("cynara_finish() Fail(%d,%s)", ret, errmsg);
-		CTS_ERR("cynara_finish() Fail(%d)", ret);
+		char errmsg[1024] = {0};
+		cynara_strerror(ret, errmsg, sizeof(errmsg));
+		CTS_ERR("cynara_finish() Fail(%d,%s)", ret, errmsg);
 	}
 }
 #endif
@@ -369,7 +367,7 @@ static int _ctsvc_server_create_client_info(int fd, struct client_info **p_info)
 {
 	int ret;
 	pid_t pid;
-	char errmsg[1024];
+	char errmsg[1024] = {0};
 
 	struct client_info *info = calloc(1, sizeof(struct client_info));
 	if (NULL == info) {
@@ -379,27 +377,24 @@ static int _ctsvc_server_create_client_info(int fd, struct client_info **p_info)
 
 	ret = cynara_creds_socket_get_client(fd, CLIENT_METHOD_SMACK, &(info->smack));
 	if (CYNARA_API_SUCCESS != ret) {
-		//cynara_strerror(ret, errmsg, sizeof(errmsg));
-		//CTS_ERR("cynara_creds_socket_get_client() Fail(%d,%s)", ret, errmsg);
-		CTS_ERR("cynara_finish() Fail(%d)", ret);
+		cynara_strerror(ret, errmsg, sizeof(errmsg));
+		CTS_ERR("cynara_creds_socket_get_client() Fail(%d,%s)", ret, errmsg);
 		_ctsvc_server_destroy_client_info(info);
 		return CONTACTS_ERROR_SYSTEM;
 	}
 
 	ret = cynara_creds_socket_get_user(fd, USER_METHOD_UID, &(info->uid));
 	if (CYNARA_API_SUCCESS != ret) {
-		//cynara_strerror(ret, errmsg, sizeof(errmsg));
-		//CTS_ERR("cynara_creds_socket_get_user() Fail(%d,%s)", ret, errmsg);
-		CTS_ERR("cynara_finish() Fail(%d)", ret);
+		cynara_strerror(ret, errmsg, sizeof(errmsg));
+		CTS_ERR("cynara_creds_socket_get_user() Fail(%d,%s)", ret, errmsg);
 		_ctsvc_server_destroy_client_info(info);
 		return CONTACTS_ERROR_SYSTEM;
 	}
 
 	ret = cynara_creds_socket_get_pid(fd, &pid);
 	if (CYNARA_API_SUCCESS != ret) {
-		//cynara_strerror(ret, errmsg, sizeof(errmsg));
-		//CTS_ERR("cynara_creds_socket_get_pid() Fail(%d,%s)", ret, errmsg);
-		CTS_ERR("cynara_finish() Fail(%d)", ret);
+		cynara_strerror(ret, errmsg, sizeof(errmsg));
+		CTS_ERR("cynara_creds_socket_get_pid() Fail(%d,%s)", ret, errmsg);
 		_ctsvc_server_destroy_client_info(info);
 		return CONTACTS_ERROR_SYSTEM;
 	}
