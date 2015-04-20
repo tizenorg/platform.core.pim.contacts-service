@@ -208,6 +208,7 @@ API int contacts_record_create( const char* view_uri, contacts_record_h* out_rec
 	ctsvc_record_type_e r_type;
 	const ctsvc_record_plugin_cb_s *plugin_cb;
 
+	RETV_IF(NULL == view_uri, CONTACTS_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == out_record, CONTACTS_ERROR_INVALID_PARAMETER);
 	*out_record = NULL;
 
