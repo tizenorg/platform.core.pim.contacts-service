@@ -46,7 +46,10 @@
 static int __server_main(void)
 {
 	int ret;
-	pims_ipc_svc_init(CTSVC_IPC_SOCKET_PATH, CTS_SECURITY_FILE_GROUP, 0777);
+
+	char sock_file[CTSVC_PATH_MAX_LEN] = {0};
+	snprintf(sock_file, sizeof(sock_file), CTSVC_SOCK_PATH"/.%s", getuid(), CTSVC_IPC_SERVICE);
+	pims_ipc_svc_init(sock_file, CTS_SECURITY_FILE_GROUP, 0777);
 
 	do {
 		// register handle functions
