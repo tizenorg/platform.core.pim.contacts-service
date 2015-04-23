@@ -26,7 +26,7 @@
 
 #include "contacts.h"
 
-#define CTSVC_SOCKET_PATH "/tmp/.contacts-svc.sock"
+#define CTSVC_SOCKET_FILE ".contacts-svc.sock"
 #define CTSVC_SOCKET_MSG_SIZE 1024
 
 // for use current contacts-svc-helper daemon

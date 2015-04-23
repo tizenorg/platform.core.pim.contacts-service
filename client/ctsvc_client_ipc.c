@@ -47,7 +47,9 @@ int ctsvc_ipc_connect_on_thread(void)
 
 	// ipc create
 	if (__contacts_ipc == NULL) {
-		__contacts_ipc = pims_ipc_create(CTSVC_IPC_SOCKET_PATH);
+		char sock_file[CTSVC_PATH_MAX_LEN] = {0};
+		snprintf(sock_file, sizeof(sock_file), CTSVC_SOCK_PATH"/.%s", getuid(), CTSVC_IPC_SERVICE);
+		__contacts_ipc = pims_ipc_create(sock_file);
 		if (__contacts_ipc == NULL) {
 			if (errno == EACCES) {
 				CTS_ERR("pims_ipc_create() Failed(%d)", CONTACTS_ERROR_PERMISSION_DENIED);
@@ -162,7 +164,9 @@ int ctsvc_ipc_connect(void)
 
 	// ipc create
 	if (__contacts_global_ipc == NULL) {
-		__contacts_global_ipc = pims_ipc_create(CTSVC_IPC_SOCKET_PATH);
+		char sock_file[CTSVC_PATH_MAX_LEN] = {0};
+		snprintf(sock_file, sizeof(sock_file), CTSVC_SOCK_PATH"/.%s", getuid(), CTSVC_IPC_SERVICE);
+		__contacts_global_ipc = pims_ipc_create(sock_file);
 		if (__contacts_global_ipc == NULL) {
 			if (errno == EACCES) {
 				CTS_ERR("[GLOBAL_IPC_CHANNEL] pims_ipc_create() Failed(%d)", CONTACTS_ERROR_PERMISSION_DENIED);

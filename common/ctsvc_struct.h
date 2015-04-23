@@ -32,6 +32,9 @@
 
 #include "contacts_views.h"
 
+#define CTSVC_SOCK_PATH "/run/user/%d"
+#define CTSVC_PATH_MAX_LEN 1024
+
 #define CTSVC_IMG_FULL_PATH_SIZE_MAX 1024		// current max length file path is 256
 #define CTSVC_IMG_FULL_LOCATION tzplatform_mkpath(TZ_USER_DATA,"contacts-svc/img")
 #define CTSVC_CONTACT_IMG_FULL_LOCATION tzplatform_mkpath(TZ_USER_DATA,"contacts-svc/img/contact")
