@@ -41,9 +41,12 @@ int ctsvc_socket_init(void)
 		return  CONTACTS_ERROR_NONE;
 	}
 
+	char sock_file[CTSVC_PATH_MAX_LEN] = {0};
+	snprintf(sock_file, sizeof(sock_file), CTSVC_SOCK_PATH"/%s", getuid(), CTSVC_SOCKET_FILE);
+
 	bzero(&caddr, sizeof(caddr));
 	caddr.sun_family = AF_UNIX;
-	snprintf(caddr.sun_path, sizeof(caddr.sun_path), "%s", CTSVC_SOCKET_PATH);
+	snprintf(caddr.sun_path, sizeof(caddr.sun_path), "%s", sock_file);
 
 	__ctsvc_sockfd = socket(PF_UNIX, SOCK_STREAM, 0);
 	RETVM_IF(-1 == __ctsvc_sockfd, CONTACTS_ERROR_IPC,

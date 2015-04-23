@@ -456,11 +456,13 @@ int ctsvc_server_socket_init(void)
 	_ctsvc_server_initialize_cynara();
 #endif
 
-	unlink(CTSVC_SOCKET_PATH);
+	char sock_file[CTSVC_PATH_MAX_LEN] = {0};
+	snprintf(sock_file, sizeof(sock_file), CTSVC_SOCK_PATH"/%s", getuid(), CTSVC_SOCKET_FILE);
+	unlink(sock_file);
 
 	bzero(&addr, sizeof(addr));
 	addr.sun_family = AF_UNIX;
-	snprintf(addr.sun_path, sizeof(addr.sun_path), "%s", CTSVC_SOCKET_PATH);
+	snprintf(addr.sun_path, sizeof(addr.sun_path), "%s", sock_file);
 
 	sockfd = socket(PF_UNIX, SOCK_STREAM, 0);
 	RETVM_IF(-1 == sockfd, CONTACTS_ERROR_SYSTEM, "socket() Failed(errno = %d)", errno);
@@ -468,11 +470,11 @@ int ctsvc_server_socket_init(void)
 	ret = bind(sockfd, (struct sockaddr *)&addr, sizeof(addr));
 	RETVM_IF(-1 == ret, CONTACTS_ERROR_SYSTEM, "bind() Failed(errno = %d)", errno);
 
-	ret = chown(CTSVC_SOCKET_PATH, getuid(), CTS_SECURITY_FILE_GROUP);
+	ret = chown(sock_file, getuid(), CTS_SECURITY_FILE_GROUP);
 	if (0 != ret)
 		CTS_ERR("chown(%s) Failed(%d)", CTSVC_SOCKET_PATH, ret);
 
-	ret = chmod(CTSVC_SOCKET_PATH, CTS_SECURITY_DEFAULT_PERMISSION);
+	ret = chmod(sock_file, CTS_SECURITY_DEFAULT_PERMISSION);
 	if (0 != ret)
 		CTS_ERR("chmod(%s) Failed(%d)", CTSVC_SOCKET_PATH, ret);
 

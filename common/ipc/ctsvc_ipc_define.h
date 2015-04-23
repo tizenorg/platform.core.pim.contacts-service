@@ -20,6 +20,9 @@
 #ifndef __CTSVC_IPC_DEFINE_H__
 #define __CTSVC_IPC_DEFINE_H__
 
+#define CTSVC_SOCK_PATH "/run/user/%d"
+#define CTSVC_PATH_MAX_LEN 1024
+
 #define CTSVC_IPC_SERVICE              "contacts_svc_ipc"
 #define CTSVC_IPC_SOCKET_PATH          "/tmp/."CTSVC_IPC_SERVICE
 
