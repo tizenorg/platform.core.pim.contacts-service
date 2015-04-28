@@ -37,7 +37,6 @@ static cts_mutex_fns __ctsvc_mutex_funtions =
 
 static pthread_mutex_t conn_mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t sockfd_mutex = PTHREAD_MUTEX_INITIALIZER;
-static pthread_mutex_t trans_mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t ipc_mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t ipc_pubsub_mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t access_control_mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -57,9 +56,6 @@ static inline pthread_mutex_t* __ctsvc_mutex_get_mutex(int type)
 		break;
 	case CTS_MUTEX_SOCKET_FD:
 		ret_val = &sockfd_mutex;
-		break;
-	case CTS_MUTEX_TRANSACTION:
-		ret_val = &trans_mutex;
 		break;
 	case CTS_MUTEX_PIMS_IPC_CALL:
 		ret_val = &ipc_mutex;

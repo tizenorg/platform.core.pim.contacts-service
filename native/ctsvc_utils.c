@@ -62,9 +62,6 @@ int ctsvc_begin_trans(void)
 {
 	int ret = -1, progress;
 
-#ifndef _CONTACTS_IPC_SERVER
-	ctsvc_mutex_lock(CTS_MUTEX_TRANSACTION);
-#endif
 	if (transaction_count <= 0) {
 		ret = ctsvc_query_exec("BEGIN IMMEDIATE TRANSACTION");
 		progress = 100000;
@@ -75,9 +72,6 @@ int ctsvc_begin_trans(void)
 		}
 		if(CONTACTS_ERROR_NONE != ret) {
 			CTS_ERR("ctsvc_query_exec() Failed(%d)", ret);
-#ifndef _CONTACTS_IPC_SERVER
-			ctsvc_mutex_unlock(CTS_MUTEX_TRANSACTION);
-#endif
 			return ret;
 		}
 
@@ -89,9 +83,6 @@ int ctsvc_begin_trans(void)
 	}
 	transaction_count++;
 	INFO("transaction_count : %d.", transaction_count);
-#ifndef _CONTACTS_IPC_SERVER
-	ctsvc_mutex_unlock(CTS_MUTEX_TRANSACTION);
-#endif
 	return CONTACTS_ERROR_NONE;
 }
 
@@ -100,18 +91,11 @@ int ctsvc_end_trans(bool is_success)
 	int ret = -1, progress;
 	char query[CTS_SQL_MIN_LEN] = {0};
 
-#ifndef _CONTACTS_IPC_SERVER
-	ctsvc_mutex_lock(CTS_MUTEX_TRANSACTION);
-#endif
-
 	transaction_count--;
 	INFO("%s, transaction_count : %d", is_success?"True": "False",  transaction_count);
 
 	if (0 != transaction_count) {
 		CTS_DBG("contact transaction_count : %d.", transaction_count);
-#ifndef _CONTACTS_IPC_SERVER
-		ctsvc_mutex_unlock(CTS_MUTEX_TRANSACTION);
-#endif
 		return CONTACTS_ERROR_NONE;
 	}
 
@@ -122,9 +106,6 @@ int ctsvc_end_trans(bool is_success)
 #endif
 		ret = ctsvc_query_exec("ROLLBACK TRANSACTION");
 
-#ifndef _CONTACTS_IPC_SERVER
-		ctsvc_mutex_unlock(CTS_MUTEX_TRANSACTION);
-#endif
 		return CONTACTS_ERROR_NONE;
 	}
 
@@ -155,19 +136,12 @@ int ctsvc_end_trans(bool is_success)
 #endif
 		tmp_ret = ctsvc_query_exec("ROLLBACK TRANSACTION");
 		WARN_IF(CONTACTS_ERROR_NONE != tmp_ret, "ctsvc_query_exec(ROLLBACK) Failed(%d)", tmp_ret);
-#ifndef _CONTACTS_IPC_SERVER
-		ctsvc_mutex_unlock(CTS_MUTEX_TRANSACTION);
-#endif
 		return ret;
 	}
 
 	ctsvc_notification_send();
 #ifdef _CONTACTS_IPC_SERVER
 	ctsvc_change_subject_publish_changed_info();
-#endif
-
-#ifndef _CONTACTS_IPC_SERVER
-	ctsvc_mutex_unlock(CTS_MUTEX_TRANSACTION);
 #endif
 
 	CTS_DBG("Transaction shut down! : (%d)\n", transaction_ver);
