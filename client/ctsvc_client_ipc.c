@@ -226,9 +226,6 @@ int ctsvc_ipc_disconnect(contacts_h contact, int connection_count)
 			return ret;
 		}
 
-		ctsvc_base_s *base = (ctsvc_base_s *)contact;
-		base->connection_count--;
-
 		if (1 == connection_count) {
 			pims_ipc_destroy(__contacts_global_ipc);
 			__contacts_global_ipc = NULL;
