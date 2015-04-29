@@ -41,6 +41,7 @@
 #include "ctsvc_ipc_define.h"
 #include "ctsvc_ipc_server.h"
 #include "ctsvc_ipc_server2.h"
+#include "ctsvc_notification.h"
 #include "ctsvc_notify.h"
 
 static int __server_main(void)
@@ -105,6 +106,8 @@ static int __server_main(void)
 
 		snprintf(sock_file, sizeof(sock_file), CTSVC_SOCK_PATH"/.%s_for_subscribe", getuid(), CTSVC_IPC_SERVICE);
 		pims_ipc_svc_init_for_publish(sock_file, CTS_SECURITY_FILE_GROUP, 0660);
+
+		ctsvc_noti_publish_socket_initialize();
 
 		ret = contacts_connect();
 		if (CONTACTS_ERROR_NONE != ret) {
@@ -198,6 +201,7 @@ int main(int argc, char *argv[])
 	ctsvc_create_rep_set_permission(CTS_LOGO_IMAGE_LOCATION, 0770);
 	ctsvc_create_rep_set_permission(CTSVC_CONTACT_IMG_FULL_LOCATION, 0770);
 
+	ctsvc_create_file_set_permission(CTSVC_NOTI_IPC_READY, 0660);
 	ctsvc_create_file_set_permission(CTSVC_NOTI_ADDRESSBOOK_CHANGED, 0660);
 	ctsvc_create_file_set_permission(CTSVC_NOTI_GROUP_CHANGED, 0660);
 	ctsvc_create_file_set_permission(CTSVC_NOTI_PERSON_CHANGED, 0660);

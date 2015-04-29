@@ -50,6 +50,7 @@ void ctsvc_set_company_noti(void);
 
 void ctsvc_notification_send();
 void ctsvc_nofitication_cancel(void);
+void ctsvc_noti_publish_socket_initialize(void);
 
 void ctsvc_db_data_delete_callback(sqlite3_context * context,
 		int argc, sqlite3_value ** argv);

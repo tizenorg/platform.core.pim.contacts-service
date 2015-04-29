@@ -87,10 +87,32 @@ cp LICENSE.APLv2 %{buildroot}/usr/share/license/contacts-service2-devel
 %post -n contacts-service2
 /sbin/ldconfig
 
+<<<<<<< HEAD
 vconftool set -t int file/private/contacts-service/default_lang 0 -g 5000 -s contacts-service::vconf-private
 vconftool set -t int db/contacts-svc/name_sorting_order 0 -g 5000 -s contacts-service::vconf
 vconftool set -t int db/contacts-svc/name_display_order 0 -g 5000 -s contacts-service::vconf
 vconftool set -t int db/contacts-svc/phonenumber_min_match_digit 8 -g 5000 -s contacts-service::vconf
+=======
+chown 200:5000 /opt/usr/data/contacts-svc
+chown 200:5000 /opt/usr/dbspace/.contacts-svc.db
+chown 200:5000 /opt/usr/dbspace/.contacts-svc.db-journal
+chown 200:5000 -R /opt/usr/data/contacts-svc/img
+chown 200:5000 /opt/usr/data/contacts-svc/.CONTACTS_SVC_*
+chown 200:200 %{_libdir}/systemd/system/contacts-service.socket
+
+
+chmod 660 /opt/usr/dbspace/.contacts-svc.db
+chmod 660 /opt/usr/dbspace/.contacts-svc.db-journal
+chmod 775 /opt/usr/data/contacts-svc
+chmod 770 -R /opt/usr/data/contacts-svc/img/
+chmod 660 /opt/usr/data/contacts-svc/.CONTACTS_SVC_*
+
+vconftool set -t int file/private/contacts-service/default_lang 0 -u 200 -g 5000 -s contacts-service::vconf-private
+vconftool set -t int db/contacts-svc/name_sorting_order 0 -u 200 -g 5000 -s contacts-service::vconf
+vconftool set -t int db/contacts-svc/name_display_order 0 -u 200 -g 5000 -s contacts-service::vconf
+vconftool set -t int db/contacts-svc/phonenumber_min_match_digit 8 -u 200 -g 5000 -s contacts-service::vconf
+
+>>>>>>> fec0b77... [IOT-264] connection recovery
 
 %postun -p /sbin/ldconfig
 

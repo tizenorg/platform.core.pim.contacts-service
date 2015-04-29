@@ -29,4 +29,7 @@ int ctsvc_inotify_subscribe(const char *view_uri, contacts_db_changed_cb cb, voi
 int ctsvc_inotify_unsubscribe(const char *view_uri, contacts_db_changed_cb cb, void *user_data);
 void ctsvc_inotify_call_blocked_callback();
 
+int ctsvc_inotify_subscribe_ipc_ready(void (*cb)(void *), void *user_data);
+int ctsvc_inotify_unsubscribe_ipc_ready(void);
+
 #endif //__TIZEN_SOCIAL_CTSVC_INOTIFY_H__

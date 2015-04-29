@@ -21,9 +21,6 @@
 #define __CTSVC_IPC_DEFINE_H__
 
 #define CTSVC_IPC_SERVICE              "contacts_svc_ipc"
-#define CTSVC_IPC_SOCKET_PATH          "/tmp/."CTSVC_IPC_SERVICE
-
-#define CTSVC_IPC_SOCKET_PATH_FOR_CHANGE_SUBSCRIPTION    "/tmp/."CTSVC_IPC_SERVICE"_for_subscribe"
 #define CTSVC_IPC_SUBSCRIBE_MODULE               "ctsvc_ipc_subscribe_module"
 
 #define CTSVC_IPC_MODULE               "ctsvc_ipc_module"

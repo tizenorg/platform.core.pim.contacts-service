@@ -100,6 +100,24 @@ int ctsvc_ipc_create_for_change_subscription()
 	return CONTACTS_ERROR_NONE;
 }
 
+int ctsvc_ipc_recover_for_change_subscription()
+{
+	ctsvc_mutex_lock(CTS_MUTEX_PIMS_IPC_PUBSUB);
+	char sock_file[CTSVC_PATH_MAX_LEN] = {0};
+	if (__ipc_pubsub_ref <= 0)
+		return CONTACTS_ERROR_NONE;
+
+	snprintf(sock_file, sizeof(sock_file), CTSVC_SOCK_PATH"/.%s_for_subscribe", getuid(), CTSVC_IPC_SERVICE);
+	__ipc = pims_ipc_create_for_subscribe(sock_file);
+	if (!__ipc) {
+		CTS_ERR("pims_ipc_create_for_subscribe error\n");
+		ctsvc_mutex_unlock(CTS_MUTEX_PIMS_IPC_PUBSUB);
+		return CONTACTS_ERROR_IPC;
+	}
+	ctsvc_mutex_unlock(CTS_MUTEX_PIMS_IPC_PUBSUB);
+	return CONTACTS_ERROR_NONE;
+}
+
 int ctsvc_ipc_destroy_for_change_subscription()
 {
 	ctsvc_mutex_lock(CTS_MUTEX_PIMS_IPC_PUBSUB);
