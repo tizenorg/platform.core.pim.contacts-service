@@ -28,6 +28,7 @@
 #include "ctsvc_db_query.h"
 #include "ctsvc_record.h"
 #include "ctsvc_notification.h"
+#include "ctsvc_server_utils.h"
 
 //static int __ctsvc_db_sdn_insert_record( contacts_record_h record, int *id );
 static int __ctsvc_db_sdn_get_record( int id, contacts_record_h* record );
@@ -80,6 +81,8 @@ static int __ctsvc_db_sdn_value_set(cts_stmt stmt, contacts_record_h *record)
 
 static int __ctsvc_db_sdn_get_record( int id, contacts_record_h* out_record )
 {
+	RETVM_IF(!ctsvc_server_have_telephony_feature(), CONTACTS_ERROR_NOT_SUPPORTED, "Telephony feature disabled");
+
 	int ret;
 	cts_stmt stmt = NULL;
 	char query[CTS_SQL_MAX_LEN] = {0};
@@ -267,6 +270,8 @@ static int __ctsvc_db_sdn_delete_record( int sdn_id )
 static int __ctsvc_db_sdn_get_all_records( int offset, int limit,
 	contacts_list_h* out_list )
 {
+	RETVM_IF(!ctsvc_server_have_telephony_feature(), CONTACTS_ERROR_NOT_SUPPORTED, "Telephony feature disabled");
+
 	int ret;
 	int len;
 	cts_stmt stmt;
@@ -307,6 +312,8 @@ static int __ctsvc_db_sdn_get_all_records( int offset, int limit,
 
 static int __ctsvc_db_sdn_get_records_with_query( contacts_query_h query, int offset, int limit, contacts_list_h* out_list )
 {
+	RETVM_IF(!ctsvc_server_have_telephony_feature(), CONTACTS_ERROR_NOT_SUPPORTED, "Telephony feature disabled");
+
 	int ret;
 	int i;
 	int field_count;
