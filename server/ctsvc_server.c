@@ -227,6 +227,7 @@ int main(int argc, char *argv[])
 	// update DB for compatability
 	ctsvc_server_db_update();
 
+	ctsvc_server_load_feature_list();
 	ret = ctsvc_server_socket_init();
 	CTS_DBG("%d", ret);
 

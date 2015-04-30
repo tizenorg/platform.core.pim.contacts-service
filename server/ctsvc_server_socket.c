@@ -40,6 +40,8 @@
 #include "ctsvc_sqlite.h"
 #include "ctsvc_socket.h"
 #include "ctsvc_server_socket.h"
+#include "ctsvc_server_utils.h"
+
 #ifdef ENABLE_SIM_FEATURE
 #include "ctsvc_mutex.h"
 #include "ctsvc_server_sim.h"
@@ -306,6 +308,15 @@ static gboolean __ctsvc_server_socket_request_handler(GIOChannel *src, GIOCondit
 	RETVM_IF(-1 == ret, TRUE, "__ctsvc_server_socket_safe_read() Failed(errno = %d)", errno);
 
 	CTS_DBG("attach number = %d", msg.attach_num);
+
+	bool have_telephony_feature = false;
+	have_telephony_feature = ctsvc_server_have_telephony_feature();
+	if (!have_telephony_feature) {
+		CTS_ERR("Telephony feature disabled");
+		__ctsvc_server_socket_read_flush(src, msg.attach_sizes[0]); 	// sim_id
+		ctsvc_server_socket_return(src, CONTACTS_ERROR_NOT_SUPPORTED, 0, NULL);
+		return TRUE;
+	}
 
 #ifdef ENABLE_SIM_FEATURE
 	ctsvc_mutex_lock(CTS_MUTEX_SOCKET_CLIENT_INFO);
