@@ -265,19 +265,6 @@ int ctsvc_ipc_call(char *module, char *function, pims_ipc_h data_in, pims_ipc_da
 	return ret;
 }
 
-int ctsvc_ipc_call_async(char *module, char *function, pims_ipc_h data_in, pims_ipc_call_async_cb callback, void *userdata)
-{
-	pims_ipc_h ipc_handle = ctsvc_get_ipc_handle();
-
-	__ctsvc_ipc_lock();
-
-	int ret = pims_ipc_call_async(ipc_handle, module, function, data_in, callback, userdata);
-
-	__ctsvc_ipc_unlock();
-
-	return ret;
-}
-
 void ctsvc_client_ipc_set_change_version(int version)
 {
 	if (__contacts_ipc == NULL) {
