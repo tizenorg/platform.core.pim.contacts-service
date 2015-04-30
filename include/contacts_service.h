@@ -61,7 +61,6 @@ extern "C"
  * @retval  #CONTACTS_ERROR_IPC_NOT_AVALIABLE   IPC server is not available
  * @retval  #CONTACTS_ERROR_IPC                 IPC error
  * @retval  #CONTACTS_ERROR_SYSTEM              System error
- * @retval  #CONTACTS_ERROR_PERMISSION_DENIED   Permission denied. This application does not have the privilege to call this method.
  *
  * @see contacts_disconnect()
  */
@@ -105,7 +104,6 @@ int contacts_disconnect(void);
  * @retval  #CONTACTS_ERROR_IPC                 IPC error
  * @retval  #CONTACTS_ERROR_SYSTEM              System error
  * @retval  #CONTACTS_ERROR_INTERNAL            Internal error
- * @retval  #CONTACTS_ERROR_PERMISSION_DENIED   Permission denied. This application does not have the privilege to call this method.
  *
  * @see  contacts_disconnect_on_thread()
  */
@@ -167,7 +165,6 @@ int contacts_disconnect_on_thread(void);
  * @retval  #CONTACTS_ERROR_IPC_NOT_AVALIABLE   IPC server is not available
  * @retval  #CONTACTS_ERROR_IPC                 IPC error
  * @retval  #CONTACTS_ERROR_SYSTEM              System error
- * @retval  #CONTACTS_ERROR_PERMISSION_DENIED   Permission denied. This application does not have the privilege to call this method.
  *
  * @see  contacts_disconnect()
  */
