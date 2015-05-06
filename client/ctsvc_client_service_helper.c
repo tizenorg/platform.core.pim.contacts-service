@@ -95,7 +95,10 @@ int ctsvc_client_connect(contacts_h contact)
 
  	ctsvc_mutex_lock(CTS_MUTEX_CONNECTION);
 	if (0 == base->connection_count) {
-		ret = ctsvc_ipc_connect(contact);
+		char ipc_key[CTSVC_STR_SHORT_LEN] = {0};
+		ctsvc_ipc_get_pid_str(ipc_key, sizeof(ipc_key));
+
+		ret = ctsvc_ipc_connect(contact, ipc_key);
 		if (ret != CONTACTS_ERROR_NONE) {
 			CTS_ERR("ctsvc_ipc_connect() Fail(%d)", ret);
 			ctsvc_mutex_unlock(CTS_MUTEX_CONNECTION);
@@ -143,7 +146,10 @@ int ctsvc_client_disconnect(contacts_h contact)
 
 	ctsvc_base_s *base = (ctsvc_base_s *)contact;
 	if (1 == base->connection_count) {
-		ret = ctsvc_ipc_disconnect(contact, _ctsvc_connection);
+		char ipc_key[CTSVC_STR_SHORT_LEN] = {0};
+		ctsvc_ipc_get_pid_str(ipc_key, sizeof(ipc_key));
+
+		ret = ctsvc_ipc_disconnect(contact, ipc_key, _ctsvc_connection);
 		if (ret != CONTACTS_ERROR_NONE) {
 			ctsvc_mutex_unlock(CTS_MUTEX_CONNECTION);
 			CTS_ERR("ctsvc_ipc_disconnect() Fail(%d)", ret);
@@ -185,7 +191,11 @@ int ctsvc_client_connect_on_thread(contacts_h contact)
 	ctsvc_mutex_lock(CTS_MUTEX_CONNECTION);
 
 	if (0 == base->connection_count) {
-		ret = ctsvc_ipc_connect(contact);
+
+		char ipc_key[CTSVC_STR_SHORT_LEN] = {0};
+		ctsvc_ipc_get_tid_str(ipc_key, sizeof(ipc_key));
+
+		ret = ctsvc_ipc_connect(contact, ipc_key);
 		if (ret != CONTACTS_ERROR_NONE) {
 			CTS_ERR("ctsvc_ipc_connect() Fail(%d)", ret);
 			ctsvc_mutex_unlock(CTS_MUTEX_CONNECTION);
@@ -234,7 +244,10 @@ int ctsvc_client_disconnect_on_thread(contacts_h contact)
 	ctsvc_mutex_lock(CTS_MUTEX_CONNECTION);
 
 	if (1 == base->connection_count) {
-		ret = ctsvc_ipc_disconnect(contact, _ctsvc_connection_on_thread);
+		char ipc_key[CTSVC_STR_SHORT_LEN] = {0};
+		ctsvc_ipc_get_tid_str(ipc_key, sizeof(ipc_key));
+
+		ret = ctsvc_ipc_disconnect(contact, ipc_key, _ctsvc_connection_on_thread);
 		if (ret != CONTACTS_ERROR_NONE) {
 			CTS_ERR("ctsvc_ipc_disconnect_on_thread() Fail(%d)", ret);
 			ctsvc_mutex_unlock(CTS_MUTEX_CONNECTION);

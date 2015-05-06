@@ -23,8 +23,11 @@
 #include <pims-ipc.h>
 #include "contacts_types.h"
 
-int ctsvc_ipc_connect(contacts_h contact);
-int ctsvc_ipc_disconnect(contacts_h contact, int connection_count);
+void ctsvc_ipc_get_pid_str(char *buf, int buf_size);
+void ctsvc_ipc_get_tid_str(char *buf, int buf_size);
+
+int ctsvc_ipc_connect(contacts_h contact, const char *ipc_key);
+int ctsvc_ipc_disconnect(contacts_h contact, const char *ipc_key, int connection_count);
 
 int ctsvc_ipc_connect_on_thread(contacts_h contact);
 int ctsvc_ipc_disconnect_on_thread(contacts_h contact, int connection_count);

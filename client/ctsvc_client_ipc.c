@@ -40,8 +40,6 @@
 #include "ctsvc_mutex.h"
 #include "ctsvc_handle.h"
 
-#define CTS_STR_SHORT_LEN 1024 //short sql string length
-
 struct ctsvc_ipc_s {
 	pims_ipc_h ipc;
 	GList *list_handle;
@@ -51,40 +49,33 @@ static GHashTable *_ctsvc_ipc_table = NULL;
 static bool _ctsvc_ipc_disconnected = false;
 static int disconnected_cb_count = 0;
 
-static inline void _ctsvc_ipc_get_pid_str(char *buf, int buf_size)
+void ctsvc_ipc_get_pid_str(char *buf, int buf_size)
 {
 	pid_t pid = getpid();
 	snprintf(buf, buf_size, "%d", (unsigned int)pid);
 }
 
-static inline void _ctsvc_ipc_get_tid_str(char *buf, int buf_size)
+void ctsvc_ipc_get_tid_str(char *buf, int buf_size)
 {
 	pthread_t tid = pthread_self();
 	snprintf(buf, buf_size, "%d", (unsigned int)tid);
 }
 
-static struct ctsvc_ipc_s* _ctsvc_get_ipc_data()
-{
-	struct ctsvc_ipc_s *ipc_data = NULL;
-	char ipc_key[CTS_STR_SHORT_LEN] = {0};
-	RETVM_IF(NULL == _ctsvc_ipc_table, NULL, "contacts not connected");
-
-	_ctsvc_ipc_get_tid_str(ipc_key, sizeof(ipc_key));
-	ipc_data = g_hash_table_lookup(_ctsvc_ipc_table, ipc_key);
-	if (NULL == ipc_data) {
-		_ctsvc_ipc_get_pid_str(ipc_key, sizeof(ipc_key));
-		ipc_data = g_hash_table_lookup(_ctsvc_ipc_table, ipc_key);
-	}
-	return ipc_data;
-}
-
 static pims_ipc_h _ctsvc_get_ipc_handle()
 {
-	struct ctsvc_ipc_s *ipc_data = _ctsvc_get_ipc_data();
-	if (ipc_data)
-		return ipc_data->ipc;
+	struct ctsvc_ipc_s *ipc_data = NULL;
+	char ipc_key[CTSVC_STR_SHORT_LEN] = {0};
+	RETVM_IF(NULL == _ctsvc_ipc_table, NULL, "contacts not connected");
 
-	return NULL;
+	ctsvc_ipc_get_tid_str(ipc_key, sizeof(ipc_key)); // get ipc_data by tid
+	ipc_data = g_hash_table_lookup(_ctsvc_ipc_table, ipc_key);
+	if (NULL == ipc_data) {
+		ctsvc_ipc_get_pid_str(ipc_key, sizeof(ipc_key)); // get ipc_data by pid
+		ipc_data = g_hash_table_lookup(_ctsvc_ipc_table, ipc_key);
+	}
+	RETVM_IF(NULL == ipc_data, NULL, "g_hash_table_lookup(%s) Fail", ipc_key);
+
+	return ipc_data->ipc;
 }
 
 bool ctsvc_ipc_is_busy()
@@ -174,15 +165,12 @@ static int _ctsvc_ipc_connect(contacts_h contact, pims_ipc_h ipc)
 	return ret;
 }
 
-int ctsvc_ipc_connect(contacts_h contact)
+int ctsvc_ipc_connect(contacts_h contact, const char *ipc_key)
 {
 	int ret = CONTACTS_ERROR_NONE;
 	struct ctsvc_ipc_s *ipc_data = NULL;
-	char ipc_key[CTS_STR_SHORT_LEN] = {0};
 
 	RETV_IF(_ctsvc_ipc_disconnected, CONTACTS_ERROR_IPC_NOT_AVALIABLE);
-
-	_ctsvc_ipc_get_tid_str(ipc_key, sizeof(ipc_key));
 
 	if (NULL == _ctsvc_ipc_table)
 		_ctsvc_ipc_table = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, _ctsvc_ipc_data_free);
@@ -205,18 +193,15 @@ int ctsvc_ipc_connect(contacts_h contact)
 }
 
 
-int ctsvc_ipc_disconnect(contacts_h contact, int connection_count)
+int ctsvc_ipc_disconnect(contacts_h contact, const char *ipc_key, int connection_count)
 {
 	int ret = CONTACTS_ERROR_NONE;
-	char ipc_key[CTS_STR_SHORT_LEN] = {0};
 	struct ctsvc_ipc_s *ipc_data = NULL;
 	pims_ipc_data_h outdata = NULL;
 	pims_ipc_data_h indata = NULL;
 
 	RETV_IF(_ctsvc_ipc_disconnected, CONTACTS_ERROR_IPC_NOT_AVALIABLE);
 	RETVM_IF(NULL == _ctsvc_ipc_table, CONTACTS_ERROR_IPC, "contacts not connected");
-
-	_ctsvc_ipc_get_tid_str(ipc_key, sizeof(ipc_key));
 
 	ipc_data = g_hash_table_lookup(_ctsvc_ipc_table, ipc_key);
 	RETVM_IF(ipc_data == NULL, CONTACTS_ERROR_IPC, "contacts not connected");
