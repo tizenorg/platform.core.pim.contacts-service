@@ -106,10 +106,6 @@ bool ctsvc_ipc_is_busy()
 
 static int _ctsvc_ipc_create(pims_ipc_h *p_ipc)
 {
-	int ret;
-	pims_ipc_data_h indata = NULL;
-	pims_ipc_data_h outdata = NULL;
-
 	char sock_file[CTSVC_PATH_MAX_LEN] = {0};
 	snprintf(sock_file, sizeof(sock_file), CTSVC_SOCK_PATH"/.%s", getuid(), CTSVC_IPC_SERVICE);
 	pims_ipc_h ipc = pims_ipc_create(sock_file);
@@ -126,31 +122,6 @@ static int _ctsvc_ipc_create(pims_ipc_h *p_ipc)
 
 	*p_ipc = ipc;
 	return CONTACTS_ERROR_NONE;
-
-	/* ipc call */
-	if (pims_ipc_call(ipc, CTSVC_IPC_MODULE, CTSVC_IPC_SERVER_CONNECT, indata, &outdata) != 0) {
-		CTS_ERR("pims_ipc_call failed");
-		pims_ipc_data_destroy(indata);
-		ret = CONTACTS_ERROR_IPC;
-		goto DATA_FREE;
-	}
-
-	if (outdata) {
-		unsigned int size = 0;
-		ret = *(int*) pims_ipc_data_get(outdata,&size);
-
-		pims_ipc_data_destroy(outdata);
-
-		if (ret != CONTACTS_ERROR_NONE) {
-			CTS_ERR("ctsvc_ipc_server_connect return(%d)", ret);
-			goto DATA_FREE;
-		}
-	}
-	*p_ipc = ipc;
-	return CONTACTS_ERROR_NONE;
-DATA_FREE:
-	pims_ipc_destroy(ipc);
-	return ret;
 }
 
 static void _ctsvc_ipc_data_free(gpointer p)
