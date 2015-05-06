@@ -2237,7 +2237,7 @@ static int __ctsvc_db_contact_replace_record( contacts_record_h record, int cont
 	version = ctsvc_get_next_ver();
 
 	len = snprintf(query, sizeof(query),
-			"UPDATE "CTS_TABLE_CONTACTS" SET changed_ver=%d, changed_time=%d, "
+			"UPDATE "CTS_TABLE_CONTACTS" SET changed_ver=%d, changed_time=%d, is_favorite=%d, "
 					"has_phonenumber=%d, has_email=%d , display_name=?, "
 					"reverse_display_name=?, display_name_source=%d, "
 					"display_name_language=%d, reverse_display_name_language=%d, "
@@ -2245,7 +2245,7 @@ static int __ctsvc_db_contact_replace_record( contacts_record_h record, int cont
 					"sortkey=?, reverse_sortkey=?, uid=?, ringtone_path=?, vibration=?, "
 					"message_alert =?, image_thumbnail_path=?",
 					version, (int)time(NULL),
-					contact->has_phonenumber, contact->has_email,
+					contact->has_phonenumber, contact->has_email, contact->is_favorite,
 					contact->display_source_type,
 					contact->display_name_language, contact->reverse_display_name_language);
 
