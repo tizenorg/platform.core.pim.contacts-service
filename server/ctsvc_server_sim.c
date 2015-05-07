@@ -832,7 +832,9 @@ static int __ctsvc_server_sim_info_init()
 	int i;
 	unsigned int cp_index = 0;
 
+#if !GLIB_CHECK_VERSION(2,35,0)
 	g_type_init();
+#endif
 	cp_name = tel_get_cp_name_list();
 	RETVM_IF(cp_name == NULL, CONTACTS_ERROR_SYSTEM, "tel_get_cp_name_list fail (cp_name is NULL)");
 
