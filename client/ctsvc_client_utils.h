@@ -17,13 +17,12 @@
  *
  */
 
-#ifndef __CTSVC_CLIENT_HANDLE_H__
-#define __CTSVC_CLIENT_HANDLE_H__
-#include "contacts_types.h"
+#ifndef __CTSVC_CLIENT_UTILS_H__
+#define __CTSVC_CLIENT_UTILS_H__
 
-int ctsvc_client_handle_get_p(contacts_h *p_contact);
-int ctsvc_client_handle_get_p_with_id(unsigned int id, contacts_h *p_contact);
-int ctsvc_client_handle_remove(unsigned int id, contacts_h contact);
-int ctsvc_client_handle_create(unsigned int id, contacts_h *p_contact);
+unsigned int ctsvc_client_get_pid();
+unsigned int ctsvc_client_get_tid();
 
-#endif /* __CTSVC_CLIENT_HANDLE_H__ */
+#endif /*  __CTSVC_CLIENT_UTILS_H__ */
+
+

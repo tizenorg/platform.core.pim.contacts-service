@@ -27,8 +27,8 @@ API int contacts_activity_delete_by_contact_id(int contact_id)
 	int ret;
 	contacts_h contact = NULL;
 
-	ret = ctsvc_client_handle_get_current_p(&contact);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_client_handle_get_current_p() Fail(%d)", ret);
+	ret = ctsvc_client_handle_get_p(&contact);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_client_handle_get_p() Fail(%d)", ret);
 
 	ret = ctsvc_client_activity_delete_by_contact_id(contact, contact_id);
 
@@ -40,8 +40,8 @@ API int contacts_activity_delete_by_account_id(int account_id)
 	int ret;
 	contacts_h contact = NULL;
 
-	ret = ctsvc_client_handle_get_current_p(&contact);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_client_handle_get_current_p() Fail(%d)", ret);
+	ret = ctsvc_client_handle_get_p(&contact);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_client_handle_get_p() Fail(%d)", ret);
 
 	ret = ctsvc_client_activity_delete_by_account_id(contact, account_id);
 

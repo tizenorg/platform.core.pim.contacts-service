@@ -16,6 +16,7 @@ SET(SRCS
 	ctsvc_client_noti.c
 	ctsvc_client_setting.c
 	ctsvc_client_handle.c
+	ctsvc_client_utils.c
 
 	ctsvc_client_service_helper.c
 	ctsvc_client_db_helper.c

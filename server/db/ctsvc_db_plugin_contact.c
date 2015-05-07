@@ -16,8 +16,6 @@
  * limitations under the License.
  *
  */
-#include <sys/types.h>
-#include <sys/syscall.h>
 #include <fcntl.h>
 #include <unistd.h>
 

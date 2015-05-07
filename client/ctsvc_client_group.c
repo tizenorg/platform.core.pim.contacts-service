@@ -27,8 +27,8 @@ API int contacts_group_add_contact(int group_id, int contact_id)
 	int ret;
 	contacts_h contact = NULL;
 
-	ret = ctsvc_client_handle_get_current_p(&contact);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_client_handle_get_current_p() Fail(%d)", ret);
+	ret = ctsvc_client_handle_get_p(&contact);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_client_handle_get_p() Fail(%d)", ret);
 
 	ret = ctsvc_client_group_add_contact(contact, group_id, contact_id);
 
@@ -40,8 +40,8 @@ API int contacts_group_remove_contact(int group_id, int contact_id)
 	int ret;
 	contacts_h contact = NULL;
 
-	ret = ctsvc_client_handle_get_current_p(&contact);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_client_handle_get_current_p() Fail(%d)", ret);
+	ret = ctsvc_client_handle_get_p(&contact);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_client_handle_get_p() Fail(%d)", ret);
 
 	ret = ctsvc_client_group_remove_contact(contact, group_id, contact_id);
 
@@ -53,8 +53,8 @@ API int contacts_group_set_group_order(int group_id, int previous_group_id, int 
 	int ret;
 	contacts_h contact = NULL;
 
-	ret = ctsvc_client_handle_get_current_p(&contact);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_client_handle_get_current_p() Fail(%d)", ret);
+	ret = ctsvc_client_handle_get_p(&contact);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_client_handle_get_p() Fail(%d)", ret);
 
 	ret = ctsvc_client_group_set_group_order(contact, group_id, previous_group_id, next_group_id);
 

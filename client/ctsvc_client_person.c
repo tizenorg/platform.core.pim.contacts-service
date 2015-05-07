@@ -27,8 +27,8 @@ API int contacts_person_link_person(int base_person_id, int person_id)
 	int ret;
 	contacts_h contact = NULL;
 
-	ret = ctsvc_client_handle_get_current_p(&contact);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_client_handle_get_current_p() Fail(%d)", ret);
+	ret = ctsvc_client_handle_get_p(&contact);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_client_handle_get_p() Fail(%d)", ret);
 
 	ret = ctsvc_client_person_link_person(contact, base_person_id, person_id);
 
@@ -40,8 +40,8 @@ API int contacts_person_unlink_contact(int person_id, int contact_id, int* unlin
 	int ret;
 	contacts_h contact = NULL;
 
-	ret = ctsvc_client_handle_get_current_p(&contact);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_client_handle_get_current_p() Fail(%d)", ret);
+	ret = ctsvc_client_handle_get_p(&contact);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_client_handle_get_p() Fail(%d)", ret);
 
 	ret = ctsvc_client_person_unlink_contact(contact, person_id, contact_id, unlinked_person_id);
 
@@ -54,8 +54,8 @@ API int contacts_person_reset_usage(int person_id, contacts_usage_type_e type)
 	int ret;
 	contacts_h contact = NULL;
 
-	ret = ctsvc_client_handle_get_current_p(&contact);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_client_handle_get_current_p() Fail(%d)", ret);
+	ret = ctsvc_client_handle_get_p(&contact);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_client_handle_get_p() Fail(%d)", ret);
 
 	ret = ctsvc_client_person_reset_usage(contact, person_id, type);
 
@@ -67,8 +67,8 @@ API int contacts_person_set_favorite_order(int person_id, int previous_person_id
 	int ret;
 	contacts_h contact = NULL;
 
-	ret = ctsvc_client_handle_get_current_p(&contact);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_client_handle_get_current_p() Fail(%d)", ret);
+	ret = ctsvc_client_handle_get_p(&contact);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_client_handle_get_p() Fail(%d)", ret);
 
 	ret = ctsvc_client_person_set_favorite_order(contact, person_id, previous_person_id, next_person_id);
 
@@ -81,8 +81,8 @@ API int contacts_person_set_default_property(contacts_person_property_e property
 	int ret;
 	contacts_h contact = NULL;
 
-	ret = ctsvc_client_handle_get_current_p(&contact);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_client_handle_get_current_p() Fail(%d)", ret);
+	ret = ctsvc_client_handle_get_p(&contact);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_client_handle_get_p() Fail(%d)", ret);
 
 	ret = ctsvc_client_person_set_default_property(contact, property, person_id, id);
 
@@ -95,8 +95,8 @@ API int contacts_person_get_default_property(contacts_person_property_e property
 	int ret;
 	contacts_h contact = NULL;
 
-	ret = ctsvc_client_handle_get_current_p(&contact);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_client_handle_get_current_p() Fail(%d)", ret);
+	ret = ctsvc_client_handle_get_p(&contact);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_client_handle_get_p() Fail(%d)", ret);
 
 	ret = ctsvc_client_person_get_default_property(contact, property, person_id, id);
 

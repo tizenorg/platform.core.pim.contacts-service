@@ -27,8 +27,8 @@ API int contacts_phone_log_reset_statistics(void)
 	int ret;
 	contacts_h contact = NULL;
 
-	ret = ctsvc_client_handle_get_current_p(&contact);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_client_handle_get_current_p() Fail(%d)", ret);
+	ret = ctsvc_client_handle_get_p(&contact);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_client_handle_get_p() Fail(%d)", ret);
 
 	ret = ctsvc_client_phone_log_reset_statistics(contact);
 
@@ -40,8 +40,8 @@ API int contacts_phone_log_delete(contacts_phone_log_delete_e op, ...)
 	int ret;
 	contacts_h contact = NULL;
 
-	ret = ctsvc_client_handle_get_current_p(&contact);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_client_handle_get_current_p() Fail(%d)", ret);
+	ret = ctsvc_client_handle_get_p(&contact);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_client_handle_get_p() Fail(%d)", ret);
 
 	va_list args;
 	va_start(args, op);

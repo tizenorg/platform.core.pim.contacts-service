@@ -33,8 +33,8 @@ API int contacts_db_add_changed_cb(const char* view_uri, contacts_db_changed_cb 
 	RETVM_IF(NULL == cb, CONTACTS_ERROR_INVALID_PARAMETER,
 			"Invalid parameter : callback is null");
 
-	ret = ctsvc_client_handle_get_current_p(&contact);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_client_handle_get_current_p() Fail(%d)", ret);
+	ret = ctsvc_client_handle_get_p(&contact);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_client_handle_get_p() Fail(%d)", ret);
 
 	ret = ctsvc_inotify_subscribe(contact, view_uri, cb, user_data);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret,
@@ -54,8 +54,8 @@ API int contacts_db_remove_changed_cb(const char* view_uri, contacts_db_changed_
 	RETVM_IF(NULL == cb, CONTACTS_ERROR_INVALID_PARAMETER,
 			"Invalid parameter : callback is null");
 
-	ret = ctsvc_client_handle_get_current_p(&contact);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_client_handle_get_current_p() Fail(%d)", ret);
+	ret = ctsvc_client_handle_get_p(&contact);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_client_handle_get_p() Fail(%d)", ret);
 
 	ret = ctsvc_inotify_unsubscribe(contact, view_uri, cb, user_data);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret,

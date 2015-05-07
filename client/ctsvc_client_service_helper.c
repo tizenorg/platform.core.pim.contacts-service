@@ -31,6 +31,7 @@
 #include "ctsvc_mutex.h"
 #include "ctsvc_inotify.h"
 #include "ctsvc_client_ipc.h"
+#include "ctsvc_client_utils.h"
 #include "ctsvc_client_handle.h"
 #include "ctsvc_client_service_helper.h"
 
@@ -95,10 +96,7 @@ int ctsvc_client_connect(contacts_h contact)
 
  	ctsvc_mutex_lock(CTS_MUTEX_CONNECTION);
 	if (0 == base->connection_count) {
-		char ipc_key[CTSVC_STR_SHORT_LEN] = {0};
-		ctsvc_ipc_get_pid_str(ipc_key, sizeof(ipc_key));
-
-		ret = ctsvc_ipc_connect(contact, ipc_key);
+		ret = ctsvc_ipc_connect(contact, ctsvc_client_get_pid());
 		if (ret != CONTACTS_ERROR_NONE) {
 			CTS_ERR("ctsvc_ipc_connect() Fail(%d)", ret);
 			ctsvc_mutex_unlock(CTS_MUTEX_CONNECTION);
@@ -146,21 +144,15 @@ int ctsvc_client_disconnect(contacts_h contact)
 
 	ctsvc_base_s *base = (ctsvc_base_s *)contact;
 	if (1 == base->connection_count) {
-		char ipc_key[CTSVC_STR_SHORT_LEN] = {0};
-		ctsvc_ipc_get_pid_str(ipc_key, sizeof(ipc_key));
-
-		ret = ctsvc_ipc_disconnect(contact, ipc_key, _ctsvc_connection);
+		ret = ctsvc_ipc_disconnect(contact, ctsvc_client_get_pid(), _ctsvc_connection);
 		if (ret != CONTACTS_ERROR_NONE) {
 			ctsvc_mutex_unlock(CTS_MUTEX_CONNECTION);
 			CTS_ERR("ctsvc_ipc_disconnect() Fail(%d)", ret);
 			return ret;
 		}
 		ctsvc_inotify_unsubscribe_ipc_ready(contact);
-		ctsvc_client_handle_remove((contacts_h)base);
 	}
-	else {
-		base->connection_count--;
-	}
+	base->connection_count--;
 
 	if (1 == _ctsvc_connection) {
 		ctsvc_ipc_destroy_for_change_subscription();
@@ -191,11 +183,7 @@ int ctsvc_client_connect_on_thread(contacts_h contact)
 	ctsvc_mutex_lock(CTS_MUTEX_CONNECTION);
 
 	if (0 == base->connection_count) {
-
-		char ipc_key[CTSVC_STR_SHORT_LEN] = {0};
-		ctsvc_ipc_get_tid_str(ipc_key, sizeof(ipc_key));
-
-		ret = ctsvc_ipc_connect(contact, ipc_key);
+		ret = ctsvc_ipc_connect(contact, ctsvc_client_get_tid());
 		if (ret != CONTACTS_ERROR_NONE) {
 			CTS_ERR("ctsvc_ipc_connect() Fail(%d)", ret);
 			ctsvc_mutex_unlock(CTS_MUTEX_CONNECTION);
@@ -244,21 +232,15 @@ int ctsvc_client_disconnect_on_thread(contacts_h contact)
 	ctsvc_mutex_lock(CTS_MUTEX_CONNECTION);
 
 	if (1 == base->connection_count) {
-		char ipc_key[CTSVC_STR_SHORT_LEN] = {0};
-		ctsvc_ipc_get_tid_str(ipc_key, sizeof(ipc_key));
-
-		ret = ctsvc_ipc_disconnect(contact, ipc_key, _ctsvc_connection_on_thread);
+		ret = ctsvc_ipc_disconnect(contact, ctsvc_client_get_tid(), _ctsvc_connection_on_thread);
 		if (ret != CONTACTS_ERROR_NONE) {
 			CTS_ERR("ctsvc_ipc_disconnect_on_thread() Fail(%d)", ret);
 			ctsvc_mutex_unlock(CTS_MUTEX_CONNECTION);
 			return ret;
 		}
 		ctsvc_inotify_unsubscribe_ipc_ready(contact);
-		ctsvc_client_handle_remove((contacts_h)base);
 	}
-	else {
-		base->connection_count--;
-	}
+	base->connection_count--;
 
 	if (1 == _ctsvc_connection_on_thread) {
 		ctsvc_ipc_destroy_for_change_subscription();
