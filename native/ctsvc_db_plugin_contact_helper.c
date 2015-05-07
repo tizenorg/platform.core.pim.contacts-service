@@ -21,8 +21,6 @@
 #include <sys/syscall.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include <vconf.h>
-#include <vconf-keys.h>
 
 #include "contacts.h"
 #include "ctsvc_internal.h"

@@ -180,17 +180,12 @@ ENDIF( ENABLE_LOG_FEATURE )
 
 INCLUDE(FindPkgConfig)
 pkg_check_modules(ctsvc_server_pkgs REQUIRED
-	glib-2.0
-	pims-ipc
-	gobject-2.0
 	sqlite3
 	tapi
-	dlog
 	capi-media-image-util
 	accounts-svc
 	libexif
 	libsmack
-	icu-i18n
 	cynara-client
 	cynara-session
 	cynara-creds-socket

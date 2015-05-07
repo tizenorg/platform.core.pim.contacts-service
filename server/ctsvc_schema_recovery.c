@@ -19,7 +19,6 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/stat.h>
-#include <db-util.h>
 #include <sqlite3.h>
 
 #include "contacts.h"

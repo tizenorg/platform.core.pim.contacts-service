@@ -20,8 +20,6 @@
 #include <unicode/unorm.h>
 #include <unicode/ucol.h>
 #include <unicode/uset.h>
-#include <vconf.h>
-#include <vconf-keys.h>
 
 #include "ctsvc_internal.h"
 #include "ctsvc_normalize.h"

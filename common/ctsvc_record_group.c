@@ -21,8 +21,6 @@
  *
  */
 
-#include <glib.h>
-
 #include "contacts.h"
 #include "ctsvc_internal.h"
 #include "ctsvc_record.h"

@@ -16,13 +16,11 @@ SET(INCLUDEDIR "\${prefix}/${DEST_INCLUDE_DIR}")
 
 EXECUTE_PROCESS(COMMAND build-util/generator.sh)
 
-SET(PC_REQUIRED "capi-base-common")
-
 #INCLUDE_DIRECTORIES(${SRC_INCLUDE_DIR})
 SET(EXTRA_CFLAGS "${EXTRA_CFLAGS} -I${SRC_INCLUDE_DIR}")
 
 INCLUDE(FindPkgConfig)
-pkg_check_modules(pkgs REQUIRED glib-2.0 capi-base-common vconf dlog db-util icu-i18n libtzplatform-config)
+pkg_check_modules(pkgs REQUIRED glib-2.0 pims-ipc capi-base-common vconf dlog db-util libtzplatform-config gobject-2.0 icu-uc)
 
 FOREACH(flag ${pkgs_CFLAGS})
 	SET(EXTRA_CFLAGS "${EXTRA_CFLAGS} ${flag}")

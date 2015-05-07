@@ -31,7 +31,6 @@
 #include <tzplatform_config.h>
 
 #ifdef _CONTACTS_IPC_CLIENT
-#include <pims-ipc.h>
 #include "ctsvc_client_ipc.h"
 #endif
 

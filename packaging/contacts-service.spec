@@ -15,7 +15,6 @@ BuildRequires:  pkgconfig(dlog)
 BuildRequires:  pkgconfig(sqlite3)
 BuildRequires:  pkgconfig(tapi)
 BuildRequires:  pkgconfig(glib-2.0)
-BuildRequires:  pkgconfig(icu-i18n)
 BuildRequires:  pkgconfig(capi-base-common)
 BuildRequires:  pkgconfig(capi-media-image-util)
 BuildRequires:  pkgconfig(pims-ipc)
@@ -27,6 +26,7 @@ BuildRequires:  pkgconfig(cynara-client)
 BuildRequires:  pkgconfig(cynara-session)
 BuildRequires:  pkgconfig(cynara-creds-socket)
 BuildRequires:  pkgconfig(capi-system-info)
+BuildRequires:  pkgconfig(icu-uc)
 Requires(post): /usr/bin/sqlite3, /bin/chmod, /bin/chown
 Requires(post): /usr/bin/vconftool
 Requires(post): /sbin/ldconfig

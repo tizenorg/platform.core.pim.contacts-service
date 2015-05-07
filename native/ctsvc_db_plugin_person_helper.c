@@ -16,9 +16,6 @@
  * limitations under the License.
  *
  */
-#include <vconf.h>
-#include <vconf-keys.h>
-
 #include "contacts.h"
 #include "ctsvc_internal.h"
 #include "ctsvc_schema.h"
