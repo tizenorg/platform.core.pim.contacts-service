@@ -24,8 +24,6 @@
 #include <sys/stat.h>
 #include <sys/vfs.h>
 #include <image_util.h>
-#include <vconf.h>
-#include <vconf-keys.h>
 #include <unicode/ulocdata.h>
 #include <unicode/uset.h>
 #include <unicode/ustring.h>

@@ -19,8 +19,6 @@
 #ifndef __CTSVC_SERVER_SIM_H__
 #define __CTSVC_SERVER_SIM_H__
 
-#include <tapi_type.h>
-
 typedef struct {
 	int sim_index;
 	int contact_id;
