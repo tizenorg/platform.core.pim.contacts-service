@@ -39,7 +39,7 @@ static __thread unsigned int __person_buf_size = 0;
 static gboolean __ctsvc_publish_changes_with_data(const char *view_uri, char *data)
 {
 	pims_ipc_data_h indata = NULL;
-	if( NULL == data )
+	if (NULL == data)
 		return true;
 
 	indata = pims_ipc_data_create(0);

@@ -47,7 +47,7 @@ int ctsvc_group_add_contact_in_transaction(int group_id, int contact_id)
 		CTS_DBG("ctsvc_query_get_first_int_result fail(%d)");
 		return ret;
 	}
-	if (1 == exist)	{
+	if (1 == exist) {
 		CTS_DBG("group relation already exist (group_id:%d, contac_id:%d)", group_id, contact_id);
 		return CONTACTS_ERROR_NONE;
 	}
@@ -67,7 +67,7 @@ int ctsvc_group_add_contact_in_transaction(int group_id, int contact_id)
 	ret = ctsvc_query_get_first_int_result(query, &contact_acc);
 	RETVM_IF(CONTACTS_ERROR_NO_DATA == ret, CONTACTS_ERROR_INVALID_PARAMETER,
 			"Invalid Parameter: contact_id(%d) is Invalid", contact_id);
-	RETVM_IF( contact_acc != grp_acc, CONTACTS_ERROR_INVALID_PARAMETER,
+	RETVM_IF(contact_acc != grp_acc, CONTACTS_ERROR_INVALID_PARAMETER,
 			"Invalid Parameter: group_acc(%d) is differ from contact_acc(%d) Invalid", grp_acc, contact_acc);
 
 	snprintf(query, sizeof(query), "INSERT OR REPLACE INTO %s VALUES(%d, %d, %d, 0)",
@@ -100,8 +100,8 @@ API int contacts_group_add_contact(int group_id, int contact_id)
 	int addressbook_id;
 	char query[CTS_SQL_MAX_LEN] = {0};
 
-	RETVM_IF( group_id <= 0, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid Parameter: group_id should be greater than 0");
-	RETVM_IF( contact_id <= 0, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid Parameter: contact_id should be greater than 0");
+	RETVM_IF(group_id <= 0, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid Parameter: group_id should be greater than 0");
+	RETVM_IF(contact_id <= 0, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid Parameter: contact_id should be greater than 0");
 
 	/* BEGIN_TRANSACTION */
 	ret = ctsvc_begin_trans();
@@ -140,15 +140,14 @@ API int contacts_group_add_contact(int group_id, int contact_id)
 		ctsvc_set_person_noti();
 
 		ret = ctsvc_end_trans(true);
-		if(ret < CONTACTS_ERROR_NONE )
-		{
+		if (ret < CONTACTS_ERROR_NONE) {
 			CTS_ERR("DB error : ctsvc_end_trans() Failed(%d)", ret);
 			return ret;
 		}
 
 		return CONTACTS_ERROR_NONE;
 
-	} while(0);
+	} while (0);
 
 	/* ROLLBACK TRANSACTION */
 	ctsvc_end_trans(false);
@@ -196,8 +195,8 @@ API int contacts_group_remove_contact(int group_id, int contact_id)
 	int addressbook_id;
 	char query[CTS_SQL_MAX_LEN] = {0};
 
-	RETVM_IF( group_id <= 0, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid Parameter: group_id should be greater than 0");
-	RETVM_IF( contact_id <= 0, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid Parameter: contact_id should be greater than 0");
+	RETVM_IF(group_id <= 0, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid Parameter: group_id should be greater than 0");
+	RETVM_IF(contact_id <= 0, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid Parameter: contact_id should be greater than 0");
 
 	/* BEGIN_TRANSACTION */
 	ret = ctsvc_begin_trans();
@@ -236,15 +235,14 @@ API int contacts_group_remove_contact(int group_id, int contact_id)
 		ctsvc_set_person_noti();
 
 		ret = ctsvc_end_trans(true);
-		if(ret < CONTACTS_ERROR_NONE )
-		{
+		if (ret < CONTACTS_ERROR_NONE) {
 			CTS_ERR("DB error : ctsvc_end_trans() Failed(%d)", ret);
 			return ret;
 		}
 
 		return CONTACTS_ERROR_NONE;
 
-	} while(0);
+	} while (0);
 
 	/* ROLLBACK TRANSACTION */
 	ctsvc_end_trans(false);
@@ -324,7 +322,7 @@ API int contacts_group_set_group_order(int group_id, int previous_group_id, int 
 			CTS_TABLE_GROUPS, prio, group_id);
 
 	ret = ctsvc_query_exec(query);
-	if (CONTACTS_ERROR_NONE != ret)	{
+	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("ctsvc_query_exec() Failed(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
@@ -333,8 +331,7 @@ API int contacts_group_set_group_order(int group_id, int previous_group_id, int 
 	ctsvc_set_group_noti();
 
 	ret = ctsvc_end_trans(true);
-	if (ret < CONTACTS_ERROR_NONE)
-	{
+	if (ret < CONTACTS_ERROR_NONE) {
 		CTS_ERR("DB error : ctsvc_end_trans() Failed(%d)", ret);
 		return ret;
 	}

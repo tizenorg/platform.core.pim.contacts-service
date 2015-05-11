@@ -46,26 +46,26 @@ API int contacts_person_link_person(int base_person_id, int person_id)
 
 	bool success = false;
 	do {
-		if( ctsvc_ipc_marshal_int( base_person_id, indata) != CONTACTS_ERROR_NONE ) break;
-		if( ctsvc_ipc_marshal_int( person_id, indata) != CONTACTS_ERROR_NONE ) break;
+		if (ctsvc_ipc_marshal_int(base_person_id, indata) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_int(person_id, indata) != CONTACTS_ERROR_NONE) break;
 
 		success = true;
 	} while(0);
 
-	if( success == false ) {
+	if (success == false) {
 		CTS_ERR("marshal fail");
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
 	}
 
 /*
-	ret = ctsvc_ipc_marshal_int( base_person_id, indata);
+	ret = ctsvc_ipc_marshal_int(base_person_id, indata);
 	if (ret != CONTACTS_ERROR_NONE)
 	{
 		CTS_ERR("marshal fail");
 		return ret;
 	}
-	ret = ctsvc_ipc_marshal_int( person_id, indata);
+	ret = ctsvc_ipc_marshal_int(person_id, indata);
 	if (ret != CONTACTS_ERROR_NONE)
 	{
 		CTS_ERR("marshal fail");
@@ -122,14 +122,14 @@ API int contacts_person_unlink_contact(int person_id, int contact_id, int* unlin
 		return ret;
 	}
 
-	ret = ctsvc_ipc_marshal_int( person_id, indata);
+	ret = ctsvc_ipc_marshal_int(person_id, indata);
 	if (ret != CONTACTS_ERROR_NONE)
 	{
 		CTS_ERR("marshal fail");
 		pims_ipc_data_destroy(indata);
 		return ret;
 	}
-	ret = ctsvc_ipc_marshal_int( contact_id, indata);
+	ret = ctsvc_ipc_marshal_int(contact_id, indata);
 	if (ret != CONTACTS_ERROR_NONE)
 	{
 		CTS_ERR("marshal fail");
@@ -186,14 +186,14 @@ API int contacts_person_reset_usage(int person_id, contacts_usage_type_e type)
 		return ret;
 	}
 
-	ret = ctsvc_ipc_marshal_int( person_id, indata);
+	ret = ctsvc_ipc_marshal_int(person_id, indata);
 	if (ret != CONTACTS_ERROR_NONE)
 	{
 		CTS_ERR("marshal fail");
 		pims_ipc_data_destroy(indata);
 		return ret;
 	}
-	ret = ctsvc_ipc_marshal_int( (int)type, indata);
+	ret = ctsvc_ipc_marshal_int((int)type, indata);
 	if (ret != CONTACTS_ERROR_NONE)
 	{
 		CTS_ERR("marshal fail");
@@ -247,21 +247,21 @@ API int contacts_person_set_favorite_order(int person_id, int previous_person_id
 		return ret;
 	}
 
-	ret = ctsvc_ipc_marshal_int( person_id, indata);
+	ret = ctsvc_ipc_marshal_int(person_id, indata);
 	if (ret != CONTACTS_ERROR_NONE)
 	{
 		CTS_ERR("marshal fail");
 		pims_ipc_data_destroy(indata);
 		return ret;
 	}
-	ret = ctsvc_ipc_marshal_int( previous_person_id, indata);
+	ret = ctsvc_ipc_marshal_int(previous_person_id, indata);
 	if (ret != CONTACTS_ERROR_NONE)
 	{
 		CTS_ERR("marshal fail");
 		pims_ipc_data_destroy(indata);
 		return ret;
 	}
-	ret = ctsvc_ipc_marshal_int( next_person_id, indata);
+	ret = ctsvc_ipc_marshal_int(next_person_id, indata);
 	if (ret != CONTACTS_ERROR_NONE)
 	{
 		CTS_ERR("marshal fail");
@@ -317,21 +317,21 @@ API int contacts_person_set_default_property(contacts_person_property_e property
 		return ret;
 	}
 
-	ret = ctsvc_ipc_marshal_int( person_id, indata);
+	ret = ctsvc_ipc_marshal_int(person_id, indata);
 	if (ret != CONTACTS_ERROR_NONE)
 	{
 		CTS_ERR("marshal fail");
 		pims_ipc_data_destroy(indata);
 		return ret;
 	}
-	ret = ctsvc_ipc_marshal_unsigned_int( property, indata);
+	ret = ctsvc_ipc_marshal_unsigned_int(property, indata);
 	if (ret != CONTACTS_ERROR_NONE)
 	{
 		CTS_ERR("marshal fail");
 		pims_ipc_data_destroy(indata);
 		return ret;
 	}
-	ret = ctsvc_ipc_marshal_int( id, indata);
+	ret = ctsvc_ipc_marshal_int(id, indata);
 	if (ret != CONTACTS_ERROR_NONE)
 	{
 		CTS_ERR("marshal fail");

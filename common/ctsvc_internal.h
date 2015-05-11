@@ -118,7 +118,7 @@
 #define ASSERT_NOT_REACHED(fmt, arg...) do { \
         CTS_ERR(fmt, ##arg); \
         assert(!"DO NOT REACH HERE!"); \
-	} while(0)
+	} while (0)
 
 
 #define CONTACTS_FREE(ptr) \
@@ -126,7 +126,7 @@
   if (ptr) \
     free(ptr); \
   ptr = NULL; \
- } while(0)
+ } while (0)
 
 // Thread-local storage
 #ifdef _CONTACTS_IPC_SERVER

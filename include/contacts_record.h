@@ -68,7 +68,7 @@ extern "C"
  *
  * @see contacts_record_destroy()
  */
-int contacts_record_create( const char* view_uri, contacts_record_h* record );
+int contacts_record_create(const char* view_uri, contacts_record_h* record);
 
 /**
  * @brief Destroys a record and releases its all resources.
@@ -87,7 +87,7 @@ int contacts_record_create( const char* view_uri, contacts_record_h* record );
  *
  * @see contacts_record_create()
  */
-int contacts_record_destroy( contacts_record_h record, bool delete_child );
+int contacts_record_destroy(contacts_record_h record, bool delete_child);
 
 /**
  * @brief Makes a clone of a record.
@@ -108,7 +108,7 @@ int contacts_record_destroy( contacts_record_h record, bool delete_child );
  *
  * @see contacts_record_destroy()
  */
-int contacts_record_clone( contacts_record_h record, contacts_record_h* cloned_record );
+int contacts_record_clone(contacts_record_h record, contacts_record_h* cloned_record);
 
 /**
  * @brief Gets a string from the record handle.
@@ -131,7 +131,7 @@ int contacts_record_clone( contacts_record_h record, contacts_record_h* cloned_r
  * @see contacts_record_get_str_p()
  * @see contacts_record_set_str()
  */
-int contacts_record_get_str( contacts_record_h record, unsigned int property_id, char** value );
+int contacts_record_get_str(contacts_record_h record, unsigned int property_id, char** value);
 
 /**
  * @brief Gets a string pointer from the record handle.
@@ -154,7 +154,7 @@ int contacts_record_get_str( contacts_record_h record, unsigned int property_id,
  * @see contacts_record_get_str()
  * @see contacts_record_set_str()
  */
-int contacts_record_get_str_p( contacts_record_h record, unsigned int property_id, char** value );
+int contacts_record_get_str_p(contacts_record_h record, unsigned int property_id, char** value);
 
 /**
  * @brief Sets a string to a record.
@@ -175,7 +175,7 @@ int contacts_record_get_str_p( contacts_record_h record, unsigned int property_i
  * @see contacts_record_get_str()
  * @see contacts_record_get_str_p()
  */
-int contacts_record_set_str( contacts_record_h record, unsigned int property_id, const char* value );
+int contacts_record_set_str(contacts_record_h record, unsigned int property_id, const char* value);
 
 /**
  * @brief Gets a record's integer value.
@@ -195,7 +195,7 @@ int contacts_record_set_str( contacts_record_h record, unsigned int property_id,
  *
  * @see contacts_record_set_int()
  */
-int contacts_record_get_int( contacts_record_h record, unsigned int property_id, int* value );
+int contacts_record_get_int(contacts_record_h record, unsigned int property_id, int* value);
 
 /**
  * @brief Sets an integer value to a record.
@@ -215,7 +215,7 @@ int contacts_record_get_int( contacts_record_h record, unsigned int property_id,
  *
  * @see contacts_record_get_int()
  */
-int contacts_record_set_int( contacts_record_h record, unsigned int property_id, int value );
+int contacts_record_set_int(contacts_record_h record, unsigned int property_id, int value);
 
 /**
  * @brief Gets a record's long integer value.
@@ -235,7 +235,7 @@ int contacts_record_set_int( contacts_record_h record, unsigned int property_id,
  *
  * @see contacts_record_set_lli()
  */
-int contacts_record_get_lli( contacts_record_h record, unsigned int property_id, long long int *value );
+int contacts_record_get_lli(contacts_record_h record, unsigned int property_id, long long int *value);
 
 /**
  * @brief Sets a long long integer value to a record.
@@ -255,7 +255,7 @@ int contacts_record_get_lli( contacts_record_h record, unsigned int property_id,
  *
  * @see contacts_record_get_lli()
  */
-int contacts_record_set_lli( contacts_record_h record, unsigned int property_id, long long int value );
+int contacts_record_set_lli(contacts_record_h record, unsigned int property_id, long long int value);
 
 /**
  * @brief Gets a record's boolean value.
@@ -275,7 +275,7 @@ int contacts_record_set_lli( contacts_record_h record, unsigned int property_id,
  *
  * @see contacts_record_set_bool()
  */
-int contacts_record_get_bool( contacts_record_h record, unsigned int property_id, bool *value );
+int contacts_record_get_bool(contacts_record_h record, unsigned int property_id, bool *value);
 
 /**
  * @brief Sets a boolean value to a record.
@@ -295,7 +295,7 @@ int contacts_record_get_bool( contacts_record_h record, unsigned int property_id
  *
  * @see contacts_record_get_bool()
  */
-int contacts_record_set_bool( contacts_record_h record, unsigned int property_id, bool value );
+int contacts_record_set_bool(contacts_record_h record, unsigned int property_id, bool value);
 
 /**
  * @brief Gets a record's double value.
@@ -315,7 +315,7 @@ int contacts_record_set_bool( contacts_record_h record, unsigned int property_id
  *
  * @see contacts_record_set_double()
  */
-int contacts_record_get_double( contacts_record_h record, unsigned int property_id, double *value );
+int contacts_record_get_double(contacts_record_h record, unsigned int property_id, double *value);
 
 /**
  * @brief Sets a double value to a record.
@@ -335,7 +335,7 @@ int contacts_record_get_double( contacts_record_h record, unsigned int property_
  *
  * @see contacts_record_get_double()
  */
-int contacts_record_set_double( contacts_record_h record, unsigned int property_id, double value );
+int contacts_record_set_double(contacts_record_h record, unsigned int property_id, double value);
 
 /**
  * @brief Adds a child record to the parent record.
@@ -355,7 +355,7 @@ int contacts_record_set_double( contacts_record_h record, unsigned int property_
  *
  * @see contacts_record_remove_child_record()
  */
-int contacts_record_add_child_record( contacts_record_h record, unsigned int property_id, contacts_record_h child_record );
+int contacts_record_add_child_record(contacts_record_h record, unsigned int property_id, contacts_record_h child_record);
 
 /**
  * @brief Removes a child record from the parent record.
@@ -375,7 +375,7 @@ int contacts_record_add_child_record( contacts_record_h record, unsigned int pro
  *
  * @see contacts_record_add_child_record()
  */
-int contacts_record_remove_child_record( contacts_record_h record, unsigned int property_id, contacts_record_h child_record );
+int contacts_record_remove_child_record(contacts_record_h record, unsigned int property_id, contacts_record_h child_record);
 
 /**
  * @brief Gets the number of child records of a parent record.
@@ -396,7 +396,7 @@ int contacts_record_remove_child_record( contacts_record_h record, unsigned int 
  * @see contacts_record_add_child_record()
  * @see contacts_record_remove_child_record()
  */
-int contacts_record_get_child_record_count( contacts_record_h record, unsigned int property_id, int *count );
+int contacts_record_get_child_record_count(contacts_record_h record, unsigned int property_id, int *count);
 
 /**
  * @brief Gets a child record handle pointer from the parent record.
@@ -422,7 +422,7 @@ int contacts_record_get_child_record_count( contacts_record_h record, unsigned i
  * @see contacts_record_remove_child_record()
  * @see contacts_record_get_child_record_count()
  */
-int contacts_record_get_child_record_at_p( contacts_record_h record, unsigned int property_id, int index, contacts_record_h* child_record );
+int contacts_record_get_child_record_at_p(contacts_record_h record, unsigned int property_id, int index, contacts_record_h* child_record);
 
 /**
  * @brief Clones a child record list of the given parent record.
@@ -444,7 +444,7 @@ int contacts_record_get_child_record_at_p( contacts_record_h record, unsigned in
  *
  * @see contacts_list_destroy()
  */
-int contacts_record_clone_child_record_list( contacts_record_h record, unsigned int property_id, contacts_list_h* cloned_list );
+int contacts_record_clone_child_record_list(contacts_record_h record, unsigned int property_id, contacts_list_h* cloned_list);
 
 /**
  * @brief Gets URI string from a record.
@@ -461,7 +461,7 @@ int contacts_record_clone_child_record_list( contacts_record_h record, unsigned 
  * @retval  #CONTACTS_ERROR_INVALID_PARAMETER    Invalid parameter
  * @retval  #CONTACTS_ERROR_NOT_SUPPORTED       Not supported
  */
-int contacts_record_get_uri_p( contacts_record_h record, const char** view_uri );
+int contacts_record_get_uri_p(contacts_record_h record, const char** view_uri);
 
 /**
  * @}

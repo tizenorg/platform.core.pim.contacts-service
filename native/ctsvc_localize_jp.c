@@ -68,10 +68,10 @@ static const unsigned char japanese_halfwidth_katakana_half_dullness_to_hiragana
 
 static inline bool is_japanese(UChar src)
 {
-	if (CTSVC_COMPARE_BETWEEN(CTSVC_JAPANESE_KATAKANA_START, src, CTSVC_JAPANESE_KATAKANA_END )
-			|| CTSVC_COMPARE_BETWEEN(CTSVC_JAPANESE_KATAKANA_PHONETIC_EXTENSIONS_START, src, CTSVC_JAPANESE_KATAKANA_PHONETIC_EXTENSIONS_END )
-			|| CTSVC_COMPARE_BETWEEN(CTSVC_JAPANESE_HALFWIDTH_AND_FULLWIDTH_FORMS_START, src, CTSVC_JAPANESE_HALFWIDTH_AND_FULLWIDTH_FORMS_END )
-			|| CTSVC_COMPARE_BETWEEN(CTSVC_JAPANESE_HIRAGANA_START, src, CTSVC_JAPANESE_HIRAGANA_END ))
+	if (CTSVC_COMPARE_BETWEEN(CTSVC_JAPANESE_KATAKANA_START, src, CTSVC_JAPANESE_KATAKANA_END)
+			|| CTSVC_COMPARE_BETWEEN(CTSVC_JAPANESE_KATAKANA_PHONETIC_EXTENSIONS_START, src, CTSVC_JAPANESE_KATAKANA_PHONETIC_EXTENSIONS_END)
+			|| CTSVC_COMPARE_BETWEEN(CTSVC_JAPANESE_HALFWIDTH_AND_FULLWIDTH_FORMS_START, src, CTSVC_JAPANESE_HALFWIDTH_AND_FULLWIDTH_FORMS_END)
+			|| CTSVC_COMPARE_BETWEEN(CTSVC_JAPANESE_HIRAGANA_START, src, CTSVC_JAPANESE_HIRAGANA_END))
 		return true;
 	else
 		return false;
@@ -84,7 +84,7 @@ int ctsvc_convert_japanese_to_hiragana_unicode(UChar *src, UChar *dest, int dest
 
 	len = u_strlen(src);
 
-	for(i = 0; i < len; i++) {
+	for (i = 0; i < len; i++) {
 		int unicode_value1 = 0;
 		int unicode_value2 = 0;
 
@@ -92,8 +92,8 @@ int ctsvc_convert_japanese_to_hiragana_unicode(UChar *src, UChar *dest, int dest
 
 		if (CTSVC_COMPARE_BETWEEN(CTSVC_JAPANESE_KATAKANA_START, src[i], CTSVC_JAPANESE_KATAKANA_END)) {
 			unicode_value1 = 0x30;
-			if ((unicode_value2 >= 0xa1 && unicode_value2 <= 0xef )
-					|| (unicode_value2 == 0xF2 || unicode_value2 == 0xF3) ) {
+			if ((unicode_value2 >= 0xa1 && unicode_value2 <= 0xef)
+					|| (unicode_value2 == 0xF2 || unicode_value2 == 0xF3)) {
 				unicode_value2 -= 0x60;
 				dest[j] = unicode_value1 << 8 | unicode_value2;
 			}
@@ -157,7 +157,7 @@ int ctsvc_convert_japanese_to_hiragana(const char *src, char **dest)
 	status = U_ZERO_ERROR;
 	tmp_result = calloc(1, sizeof(UChar) * (size + 1));
 	u_strFromUTF8(tmp_result, size + 1, NULL, src, -1, &status);
-	if (U_FAILURE(status)){
+	if (U_FAILURE(status)) {
 		CTS_ERR("u_strFromUTF8 Failed(%s)", u_errorName(status));
 		ret = CONTACTS_ERROR_SYSTEM;
 		goto DATA_FREE;
@@ -165,7 +165,7 @@ int ctsvc_convert_japanese_to_hiragana(const char *src, char **dest)
 
 	result = calloc(1, sizeof(UChar) * (size + 1));
 
-	ctsvc_convert_japanese_to_hiragana_unicode(tmp_result, result, size + 1 );
+	ctsvc_convert_japanese_to_hiragana_unicode(tmp_result, result, size + 1);
 
 	u_strToUTF8(NULL, 0, &size, result, -1, &status);
 	if (U_FAILURE(status) && status != U_BUFFER_OVERFLOW_ERROR) {
@@ -179,7 +179,7 @@ int ctsvc_convert_japanese_to_hiragana(const char *src, char **dest)
 
 	u_strToUTF8(*dest, size + 1, &size, result, -1, &status);
 
-	if (U_FAILURE(status) ) {
+	if (U_FAILURE(status)) {
 		CTS_ERR("u_strToUTF8 Failed(%s)", u_errorName(status));
 		ret =  CONTACTS_ERROR_SYSTEM;
 		goto DATA_FREE;

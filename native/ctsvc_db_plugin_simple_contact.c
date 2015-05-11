@@ -34,9 +34,9 @@
 #include "ctsvc_db_access_control.h"
 #include "ctsvc_notify.h"
 
-static int __ctsvc_db_simple_contact_get_record( int id, contacts_record_h* out_record );
-static int __ctsvc_db_simple_contact_get_all_records( int offset, int limit, contacts_list_h* out_list );
-static int __ctsvc_db_simple_contact_get_records_with_query( contacts_query_h query, int offset, int limit, contacts_list_h* out_list );
+static int __ctsvc_db_simple_contact_get_record(int id, contacts_record_h* out_record);
+static int __ctsvc_db_simple_contact_get_all_records(int offset, int limit, contacts_list_h* out_list);
+static int __ctsvc_db_simple_contact_get_records_with_query(contacts_query_h query, int offset, int limit, contacts_list_h* out_list);
 
 ctsvc_db_plugin_info_s ctsvc_db_plugin_simple_contact = {
 	.is_query_only = false,
@@ -97,7 +97,7 @@ static int __ctsvc_db_simple_contact_value_set(cts_stmt stmt, contacts_record_h 
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_db_simple_contact_get_record( int id, contacts_record_h* out_record )
+static int __ctsvc_db_simple_contact_get_record(int id, contacts_record_h* out_record)
 {
 	int ret;
 	cts_stmt stmt = NULL;
@@ -140,8 +140,8 @@ static int __ctsvc_db_simple_contact_get_record( int id, contacts_record_h* out_
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_db_simple_contact_get_all_records( int offset, int limit,
-	contacts_list_h* out_list )
+static int __ctsvc_db_simple_contact_get_all_records(int offset, int limit,
+	contacts_list_h* out_list)
 {
 	int ret;
 	int len;
@@ -184,8 +184,8 @@ static int __ctsvc_db_simple_contact_get_all_records( int offset, int limit,
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_db_simple_contact_get_records_with_query( contacts_query_h query,
-	int offset, int limit, contacts_list_h* out_list )
+static int __ctsvc_db_simple_contact_get_records_with_query(contacts_query_h query,
+	int offset, int limit, contacts_list_h* out_list)
 {
 	int ret;
 	int i;
@@ -216,17 +216,15 @@ static int __ctsvc_db_simple_contact_get_records_with_query( contacts_query_h qu
 		contact = (ctsvc_simple_contact_s*)record;
 		if (0 == s_query->projection_count)
 			field_count = s_query->property_count;
-		else
-		{
+		else {
 			field_count = s_query->projection_count;
 
-			if( CONTACTS_ERROR_NONE != ctsvc_record_set_projection_flags(record, s_query->projection, s_query->projection_count, s_query->property_count) )
-			{
+			if (CONTACTS_ERROR_NONE != ctsvc_record_set_projection_flags(record, s_query->projection, s_query->projection_count, s_query->property_count)) {
 				ASSERT_NOT_REACHED("To set projection is failed.\n");
 			}
 		}
 
-		for(i=0;i<field_count;i++) {
+		for (i=0;i<field_count;i++) {
 			char *temp;
 			int property_id;
 			if (0 == s_query->projection_count)

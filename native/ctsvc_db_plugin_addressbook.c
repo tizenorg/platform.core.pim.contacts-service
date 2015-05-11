@@ -33,12 +33,12 @@
 #include "ctsvc_db_access_control.h"
 #include "ctsvc_db_plugin_addressbook_helper.h"
 
-static int __ctsvc_db_addressbook_insert_record( contacts_record_h record, int *id );
-static int __ctsvc_db_addressbook_get_record( int id, contacts_record_h* record );
-static int __ctsvc_db_addressbook_update_record( contacts_record_h record );
-static int __ctsvc_db_addressbook_delete_record( int id );
-static int __ctsvc_db_addressbook_get_all_records( int offset, int limit, contacts_list_h* out_list );
-static int __ctsvc_db_addressbook_get_records_with_query( contacts_query_h query, int offset, int limit, contacts_list_h* out_list );
+static int __ctsvc_db_addressbook_insert_record(contacts_record_h record, int *id);
+static int __ctsvc_db_addressbook_get_record(int id, contacts_record_h* record);
+static int __ctsvc_db_addressbook_update_record(contacts_record_h record);
+static int __ctsvc_db_addressbook_delete_record(int id);
+static int __ctsvc_db_addressbook_get_all_records(int offset, int limit, contacts_list_h* out_list);
+static int __ctsvc_db_addressbook_get_records_with_query(contacts_query_h query, int offset, int limit, contacts_list_h* out_list);
 //static int __ctsvc_db_addressbook_insert_records(const contacts_list_h in_list, int **ids);
 //static int __ctsvc_db_addressbook_update_records(const contacts_list_h in_list);
 //static int __ctsvc_db_addressbook_delete_records(int ids[], int count);
@@ -81,7 +81,7 @@ static int __ctsvc_db_addressbook_value_set(cts_stmt stmt, contacts_record_h *re
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_db_addressbook_get_record( int id, contacts_record_h* out_record )
+static int __ctsvc_db_addressbook_get_record(int id, contacts_record_h* out_record)
 {
 	int ret;
 	cts_stmt stmt = NULL;
@@ -122,7 +122,7 @@ static int __ctsvc_db_addressbook_get_record( int id, contacts_record_h* out_rec
 }
 
 
-static int __ctsvc_db_addressbook_insert_record( contacts_record_h record, int *id )
+static int __ctsvc_db_addressbook_insert_record(contacts_record_h record, int *id)
 {
 	int ret;
 	cts_stmt stmt = NULL;
@@ -209,7 +209,7 @@ static int __ctsvc_db_addressbook_insert_record( contacts_record_h record, int *
 
 		ctsvc_set_addressbook_noti();
 		ret = ctsvc_end_trans(true);
-		if(ret < CONTACTS_ERROR_NONE )
+		if (ret < CONTACTS_ERROR_NONE)
 		{
 			CTS_ERR("DB error : ctsvc_end_trans() Failed(%d)", ret);
 			free(smack);
@@ -220,7 +220,7 @@ static int __ctsvc_db_addressbook_insert_record( contacts_record_h record, int *
 		// SUCCESS
 		return CONTACTS_ERROR_NONE;
 
-	} while(0);
+	} while (0);
 
 	/* ROLLBACK TRANSACTION */
 	ctsvc_end_trans(false);
@@ -228,7 +228,7 @@ static int __ctsvc_db_addressbook_insert_record( contacts_record_h record, int *
 	return ret;
 }
 
-static int __ctsvc_db_addressbook_update_record( contacts_record_h record )
+static int __ctsvc_db_addressbook_update_record(contacts_record_h record)
 {
 	int ret = CONTACTS_ERROR_NONE;
 	char* set = NULL;
@@ -307,7 +307,7 @@ static int __ctsvc_db_addressbook_update_record( contacts_record_h record )
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_db_addressbook_delete_record( int addressbook_id )
+static int __ctsvc_db_addressbook_delete_record(int addressbook_id)
 {
 	CTS_FN_CALL;
 
@@ -359,23 +359,22 @@ static int __ctsvc_db_addressbook_delete_record( int addressbook_id )
 		}
 
 		ret = ctsvc_end_trans(true);
-		if (ret < CONTACTS_ERROR_NONE)
-		{
+		if (ret < CONTACTS_ERROR_NONE) {
 			CTS_ERR("DB error : ctsvc_end_trans() Failed(%d)", ret);
 			return ret;
 		}
 
 		return CONTACTS_ERROR_NONE;
 
-	} while(0);
+	} while (0);
 
 	ctsvc_end_trans(false);
 
 	return ret;
 }
 
-static int __ctsvc_db_addressbook_get_all_records( int offset, int limit,
-	contacts_list_h* out_list )
+static int __ctsvc_db_addressbook_get_all_records(int offset, int limit,
+	contacts_list_h* out_list)
 {
 	int ret;
 	int len;
@@ -419,7 +418,7 @@ static int __ctsvc_db_addressbook_get_all_records( int offset, int limit,
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_db_addressbook_get_records_with_query( contacts_query_h query, int offset, int limit, contacts_list_h* out_list )
+static int __ctsvc_db_addressbook_get_records_with_query(contacts_query_h query, int offset, int limit, contacts_list_h* out_list)
 {
 	int ret;
 	int i;
@@ -458,7 +457,7 @@ static int __ctsvc_db_addressbook_get_records_with_query( contacts_query_h query
 				ASSERT_NOT_REACHED("To set projection is failed.\n");
 		}
 
-		for(i=0;i<field_count;i++) {
+		for (i=0;i<field_count;i++) {
 			char *temp;
 			int property_id;
 			if (0 == s_query->projection_count)

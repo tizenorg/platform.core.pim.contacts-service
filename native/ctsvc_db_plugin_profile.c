@@ -31,15 +31,15 @@
 #include "ctsvc_list.h"
 #include "ctsvc_notification.h"
 
-static int __ctsvc_db_profile_insert_record( contacts_record_h record, int *id );
-static int __ctsvc_db_profile_get_record( int id, contacts_record_h* out_record );
-static int __ctsvc_db_profile_update_record( contacts_record_h record );
-static int __ctsvc_db_profile_delete_record( int id );
-static int __ctsvc_db_profile_get_all_records( int offset, int limit, contacts_list_h* out_list );
-static int __ctsvc_db_profile_get_records_with_query( contacts_query_h query, int offset, int limit, contacts_list_h* out_list );
+static int __ctsvc_db_profile_insert_record(contacts_record_h record, int *id);
+static int __ctsvc_db_profile_get_record(int id, contacts_record_h* out_record);
+static int __ctsvc_db_profile_update_record(contacts_record_h record);
+static int __ctsvc_db_profile_delete_record(int id);
+static int __ctsvc_db_profile_get_all_records(int offset, int limit, contacts_list_h* out_list);
+static int __ctsvc_db_profile_get_records_with_query(contacts_query_h query, int offset, int limit, contacts_list_h* out_list);
 //static int __ctsvc_db_profile_insert_records(const contacts_list_h in_list, int **ids);
 //static int __ctsvc_db_profile_update_records(const contacts_list_h in_list);
-//static int __ctsvc_db_profile_delete_records( int ids[], int count);
+//static int __ctsvc_db_profile_delete_records(int ids[], int count);
 
 ctsvc_db_plugin_info_s ctsvc_db_plugin_profile = {
 	.is_query_only = false,
@@ -58,7 +58,7 @@ ctsvc_db_plugin_info_s ctsvc_db_plugin_profile = {
 	.replace_records = NULL,
 };
 
-static int __ctsvc_db_profile_insert_record( contacts_record_h record, int *id )
+static int __ctsvc_db_profile_insert_record(contacts_record_h record, int *id)
 {
 	int ret;
 	int addressbook_id;
@@ -111,8 +111,7 @@ static int __ctsvc_db_profile_insert_record( contacts_record_h record, int *id )
 	ctsvc_set_person_noti();
 
 	ret = ctsvc_end_trans(true);
-	if (ret < CONTACTS_ERROR_NONE)
-	{
+	if (ret < CONTACTS_ERROR_NONE) {
 		CTS_ERR("DB error : ctsvc_end_trans() Failed(%d)", ret);
 		return ret;
 	}
@@ -120,7 +119,7 @@ static int __ctsvc_db_profile_insert_record( contacts_record_h record, int *id )
 		return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_db_profile_get_record( int id, contacts_record_h* out_record )
+static int __ctsvc_db_profile_get_record(int id, contacts_record_h* out_record)
 {
 	int ret;
 	cts_stmt stmt = NULL;
@@ -157,7 +156,7 @@ static int __ctsvc_db_profile_get_record( int id, contacts_record_h* out_record 
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_db_profile_update_record( contacts_record_h record )
+static int __ctsvc_db_profile_update_record(contacts_record_h record)
 {
 	int ret;
 	int addressbook_id;
@@ -202,8 +201,7 @@ static int __ctsvc_db_profile_update_record( contacts_record_h record )
 	ctsvc_set_person_noti();
 
 	ret = ctsvc_end_trans(true);
-	if (ret < CONTACTS_ERROR_NONE)
-	{
+	if (ret < CONTACTS_ERROR_NONE) {
 		CTS_ERR("DB error : ctsvc_end_trans() Failed(%d)", ret);
 		return ret;
 	}
@@ -211,7 +209,7 @@ static int __ctsvc_db_profile_update_record( contacts_record_h record )
 		return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_db_profile_delete_record( int id )
+static int __ctsvc_db_profile_delete_record(int id)
 {
 	int ret;
 	int contact_id;
@@ -271,8 +269,7 @@ static int __ctsvc_db_profile_delete_record( int id )
 	ctsvc_set_person_noti();
 
 	ret = ctsvc_end_trans(true);
-	if (ret < CONTACTS_ERROR_NONE)
-	{
+	if (ret < CONTACTS_ERROR_NONE) {
 		CTS_ERR("DB error : ctsvc_end_trans() Failed(%d)", ret);
 		return ret;
 	}
@@ -280,7 +277,7 @@ static int __ctsvc_db_profile_delete_record( int id )
 		return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_db_profile_get_all_records( int offset, int limit, contacts_list_h* out_list )
+static int __ctsvc_db_profile_get_all_records(int offset, int limit, contacts_list_h* out_list)
 {
 	int len;
 	int ret;
@@ -324,8 +321,8 @@ static int __ctsvc_db_profile_get_all_records( int offset, int limit, contacts_l
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_db_profile_get_records_with_query( contacts_query_h query, int offset,
-		int limit, contacts_list_h* out_list )
+static int __ctsvc_db_profile_get_records_with_query(contacts_query_h query, int offset,
+		int limit, contacts_list_h* out_list)
 {
 	int ret;
 	int i;
@@ -360,11 +357,11 @@ static int __ctsvc_db_profile_get_records_with_query( contacts_query_h query, in
 			ret = ctsvc_record_set_projection_flags(record, s_query->projection,
 					s_query->projection_count, s_query->property_count);
 
-			if(CONTACTS_ERROR_NONE != ret)
+			if (CONTACTS_ERROR_NONE != ret)
 				ASSERT_NOT_REACHED("To set projection is failed.\n");
 		}
 
-		for(i=0;i<field_count;i++) {
+		for (i=0;i<field_count;i++) {
 			char *temp;
 			int property_id;
 			if (0 == s_query->projection_count)
@@ -429,4 +426,4 @@ static int __ctsvc_db_profile_get_records_with_query( contacts_query_h query, in
 
 //static int __ctsvc_db_profile_insert_records(const contacts_list_h in_list, int **ids) { return CONTACTS_ERROR_NONE; }
 //static int __ctsvc_db_profile_update_records(const contacts_list_h in_list) { return CONTACTS_ERROR_NONE; }
-//static int __ctsvc_db_profile_delete_records( int ids[], int count) { return CONTACTS_ERROR_NONE; }
+//static int __ctsvc_db_profile_delete_records(int ids[], int count) { return CONTACTS_ERROR_NONE; }

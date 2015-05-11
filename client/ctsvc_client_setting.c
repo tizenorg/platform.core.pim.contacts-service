@@ -235,7 +235,7 @@ API int contacts_setting_remove_name_display_order_changed_cb(
 
 	if (__setting_name_display_order_subscribe_list) {
 		GSList *l;
-		for(l = __setting_name_display_order_subscribe_list;l;l=l->next) {
+		for (l = __setting_name_display_order_subscribe_list;l;l=l->next) {
 			ctsvc_name_display_order_changed_cb_info_s *cb_info = l->data;
 			if (cb == cb_info->cb && user_data == cb_info->user_data) {
 				__setting_name_display_order_subscribe_list = g_slist_remove(__setting_name_display_order_subscribe_list, cb_info);
@@ -332,7 +332,7 @@ API int contacts_setting_remove_name_sorting_order_changed_cb(
 
 	if (__setting_name_sorting_order_subscribe_list) {
 		GSList *l;
-		for(l = __setting_name_sorting_order_subscribe_list;l;l=l->next) {
+		for (l = __setting_name_sorting_order_subscribe_list;l;l=l->next) {
 			ctsvc_name_sorting_order_changed_cb_info_s *cb_info = l->data;
 			if (cb == cb_info->cb && user_data == cb_info->user_data) {
 				__setting_name_sorting_order_subscribe_list = g_slist_remove(__setting_name_sorting_order_subscribe_list, cb_info);

@@ -27,14 +27,14 @@
 #include "contacts_views.h"
 
 int ctsvc_list_clone(contacts_list_h list, contacts_list_h* out_list);
-int ctsvc_list_get_nth_record_p( contacts_list_h list, int index, contacts_record_h* record );
-int ctsvc_list_add_child( contacts_list_h list, contacts_record_h child_record );
-int ctsvc_list_prepend( contacts_list_h list, contacts_record_h child_record );
-int ctsvc_list_reverse( contacts_list_h list);
-int ctsvc_list_remove_child( contacts_list_h list, contacts_record_h record, bool insert_delete_list );
+int ctsvc_list_get_nth_record_p(contacts_list_h list, int index, contacts_record_h* record);
+int ctsvc_list_add_child(contacts_list_h list, contacts_record_h child_record);
+int ctsvc_list_prepend(contacts_list_h list, contacts_record_h child_record);
+int ctsvc_list_reverse(contacts_list_h list);
+int ctsvc_list_remove_child(contacts_list_h list, contacts_record_h record, bool insert_delete_list);
 
-int ctsvc_list_get_deleted_count(contacts_list_h list, unsigned int *count );
-int ctsvc_list_get_deleted_nth_record_p( contacts_list_h list, int index, contacts_record_h* record );
+int ctsvc_list_get_deleted_count(contacts_list_h list, unsigned int *count);
+int ctsvc_list_get_deleted_nth_record_p(contacts_list_h list, int index, contacts_record_h* record);
 int ctsvc_list_append_deleted_record(contacts_list_h list, contacts_record_h record);
 
 #endif /*  __TIZEN_SOCIAL_CTSVC_LIST_H__ */

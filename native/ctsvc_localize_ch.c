@@ -2137,7 +2137,7 @@ static inline int __ctsvc_get_pinyinspell(UChar src, char spell[CHINESE_DUOYINZI
 
 	len = strlen(pinyin_spell_table[offset]);
 
-	for(i=0, j=0; i<=len; i++) {
+	for (i=0, j=0; i<=len; i++) {
 		if (pinyin_spell_table[offset][i]== DUOYINZI_SEPERATOR
 				|| pinyin_spell_table[offset][i] == '\0') {
 			strncpy(spell[count], pinyin_spell_table[offset]+j, i-j);
@@ -2164,8 +2164,7 @@ __ctsvc_has_chinese(const UChar *src)
 
 	len = u_strlen(src);
 
-	for (i = 0; i < len; i++)
-	{
+	for (i = 0; i < len; i++) {
 		if (__ctsvc_is_chinese(&src[i]))
 			return true;
 	}
@@ -2182,7 +2181,7 @@ bool ctsvc_has_chinese(const char *src)
 	RETVM_IF(!*src, false, "*src is NULL");
 
 	u_strFromUTF8(temp, array_sizeof(temp), NULL, src, -1, &status);
-	if (U_FAILURE(status)){
+	if (U_FAILURE(status)) {
 		CTS_ERR("u_strFromUTF8 Failed(%s)", u_errorName(status));
 		return false;
 	}
@@ -2214,7 +2213,7 @@ int ctsvc_convert_chinese_to_pinyin(const char *src, pinyin_name_s **name, int *
 	RETVM_IF(!*src, CONTACTS_ERROR_SYSTEM, "*src is NULL");
 
 	u_strFromUTF8(temp_result, array_sizeof(temp_result), NULL, src, -1, &status);
-	if (U_FAILURE(status)){
+	if (U_FAILURE(status)) {
 		CTS_ERR("u_strFromUTF8 Failed(%s)", u_errorName(status));
 		return CONTACTS_ERROR_SYSTEM;
 	}
@@ -2234,7 +2233,7 @@ int ctsvc_convert_chinese_to_pinyin(const char *src, pinyin_name_s **name, int *
 
 			pinyin_spell_count[count] = ret;
 
-			if(total_count==0)
+			if (total_count==0)
 				total_count = ret;
 			else
 				total_count *= ret;
@@ -2263,8 +2262,8 @@ int ctsvc_convert_chinese_to_pinyin(const char *src, pinyin_name_s **name, int *
 	int initial_len[total_count];
 	int pinyin_name_len = sizeof(char) * ((len + 2) * CHINESE_PINYIN_SPELL_MAX_LEN);
 	int pinyin_initial_len = sizeof(char) * (len * 5 + 1);
-	for(i=0; i < count ; i++) {
-		for(j=0;j<total_count;j++) {
+	for (i=0; i < count ; i++) {
+		for (j=0;j<total_count;j++) {
 			int index = (j/repeat) %pinyin_spell_count[i];
 
 			if (i==0) {
@@ -2276,7 +2275,7 @@ int ctsvc_convert_chinese_to_pinyin(const char *src, pinyin_name_s **name, int *
 			}
 
 			if (spell[i][index][0]) {
-				if(temp_name[j].pinyin_name[0])
+				if (temp_name[j].pinyin_name[0])
 					name_len[j] += snprintf(temp_name[j].pinyin_name + name_len[j], pinyin_name_len - name_len[j], " ");
 
 				name_len[j] += snprintf(temp_name[j].pinyin_name + name_len[j], pinyin_name_len - name_len[j],

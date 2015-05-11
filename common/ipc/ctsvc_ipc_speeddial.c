@@ -49,7 +49,7 @@ static int __ctsvc_ipc_unmarshal_speeddial(pims_ipc_data_h ipc_data, const char*
 		if (ctsvc_ipc_unmarshal_int(ipc_data, &speeddial_p->dial_number) != CONTACTS_ERROR_NONE) break;
 
 		return CONTACTS_ERROR_NONE;
-	} while(0);
+	} while (0);
 
 	CTS_ERR("_ctsvc_ipc_unmarshal fail");
 	return CONTACTS_ERROR_INVALID_PARAMETER;
@@ -72,7 +72,7 @@ static int __ctsvc_ipc_marshal_speeddial(const contacts_record_h record, pims_ip
 		if (ctsvc_ipc_marshal_int((speeddial_p->dial_number),ipc_data) != CONTACTS_ERROR_NONE) break;
 
 		return CONTACTS_ERROR_NONE;
-	} while(0);
+	} while (0);
 
 	CTS_ERR("_ctsvc_ipc_marshal fail");
 	return CONTACTS_ERROR_INVALID_PARAMETER;

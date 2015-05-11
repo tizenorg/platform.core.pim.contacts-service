@@ -30,12 +30,12 @@
 #include "ctsvc_notification.h"
 #include "ctsvc_server_utils.h"
 
-//static int __ctsvc_db_sdn_insert_record( contacts_record_h record, int *id );
-static int __ctsvc_db_sdn_get_record( int id, contacts_record_h* record );
-//static int __ctsvc_db_sdn_update_record( contacts_record_h record );
-//static int __ctsvc_db_sdn_delete_record( int id );
-static int __ctsvc_db_sdn_get_all_records( int offset, int limit, contacts_list_h* out_list );
-static int __ctsvc_db_sdn_get_records_with_query( contacts_query_h query, int offset, int limit, contacts_list_h* out_list );
+//static int __ctsvc_db_sdn_insert_record(contacts_record_h record, int *id);
+static int __ctsvc_db_sdn_get_record(int id, contacts_record_h* record);
+//static int __ctsvc_db_sdn_update_record(contacts_record_h record);
+//static int __ctsvc_db_sdn_delete_record(int id);
+static int __ctsvc_db_sdn_get_all_records(int offset, int limit, contacts_list_h* out_list);
+static int __ctsvc_db_sdn_get_records_with_query(contacts_query_h query, int offset, int limit, contacts_list_h* out_list);
 //static int __ctsvc_db_sdn_insert_records(const contacts_list_h in_list, int **ids);
 //static int __ctsvc_db_sdn_update_records(const contacts_list_h in_list);
 //static int __ctsvc_db_sdn_delete_records(int ids[], int count);
@@ -79,7 +79,7 @@ static int __ctsvc_db_sdn_value_set(cts_stmt stmt, contacts_record_h *record)
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_db_sdn_get_record( int id, contacts_record_h* out_record )
+static int __ctsvc_db_sdn_get_record(int id, contacts_record_h* out_record)
 {
 	RETVM_IF(!ctsvc_server_have_telephony_feature(), CONTACTS_ERROR_NOT_SUPPORTED, "Telephony feature disabled");
 
@@ -121,7 +121,7 @@ static int __ctsvc_db_sdn_get_record( int id, contacts_record_h* out_record )
 }
 
 #if 0
-static int __ctsvc_db_sdn_insert_record( contacts_record_h record, int *id )
+static int __ctsvc_db_sdn_insert_record(contacts_record_h record, int *id)
 {
 	int ret;
 	ctsvc_sdn_s *sdn = (ctsvc_sdn_s*)record;
@@ -145,7 +145,7 @@ static int __ctsvc_db_sdn_insert_record( contacts_record_h record, int *id )
 	ctsvc_stmt_bind_int(stmt, 3, sdn->sim_slot_no);
 
 	ret = ctsvc_begin_trans();
-	if( ret < CONTACTS_ERROR_NONE ) {
+	if (ret < CONTACTS_ERROR_NONE) {
 		CTS_ERR("DB error : ctsvc_begin_trans() Failed(%d)", ret);
 		ctsvc_stmt_finalize(stmt);
 		return ret;
@@ -166,7 +166,7 @@ static int __ctsvc_db_sdn_insert_record( contacts_record_h record, int *id )
 
 	ctsvc_set_sdn_noti();
 	ret = ctsvc_end_trans(true);
-	if(ret < CONTACTS_ERROR_NONE ) {
+	if (ret < CONTACTS_ERROR_NONE) {
 		CTS_ERR("DB error : ctsvc_end_trans() Failed(%d)", ret);
 		return ret;
 	}
@@ -174,7 +174,7 @@ static int __ctsvc_db_sdn_insert_record( contacts_record_h record, int *id )
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_db_sdn_update_record( contacts_record_h record )
+static int __ctsvc_db_sdn_update_record(contacts_record_h record)
 {
 	int sdn_id;
 	int ret = CONTACTS_ERROR_NONE;
@@ -223,7 +223,7 @@ static int __ctsvc_db_sdn_update_record( contacts_record_h record )
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_db_sdn_delete_record( int sdn_id )
+static int __ctsvc_db_sdn_delete_record(int sdn_id)
 {
 	int ret;
 	int id;
@@ -267,8 +267,8 @@ static int __ctsvc_db_sdn_delete_record( int sdn_id )
 }
 #endif
 
-static int __ctsvc_db_sdn_get_all_records( int offset, int limit,
-	contacts_list_h* out_list )
+static int __ctsvc_db_sdn_get_all_records(int offset, int limit,
+	contacts_list_h* out_list)
 {
 	RETVM_IF(!ctsvc_server_have_telephony_feature(), CONTACTS_ERROR_NOT_SUPPORTED, "Telephony feature disabled");
 
@@ -310,7 +310,7 @@ static int __ctsvc_db_sdn_get_all_records( int offset, int limit,
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_db_sdn_get_records_with_query( contacts_query_h query, int offset, int limit, contacts_list_h* out_list )
+static int __ctsvc_db_sdn_get_records_with_query(contacts_query_h query, int offset, int limit, contacts_list_h* out_list)
 {
 	RETVM_IF(!ctsvc_server_have_telephony_feature(), CONTACTS_ERROR_NOT_SUPPORTED, "Telephony feature disabled");
 
@@ -342,17 +342,15 @@ static int __ctsvc_db_sdn_get_records_with_query( contacts_query_h query, int of
 		sdn = (ctsvc_sdn_s*)record;
 		if (0 == s_query->projection_count)
 			field_count = s_query->property_count;
-		else
-		{
+		else {
 			field_count = s_query->projection_count;
 
-			if( CONTACTS_ERROR_NONE != ctsvc_record_set_projection_flags(record, s_query->projection, s_query->projection_count, s_query->property_count) )
-			{
+			if (CONTACTS_ERROR_NONE != ctsvc_record_set_projection_flags(record, s_query->projection, s_query->projection_count, s_query->property_count)) {
 				ASSERT_NOT_REACHED("To set projection is failed.\n");
 			}
 		}
 
-		for(i=0;i<field_count;i++) {
+		for (i=0;i<field_count;i++) {
 			char *temp;
 			int property_id;
 			if (0 == s_query->projection_count)

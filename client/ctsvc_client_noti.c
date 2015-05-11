@@ -230,7 +230,7 @@ API int contacts_db_remove_changed_cb_with_info(const char* view_uri,
 
 	if (info) {
 		GSList *l;
-		for(l = info->callbacks;l;l=l->next) {
+		for (l = info->callbacks;l;l=l->next) {
 			db_callback_info_s *cb_info = l->data;
 			if (cb == cb_info->cb && user_data == cb_info->user_data) {
 				info->callbacks = g_slist_remove(info->callbacks, cb_info);

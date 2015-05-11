@@ -1381,7 +1381,7 @@ ctsvc_record_type_e ctsvc_view_get_record_type(const char* view_uri)
 	return type;
 }
 
-const char* ctsvc_view_get_uri( const char* view_uri )
+const char* ctsvc_view_get_uri(const char* view_uri)
 {
 	view_uri_info_s* view_uri_info = NULL;
 

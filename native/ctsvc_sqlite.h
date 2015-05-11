@@ -68,7 +68,7 @@ static inline int ctsvc_stmt_bind_text(cts_stmt stmt, int pos, const char *str) 
 	return sqlite3_bind_text(stmt, pos, str, strlen(str), SQLITE_STATIC);
 }
 static inline int ctsvc_stmt_bind_copy_text(cts_stmt stmt, int pos,
-		const char *str, int strlen){
+		const char *str, int strlen) {
 	return sqlite3_bind_text(stmt, pos, str, strlen, SQLITE_TRANSIENT);
 }
 

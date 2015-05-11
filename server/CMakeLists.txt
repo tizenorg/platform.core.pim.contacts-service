@@ -156,7 +156,7 @@ SET(SRCS
 	ctsvc_server.c
 )
 
-IF( ENABLE_SIM_FEATURE )
+IF(ENABLE_SIM_FEATURE)
 SET(SRCS ${SRCS}
 	${CMAKE_SOURCE_DIR}/common/ipc/ctsvc_ipc_sdn.c
 	${CMAKE_SOURCE_DIR}/common/ctsvc_record_sdn.c
@@ -166,16 +166,16 @@ SET(SRCS ${SRCS}
 	${CMAKE_SOURCE_DIR}/native/ctsvc_db_plugin_speeddial.c
 	ctsvc_server_sim.c
 )
-ENDIF( ENABLE_SIM_FEATURE )
+ENDIF(ENABLE_SIM_FEATURE)
 
-IF( ENABLE_LOG_FEATURE )
+IF(ENABLE_LOG_FEATURE)
 SET(SRCS ${SRCS}
 	${CMAKE_SOURCE_DIR}/common/ipc/ctsvc_ipc_phonelog.c
 	${CMAKE_SOURCE_DIR}/common/ctsvc_record_phonelog.c
 	${CMAKE_SOURCE_DIR}/native/ctsvc_db_plugin_phonelog.c
 	${CMAKE_SOURCE_DIR}/native/ctsvc_phonelog.c
 )
-ENDIF( ENABLE_LOG_FEATURE )
+ENDIF(ENABLE_LOG_FEATURE)
 
 
 INCLUDE(FindPkgConfig)

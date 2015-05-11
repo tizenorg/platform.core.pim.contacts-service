@@ -120,7 +120,7 @@ static void __ctsvc_server_number_info_update(sqlite3 *__db)
 			"SELECT id, number, person_id FROM "CTS_TABLE_PHONELOGS " "
 			"WHERE log_type < %d", CONTACTS_PLOG_TYPE_EMAIL_RECEIVED);
 	ret = sqlite3_prepare_v2(__db, query, strlen(query), &stmt, NULL);
-	if(SQLITE_OK != ret) {
+	if (SQLITE_OK != ret) {
 		CTS_ERR("sqlite3_prepare_v2() Failed(%s)", sqlite3_errmsg(__db));
 		return;
 	}
@@ -129,13 +129,13 @@ static void __ctsvc_server_number_info_update(sqlite3 *__db)
 			"UPDATE "CTS_TABLE_PHONELOGS" SET normal_num=?, clean_num=?, "
 			"minmatch=?, person_id=?, number_type=? WHERE id = ?");
 	ret = sqlite3_prepare_v2(__db, query, strlen(query), &update_stmt, NULL);
-	if(SQLITE_OK != ret) {
+	if (SQLITE_OK != ret) {
 		CTS_ERR("sqlite3_prepare_v2() Failed(%s)", sqlite3_errmsg(__db));
 		sqlite3_finalize(stmt);
 		return;
 	}
 
-	while(SQLITE_ROW == (ret = sqlite3_step(stmt))) {
+	while (SQLITE_ROW == (ret = sqlite3_step(stmt))) {
 		int phonelog_id = sqlite3_column_int(stmt, 0);
 		char *number = (char*)sqlite3_column_text(stmt, 1);
 		int person_id = sqlite3_column_int(stmt, 2);
@@ -181,7 +181,7 @@ static void __ctsvc_server_number_info_update(sqlite3 *__db)
 			"SELECT id, data3 FROM "CTS_TABLE_DATA" "
 			"WHERE datatype = %d", CTSVC_DATA_NUMBER);
 	ret = sqlite3_prepare_v2(__db, query, strlen(query), &stmt, NULL);
-	if(SQLITE_OK != ret) {
+	if (SQLITE_OK != ret) {
 		CTS_ERR("sqlite3_prepare_v2() Failed(%s)", sqlite3_errmsg(__db));
 		return;
 	}
@@ -189,13 +189,13 @@ static void __ctsvc_server_number_info_update(sqlite3 *__db)
 	snprintf(query, sizeof(query),
 			"UPDATE "CTS_TABLE_DATA" SET data4=?, data5=?, data6=?  WHERE id = ?");
 	ret = sqlite3_prepare_v2(__db, query, strlen(query), &update_stmt, NULL);
-	if(SQLITE_OK != ret) {
+	if (SQLITE_OK != ret) {
 		CTS_ERR("sqlite3_prepare_v2() Failed(%s)", sqlite3_errmsg(__db));
 		sqlite3_finalize(stmt);
 		return;
 	}
 
-	while(SQLITE_ROW == (ret = sqlite3_step(stmt))) {
+	while (SQLITE_ROW == (ret = sqlite3_step(stmt))) {
 		int id = sqlite3_column_int(stmt, 0);
 		char *number = (char*)sqlite3_column_text(stmt, 1);
 		char clean_num[SAFE_STRLEN(number)+1];
@@ -237,7 +237,7 @@ static int __ctsvc_server_get_db_version(sqlite3 *db, int *version)
 
 	snprintf(query, sizeof(query), "PRAGMA user_version;");
 	ret = sqlite3_prepare_v2(db, query, strlen(query), &stmt, NULL);
-	if(SQLITE_OK != ret) {
+	if (SQLITE_OK != ret) {
 		CTS_ERR("sqlite3_prepare_v2() Failed(%s)", sqlite3_errmsg(db));
 		return CONTACTS_ERROR_DB;
 	}
@@ -411,7 +411,7 @@ int ctsvc_server_db_update(void)
 	snprintf(query, sizeof(query),
 			"PRAGMA user_version = %d", CTSVC_SCHEMA_VERSION);
 	ret = sqlite3_exec(__db, query, NULL, 0, &errmsg);
-	if(SQLITE_OK != ret) {
+	if (SQLITE_OK != ret) {
 		CTS_ERR("sqlite3_exec() Failed(%s)", errmsg);
 		sqlite3_free(errmsg);
 	}

@@ -258,19 +258,19 @@
  *
  * APIs which needs _uri
  * @code
- * API int contacts_record_create( const char* view_uri, ... )
- * API int contacts_filter_create( const char* view_uri, ... )
- * API int contacts_query_create( const char* view_uri, ... )
- * API int contacts_db_get_record( const char* view_uri, ... )
- * API int contacts_db_delete_record( const char* view_uri, ... )
- * API int contacts_db_get_all_records( const char* view_uri, ... )
- * API int contacts_db_delete_records(const char* view_uri, ... )
- * API int contacts_db_add_changed_cb( const char* view_uri, ... )
- * API int contacts_db_remove_changed_cb( const char* view_uri, ... )
- * API int contacts_db_get_changes_by_version( const char* view_uri, ... )
- * API int contacts_db_search_records(const char* view_uri, ... )
- * API int contacts_db_search_records_with_range(const char* view_uri, ... )
- * API int contacts_db_get_count( const char* view_uri, ... )
+ * API int contacts_record_create(const char* view_uri, ...)
+ * API int contacts_filter_create(const char* view_uri, ...)
+ * API int contacts_query_create(const char* view_uri, ...)
+ * API int contacts_db_get_record(const char* view_uri, ...)
+ * API int contacts_db_delete_record(const char* view_uri, ...)
+ * API int contacts_db_get_all_records(const char* view_uri, ...)
+ * API int contacts_db_delete_records(const char* view_uri, ...)
+ * API int contacts_db_add_changed_cb(const char* view_uri, ...)
+ * API int contacts_db_remove_changed_cb(const char* view_uri, ...)
+ * API int contacts_db_get_changes_by_version(const char* view_uri, ...)
+ * API int contacts_db_search_records(const char* view_uri, ...)
+ * API int contacts_db_search_records_with_range(const char* view_uri, ...)
+ * API int contacts_db_get_count(const char* view_uri, ...)
  * @endcode
  *
  *
@@ -437,7 +437,7 @@
  * int i = 0;
  * contacts_db_get_record(_contacts_contact._uri, contact_id, &contact);
  * contacts_record_get_child_record_count(contact, _contacts_contact.address, &address_num);
- * for(i=0; i<address_num; i++) {
+ * for (i=0; i<address_num; i++) {
  * 	contacts_record_h address = NULL;
  * 	contacts_record_get_child_record_at_p(contact, _contacts_contact.address, i, &address);
  * 	contacts_record_set_str(address, _contacts_address.country, "Korea");
@@ -455,8 +455,8 @@
  *
  * To operate a list, you must obtain its handle. The handle is provided during creation of the list. List handle must destroy after use.
  * @code
- * API int contacts_list_create( contacts_list_h* contacts_list );
- * API int contacts_list_destroy( contacts_list_h contacts_list, bool delete_child );
+ * API int contacts_list_create(contacts_list_h* contacts_list);
+ * API int contacts_list_destroy(contacts_list_h contacts_list, bool delete_child);
  * @endcode
  *
  * If ‘delete_child’ parameter is the true, child resources will destroy automatically.
@@ -489,15 +489,15 @@
  * @subsection CAPI_SOCIAL_CONTACTS_SVC_MODULE_LISTS_CURSOR Cursor
  * The list can be traversed by using cursor.
  * @code
- * API int contacts_list_first( contacts_list_h contacts_list );
- * API int contacts_list_last( contacts_list_h contacts_list );
- * API int contacts_list_next( contacts_list_h contacts_list );
- * API int contacts_list_prev( contacts_list_h contacts_list );
+ * API int contacts_list_first(contacts_list_h contacts_list);
+ * API int contacts_list_last(contacts_list_h contacts_list);
+ * API int contacts_list_next(contacts_list_h contacts_list);
+ * API int contacts_list_prev(contacts_list_h contacts_list);
  * @endcode
  *
  * You can get a record of current cursor.
  * @code
- * API int contacts_list_get_current_record_p( contacts_list_h contacts_list, contacts_record_h* record );
+ * API int contacts_list_get_current_record_p(contacts_list_h contacts_list, contacts_record_h* record);
  * @endcode
  *
  * Sample code: Loop list
@@ -520,8 +520,8 @@
  * @subsection CAPI_SOCIAL_CONTACTS_SVC_MODULE_LISTS_ADD_REMOVE Add / Remove
  * The contacts-service provides functions for adding/removing child record on list.
  * @code
- * API int contacts_list_add( contacts_list_h contacts_list, contacts_record_h record );
- * API int contacts_list_remove( contacts_list_h contacts_list, contacts_record_h record );
+ * API int contacts_list_add(contacts_list_h contacts_list, contacts_record_h record);
+ * API int contacts_list_remove(contacts_list_h contacts_list, contacts_record_h record);
  * @endcode
  *
  * Sample code: Adds records to the list
@@ -551,10 +551,10 @@
  * Bulk APIs provide to insert/update/delete multiple records. There is no limit of record count on bulk API, but it cause a process to hang during the api is operated. Bulk APIs guarantee atomicity. That is, the api operations either all, or nothing.
  *
  * @code
- * API int contacts_db_insert_records( contacts_list_h record_list, int **ids, int *count);
- * API int contacts_db_update_records( contacts_list_h record_list);
+ * API int contacts_db_insert_records(contacts_list_h record_list, int **ids, int *count);
+ * API int contacts_db_update_records(contacts_list_h record_list);
  * API int contacts_db_delete_records(const char* view_uri, int record_id_array[], int count);
- * API int contacts_db_replace_records( contacts_list_h list, int record_id_array[], int count );
+ * API int contacts_db_replace_records(contacts_list_h list, int record_id_array[], int count);
  * @endcode
  *
  * Sample code: Insert two contact records using bulk API.
@@ -600,8 +600,8 @@
  * The contacts Filter API provides the set of definitions and interfaces that enable application developers to make filters to set query. <br>
  * When creating a filter, you need to specify what type of filter you want to create using _uri property. Filter handle must destroy after use.
  * @code
- * API int contacts_filter_create( const char* view_uri, contacts_filter_h* filter );
- * API int contacts_filter_destroy( contacts_filter_h filter );
+ * API int contacts_filter_create(const char* view_uri, contacts_filter_h* filter);
+ * API int contacts_filter_destroy(contacts_filter_h filter);
  * @endcode
  *
  * Sample code: Set filter condition to contain a given substring.

@@ -160,7 +160,7 @@ bool ctsvc_record_check_property_flag(const ctsvc_record_s* s_record, unsigned i
 		if (NULL == s_record->properties_flags)
 			return false;
 	}
-	return ( s_record->properties_flags[index] & flag) ? true : false;
+	return (s_record->properties_flags[index] & flag) ? true : false;
 }
 
 int ctsvc_record_set_property_flag(ctsvc_record_s* _record, int property_id, contacts_property_flag_e flag)
@@ -186,21 +186,19 @@ int ctsvc_record_set_property_flag(ctsvc_record_s* _record, int property_id, con
 }
 
 #define __CHECK_READ_ONLY_PROPERTY() \
-	if( CTSVC_READ_ONLY_CHECK(property_id, CTSVC_READ_ONLY_PROPERTY) ) \
-	{ \
+	if (CTSVC_READ_ONLY_CHECK(property_id, CTSVC_READ_ONLY_PROPERTY)) { \
 		CTS_ERR("Invalid parameter: Don't try to change read-only property.(0x%0x)", property_id); \
 		return CONTACTS_ERROR_INVALID_PARAMETER; \
 	}
 
 #define __CHECK_PROJECTED_PROPERTY() \
-	if( false == ctsvc_record_check_property_flag( s_record, property_id, CTSVC_PROPERTY_FLAG_PROJECTION ) ) \
-	{ \
+	if (false == ctsvc_record_check_property_flag(s_record, property_id, CTSVC_PROPERTY_FLAG_PROJECTION)) { \
 		CTS_ERR("Invalid parameter: Don't try to get un-projected property(0x%0x).", property_id); \
 		return CONTACTS_ERROR_INVALID_PARAMETER; \
 	}
 
 // Record constuct/destruct
-API int contacts_record_create( const char* view_uri, contacts_record_h* out_record )
+API int contacts_record_create(const char* view_uri, contacts_record_h* out_record)
 {
 	int ret;
 	ctsvc_record_type_e r_type;
@@ -216,7 +214,7 @@ API int contacts_record_create( const char* view_uri, contacts_record_h* out_rec
 	plugin_cb = __ctsvc_record_get_plugin_cb(r_type);
 	if (plugin_cb && plugin_cb->create) {
 		ret = plugin_cb->create(out_record);
-		if( CONTACTS_ERROR_NONE == ret ) {
+		if (CONTACTS_ERROR_NONE == ret) {
 			CTSVC_RECORD_INIT_BASE((ctsvc_record_s*)*out_record, r_type, plugin_cb, ctsvc_view_get_uri(view_uri));
 		}
 		return ret;
@@ -225,7 +223,7 @@ API int contacts_record_create( const char* view_uri, contacts_record_h* out_rec
 	__INVALID_PARAMETER_ERROR_HANDLING();
 }
 
-API int contacts_record_destroy( contacts_record_h record, bool delete_child )
+API int contacts_record_destroy(contacts_record_h record, bool delete_child)
 {
 	ctsvc_record_s *s_record;
 
@@ -238,7 +236,7 @@ API int contacts_record_destroy( contacts_record_h record, bool delete_child )
 	__INVALID_PARAMETER_ERROR_HANDLING();
 }
 
-API int contacts_record_clone( contacts_record_h record, contacts_record_h* out_record )
+API int contacts_record_clone(contacts_record_h record, contacts_record_h* out_record)
 {
 	ctsvc_record_s *s_record;
 
@@ -254,7 +252,7 @@ API int contacts_record_clone( contacts_record_h record, contacts_record_h* out_
 	__INVALID_PARAMETER_ERROR_HANDLING();
 }
 
-API int contacts_record_get_uri_p( contacts_record_h record, const char** out_str )
+API int contacts_record_get_uri_p(contacts_record_h record, const char** out_str)
 {
     int ret = CONTACTS_ERROR_NONE;
 
@@ -268,7 +266,7 @@ API int contacts_record_get_uri_p( contacts_record_h record, const char** out_st
 }
 
 // Record get/set int,str, etc..
-API int contacts_record_get_str( contacts_record_h record, unsigned int property_id, char** out_str )
+API int contacts_record_get_str(contacts_record_h record, unsigned int property_id, char** out_str)
 {
 	ctsvc_record_s *s_record;
 
@@ -286,7 +284,7 @@ API int contacts_record_get_str( contacts_record_h record, unsigned int property
 	__INVALID_PARAMETER_ERROR_HANDLING();
 }
 
-API int contacts_record_get_lli( contacts_record_h record, unsigned int property_id, long long int *value )
+API int contacts_record_get_lli(contacts_record_h record, unsigned int property_id, long long int *value)
 {
 	ctsvc_record_s *s_record;
 
@@ -304,7 +302,7 @@ API int contacts_record_get_lli( contacts_record_h record, unsigned int property
 	__INVALID_PARAMETER_ERROR_HANDLING();
 }
 
-API int contacts_record_get_double( contacts_record_h record, unsigned int property_id, double *value )
+API int contacts_record_get_double(contacts_record_h record, unsigned int property_id, double *value)
 {
 	ctsvc_record_s *s_record;
 
@@ -322,7 +320,7 @@ API int contacts_record_get_double( contacts_record_h record, unsigned int prope
 	__INVALID_PARAMETER_ERROR_HANDLING();
 }
 
-API int contacts_record_get_str_p( contacts_record_h record, unsigned int property_id, char** out_str )
+API int contacts_record_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str)
 {
 	ctsvc_record_s *s_record;
 
@@ -335,12 +333,12 @@ API int contacts_record_get_str_p( contacts_record_h record, unsigned int proper
 	__CHECK_PROJECTED_PROPERTY();
 
 	if (s_record->plugin_cbs && s_record->plugin_cbs->get_str_p)
-		return s_record->plugin_cbs->get_str_p(record, property_id, out_str );
+		return s_record->plugin_cbs->get_str_p(record, property_id, out_str);
 
 	__INVALID_PARAMETER_ERROR_HANDLING();
 }
 
-API int contacts_record_get_int( contacts_record_h record, unsigned int property_id, int* out_value )
+API int contacts_record_get_int(contacts_record_h record, unsigned int property_id, int* out_value)
 {
 	ctsvc_record_s *s_record;
 
@@ -358,7 +356,7 @@ API int contacts_record_get_int( contacts_record_h record, unsigned int property
 	__INVALID_PARAMETER_ERROR_HANDLING();
 }
 
-API int contacts_record_set_str( contacts_record_h record, unsigned int property_id, const char* value )
+API int contacts_record_set_str(contacts_record_h record, unsigned int property_id, const char* value)
 {
 	RETV_IF(NULL == record, CONTACTS_ERROR_INVALID_PARAMETER);
 
@@ -367,7 +365,7 @@ API int contacts_record_set_str( contacts_record_h record, unsigned int property
 	return ctsvc_record_set_str(record, property_id, value);
 }
 
-int ctsvc_record_set_str( contacts_record_h record, unsigned int property_id, const char* value )
+int ctsvc_record_set_str(contacts_record_h record, unsigned int property_id, const char* value)
 {
 	char *str;
 	ctsvc_record_s *s_record;
@@ -392,7 +390,7 @@ int ctsvc_record_set_str( contacts_record_h record, unsigned int property_id, co
 	__INVALID_PARAMETER_ERROR_HANDLING();
 }
 
-API int contacts_record_get_bool( contacts_record_h record, unsigned int property_id, bool* value )
+API int contacts_record_get_bool(contacts_record_h record, unsigned int property_id, bool* value)
 {
 	ctsvc_record_s *s_record;
 
@@ -410,7 +408,7 @@ API int contacts_record_get_bool( contacts_record_h record, unsigned int propert
 	__INVALID_PARAMETER_ERROR_HANDLING();
 }
 
-API int	contacts_record_set_bool( contacts_record_h record, unsigned int property_id, bool value )
+API int	contacts_record_set_bool(contacts_record_h record, unsigned int property_id, bool value)
 {
 	RETV_IF(NULL == record, CONTACTS_ERROR_INVALID_PARAMETER);
 
@@ -419,7 +417,7 @@ API int	contacts_record_set_bool( contacts_record_h record, unsigned int propert
 	return ctsvc_record_set_bool(record, property_id, value);
 }
 
-int ctsvc_record_set_bool( contacts_record_h record, unsigned int property_id, bool value )
+int ctsvc_record_set_bool(contacts_record_h record, unsigned int property_id, bool value)
 {
 	int ret;
 	ctsvc_record_s *s_record;
@@ -436,7 +434,7 @@ int ctsvc_record_set_bool( contacts_record_h record, unsigned int property_id, b
 	__INVALID_PARAMETER_ERROR_HANDLING();
 }
 
-API int contacts_record_set_int( contacts_record_h record, unsigned int property_id, int value )
+API int contacts_record_set_int(contacts_record_h record, unsigned int property_id, int value)
 {
 	RETV_IF(NULL == record, CONTACTS_ERROR_INVALID_PARAMETER);
 
@@ -451,7 +449,7 @@ API int contacts_record_set_int( contacts_record_h record, unsigned int property
 	return ctsvc_record_set_int(record, property_id, value);
 }
 
-int ctsvc_record_set_int( contacts_record_h record, unsigned int property_id, int value )
+int ctsvc_record_set_int(contacts_record_h record, unsigned int property_id, int value)
 {
 	int ret;
 	ctsvc_record_s *s_record;
@@ -467,7 +465,7 @@ int ctsvc_record_set_int( contacts_record_h record, unsigned int property_id, in
 	__INVALID_PARAMETER_ERROR_HANDLING();
 }
 
-API int contacts_record_set_lli( contacts_record_h record, unsigned int property_id, long long int value )
+API int contacts_record_set_lli(contacts_record_h record, unsigned int property_id, long long int value)
 {
 	RETV_IF(NULL == record, CONTACTS_ERROR_INVALID_PARAMETER);
 
@@ -476,7 +474,7 @@ API int contacts_record_set_lli( contacts_record_h record, unsigned int property
 	return ctsvc_record_set_lli(record, property_id, value);
 }
 
-int ctsvc_record_set_lli( contacts_record_h record, unsigned int property_id, long long int value )
+int ctsvc_record_set_lli(contacts_record_h record, unsigned int property_id, long long int value)
 {
 	int ret;
 	ctsvc_record_s *s_record;
@@ -493,7 +491,7 @@ int ctsvc_record_set_lli( contacts_record_h record, unsigned int property_id, lo
 	__INVALID_PARAMETER_ERROR_HANDLING();
 }
 
-API int contacts_record_set_double( contacts_record_h record, unsigned int property_id, double value )
+API int contacts_record_set_double(contacts_record_h record, unsigned int property_id, double value)
 {
 	RETV_IF(NULL == record, CONTACTS_ERROR_INVALID_PARAMETER);
 
@@ -502,7 +500,7 @@ API int contacts_record_set_double( contacts_record_h record, unsigned int prope
 	return ctsvc_record_set_double(record, property_id, value);
 }
 
-int ctsvc_record_set_double( contacts_record_h record, unsigned int property_id, double value )
+int ctsvc_record_set_double(contacts_record_h record, unsigned int property_id, double value)
 {
 	int ret;
 	ctsvc_record_s *s_record;
@@ -521,8 +519,8 @@ int ctsvc_record_set_double( contacts_record_h record, unsigned int property_id,
 }
 
 // Record get/set child records
-API int	contacts_record_add_child_record( contacts_record_h record,
-		unsigned int property_id, contacts_record_h child_record )
+API int	contacts_record_add_child_record(contacts_record_h record,
+		unsigned int property_id, contacts_record_h child_record)
 {
 	ctsvc_record_s *s_record;
 
@@ -536,8 +534,8 @@ API int	contacts_record_add_child_record( contacts_record_h record,
 	__INVALID_PARAMETER_ERROR_HANDLING();
 }
 
-API int	contacts_record_remove_child_record( contacts_record_h record,
-		unsigned int property_id, contacts_record_h child_record )
+API int	contacts_record_remove_child_record(contacts_record_h record,
+		unsigned int property_id, contacts_record_h child_record)
 {
 	ctsvc_record_s *s_record;
 
@@ -551,8 +549,8 @@ API int	contacts_record_remove_child_record( contacts_record_h record,
 	__INVALID_PARAMETER_ERROR_HANDLING();
 }
 
-API int contacts_record_get_child_record_count( contacts_record_h record,
-		unsigned int property_id, int *count )
+API int contacts_record_get_child_record_count(contacts_record_h record,
+		unsigned int property_id, int *count)
 {
 	ctsvc_record_s *s_record;
 
@@ -568,8 +566,8 @@ API int contacts_record_get_child_record_count( contacts_record_h record,
 	__INVALID_PARAMETER_ERROR_HANDLING();
 }
 
-API int contacts_record_get_child_record_at_p( contacts_record_h record,
-		unsigned int property_id, int index, contacts_record_h* out_record )
+API int contacts_record_get_child_record_at_p(contacts_record_h record,
+		unsigned int property_id, int index, contacts_record_h* out_record)
 {
 	ctsvc_record_s *s_record;
 
@@ -585,8 +583,8 @@ API int contacts_record_get_child_record_at_p( contacts_record_h record,
 	__INVALID_PARAMETER_ERROR_HANDLING();
 }
 
-API int contacts_record_clone_child_record_list( contacts_record_h record,
-		unsigned int property_id, contacts_list_h* out_list )
+API int contacts_record_clone_child_record_list(contacts_record_h record,
+		unsigned int property_id, contacts_list_h* out_list)
 {
 	ctsvc_record_s *s_record;
 
@@ -602,7 +600,7 @@ API int contacts_record_clone_child_record_list( contacts_record_h record,
 	__INVALID_PARAMETER_ERROR_HANDLING();
 }
 
-int ctsvc_record_set_projection_flags( contacts_record_h record, const unsigned int *projection, const unsigned int projection_count, const unsigned int property_max_count)
+int ctsvc_record_set_projection_flags(contacts_record_h record, const unsigned int *projection, const unsigned int projection_count, const unsigned int property_max_count)
 {
 	int i;
 

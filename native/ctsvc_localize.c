@@ -145,8 +145,7 @@ const char *ctsvc_get_language_locale(int lang)
 {
 	char *langset = ctsvc_get_langset();
 
-	switch(lang)
-	{
+	switch(lang) {
 	case CTSVC_LANG_AZERBAIJAN: // az, Azerbaijan
 		return "az";
 	case CTSVC_LANG_ARABIC: // ar, Bahrain - Arabic
@@ -180,7 +179,7 @@ const char *ctsvc_get_language_locale(int lang)
 	case CTSVC_LANG_GALICIAN: // gl, Spain - Galician
 		return "gl";
 	case CTSVC_LANG_HINDI: // hi, India - Hindi, Marathi, Nepali
-		if (!strncmp(langset, "hi", strlen("hi"))){
+		if (!strncmp(langset, "hi", strlen("hi"))) {
 			return "hi";
 		}
 		else if (!strncmp(langset, "mr", strlen("mr"))) {
@@ -243,7 +242,7 @@ const char *ctsvc_get_language_locale(int lang)
 	case CTSVC_LANG_THAI: // th_TH, Thai
 		return "th";
 	case CTSVC_LANG_BENGALI: // as, bn
-		if (!strncmp(langset, "as", strlen("as"))){
+		if (!strncmp(langset, "as", strlen("as"))) {
 			return "as";
 		}
 		return "bn";

@@ -43,7 +43,7 @@ API int contacts_activity_delete_by_contact_id(int contact_id)
 		return ret;
 	}
 
-	ret = ctsvc_ipc_marshal_int( contact_id, indata);
+	ret = ctsvc_ipc_marshal_int(contact_id, indata);
 	if (ret != CONTACTS_ERROR_NONE)
 	{
 		CTS_ERR("marshal fail");
@@ -52,7 +52,7 @@ API int contacts_activity_delete_by_contact_id(int contact_id)
 	}
 
 	// ipc call
-	if (ctsvc_ipc_call( CTSVC_IPC_ACTIVITY_MODULE, CTSVC_IPC_SERVER_ACTIVITY_DELETE_BY_CONTACT_ID, indata, &outdata) != 0)
+	if (ctsvc_ipc_call(CTSVC_IPC_ACTIVITY_MODULE, CTSVC_IPC_SERVER_ACTIVITY_DELETE_BY_CONTACT_ID, indata, &outdata) != 0)
 	{
 		CTS_ERR("ctsvc_ipc_call failed");
 		pims_ipc_data_destroy(indata);
@@ -95,7 +95,7 @@ API int contacts_activity_delete_by_account_id(int account_id)
 		return ret;
 	}
 
-	ret = ctsvc_ipc_marshal_int( account_id, indata);
+	ret = ctsvc_ipc_marshal_int(account_id, indata);
 	if (ret != CONTACTS_ERROR_NONE)
 	{
 		CTS_ERR("marshal fail");
@@ -104,7 +104,7 @@ API int contacts_activity_delete_by_account_id(int account_id)
 	}
 
 	// ipc call
-	if (ctsvc_ipc_call( CTSVC_IPC_ACTIVITY_MODULE, CTSVC_IPC_SERVER_ACTIVITY_DELETE_BY_ACCOUNT_ID, indata, &outdata) != 0)
+	if (ctsvc_ipc_call(CTSVC_IPC_ACTIVITY_MODULE, CTSVC_IPC_SERVER_ACTIVITY_DELETE_BY_ACCOUNT_ID, indata, &outdata) != 0)
 	{
 		CTS_ERR("ctsvc_ipc_call failed");
 		pims_ipc_data_destroy(indata);

@@ -45,7 +45,7 @@ int ctsvc_db_person_create_record_from_stmt_with_projection(cts_stmt stmt, unsig
 	person = (ctsvc_person_s*)*record;
 
 	int i;
-	for(i=0;i<projection_count;i++) {
+	for (i=0;i<projection_count;i++) {
 		char *temp;
 		int property_id = projection[i];
 
@@ -126,12 +126,10 @@ int ctsvc_db_person_create_record_from_stmt_with_query(cts_stmt stmt, contacts_q
 	RETV_IF(NULL == query, CONTACTS_ERROR_INVALID_PARAMETER);
 	ctsvc_query_s *s_query = (ctsvc_query_s *)query;
 
-	if (0 == s_query->projection_count)
-	{
+	if (0 == s_query->projection_count) {
 		unsigned int *projection = malloc(sizeof(unsigned int)*s_query->property_count);
 		int i;
-		for(i=0;i<s_query->property_count;i++)
-		{
+		for (i=0;i<s_query->property_count;i++) {
 			projection[i] = s_query->properties[i].property_id;
 		}
 
@@ -299,15 +297,15 @@ int ctsvc_db_insert_person(contacts_record_h record)
 		free(status);
 		return ret;
 	}
-	if(contact->ringtone_path)
+	if (contact->ringtone_path)
 		ctsvc_stmt_bind_text(stmt, 1, contact->ringtone_path);
-	if(contact->vibration)
+	if (contact->vibration)
 		ctsvc_stmt_bind_text(stmt, 2, contact->vibration);
-	if(contact->message_alert)
+	if (contact->message_alert)
 		ctsvc_stmt_bind_text(stmt, 3, contact->message_alert);
-	if(status)
+	if (status)
 		ctsvc_stmt_bind_text(stmt, 4, status);
-	if(contact->image_thumbnail_path)
+	if (contact->image_thumbnail_path)
 		ctsvc_stmt_bind_text(stmt, 5, __ctsvc_get_image_filename(contact->image_thumbnail_path));
 
 	ret = ctsvc_stmt_step(stmt);
@@ -365,7 +363,7 @@ static inline int __ctsvc_db_update_person_default(int person_id, int datatype)
 		person_id, datatype);
 
 	ret = ctsvc_query_get_first_int_result(query, &data_id);
-	if (CONTACTS_ERROR_NO_DATA == ret ) {
+	if (CONTACTS_ERROR_NO_DATA == ret) {
 		snprintf(query, sizeof(query),
 			"SELECT D.id, D.data3 FROM "CTS_TABLE_CONTACTS" C, "CTS_TABLE_DATA" D "
 			"ON C.contact_id = D.contact_id AND C.deleted = 0 "
@@ -582,8 +580,7 @@ int ctsvc_db_update_person(contacts_record_h record)
 #endif
 
 	ret = ctsvc_end_trans(true);
-	if (ret < CONTACTS_ERROR_NONE)
-	{
+	if (ret < CONTACTS_ERROR_NONE) {
 		CTS_ERR("DB error : ctsvc_end_trans() Failed(%d)", ret);
 		return ret;
 	}

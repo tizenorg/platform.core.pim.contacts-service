@@ -41,11 +41,11 @@
 #define SAFE_STRDUP(src) (src)?strdup(src):NULL
 #define SAFE_STRLEN(src) ((src)?strlen(src):0)
 #define FREEandSTRDUP(dest, src) \
-	do{ \
+	do { \
 		free(dest);\
 		if (src) dest = strdup(src);\
 		else dest = NULL; \
-	}while (0)
+	} while (0)
 #define GET_STR(copy, str)	(copy)?(SAFE_STRDUP(str)):(str)
 
 enum {
@@ -121,7 +121,7 @@ typedef struct{
 }property_info_s;
 
 typedef int (*__ctsvc_record_create_cb)(contacts_record_h* out_record);
-typedef int (*__ctsvc_record_destroy_cb)(contacts_record_h record, bool delete_child );
+typedef int (*__ctsvc_record_destroy_cb)(contacts_record_h record, bool delete_child);
 typedef int (*__ctsvc_record_clone_cb)(contacts_record_h record, contacts_record_h* out_record);
 
 typedef int (*__ctsvc_record_get_str_cb)(contacts_record_h record, unsigned int property_id,char** out_str);

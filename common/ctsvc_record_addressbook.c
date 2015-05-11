@@ -28,7 +28,7 @@
 
 static int __ctsvc_addressbook_create(contacts_record_h *out_record);
 static int __ctsvc_addressbook_destroy(contacts_record_h record, bool delete_child);
-static int __ctsvc_addressbook_clone( contacts_record_h record, contacts_record_h* out_record );
+static int __ctsvc_addressbook_clone(contacts_record_h record, contacts_record_h* out_record);
 static int __ctsvc_addressbook_get_int(contacts_record_h record, unsigned int property_id, int *out);
 static int __ctsvc_addressbook_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_addressbook_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
@@ -81,7 +81,7 @@ static int __ctsvc_addressbook_destroy(contacts_record_h record, bool delete_chi
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_addressbook_clone( contacts_record_h record, contacts_record_h* out_record )
+static int __ctsvc_addressbook_clone(contacts_record_h record, contacts_record_h* out_record)
 {
 	ctsvc_addressbook_s *src = (ctsvc_addressbook_s*)record;
 	ctsvc_addressbook_s *dest;
@@ -103,7 +103,7 @@ static int __ctsvc_addressbook_clone( contacts_record_h record, contacts_record_
 }
 
 static int __ctsvc_addressbook_get_str_real(contacts_record_h record,
-		unsigned int property_id, char** out_str, bool copy )
+		unsigned int property_id, char** out_str, bool copy)
 {
 	ctsvc_addressbook_s *addressbook = (ctsvc_addressbook_s*)record;
 
@@ -129,7 +129,7 @@ static int __ctsvc_addressbook_get_str(contacts_record_h record, unsigned int pr
 }
 
 static int __ctsvc_addressbook_set_str(contacts_record_h record,
-		unsigned int property_id, const char* str )
+		unsigned int property_id, const char* str)
 {
 	ctsvc_addressbook_s *addressbook = (ctsvc_addressbook_s*)record;
 

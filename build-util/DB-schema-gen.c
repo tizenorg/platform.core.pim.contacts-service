@@ -30,10 +30,9 @@ int main(int argc, char **argv)
 	if (fp == NULL)
 		exit(EXIT_FAILURE);
 
-	do{
+	do {
 		c = fgetc(fp);
-		switch (c)
-		{
+		switch (c) {
 		case '\n':
 			printf("\\\n");
 			break;
@@ -51,7 +50,7 @@ int main(int argc, char **argv)
 			printf("%c",c);
 			break;
 		}
-	}while(EOF != c);
+	} while (EOF != c);
 
 	exit(EXIT_SUCCESS);
 }

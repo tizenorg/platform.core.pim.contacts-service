@@ -99,7 +99,7 @@ API int contacts_phone_log_delete(contacts_phone_log_delete_e op, ...)
 		return ret;
 	}
 
-	ret = ctsvc_ipc_marshal_int( op, indata);
+	ret = ctsvc_ipc_marshal_int(op, indata);
 	if (ret != CONTACTS_ERROR_NONE) {
 		CTS_ERR("ctsvc_ipc_marshal_int fail");
 		pims_ipc_data_destroy(indata);

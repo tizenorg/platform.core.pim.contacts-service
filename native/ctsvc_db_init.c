@@ -183,7 +183,7 @@ int ctsvc_db_get_table_name(const char *view_uri, const char **out_table)
 	RETV_IF(NULL == view_uri, CONTACTS_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == out_table, CONTACTS_ERROR_INVALID_PARAMETER);
 
-	if(__ctsvc_db_view_hash_table){
+	if (__ctsvc_db_view_hash_table) {
 		db_view_info = g_hash_table_lookup(__ctsvc_db_view_hash_table, view_uri);
 		if (db_view_info) {
 			*out_table = db_view_info->table_name;
@@ -201,7 +201,7 @@ int ctsvc_required_read_permission(const char *view_uri)
 	db_table_info_s* db_view_info = NULL;
 	RETV_IF(NULL == view_uri, CTSVC_PERMISSION_CONTACT_NONE);
 
-	if(__ctsvc_db_view_hash_table){
+	if (__ctsvc_db_view_hash_table) {
 		db_view_info = g_hash_table_lookup(__ctsvc_db_view_hash_table, view_uri);
 		if (db_view_info) {
 			return db_view_info->read_permission;
@@ -218,7 +218,7 @@ int ctsvc_required_write_permission(const char *view_uri)
 	db_table_info_s* db_view_info = NULL;
 	RETV_IF(NULL == view_uri, CTSVC_PERMISSION_CONTACT_NONE);
 
-	if(__ctsvc_db_view_hash_table){
+	if (__ctsvc_db_view_hash_table) {
 		db_view_info = g_hash_table_lookup(__ctsvc_db_view_hash_table, view_uri);
 		if (db_view_info) {
 			return db_view_info->write_permission;
@@ -235,7 +235,7 @@ bool ctsvc_should_ab_access_control(const char *view_uri)
 	db_table_info_s* db_view_info = NULL;
 	RETV_IF(NULL == view_uri, false);
 
-	if(__ctsvc_db_view_hash_table){
+	if (__ctsvc_db_view_hash_table) {
 		db_view_info = g_hash_table_lookup(__ctsvc_db_view_hash_table, view_uri);
 		if (db_view_info) {
 			return db_view_info->need_ab_access_control;
@@ -319,7 +319,7 @@ static int __ctsvc_db_create_views()
 	int ret;
 	char query[CTS_SQL_MAX_LEN] = {0};
 
-	if( __ctsvc_db_view_already_created )
+	if (__ctsvc_db_view_already_created)
 		return CONTACTS_ERROR_NONE;
 
 	// CTSVC_DB_VIEW_CONTACT

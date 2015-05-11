@@ -68,7 +68,7 @@ int ctsvc_begin_trans(void)
 			ret = ctsvc_query_exec("BEGIN IMMEDIATE TRANSACTION");
 			progress *= 2;
 		}
-		if(CONTACTS_ERROR_NONE != ret) {
+		if (CONTACTS_ERROR_NONE != ret) {
 			CTS_ERR("ctsvc_query_exec() Failed(%d)", ret);
 			return ret;
 		}
@@ -204,7 +204,7 @@ void ctsvc_utils_make_image_file_name(int parent_id, int id, char *src_img, char
 	free(lower_ext);
 }
 
-static inline bool ctsvc_check_available_image_space(void){
+static inline bool ctsvc_check_available_image_space(void) {
 	int ret;
 	struct statfs buf;
 	long long size;
@@ -302,7 +302,7 @@ static bool __ctsvc_image_util_supported_jpeg_colorspace_cb(image_util_colorspac
 
 	// load jpeg sample file
 	CTS_DBG("colorspace %d src : %s, dest : %s", colorspace, info->src, info->dest);
-	ret = image_util_decode_jpeg( info->src, colorspace, &img_source, &width, &height, &size_decode );
+	ret = image_util_decode_jpeg(info->src, colorspace, &img_source, &width, &height, &size_decode);
 	if (ret!=IMAGE_UTIL_ERROR_NONE) {
 		info->ret = CONTACTS_ERROR_SYSTEM;
 		return true;
@@ -350,19 +350,19 @@ static bool __ctsvc_image_util_supported_jpeg_colorspace_cb(image_util_colorspac
 
 		image_util_calculate_buffer_size(resized_width, resized_height, colorspace , &size_decode);
 
-		img_target = malloc( size_decode );
+		img_target = malloc(size_decode);
 
 		// do resize
-		ret = image_util_resize( img_target, &resized_width, &resized_height,
-				img_source, width, height, colorspace );
+		ret = image_util_resize(img_target, &resized_width, &resized_height,
+				img_source, width, height, colorspace);
 		if (ret!=IMAGE_UTIL_ERROR_NONE) {
 			CTS_ERR("image_util_resize failed(%d)", ret);
-			free( img_target );
-			free( img_source );
+			free(img_target);
+			free(img_source);
 			info->ret = CONTACTS_ERROR_SYSTEM;
 			return false;
 		}
-		free( img_source );
+		free(img_source);
 	}
 	else {
 		resized_width = width;
@@ -374,7 +374,7 @@ static bool __ctsvc_image_util_supported_jpeg_colorspace_cb(image_util_colorspac
 	if (IMAGE_UTIL_ROTATION_NONE != rotation) {
 		int rotated_width, rotated_height;
 		unsigned char *img_rotate = 0;
-		img_rotate = malloc( size_decode );
+		img_rotate = malloc(size_decode);
 		ret= image_util_rotate(img_rotate, &rotated_width, &rotated_height,
 					rotation, img_target, resized_width, resized_height, colorspace);
 		free(img_target);
@@ -390,9 +390,9 @@ static bool __ctsvc_image_util_supported_jpeg_colorspace_cb(image_util_colorspac
 	}
 
 	// image encode
-	ret = image_util_encode_jpeg(img_target, resized_width, resized_height, colorspace, CTS_IMAGE_ENCODE_QUALITY, info->dest );
-	free( img_target );
-	if(ret != IMAGE_UTIL_ERROR_NONE) {
+	ret = image_util_encode_jpeg(img_target, resized_width, resized_height, colorspace, CTS_IMAGE_ENCODE_QUALITY, info->dest);
+	free(img_target);
+	if (ret != IMAGE_UTIL_ERROR_NONE) {
 		CTS_ERR("image_util_encode_jpeg failed(%d)", ret);
 		info->ret = CONTACTS_ERROR_SYSTEM;
 		return false;
@@ -526,7 +526,7 @@ int ctsvc_get_next_ver(void)
 	return (1 + version);
 }
 
-int ctsvc_get_current_version( int* out_current_version ){
+int ctsvc_get_current_version(int* out_current_version) {
 	if (transaction_count <= 0) {
 		int ret;
 		int version = 0;
@@ -560,7 +560,7 @@ int SAFE_SNPRINTF(char **buf, int *buf_size, int len, const char *src)
 	}
 	else {
 		char *temp;
-		while(1) {
+		while (1) {
 			temp = realloc(*buf, *buf_size*2);
 			if (NULL == temp)
 				return -1;

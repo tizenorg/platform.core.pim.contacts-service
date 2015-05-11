@@ -105,7 +105,7 @@ static inline int __ctsvc_collation_str(const char *src, char **dest)
 	RETVM_IF(U_FAILURE(status), CONTACTS_ERROR_SYSTEM,
 			"ucol_open() Failed(%s)", u_errorName(status));
 
-	if (U_FAILURE(status)){
+	if (U_FAILURE(status)) {
 		CTS_ERR("ucol_setAttribute Failed(%s)", u_errorName(status));
 		ucol_close(collator);
 		return CONTACTS_ERROR_SYSTEM;
@@ -120,7 +120,7 @@ static inline int __ctsvc_collation_str(const char *src, char **dest)
 	status = U_ZERO_ERROR;
 	tmp_result = calloc(1, sizeof(UChar) * (size + 1));
 	u_strFromUTF8(tmp_result, size + 1, NULL, src, -1, &status);
-	if (U_FAILURE(status)){
+	if (U_FAILURE(status)) {
 		CTS_ERR("u_strFromUTF8 Failed(%s)", u_errorName(status));
 		free(tmp_result);
 		ucol_close(collator);
@@ -277,7 +277,7 @@ static int __ctsvc_convert_halfwidth_ascii_and_symbol(const char *src, UChar *de
 	*str_size = size;
 
 	// full width -> half width
-	for ( i=0; i < size; i++ ) {
+	for (i=0; i < size; i++) {
 		// FF00 ~ FF60: Fullwidth ASCII variants
 		if (CTSVC_COMPARE_BETWEEN((UChar)0xFF00, dest[i], (UChar)0xFF60)) {
 			int unicode_value1 = 0;
@@ -288,31 +288,31 @@ static int __ctsvc_convert_halfwidth_ascii_and_symbol(const char *src, UChar *de
 		}
 		// FFE0~FFE6: Fullwidth symbol variants
 		else if (CTSVC_COMPARE_BETWEEN((UChar)0xFFE0, dest[i], (UChar)0xFFE6)) {
-			if( dest[i] == (UChar)0xFFE0 )
+			if (dest[i] == (UChar)0xFFE0)
 			{
 				dest[i] = (UChar)0x00A2;
 			}
-			else if( dest[i] == (UChar)0xFFE1 )
+			else if (dest[i] == (UChar)0xFFE1)
 			{
 				dest[i] = (UChar)0x00A3;
 			}
-			else if( dest[i] == (UChar)0xFFE2 )
+			else if (dest[i] == (UChar)0xFFE2)
 			{
 				dest[i] = (UChar)0x00AC;
 			}
-			else if( dest[i] == (UChar)0xFFE3 )
+			else if (dest[i] == (UChar)0xFFE3)
 			{
 				dest[i] = (UChar)0x00AF;
 			}
-			else if( dest[i] == (UChar)0xFFE4 )
+			else if (dest[i] == (UChar)0xFFE4)
 			{
 				dest[i] = (UChar)0x00A6;
 			}
-			else if( dest[i] == (UChar)0xFFE5 )
+			else if (dest[i] == (UChar)0xFFE5)
 			{
 				dest[i] = (UChar)0x00A5;
 			}
-			else if( dest[i] == (UChar)0xFFE6 )
+			else if (dest[i] == (UChar)0xFFE6)
 			{
 				dest[i] = (UChar)0x20A9;
 			}
@@ -338,7 +338,7 @@ int ctsvc_get_halfwidth_string(const char *src, char** dest, int* dest_size)
 	UChar unicodes[LARGE_BUFFER_SIZE];
 	int ustr_size = 0;
 
-	if( __ctsvc_convert_halfwidth_ascii_and_symbol(src, unicodes, LARGE_BUFFER_SIZE, &ustr_size) != CONTACTS_ERROR_NONE )
+	if (__ctsvc_convert_halfwidth_ascii_and_symbol(src, unicodes, LARGE_BUFFER_SIZE, &ustr_size) != CONTACTS_ERROR_NONE)
 	{
 		CTS_ERR("convert to halfwidth failed! %s ", src);
 
@@ -531,7 +531,7 @@ static bool __ctsvc_compare_pinyin_letter(const char *haystack, int haystack_lan
 		len = ctsvc_check_utf8(haystack[i]);
 		if (len < 0)
 			return false;
-		memcpy(temp, haystack + i, len );
+		memcpy(temp, haystack + i, len);
 		temp[len] = '\0';
 
 		ret = ctsvc_convert_chinese_to_pinyin(temp, &pinyinname, &size);
@@ -594,7 +594,7 @@ static bool __ctsvc_compare_unicode_letter(const UChar* haystack, int haystack_l
 			if (haystack_lang == needle_lang)
 			{
 				for(i=0, j=0; i<u_strlen(haystack) && j<u_strlen(needle);) {
-					if(haystack[i] == needle[j])
+					if (haystack[i] == needle[j])
 						ret = true;
 					else {
 						ret = false;
@@ -623,7 +623,7 @@ static bool __ctsvc_compare_unicode_letter(const UChar* haystack, int haystack_l
 						continue;
 					}
 
-					if(haystack[i] == needle[j])
+					if (haystack[i] == needle[j])
 						ret = true;
 					else {
 						ret = false;
@@ -641,7 +641,7 @@ static bool __ctsvc_compare_unicode_letter(const UChar* haystack, int haystack_l
 		break;
 	case CTSVC_LANG_KOREAN:
 		{
-			if(needle_lang != CTSVC_LANG_KOREAN)
+			if (needle_lang != CTSVC_LANG_KOREAN)
 				break;
 
 			if (u_strlen(needle) == 1
@@ -651,7 +651,7 @@ static bool __ctsvc_compare_unicode_letter(const UChar* haystack, int haystack_l
 			}
 
 			for(i=0, j=0; i<u_strlen(haystack) && j<u_strlen(needle);) {
-				if(haystack[i] == needle[j])
+				if (haystack[i] == needle[j])
 					ret = true;
 				else {
 					ret = false;
@@ -665,7 +665,7 @@ static bool __ctsvc_compare_unicode_letter(const UChar* haystack, int haystack_l
 		break;
 	case CTSVC_LANG_JAPANESE:
 		{
-			if(needle_lang != CTSVC_LANG_JAPANESE)
+			if (needle_lang != CTSVC_LANG_JAPANESE)
 				break;
 
 			if (haystack[0] == needle[0])
@@ -678,7 +678,7 @@ static bool __ctsvc_compare_unicode_letter(const UChar* haystack, int haystack_l
 				temp_haystack[0] = haystack[0];
 				temp_needle[0] = needle[0];
 
-				ctsvc_convert_japanese_to_hiragana_unicode(temp_haystack, hiragana_haystack, 2 );
+				ctsvc_convert_japanese_to_hiragana_unicode(temp_haystack, hiragana_haystack, 2);
 
 				ctsvc_convert_japanese_to_hiragana_unicode(temp_needle, hiragana_needle,  2);
 
@@ -689,7 +689,7 @@ static bool __ctsvc_compare_unicode_letter(const UChar* haystack, int haystack_l
 		}
 	case CTSVC_LANG_CHINESE:
 		{
-			if(needle_lang == haystack_lang
+			if (needle_lang == haystack_lang
 					&& haystack[0] == needle[0])
 				ret = true;
 		}
@@ -769,7 +769,7 @@ API int contacts_utils_strstr(const char *haystack,
 			needle_letter_lang = __ctsvc_normalize_str_to_unicode(temp_needle + j, n_len, needle_letter, SMALL_BUFFER_SIZE);
 			RETVM_IF(needle_letter_lang < CONTACTS_ERROR_NONE , -1, "The __ctsvc_normalize_str_to_unicode failed(%d)", needle_letter_lang);
 
-			if (__ctsvc_compare_unicode_letter(haystack_letter, haystack_letter_lang, needle_letter, needle_letter_lang )){
+			if (__ctsvc_compare_unicode_letter(haystack_letter, haystack_letter_lang, needle_letter, needle_letter_lang)) {
 				j+=n_len;
 				match_len += h_len;
 
@@ -940,7 +940,7 @@ API int contacts_normalized_strstr(const char *haystack,
 		if ('\0' == needle[j]) {
 			if ('\0' != haystack[i]) {
 				h_len = ctsvc_check_utf8(haystack[i]);
-				if(h_len == 2 && __ctsvc_is_diacritical(&haystack[i]))
+				if (h_len == 2 && __ctsvc_is_diacritical(&haystack[i]))
 					equal_length++;
 			}
 			*len = equal_length;

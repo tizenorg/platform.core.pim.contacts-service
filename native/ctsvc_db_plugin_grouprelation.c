@@ -28,15 +28,15 @@
 #include "ctsvc_record.h"
 #include "ctsvc_db_access_control.h"
 
-static int __ctsvc_db_grouprelation_insert_record( contacts_record_h record, int *id );
-static int __ctsvc_db_grouprelation_get_record( int id, contacts_record_h* out_record );
-static int __ctsvc_db_grouprelation_update_record( contacts_record_h record );
-static int __ctsvc_db_grouprelation_delete_record( int id );
-static int __ctsvc_db_grouprelation_get_all_records( int offset, int limit, contacts_list_h* out_list );
-static int __ctsvc_db_grouprelation_get_records_with_query( contacts_query_h query, int offset, int limit, contacts_list_h* out_list );
+static int __ctsvc_db_grouprelation_insert_record(contacts_record_h record, int *id);
+static int __ctsvc_db_grouprelation_get_record(int id, contacts_record_h* out_record);
+static int __ctsvc_db_grouprelation_update_record(contacts_record_h record);
+static int __ctsvc_db_grouprelation_delete_record(int id);
+static int __ctsvc_db_grouprelation_get_all_records(int offset, int limit, contacts_list_h* out_list);
+static int __ctsvc_db_grouprelation_get_records_with_query(contacts_query_h query, int offset, int limit, contacts_list_h* out_list);
 //static int __ctsvc_db_grouprelation_insert_records(const contacts_list_h in_list, int **ids);
 //static int __ctsvc_db_grouprelation_update_records(const contacts_list_h in_list);
-//static int __ctsvc_db_grouprelation_delete_records( int ids[], int count);
+//static int __ctsvc_db_grouprelation_delete_records(int ids[], int count);
 
 ctsvc_db_plugin_info_s ctsvc_db_plugin_grouprelation = {
 	.is_query_only = false,
@@ -55,31 +55,31 @@ ctsvc_db_plugin_info_s ctsvc_db_plugin_grouprelation = {
 	.replace_records = NULL,
 };
 
-static int __ctsvc_db_grouprelation_insert_record( contacts_record_h record, int *id )
+static int __ctsvc_db_grouprelation_insert_record(contacts_record_h record, int *id)
 {
 	CTS_ERR("Please use the contacts_group_add_contact()");
 	return CONTACTS_ERROR_INVALID_PARAMETER;
 }
 
-static int __ctsvc_db_grouprelation_get_record( int id, contacts_record_h* out_record )
+static int __ctsvc_db_grouprelation_get_record(int id, contacts_record_h* out_record)
 {
 	CTS_ERR("Not support get group-relation");
 	return CONTACTS_ERROR_INVALID_PARAMETER;
 }
 
-static int __ctsvc_db_grouprelation_update_record( contacts_record_h record )
+static int __ctsvc_db_grouprelation_update_record(contacts_record_h record)
 {
 	CTS_ERR("Not support update group-relation");
 	return CONTACTS_ERROR_INVALID_PARAMETER;
 }
 
-static int __ctsvc_db_grouprelation_delete_record( int id )
+static int __ctsvc_db_grouprelation_delete_record(int id)
 {
 	CTS_ERR("Please use the contacts_group_remove_contact()");
 	return CONTACTS_ERROR_INVALID_PARAMETER;
 }
 
-static int __ctsvc_db_grouprelation_get_all_records( int offset, int limit, contacts_list_h* out_list )
+static int __ctsvc_db_grouprelation_get_all_records(int offset, int limit, contacts_list_h* out_list)
 {
 	int len;
 	int ret;
@@ -129,8 +129,8 @@ static int __ctsvc_db_grouprelation_get_all_records( int offset, int limit, cont
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_db_grouprelation_get_records_with_query( contacts_query_h query,
-		int offset, int limit, contacts_list_h* out_list )
+static int __ctsvc_db_grouprelation_get_records_with_query(contacts_query_h query,
+		int offset, int limit, contacts_list_h* out_list)
 {
 	int ret;
 	int i;
@@ -160,17 +160,15 @@ static int __ctsvc_db_grouprelation_get_records_with_query( contacts_query_h que
 		group_relation = (ctsvc_group_relation_s*)record;
 		if (0 == s_query->projection_count)
 			field_count = s_query->property_count;
-		else
-		{
+		else {
 			field_count = s_query->projection_count;
 
-			if( CONTACTS_ERROR_NONE != ctsvc_record_set_projection_flags(record, s_query->projection, s_query->projection_count, s_query->property_count) )
-			{
+			if (CONTACTS_ERROR_NONE != ctsvc_record_set_projection_flags(record, s_query->projection, s_query->projection_count, s_query->property_count)) {
 				ASSERT_NOT_REACHED("To set projection is failed.\n");
 			}
 		}
 
-		for(i=0;i<field_count;i++) {
+		for (i=0;i<field_count;i++) {
 			char *temp;
 			int property_id;
 			if (0 == s_query->projection_count)
@@ -208,4 +206,4 @@ static int __ctsvc_db_grouprelation_get_records_with_query( contacts_query_h que
 
 //static int __ctsvc_db_grouprelation_insert_records(const contacts_list_h in_list, int **ids) { return CONTACTS_ERROR_NONE; }
 //static int __ctsvc_db_grouprelation_update_records(const contacts_list_h in_list) { return CONTACTS_ERROR_NONE; }
-//static int __ctsvc_db_grouprelation_delete_records( int ids[], int count) { return CONTACTS_ERROR_NONE; }
+//static int __ctsvc_db_grouprelation_delete_records(int ids[], int count) { return CONTACTS_ERROR_NONE; }

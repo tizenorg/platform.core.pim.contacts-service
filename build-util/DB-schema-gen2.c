@@ -30,10 +30,9 @@ int main(int argc, char **argv)
 	if (fp == NULL)
 		exit(EXIT_FAILURE);
 
-	do{
+	do {
 		c = fgetc(fp);
-		switch (c)
-		{
+		switch (c) {
 		case '-':
 			if ('-' == (c = fgetc(fp))) {
 				while ('\n' != c && EOF != c)
@@ -48,7 +47,7 @@ int main(int argc, char **argv)
 			printf("%c",c);
 			break;
 		}
-	}while(EOF != c);
+	} while (EOF != c);
 
 	exit(EXIT_SUCCESS);
 }
