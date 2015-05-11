@@ -88,9 +88,6 @@ cp LICENSE.APLv2 %{buildroot}/usr/share/license/contacts-service2-devel
 /sbin/ldconfig
 
 vconftool set -t int file/private/contacts-service/default_lang 0 -g 5000 -s contacts-service::vconf-private
-vconftool set -t int db/contacts-svc/name_sorting_order 0 -g 5000 -s contacts-service::vconf
-vconftool set -t int db/contacts-svc/name_display_order 0 -g 5000 -s contacts-service::vconf
-vconftool set -t int db/contacts-svc/phonenumber_min_match_digit 8 -g 5000 -s contacts-service::vconf
 
 %postun -p /sbin/ldconfig
 
