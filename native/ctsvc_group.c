@@ -302,10 +302,10 @@ API int contacts_group_set_group_order(int group_id, int previous_group_id, int 
 
 	RETVM_IF(0.0 == previous_prio && 0.0 == next_prio, CONTACTS_ERROR_INVALID_PARAMETER,
 			"The indexes for previous and next are invalid.");
-	RETVM_IF(previous_group_id && previous_addressbook_id != addressbook_id , CONTACTS_ERROR_INVALID_PARAMETER,
+	RETVM_IF(previous_group_id && previous_addressbook_id != addressbook_id, CONTACTS_ERROR_INVALID_PARAMETER,
 				"previous group(%d) and group(%d) are not the same addressbook(%d, %d) groups",
 				previous_group_id, group_id, previous_addressbook_id, addressbook_id);
-	RETVM_IF(next_group_id && next_addressbook_id != addressbook_id , CONTACTS_ERROR_INVALID_PARAMETER,
+	RETVM_IF(next_group_id && next_addressbook_id != addressbook_id, CONTACTS_ERROR_INVALID_PARAMETER,
 				"next group(%d) and group(%d) are not the same addressbook(%d, %d) groups",
 				next_group_id, group_id, next_addressbook_id, addressbook_id);
 

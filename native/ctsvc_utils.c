@@ -348,7 +348,7 @@ static bool __ctsvc_image_util_supported_jpeg_colorspace_cb(image_util_colorspac
 
 		CTS_DBG("size(%d, %d) -> resize(%d,%d)", width, height, resized_width, resized_height);
 
-		image_util_calculate_buffer_size(resized_width, resized_height, colorspace , &size_decode);
+		image_util_calculate_buffer_size(resized_width, resized_height, colorspace, &size_decode);
 
 		img_target = malloc(size_decode);
 

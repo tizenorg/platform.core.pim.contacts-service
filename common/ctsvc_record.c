@@ -408,7 +408,7 @@ API int contacts_record_get_bool(contacts_record_h record, unsigned int property
 	__INVALID_PARAMETER_ERROR_HANDLING();
 }
 
-API int	contacts_record_set_bool(contacts_record_h record, unsigned int property_id, bool value)
+API int contacts_record_set_bool(contacts_record_h record, unsigned int property_id, bool value)
 {
 	RETV_IF(NULL == record, CONTACTS_ERROR_INVALID_PARAMETER);
 
@@ -519,7 +519,7 @@ int ctsvc_record_set_double(contacts_record_h record, unsigned int property_id, 
 }
 
 // Record get/set child records
-API int	contacts_record_add_child_record(contacts_record_h record,
+API int contacts_record_add_child_record(contacts_record_h record,
 		unsigned int property_id, contacts_record_h child_record)
 {
 	ctsvc_record_s *s_record;
@@ -534,7 +534,7 @@ API int	contacts_record_add_child_record(contacts_record_h record,
 	__INVALID_PARAMETER_ERROR_HANDLING();
 }
 
-API int	contacts_record_remove_child_record(contacts_record_h record,
+API int contacts_record_remove_child_record(contacts_record_h record,
 		unsigned int property_id, contacts_record_h child_record)
 {
 	ctsvc_record_s *s_record;

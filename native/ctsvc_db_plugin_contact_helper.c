@@ -1060,7 +1060,7 @@ void ctsvc_contact_make_display_name(ctsvc_contact_s *contact)
 			display_len = SAFE_STRLEN(name->prefix) + temp_display_len + 2;
 			display = calloc(1, display_len);
 			char * temp = __ctsvc_remove_first_space(name->prefix);
-			snprintf(display, display_len , "%s %s", temp, temp_display);
+			snprintf(display, display_len, "%s %s", temp, temp_display);
 			free(temp);
 			contact->reverse_display_name = display;
 			contact->reverse_sort_name = temp_display;
@@ -1140,7 +1140,7 @@ void ctsvc_contact_make_display_name(ctsvc_contact_s *contact)
 			if (name->prefix && temp_display) {
 				display_len = SAFE_STRLEN(name->prefix) + temp_display_len + 2;
 				display = calloc(1, display_len);
-				snprintf(display, display_len , "%s %s", name->prefix, temp_display);
+				snprintf(display, display_len, "%s %s", name->prefix, temp_display);
 				contact->display_name = display;
 				contact->sort_name = temp_display;
 			}

@@ -1178,7 +1178,7 @@ API int contacts_person_unlink_contact(int person_id, int contact_id, int* out_p
 	bool is_favorite = false;
 	double priority = 0.0;
 
-	RETVM_IF(person_id <= 0 || contact_id <= 0 , CONTACTS_ERROR_INVALID_PARAMETER,
+	RETVM_IF(person_id <= 0 || contact_id <= 0, CONTACTS_ERROR_INVALID_PARAMETER,
 		"Invalid parameter : person_id(%d), person_id(%d)", person_id, person_id);
 
 	if (out_person_id)

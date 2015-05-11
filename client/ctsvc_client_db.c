@@ -101,7 +101,7 @@ API int contacts_db_insert_record(contacts_record_h record, int *id)
 	return ret;
 }
 
-API int	contacts_db_get_record(const char* view_uri, int id, contacts_record_h* out_record)
+API int contacts_db_get_record(const char* view_uri, int id, contacts_record_h* out_record)
 {
 	int ret = CONTACTS_ERROR_NONE;
 	pims_ipc_data_h indata = NULL;

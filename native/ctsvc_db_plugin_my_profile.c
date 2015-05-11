@@ -522,7 +522,7 @@ static void __ctsvc_make_my_profile_display_name(ctsvc_my_profile_s *my_profile)
 		if (name->prefix && temp_display) {
 			display_len = SAFE_STRLEN(name->prefix) + temp_display_len + 2;
 			display = calloc(1, display_len);
-			snprintf(display, display_len , "%s %s", name->prefix, temp_display);
+			snprintf(display, display_len, "%s %s", name->prefix, temp_display);
 			my_profile->reverse_display_name = display;
 			free(temp_display);
 		}
@@ -590,7 +590,7 @@ static void __ctsvc_make_my_profile_display_name(ctsvc_my_profile_s *my_profile)
 			if (name->prefix && temp_display) {
 				display_len = SAFE_STRLEN(name->prefix) + temp_display_len + 2;
 				display = calloc(1, display_len);
-				snprintf(display, display_len , "%s %s", name->prefix, temp_display);
+				snprintf(display, display_len, "%s %s", name->prefix, temp_display);
 				my_profile->display_name = display;
 				free(temp_display);
 			}

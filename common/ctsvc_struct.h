@@ -439,7 +439,7 @@ typedef struct {
 	int id;
 	int activity_id;
 	char *photo_url;
-	int	sort_index;
+	int sort_index;
 }ctsvc_activity_photo_s;
 
 typedef struct {

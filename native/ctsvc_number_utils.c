@@ -819,7 +819,7 @@ int ctsvc_normalize_number(const char *src, char *dest, int dest_size, bool repl
 	return d_pos;
 }
 
-// vaild character : digit, +, *, #, , ;, alphabet(depends on replace_alphabet parameter)
+// vaild character : digit, +, *, #,, ;, alphabet(depends on replace_alphabet parameter)
 // Remove invalid string from number
 int ctsvc_clean_number(const char *src, char *dest, int dest_size, bool replace_alphabet)
 {
@@ -1079,7 +1079,7 @@ static bool __ctsvc_number_compare(const char *number1, const char *number2)
 				&& (number1[0] == '0' || (cc && cc[0] == '7' && number1[0] == '8')))
 			return true;
 		//////////////////////////////////////////////////
-		// + IP CC XXXXXXXX, + CC XXXXXXXX  (ex. +001 82  11 1234 5678 , +82 10 1234 5678)
+		// + IP CC XXXXXXXX, + CC XXXXXXXX  (ex. +001 82  11 1234 5678, +82 10 1234 5678)
 		else if ((CTSVC_PLUS_IP_CC == n1 || CTSVC_IP_CC == n1)
 				&& (CTSVC_PLUS_CC_ONLY == n2 || CTSVC_CC_ONLY == n2)) {
 			int p = (CTSVC_PLUS_CC_ONLY == n2)?1:0;
@@ -1095,7 +1095,7 @@ static bool __ctsvc_number_compare(const char *number1, const char *number2)
 				return true;
 		}
 		///////////////////////////////////////////////////
-		// + CC XXXXXXXX, + IP CC XXXXXXXX  (ex. +001 82  10 1234 5678 , +82 10 1234 5678)
+		// + CC XXXXXXXX, + IP CC XXXXXXXX  (ex. +001 82  10 1234 5678, +82 10 1234 5678)
 		else if ((CTSVC_PLUS_IP_ONLY == n1 || CTSVC_IP_ONLY == n1)
 				&& CTSVC_PLUS_ONLY == n2) {
 			return true;

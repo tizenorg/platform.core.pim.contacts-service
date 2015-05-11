@@ -2133,7 +2133,7 @@ static inline int __ctsvc_get_pinyinspell(UChar src, char spell[CHINESE_DUOYINZI
 	int count=0;
 
 	offset = src - CHINESE_UNICODE_START;
-	RETVM_IF(offset < 0 || offset >= CHINESE_COUNT , CONTACTS_ERROR_INVALID_PARAMETER, "src is invalid");
+	RETVM_IF(offset < 0 || offset >= CHINESE_COUNT, CONTACTS_ERROR_INVALID_PARAMETER, "src is invalid");
 
 	len = strlen(pinyin_spell_table[offset]);
 
@@ -2157,10 +2157,9 @@ static inline bool __ctsvc_is_chinese(const UChar *src)
 	return	false;
 }
 
-static inline bool
-__ctsvc_has_chinese(const UChar *src)
+static inline bool __ctsvc_has_chinese(const UChar *src)
 {
-	int	i, len;
+	int i, len;
 
 	len = u_strlen(src);
 
@@ -2201,7 +2200,7 @@ bool ctsvc_has_chinese(const char *src)
 int ctsvc_convert_chinese_to_pinyin(const char *src, pinyin_name_s **name, int *size)
 {
 	UChar	temp_result[strlen(src)+1];
-	int	count = 0, len=0, total_count=0;
+	int count = 0, len=0, total_count=0;
 	int ret, i, j;
 	int multi_pinyin_count = 0;
 	UErrorCode status = 0;

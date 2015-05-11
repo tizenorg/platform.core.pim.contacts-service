@@ -1748,7 +1748,7 @@ static int __ctsvc_db_search_records_append_sort(const char *view_uri,
 			if (temp_len >= 0) len+= temp_len;
 				free(temp_keyword);
 		}
-		temp_len = SAFE_SNPRINTF(query, query_size, len, " , ");
+		temp_len = SAFE_SNPRINTF(query, query_size, len, ", ");
 		if (temp_len >= 0) len+= temp_len;
 		temp_len = SAFE_SNPRINTF(query, query_size, len, sortkey);
 		if (temp_len >= 0) len+= temp_len;
@@ -2015,7 +2015,7 @@ static int __ctsvc_db_search_records_exec(const char *view_uri, const property_i
 		sortkey = ctsvc_get_sort_column();
 
 	if (sortkey) {
-		len = __ctsvc_db_search_records_append_sort(view_uri, sortkey, keyword, len , &query, &query_size);
+		len = __ctsvc_db_search_records_append_sort(view_uri, sortkey, keyword, len, &query, &query_size);
 	}
 	else if (0 == strcmp(view_uri, CTSVC_VIEW_URI_GROUP)) {
 		temp_len = SAFE_SNPRINTF(&query, &query_size, len, " ORDER BY group_prio");
@@ -2587,7 +2587,7 @@ static int __ctsvc_db_get_count_exec(const char *view_uri, const property_info_s
 	len += snprintf(query+len, sizeof(query)-len, ") ");
 
 	ret = ctsvc_query_get_first_int_result(query, out_count);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret , "DB error : ctsvc_query_get_first_int_result() Failed(%d)", ret);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_get_first_int_result() Failed(%d)", ret);
 
 	return ret;
 }
@@ -2669,12 +2669,12 @@ static int __ctsvc_db_get_count_with_query_exec(ctsvc_query_s *s_query, const ch
 		for (cursor=bind_text, i=1; cursor;cursor=cursor->next, i++)
 			ctsvc_stmt_bind_copy_text(stmt, i, cursor->data, strlen(cursor->data));
 		ret = ctsvc_stmt_get_first_int_result(stmt, out_count);
-		RETVM_IF(CONTACTS_ERROR_NONE != ret, ret , "DB error : ctsvc_stmt_get_first_int_result() Failed(%d)", ret);
+		RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_stmt_get_first_int_result() Failed(%d)", ret);
 	}
 	else {
 		ret = ctsvc_query_get_first_int_result(query, out_count);
 		free(query);
-		RETVM_IF(CONTACTS_ERROR_NONE != ret, ret , "DB error : ctsvc_query_get_first_int_result() Failed(%d)", ret);
+		RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_get_first_int_result() Failed(%d)", ret);
 	}
 	return ret;
 }
@@ -2783,7 +2783,7 @@ static int __ctsvc_db_get_contact_changes(const char* view_uri, int addressbook_
 						"AND "CTS_TABLE_CONTACTS".addressbook_id = "CTS_TABLE_ADDRESSBOOKS".addressbook_id",
 			CONTACTS_CHANGE_UPDATED, version,
 			CONTACTS_CHANGE_DELETED, version, version,
-			CONTACTS_CHANGE_DELETED, version ,version);
+			CONTACTS_CHANGE_DELETED, version,version);
 	}
 
 	ret = ctsvc_query_prepare(query, &stmt);
@@ -2822,7 +2822,7 @@ static int __ctsvc_db_get_contact_changes(const char* view_uri, int addressbook_
 
 	snprintf(query, sizeof(query), "SELECT ver FROM "CTS_TABLE_VERSION);
 	ret = ctsvc_query_get_first_int_result(query, out_current_version);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret , "DB error : ctsvc_query_get_first_int_result() Failed(%d)", ret);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_get_first_int_result() Failed(%d)", ret);
 	*out_list = list;
 
 	return CONTACTS_ERROR_NONE;
@@ -2890,7 +2890,7 @@ static int __ctsvc_db_get_group_changes(const char* view_uri, int addressbook_id
 
 	snprintf(query, sizeof(query), "SELECT ver FROM "CTS_TABLE_VERSION);
 	ret = ctsvc_query_get_first_int_result(query, out_current_version);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret , "DB error : ctsvc_query_get_first_int_result() Failed(%d)", ret);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_get_first_int_result() Failed(%d)", ret);
 	*out_list = list;
 
 	return CONTACTS_ERROR_NONE;
@@ -2948,7 +2948,7 @@ static int __ctsvc_db_get_group_relations_changes(const char* view_uri, int addr
 
 	snprintf(query, sizeof(query), "SELECT ver FROM "CTS_TABLE_VERSION);
 	ret = ctsvc_query_get_first_int_result(query, out_current_version);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret , "DB error : ctsvc_query_get_first_int_result() Failed(%d)", ret);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_get_first_int_result() Failed(%d)", ret);
 	*out_list = list;
 
 	return CONTACTS_ERROR_NONE;
@@ -2995,7 +2995,7 @@ static int __ctsvc_db_get_group_member_changes(const char* view_uri, int address
 
 	snprintf(query, sizeof(query), "SELECT ver FROM "CTS_TABLE_VERSION);
 	ret = ctsvc_query_get_first_int_result(query, out_current_version);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret , "DB error : ctsvc_query_get_first_int_result() Failed(%d)", ret);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_get_first_int_result() Failed(%d)", ret);
 	*out_list = list;
 
 	return CONTACTS_ERROR_NONE;
@@ -3062,7 +3062,7 @@ static int __ctsvc_db_get_my_profile_changes(const char* view_uri, int addressbo
 
 	snprintf(query, sizeof(query), "SELECT ver FROM "CTS_TABLE_VERSION);
 	ret = ctsvc_query_get_first_int_result(query, out_current_version);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret , "DB error : ctsvc_query_get_first_int_result() Failed(%d)", ret);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_get_first_int_result() Failed(%d)", ret);
 	*out_list = list;
 
 	return CONTACTS_ERROR_NONE;

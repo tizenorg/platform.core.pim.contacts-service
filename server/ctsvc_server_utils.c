@@ -137,7 +137,7 @@ int ctsvc_server_init_configuration(void)
 
 	ret = vconf_get_int(ctsvc_get_default_sort_vconfkey(), &sort_type);
 	if (ret < 0 || sort_type == CTSVC_SORT_OTHERS) {
-		CTS_ERR("vconf_get_int(%s) Failed(%d)", ctsvc_get_default_sort_vconfkey() ,ret);
+		CTS_ERR("vconf_get_int(%s) Failed(%d)", ctsvc_get_default_sort_vconfkey(),ret);
 		sort_type = ctsvc_get_sort_type_from_language(system_language);
 		if (sort_type == CTSVC_SORT_OTHERS)
 			sort_type = CTSVC_SORT_WESTERN;
