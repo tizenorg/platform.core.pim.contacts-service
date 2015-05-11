@@ -31,10 +31,10 @@ static int __ctsvc_phonelog_create(contacts_record_h *out_record);
 static int __ctsvc_phonelog_destroy(contacts_record_h record, bool delete_child);
 static int __ctsvc_phonelog_clone(contacts_record_h record, contacts_record_h *out_record);
 static int __ctsvc_phonelog_get_int(contacts_record_h record, unsigned int property_id, int *out);
-static int __ctsvc_phonelog_get_str(contacts_record_h record, unsigned int property_id, char** out_str );
+static int __ctsvc_phonelog_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_phonelog_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_phonelog_set_int(contacts_record_h record, unsigned int property_id, int value);
-static int __ctsvc_phonelog_set_str(contacts_record_h record, unsigned int property_id, const char* str );
+static int __ctsvc_phonelog_set_str(contacts_record_h record, unsigned int property_id, const char* str);
 
 ctsvc_record_plugin_cb_s phonelog_plugin_cbs = {
 	.create = __ctsvc_phonelog_create,
@@ -139,7 +139,7 @@ static int __ctsvc_phonelog_get_int(contacts_record_h record, unsigned int prope
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_phonelog_get_str_real(contacts_record_h record, unsigned int property_id, char** out_str, bool copy )
+static int __ctsvc_phonelog_get_str_real(contacts_record_h record, unsigned int property_id, char** out_str, bool copy)
 {
 	ctsvc_phonelog_s* phonelog = (ctsvc_phonelog_s*)record;
 
@@ -216,7 +216,7 @@ static int __ctsvc_phonelog_set_int(contacts_record_h record, unsigned int prope
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_phonelog_set_str(contacts_record_h record, unsigned int property_id, const char* str )
+static int __ctsvc_phonelog_set_str(contacts_record_h record, unsigned int property_id, const char* str)
 {
 	ctsvc_phonelog_s* phonelog = (ctsvc_phonelog_s*)record;
 

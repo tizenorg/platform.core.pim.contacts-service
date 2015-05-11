@@ -64,7 +64,7 @@ extern "C"
  *
  * @see contacts_list_destroy()
  */
-int contacts_list_create( contacts_list_h* contacts_list );
+int contacts_list_create(contacts_list_h* contacts_list);
 
 /**
  * @brief Destroys a contacts list and releases its all resources.
@@ -83,7 +83,7 @@ int contacts_list_create( contacts_list_h* contacts_list );
  *
  * @see contacts_list_create()
  */
-int contacts_list_destroy( contacts_list_h contacts_list, bool delete_child );
+int contacts_list_destroy(contacts_list_h contacts_list, bool delete_child);
 
 /**
  * @brief Retrieves the number of contact entities from a contacts list.
@@ -101,7 +101,7 @@ int contacts_list_destroy( contacts_list_h contacts_list, bool delete_child );
  *
  * @see contacts_list_add()
  */
-int contacts_list_get_count( contacts_list_h contacts_list, int *count );
+int contacts_list_get_count(contacts_list_h contacts_list, int *count);
 
 /**
  * @brief Adds a record to a contacts list.
@@ -121,7 +121,7 @@ int contacts_list_get_count( contacts_list_h contacts_list, int *count );
  *
  * @see contacts_list_remove()
  */
-int contacts_list_add( contacts_list_h contacts_list, contacts_record_h record );
+int contacts_list_add(contacts_list_h contacts_list, contacts_record_h record);
 
 /**
  * @brief Removes a record from the contacts list.
@@ -143,7 +143,7 @@ int contacts_list_add( contacts_list_h contacts_list, contacts_record_h record )
  *
  * @see contacts_list_add()
  */
-int contacts_list_remove( contacts_list_h contacts_list, contacts_record_h record );
+int contacts_list_remove(contacts_list_h contacts_list, contacts_record_h record);
 
 /**
  * @brief Retrieves a record from the contacts list.
@@ -165,7 +165,7 @@ int contacts_list_remove( contacts_list_h contacts_list, contacts_record_h recor
  * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
  * @retval  #CONTACTS_ERROR_NO_DATA             Requested data does not exist
  */
-int contacts_list_get_current_record_p( contacts_list_h contacts_list, contacts_record_h* record );
+int contacts_list_get_current_record_p(contacts_list_h contacts_list, contacts_record_h* record);
 
 /**
  * @brief Moves a contacts list to the previous position.
@@ -183,7 +183,7 @@ int contacts_list_get_current_record_p( contacts_list_h contacts_list, contacts_
  *
  * @see contacts_list_next()
  */
-int contacts_list_prev( contacts_list_h contacts_list );
+int contacts_list_prev(contacts_list_h contacts_list);
 
 /**
  * @brief Moves a contacts list to the next position.
@@ -201,7 +201,7 @@ int contacts_list_prev( contacts_list_h contacts_list );
  *
  * @see contacts_list_prev()
  */
-int contacts_list_next( contacts_list_h contacts_list );
+int contacts_list_next(contacts_list_h contacts_list);
 
 /**
  * @brief Moves a contacts list to the first position.
@@ -219,7 +219,7 @@ int contacts_list_next( contacts_list_h contacts_list );
  *
  * @see contacts_list_last()
  */
-int contacts_list_first( contacts_list_h contacts_list );
+int contacts_list_first(contacts_list_h contacts_list);
 
 /**
  * @brief Moves a contacts list to the last position.
@@ -237,7 +237,7 @@ int contacts_list_first( contacts_list_h contacts_list );
  *
  * @see contacts_list_first()
  */
-int contacts_list_last( contacts_list_h contacts_list );
+int contacts_list_last(contacts_list_h contacts_list);
 
 /**
  * @}

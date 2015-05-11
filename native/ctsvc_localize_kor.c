@@ -242,8 +242,7 @@ int ctsvc_get_korean_search_pattern(const char *src, char *dest, int dest_size)
 		RETVM_IF(U_FAILURE(status), CONTACTS_ERROR_SYSTEM,
 				"u_strFromUTF8() Failed(%s)", u_errorName(status));
 
-		if (is_chosung(tmp_result[0]))
-		{
+		if (is_chosung(tmp_result[0])) {
 			ctsvc_hangul_compatibility2jamo(tmp_result);
 
 			u_strToUTF8(&dest[j], dest_size - j, &size, tmp_result, -1, &status);

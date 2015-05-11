@@ -112,7 +112,7 @@ typedef enum {
  *
  * @see contacts_filter_destroy()
  */
-int contacts_filter_create( const char* view_uri, contacts_filter_h* filter );
+int contacts_filter_create(const char* view_uri, contacts_filter_h* filter);
 
 /**
  * @brief Destroys a filter.
@@ -129,7 +129,7 @@ int contacts_filter_create( const char* view_uri, contacts_filter_h* filter );
  *
  * @see contacts_filter_create()
  */
-int contacts_filter_destroy( contacts_filter_h filter );
+int contacts_filter_destroy(contacts_filter_h filter);
 
 /**
  * @brief Adds a condition for a string type property.
@@ -150,7 +150,7 @@ int contacts_filter_destroy( contacts_filter_h filter );
  *
  * @see contacts_filter_add_operator()
  */
-int contacts_filter_add_str( contacts_filter_h filter, unsigned int property_id, contacts_match_str_flag_e match, const char* match_value );
+int contacts_filter_add_str(contacts_filter_h filter, unsigned int property_id, contacts_match_str_flag_e match, const char* match_value);
 
 /**
  * @brief Adds a condition for an integer type property.
@@ -171,7 +171,7 @@ int contacts_filter_add_str( contacts_filter_h filter, unsigned int property_id,
  *
  * @see contacts_filter_add_operator()
  */
-int contacts_filter_add_int( contacts_filter_h filter, unsigned int property_id, contacts_match_int_flag_e match, int match_value );
+int contacts_filter_add_int(contacts_filter_h filter, unsigned int property_id, contacts_match_int_flag_e match, int match_value);
 
 /**
  * @brief Adds a condition for a long int type property.
@@ -192,7 +192,7 @@ int contacts_filter_add_int( contacts_filter_h filter, unsigned int property_id,
  *
  * @see contacts_filter_add_operator()
  */
-int contacts_filter_add_lli( contacts_filter_h filter, unsigned int property_id, contacts_match_int_flag_e match, long long int match_value );
+int contacts_filter_add_lli(contacts_filter_h filter, unsigned int property_id, contacts_match_int_flag_e match, long long int match_value);
 
 /**
  * @brief Adds a condition for a double type property.
@@ -213,7 +213,7 @@ int contacts_filter_add_lli( contacts_filter_h filter, unsigned int property_id,
  *
  * @see contacts_filter_add_operator()
  */
-int contacts_filter_add_double( contacts_filter_h filter, unsigned int property_id, contacts_match_int_flag_e match, double match_value );
+int contacts_filter_add_double(contacts_filter_h filter, unsigned int property_id, contacts_match_int_flag_e match, double match_value);
 
 /**
  * @brief Adds a condition for a boolean type property.
@@ -233,7 +233,7 @@ int contacts_filter_add_double( contacts_filter_h filter, unsigned int property_
  *
  * @see contacts_filter_add_operator()
  */
-int contacts_filter_add_bool( contacts_filter_h filter, unsigned int property_id, bool match_value );
+int contacts_filter_add_bool(contacts_filter_h filter, unsigned int property_id, bool match_value);
 
 /**
  * @brief Adds an operator between conditions.
@@ -253,7 +253,7 @@ int contacts_filter_add_bool( contacts_filter_h filter, unsigned int property_id
  * @see contacts_filter_add_int()
  * @see contacts_filter_add_bool()
  */
-int contacts_filter_add_operator( contacts_filter_h filter, contacts_filter_operator_e operator_type );
+int contacts_filter_add_operator(contacts_filter_h filter, contacts_filter_operator_e operator_type);
 
 /**
  * @brief Adds a filter to a given filter.

@@ -99,14 +99,14 @@ static inline int __ctsvc_collation_str(const char *src, char **dest)
 		*dot = '\0';
 
 	collator = ucol_open(region, &status);
-	if (U_FAILURE(status)){
+	if (U_FAILURE(status)) {
 		CTS_ERR("ucol_open Failed(%s)", u_errorName(status));
 		free(region);
 		return CONTACTS_ERROR_SYSTEM;
 	}
 
 	// TODO: ucol_setAttribute is not called
-	if (U_FAILURE(status)){
+	if (U_FAILURE(status)) {
 		CTS_ERR("ucol_setAttribute Failed(%s)", u_errorName(status));
 		free(region);
 		ucol_close(collator);
@@ -123,7 +123,7 @@ static inline int __ctsvc_collation_str(const char *src, char **dest)
 	status = U_ZERO_ERROR;
 	tmp_result = calloc(1, sizeof(UChar) * (size + 1));
 	u_strFromUTF8(tmp_result, size + 1, NULL, src, -1, &status);
-	if (U_FAILURE(status)){
+	if (U_FAILURE(status)) {
 		CTS_ERR("u_strFromUTF8 Failed(%s)", u_errorName(status));
 		free(region);
 		free(tmp_result);
@@ -230,7 +230,7 @@ static int __ctsvc_normalize_str(const char *src, char **dest)
 	UChar *temp_result = NULL;
 	temp_result = calloc(1, sizeof(UChar)*(size+1));
 	bool replaced = false;
-	for(i=0,j=0; i<size;i++) {
+	for (i=0,j=0; i<size;i++) {
 		if (CTSVC_COMPARE_BETWEEN((UChar)CTSVC_COMBINING_DIACRITICAL_MARKS_START,
 			result[i], (UChar)CTSVC_COMBINING_DIACRITICAL_MARKS_END)) {
 			replaced = true;
@@ -282,7 +282,7 @@ static int __ctsvc_convert_halfwidth_ascii_and_symbol(const char *src, UChar *de
 	*str_size = size;
 
 	// full width -> half width
-	for ( i=0; i < size; i++ ) {
+	for (i=0;i<size;i++) {
 		// FF00 ~ FF60: Fullwidth ASCII variants
 		if (CTSVC_COMPARE_BETWEEN((UChar)0xFF00, dest[i], (UChar)0xFF60)) {
 			int unicode_value1 = 0;
@@ -293,36 +293,28 @@ static int __ctsvc_convert_halfwidth_ascii_and_symbol(const char *src, UChar *de
 		}
 		// FFE0~FFE6: Fullwidth symbol variants
 		else if (CTSVC_COMPARE_BETWEEN((UChar)0xFFE0, dest[i], (UChar)0xFFE6)) {
-			if( dest[i] == (UChar)0xFFE0 )
-			{
+			if (dest[i] == (UChar)0xFFE0) {
 				dest[i] = (UChar)0x00A2;
 			}
-			else if( dest[i] == (UChar)0xFFE1 )
-			{
+			else if (dest[i] == (UChar)0xFFE1) {
 				dest[i] = (UChar)0x00A3;
 			}
-			else if( dest[i] == (UChar)0xFFE2 )
-			{
+			else if (dest[i] == (UChar)0xFFE2) {
 				dest[i] = (UChar)0x00AC;
 			}
-			else if( dest[i] == (UChar)0xFFE3 )
-			{
+			else if (dest[i] == (UChar)0xFFE3) {
 				dest[i] = (UChar)0x00AF;
 			}
-			else if( dest[i] == (UChar)0xFFE4 )
-			{
+			else if (dest[i] == (UChar)0xFFE4) {
 				dest[i] = (UChar)0x00A6;
 			}
-			else if( dest[i] == (UChar)0xFFE5 )
-			{
+			else if (dest[i] == (UChar)0xFFE5) {
 				dest[i] = (UChar)0x00A5;
 			}
-			else if( dest[i] == (UChar)0xFFE6 )
-			{
+			else if (dest[i] == (UChar)0xFFE6) {
 				dest[i] = (UChar)0x20A9;
 			}
-			else
-			{
+			else {
 
 			}
 		}
@@ -343,8 +335,7 @@ int ctsvc_get_halfwidth_string(const char *src, char** dest, int* dest_size)
 	UChar unicodes[LARGE_BUFFER_SIZE+1];
 	int ustr_size = 0;
 
-	if( __ctsvc_convert_halfwidth_ascii_and_symbol(src, unicodes, LARGE_BUFFER_SIZE, &ustr_size) != CONTACTS_ERROR_NONE )
-	{
+	if (__ctsvc_convert_halfwidth_ascii_and_symbol(src, unicodes, LARGE_BUFFER_SIZE, &ustr_size) != CONTACTS_ERROR_NONE) {
 		CTS_ERR("convert to halfwidth failed! %s ", src);
 
 		return CONTACTS_ERROR_SYSTEM;
@@ -398,7 +389,7 @@ static void __ctsvc_convert_japanese_group_letter(char *dest)
 
 	unicode_value = (0xFF & (tmp_result[0]));
 
-	for(i=0; i < 13; i++) {
+	for (i=0; i < 13; i++) {
 		if (hiragana_group[i].start <= unicode_value
 				&& unicode_value <= hiragana_group[i].end)
 			result[0] = hiragana_group[i].letter;
@@ -411,7 +402,7 @@ static void __ctsvc_convert_japanese_group_letter(char *dest)
 
 static bool __ctsvc_check_range_out_index(const char src[])
 {
-	if(src[0] == 0xe2 && src[1] == 0x80 && src[2] == 0xa6){
+	if (src[0] == 0xe2 && src[1] == 0x80 && src[2] == 0xa6) {
 		return true;
 	}
 	return false;
@@ -423,12 +414,12 @@ int ctsvc_normalize_index(const char *src, char **dest)
 	char first_str[10] = {0};
 	int length = 0;
 
-	if(first_str[0] == '\0' || __ctsvc_check_range_out_index(first_str)){
+	if (first_str[0] == '\0' || __ctsvc_check_range_out_index(first_str)) {
 		length = ctsvc_check_utf8(src[0]);
 		RETVM_IF(length <= 0, CONTACTS_ERROR_INTERNAL, "check_utf8 is failed");
 		memset(first_str,0x00, sizeof(first_str));
 		strncpy(first_str, src, length);
-		if (length != strlen(first_str)){
+		if (length != strlen(first_str)) {
 			CTS_ERR("length : %d, first_str : %s, strlne : %d", length, first_str, strlen(first_str));
 			return CONTACTS_ERROR_INVALID_PARAMETER;
 		}

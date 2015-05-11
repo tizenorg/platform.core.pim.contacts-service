@@ -21,8 +21,8 @@
 #include "ctsvc_internal.h"
 #include "ctsvc_inotify.h"
 
-API int contacts_db_add_changed_cb( const char* view_uri, contacts_db_changed_cb cb,
-		void* user_data )
+API int contacts_db_add_changed_cb(const char* view_uri, contacts_db_changed_cb cb,
+		void* user_data)
 {
 	int ret;
 
@@ -38,8 +38,8 @@ API int contacts_db_add_changed_cb( const char* view_uri, contacts_db_changed_cb
 	return CONTACTS_ERROR_NONE;
 }
 
-API int contacts_db_remove_changed_cb( const char* view_uri, contacts_db_changed_cb cb,
-		void* user_data )
+API int contacts_db_remove_changed_cb(const char* view_uri, contacts_db_changed_cb cb,
+		void* user_data)
 {
 	int ret;
 

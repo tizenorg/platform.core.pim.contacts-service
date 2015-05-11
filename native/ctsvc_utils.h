@@ -27,7 +27,7 @@ const char* ctsvc_get_sort_name_column(void);
 int ctsvc_begin_trans(void);
 int ctsvc_end_trans(bool is_success);
 int ctsvc_get_next_ver(void);
-int ctsvc_get_current_version( int* out_current_version );
+int ctsvc_get_current_version(int* out_current_version);
 int ctsvc_get_transaction_ver(void);
 
 int ctsvc_utils_copy_image(const char *dir, const char *src, const char *file);

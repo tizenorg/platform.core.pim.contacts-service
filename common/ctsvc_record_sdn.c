@@ -30,10 +30,10 @@ static int __ctsvc_sdn_create(contacts_record_h* out_record);
 static int __ctsvc_sdn_destroy(contacts_record_h record, bool delete_child);
 static int __ctsvc_sdn_clone(contacts_record_h record, contacts_record_h *out_record);
 static int __ctsvc_sdn_get_int(contacts_record_h record, unsigned int property_id, int *out);
-static int __ctsvc_sdn_get_str(contacts_record_h record, unsigned int property_id, char** out_str );
-static int __ctsvc_sdn_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str );
+static int __ctsvc_sdn_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
+static int __ctsvc_sdn_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_sdn_set_int(contacts_record_h record, unsigned int property_id, int value);
-static int __ctsvc_sdn_set_str(contacts_record_h record, unsigned int property_id, const char* str );
+static int __ctsvc_sdn_set_str(contacts_record_h record, unsigned int property_id, const char* str);
 
 ctsvc_record_plugin_cb_s sdn_plugin_cbs = {
 	.create = __ctsvc_sdn_create,
@@ -120,7 +120,7 @@ static int __ctsvc_sdn_get_int(contacts_record_h record, unsigned int property_i
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_sdn_get_str_real(contacts_record_h record, unsigned int property_id, char** out_str, bool copy )
+static int __ctsvc_sdn_get_str_real(contacts_record_h record, unsigned int property_id, char** out_str, bool copy)
 {
 	ctsvc_sdn_s* sdn = (ctsvc_sdn_s*)record;
 
@@ -166,7 +166,7 @@ static int __ctsvc_sdn_set_int(contacts_record_h record, unsigned int property_i
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_sdn_set_str(contacts_record_h record, unsigned int property_id, const char* str )
+static int __ctsvc_sdn_set_str(contacts_record_h record, unsigned int property_id, const char* str)
 {
 	ctsvc_sdn_s* sdn = (ctsvc_sdn_s*)record;
 

@@ -127,8 +127,8 @@ int ctsvc_ipc_disconnect_on_thread(void)
 
 pims_ipc_h ctsvc_get_ipc_handle()
 {
-	if(__contacts_ipc == NULL) {
-		if(__contacts_global_ipc == NULL ) {
+	if (__contacts_ipc == NULL) {
+		if (__contacts_global_ipc == NULL) {
 			CTS_ERR("IPC haven't been initialized yet.");
 			return NULL;
 		}
@@ -143,7 +143,7 @@ bool ctsvc_ipc_is_busy()
 {
 	bool ret = false;
 
-	if(__contacts_ipc != NULL) {
+	if (__contacts_ipc != NULL) {
 		ret = pims_ipc_is_call_in_progress(__contacts_ipc);
 		if (ret)
 			CTS_ERR("thread local ipc channel is busy.");

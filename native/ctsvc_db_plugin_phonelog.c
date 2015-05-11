@@ -42,15 +42,15 @@
 #endif // ENABLE_SIM_FEATURE
 #endif
 
-static int __ctsvc_db_phonelog_insert_record( contacts_record_h record, int *id );
-static int __ctsvc_db_phonelog_get_record( int id, contacts_record_h* out_record );
-static int __ctsvc_db_phonelog_update_record( contacts_record_h record );
-static int __ctsvc_db_phonelog_delete_record( int id );
-static int __ctsvc_db_phonelog_get_all_records( int offset, int limit, contacts_list_h* out_list );
-static int __ctsvc_db_phonelog_get_records_with_query( contacts_query_h query, int offset, int limit, contacts_list_h* out_list );
+static int __ctsvc_db_phonelog_insert_record(contacts_record_h record, int *id);
+static int __ctsvc_db_phonelog_get_record(int id, contacts_record_h* out_record);
+static int __ctsvc_db_phonelog_update_record(contacts_record_h record);
+static int __ctsvc_db_phonelog_delete_record(int id);
+static int __ctsvc_db_phonelog_get_all_records(int offset, int limit, contacts_list_h* out_list);
+static int __ctsvc_db_phonelog_get_records_with_query(contacts_query_h query, int offset, int limit, contacts_list_h* out_list);
 //static int __ctsvc_db_phonelog_insert_records(const contacts_list_h in_list, int **ids);
 //static int __ctsvc_db_phonelog_update_records(const contacts_list_h in_list);
-//static int __ctsvc_db_phonelog_delete_records( int ids[], int count);
+//static int __ctsvc_db_phonelog_delete_records(int ids[], int count);
 
 ctsvc_db_plugin_info_s ctsvc_db_plugin_phonelog = {
 	.is_query_only = false,
@@ -98,7 +98,7 @@ static int __ctsvc_db_phonelog_value_set(cts_stmt stmt, contacts_record_h *recor
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_db_phonelog_get_record( int id, contacts_record_h* out_record )
+static int __ctsvc_db_phonelog_get_record(int id, contacts_record_h* out_record)
 {
 	int ret;
 	cts_stmt stmt = NULL;
@@ -138,7 +138,7 @@ static int __ctsvc_db_phonelog_get_record( int id, contacts_record_h* out_record
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_db_phonelog_update_record( contacts_record_h record )
+static int __ctsvc_db_phonelog_update_record(contacts_record_h record)
 {
 	int phonelog_id;
 	char query[CTS_SQL_MIN_LEN] = {0};
@@ -195,7 +195,7 @@ static int __ctsvc_db_phonelog_update_record( contacts_record_h record )
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_db_phonelog_delete_record( int id )
+static int __ctsvc_db_phonelog_delete_record(int id)
 {
 	int ret;
 	int phonelog_id;
@@ -226,8 +226,7 @@ static int __ctsvc_db_phonelog_delete_record( int id )
 	ctsvc_set_phonelog_noti();
 
 	ret = ctsvc_end_trans(true);
-	if (ret < CONTACTS_ERROR_NONE)
-	{
+	if (ret < CONTACTS_ERROR_NONE) {
 		CTS_ERR("DB error : ctsvc_end_trans() Failed(%d)", ret);
 		return ret;
 	}
@@ -235,8 +234,8 @@ static int __ctsvc_db_phonelog_delete_record( int id )
 		return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_db_phonelog_get_all_records( int offset, int limit,
-		contacts_list_h* out_list )
+static int __ctsvc_db_phonelog_get_all_records(int offset, int limit,
+		contacts_list_h* out_list)
 {
 	int ret;
 	int len;
@@ -277,8 +276,8 @@ static int __ctsvc_db_phonelog_get_all_records( int offset, int limit,
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_db_phonelog_get_records_with_query( contacts_query_h query, int offset,
-		int limit, contacts_list_h* out_list )
+static int __ctsvc_db_phonelog_get_records_with_query(contacts_query_h query, int offset,
+		int limit, contacts_list_h* out_list)
 {
 	int ret;
 	int i;
@@ -308,17 +307,15 @@ static int __ctsvc_db_phonelog_get_records_with_query( contacts_query_h query, i
 		phonelog = (ctsvc_phonelog_s*)record;
 		if (0 == s_query->projection_count)
 			field_count = s_query->property_count;
-		else
-		{
+		else {
 			field_count = s_query->projection_count;
 
-			if( CONTACTS_ERROR_NONE != ctsvc_record_set_projection_flags(record, s_query->projection, s_query->projection_count, s_query->property_count) )
-			{
+			if (CONTACTS_ERROR_NONE != ctsvc_record_set_projection_flags(record, s_query->projection, s_query->projection_count, s_query->property_count)) {
 				ASSERT_NOT_REACHED("To set projection is failed.\n");
 			}
 		}
 
-		for(i=0;i<field_count;i++) {
+		for (i=0;i<field_count;i++) {
 			char *temp;
 			int property_id;
 			if (0 == s_query->projection_count)
@@ -371,7 +368,7 @@ static int __ctsvc_db_phonelog_get_records_with_query( contacts_query_h query, i
 }
 //static int __ctsvc_db_phonelog_insert_records(const contacts_list_h in_list, int **ids) { return CONTACTS_ERROR_NONE; }
 //static int __ctsvc_db_phonelog_update_records(const contacts_list_h in_list) { return CONTACTS_ERROR_NONE; }
-//static int __ctsvc_db_phonelog_delete_records( int ids[], int count) { return CONTACTS_ERROR_NONE; }
+//static int __ctsvc_db_phonelog_delete_records(int ids[], int count) { return CONTACTS_ERROR_NONE; }
 
 static int __ctsvc_db_phonelog_increase_outgoing_count(ctsvc_phonelog_s *phonelog)
 {
@@ -482,7 +479,7 @@ static int  __ctsvc_db_phonelog_insert(ctsvc_phonelog_s *phonelog, int *id)
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_db_phonelog_insert_record( contacts_record_h record, int *id )
+static int __ctsvc_db_phonelog_insert_record(contacts_record_h record, int *id)
 {
 	int ret;
 	ctsvc_phonelog_s *phonelog = (ctsvc_phonelog_s *)record;

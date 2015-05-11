@@ -211,7 +211,7 @@ int ctsvc_db_phone_log_update_person_id(const char *number, int old_person_id, i
 
 	if (number && *number) {
 		char clean_num[strlen(number)+1];
-		len += snprintf(query+len, sizeof(query)-len, "AND ((number = ? ) ");
+		len += snprintf(query+len, sizeof(query)-len, "AND ((number = ?) ");
 		bind_text = g_slist_append(bind_text, strdup(number));
 
 		ret = ctsvc_clean_number(number, clean_num, sizeof(clean_num), true);

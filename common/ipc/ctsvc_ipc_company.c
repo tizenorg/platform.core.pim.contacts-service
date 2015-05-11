@@ -57,7 +57,7 @@ static int __ctsvc_ipc_unmarshal_company(pims_ipc_data_h ipc_data, const char* v
 		if (ctsvc_ipc_unmarshal_string(ipc_data, &company_p->phonetic_name) != CONTACTS_ERROR_NONE) break;
 
 		return CONTACTS_ERROR_NONE;
-	} while(0);
+	} while (0);
 
 	CTS_ERR("_ctsvc_ipc_unmarshal fail");
 	return CONTACTS_ERROR_INVALID_PARAMETER;
@@ -86,7 +86,7 @@ static int __ctsvc_ipc_marshal_company(const contacts_record_h record, pims_ipc_
 		if (ctsvc_ipc_marshal_string((company_p->phonetic_name),ipc_data) != CONTACTS_ERROR_NONE) break;
 
 		return CONTACTS_ERROR_NONE;
-	} while(0);
+	} while (0);
 
 	CTS_ERR("_ctsvc_ipc_marshal fail");
 	return CONTACTS_ERROR_INVALID_PARAMETER;
@@ -95,5 +95,5 @@ static int __ctsvc_ipc_marshal_company(const contacts_record_h record, pims_ipc_
 static int __ctsvc_ipc_marshal_company_get_primary_id(const contacts_record_h record, unsigned int *property_id, int *id)
 {
 	*property_id = CTSVC_PROPERTY_COMPANY_ID;
-	return contacts_record_get_int(record, *property_id, id );
+	return contacts_record_get_int(record, *property_id, id);
 }

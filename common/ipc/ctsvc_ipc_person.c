@@ -57,7 +57,7 @@ static int __ctsvc_ipc_unmarshal_person(pims_ipc_data_h ipc_data, const char* vi
 		if (ctsvc_ipc_unmarshal_string(ipc_data, &person_p->addressbook_ids) != CONTACTS_ERROR_NONE) break;
 
 		return CONTACTS_ERROR_NONE;
-	} while(0);
+	} while (0);
 
 	CTS_ERR("_ctsvc_ipc_unmarshal fail");
 	return CONTACTS_ERROR_INVALID_PARAMETER;
@@ -87,7 +87,7 @@ static int __ctsvc_ipc_marshal_person(const contacts_record_h record, pims_ipc_d
 		if (ctsvc_ipc_marshal_string((person_p->addressbook_ids),ipc_data) != CONTACTS_ERROR_NONE) break;
 
 		return CONTACTS_ERROR_NONE;
-	} while(0);
+	} while (0);
 
 	CTS_ERR("_ctsvc_ipc_marshal fail");
 	return CONTACTS_ERROR_INVALID_PARAMETER;
@@ -96,5 +96,5 @@ static int __ctsvc_ipc_marshal_person(const contacts_record_h record, pims_ipc_d
 static int __ctsvc_ipc_marshal_person_get_primary_id(const contacts_record_h record, unsigned int *property_id, int *id)
 {
 	*property_id = CTSVC_PROPERTY_PERSON_ID;
-	return contacts_record_get_int(record, *property_id, id );
+	return contacts_record_get_int(record, *property_id, id);
 }

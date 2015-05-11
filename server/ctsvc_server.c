@@ -140,7 +140,7 @@ static int __server_main(void)
 
 		return 0;
 
-	} while(0);
+	} while (0);
 
 	CTS_ERR("pims_ipc_svc_register error");
 	return -1;

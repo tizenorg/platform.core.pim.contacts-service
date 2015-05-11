@@ -307,8 +307,7 @@ int ctsvc_db_contact_delete(int contact_id)
 		ctsvc_set_group_rel_noti();
 
 	ret = ctsvc_end_trans(true);
-	if (ret < CONTACTS_ERROR_NONE)
-	{
+	if (ret < CONTACTS_ERROR_NONE) {
 		CTS_ERR("DB error : ctsvc_end_trans() Failed(%d)", ret);
 		return ret;
 	}
@@ -316,13 +315,12 @@ int ctsvc_db_contact_delete(int contact_id)
 		return CONTACTS_ERROR_NONE;
 }
 
-static inline void __ctsvc_contact_get_initial(char *src, char *dest, int dest_size, bool pinyin )
+static inline void __ctsvc_contact_get_initial(char *src, char *dest, int dest_size, bool pinyin)
 {
 	int i, j=0;
 	bool bFirst = true;
 	int len = strlen(src);
-	for(i = 0; i < len && j < (dest_size-1);)
-	{
+	for (i = 0; i < len && j < (dest_size-1);) {
 		if (src[i] == ' ') {
 			bFirst=true;
 			i++;
@@ -345,7 +343,7 @@ static inline void __ctsvc_remove_space(char *src, char *dest, int dest_size)
 	int len = strlen(src);
 	int i, j=0;
 
-	for(i=0; i < len && i < dest_size; i++) {
+	for (i=0; i < len && i < dest_size; i++) {
 		if (src[i] && src[i] != ' ') {
 			dest[j] = src[i];
 			j++;
@@ -394,7 +392,7 @@ int ctsvc_contact_make_search_name(ctsvc_contact_s *contact, char **search_name)
 
 						ctsvc_normalize_str(contact->display_name, &name);
 						if (name) {
-							for(i=0; i<size; i++) {
+							for (i=0; i<size; i++) {
 								__ctsvc_remove_space(pinyinname[i].pinyin_name, name_nospace, name_len);
 
 								buf_size = SAFE_STRLEN(name)
@@ -411,7 +409,7 @@ int ctsvc_contact_make_search_name(ctsvc_contact_s *contact, char **search_name)
 						}
 
 						len = ctsvc_check_utf8(contact->display_name[0]);
-						for(i=len; i < strlen(contact->display_name); i+=len) {
+						for (i=len; i < strlen(contact->display_name); i+=len) {
 							len = ctsvc_check_utf8(contact->display_name[i]);
 
 							buf_size = SAFE_STRLEN(name) + SAFE_STRLEN(&contact->display_name[i]) + 2;
@@ -464,12 +462,12 @@ int ctsvc_contact_make_search_name(ctsvc_contact_s *contact, char **search_name)
 			char *chosung = calloc(1, strlen(contact->display_name) * 5);
 			int total_len = strlen(contact->display_name);
 
-			count = ctsvc_get_chosung(contact->display_name, chosung, strlen(contact->display_name) * 5 );
+			count = ctsvc_get_chosung(contact->display_name, chosung, strlen(contact->display_name) * 5);
 
 			ctsvc_normalize_str(contact->display_name, &name);
 
 			if (count > 0) {
-				for(i=0, j=0; i < total_len; i+=full_len, j+=chosung_len) {
+				for (i=0, j=0; i < total_len; i+=full_len, j+=chosung_len) {
 					full_len = ctsvc_check_utf8(contact->display_name[i]);
 					chosung_len = ctsvc_check_utf8(chosung[j]);
 
@@ -552,13 +550,12 @@ int ctsvc_contact_make_search_name(ctsvc_contact_s *contact, char **search_name)
 static int __ctsvc_make_phonetic_name(ctsvc_name_s* name, char** phonetic, contacts_name_display_order_e order)
 {
 	int len = SAFE_STRLEN(name->phonetic_first) + SAFE_STRLEN(name->phonetic_last) + SAFE_STRLEN(name->phonetic_middle);
-	if( len > 0 )
-	{
+	if (len > 0) {
 		len += 3; // for space and null string
 		*phonetic = calloc(1, len);
 
 		int temp_len = 0;
-		if ( order == CONTACTS_NAME_DISPLAY_ORDER_FIRSTLAST ) {
+		if (order == CONTACTS_NAME_DISPLAY_ORDER_FIRSTLAST) {
 			if (name->phonetic_first)
 				temp_len += snprintf(*phonetic, len, "%s", name->phonetic_first);
 			if (name->phonetic_middle) {
@@ -608,7 +605,7 @@ static inline int __ctsvc_get_sort_name_to_pinyin(const char *display_name, char
 		int name_index = 0;
 		int temp_index = 0;
 
-		while(1) {
+		while (1) {
 			int pinyin_len = 0;
 			int name_len = 0;
 
@@ -664,8 +661,8 @@ void ctsvc_contact_make_sortkey(ctsvc_contact_s *contact)
 	int sort_type = -1;
 
 	if (contact->display_source_type == CONTACTS_DISPLAY_NAME_SOURCE_TYPE_NAME) {
-		if ( contact->name->count > 0 && contact->name->records != NULL
-				&& contact->name->records->data != NULL ) {
+		if (contact->name->count > 0 && contact->name->records != NULL
+				&& contact->name->records->data != NULL) {
 			ctsvc_name_s *name = (ctsvc_name_s *)contact->name->records->data;
 			__ctsvc_make_phonetic_name(name, &phonetic, CONTACTS_NAME_DISPLAY_ORDER_FIRSTLAST);
 		}
@@ -715,7 +712,7 @@ void ctsvc_contact_make_sortkey(ctsvc_contact_s *contact)
 		}
 	default:
 		{
-			if( phonetic )
+			if (phonetic)
 				FREEandSTRDUP(contact->sort_name, phonetic);
 		}
 		break;
@@ -736,8 +733,8 @@ void ctsvc_contact_make_sortkey(ctsvc_contact_s *contact)
 	// check reverse sort_name, reverser_display_name_language
 	// make reverse phonetic name
 	if (contact->display_source_type == CONTACTS_DISPLAY_NAME_SOURCE_TYPE_NAME) {
-		if ( contact->name->count > 0 && contact->name->records != NULL
-				&& contact->name->records->data != NULL ) {
+		if (contact->name->count > 0 && contact->name->records != NULL
+				&& contact->name->records->data != NULL) {
 			ctsvc_name_s *name = (ctsvc_name_s *)contact->name->records->data;
 			__ctsvc_make_phonetic_name(name, &phonetic, CONTACTS_NAME_DISPLAY_ORDER_LASTFIRST);
 		}
@@ -750,10 +747,9 @@ void ctsvc_contact_make_sortkey(ctsvc_contact_s *contact)
 	else
 		sort_type = CTSVC_SORT_OTHERS;
 
-	WARN_IF( sort_type < 0, "ctsvc_get_name_sort_type Failed(%d)", sort_type);
+	WARN_IF(sort_type < 0, "ctsvc_get_name_sort_type Failed(%d)", sort_type);
 
-	switch (sort_type)
-	{
+	switch (sort_type) {
 	case CTSVC_SORT_CJK:
 		{
 			if (strncmp(langset, "zh_CN", strlen("zh_CN")) == 0) {
@@ -787,7 +783,7 @@ void ctsvc_contact_make_sortkey(ctsvc_contact_s *contact)
 		break;
 	default:
 		{
-			if( phonetic )
+			if (phonetic)
 				FREEandSTRDUP(contact->reverse_sort_name, phonetic);
 		}
 		break;
@@ -887,7 +883,7 @@ int ctsvc_contact_get_name_language(const ctsvc_name_s *name)
 
 char * __ctsvc_remove_first_space(char *src)
 {
-	if(src == NULL ||SAFE_STRLEN(src) == 0)
+	if (src == NULL ||SAFE_STRLEN(src) == 0)
 		return NULL;
 
 	int name_len = (SAFE_STRLEN(src)+1)*sizeof(char);
@@ -897,7 +893,7 @@ char * __ctsvc_remove_first_space(char *src)
 	int len = strlen(src);
 	int i =0;
 
-	for(i=0; i < len && i < name_len; i++) {
+	for (i=0; i < len && i < name_len; i++) {
 		if (src[i] && src[i] != ' ') {
 			strncpy(name_nospace, src+i, name_len);
 			break;
@@ -936,12 +932,11 @@ void ctsvc_contact_make_display_name(ctsvc_contact_s *contact)
 
 	contact->display_source_type = CONTACTS_DISPLAY_NAME_SOURCE_TYPE_INVALID;
 
-	if ( contact->name->count > 0 && contact->name->records != NULL && contact->name->records->data != NULL )
-	{
+	if (contact->name->count > 0 && contact->name->records != NULL && contact->name->records->data != NULL) {
 		name = (ctsvc_name_s *)contact->name->records->data;
 	}
 
-	if ( name && ( name->first || name->last || name->prefix || name->addition || name->suffix) ) {
+	if (name && (name->first || name->last || name->prefix || name->addition || name->suffix)) {
 		int reverse_lang_type = -1;
 		int display_len;
 		int temp_display_len;
@@ -967,21 +962,21 @@ void ctsvc_contact_make_display_name(ctsvc_contact_s *contact)
 
 			// get language type
 			reverse_lang_type = ctsvc_contact_get_name_language(name);
-			if(name->last) {
+			if (name->last) {
 				char * temp = __ctsvc_remove_first_space(name->last);
 				len += snprintf(temp_display + len, temp_display_len - len, "%s", temp);
 				free(temp);
 				if (reverse_lang_type != CTSVC_LANG_KOREAN &&
 						reverse_lang_type != CTSVC_LANG_CHINESE &&
 						reverse_lang_type != CTSVC_LANG_JAPANESE) {
-					if(name->first || name->addition)
+					if (name->first || name->addition)
 						len += snprintf(temp_display + len, temp_display_len - len, ",");
 				}
 			}
 
-			if(reverse_lang_type == CTSVC_LANG_JAPANESE) {
+			if (reverse_lang_type == CTSVC_LANG_JAPANESE) {
 				// make temp_display name Prefix - Last - Middle - First - Suffix
-				if(name->addition) {
+				if (name->addition) {
 					char * temp = __ctsvc_remove_first_space(name->addition);
 					if (*temp_display)
 						len += snprintf(temp_display + len, temp_display_len - len, " ");
@@ -989,7 +984,7 @@ void ctsvc_contact_make_display_name(ctsvc_contact_s *contact)
 					free(temp);
 				}
 
-				if(name->first) {
+				if (name->first) {
 					char * temp = __ctsvc_remove_first_space(name->first);
 					if (*temp_display)
 						len += snprintf(temp_display + len, temp_display_len - len, " ");
@@ -998,13 +993,13 @@ void ctsvc_contact_make_display_name(ctsvc_contact_s *contact)
 				}
 			}
 			else if (reverse_lang_type == CTSVC_LANG_CHINESE || reverse_lang_type == CTSVC_LANG_KOREAN) {
-				if(name->addition) {
+				if (name->addition) {
 					char * temp = __ctsvc_remove_first_space(name->addition);
 					len += snprintf(temp_display + len, temp_display_len - len, "%s", temp);
 					free(temp);
 				}
 
-				if(name->first) {
+				if (name->first) {
 					char * temp = __ctsvc_remove_first_space(name->first);
 					len += snprintf(temp_display + len, temp_display_len - len, "%s", temp);
 					free(temp);
@@ -1012,7 +1007,7 @@ void ctsvc_contact_make_display_name(ctsvc_contact_s *contact)
 			}
 			else {
 				// make temp_display name Prefix - Last - First - Middle - Suffix
-				if(name->first) {
+				if (name->first) {
 					if (*temp_display) {
 						if (reverse_lang_type < 0) {
 							reverse_lang_type = ctsvc_check_language_type(temp_display);
@@ -1027,7 +1022,7 @@ void ctsvc_contact_make_display_name(ctsvc_contact_s *contact)
 					free(temp);
 				}
 
-				if(name->addition) {
+				if (name->addition) {
 					if (*temp_display) {
 						if (reverse_lang_type < 0) {
 							reverse_lang_type = ctsvc_check_language_type(temp_display);
@@ -1043,7 +1038,7 @@ void ctsvc_contact_make_display_name(ctsvc_contact_s *contact)
 				}
 			}
 
-			if(name->suffix) {
+			if (name->suffix) {
 				if (*temp_display) {
 					if (reverse_lang_type < 0) {
 						reverse_lang_type = ctsvc_check_language_type(temp_display);
@@ -1061,7 +1056,7 @@ void ctsvc_contact_make_display_name(ctsvc_contact_s *contact)
 			}
 		}
 
-		if(name->prefix && temp_display) {
+		if (name->prefix && temp_display) {
 			display_len = SAFE_STRLEN(name->prefix) + temp_display_len + 2;
 			display = calloc(1, display_len);
 			char * temp = __ctsvc_remove_first_space(name->prefix);
@@ -1106,13 +1101,13 @@ void ctsvc_contact_make_display_name(ctsvc_contact_s *contact)
 				temp_display = calloc(1, temp_display_len);
 				len = 0;
 
-				if(name->first) {
+				if (name->first) {
 					char * temp = __ctsvc_remove_first_space(name->first);
 					len += snprintf(temp_display + len, temp_display_len - len, "%s", temp);
 					free(temp);
 				}
 
-				if(name->addition) {
+				if (name->addition) {
 					char * temp = __ctsvc_remove_first_space(name->addition);
 					if (*temp_display)
 						len += snprintf(temp_display + len, temp_display_len - len, " ");
@@ -1120,7 +1115,7 @@ void ctsvc_contact_make_display_name(ctsvc_contact_s *contact)
 					free(temp);
 				}
 
-				if(name->last) {
+				if (name->last) {
 					char * temp = __ctsvc_remove_first_space(name->last);
 					if (*temp_display)
 						len += snprintf(temp_display + len, temp_display_len - len, " ");
@@ -1128,7 +1123,7 @@ void ctsvc_contact_make_display_name(ctsvc_contact_s *contact)
 					free(temp);
 				}
 
-				if(name->suffix) {
+				if (name->suffix) {
 					if (*temp_display) {
 						lang_type = ctsvc_check_language_type(temp_display);
 						if (lang_type == CTSVC_LANG_JAPANESE)
@@ -1142,7 +1137,7 @@ void ctsvc_contact_make_display_name(ctsvc_contact_s *contact)
 				}
 			}
 
-			if(name->prefix && temp_display) {
+			if (name->prefix && temp_display) {
 				display_len = SAFE_STRLEN(name->prefix) + temp_display_len + 2;
 				display = calloc(1, display_len);
 				snprintf(display, display_len , "%s %s", name->prefix, temp_display);
@@ -1389,7 +1384,7 @@ bool ctsvc_contact_check_default_number(contacts_list_h number_list)
 	RETV_IF(NULL == number_list, false);
 
 	ret = contacts_list_get_count(number_list, &count);
-	if(CONTACTS_ERROR_NONE !=ret || 0 == count)
+	if (CONTACTS_ERROR_NONE !=ret || 0 == count)
 		return false;
 
 	contacts_list_first(number_list);
@@ -1401,7 +1396,7 @@ bool ctsvc_contact_check_default_number(contacts_list_h number_list)
 			else if (has_default)
 				number->is_default = false;
 		}
-	}while(CONTACTS_ERROR_NONE == contacts_list_next(number_list));
+	} while (CONTACTS_ERROR_NONE == contacts_list_next(number_list));
 
 	if (false == has_default) {
 		contacts_list_first(number_list);
@@ -1413,7 +1408,7 @@ bool ctsvc_contact_check_default_number(contacts_list_h number_list)
 				has_default = true;
 				break;
 			}
-		}while(CONTACTS_ERROR_NONE == contacts_list_next(number_list));
+		} while (CONTACTS_ERROR_NONE == contacts_list_next(number_list));
 	}
 	return has_default;
 }
@@ -1428,7 +1423,7 @@ bool ctsvc_contact_check_default_email(contacts_list_h email_list)
 	RETV_IF(NULL == email_list, false);
 
 	ret = contacts_list_get_count(email_list, &count);
-	if(CONTACTS_ERROR_NONE !=ret || 0 == count)
+	if (CONTACTS_ERROR_NONE !=ret || 0 == count)
 		return false;
 
 	contacts_list_first(email_list);
@@ -1440,7 +1435,7 @@ bool ctsvc_contact_check_default_email(contacts_list_h email_list)
 			else if (has_default)
 				email->is_default = false;
 		}
-	}while(CONTACTS_ERROR_NONE == contacts_list_next(email_list));
+	} while (CONTACTS_ERROR_NONE == contacts_list_next(email_list));
 
 	if (false == has_default) {
 		contacts_list_first(email_list);
@@ -1452,7 +1447,7 @@ bool ctsvc_contact_check_default_email(contacts_list_h email_list)
 				has_default = true;
 				break;
 			}
-		}while(CONTACTS_ERROR_NONE == contacts_list_next(email_list));
+		} while (CONTACTS_ERROR_NONE == contacts_list_next(email_list));
 	}
 	return has_default;
 }
@@ -1481,7 +1476,7 @@ bool ctsvc_contact_check_default_image(contacts_list_h image_list)
 			else if (has_default)
 				image->is_default = false;
 		}
-	}while(CONTACTS_ERROR_NONE == contacts_list_next(image_list));
+	} while (CONTACTS_ERROR_NONE == contacts_list_next(image_list));
 
 	if (false == has_default) {
 		contacts_list_first(image_list);
@@ -1493,7 +1488,7 @@ bool ctsvc_contact_check_default_image(contacts_list_h image_list)
 				has_default = true;
 				break;
 			}
-		}while(CONTACTS_ERROR_NONE == contacts_list_next(image_list));
+		} while (CONTACTS_ERROR_NONE == contacts_list_next(image_list));
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -1524,7 +1519,7 @@ bool ctsvc_contact_check_default_address(contacts_list_h address_list)
 			else if (has_default)
 				address->is_default = false;
 		}
-	}while(CONTACTS_ERROR_NONE == contacts_list_next(address_list));
+	} while (CONTACTS_ERROR_NONE == contacts_list_next(address_list));
 
 	if (false == has_default) {
 		contacts_list_first(address_list);
@@ -1538,7 +1533,7 @@ bool ctsvc_contact_check_default_address(contacts_list_h address_list)
 				has_default = true;
 				break;
 			}
-		}while(CONTACTS_ERROR_NONE == contacts_list_next(address_list));
+		} while (CONTACTS_ERROR_NONE == contacts_list_next(address_list));
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -1553,7 +1548,7 @@ int ctsvc_contact_update_data_name(contacts_list_h name_list, int contact_id, bo
 	GList *cursor;
 	RETV_IF(NULL == name_list, CONTACTS_ERROR_INVALID_PARAMETER);
 
-	for(cursor = list->deleted_records;cursor;cursor=cursor->next) {
+	for (cursor = list->deleted_records;cursor;cursor=cursor->next) {
 		name = (ctsvc_name_s *)cursor->data;
 		ctsvc_db_name_delete(name->id, is_my_profile);
 	}
@@ -1590,13 +1585,13 @@ int ctsvc_contact_update_data_company(contacts_list_h company_list, int contact_
 
 	RETV_IF(NULL == company_list, CONTACTS_ERROR_INVALID_PARAMETER);
 
-	for(cursor = list->deleted_records;cursor;cursor=cursor->next) {
+	for (cursor = list->deleted_records;cursor;cursor=cursor->next) {
 		company = (ctsvc_company_s *)cursor->data;
 		ctsvc_db_company_delete(company->id, is_my_profile);
 	}
 
 	ret = contacts_list_get_count(company_list, &count);
-	if(0 == count)
+	if (0 == count)
 		return CONTACTS_ERROR_NONE;
 
 	contacts_list_first(company_list);
@@ -1613,11 +1608,11 @@ int ctsvc_contact_update_data_company(contacts_list_h company_list, int contact_
 		}
 		else
 			ret = ctsvc_db_company_insert(record, contact_id, is_my_profile, NULL);
-		if (CONTACTS_ERROR_DB == ret){
+		if (CONTACTS_ERROR_DB == ret) {
 			CTS_ERR("DB error : return (%d)", ret);
 			break;
 		}
-	}while(CONTACTS_ERROR_NONE == contacts_list_next(company_list));
+	} while (CONTACTS_ERROR_NONE == contacts_list_next(company_list));
 
 	return ret;
 }
@@ -1634,13 +1629,13 @@ int ctsvc_contact_update_data_note(contacts_list_h note_list, int contact_id, bo
 
 	RETV_IF(NULL == note_list, CONTACTS_ERROR_INVALID_PARAMETER);
 
-	for(cursor = list->deleted_records;cursor;cursor=cursor->next) {
+	for (cursor = list->deleted_records;cursor;cursor=cursor->next) {
 		note = (ctsvc_note_s *)cursor->data;
 		ctsvc_db_note_delete(note->id, is_my_profile);
 	}
 
 	ret = contacts_list_get_count(note_list, &count);
-	if(0 == count)
+	if (0 == count)
 		return CONTACTS_ERROR_NONE;
 
 	contacts_list_first(note_list);
@@ -1655,11 +1650,11 @@ int ctsvc_contact_update_data_note(contacts_list_h note_list, int contact_id, bo
 		}
 		else
 			ret = ctsvc_db_note_insert(record, contact_id, is_my_profile, NULL);
-		if (CONTACTS_ERROR_DB == ret){
+		if (CONTACTS_ERROR_DB == ret) {
 			CTS_ERR("DB error : return (%d)", ret);
 			break;
 		}
-	}while(CONTACTS_ERROR_NONE == contacts_list_next(note_list));
+	} while (CONTACTS_ERROR_NONE == contacts_list_next(note_list));
 
 	return ret;
 }
@@ -1676,13 +1671,13 @@ int ctsvc_contact_update_data_event(contacts_list_h event_list, int contact_id, 
 
 	RETV_IF(NULL == event_list, CONTACTS_ERROR_INVALID_PARAMETER);
 
-	for(cursor = list->deleted_records;cursor;cursor=cursor->next) {
+	for (cursor = list->deleted_records;cursor;cursor=cursor->next) {
 		event = (ctsvc_event_s *)cursor->data;
 		ctsvc_db_event_delete(event->id, is_my_profile);
 	}
 
 	ret = contacts_list_get_count(event_list, &count);
-	if(0 == count)
+	if (0 == count)
 		return CONTACTS_ERROR_NONE;
 
 	contacts_list_first(event_list);
@@ -1697,11 +1692,11 @@ int ctsvc_contact_update_data_event(contacts_list_h event_list, int contact_id, 
 		}
 		else
 			ret = ctsvc_db_event_insert(record, contact_id, is_my_profile, NULL);
-		if (CONTACTS_ERROR_DB == ret){
+		if (CONTACTS_ERROR_DB == ret) {
 			CTS_ERR("DB error : return (%d)", ret);
 			break;
 		}
-	}while(CONTACTS_ERROR_NONE == contacts_list_next(event_list));
+	} while (CONTACTS_ERROR_NONE == contacts_list_next(event_list));
 
 	return ret;
 }
@@ -1718,13 +1713,13 @@ int ctsvc_contact_update_data_messenger(contacts_list_h messenger_list, int cont
 
 	RETV_IF(NULL == messenger_list, CONTACTS_ERROR_INVALID_PARAMETER);
 
-	for(cursor = list->deleted_records;cursor;cursor=cursor->next) {
+	for (cursor = list->deleted_records;cursor;cursor=cursor->next) {
 		messenger = (ctsvc_messenger_s *)cursor->data;
 		ctsvc_db_messenger_delete(messenger->id, is_my_profile);
 	}
 
 	ret = contacts_list_get_count(messenger_list, &count);
-	if(0 == count)
+	if (0 == count)
 		return CONTACTS_ERROR_NONE;
 
 	contacts_list_first(messenger_list);
@@ -1739,11 +1734,11 @@ int ctsvc_contact_update_data_messenger(contacts_list_h messenger_list, int cont
 		}
 		else
 			ret = ctsvc_db_messenger_insert(record, contact_id, is_my_profile, NULL);
-		if (CONTACTS_ERROR_DB == ret){
+		if (CONTACTS_ERROR_DB == ret) {
 			CTS_ERR("DB error : return (%d)", ret);
 			break;
 		}
-	}while(CONTACTS_ERROR_NONE == contacts_list_next(messenger_list));
+	} while (CONTACTS_ERROR_NONE == contacts_list_next(messenger_list));
 
 	return ret;
 }
@@ -1760,13 +1755,13 @@ int ctsvc_contact_update_data_address(contacts_list_h address_list, int contact_
 
 	RETV_IF(NULL == address_list, CONTACTS_ERROR_INVALID_PARAMETER);
 
-	for(cursor = list->deleted_records;cursor;cursor=cursor->next) {
+	for (cursor = list->deleted_records;cursor;cursor=cursor->next) {
 		address = (ctsvc_address_s *)cursor->data;
 		ctsvc_db_address_delete(address->id, is_my_profile);
 	}
 
 	ret = contacts_list_get_count(address_list, &count);
-	if(0 == count)
+	if (0 == count)
 		return CONTACTS_ERROR_NONE;
 
 	contacts_list_first(address_list);
@@ -1782,11 +1777,11 @@ int ctsvc_contact_update_data_address(contacts_list_h address_list, int contact_
 		}
 		else
 			ret = ctsvc_db_address_insert(record, contact_id, is_my_profile, NULL);
-		if (CONTACTS_ERROR_DB == ret){
+		if (CONTACTS_ERROR_DB == ret) {
 			CTS_ERR("DB error : return (%d)", ret);
 			break;
 		}
-	}while(CONTACTS_ERROR_NONE == contacts_list_next(address_list));
+	} while (CONTACTS_ERROR_NONE == contacts_list_next(address_list));
 
 	return ret;
 }
@@ -1803,13 +1798,13 @@ int ctsvc_contact_update_data_url(contacts_list_h url_list, int contact_id, bool
 
 	RETV_IF(NULL == url_list, CONTACTS_ERROR_INVALID_PARAMETER);
 
-	for(cursor = list->deleted_records;cursor;cursor=cursor->next) {
+	for (cursor = list->deleted_records;cursor;cursor=cursor->next) {
 		url = (ctsvc_url_s *)cursor->data;
 		ctsvc_db_url_delete(url->id, is_my_profile);
 	}
 
 	ret = contacts_list_get_count(url_list, &count);
-	if(0 == count)
+	if (0 == count)
 		return CONTACTS_ERROR_NONE;
 
 	contacts_list_first(url_list);
@@ -1824,11 +1819,11 @@ int ctsvc_contact_update_data_url(contacts_list_h url_list, int contact_id, bool
 		}
 		else
 			ret = ctsvc_db_url_insert(record, contact_id, is_my_profile, NULL);
-		if (CONTACTS_ERROR_DB == ret){
+		if (CONTACTS_ERROR_DB == ret) {
 			CTS_ERR("DB error : return (%d)", ret);
 			break;
 		}
-	}while(CONTACTS_ERROR_NONE == contacts_list_next(url_list));
+	} while (CONTACTS_ERROR_NONE == contacts_list_next(url_list));
 
 	return ret;
 }
@@ -1845,12 +1840,12 @@ int ctsvc_contact_update_data_profile(contacts_list_h profile_list, int contact_
 
 	RETV_IF(NULL == profile_list, CONTACTS_ERROR_INVALID_PARAMETER);
 
-	for(cursor = list->deleted_records;cursor;cursor=cursor->next) {
+	for (cursor = list->deleted_records;cursor;cursor=cursor->next) {
 		profile = (ctsvc_profile_s *)cursor->data;
 		ctsvc_db_profile_delete(profile->id, is_my_profile);
 	}
 	ret = contacts_list_get_count(profile_list, &count);
-	if(0 == count)
+	if (0 == count)
 		return CONTACTS_ERROR_NONE;
 
 	contacts_list_first(profile_list);
@@ -1865,11 +1860,11 @@ int ctsvc_contact_update_data_profile(contacts_list_h profile_list, int contact_
 		}
 		else
 			ret = ctsvc_db_profile_insert(record, contact_id, is_my_profile, NULL);
-		if (CONTACTS_ERROR_DB == ret){
+		if (CONTACTS_ERROR_DB == ret) {
 			CTS_ERR("DB error : return (%d)", ret);
 			break;
 		}
-	}while(CONTACTS_ERROR_NONE == contacts_list_next(profile_list));
+	} while (CONTACTS_ERROR_NONE == contacts_list_next(profile_list));
 
 	return ret;
 }
@@ -1886,13 +1881,13 @@ int ctsvc_contact_update_data_relationship(contacts_list_h relationship_list, in
 
 	RETV_IF(NULL == relationship_list, CONTACTS_ERROR_INVALID_PARAMETER);
 
-	for(cursor = list->deleted_records;cursor;cursor=cursor->next) {
+	for (cursor = list->deleted_records;cursor;cursor=cursor->next) {
 		relationship = (ctsvc_relationship_s *)cursor->data;
 		ctsvc_db_relationship_delete(relationship->id, is_my_profile);
 	}
 
 	ret = contacts_list_get_count(relationship_list, &count);
-	if(0 == count)
+	if (0 == count)
 		return CONTACTS_ERROR_NONE;
 
 	contacts_list_first(relationship_list);
@@ -1907,11 +1902,11 @@ int ctsvc_contact_update_data_relationship(contacts_list_h relationship_list, in
 		}
 		else
 			ret = ctsvc_db_relationship_insert(record, contact_id, is_my_profile, NULL);
-		if (CONTACTS_ERROR_DB == ret){
+		if (CONTACTS_ERROR_DB == ret) {
 			CTS_ERR("DB error : return (%d)", ret);
 			break;
 		}
-	}while(CONTACTS_ERROR_NONE == contacts_list_next(relationship_list));
+	} while (CONTACTS_ERROR_NONE == contacts_list_next(relationship_list));
 
 	return ret;
 }
@@ -1928,13 +1923,13 @@ int ctsvc_contact_update_data_image(contacts_list_h image_list, int contact_id, 
 
 	RETV_IF(NULL == image_list, CONTACTS_ERROR_INVALID_PARAMETER);
 
-	for(cursor = list->deleted_records;cursor;cursor=cursor->next) {
+	for (cursor = list->deleted_records;cursor;cursor=cursor->next) {
 		image = (ctsvc_image_s *)cursor->data;
 		ctsvc_db_image_delete(image->id, is_my_profile);
 	}
 
 	ret = contacts_list_get_count(image_list, &count);
-	if(0 == count)
+	if (0 == count)
 		return CONTACTS_ERROR_NONE;
 
 	contacts_list_first(image_list);
@@ -1951,11 +1946,11 @@ int ctsvc_contact_update_data_image(contacts_list_h image_list, int contact_id, 
 			else
 				ret = ctsvc_db_image_insert(record, contact_id, is_my_profile, NULL);
 		}
-		if (CONTACTS_ERROR_DB == ret){
+		if (CONTACTS_ERROR_DB == ret) {
 			CTS_ERR("DB error : return (%d)", ret);
 			break;
 		}
-	}while(CONTACTS_ERROR_NONE == contacts_list_next(image_list));
+	} while (CONTACTS_ERROR_NONE == contacts_list_next(image_list));
 
 	return ret;
 }
@@ -1972,13 +1967,13 @@ int ctsvc_contact_update_data_nickname(contacts_list_h nickname_list, int contac
 
 	RETV_IF(NULL == nickname_list, CONTACTS_ERROR_INVALID_PARAMETER);
 
-	for(cursor = list->deleted_records;cursor;cursor=cursor->next) {
+	for (cursor = list->deleted_records;cursor;cursor=cursor->next) {
 		nickname = (ctsvc_nickname_s *)cursor->data;
 		ctsvc_db_nickname_delete(nickname->id, is_my_profile);
 	}
 
 	ret = contacts_list_get_count(nickname_list, &count);
-	if(0 == count)
+	if (0 == count)
 		return CONTACTS_ERROR_NONE;
 
 	contacts_list_first(nickname_list);
@@ -1993,11 +1988,11 @@ int ctsvc_contact_update_data_nickname(contacts_list_h nickname_list, int contac
 		}
 		else
 			ret = ctsvc_db_nickname_insert(record, contact_id, is_my_profile, NULL);
-		if (CONTACTS_ERROR_DB == ret){
+		if (CONTACTS_ERROR_DB == ret) {
 			CTS_ERR("DB error : return (%d)", ret);
 			break;
 		}
-	}while(CONTACTS_ERROR_NONE == contacts_list_next(nickname_list));
+	} while (CONTACTS_ERROR_NONE == contacts_list_next(nickname_list));
 
 	return ret;
 }
@@ -2014,13 +2009,13 @@ int ctsvc_contact_update_data_extension(contacts_list_h extension_list, int cont
 
 	RETV_IF(NULL == extension_list, CONTACTS_ERROR_INVALID_PARAMETER);
 
-	for(cursor = list->deleted_records;cursor;cursor=cursor->next) {
+	for (cursor = list->deleted_records;cursor;cursor=cursor->next) {
 		extension = (ctsvc_extension_s *)cursor->data;
 		ctsvc_db_extension_delete(extension->id, is_my_profile);
 	}
 
 	ret = contacts_list_get_count(extension_list, &count);
-	if(0 == count)
+	if (0 == count)
 		return CONTACTS_ERROR_NONE;
 
 	contacts_list_first(extension_list);
@@ -2037,11 +2032,11 @@ int ctsvc_contact_update_data_extension(contacts_list_h extension_list, int cont
 		}
 		else
 			ret = ctsvc_db_extension_insert(record, contact_id, is_my_profile, NULL);
-		if (CONTACTS_ERROR_DB == ret){
+		if (CONTACTS_ERROR_DB == ret) {
 			CTS_ERR("DB error : return (%d)", ret);
 			break;
 		}
-	}while(CONTACTS_ERROR_NONE == contacts_list_next(extension_list));
+	} while (CONTACTS_ERROR_NONE == contacts_list_next(extension_list));
 
 	return ret;
 }
@@ -2061,13 +2056,13 @@ int ctsvc_contact_update_data_number(contacts_list_h number_list,
 
 	RETV_IF(NULL == number_list, CONTACTS_ERROR_INVALID_PARAMETER);
 
-	for(cursor = list->deleted_records;cursor;cursor=cursor->next) {
+	for (cursor = list->deleted_records;cursor;cursor=cursor->next) {
 		number = (ctsvc_number_s *)cursor->data;
 		ctsvc_db_number_delete(number->id, is_my_profile);
 	}
 
 	ret = contacts_list_get_count(number_list, &count);
-	if(0 == count)
+	if (0 == count)
 		return CONTACTS_ERROR_NONE;
 
 	contacts_list_first(number_list);
@@ -2090,7 +2085,7 @@ int ctsvc_contact_update_data_number(contacts_list_h number_list,
 			CTS_ERR("DB error : return (%d)", ret);
 			break;
 		}
-	}while(CONTACTS_ERROR_NONE == contacts_list_next(number_list));
+	} while (CONTACTS_ERROR_NONE == contacts_list_next(number_list));
 
 	*had_phonenumber = had;
 	return ret;
@@ -2111,13 +2106,13 @@ int ctsvc_contact_update_data_email(contacts_list_h email_list,
 
 	RETV_IF(NULL == email_list, CONTACTS_ERROR_INVALID_PARAMETER);
 
-	for(cursor = list->deleted_records;cursor;cursor=cursor->next) {
+	for (cursor = list->deleted_records;cursor;cursor=cursor->next) {
 		email = (ctsvc_email_s *)cursor->data;
 		ctsvc_db_email_delete(email->id, is_my_profile);
 	}
 
 	ret = contacts_list_get_count(email_list, &count);
-	if(0 == count)
+	if (0 == count)
 		return CONTACTS_ERROR_NONE;
 
 	contacts_list_first(email_list);
@@ -2137,11 +2132,11 @@ int ctsvc_contact_update_data_email(contacts_list_h email_list,
 			ret = ctsvc_db_email_insert(record, contact_id, is_my_profile, NULL);
 			had = true;
 		}
-		if (CONTACTS_ERROR_DB == ret){
+		if (CONTACTS_ERROR_DB == ret) {
 			CTS_ERR("DB error : return (%d)", ret);
 			break;
 		}
-	}while(CONTACTS_ERROR_NONE == contacts_list_next(email_list));
+	} while (CONTACTS_ERROR_NONE == contacts_list_next(email_list));
 
 	*had_email = had;
 	return ret;
@@ -2158,7 +2153,7 @@ int ctsvc_contact_insert_data_name(contacts_list_h name_list, int contact_id, bo
 	contacts_list_get_current_record_p(name_list, &record);
 	if (record) {
 		ret = ctsvc_db_name_insert(record, contact_id, is_my_profile, NULL);
-		if (CONTACTS_ERROR_DB == ret){
+		if (CONTACTS_ERROR_DB == ret) {
 			CTS_ERR("DB error : ctsvc_db_name_insert");
 		}
 	}
@@ -2174,18 +2169,18 @@ int ctsvc_contact_insert_data_number(contacts_list_h number_list, int contact_id
 
 	RETV_IF(NULL == number_list, CONTACTS_ERROR_INVALID_PARAMETER);
 	ret = contacts_list_get_count(number_list, &count);
-	if(0 == count)
+	if (0 == count)
 		return CONTACTS_ERROR_NONE;
 
 	contacts_list_first(number_list);
 	do {
 		contacts_list_get_current_record_p(number_list, &record);
 		ret = ctsvc_db_number_insert(record, contact_id, is_my_profile, NULL);
-		if (CONTACTS_ERROR_DB == ret){
+		if (CONTACTS_ERROR_DB == ret) {
 			CTS_ERR("DB error : ctsvc_db_number_insert");
 			break;
 		}
-	}while(CONTACTS_ERROR_NONE == contacts_list_next(number_list));
+	} while (CONTACTS_ERROR_NONE == contacts_list_next(number_list));
 
 	return ret;
 }
@@ -2199,18 +2194,18 @@ int ctsvc_contact_insert_data_email(contacts_list_h email_list, int contact_id, 
 
 	RETV_IF(NULL == email_list, CONTACTS_ERROR_INVALID_PARAMETER);
 	ret = contacts_list_get_count(email_list, &count);
-	if(0 == count)
+	if (0 == count)
 		return CONTACTS_ERROR_NONE;
 
 	contacts_list_first(email_list);
 	do {
 		contacts_list_get_current_record_p(email_list, &record);
 		ret = ctsvc_db_email_insert(record, contact_id, is_my_profile, NULL);
-		if (CONTACTS_ERROR_DB == ret){
+		if (CONTACTS_ERROR_DB == ret) {
 			CTS_ERR("DB error : ctsvc_db_email_insert");
 			break;
 		}
-	}while(CONTACTS_ERROR_NONE == contacts_list_next(email_list));
+	} while (CONTACTS_ERROR_NONE == contacts_list_next(email_list));
 
 	return ret;
 }
@@ -2224,18 +2219,18 @@ int ctsvc_contact_insert_data_profile(contacts_list_h profile_list, int contact_
 
 	RETV_IF(NULL == profile_list, CONTACTS_ERROR_INVALID_PARAMETER);
 	ret = contacts_list_get_count(profile_list, &count);
-	if(0 == count)
+	if (0 == count)
 		return CONTACTS_ERROR_NONE;
 
 	contacts_list_first(profile_list);
 	do {
 		contacts_list_get_current_record_p(profile_list, &record);
 		ret = ctsvc_db_profile_insert(record, contact_id, is_my_profile, NULL);
-		if (CONTACTS_ERROR_DB == ret){
+		if (CONTACTS_ERROR_DB == ret) {
 			CTS_ERR("DB error : ctsvc_db_profile_insert");
 			break;
 		}
-	}while(CONTACTS_ERROR_NONE == contacts_list_next(profile_list));
+	} while (CONTACTS_ERROR_NONE == contacts_list_next(profile_list));
 
 	return ret;
 }
@@ -2249,18 +2244,18 @@ int ctsvc_contact_insert_data_company(contacts_list_h company_list, int contact_
 
 	RETV_IF(NULL == company_list, CONTACTS_ERROR_INVALID_PARAMETER);
 	ret = contacts_list_get_count(company_list, &count);
-	if(0 == count)
+	if (0 == count)
 		return CONTACTS_ERROR_NONE;
 
 	contacts_list_first(company_list);
 	do {
 		contacts_list_get_current_record_p(company_list, &record);
 		ret = ctsvc_db_company_insert(record, contact_id, is_my_profile, NULL);
-		if (CONTACTS_ERROR_DB == ret){
+		if (CONTACTS_ERROR_DB == ret) {
 			CTS_ERR("DB error : ctsvc_db_company_insert");
 			break;
 		}
-	}while(CONTACTS_ERROR_NONE == contacts_list_next(company_list));
+	} while (CONTACTS_ERROR_NONE == contacts_list_next(company_list));
 
 	return ret;
 }
@@ -2274,7 +2269,7 @@ int ctsvc_contact_insert_data_note(contacts_list_h note_list, int contact_id, bo
 
 	RETV_IF(NULL == note_list, CONTACTS_ERROR_INVALID_PARAMETER);
 	ret = contacts_list_get_count(note_list, &count);
-	if(0 == count)
+	if (0 == count)
 		return CONTACTS_ERROR_NONE;
 
 	contacts_list_first(note_list);
@@ -2282,12 +2277,12 @@ int ctsvc_contact_insert_data_note(contacts_list_h note_list, int contact_id, bo
 		contacts_list_get_current_record_p(note_list, &record);
 		if (record) {
 			ret = ctsvc_db_note_insert(record, contact_id, is_my_profile, NULL);
-			if (CONTACTS_ERROR_DB == ret){
+			if (CONTACTS_ERROR_DB == ret) {
 				CTS_ERR("DB error : ctsvc_db_note_insert");
 				break;
 			}
 		}
-	}while(CONTACTS_ERROR_NONE == contacts_list_next(note_list));
+	} while (CONTACTS_ERROR_NONE == contacts_list_next(note_list));
 	return ret;
 }
 
@@ -2300,18 +2295,18 @@ int ctsvc_contact_insert_data_event(contacts_list_h event_list, int contact_id, 
 
 	RETV_IF(NULL == event_list, CONTACTS_ERROR_INVALID_PARAMETER);
 	ret = contacts_list_get_count(event_list, &count);
-	if(0 == count)
+	if (0 == count)
 		return CONTACTS_ERROR_NONE;
 
 	contacts_list_first(event_list);
 	do {
 		contacts_list_get_current_record_p(event_list, &record);
 		ret = ctsvc_db_event_insert(record, contact_id, is_my_profile, NULL);
-		if (CONTACTS_ERROR_DB == ret){
+		if (CONTACTS_ERROR_DB == ret) {
 			CTS_ERR("DB error : ctsvc_db_event_insert");
 			break;
 		}
-	}while(CONTACTS_ERROR_NONE == contacts_list_next(event_list));
+	} while (CONTACTS_ERROR_NONE == contacts_list_next(event_list));
 
 	return ret;
 }
@@ -2325,18 +2320,18 @@ int ctsvc_contact_insert_data_messenger(contacts_list_h messenger_list, int cont
 
 	RETV_IF(NULL == messenger_list, CONTACTS_ERROR_INVALID_PARAMETER);
 	ret = contacts_list_get_count(messenger_list, &count);
-	if(0 == count)
+	if (0 == count)
 		return CONTACTS_ERROR_NONE;
 
 	contacts_list_first(messenger_list);
 	do {
 		contacts_list_get_current_record_p(messenger_list, &record);
 		ret = ctsvc_db_messenger_insert(record, contact_id, is_my_profile, NULL);
-		if (CONTACTS_ERROR_DB == ret){
+		if (CONTACTS_ERROR_DB == ret) {
 			CTS_ERR("DB error : ctsvc_db_messenger_insert");
 			break;
 		}
-	}while(CONTACTS_ERROR_NONE == contacts_list_next(messenger_list));
+	} while (CONTACTS_ERROR_NONE == contacts_list_next(messenger_list));
 
 	return ret;
 }
@@ -2350,18 +2345,18 @@ int ctsvc_contact_insert_data_address(contacts_list_h address_list, int contact_
 
 	RETV_IF(NULL == address_list, CONTACTS_ERROR_INVALID_PARAMETER);
 	ret = contacts_list_get_count(address_list, &count);
-	if(0 == count)
+	if (0 == count)
 		return CONTACTS_ERROR_NONE;
 
 	contacts_list_first(address_list);
 	do {
 		contacts_list_get_current_record_p(address_list, &record);
 		ret = ctsvc_db_address_insert(record, contact_id, is_my_profile, NULL);
-		if (CONTACTS_ERROR_DB == ret){
+		if (CONTACTS_ERROR_DB == ret) {
 			CTS_ERR("DB error : ctsvc_db_address_insert");
 			break;
 		}
-	}while(CONTACTS_ERROR_NONE == contacts_list_next(address_list));
+	} while (CONTACTS_ERROR_NONE == contacts_list_next(address_list));
 
 	return ret;
 }
@@ -2375,18 +2370,18 @@ int ctsvc_contact_insert_data_url(contacts_list_h url_list, int contact_id, bool
 
 	RETV_IF(NULL == url_list, CONTACTS_ERROR_INVALID_PARAMETER);
 	ret = contacts_list_get_count(url_list, &count);
-	if(0 == count)
+	if (0 == count)
 		return CONTACTS_ERROR_NONE;
 
 	contacts_list_first(url_list);
 	do {
 		contacts_list_get_current_record_p(url_list, &record);
 		ret = ctsvc_db_url_insert(record, contact_id, is_my_profile, NULL);
-		if (CONTACTS_ERROR_DB == ret){
+		if (CONTACTS_ERROR_DB == ret) {
 			CTS_ERR("DB error : ctsvc_db_url_insert");
 			break;
 		}
-	}while(CONTACTS_ERROR_NONE == contacts_list_next(url_list));
+	} while (CONTACTS_ERROR_NONE == contacts_list_next(url_list));
 
 	return ret;
 }
@@ -2400,18 +2395,18 @@ int ctsvc_contact_insert_data_nickname(contacts_list_h nickname_list, int contac
 
 	RETV_IF(NULL == nickname_list, CONTACTS_ERROR_INVALID_PARAMETER);
 	ret = contacts_list_get_count(nickname_list, &count);
-	if(0 == count)
+	if (0 == count)
 		return CONTACTS_ERROR_NONE;
 
 	contacts_list_first(nickname_list);
 	do {
 		contacts_list_get_current_record_p(nickname_list, &record);
 		ret = ctsvc_db_nickname_insert(record, contact_id, is_my_profile, NULL);
-		if (CONTACTS_ERROR_DB == ret){
+		if (CONTACTS_ERROR_DB == ret) {
 			CTS_ERR("DB error : ctsvc_db_nickname_insert");
 			break;
 		}
-	}while(CONTACTS_ERROR_NONE == contacts_list_next(nickname_list));
+	} while (CONTACTS_ERROR_NONE == contacts_list_next(nickname_list));
 
 	return ret;
 }
@@ -2425,18 +2420,18 @@ int ctsvc_contact_insert_data_relationship(contacts_list_h relationship_list, in
 
 	RETV_IF(NULL == relationship_list, CONTACTS_ERROR_INVALID_PARAMETER);
 	ret = contacts_list_get_count(relationship_list, &count);
-	if(0 == count)
+	if (0 == count)
 		return CONTACTS_ERROR_NONE;
 
 	contacts_list_first(relationship_list);
 	do {
 		contacts_list_get_current_record_p(relationship_list, &record);
 		ret = ctsvc_db_relationship_insert(record, contact_id, is_my_profile, NULL);
-		if (CONTACTS_ERROR_DB == ret){
+		if (CONTACTS_ERROR_DB == ret) {
 			CTS_ERR("DB error : ctsvc_db_relationship_insert");
 			break;
 		}
-	}while(CONTACTS_ERROR_NONE == contacts_list_next(relationship_list));
+	} while (CONTACTS_ERROR_NONE == contacts_list_next(relationship_list));
 
 	return ret;
 }
@@ -2450,18 +2445,18 @@ int ctsvc_contact_insert_data_image(contacts_list_h image_list, int contact_id, 
 
 	RETV_IF(NULL == image_list, CONTACTS_ERROR_INVALID_PARAMETER);
 	ret = contacts_list_get_count(image_list, &count);
-	if(0 == count)
+	if (0 == count)
 		return CONTACTS_ERROR_NONE;
 
 	contacts_list_first(image_list);
 	do {
 		contacts_list_get_current_record_p(image_list, &record);
 		ret = ctsvc_db_image_insert(record, contact_id, is_my_profile, NULL);
-		if (CONTACTS_ERROR_DB == ret){
+		if (CONTACTS_ERROR_DB == ret) {
 			CTS_ERR("DB error : ctsvc_db_image_insert");
 			break;
 		}
-	}while(CONTACTS_ERROR_NONE == contacts_list_next(image_list));
+	} while (CONTACTS_ERROR_NONE == contacts_list_next(image_list));
 
 	return ret;
 }
@@ -2475,18 +2470,18 @@ int ctsvc_contact_insert_data_extension(contacts_list_h extension_list, int cont
 
 	RETV_IF(NULL == extension_list, CONTACTS_ERROR_INVALID_PARAMETER);
 	ret = contacts_list_get_count(extension_list, &count);
-	if(0 == count)
+	if (0 == count)
 		return CONTACTS_ERROR_NONE;
 
 	contacts_list_first(extension_list);
 	do {
 		contacts_list_get_current_record_p(extension_list, &record);
 		ret = ctsvc_db_extension_insert(record, contact_id, is_my_profile, NULL);
-		if (CONTACTS_ERROR_DB == ret){
+		if (CONTACTS_ERROR_DB == ret) {
 			CTS_ERR("DB error : ctsvc_db_extension_insert");
 			break;
 		}
-	}while(CONTACTS_ERROR_NONE == contacts_list_next(extension_list));
+	} while (CONTACTS_ERROR_NONE == contacts_list_next(extension_list));
 
 	return ret;
 }
@@ -2547,7 +2542,7 @@ int ctsvc_contact_update_display_name(int contact_id, contacts_display_name_sour
 }
 
 extern ctsvc_db_plugin_info_s ctsvc_db_plugin_contact;
-int ctsvc_db_contact_get( int id, contacts_record_h* out_record )
+int ctsvc_db_contact_get(int id, contacts_record_h* out_record)
 {
 	return ctsvc_db_plugin_contact.get_record(id, out_record);
 }

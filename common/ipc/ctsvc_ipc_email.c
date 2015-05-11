@@ -49,7 +49,7 @@ static int __ctsvc_ipc_unmarshal_email(pims_ipc_data_h ipc_data, const char* vie
 
 		return CONTACTS_ERROR_NONE;
 
-	} while(0);
+	} while (0);
 
 	CTS_ERR("_ctsvc_ipc_unmarshal fail");
 	return CONTACTS_ERROR_INVALID_PARAMETER;
@@ -71,7 +71,7 @@ static int __ctsvc_ipc_marshal_email(const contacts_record_h record, pims_ipc_da
 
 		return CONTACTS_ERROR_NONE;
 
-	} while(0);
+	} while (0);
 
 	CTS_ERR("_ctsvc_ipc_marshal fail");
 	return CONTACTS_ERROR_INVALID_PARAMETER;
@@ -80,5 +80,5 @@ static int __ctsvc_ipc_marshal_email(const contacts_record_h record, pims_ipc_da
 static int __ctsvc_ipc_marshal_email_get_primary_id(const contacts_record_h record, unsigned int *property_id, int *id)
 {
 	*property_id = CTSVC_PROPERTY_EMAIL_ID;
-	return contacts_record_get_int(record, *property_id, id );
+	return contacts_record_get_int(record, *property_id, id);
 }

@@ -29,12 +29,12 @@
 #include "ctsvc_db_query.h"
 #include "ctsvc_list.h"
 
-static int __ctsvc_db_activity_photo_insert_record( contacts_record_h record, int *id );
-static int __ctsvc_db_activity_photo_get_record( int id, contacts_record_h* out_record );
-static int __ctsvc_db_activity_photo_update_record( contacts_record_h record );
-static int __ctsvc_db_activity_photo_delete_record( int id );
-static int __ctsvc_db_activity_photo_get_all_records( int offset, int limit, contacts_list_h* out_list );
-static int __ctsvc_db_activity_photo_get_records_with_query( contacts_query_h query, int offset, int limit, contacts_list_h* out_list );
+static int __ctsvc_db_activity_photo_insert_record(contacts_record_h record, int *id);
+static int __ctsvc_db_activity_photo_get_record(int id, contacts_record_h* out_record);
+static int __ctsvc_db_activity_photo_update_record(contacts_record_h record);
+static int __ctsvc_db_activity_photo_delete_record(int id);
+static int __ctsvc_db_activity_photo_get_all_records(int offset, int limit, contacts_list_h* out_list);
+static int __ctsvc_db_activity_photo_get_records_with_query(contacts_query_h query, int offset, int limit, contacts_list_h* out_list);
 
 ctsvc_db_plugin_info_s ctsvc_db_plugin_activity_photo = {
 	.is_query_only = false,
@@ -53,7 +53,7 @@ ctsvc_db_plugin_info_s ctsvc_db_plugin_activity_photo = {
 	.replace_records = NULL,
 };
 
-static int __ctsvc_db_activity_photo_insert_record( contacts_record_h record, int *id )
+static int __ctsvc_db_activity_photo_insert_record(contacts_record_h record, int *id)
 {
 	int ret;
 	int addressbook_id;
@@ -104,7 +104,7 @@ static int __ctsvc_db_activity_photo_insert_record( contacts_record_h record, in
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_db_activity_photo_get_record( int id, contacts_record_h* out_record )
+static int __ctsvc_db_activity_photo_get_record(int id, contacts_record_h* out_record)
 {
 	int ret;
 	cts_stmt stmt = NULL;
@@ -139,7 +139,7 @@ static int __ctsvc_db_activity_photo_get_record( int id, contacts_record_h* out_
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_db_activity_photo_update_record( contacts_record_h record )
+static int __ctsvc_db_activity_photo_update_record(contacts_record_h record)
 {
 	int ret;
 	int addressbook_id;
@@ -185,7 +185,7 @@ static int __ctsvc_db_activity_photo_update_record( contacts_record_h record )
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_db_activity_photo_delete_record( int id )
+static int __ctsvc_db_activity_photo_delete_record(int id)
 {
 	int ret;
 	char query[CTS_SQL_MAX_LEN] = {0};
@@ -228,7 +228,7 @@ static int __ctsvc_db_activity_photo_delete_record( int id )
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_db_activity_photo_get_all_records( int offset, int limit, contacts_list_h* out_list )
+static int __ctsvc_db_activity_photo_get_all_records(int offset, int limit, contacts_list_h* out_list)
 {
 	int len;
 	int ret;
@@ -270,7 +270,7 @@ static int __ctsvc_db_activity_photo_get_all_records( int offset, int limit, con
 }
 
 static int __ctsvc_db_activity_photo_get_records_with_query(contacts_query_h query, int offset,
-		int limit, contacts_list_h* out_list )
+		int limit, contacts_list_h* out_list)
 {
 	int ret;
 	int i;
@@ -305,11 +305,11 @@ static int __ctsvc_db_activity_photo_get_records_with_query(contacts_query_h que
 			ret = ctsvc_record_set_projection_flags(record, s_query->projection,
 					s_query->projection_count, s_query->property_count);
 
-			if(CONTACTS_ERROR_NONE != ret)
+			if (CONTACTS_ERROR_NONE != ret)
 				ASSERT_NOT_REACHED("To set projection is failed.\n");
 		}
 
-		for(i=0;i<field_count;i++) {
+		for (i=0;i<field_count;i++) {
 			char *temp;
 			int property_id;
 			if (0 == s_query->projection_count)

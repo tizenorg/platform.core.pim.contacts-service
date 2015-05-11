@@ -499,8 +499,7 @@ static inline int __ctsvc_vcard_append_name(ctsvc_list_s *names, char **buf, int
 
 static inline const char* __ctsvc_get_img_suffix(int type)
 {
-	switch (type)
-	{
+	switch (type) {
 	case CTSVC_VCARD_IMG_TIFF:
 		return "tiff";
 	case CTSVC_VCARD_IMG_GIF:
@@ -610,8 +609,7 @@ static inline int __ctsvc_vcard_get_image_type(char *val)
 
 static inline const char* __ctsvc_get_image_type_str(int type)
 {
-	switch (type)
-	{
+	switch (type) {
 	case CTSVC_VCARD_IMG_TIFF:
 		return "TIFF";
 	case CTSVC_VCARD_IMG_GIF:
@@ -1362,7 +1360,7 @@ static inline int __ctsvc_vcard_append_messengers(ctsvc_list_s *messenger_list, 
 				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, content_name_messenger);
 				CTSVC_VCARD_APPEND_CONTENT(buf, buf_size, len, messenger->im_id);
 			}
-			else if(content_name_x_type) {
+			else if (content_name_x_type) {
 				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, content_name[CTSVC_VCARD_VALUE_X_TIZEN_MESSENGER]);
 				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";TYPE=");
 				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, content_name_x_type);
@@ -1787,7 +1785,7 @@ static int __ctsvc_vcard_append_person(ctsvc_person_s *person, ctsvc_list_s *lis
 	ctsvc_contact_s *contact;
 	GList *cursor = NULL;
 
-	for(cursor=list_contacts->records;cursor;cursor=cursor->next) {
+	for (cursor=list_contacts->records;cursor;cursor=cursor->next) {
 		contact = (ctsvc_contact_s *)cursor->data;
 		if (contact && contact->id == person->name_contact_id && contact->name) {
 			len = __ctsvc_vcard_append_name(contact->name, buf, buf_size, len);
@@ -1795,7 +1793,7 @@ static int __ctsvc_vcard_append_person(ctsvc_person_s *person, ctsvc_list_s *lis
 		}
 	}
 
-	for(cursor=list_contacts->records;cursor;cursor=cursor->next) {
+	for (cursor=list_contacts->records;cursor;cursor=cursor->next) {
 		contact = (ctsvc_contact_s *)cursor->data;
 		if (contact && contact->company && contact->company->cursor) {
 			len = __ctsvc_vcard_append_company(contact->company, buf, buf_size, len);
@@ -1803,21 +1801,21 @@ static int __ctsvc_vcard_append_person(ctsvc_person_s *person, ctsvc_list_s *lis
 		}
 	}
 
-	for(cursor=list_contacts->records;cursor;cursor=cursor->next) {
+	for (cursor=list_contacts->records;cursor;cursor=cursor->next) {
 		contact = (ctsvc_contact_s *)cursor->data;
 		if (contact && contact->note && contact->note->cursor) {
 			len = __ctsvc_vcard_append_note(contact->note, buf, buf_size, len);
 			RETV_IF(len < 0, len);
 		}
 	}
-	for(cursor=list_contacts->records;cursor;cursor=cursor->next) {
+	for (cursor=list_contacts->records;cursor;cursor=cursor->next) {
 		contact = (ctsvc_contact_s *)cursor->data;
 		if (contact && contact->postal_addrs && contact->postal_addrs->cursor) {
 			len = __ctsvc_vcard_append_postals(contact->postal_addrs, buf, buf_size, len);
 			RETV_IF(len < 0, len);
 		}
 	}
-	for(cursor=list_contacts->records;cursor;cursor=cursor->next) {
+	for (cursor=list_contacts->records;cursor;cursor=cursor->next) {
 		contact = (ctsvc_contact_s *)cursor->data;
 		if (contact && contact->numbers && contact->numbers->cursor) {
 			len = __ctsvc_vcard_append_numbers(contact->numbers, buf, buf_size, len);
@@ -1825,7 +1823,7 @@ static int __ctsvc_vcard_append_person(ctsvc_person_s *person, ctsvc_list_s *lis
 		}
 	}
 
-	for(cursor=list_contacts->records;cursor;cursor=cursor->next) {
+	for (cursor=list_contacts->records;cursor;cursor=cursor->next) {
 		contact = (ctsvc_contact_s *)cursor->data;
 		if (contact && contact->emails && contact->emails->cursor) {
 			len = __ctsvc_vcard_append_emails(contact->emails, buf, buf_size, len);
@@ -1833,14 +1831,14 @@ static int __ctsvc_vcard_append_person(ctsvc_person_s *person, ctsvc_list_s *lis
 		}
 	}
 
-	for(cursor=list_contacts->records;cursor;cursor=cursor->next) {
+	for (cursor=list_contacts->records;cursor;cursor=cursor->next) {
 		contact = (ctsvc_contact_s *)cursor->data;
 		if (contact && contact->nicknames && contact->nicknames->cursor) {
 			len = __ctsvc_vcard_append_nicknames(contact->nicknames, buf, buf_size, len);
 			RETV_IF(len < 0, len);
 		}
 	}
-	for(cursor=list_contacts->records;cursor;cursor=cursor->next) {
+	for (cursor=list_contacts->records;cursor;cursor=cursor->next) {
 		contact = (ctsvc_contact_s *)cursor->data;
 		if (contact && contact->urls && contact->urls->cursor) {
 			len = __ctsvc_vcard_append_webs(contact->urls, buf, buf_size, len);
@@ -1848,21 +1846,21 @@ static int __ctsvc_vcard_append_person(ctsvc_person_s *person, ctsvc_list_s *lis
 		}
 	}
 
-	for(cursor=list_contacts->records;cursor;cursor=cursor->next) {
+	for (cursor=list_contacts->records;cursor;cursor=cursor->next) {
 		contact = (ctsvc_contact_s *)cursor->data;
 		if (contact && contact->events && contact->events->cursor) {
 			len = __ctsvc_vcard_append_events(contact->events, buf, buf_size, len);
 			RETV_IF(len < 0, len);
 		}
 	}
-	for(cursor=list_contacts->records;cursor;cursor=cursor->next) {
+	for (cursor=list_contacts->records;cursor;cursor=cursor->next) {
 		contact = (ctsvc_contact_s *)cursor->data;
 		if (contact && contact->images && contact->images->cursor) {
 			len = __ctsvc_vcard_put_photo(contact->images, buf, buf_size, len);
 			RETV_IF(len < 0, len);
 		}
 	}
-	for(cursor=list_contacts->records;cursor;cursor=cursor->next) {
+	for (cursor=list_contacts->records;cursor;cursor=cursor->next) {
 		contact = (ctsvc_contact_s *)cursor->data;
 		if (contact && contact->messengers && contact->messengers->cursor) {
 			len = __ctsvc_vcard_append_messengers(contact->messengers, buf, buf_size, len);
@@ -1870,7 +1868,7 @@ static int __ctsvc_vcard_append_person(ctsvc_person_s *person, ctsvc_list_s *lis
 		}
 	}
 
-	for(cursor=list_contacts->records;cursor;cursor=cursor->next) {
+	for (cursor=list_contacts->records;cursor;cursor=cursor->next) {
 		contact = (ctsvc_contact_s *)cursor->data;
 		if (contact && contact->relationships && contact->relationships->cursor) {
 			len = __ctsvc_vcard_append_relationships(contact->relationships, buf, buf_size, len);
@@ -1878,14 +1876,14 @@ static int __ctsvc_vcard_append_person(ctsvc_person_s *person, ctsvc_list_s *lis
 		}
 	}
 
-	for(cursor=list_contacts->records;cursor;cursor=cursor->next) {
+	for (cursor=list_contacts->records;cursor;cursor=cursor->next) {
 		contact = (ctsvc_contact_s *)cursor->data;
 		if (contact && contact->uid && DEFAULT_ADDRESS_BOOK_ID == contact->addressbook_id) {
 			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, content_name[CTSVC_VCARD_VALUE_UID]);
 			CTSVC_VCARD_APPEND_CONTENT(buf, buf_size, len, contact->uid);
 		}
 	}
-	for(cursor=list_contacts->records;cursor;cursor=cursor->next) {
+	for (cursor=list_contacts->records;cursor;cursor=cursor->next) {
 		contact = (ctsvc_contact_s *)cursor->data;
 		if (contact && changed_time < contact->changed_time)
 			changed_time = contact->changed_time;
@@ -2559,7 +2557,7 @@ static inline int __ctsvc_vcard_get_nickname(ctsvc_list_s *nickname_list, char *
 		if (ret < CONTACTS_ERROR_NONE) {
 			GList *cursor = NULL;
 			CTS_ERR("contacts_record_create is failed(%d)", ret);
-			for(cursor = nickname_list->records;cursor;cursor=cursor->next)
+			for (cursor = nickname_list->records;cursor;cursor=cursor->next)
 				contacts_record_destroy((contacts_record_h)(cursor->data), true);
 			g_list_free(nickname_list->records);
 			nickname_list->records = NULL;
@@ -3724,7 +3722,7 @@ static inline void __ctsvc_vcard_make_contact_display_name(ctsvc_contact_s *cont
 		name = (ctsvc_name_s *)contact->name->records->data;
 	}
 
-	if (name && ( name->first || name->last || name->prefix || name->addition || name->suffix)) {
+	if (name && (name->first || name->last || name->prefix || name->addition || name->suffix)) {
 		int reverse_lang_type = -1;
 		char *display = NULL;
 		char *reverse_display = NULL;
@@ -3777,15 +3775,15 @@ static inline void __ctsvc_vcard_make_contact_display_name(ctsvc_contact_s *cont
 				}
 			}
 
-			if(reverse_lang_type == CTSVC_LANG_JAPANESE) {
+			if (reverse_lang_type == CTSVC_LANG_JAPANESE) {
 				// make temp_display name Prefix - Last - Middle - First - Suffix
-				if(name->addition) {
+				if (name->addition) {
 					if (*temp_display)
 						len += snprintf(temp_display + len, temp_display_len - len, " ");
 					len += snprintf(temp_display + len, temp_display_len - len, "%s", name->addition);
 				}
 
-				if(name->first) {
+				if (name->first) {
 					if (*temp_display)
 						len += snprintf(temp_display + len, temp_display_len - len, " ");
 					len += snprintf(temp_display + len, temp_display_len - len, "%s", name->first);
@@ -3836,7 +3834,7 @@ static inline void __ctsvc_vcard_make_contact_display_name(ctsvc_contact_s *cont
 			}
 		}
 
-		if(name->prefix && temp_display) {
+		if (name->prefix && temp_display) {
 			display_len = SAFE_STRLEN(name->prefix) + temp_display_len + 2;
 			reverse_display = calloc(1, display_len);
 			snprintf(reverse_display, display_len, "%s %s", name->prefix, temp_display);
@@ -3892,7 +3890,7 @@ static inline void __ctsvc_vcard_make_contact_display_name(ctsvc_contact_s *cont
 					len += snprintf(temp_display + len, temp_display_len - len, "%s", name->last);
 				}
 
-				if(name->suffix) {
+				if (name->suffix) {
 					if (*temp_display) {
 						lang_type = ctsvc_check_language_type(temp_display);
 						if (lang_type == CTSVC_LANG_JAPANESE)
@@ -3904,7 +3902,7 @@ static inline void __ctsvc_vcard_make_contact_display_name(ctsvc_contact_s *cont
 				}
 			}
 
-			if(name->prefix && temp_display) {
+			if (name->prefix && temp_display) {
 				display_len = SAFE_STRLEN(name->prefix) + temp_display_len + 2;
 				display = calloc(1, display_len);
 				snprintf(display, display_len, "%s %s", name->prefix, temp_display);

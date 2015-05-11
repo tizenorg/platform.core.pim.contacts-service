@@ -75,7 +75,7 @@ static inline void __ctsvc_inotify_handle_callback(GSList *noti_list, int wd, ui
 		if (noti->wd == wd) {
 
 #ifdef _CONTACTS_IPC_CLIENT
-			if( ctsvc_ipc_is_busy() ){
+			if (ctsvc_ipc_is_busy()) {
 				// hold the line
 				noti->blocked = true;
 				continue;
@@ -388,7 +388,7 @@ static void __clear_nslot_list(gpointer data, gpointer user_data)
 	noti_info *noti = (noti_info *)data;
 
 	free(noti->view_uri);
-	free(noti );
+	free(noti);
 }
 
 static inline gboolean __ctsvc_inotify_detach_handler(guint id)

@@ -35,45 +35,45 @@ static int __ctsvc_activity_create(contacts_record_h *out_record);
 static int __ctsvc_activity_destroy(contacts_record_h record, bool delete_child);
 static int __ctsvc_activity_clone(contacts_record_h record, contacts_record_h *out_record);
 static int __ctsvc_activity_get_int(contacts_record_h record, unsigned int property_id, int *out);
-static int __ctsvc_activity_get_str(contacts_record_h record, unsigned int property_id, char** out_str );
+static int __ctsvc_activity_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_activity_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_activity_set_int(contacts_record_h record, unsigned int property_id, int value);
-static int __ctsvc_activity_set_str(contacts_record_h record, unsigned int property_id, const char* str );
-static int __ctsvc_activity_add_child_record(contacts_record_h record, unsigned int property_id, contacts_record_h child_record );
-static int __ctsvc_activity_remove_child_record(contacts_record_h record, unsigned int property_id, contacts_record_h child_record );
-static int __ctsvc_activity_get_child_record_count(contacts_record_h record, unsigned int property_id, int *count );
-static int __ctsvc_activity_get_child_record_at_p(contacts_record_h record, unsigned int property_id, int index, contacts_record_h* out_record );
-static int __ctsvc_activity_clone_child_record_list(contacts_record_h record, unsigned int property_id, contacts_list_h* out_list );
+static int __ctsvc_activity_set_str(contacts_record_h record, unsigned int property_id, const char* str);
+static int __ctsvc_activity_add_child_record(contacts_record_h record, unsigned int property_id, contacts_record_h child_record);
+static int __ctsvc_activity_remove_child_record(contacts_record_h record, unsigned int property_id, contacts_record_h child_record);
+static int __ctsvc_activity_get_child_record_count(contacts_record_h record, unsigned int property_id, int *count);
+static int __ctsvc_activity_get_child_record_at_p(contacts_record_h record, unsigned int property_id, int index, contacts_record_h* out_record);
+static int __ctsvc_activity_clone_child_record_list(contacts_record_h record, unsigned int property_id, contacts_list_h* out_list);
 
 static int __ctsvc_activity_photo_create(contacts_record_h *out_record);
 static int __ctsvc_activity_photo_destroy(contacts_record_h record, bool delete_child);
 static int __ctsvc_activity_photo_clone(contacts_record_h record, contacts_record_h *out_record);
 static int __ctsvc_activity_photo_get_int(contacts_record_h record, unsigned int property_id, int *out);
-static int __ctsvc_activity_photo_get_str(contacts_record_h record, unsigned int property_id, char** out_str );
+static int __ctsvc_activity_photo_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_activity_photo_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_activity_photo_set_int(contacts_record_h record, unsigned int property_id, int value);
-static int __ctsvc_activity_photo_set_str(contacts_record_h record, unsigned int property_id, const char* str );
+static int __ctsvc_activity_photo_set_str(contacts_record_h record, unsigned int property_id, const char* str);
 
 
 static int __ctsvc_address_create(contacts_record_h *out_ecord);
 static int __ctsvc_address_destroy(contacts_record_h record, bool delete_child);
 static int __ctsvc_address_clone(contacts_record_h record, contacts_record_h *out_record);
 static int __ctsvc_address_get_int(contacts_record_h record, unsigned int property_id, int *out);
-static int __ctsvc_address_get_str(contacts_record_h record, unsigned int property_id, char** out_str );
+static int __ctsvc_address_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_address_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
-static int __ctsvc_address_get_bool(contacts_record_h record, unsigned int property_id, bool *value );
+static int __ctsvc_address_get_bool(contacts_record_h record, unsigned int property_id, bool *value);
 static int __ctsvc_address_set_int(contacts_record_h record, unsigned int property_id, int value);
-static int __ctsvc_address_set_str(contacts_record_h record, unsigned int property_id, const char* str );
+static int __ctsvc_address_set_str(contacts_record_h record, unsigned int property_id, const char* str);
 static int __ctsvc_address_set_bool(contacts_record_h record, unsigned int property_id, bool value);
 
 static int __ctsvc_company_create(contacts_record_h *out_record);
 static int __ctsvc_company_destroy(contacts_record_h record, bool delete_child);
 static int __ctsvc_company_clone(contacts_record_h record, contacts_record_h *out_record);
 static int __ctsvc_company_get_int(contacts_record_h record, unsigned int property_id, int *out);
-static int __ctsvc_company_get_str(contacts_record_h record, unsigned int property_id, char** out_str );
+static int __ctsvc_company_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_company_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_company_set_int(contacts_record_h record, unsigned int property_id, int value);
-static int __ctsvc_company_set_str(contacts_record_h record, unsigned int property_id, const char* str );
+static int __ctsvc_company_set_str(contacts_record_h record, unsigned int property_id, const char* str);
 
 static int __ctsvc_contact_create(contacts_record_h *out_record);
 static int __ctsvc_contact_destroy(contacts_record_h record, bool delete_child);
@@ -81,25 +81,25 @@ static int __ctsvc_contact_clone(contacts_record_h record, contacts_record_h *ou
 static int __ctsvc_contact_get_int(contacts_record_h record, unsigned int property_id, int *out);
 static int __ctsvc_contact_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_contact_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
-static int __ctsvc_contact_get_bool(contacts_record_h record, unsigned int property_id, bool *value );
+static int __ctsvc_contact_get_bool(contacts_record_h record, unsigned int property_id, bool *value);
 static int __ctsvc_contact_set_int(contacts_record_h record, unsigned int property_id, int value);
-static int __ctsvc_contact_set_str(contacts_record_h record, unsigned int property_id, const char* str );
+static int __ctsvc_contact_set_str(contacts_record_h record, unsigned int property_id, const char* str);
 static int __ctsvc_contact_set_bool(contacts_record_h record, unsigned int property_id, bool value);
-static int __ctsvc_contact_clone_child_record_list(contacts_record_h record, unsigned int property_id, contacts_list_h* out_list );
-static int __ctsvc_contact_get_child_record_at_p(contacts_record_h record, unsigned int property_id, int index, contacts_record_h* out_record );
-static int __ctsvc_contact_get_child_record_count(contacts_record_h record, unsigned int property_id, int *count );
-static int __ctsvc_contact_add_child_record(contacts_record_h record, unsigned int property_id, contacts_record_h child_record );
-static int __ctsvc_contact_remove_child_record(contacts_record_h record, unsigned int property_id, contacts_record_h child_record );
+static int __ctsvc_contact_clone_child_record_list(contacts_record_h record, unsigned int property_id, contacts_list_h* out_list);
+static int __ctsvc_contact_get_child_record_at_p(contacts_record_h record, unsigned int property_id, int index, contacts_record_h* out_record);
+static int __ctsvc_contact_get_child_record_count(contacts_record_h record, unsigned int property_id, int *count);
+static int __ctsvc_contact_add_child_record(contacts_record_h record, unsigned int property_id, contacts_record_h child_record);
+static int __ctsvc_contact_remove_child_record(contacts_record_h record, unsigned int property_id, contacts_record_h child_record);
 
 static int __ctsvc_email_create(contacts_record_h *out_record);
 static int __ctsvc_email_destroy(contacts_record_h record, bool delete_child);
 static int __ctsvc_email_clone(contacts_record_h record, contacts_record_h *out_record);
 static int __ctsvc_email_get_int(contacts_record_h record, unsigned int property_id, int *out);
 static int __ctsvc_email_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
-static int __ctsvc_email_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str );
-static int __ctsvc_email_get_bool(contacts_record_h record, unsigned int property_id, bool *value );
+static int __ctsvc_email_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
+static int __ctsvc_email_get_bool(contacts_record_h record, unsigned int property_id, bool *value);
 static int __ctsvc_email_set_int(contacts_record_h record, unsigned int property_id, int value);
-static int __ctsvc_email_set_str(contacts_record_h record, unsigned int property_id, const char* str );
+static int __ctsvc_email_set_str(contacts_record_h record, unsigned int property_id, const char* str);
 static int __ctsvc_email_set_bool(contacts_record_h record, unsigned int property_id, bool value);
 
 static int __ctsvc_event_create(contacts_record_h *out_record);
@@ -108,103 +108,103 @@ static int __ctsvc_event_clone(contacts_record_h record, contacts_record_h *out_
 static int __ctsvc_event_get_int(contacts_record_h record, unsigned int property_id, int *out);
 static int __ctsvc_event_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_event_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
-static int __ctsvc_event_get_bool(contacts_record_h record, unsigned int property_id, bool *value );
+static int __ctsvc_event_get_bool(contacts_record_h record, unsigned int property_id, bool *value);
 static int __ctsvc_event_set_int(contacts_record_h record, unsigned int property_id, int value);
-static int __ctsvc_event_set_str(contacts_record_h record, unsigned int property_id, const char* str );
+static int __ctsvc_event_set_str(contacts_record_h record, unsigned int property_id, const char* str);
 static int __ctsvc_event_set_bool(contacts_record_h record, unsigned int property_id, bool value);
 
 static int __ctsvc_extension_create(contacts_record_h *out_record);
 static int __ctsvc_extension_destroy(contacts_record_h record, bool delete_child);
 static int __ctsvc_extension_clone(contacts_record_h record, contacts_record_h *out_record);
 static int __ctsvc_extension_get_int(contacts_record_h record, unsigned int property_id, int *out);
-static int __ctsvc_extension_get_str(contacts_record_h record, unsigned int property_id, char** out_str );
-static int __ctsvc_extension_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str );
+static int __ctsvc_extension_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
+static int __ctsvc_extension_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_extension_set_int(contacts_record_h record, unsigned int property_id, int value);
-static int __ctsvc_extension_set_str(contacts_record_h record, unsigned int property_id, const char* str );
+static int __ctsvc_extension_set_str(contacts_record_h record, unsigned int property_id, const char* str);
 
 static int __ctsvc_group_relation_create(contacts_record_h *out_record);
 static int __ctsvc_group_relation_destroy(contacts_record_h record, bool delete_child);
 static int __ctsvc_group_relation_clone(contacts_record_h record, contacts_record_h *out_record);
 static int __ctsvc_group_relation_get_int(contacts_record_h record, unsigned int property_id, int *out);
-static int __ctsvc_group_relation_get_str(contacts_record_h record, unsigned int property_id, char** out_str );
+static int __ctsvc_group_relation_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_group_relation_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_group_relation_set_int(contacts_record_h record, unsigned int property_id, int value);
-static int __ctsvc_group_relation_set_str(contacts_record_h record, unsigned int property_id, const char* str );
+static int __ctsvc_group_relation_set_str(contacts_record_h record, unsigned int property_id, const char* str);
 
 static int __ctsvc_messenger_create(contacts_record_h *out_record);
 static int __ctsvc_messenger_destroy(contacts_record_h record, bool delete_child);
 static int __ctsvc_messenger_clone(contacts_record_h record, contacts_record_h *out_record);
 static int __ctsvc_messenger_get_int(contacts_record_h record, unsigned int property_id, int *out);
-static int __ctsvc_messenger_get_str(contacts_record_h record, unsigned int property_id, char** out_str );
+static int __ctsvc_messenger_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_messenger_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_messenger_set_int(contacts_record_h record, unsigned int property_id, int value);
-static int __ctsvc_messenger_set_str(contacts_record_h record, unsigned int property_id, const char* str );
+static int __ctsvc_messenger_set_str(contacts_record_h record, unsigned int property_id, const char* str);
 
 static int __ctsvc_name_create(contacts_record_h *out_record);
 static int __ctsvc_name_destroy(contacts_record_h record, bool delete_child);
 static int __ctsvc_name_clone(contacts_record_h record, contacts_record_h *out_record);
 static int __ctsvc_name_get_int(contacts_record_h record, unsigned int property_id, int *out);
-static int __ctsvc_name_get_str(contacts_record_h record, unsigned int property_id, char** out_str );
-static int __ctsvc_name_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str );
+static int __ctsvc_name_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
+static int __ctsvc_name_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_name_set_int(contacts_record_h record, unsigned int property_id, int value);
-static int __ctsvc_name_set_str(contacts_record_h record, unsigned int property_id, const char* str );
+static int __ctsvc_name_set_str(contacts_record_h record, unsigned int property_id, const char* str);
 
 static int __ctsvc_nickname_create(contacts_record_h *out_record);
 static int __ctsvc_nickname_destroy(contacts_record_h record, bool delete_child);
 static int __ctsvc_nickname_clone(contacts_record_h record, contacts_record_h *out_record);
 static int __ctsvc_nickname_get_int(contacts_record_h record, unsigned int property_id, int *out);
-static int __ctsvc_nickname_get_str(contacts_record_h record, unsigned int property_id, char** out_str );
-static int __ctsvc_nickname_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str );
+static int __ctsvc_nickname_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
+static int __ctsvc_nickname_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_nickname_set_int(contacts_record_h record, unsigned int property_id, int value);
-static int __ctsvc_nickname_set_str(contacts_record_h record, unsigned int property_id, const char* str );
+static int __ctsvc_nickname_set_str(contacts_record_h record, unsigned int property_id, const char* str);
 
 static int __ctsvc_note_create(contacts_record_h *out_record);
 static int __ctsvc_note_destroy(contacts_record_h record, bool delete_child);
 static int __ctsvc_note_clone(contacts_record_h record, contacts_record_h *out_record);
 static int __ctsvc_note_get_int(contacts_record_h record, unsigned int property_id, int *out);
 static int __ctsvc_note_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
-static int __ctsvc_note_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str );
+static int __ctsvc_note_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_note_set_int(contacts_record_h record, unsigned int property_id, int value);
-static int __ctsvc_note_set_str(contacts_record_h record, unsigned int property_id, const char* str );
+static int __ctsvc_note_set_str(contacts_record_h record, unsigned int property_id, const char* str);
 
 static int __ctsvc_number_create(contacts_record_h *out_record);
 static int __ctsvc_number_destroy(contacts_record_h record, bool delete_child);
 static int __ctsvc_number_clone(contacts_record_h record, contacts_record_h *out_record);
 static int __ctsvc_number_get_int(contacts_record_h record, unsigned int property_id, int *out);
 static int __ctsvc_number_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
-static int __ctsvc_number_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str );
-static int __ctsvc_number_get_bool(contacts_record_h record, unsigned int property_id, bool *value );
+static int __ctsvc_number_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
+static int __ctsvc_number_get_bool(contacts_record_h record, unsigned int property_id, bool *value);
 static int __ctsvc_number_set_int(contacts_record_h record, unsigned int property_id, int value);
-static int __ctsvc_number_set_str(contacts_record_h record, unsigned int property_id, const char* str );
+static int __ctsvc_number_set_str(contacts_record_h record, unsigned int property_id, const char* str);
 static int __ctsvc_number_set_bool(contacts_record_h record, unsigned int property_id, bool value);
 
 static int __ctsvc_profile_create(contacts_record_h *out_record);
 static int __ctsvc_profile_destroy(contacts_record_h record, bool delete_child);
 static int __ctsvc_profile_clone(contacts_record_h record, contacts_record_h *out_reord);
 static int __ctsvc_profile_get_int(contacts_record_h record, unsigned int property_id, int *out);
-static int __ctsvc_profile_get_str(contacts_record_h record, unsigned int property_id, char** out_str );
+static int __ctsvc_profile_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_profile_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_profile_set_int(contacts_record_h record, unsigned int property_id, int value);
-static int __ctsvc_profile_set_str(contacts_record_h record, unsigned int property_id, const char* str );
+static int __ctsvc_profile_set_str(contacts_record_h record, unsigned int property_id, const char* str);
 
 static int __ctsvc_relationship_create(contacts_record_h *out_record);
 static int __ctsvc_relationship_destroy(contacts_record_h record, bool delete_child);
 static int __ctsvc_relationship_clone(contacts_record_h record, contacts_record_h *out_record);
 static int __ctsvc_relationship_get_int(contacts_record_h record, unsigned int property_id, int *out);
 static int __ctsvc_relationship_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
-static int __ctsvc_relationship_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str );
+static int __ctsvc_relationship_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_relationship_set_int(contacts_record_h record, unsigned int property_id, int value);
-static int __ctsvc_relationship_set_str(contacts_record_h record, unsigned int property_id, const char* str );
+static int __ctsvc_relationship_set_str(contacts_record_h record, unsigned int property_id, const char* str);
 
 static int __ctsvc_image_create(contacts_record_h *out_record);
 static int __ctsvc_image_destroy(contacts_record_h record, bool delete_child);
 static int __ctsvc_image_clone(contacts_record_h record, contacts_record_h *out_record);
 static int __ctsvc_image_get_int(contacts_record_h record, unsigned int property_id, int *out);
 static int __ctsvc_image_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
-static int __ctsvc_image_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str );
-static int __ctsvc_image_get_bool(contacts_record_h record, unsigned int property_id, bool *value );
+static int __ctsvc_image_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
+static int __ctsvc_image_get_bool(contacts_record_h record, unsigned int property_id, bool *value);
 static int __ctsvc_image_set_int(contacts_record_h record, unsigned int property_id, int value);
-static int __ctsvc_image_set_str(contacts_record_h record, unsigned int property_id, const char* str );
+static int __ctsvc_image_set_str(contacts_record_h record, unsigned int property_id, const char* str);
 static int __ctsvc_image_set_bool(contacts_record_h record, unsigned int property_id, bool value);
 
 static int __ctsvc_simple_contact_create(contacts_record_h *out_record);
@@ -212,19 +212,19 @@ static int __ctsvc_simple_contact_destroy(contacts_record_h record, bool delete_
 static int __ctsvc_simple_contact_clone(contacts_record_h record, contacts_record_h *out_record);
 static int __ctsvc_simple_contact_get_bool(contacts_record_h record, unsigned int property_id, bool *out);
 static int __ctsvc_simple_contact_get_int(contacts_record_h record, unsigned int property_id, int *out);
-static int __ctsvc_simple_contact_get_str(contacts_record_h record, unsigned int property_id, char** out_str );
-static int __ctsvc_simple_contact_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str );
+static int __ctsvc_simple_contact_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
+static int __ctsvc_simple_contact_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_simple_contact_set_int(contacts_record_h record, unsigned int property_id, int value);
-static int __ctsvc_simple_contact_set_str(contacts_record_h record, unsigned int property_id, const char* str );
+static int __ctsvc_simple_contact_set_str(contacts_record_h record, unsigned int property_id, const char* str);
 
 static int __ctsvc_url_create(contacts_record_h *out_record);
 static int __ctsvc_url_destroy(contacts_record_h record, bool delete_child);
 static int __ctsvc_url_clone(contacts_record_h record, contacts_record_h *out_record);
 static int __ctsvc_url_get_int(contacts_record_h record, unsigned int property_id, int *out);
-static int __ctsvc_url_get_str(contacts_record_h record, unsigned int property_id, char** out_str );
+static int __ctsvc_url_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_url_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_url_set_int(contacts_record_h record, unsigned int property_id, int value);
-static int __ctsvc_url_set_str(contacts_record_h record, unsigned int property_id, const char* str );
+static int __ctsvc_url_set_str(contacts_record_h record, unsigned int property_id, const char* str);
 
 static GHashTable *__ctsvc_temp_image_file_hash_table = NULL;
 
@@ -1592,7 +1592,7 @@ static int __ctsvc_activity_get_int(contacts_record_h record, unsigned int prope
 }
 
 static int __ctsvc_activity_add_child_record(contacts_record_h record,
-		unsigned int property_id, contacts_record_h child_record )
+		unsigned int property_id, contacts_record_h child_record)
 {
 	ctsvc_activity_s *s_activity = (ctsvc_activity_s *)record;
 	ctsvc_activity_photo_s *s_activity_photo = (ctsvc_activity_photo_s *)child_record;
@@ -1605,7 +1605,7 @@ static int __ctsvc_activity_add_child_record(contacts_record_h record,
 }
 
 static int __ctsvc_activity_remove_child_record(contacts_record_h record,
-		unsigned int property_id, contacts_record_h child_record )
+		unsigned int property_id, contacts_record_h child_record)
 {
 	ctsvc_activity_s *s_activity = (ctsvc_activity_s *)record;
 	ctsvc_activity_photo_s *s_activity_photo = (ctsvc_activity_photo_s *)child_record;
@@ -1618,7 +1618,7 @@ static int __ctsvc_activity_remove_child_record(contacts_record_h record,
 }
 
 static int __ctsvc_activity_get_child_record_count(contacts_record_h record,
-		unsigned int property_id, int *count )
+		unsigned int property_id, int *count)
 {
 	ctsvc_activity_s *s_activity = (ctsvc_activity_s *)record;
 	RETVM_IF(property_id != CTSVC_PROPERTY_ACTIVITY_ACTIVITY_PHOTO, CONTACTS_ERROR_INVALID_PARAMETER, "property_id(%d) is not supported", property_id);
@@ -1630,7 +1630,7 @@ static int __ctsvc_activity_get_child_record_count(contacts_record_h record,
 }
 
 static int __ctsvc_activity_get_child_record_at_p(contacts_record_h record,
-		unsigned int property_id, int index, contacts_record_h* out_record )
+		unsigned int property_id, int index, contacts_record_h* out_record)
 {
 	int count = 0;
 	ctsvc_activity_s *s_activity = (ctsvc_activity_s *)record;
@@ -1651,7 +1651,7 @@ static int __ctsvc_activity_get_child_record_at_p(contacts_record_h record,
 
 
 static int __ctsvc_activity_clone_child_record_list(contacts_record_h record,
-		unsigned int property_id, contacts_list_h* out_list )
+		unsigned int property_id, contacts_list_h* out_list)
 {
 	int count;
 	ctsvc_activity_s *s_activity = (ctsvc_activity_s *)record;
@@ -2254,7 +2254,7 @@ static int __ctsvc_extension_set_int(contacts_record_h record, unsigned int prop
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_contact_get_str_real(contacts_record_h record, unsigned int property_id, char** out_str, bool copy )
+static int __ctsvc_contact_get_str_real(contacts_record_h record, unsigned int property_id, char** out_str, bool copy)
 {
 	ctsvc_contact_s *contact = (ctsvc_contact_s*)record;
 	switch(property_id) {
@@ -2352,7 +2352,7 @@ static int __ctsvc_contact_get_record_list_p(contacts_record_h record,
 }
 
 static int __ctsvc_contact_get_child_record_count(contacts_record_h record,
-		unsigned int property_id, int *count )
+		unsigned int property_id, int *count)
 {
 	int ret;
 	contacts_list_h list = NULL;
@@ -2362,14 +2362,14 @@ static int __ctsvc_contact_get_child_record_count(contacts_record_h record,
 	if (CONTACTS_ERROR_INVALID_PARAMETER == ret)
 		return ret;
 
-	if(list)
+	if (list)
 		contacts_list_get_count(list, count);
 
 	return CONTACTS_ERROR_NONE;
 }
 
 static int __ctsvc_contact_get_child_record_at_p(contacts_record_h record,
-		unsigned int property_id, int index, contacts_record_h* out_record )
+		unsigned int property_id, int index, contacts_record_h* out_record)
 {
 	int ret;
 	int count;
@@ -2390,7 +2390,7 @@ static int __ctsvc_contact_get_child_record_at_p(contacts_record_h record,
 }
 
 static int __ctsvc_contact_clone_child_record_list(contacts_record_h record,
-		unsigned int property_id, contacts_list_h* out_list )
+		unsigned int property_id, contacts_list_h* out_list)
 {
 	int ret;
 	int count;
@@ -2516,7 +2516,7 @@ static int __ctsvc_contact_get_child_record_id(contacts_record_h child_record)
 }
 
 static int __ctsvc_contact_add_child_record(contacts_record_h record,
-		unsigned int property_id, contacts_record_h child_record )
+		unsigned int property_id, contacts_record_h child_record)
 {
 	int ret;
 	contacts_list_h list = NULL;
@@ -2541,7 +2541,7 @@ static int __ctsvc_contact_add_child_record(contacts_record_h record,
 }
 
 static int __ctsvc_contact_remove_child_record(contacts_record_h record,
-		unsigned int property_id, contacts_record_h child_record )
+		unsigned int property_id, contacts_record_h child_record)
 {
 	int id;
 	int ret;
@@ -2558,7 +2558,7 @@ static int __ctsvc_contact_remove_child_record(contacts_record_h record,
 }
 
 static int __ctsvc_simple_contact_get_str_real(contacts_record_h record,
-		unsigned int property_id, char** out_str, bool copy )
+		unsigned int property_id, char** out_str, bool copy)
 {
 	ctsvc_simple_contact_s *contact = (ctsvc_simple_contact_s *)record;
 
@@ -2598,7 +2598,7 @@ static int __ctsvc_simple_contact_get_str(contacts_record_h record, unsigned int
 	return __ctsvc_simple_contact_get_str_real(record, property_id, out_str, true);
 }
 
-static int __ctsvc_name_get_str_real(contacts_record_h record, unsigned int property_id, char** out_str, bool copy )
+static int __ctsvc_name_get_str_real(contacts_record_h record, unsigned int property_id, char** out_str, bool copy)
 {
 	ctsvc_name_s *name = (ctsvc_name_s *)record;
 
@@ -2644,7 +2644,7 @@ static int __ctsvc_name_get_str(contacts_record_h record, unsigned int property_
 	return __ctsvc_name_get_str_real(record, property_id, out_str, true);
 }
 
-static int __ctsvc_company_get_str_real(contacts_record_h record, unsigned int property_id, char** out_str, bool copy )
+static int __ctsvc_company_get_str_real(contacts_record_h record, unsigned int property_id, char** out_str, bool copy)
 {
 	ctsvc_company_s *company = (ctsvc_company_s *)record;
 
@@ -2696,7 +2696,7 @@ static int __ctsvc_company_get_str(contacts_record_h record, unsigned int proper
 	return __ctsvc_company_get_str_real(record, property_id, out_str, true);
 }
 
-static int __ctsvc_note_get_str_real(contacts_record_h record, unsigned int property_id, char** out_str, bool copy )
+static int __ctsvc_note_get_str_real(contacts_record_h record, unsigned int property_id, char** out_str, bool copy)
 {
 	ctsvc_note_s *note = (ctsvc_note_s *)record;
 
@@ -2721,7 +2721,7 @@ static int __ctsvc_note_get_str(contacts_record_h record, unsigned int property_
 	return __ctsvc_note_get_str_real(record, property_id, out_str, true);
 }
 
-static int __ctsvc_number_get_str_real(contacts_record_h record, unsigned int property_id, char** out_str, bool copy )
+static int __ctsvc_number_get_str_real(contacts_record_h record, unsigned int property_id, char** out_str, bool copy)
 {
 	ctsvc_number_s *number = (ctsvc_number_s*)record;
 
@@ -2749,7 +2749,7 @@ static int __ctsvc_number_get_str(contacts_record_h record, unsigned int propert
 	return __ctsvc_number_get_str_real(record, property_id, out_str, true);
 }
 
-static int __ctsvc_email_get_str_real(contacts_record_h record, unsigned int property_id, char** out_str, bool copy )
+static int __ctsvc_email_get_str_real(contacts_record_h record, unsigned int property_id, char** out_str, bool copy)
 {
 	ctsvc_email_s *email = (ctsvc_email_s*)record;
 
@@ -2777,7 +2777,7 @@ static int __ctsvc_email_get_str(contacts_record_h record, unsigned int property
 	return __ctsvc_email_get_str_real(record, property_id, out_str, true);
 }
 
-static int __ctsvc_url_get_str_real(contacts_record_h record, unsigned int property_id, char** out_str, bool copy )
+static int __ctsvc_url_get_str_real(contacts_record_h record, unsigned int property_id, char** out_str, bool copy)
 {
 	ctsvc_url_s *url = (ctsvc_url_s *)record;
 
@@ -2805,7 +2805,7 @@ static int __ctsvc_url_get_str(contacts_record_h record, unsigned int property_i
 	return __ctsvc_url_get_str_real(record, property_id, out_str, true);
 }
 
-static int __ctsvc_event_get_str_real(contacts_record_h record, unsigned int property_id, char** out_str, bool copy )
+static int __ctsvc_event_get_str_real(contacts_record_h record, unsigned int property_id, char** out_str, bool copy)
 {
 	ctsvc_event_s *event = (ctsvc_event_s *)record;
 
@@ -2830,7 +2830,7 @@ static int __ctsvc_event_get_str(contacts_record_h record, unsigned int property
 	return __ctsvc_event_get_str_real(record, property_id, out_str, true);
 }
 
-static int __ctsvc_nickname_get_str_real(contacts_record_h record, unsigned int property_id, char** out_str, bool copy )
+static int __ctsvc_nickname_get_str_real(contacts_record_h record, unsigned int property_id, char** out_str, bool copy)
 {
 	ctsvc_nickname_s *nickname = (ctsvc_nickname_s *)record;
 
@@ -2855,7 +2855,7 @@ static int __ctsvc_nickname_get_str(contacts_record_h record, unsigned int prope
 	return __ctsvc_nickname_get_str_real(record, property_id, out_str, true);
 }
 
-static int __ctsvc_address_get_str_real(contacts_record_h record, unsigned int property_id, char** out_str, bool copy )
+static int __ctsvc_address_get_str_real(contacts_record_h record, unsigned int property_id, char** out_str, bool copy)
 {
 	ctsvc_address_s *address = (ctsvc_address_s *)record;
 
@@ -2901,7 +2901,7 @@ static int __ctsvc_address_get_str(contacts_record_h record, unsigned int proper
 	return __ctsvc_address_get_str_real(record, property_id, out_str, true);
 }
 
-static int __ctsvc_messenger_get_str_real(contacts_record_h record, unsigned int property_id, char** out_str, bool copy )
+static int __ctsvc_messenger_get_str_real(contacts_record_h record, unsigned int property_id, char** out_str, bool copy)
 {
 	ctsvc_messenger_s *messenger = (ctsvc_messenger_s *)record;
 
@@ -2930,7 +2930,7 @@ static int __ctsvc_messenger_get_str(contacts_record_h record, unsigned int prop
 }
 
 static int __ctsvc_group_relation_get_str_real(contacts_record_h record,
-		unsigned int property_id, char** out_str, bool copy )
+		unsigned int property_id, char** out_str, bool copy)
 {
 	ctsvc_group_relation_s *group_relation = (ctsvc_group_relation_s *)record;
 
@@ -2956,7 +2956,7 @@ static int __ctsvc_group_relation_get_str(contacts_record_h record, unsigned int
 	return __ctsvc_group_relation_get_str_real(record, property_id, out_str, true);
 }
 
-static int __ctsvc_activity_get_str_real(contacts_record_h record, unsigned int property_id, char** out_str, bool copy )
+static int __ctsvc_activity_get_str_real(contacts_record_h record, unsigned int property_id, char** out_str, bool copy)
 {
 	ctsvc_activity_s *activity = (ctsvc_activity_s *)record;
 
@@ -2990,7 +2990,7 @@ static int __ctsvc_activity_get_str(contacts_record_h record, unsigned int prope
 	return __ctsvc_activity_get_str_real(record, property_id, out_str, true);
 }
 
-static int __ctsvc_activity_photo_get_str_real(contacts_record_h record, unsigned int property_id, char** out_str, bool copy )
+static int __ctsvc_activity_photo_get_str_real(contacts_record_h record, unsigned int property_id, char** out_str, bool copy)
 {
 	ctsvc_activity_photo_s *photo = (ctsvc_activity_photo_s *)record;
 
@@ -3015,7 +3015,7 @@ static int __ctsvc_activity_photo_get_str(contacts_record_h record, unsigned int
 	return __ctsvc_activity_photo_get_str_real(record, property_id, out_str, true);
 }
 
-static int __ctsvc_profile_get_str_real(contacts_record_h record, unsigned int property_id, char** out_str, bool copy )
+static int __ctsvc_profile_get_str_real(contacts_record_h record, unsigned int property_id, char** out_str, bool copy)
 {
 	ctsvc_profile_s *profile = (ctsvc_profile_s *)record;
 
@@ -3061,7 +3061,7 @@ static int __ctsvc_profile_get_str(contacts_record_h record, unsigned int proper
 	return __ctsvc_profile_get_str_real(record, property_id, out_str, true);
 }
 
-static int __ctsvc_relationship_get_str_real(contacts_record_h record, unsigned int property_id, char** out_str, bool copy )
+static int __ctsvc_relationship_get_str_real(contacts_record_h record, unsigned int property_id, char** out_str, bool copy)
 {
 	ctsvc_relationship_s *relationship = (ctsvc_relationship_s *)record;
 
@@ -3089,7 +3089,7 @@ static int __ctsvc_relationship_get_str(contacts_record_h record, unsigned int p
 	return __ctsvc_relationship_get_str_real(record, property_id, out_str, true);
 }
 
-static int __ctsvc_image_get_str_real(contacts_record_h record, unsigned int property_id, char** out_str, bool copy )
+static int __ctsvc_image_get_str_real(contacts_record_h record, unsigned int property_id, char** out_str, bool copy)
 {
 	ctsvc_image_s *image = (ctsvc_image_s *)record;
 
@@ -3117,7 +3117,7 @@ static int __ctsvc_image_get_str(contacts_record_h record, unsigned int property
 	return __ctsvc_image_get_str_real(record, property_id, out_str, true);
 }
 
-static int __ctsvc_extension_get_str_real(contacts_record_h record, unsigned int property_id, char** out_str, bool copy )
+static int __ctsvc_extension_get_str_real(contacts_record_h record, unsigned int property_id, char** out_str, bool copy)
 {
 	ctsvc_extension_s *extension = (ctsvc_extension_s *)record;
 
@@ -3172,7 +3172,7 @@ static int __ctsvc_extension_get_str(contacts_record_h record, unsigned int prop
 	return __ctsvc_extension_get_str_real(record, property_id, out_str, true);
 }
 
-static int __ctsvc_contact_set_str(contacts_record_h record, unsigned int property_id, const char* str )
+static int __ctsvc_contact_set_str(contacts_record_h record, unsigned int property_id, const char* str)
 {
 	ctsvc_contact_s *contact = (ctsvc_contact_s *)record;
 
@@ -3207,7 +3207,7 @@ static int __ctsvc_contact_set_str(contacts_record_h record, unsigned int proper
 }
 
 
-static int __ctsvc_simple_contact_set_str(contacts_record_h record, unsigned int property_id, const char* str )
+static int __ctsvc_simple_contact_set_str(contacts_record_h record, unsigned int property_id, const char* str)
 {
 	ctsvc_simple_contact_s *contact = (ctsvc_simple_contact_s *)record;
 
@@ -3241,7 +3241,7 @@ static int __ctsvc_simple_contact_set_str(contacts_record_h record, unsigned int
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_name_set_str(contacts_record_h record, unsigned int property_id, const char* str )
+static int __ctsvc_name_set_str(contacts_record_h record, unsigned int property_id, const char* str)
 {
 	ctsvc_name_s *name = (ctsvc_name_s *)record;
 
@@ -3277,7 +3277,7 @@ static int __ctsvc_name_set_str(contacts_record_h record, unsigned int property_
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_company_set_str(contacts_record_h record, unsigned int property_id, const char* str )
+static int __ctsvc_company_set_str(contacts_record_h record, unsigned int property_id, const char* str)
 {
 	ctsvc_company_s *company = (ctsvc_company_s *)record;
 
@@ -3323,7 +3323,7 @@ static int __ctsvc_company_set_str(contacts_record_h record, unsigned int proper
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_note_set_str(contacts_record_h record, unsigned int property_id, const char* str )
+static int __ctsvc_note_set_str(contacts_record_h record, unsigned int property_id, const char* str)
 {
 	ctsvc_note_s *note = (ctsvc_note_s *)record;
 
@@ -3338,7 +3338,7 @@ static int __ctsvc_note_set_str(contacts_record_h record, unsigned int property_
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_number_set_str(contacts_record_h record, unsigned int property_id, const char* str )
+static int __ctsvc_number_set_str(contacts_record_h record, unsigned int property_id, const char* str)
 {
 	ctsvc_number_s *number = (ctsvc_number_s*)record;
 
@@ -3356,7 +3356,7 @@ static int __ctsvc_number_set_str(contacts_record_h record, unsigned int propert
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_email_set_str(contacts_record_h record, unsigned int property_id, const char* str )
+static int __ctsvc_email_set_str(contacts_record_h record, unsigned int property_id, const char* str)
 {
 	ctsvc_email_s *email = (ctsvc_email_s *)record;
 
@@ -3374,7 +3374,7 @@ static int __ctsvc_email_set_str(contacts_record_h record, unsigned int property
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_url_set_str(contacts_record_h record, unsigned int property_id, const char* str )
+static int __ctsvc_url_set_str(contacts_record_h record, unsigned int property_id, const char* str)
 {
 	ctsvc_url_s *url = (ctsvc_url_s *)record;
 
@@ -3392,7 +3392,7 @@ static int __ctsvc_url_set_str(contacts_record_h record, unsigned int property_i
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_event_set_str(contacts_record_h record, unsigned int property_id, const char* str )
+static int __ctsvc_event_set_str(contacts_record_h record, unsigned int property_id, const char* str)
 {
 	ctsvc_event_s *event = (ctsvc_event_s *)record;
 
@@ -3407,7 +3407,7 @@ static int __ctsvc_event_set_str(contacts_record_h record, unsigned int property
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_nickname_set_str(contacts_record_h record, unsigned int property_id, const char* str )
+static int __ctsvc_nickname_set_str(contacts_record_h record, unsigned int property_id, const char* str)
 {
 	ctsvc_nickname_s *nickname = (ctsvc_nickname_s *)record;
 
@@ -3422,7 +3422,7 @@ static int __ctsvc_nickname_set_str(contacts_record_h record, unsigned int prope
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_address_set_str(contacts_record_h record, unsigned int property_id, const char* str )
+static int __ctsvc_address_set_str(contacts_record_h record, unsigned int property_id, const char* str)
 {
 	ctsvc_address_s *address = (ctsvc_address_s *)record;
 
@@ -3458,7 +3458,7 @@ static int __ctsvc_address_set_str(contacts_record_h record, unsigned int proper
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_messenger_set_str(contacts_record_h record, unsigned int property_id, const char* str )
+static int __ctsvc_messenger_set_str(contacts_record_h record, unsigned int property_id, const char* str)
 {
 	ctsvc_messenger_s *messenger = (ctsvc_messenger_s *)record;
 
@@ -3476,7 +3476,7 @@ static int __ctsvc_messenger_set_str(contacts_record_h record, unsigned int prop
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_group_relation_set_str(contacts_record_h record, unsigned int property_id, const char* str )
+static int __ctsvc_group_relation_set_str(contacts_record_h record, unsigned int property_id, const char* str)
 {
 	ctsvc_group_relation_s *group_relation = (ctsvc_group_relation_s *)record;
 
@@ -3495,7 +3495,7 @@ static int __ctsvc_group_relation_set_str(contacts_record_h record, unsigned int
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_activity_set_str(contacts_record_h record, unsigned int property_id, const char* str )
+static int __ctsvc_activity_set_str(contacts_record_h record, unsigned int property_id, const char* str)
 {
 	ctsvc_activity_s *activity = (ctsvc_activity_s *)record;
 
@@ -3519,7 +3519,7 @@ static int __ctsvc_activity_set_str(contacts_record_h record, unsigned int prope
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_activity_photo_set_str(contacts_record_h record, unsigned int property_id, const char* str )
+static int __ctsvc_activity_photo_set_str(contacts_record_h record, unsigned int property_id, const char* str)
 {
 	ctsvc_activity_photo_s *photo = (ctsvc_activity_photo_s *)record;
 
@@ -3534,7 +3534,7 @@ static int __ctsvc_activity_photo_set_str(contacts_record_h record, unsigned int
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_profile_set_str(contacts_record_h record, unsigned int property_id, const char* str )
+static int __ctsvc_profile_set_str(contacts_record_h record, unsigned int property_id, const char* str)
 {
 	ctsvc_profile_s *profile = (ctsvc_profile_s *)record;
 
@@ -3570,7 +3570,7 @@ static int __ctsvc_profile_set_str(contacts_record_h record, unsigned int proper
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_relationship_set_str(contacts_record_h record, unsigned int property_id, const char* str )
+static int __ctsvc_relationship_set_str(contacts_record_h record, unsigned int property_id, const char* str)
 {
 	ctsvc_relationship_s *relationship = (ctsvc_relationship_s *)record;
 
@@ -3588,7 +3588,7 @@ static int __ctsvc_relationship_set_str(contacts_record_h record, unsigned int p
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_image_set_str(contacts_record_h record, unsigned int property_id, const char* str )
+static int __ctsvc_image_set_str(contacts_record_h record, unsigned int property_id, const char* str)
 {
 	ctsvc_image_s *image = (ctsvc_image_s *)record;
 
@@ -3610,7 +3610,7 @@ static int __ctsvc_image_set_str(contacts_record_h record, unsigned int property
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_extension_set_str(contacts_record_h record, unsigned int property_id, const char* str )
+static int __ctsvc_extension_set_str(contacts_record_h record, unsigned int property_id, const char* str)
 {
 	ctsvc_extension_s *extension = (ctsvc_extension_s *)record;
 
@@ -3655,7 +3655,7 @@ static int __ctsvc_extension_set_str(contacts_record_h record, unsigned int prop
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_contact_get_bool(contacts_record_h record, unsigned int property_id, bool *value )
+static int __ctsvc_contact_get_bool(contacts_record_h record, unsigned int property_id, bool *value)
 {
 	ctsvc_contact_s *contact = (ctsvc_contact_s *)record;
 	switch (property_id) {
@@ -3675,7 +3675,7 @@ static int __ctsvc_contact_get_bool(contacts_record_h record, unsigned int prope
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_simple_contact_get_bool(contacts_record_h record, unsigned int property_id, bool *value )
+static int __ctsvc_simple_contact_get_bool(contacts_record_h record, unsigned int property_id, bool *value)
 {
 	ctsvc_simple_contact_s *contact = (ctsvc_simple_contact_s *)record;
 	switch (property_id) {
@@ -3696,7 +3696,7 @@ static int __ctsvc_simple_contact_get_bool(contacts_record_h record, unsigned in
 }
 
 
-static int __ctsvc_number_get_bool(contacts_record_h record, unsigned int property_id, bool *value )
+static int __ctsvc_number_get_bool(contacts_record_h record, unsigned int property_id, bool *value)
 {
 	ctsvc_number_s *number = (ctsvc_number_s*)record;
 	switch (property_id) {
@@ -3710,7 +3710,7 @@ static int __ctsvc_number_get_bool(contacts_record_h record, unsigned int proper
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_email_get_bool(contacts_record_h record, unsigned int property_id, bool *value )
+static int __ctsvc_email_get_bool(contacts_record_h record, unsigned int property_id, bool *value)
 {
 	ctsvc_email_s *email = (ctsvc_email_s *)record;
 	switch (property_id) {
@@ -3724,7 +3724,7 @@ static int __ctsvc_email_get_bool(contacts_record_h record, unsigned int propert
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_event_get_bool(contacts_record_h record, unsigned int property_id, bool *value )
+static int __ctsvc_event_get_bool(contacts_record_h record, unsigned int property_id, bool *value)
 {
 	ctsvc_event_s *event = (ctsvc_event_s *)record;
 	switch (property_id) {
@@ -3738,7 +3738,7 @@ static int __ctsvc_event_get_bool(contacts_record_h record, unsigned int propert
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_image_get_bool(contacts_record_h record, unsigned int property_id, bool *value )
+static int __ctsvc_image_get_bool(contacts_record_h record, unsigned int property_id, bool *value)
 {
 	ctsvc_image_s *image = (ctsvc_image_s *)record;
 	switch (property_id) {
@@ -3752,7 +3752,7 @@ static int __ctsvc_image_get_bool(contacts_record_h record, unsigned int propert
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_address_get_bool(contacts_record_h record, unsigned int property_id, bool *value )
+static int __ctsvc_address_get_bool(contacts_record_h record, unsigned int property_id, bool *value)
 {
 	ctsvc_address_s *address = (ctsvc_address_s *)record;
 	switch (property_id) {

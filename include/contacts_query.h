@@ -67,7 +67,7 @@ extern "C"
  *
  * @see contacts_query_destroy()
  */
-int contacts_query_create( const char* view_uri, contacts_query_h* query );
+int contacts_query_create(const char* view_uri, contacts_query_h* query);
 
 /**
  * @brief Destroys a query.
@@ -84,7 +84,7 @@ int contacts_query_create( const char* view_uri, contacts_query_h* query );
  *
  * @see contacts_query_create()
  */
-int contacts_query_destroy( contacts_query_h query );
+int contacts_query_destroy(contacts_query_h query);
 
 /**
  * @brief Adds property IDs for projection.

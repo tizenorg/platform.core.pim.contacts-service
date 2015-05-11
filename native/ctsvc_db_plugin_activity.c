@@ -31,15 +31,15 @@
 #include "ctsvc_notification.h"
 #include "ctsvc_db_access_control.h"
 
-static int __ctsvc_db_activity_insert_record( contacts_record_h record, int *id );
-static int __ctsvc_db_activity_get_record( int id, contacts_record_h* out_record );
-static int __ctsvc_db_activity_update_record( contacts_record_h record );
-static int __ctsvc_db_activity_delete_record( int id );
-static int __ctsvc_db_activity_get_all_records( int offset, int limit, contacts_list_h* out_list );
-static int __ctsvc_db_activity_get_records_with_query( contacts_query_h query, int offset, int limit, contacts_list_h* out_list );
+static int __ctsvc_db_activity_insert_record(contacts_record_h record, int *id);
+static int __ctsvc_db_activity_get_record(int id, contacts_record_h* out_record);
+static int __ctsvc_db_activity_update_record(contacts_record_h record);
+static int __ctsvc_db_activity_delete_record(int id);
+static int __ctsvc_db_activity_get_all_records(int offset, int limit, contacts_list_h* out_list);
+static int __ctsvc_db_activity_get_records_with_query(contacts_query_h query, int offset, int limit, contacts_list_h* out_list);
 //static int __ctsvc_db_activity_insert_records(const contacts_list_h in_list, int **ds);
 //static int __ctsvc_db_activity_update_records(const contacts_list_h in_list);
-//static int __ctsvc_db_activity_delete_records( int ids[], int count);
+//static int __ctsvc_db_activity_delete_records(int ids[], int count);
 
 ctsvc_db_plugin_info_s ctsvc_db_plugin_activity = {
 	.is_query_only = false,
@@ -58,7 +58,7 @@ ctsvc_db_plugin_info_s ctsvc_db_plugin_activity = {
 	.replace_records = NULL,
 };
 
-static int __ctsvc_db_activity_insert_record( contacts_record_h record, int *id )
+static int __ctsvc_db_activity_insert_record(contacts_record_h record, int *id)
 {
 	int ret;
 	int activity_id;
@@ -83,7 +83,7 @@ static int __ctsvc_db_activity_insert_record( contacts_record_h record, int *id 
 				CTSVC_DB_VIEW_CONTACT, activity->contact_id);
 
 	ret = ctsvc_query_get_first_int_result(query, &addressbook_id);
-	if (CONTACTS_ERROR_NONE != ret ) {
+	if (CONTACTS_ERROR_NONE != ret) {
 		ctsvc_end_trans(false);
 		if (CONTACTS_ERROR_NO_DATA == ret) {
 			CTS_ERR("No data : contact id (%d)", activity->contact_id);
@@ -141,7 +141,7 @@ static int __ctsvc_db_activity_insert_record( contacts_record_h record, int *id 
 
 	if (activity->photos) {
 		ret = contacts_list_get_count((contacts_list_h)activity->photos, &count);
-		if(CONTACTS_ERROR_NONE == ret && 0 < count) {
+		if (CONTACTS_ERROR_NONE == ret && 0 < count) {
 			ctsvc_activity_photo_s *photo = NULL;
 			contacts_record_h record = NULL;
 
@@ -150,11 +150,11 @@ static int __ctsvc_db_activity_insert_record( contacts_record_h record, int *id 
 				contacts_list_get_current_record_p((contacts_list_h)activity->photos, &record);
 				photo = (ctsvc_activity_photo_s*)record;
 				ret = ctsvc_db_activity_photo_insert((contacts_record_h)photo, activity_id, NULL);
-				if (CONTACTS_ERROR_DB == ret){
+				if (CONTACTS_ERROR_DB == ret) {
 					CTS_ERR("DB error : return (%d)", ret);
 					break;
 				}
-			}while(CONTACTS_ERROR_NONE == contacts_list_next((contacts_list_h)activity->photos));
+			} while (CONTACTS_ERROR_NONE == contacts_list_next((contacts_list_h)activity->photos));
 		}
 	}
 
@@ -196,7 +196,7 @@ static int __ctsvc_db_activity_value_set(cts_stmt stmt, contacts_record_h *recor
 }
 
 
-static int __ctsvc_db_activity_get_record( int id, contacts_record_h* out_record )
+static int __ctsvc_db_activity_get_record(int id, contacts_record_h* out_record)
 {
 	char query[CTS_SQL_MAX_LEN] = {0};
 	int ret;
@@ -230,13 +230,13 @@ static int __ctsvc_db_activity_get_record( int id, contacts_record_h* out_record
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_db_activity_update_record( contacts_record_h record )
+static int __ctsvc_db_activity_update_record(contacts_record_h record)
 {
 	CTS_ERR("Invalid operation : activity can not update, only insert/delete");
 	return CONTACTS_ERROR_INVALID_PARAMETER;
 }
 
-static int __ctsvc_db_activity_delete_record( int id )
+static int __ctsvc_db_activity_delete_record(int id)
 {
 	int ret;
 	int addressbook_id;
@@ -249,7 +249,7 @@ static int __ctsvc_db_activity_delete_record( int id )
 			"SELECT addressbook_id FROM "CTSVC_DB_VIEW_CONTACT" "
 				"WHERE contact_id = (SELECT contact_id FROM "CTSVC_DB_VIEW_ACTIVITY" WHERE id = %d)", id);
 	ret = ctsvc_query_get_first_int_result(query, &addressbook_id);
-	if (CONTACTS_ERROR_NONE != ret ) {
+	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("No data : id (%d)", id);
 		ctsvc_end_trans(false);
 		return ret;
@@ -284,8 +284,8 @@ static int __ctsvc_db_activity_delete_record( int id )
 		return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_db_activity_get_all_records( int offset, int limit,
-	contacts_list_h* out_list )
+static int __ctsvc_db_activity_get_all_records(int offset, int limit,
+	contacts_list_h* out_list)
 {
 	int ret;
 	int len;
@@ -332,7 +332,7 @@ static int __ctsvc_db_activity_get_all_records( int offset, int limit,
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_db_activity_get_records_with_query( contacts_query_h query, int offset, int limit, contacts_list_h* out_list )
+static int __ctsvc_db_activity_get_records_with_query(contacts_query_h query, int offset, int limit, contacts_list_h* out_list)
 {
 	int ret;
 	int i;
@@ -386,11 +386,11 @@ static int __ctsvc_db_activity_get_records_with_query( contacts_query_h query, i
 			ret = ctsvc_record_set_projection_flags(record, s_query->projection,
 					s_query->projection_count, s_query->property_count);
 
-			if(CONTACTS_ERROR_NONE != ret)
+			if (CONTACTS_ERROR_NONE != ret)
 				ASSERT_NOT_REACHED("To set projection is failed.\n");
 		}
 
-		for(i=0;i<field_count;i++) {
+		for (i=0;i<field_count;i++) {
 			char *temp;
 			int property_id;
 			if (0 == s_query->projection_count)
@@ -443,4 +443,4 @@ static int __ctsvc_db_activity_get_records_with_query( contacts_query_h query, i
 }
 //static int __ctsvc_db_activity_insert_records(const contacts_list_h in_list, int **ids) { return CONTACTS_ERROR_NONE; }
 //static int __ctsvc_db_activity_update_records(const contacts_list_h in_list) { return CONTACTS_ERROR_NONE; }
-//static int __ctsvc_db_activity_delete_records( int ids[], int count) { return CONTACTS_ERROR_NONE; }
+//static int __ctsvc_db_activity_delete_records(int ids[], int count) { return CONTACTS_ERROR_NONE; }

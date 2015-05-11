@@ -45,7 +45,7 @@ static inline bool __ctsvc_filters_property_check(const property_info_s *propert
 	return false;
 }
 
-API int contacts_filter_create( const char* view_uri, contacts_filter_h* out_filter )
+API int contacts_filter_create(const char* view_uri, contacts_filter_h* out_filter)
 {
 	ctsvc_composite_filter_s *com_filter;
 
@@ -63,7 +63,7 @@ API int contacts_filter_create( const char* view_uri, contacts_filter_h* out_fil
 	return CONTACTS_ERROR_NONE;
 }
 
-API int contacts_filter_add_operator( contacts_filter_h filter, contacts_filter_operator_e op )
+API int contacts_filter_add_operator(contacts_filter_h filter, contacts_filter_operator_e op)
 {
 	ctsvc_composite_filter_s *com_filter;
 
@@ -73,7 +73,7 @@ API int contacts_filter_add_operator( contacts_filter_h filter, contacts_filter_
 
 	RETVM_IF(g_slist_length(com_filter->filter_ops) != (g_slist_length(com_filter->filters)-1),
 				CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : Please check the operator of filter");
-	com_filter->filter_ops = g_slist_append(com_filter->filter_ops, (void*)op );
+	com_filter->filter_ops = g_slist_append(com_filter->filter_ops, (void*)op);
 	return CONTACTS_ERROR_NONE;
 }
 
@@ -148,8 +148,8 @@ static int __ctsvc_attribute_filter_create(ctsvc_composite_filter_s *com_filter,
 	return CONTACTS_ERROR_NONE;
 }
 
-API int contacts_filter_add_str( contacts_filter_h filter, unsigned int property_id,
-		contacts_match_str_flag_e match, const char* match_value )
+API int contacts_filter_add_str(contacts_filter_h filter, unsigned int property_id,
+		contacts_match_str_flag_e match, const char* match_value)
 {
 	ctsvc_composite_filter_s *com_filter;
 	ctsvc_attribute_filter_s *str_filter;
@@ -167,8 +167,8 @@ API int contacts_filter_add_str( contacts_filter_h filter, unsigned int property
 	return CONTACTS_ERROR_NONE;
 }
 
-API int contacts_filter_add_int( contacts_filter_h filter, unsigned int property_id,
-		contacts_match_int_flag_e match, int match_value )
+API int contacts_filter_add_int(contacts_filter_h filter, unsigned int property_id,
+		contacts_match_int_flag_e match, int match_value)
 {
 	ctsvc_composite_filter_s *com_filter;
 	ctsvc_attribute_filter_s *int_filter;
@@ -190,8 +190,8 @@ API int contacts_filter_add_int( contacts_filter_h filter, unsigned int property
 	return CONTACTS_ERROR_NONE;
 }
 
-API int contacts_filter_add_lli( contacts_filter_h filter, unsigned int property_id,
-		contacts_match_int_flag_e match, long long int match_value )
+API int contacts_filter_add_lli(contacts_filter_h filter, unsigned int property_id,
+		contacts_match_int_flag_e match, long long int match_value)
 {
 	ctsvc_composite_filter_s *com_filter;
 	ctsvc_attribute_filter_s *lli_filter;
@@ -210,8 +210,8 @@ API int contacts_filter_add_lli( contacts_filter_h filter, unsigned int property
 	return CONTACTS_ERROR_NONE;
 }
 
-API int contacts_filter_add_double( contacts_filter_h filter, unsigned int property_id,
-		contacts_match_int_flag_e match, double match_value )
+API int contacts_filter_add_double(contacts_filter_h filter, unsigned int property_id,
+		contacts_match_int_flag_e match, double match_value)
 {
 	ctsvc_composite_filter_s *com_filter;
 	ctsvc_attribute_filter_s *double_filter;
@@ -230,7 +230,7 @@ API int contacts_filter_add_double( contacts_filter_h filter, unsigned int prope
 	return CONTACTS_ERROR_NONE;
 }
 
-API int contacts_filter_add_bool( contacts_filter_h filter, unsigned int property_id, bool match_value )
+API int contacts_filter_add_bool(contacts_filter_h filter, unsigned int property_id, bool match_value)
 {
 	ctsvc_composite_filter_s *com_filter;
 	ctsvc_attribute_filter_s *bool_filter;
@@ -256,7 +256,7 @@ static int __ctsvc_composite_filter_destroy(ctsvc_composite_filter_s *com_filter
 
 	RETV_IF(NULL == com_filter, CONTACTS_ERROR_INVALID_PARAMETER);
 
-	for(cursor=com_filter->filters;cursor;cursor=cursor->next) {
+	for (cursor=com_filter->filters;cursor;cursor=cursor->next) {
 		ctsvc_filter_s *sub_filter = (ctsvc_filter_s *)cursor->data;
 
 		if (sub_filter->filter_type == CTSVC_FILTER_COMPOSITE)
@@ -278,7 +278,7 @@ static int __ctsvc_composite_filter_destroy(ctsvc_composite_filter_s *com_filter
 }
 
 
-API int contacts_filter_destroy( contacts_filter_h filter )
+API int contacts_filter_destroy(contacts_filter_h filter)
 {
 	RETV_IF(NULL == filter, CONTACTS_ERROR_INVALID_PARAMETER);
 
@@ -318,7 +318,7 @@ static int __ctsvc_composite_filter_clone(ctsvc_composite_filter_s * filter,
 	RETV_IF(NULL == filter, CONTACTS_ERROR_INVALID_PARAMETER);
 	contacts_filter_create(filter->view_uri, (contacts_filter_h *)&out);
 
-	for(cursor=filter->filters;cursor;cursor=cursor->next) {
+	for (cursor=filter->filters;cursor;cursor=cursor->next) {
 		ctsvc_filter_s *src = (ctsvc_filter_s *)cursor->data;
 		ctsvc_filter_s *dest = NULL;
 

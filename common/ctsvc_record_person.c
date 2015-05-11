@@ -28,9 +28,9 @@ static int __ctsvc_person_clone(contacts_record_h record, contacts_record_h *out
 static int __ctsvc_person_get_int(contacts_record_h record, unsigned int property_id, int *out);
 static int __ctsvc_person_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_person_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
-static int __ctsvc_person_get_bool( contacts_record_h record, unsigned int property_id, bool *value );
+static int __ctsvc_person_get_bool(contacts_record_h record, unsigned int property_id, bool *value);
 static int __ctsvc_person_set_int(contacts_record_h record, unsigned int property_id, int value);
-static int __ctsvc_person_set_str(contacts_record_h record, unsigned int property_id, const char* str );
+static int __ctsvc_person_set_str(contacts_record_h record, unsigned int property_id, const char* str);
 static int __ctsvc_person_set_bool(contacts_record_h record, unsigned int property_id, bool value);
 
 
@@ -137,7 +137,7 @@ static int __ctsvc_person_get_int(contacts_record_h record, unsigned int propert
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_person_get_str_real(contacts_record_h record, unsigned int property_id, char** out_str, bool copy )
+static int __ctsvc_person_get_str_real(contacts_record_h record, unsigned int property_id, char** out_str, bool copy)
 {
 	ctsvc_person_s *person = (ctsvc_person_s *)record;
 	switch(property_id) {
@@ -182,7 +182,7 @@ static int __ctsvc_person_get_str(contacts_record_h record, unsigned int propert
 	return __ctsvc_person_get_str_real(record, property_id, out_str, true);
 }
 
-static int __ctsvc_person_get_bool(contacts_record_h record, unsigned int property_id, bool *value )
+static int __ctsvc_person_get_bool(contacts_record_h record, unsigned int property_id, bool *value)
 {
 	ctsvc_person_s *person = (ctsvc_person_s *)record;
 	switch (property_id) {
@@ -223,16 +223,16 @@ static int __ctsvc_person_set_int(contacts_record_h record, unsigned int propert
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_person_set_str(contacts_record_h record, unsigned int property_id, const char* str )
+static int __ctsvc_person_set_str(contacts_record_h record, unsigned int property_id, const char* str)
 {
 	ctsvc_person_s *person = (ctsvc_person_s *)record;
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_PERSON_DISPLAY_NAME:
-		FREEandSTRDUP( person->display_name, str);
+		FREEandSTRDUP(person->display_name, str);
 		break;
 	case CTSVC_PROPERTY_PERSON_DISPLAY_NAME_INDEX:
-		FREEandSTRDUP( person->display_name_index, str);
+		FREEandSTRDUP(person->display_name_index, str);
 		break;
 	case CTSVC_PROPERTY_PERSON_IMAGE_THUMBNAIL:
 		FREEandSTRDUP(person->image_thumbnail_path, str);

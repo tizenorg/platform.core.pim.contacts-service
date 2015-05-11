@@ -47,7 +47,7 @@ static int __ctsvc_ipc_unmarshal_nickname(pims_ipc_data_h ipc_data, const char* 
 		if (ctsvc_ipc_unmarshal_string(ipc_data, &nickname_p->nickname) != CONTACTS_ERROR_NONE) break;
 
 		return CONTACTS_ERROR_NONE;
-	} while(0);
+	} while (0);
 
 	CTS_ERR("_ctsvc_ipc_unmarshal fail");
 	return CONTACTS_ERROR_INVALID_PARAMETER;
@@ -59,7 +59,7 @@ static int __ctsvc_ipc_marshal_nickname(const contacts_record_h record, pims_ipc
 	RETV_IF(ipc_data==NULL,CONTACTS_ERROR_NO_DATA);
 	RETV_IF(nickname_p==NULL,CONTACTS_ERROR_NO_DATA);
 
-	do{
+	do {
 		if (ctsvc_ipc_marshal_int((nickname_p->id),ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_int((nickname_p->contact_id),ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_int((nickname_p->type),ipc_data) != CONTACTS_ERROR_NONE) break;
@@ -68,7 +68,7 @@ static int __ctsvc_ipc_marshal_nickname(const contacts_record_h record, pims_ipc
 
 		return CONTACTS_ERROR_NONE;
 
-	} while(0);
+	} while (0);
 
 	CTS_ERR("_ctsvc_ipc_marshal fail");
 	return CONTACTS_ERROR_INVALID_PARAMETER;
@@ -77,5 +77,5 @@ static int __ctsvc_ipc_marshal_nickname(const contacts_record_h record, pims_ipc
 static int __ctsvc_ipc_marshal_nickname_get_primary_id(const contacts_record_h record, unsigned int *property_id, int *id)
 {
 	*property_id = CTSVC_PROPERTY_NICKNAME_ID;
-	return contacts_record_get_int(record, *property_id, id );
+	return contacts_record_get_int(record, *property_id, id);
 }

@@ -42,13 +42,13 @@
 
 #define CTSVC_MY_PROFILE_DISPLAY_NAME_MAX_LEN 1024
 
-static int __ctsvc_db_my_profile_insert_record( contacts_record_h record, int *id );
-static int __ctsvc_db_my_profile_get_record( int id, contacts_record_h* out_record );
-static int __ctsvc_db_my_profile_update_record( contacts_record_h record );
-static int __ctsvc_db_my_profile_delete_record( int id );
+static int __ctsvc_db_my_profile_insert_record(contacts_record_h record, int *id);
+static int __ctsvc_db_my_profile_get_record(int id, contacts_record_h* out_record);
+static int __ctsvc_db_my_profile_update_record(contacts_record_h record);
+static int __ctsvc_db_my_profile_delete_record(int id);
 
-static int __ctsvc_db_my_profile_get_all_records( int offset, int limit, contacts_list_h* out_list );
-static int __ctsvc_db_my_profile_get_records_with_query( contacts_query_h query, int offset, int limit, contacts_list_h* out_list );
+static int __ctsvc_db_my_profile_get_all_records(int offset, int limit, contacts_list_h* out_list);
+static int __ctsvc_db_my_profile_get_records_with_query(contacts_query_h query, int offset, int limit, contacts_list_h* out_list);
 
 ctsvc_db_plugin_info_s ctsvc_db_plugin_my_profile = {
 	.is_query_only = false,
@@ -184,7 +184,7 @@ static int __ctsvc_db_my_profile_get_data(int id, ctsvc_my_profile_s *my_profile
 			break;
 		}
 
-	}while(1 /*CTS_TRUE*/ == ctsvc_stmt_step(stmt));
+	} while (1 /*CTS_TRUE*/ == ctsvc_stmt_step(stmt));
 
 	ctsvc_stmt_finalize(stmt);
 
@@ -192,7 +192,7 @@ static int __ctsvc_db_my_profile_get_data(int id, ctsvc_my_profile_s *my_profile
 
 }
 
-static int __ctsvc_db_my_profile_get_record( int id, contacts_record_h* out_record )
+static int __ctsvc_db_my_profile_get_record(int id, contacts_record_h* out_record)
 {
 	int ret;
 	contacts_record_h record;
@@ -222,7 +222,7 @@ static int __ctsvc_db_my_profile_get_record( int id, contacts_record_h* out_reco
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_db_my_profile_delete_record( int id )
+static int __ctsvc_db_my_profile_delete_record(int id)
 {
 	CTS_FN_CALL;
 	int ret;
@@ -259,8 +259,7 @@ static int __ctsvc_db_my_profile_delete_record( int id )
 	ctsvc_set_my_profile_noti();
 
 	ret = ctsvc_end_trans(true);
-	if (ret < CONTACTS_ERROR_NONE)
-	{
+	if (ret < CONTACTS_ERROR_NONE) {
 		CTS_ERR("DB error : ctsvc_end_trans() Failed(%d)", ret);
 		return ret;
 	}
@@ -445,7 +444,7 @@ static void __ctsvc_make_my_profile_display_name(ctsvc_my_profile_s *my_profile)
 				if (reverse_lang_type != CTSVC_LANG_KOREAN &&
 					reverse_lang_type != CTSVC_LANG_CHINESE &&
 					reverse_lang_type != CTSVC_LANG_JAPANESE) {
-					if(name->first || name->addition)
+					if (name->first || name->addition)
 						len += snprintf(temp_display + len, temp_display_len - len, ",");
 				}
 			}
@@ -462,15 +461,15 @@ static void __ctsvc_make_my_profile_display_name(ctsvc_my_profile_s *my_profile)
 				}
 			}
 
-			if(reverse_lang_type == CTSVC_LANG_JAPANESE) {
+			if (reverse_lang_type == CTSVC_LANG_JAPANESE) {
 				// make temp_display name Prefix - Last - Middle - First - Suffix
-				if(name->addition) {
+				if (name->addition) {
 					if (*temp_display)
 						len += snprintf(temp_display + len, temp_display_len - len, " ");
 					len += snprintf(temp_display + len, temp_display_len - len, "%s", name->addition);
 				}
 
-				if(name->first) {
+				if (name->first) {
 					if (*temp_display)
 						len += snprintf(temp_display + len, temp_display_len - len, " ");
 					len += snprintf(temp_display + len, temp_display_len - len, "%s", name->first);
@@ -520,7 +519,7 @@ static void __ctsvc_make_my_profile_display_name(ctsvc_my_profile_s *my_profile)
 			}
 		}
 
-		if(name->prefix && temp_display) {
+		if (name->prefix && temp_display) {
 			display_len = SAFE_STRLEN(name->prefix) + temp_display_len + 2;
 			display = calloc(1, display_len);
 			snprintf(display, display_len , "%s %s", name->prefix, temp_display);
@@ -576,7 +575,7 @@ static void __ctsvc_make_my_profile_display_name(ctsvc_my_profile_s *my_profile)
 					len += snprintf(temp_display + len, temp_display_len - len, "%s", name->last);
 				}
 
-				if(name->suffix) {
+				if (name->suffix) {
 					if (*temp_display) {
 						lang_type = ctsvc_check_language_type(temp_display);
 						if (lang_type == CTSVC_LANG_JAPANESE)
@@ -666,7 +665,7 @@ static void __ctsvc_make_my_profile_display_name(ctsvc_my_profile_s *my_profile)
 }
 
 
-static int __ctsvc_db_my_profile_update_record( contacts_record_h record )
+static int __ctsvc_db_my_profile_update_record(contacts_record_h record)
 {
 	int id;
 	int ret;
@@ -811,7 +810,7 @@ static int __ctsvc_db_my_profile_update_record( contacts_record_h record )
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_db_my_profile_get_all_records( int offset, int limit, contacts_list_h* out_list )
+static int __ctsvc_db_my_profile_get_all_records(int offset, int limit, contacts_list_h* out_list)
 {
 	int ret;
 	int len;
@@ -858,7 +857,7 @@ static int __ctsvc_db_my_profile_get_all_records( int offset, int limit, contact
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_db_my_profile_get_records_with_query( contacts_query_h query, int offset, int limit, contacts_list_h* out_list )
+static int __ctsvc_db_my_profile_get_records_with_query(contacts_query_h query, int offset, int limit, contacts_list_h* out_list)
 {
 	int ret;
 	int i;
@@ -917,7 +916,7 @@ static int __ctsvc_db_my_profile_get_records_with_query( contacts_query_h query,
 				ASSERT_NOT_REACHED("To set projection is failed.\n");
 		}
 
-		for(i=0;i<field_count;i++) {
+		for (i=0;i<field_count;i++) {
 			char *temp;
 			int property_id;
 			if (0 == s_query->projection_count)
@@ -1111,7 +1110,7 @@ static int __ctsvc_my_profile_insert_data(ctsvc_my_profile_s *contact)
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_db_my_profile_insert_record( contacts_record_h record, int *id)
+static int __ctsvc_db_my_profile_insert_record(contacts_record_h record, int *id)
 {
 	CTS_FN_CALL;
 	int ret;

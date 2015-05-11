@@ -62,8 +62,7 @@ int ctsvc_addressbook_reset_internal_addressbook(void)
 				CTS_TABLE_MY_PROFILES, 0);
 
 		ret = ctsvc_query_exec(query);
-		if (CONTACTS_ERROR_NONE != ret)
-		{
+		if (CONTACTS_ERROR_NONE != ret) {
 			CTS_ERR("DB error : ctsvc_query_exec() Failed(%d)", ret);
 			break;
 		}
@@ -109,7 +108,7 @@ int ctsvc_addressbook_reset_internal_addressbook(void)
 		}
 
 		return CONTACTS_ERROR_NONE;
-	} while(0);
+	} while (0);
 
 	/* ROLLBACK TRANSACTION */
 	ctsvc_end_trans(false);

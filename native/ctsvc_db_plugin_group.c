@@ -33,15 +33,15 @@
 #include "ctsvc_db_plugin_group_helper.h"
 #include "ctsvc_notify.h"
 
-static int __ctsvc_db_group_insert_record( contacts_record_h record, int *id );
-static int __ctsvc_db_group_get_record( int id, contacts_record_h* out_record );
-static int __ctsvc_db_group_update_record( contacts_record_h record );
-static int __ctsvc_db_group_delete_record( int id );
-static int __ctsvc_db_group_get_all_records( int offset, int limit, contacts_list_h* out_list );
-static int __ctsvc_db_group_get_records_with_query( contacts_query_h query, int offset, int limit, contacts_list_h* out_list );
+static int __ctsvc_db_group_insert_record(contacts_record_h record, int *id);
+static int __ctsvc_db_group_get_record(int id, contacts_record_h* out_record);
+static int __ctsvc_db_group_update_record(contacts_record_h record);
+static int __ctsvc_db_group_delete_record(int id);
+static int __ctsvc_db_group_get_all_records(int offset, int limit, contacts_list_h* out_list);
+static int __ctsvc_db_group_get_records_with_query(contacts_query_h query, int offset, int limit, contacts_list_h* out_list);
 //static int __ctsvc_db_group_insert_records(const contacts_list_h in_list, int **ids);
 //static int __ctsvc_db_group_update_records(const contacts_list_h in_list);
-//static int __ctsvc_db_group_delete_records( int ids[], int count);
+//static int __ctsvc_db_group_delete_records(int ids[], int count);
 
 ctsvc_db_plugin_info_s ctsvc_db_plugin_group = {
 	.is_query_only = false,
@@ -80,7 +80,7 @@ static double __ctsvc_db_group_get_next_group_prio(void)
 	return prio + 1.0;
 }
 
-static int __ctsvc_db_group_insert_record( contacts_record_h record, int *id )
+static int __ctsvc_db_group_insert_record(contacts_record_h record, int *id)
 {
 	int ret;
 	int ver;
@@ -96,7 +96,7 @@ static int __ctsvc_db_group_insert_record( contacts_record_h record, int *id )
 			"Invalid parameter : The name of record is empty.");
 
 	ret = ctsvc_begin_trans();
-	RETVM_IF( ret < CONTACTS_ERROR_NONE, ret,  "DB error : ctsvc_begin_trans() Failed(%d)", ret);
+	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret,  "DB error : ctsvc_begin_trans() Failed(%d)", ret);
 
 	if (false == ctsvc_have_ab_write_permission(group->addressbook_id)) {
 		CTS_ERR("ctsvc_have_ab_write_permission fail : does not have permission(addressbook_id : %d)",
@@ -137,7 +137,7 @@ static int __ctsvc_db_group_insert_record( contacts_record_h record, int *id )
 	if (group->message_alert)
 		ctsvc_stmt_bind_text(stmt, 6, group->message_alert);
 
-	if(group->image_thumbnail_path) {
+	if (group->image_thumbnail_path) {
 		char image[CTSVC_IMG_FULL_PATH_SIZE_MAX] = {0};
 		ret = ctsvc_have_file_read_permission(group->image_thumbnail_path);
 		if (ret != CONTACTS_ERROR_NONE) {
@@ -177,7 +177,7 @@ static int __ctsvc_db_group_insert_record( contacts_record_h record, int *id )
 	ctsvc_stmt_finalize(stmt);
 
 	ret = ctsvc_end_trans(true);
-	if(ret < CONTACTS_ERROR_NONE ) {
+	if (ret < CONTACTS_ERROR_NONE) {
 		CTS_ERR("DB error : ctsvc_end_trans() Failed(%d)", ret);
 		return ret;
 	}
@@ -185,7 +185,7 @@ static int __ctsvc_db_group_insert_record( contacts_record_h record, int *id )
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_db_group_update_record( contacts_record_h record )
+static int __ctsvc_db_group_update_record(contacts_record_h record)
 {
 	int addressbook_id = 0;
 	int ret = CONTACTS_ERROR_NONE;
@@ -365,7 +365,7 @@ static int __ctsvc_db_group_update_record( contacts_record_h record )
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_db_group_delete_record( int id )
+static int __ctsvc_db_group_delete_record(int id)
 {
 	int ret;
 	int count = 0;
@@ -380,7 +380,7 @@ static int __ctsvc_db_group_delete_record( int id )
 			CTS_TABLE_GROUPS, id);
 
 	ret = ctsvc_query_get_first_int_result(query, &addressbook_id);
-	if ( ret < CONTACTS_ERROR_NONE) {
+	if (ret < CONTACTS_ERROR_NONE) {
 		CTS_ERR("DB error : The id(%d) is Invalid(%d)", id, addressbook_id);
 		ctsvc_end_trans(false);
 		return ret;
@@ -396,7 +396,7 @@ static int __ctsvc_db_group_delete_record( int id )
 	snprintf(query, sizeof(query),
 				"SELECT COUNT(contact_id) FROM "CTS_TABLE_GROUP_RELATIONS" WHERE group_id = %d", id);
 	ret = ctsvc_query_get_first_int_result(query, &count);
-	if ( ret < CONTACTS_ERROR_NONE) {
+	if (ret < CONTACTS_ERROR_NONE) {
 		CTS_ERR("DB error : ctsvc_query_get_first_int_result Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
@@ -471,7 +471,7 @@ static int __ctsvc_db_group_value_set(cts_stmt stmt, contacts_record_h *record)
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_db_group_get_record( int id, contacts_record_h *out_record )
+static int __ctsvc_db_group_get_record(int id, contacts_record_h *out_record)
 {
 	int ret;
 	cts_stmt stmt = NULL;
@@ -511,7 +511,7 @@ static int __ctsvc_db_group_get_record( int id, contacts_record_h *out_record )
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_db_group_get_all_records( int offset, int limit, contacts_list_h* out_list )
+static int __ctsvc_db_group_get_all_records(int offset, int limit, contacts_list_h* out_list)
 {
 	int ret;
 	int len;
@@ -557,8 +557,8 @@ static int __ctsvc_db_group_get_all_records( int offset, int limit, contacts_lis
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_db_group_get_records_with_query( contacts_query_h query,
-	int offset, int limit, contacts_list_h* out_list )
+static int __ctsvc_db_group_get_records_with_query(contacts_query_h query,
+	int offset, int limit, contacts_list_h* out_list)
 {
 	int ret;
 	int i;
@@ -589,17 +589,15 @@ static int __ctsvc_db_group_get_records_with_query( contacts_query_h query,
 		group = (ctsvc_group_s*)record;
 		if (0 == s_query->projection_count)
 			field_count = s_query->property_count;
-		else
-		{
+		else {
 			field_count = s_query->projection_count;
 
-			if( CONTACTS_ERROR_NONE != ctsvc_record_set_projection_flags(record, s_query->projection, s_query->projection_count, s_query->property_count) )
-			{
+			if (CONTACTS_ERROR_NONE != ctsvc_record_set_projection_flags(record, s_query->projection, s_query->projection_count, s_query->property_count)) {
 				ASSERT_NOT_REACHED("To set projection is failed.\n");
 			}
 		}
 
-		for(i=0;i<field_count;i++) {
+		for (i=0;i<field_count;i++) {
 			char *temp;
 			int property_id;
 			if (0 == s_query->projection_count)
@@ -660,6 +658,6 @@ static int __ctsvc_db_group_get_records_with_query( contacts_query_h query,
 
 //static int __ctsvc_db_group_insert_records(const contacts_list_h in_list, int **ids) { return CONTACTS_ERROR_NONE; }
 //static int __ctsvc_db_group_update_records(const contacts_list_h in_list) { return CONTACTS_ERROR_NONE; }
-//static int __ctsvc_db_group_delete_records( int ids[], int count) { return CONTACTS_ERROR_NONE; }
+//static int __ctsvc_db_group_delete_records(int ids[], int count) { return CONTACTS_ERROR_NONE; }
 
 

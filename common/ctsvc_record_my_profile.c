@@ -34,12 +34,12 @@ static int __ctsvc_my_profile_get_int(contacts_record_h record, unsigned int pro
 static int __ctsvc_my_profile_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_my_profile_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_my_profile_set_int(contacts_record_h record, unsigned int property_id, int value);
-static int __ctsvc_my_profile_set_str(contacts_record_h record, unsigned int property_id, const char* str );
-static int __ctsvc_my_profile_clone_child_record_list(contacts_record_h record, unsigned int property_id, contacts_list_h* out_list );
-static int __ctsvc_my_profile_get_child_record_at_p(contacts_record_h record, unsigned int property_id, int index, contacts_record_h* out_record );
-static int __ctsvc_my_profile_get_child_record_count(contacts_record_h record, unsigned int property_id, int *count );
-static int __ctsvc_my_profile_add_child_record(contacts_record_h record, unsigned int property_id, contacts_record_h child_record );
-static int __ctsvc_my_profile_remove_child_record(contacts_record_h record, unsigned int property_id, contacts_record_h child_record );
+static int __ctsvc_my_profile_set_str(contacts_record_h record, unsigned int property_id, const char* str);
+static int __ctsvc_my_profile_clone_child_record_list(contacts_record_h record, unsigned int property_id, contacts_list_h* out_list);
+static int __ctsvc_my_profile_get_child_record_at_p(contacts_record_h record, unsigned int property_id, int index, contacts_record_h* out_record);
+static int __ctsvc_my_profile_get_child_record_count(contacts_record_h record, unsigned int property_id, int *count);
+static int __ctsvc_my_profile_add_child_record(contacts_record_h record, unsigned int property_id, contacts_record_h child_record);
+static int __ctsvc_my_profile_remove_child_record(contacts_record_h record, unsigned int property_id, contacts_record_h child_record);
 
 ctsvc_record_plugin_cb_s my_profile_plugin_cbs = {
 	.create = __ctsvc_my_profile_create,
@@ -205,7 +205,7 @@ static int __ctsvc_my_profile_set_int(contacts_record_h record, unsigned int pro
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_my_profile_get_str_real(contacts_record_h record, unsigned int property_id, char** out_str, bool copy )
+static int __ctsvc_my_profile_get_str_real(contacts_record_h record, unsigned int property_id, char** out_str, bool copy)
 {
 	ctsvc_my_profile_s *my_profile = (ctsvc_my_profile_s*)record;
 	switch(property_id) {
@@ -291,7 +291,7 @@ static int __ctsvc_my_profile_get_record_list_p(contacts_record_h record,
 }
 
 static int __ctsvc_my_profile_get_child_record_count(contacts_record_h record,
-		unsigned int property_id, int *count )
+		unsigned int property_id, int *count)
 {
 	int ret;
 	contacts_list_h list = NULL;
@@ -301,14 +301,14 @@ static int __ctsvc_my_profile_get_child_record_count(contacts_record_h record,
 	if (CONTACTS_ERROR_INVALID_PARAMETER == ret)
 		return ret;
 
-	if(list)
+	if (list)
 		contacts_list_get_count(list, count);
 
 	return CONTACTS_ERROR_NONE;
 }
 
 static int __ctsvc_my_profile_get_child_record_at_p(contacts_record_h record,
-		unsigned int property_id, int index, contacts_record_h* out_record )
+		unsigned int property_id, int index, contacts_record_h* out_record)
 {
 	int ret;
 	int count;
@@ -331,7 +331,7 @@ static int __ctsvc_my_profile_get_child_record_at_p(contacts_record_h record,
 }
 
 static int __ctsvc_my_profile_clone_child_record_list(contacts_record_h record,
-		unsigned int property_id, contacts_list_h* out_list )
+		unsigned int property_id, contacts_list_h* out_list)
 {
 	int ret;
 	int count;
@@ -413,7 +413,7 @@ static int __ctsvc_my_profile_reset_child_record_id(contacts_record_h child_reco
 
 
 static int __ctsvc_my_profile_add_child_record(contacts_record_h record,
-		unsigned int property_id, contacts_record_h child_record )
+		unsigned int property_id, contacts_record_h child_record)
 {
 	int ret;
 	contacts_list_h list = NULL;
@@ -488,7 +488,7 @@ static int __ctsvc_my_profile_get_child_record_id(contacts_record_h child_record
 
 
 static int __ctsvc_my_profile_remove_child_record(contacts_record_h record,
-		unsigned int property_id, contacts_record_h child_record )
+		unsigned int property_id, contacts_record_h child_record)
 {
 	int id;
 	int ret;
@@ -504,7 +504,7 @@ static int __ctsvc_my_profile_remove_child_record(contacts_record_h record,
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_my_profile_set_str(contacts_record_h record, unsigned int property_id, const char* str )
+static int __ctsvc_my_profile_set_str(contacts_record_h record, unsigned int property_id, const char* str)
 {
 	ctsvc_my_profile_s *my_profile = (ctsvc_my_profile_s *)record;
 

@@ -34,15 +34,15 @@ static int __ctsvc_result_destroy(contacts_record_h record, bool delete_child);
 static int __ctsvc_result_clone(contacts_record_h record, contacts_record_h *out_record);
 static int __ctsvc_result_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_result_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
-static int __ctsvc_result_get_int(contacts_record_h record, unsigned int property_id, int* out_value );
-static int __ctsvc_result_get_lli(contacts_record_h record, unsigned int property_id, long long int* out_value );
-static int __ctsvc_result_get_bool(contacts_record_h record, unsigned int property_id, bool* out_value );
-static int __ctsvc_result_get_double(contacts_record_h record, unsigned int property_id, double* out_value );
-static int __ctsvc_result_set_int(contacts_record_h record, unsigned int property_id, int value );
-static int __ctsvc_result_set_lli(contacts_record_h record, unsigned int property_id, long long int value );
-static int __ctsvc_result_set_bool(contacts_record_h record, unsigned int property_id, bool value );
-static int __ctsvc_result_set_str(contacts_record_h record, unsigned int property_id, const char *str );
-static int __ctsvc_result_set_double(contacts_record_h record, unsigned int property_id, double value );
+static int __ctsvc_result_get_int(contacts_record_h record, unsigned int property_id, int* out_value);
+static int __ctsvc_result_get_lli(contacts_record_h record, unsigned int property_id, long long int* out_value);
+static int __ctsvc_result_get_bool(contacts_record_h record, unsigned int property_id, bool* out_value);
+static int __ctsvc_result_get_double(contacts_record_h record, unsigned int property_id, double* out_value);
+static int __ctsvc_result_set_int(contacts_record_h record, unsigned int property_id, int value);
+static int __ctsvc_result_set_lli(contacts_record_h record, unsigned int property_id, long long int value);
+static int __ctsvc_result_set_bool(contacts_record_h record, unsigned int property_id, bool value);
+static int __ctsvc_result_set_str(contacts_record_h record, unsigned int property_id, const char *str);
+static int __ctsvc_result_set_double(contacts_record_h record, unsigned int property_id, double value);
 
 ctsvc_record_plugin_cb_s result_plugin_cbs = {
 	.create = __ctsvc_result_create,
@@ -82,7 +82,7 @@ static int __ctsvc_result_destroy(contacts_record_h record, bool delete_child)
 	GSList *cursor;
 	ctsvc_result_s* result = (ctsvc_result_s*)record;
 
-	for(cursor = result->values;cursor;cursor=cursor->next){
+	for (cursor = result->values;cursor;cursor=cursor->next) {
 		ctsvc_result_value_s *data = cursor->data;
 		if (data->type == CTSVC_VIEW_DATA_TYPE_STR)
 			free(data->value.s);
@@ -108,7 +108,7 @@ static int __ctsvc_result_clone(contacts_record_h record, contacts_record_h *out
     RETVM_IF(NULL == out_data, CONTACTS_ERROR_OUT_OF_MEMORY,
 			 "Out of memeory : calloc(ctsvc_result_s) Failed(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
 
-	for(cursor=src_data->values;cursor;cursor=cursor->next) {
+	for (cursor=src_data->values;cursor;cursor=cursor->next) {
 		ctsvc_result_value_s *src = cursor->data;
 		ctsvc_result_value_s *dest = calloc(1, sizeof(ctsvc_result_value_s));
 		dest->property_id = src->property_id;
@@ -143,13 +143,13 @@ static int __ctsvc_result_clone(contacts_record_h record, contacts_record_h *out
 }
 
 static int __ctsvc_result_get_str_real(contacts_record_h record, unsigned int property_id,
-		char** out_str, bool copy )
+		char** out_str, bool copy)
 {
 	ctsvc_result_s* result = (ctsvc_result_s *)record;
 
 	GSList *cursor;
 
-	for(cursor = result->values;cursor;cursor=cursor->next){
+	for (cursor = result->values;cursor;cursor=cursor->next) {
 		ctsvc_result_value_s *data = cursor->data;
 		if (data->property_id == property_id) {
 			if (data->type == CTSVC_VIEW_DATA_TYPE_STR) {
@@ -176,13 +176,13 @@ static int __ctsvc_result_get_str(contacts_record_h record, unsigned int propert
 	return __ctsvc_result_get_str_real(record, property_id, out_str, true);
 }
 
-static int __ctsvc_result_get_int(contacts_record_h record, unsigned int property_id, int* out_value )
+static int __ctsvc_result_get_int(contacts_record_h record, unsigned int property_id, int* out_value)
 {
 	ctsvc_result_s* result = (ctsvc_result_s *)record;
 
 	GSList *cursor;
 	//TODO: check the value type of property_id is int
-	for(cursor = result->values;cursor;cursor=cursor->next){
+	for (cursor = result->values;cursor;cursor=cursor->next) {
 		ctsvc_result_value_s *data = cursor->data;
 		if (data->property_id == property_id) {
 			if (data->type == CTSVC_VIEW_DATA_TYPE_INT) {
@@ -199,14 +199,14 @@ static int __ctsvc_result_get_int(contacts_record_h record, unsigned int propert
 	return CONTACTS_ERROR_NO_DATA;
 }
 
-static int __ctsvc_result_set_int(contacts_record_h record, unsigned int property_id, int value )
+static int __ctsvc_result_set_int(contacts_record_h record, unsigned int property_id, int value)
 {
 	ctsvc_result_s* result = (ctsvc_result_s *)record;
 	GSList *cursor;
 	ctsvc_result_value_s *data;
 
 	// TODO: check the value type of property_id is int
-	for(cursor = result->values;cursor;cursor=cursor->next){
+	for (cursor = result->values;cursor;cursor=cursor->next) {
 		data = cursor->data;
 		if (data->property_id == property_id) {
 			if (data->type == CTSVC_VIEW_DATA_TYPE_INT) {
@@ -243,14 +243,14 @@ static int __ctsvc_result_set_int(contacts_record_h record, unsigned int propert
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_result_set_lli(contacts_record_h record, unsigned int property_id, long long int value )
+static int __ctsvc_result_set_lli(contacts_record_h record, unsigned int property_id, long long int value)
 {
 	ctsvc_result_s* result = (ctsvc_result_s *)record;
 	GSList *cursor;
 	ctsvc_result_value_s *data;
 
 	// TODO: check the value type of property_id is int
-	for(cursor = result->values;cursor;cursor=cursor->next){
+	for (cursor = result->values;cursor;cursor=cursor->next) {
 		data = cursor->data;
 		if (data->property_id == property_id) {
 			if (data->type == CTSVC_VIEW_DATA_TYPE_LLI) {
@@ -272,13 +272,13 @@ static int __ctsvc_result_set_lli(contacts_record_h record, unsigned int propert
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_result_set_double(contacts_record_h record, unsigned int property_id, double value )
+static int __ctsvc_result_set_double(contacts_record_h record, unsigned int property_id, double value)
 {
 	ctsvc_result_s* result = (ctsvc_result_s *)record;
 	GSList *cursor;
 	ctsvc_result_value_s *data;
 
-	for(cursor = result->values;cursor;cursor=cursor->next){
+	for (cursor = result->values;cursor;cursor=cursor->next) {
 		data = cursor->data;
 		if (data->property_id == property_id) {
 			if (data->type == CTSVC_VIEW_DATA_TYPE_DOUBLE) {
@@ -300,14 +300,14 @@ static int __ctsvc_result_set_double(contacts_record_h record, unsigned int prop
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_result_set_bool(contacts_record_h record, unsigned int property_id, bool value )
+static int __ctsvc_result_set_bool(contacts_record_h record, unsigned int property_id, bool value)
 {
 	ctsvc_result_s* result = (ctsvc_result_s *)record;
 	GSList *cursor;
 	ctsvc_result_value_s *data;
 
 	// TODO: check the value type of property_id is int
-	for(cursor = result->values;cursor;cursor=cursor->next){
+	for (cursor = result->values;cursor;cursor=cursor->next) {
 		data = cursor->data;
 		if (data->property_id == property_id) {
 			if (data->type == CTSVC_VIEW_DATA_TYPE_BOOL) {
@@ -329,7 +329,7 @@ static int __ctsvc_result_set_bool(contacts_record_h record, unsigned int proper
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_result_set_str(contacts_record_h record, unsigned int property_id, const char *str )
+static int __ctsvc_result_set_str(contacts_record_h record, unsigned int property_id, const char *str)
 {
 	ctsvc_result_s* result = (ctsvc_result_s *)record;
 	GSList *cursor;
@@ -338,7 +338,7 @@ static int __ctsvc_result_set_str(contacts_record_h record, unsigned int propert
 	int str_len;
 
 	// TODO: check the value type of property_id is int
-	for(cursor = result->values;cursor;cursor=cursor->next){
+	for (cursor = result->values;cursor;cursor=cursor->next) {
 		data = cursor->data;
 		if (data->property_id == property_id) {
 			if (data->type == CTSVC_VIEW_DATA_TYPE_STR) {
@@ -388,11 +388,11 @@ static int __ctsvc_result_set_str(contacts_record_h record, unsigned int propert
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_result_get_bool(contacts_record_h record, unsigned int property_id, bool* out_value )
+static int __ctsvc_result_get_bool(contacts_record_h record, unsigned int property_id, bool* out_value)
 {
 	ctsvc_result_s* result = (ctsvc_result_s *)record;
 	GSList *cursor;
-	for(cursor = result->values;cursor;cursor=cursor->next){
+	for (cursor = result->values;cursor;cursor=cursor->next) {
 		ctsvc_result_value_s *data = cursor->data;
 		if (data->property_id == property_id) {
 			if (data->type == CTSVC_VIEW_DATA_TYPE_BOOL) {
@@ -409,11 +409,11 @@ static int __ctsvc_result_get_bool(contacts_record_h record, unsigned int proper
 	return CONTACTS_ERROR_NO_DATA;
 }
 
-static int __ctsvc_result_get_lli(contacts_record_h record, unsigned int property_id, long long int* out_value )
+static int __ctsvc_result_get_lli(contacts_record_h record, unsigned int property_id, long long int* out_value)
 {
 	ctsvc_result_s* result = (ctsvc_result_s *)record;
 	GSList *cursor;
-	for(cursor = result->values;cursor;cursor=cursor->next){
+	for (cursor = result->values;cursor;cursor=cursor->next) {
 		ctsvc_result_value_s *data = cursor->data;
 		if (data->property_id == property_id) {
 			if (data->type == CTSVC_VIEW_DATA_TYPE_LLI) {
@@ -430,11 +430,11 @@ static int __ctsvc_result_get_lli(contacts_record_h record, unsigned int propert
 	return CONTACTS_ERROR_NO_DATA;
 }
 
-static int __ctsvc_result_get_double(contacts_record_h record, unsigned int property_id, double* out_value )
+static int __ctsvc_result_get_double(contacts_record_h record, unsigned int property_id, double* out_value)
 {
 	ctsvc_result_s* result = (ctsvc_result_s *)record;
 	GSList *cursor;
-	for(cursor = result->values;cursor;cursor=cursor->next){
+	for (cursor = result->values;cursor;cursor=cursor->next) {
 		ctsvc_result_value_s *data = cursor->data;
 		if (data->property_id == property_id) {
 			if (data->type == CTSVC_VIEW_DATA_TYPE_DOUBLE) {

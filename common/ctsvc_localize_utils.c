@@ -64,7 +64,7 @@ int ctsvc_check_language(UChar *word)
 		UBlockCode code = ublock_getCode(word[0]);
 		CTS_VERBOSE("Character unicode block is %d", code);
 
-		switch (code){
+		switch (code) {
 		//english
 		case UBLOCK_BASIC_LATIN:							// = 1, /*[0000]*/
 		case UBLOCK_LATIN_1_SUPPLEMENT:					// =2, /*[0080]*/

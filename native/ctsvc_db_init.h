@@ -27,21 +27,21 @@
 #include "contacts.h"
 #include "ctsvc_struct.h"
 
-typedef int (*ctsvc_db_insert_record_cb)( contacts_record_h record, int *id );
-typedef int (*ctsvc_db_get_record_cb)( int id, contacts_record_h* out_record );
-typedef int (*ctsvc_db_update_record_cb)( contacts_record_h record );
-typedef int (*ctsvc_db_delete_record_cb)( int id );
-typedef int (*ctsvc_db_replace_record_cb)( contacts_record_h record, int id );
+typedef int (*ctsvc_db_insert_record_cb)(contacts_record_h record, int *id);
+typedef int (*ctsvc_db_get_record_cb)(int id, contacts_record_h* out_record);
+typedef int (*ctsvc_db_update_record_cb)(contacts_record_h record);
+typedef int (*ctsvc_db_delete_record_cb)(int id);
+typedef int (*ctsvc_db_replace_record_cb)(contacts_record_h record, int id);
 
 typedef int (*ctsvc_db_insert_records_cb)(const contacts_list_h in_list, int **ids);
 typedef int (*ctsvc_db_update_records_cb)(const contacts_list_h in_list);
 typedef int (*ctsvc_db_delete_records_cb)(int ids[], int count);
 typedef int (*ctsvc_db_replace_records_cb)(const contacts_list_h in_list, int ids[], int count);
 
-typedef int (*ctsvc_db_get_all_records_cb)( int offset, int limit, contacts_list_h* out_list );
-typedef int (*ctsvc_db_get_records_with_query_cb)( contacts_query_h query, int offset, int limit, contacts_list_h* out_list );
-typedef int (*ctsvc_db_get_count_cb)( int *out_count);
-typedef int (*ctsvc_db_get_count_with_query_cb)( contacts_query_h query, int *out_count);
+typedef int (*ctsvc_db_get_all_records_cb)(int offset, int limit, contacts_list_h* out_list);
+typedef int (*ctsvc_db_get_records_with_query_cb)(contacts_query_h query, int offset, int limit, contacts_list_h* out_list);
+typedef int (*ctsvc_db_get_count_cb)(int *out_count);
+typedef int (*ctsvc_db_get_count_with_query_cb)(contacts_query_h query, int *out_count);
 
 typedef struct {
     bool is_query_only;

@@ -85,7 +85,7 @@ int ctsvc_have_file_read_permission(const char *path)
 
 	// Get SMACK label of the file
 	ret = smack_getlabel(path, &file_label, SMACK_LABEL_ACCESS);
-	if(ret < 0) {
+	if (ret < 0) {
 		CTS_ERR("smack_getlabel Fail (%d)", ret);
 		return CONTACTS_ERROR_SYSTEM;
 	}

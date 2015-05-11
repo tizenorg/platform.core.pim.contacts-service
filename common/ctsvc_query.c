@@ -52,7 +52,7 @@ static bool __ctsvc_query_property_check(const property_info_s *properties,
 	return false;
 }
 
-API int contacts_query_create( const char* view_uri, contacts_query_h* out_query )
+API int contacts_query_create(const char* view_uri, contacts_query_h* out_query)
 {
 	ctsvc_query_s *query;
 
@@ -128,7 +128,7 @@ API int contacts_query_set_sort(contacts_query_h query, unsigned int property_id
 	return CONTACTS_ERROR_NONE;
 }
 
-API int contacts_query_destroy( contacts_query_h query )
+API int contacts_query_destroy(contacts_query_h query)
 {
 	ctsvc_query_s *s_query;
 	RETV_IF(NULL == query, CONTACTS_ERROR_INVALID_PARAMETER);

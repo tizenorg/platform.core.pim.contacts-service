@@ -113,7 +113,7 @@ typedef void (*contacts_db_changed_cb)(const char* view_uri, void* user_data);
  * @see contacts_db_delete_record()
  * @see contacts_db_get_record()
  */
-int contacts_db_insert_record( contacts_record_h record, int *id );
+int contacts_db_insert_record(contacts_record_h record, int *id);
 
 /**
  * @brief Gets a record from the contacts database.
@@ -159,7 +159,7 @@ int contacts_db_insert_record( contacts_record_h record, int *id );
  * @see contacts_connect()
  * @see contacts_record_destroy()
  */
-int contacts_db_get_record( const char* view_uri, int record_id, contacts_record_h* record );
+int contacts_db_get_record(const char* view_uri, int record_id, contacts_record_h* record);
 
 /**
  * @brief Updates a record in the contacts database.
@@ -200,7 +200,7 @@ int contacts_db_get_record( const char* view_uri, int record_id, contacts_record
  * @see contacts_db_delete_record()
  * @see contacts_db_get_record()
  */
-int contacts_db_update_record( contacts_record_h record );
+int contacts_db_update_record(contacts_record_h record);
 
 /**
  * @brief Deletes a record from the contacts database with related child records.
@@ -240,7 +240,7 @@ int contacts_db_update_record( contacts_record_h record );
  * @see contacts_connect()
  * @see contacts_db_insert_record()
  */
-int contacts_db_delete_record( const char* view_uri, int record_id );
+int contacts_db_delete_record(const char* view_uri, int record_id);
 
 /**
  * @brief Replaces an id-identified record with the given record.
@@ -278,7 +278,7 @@ int contacts_db_delete_record( const char* view_uri, int record_id );
  * @see contacts_db_delete_record()
  * @see contacts_db_get_record()
  */
-int contacts_db_replace_record( contacts_record_h record, int id );
+int contacts_db_replace_record(contacts_record_h record, int id);
 
 /**
  * @brief Retrieves all records and returns the results list.
@@ -322,7 +322,7 @@ int contacts_db_replace_record( contacts_record_h record, int id );
  * @see contacts_connect()
  * @see contacts_list_destroy()
  */
-int contacts_db_get_all_records( const char* view_uri, int offset, int limit, contacts_list_h* record_list );
+int contacts_db_get_all_records(const char* view_uri, int offset, int limit, contacts_list_h* record_list);
 
 /**
  * @brief Uses a query to find records.
@@ -366,7 +366,7 @@ int contacts_db_get_all_records( const char* view_uri, int offset, int limit, co
  * @see contacts_connect()
  * @see contacts_list_destroy()
  */
-int contacts_db_get_records_with_query( contacts_query_h query, int offset, int limit, contacts_list_h* record_list );
+int contacts_db_get_records_with_query(contacts_query_h query, int offset, int limit, contacts_list_h* record_list);
 
 /**
  * @brief Inserts multiple records to the contacts database.
@@ -408,7 +408,7 @@ int contacts_db_get_records_with_query( contacts_query_h query, int offset, int 
  * @see contacts_db_update_records()
  * @see contacts_db_delete_records()
  */
-int contacts_db_insert_records( contacts_list_h record_list, int **ids, int *count);
+int contacts_db_insert_records(contacts_list_h record_list, int **ids, int *count);
 
 /**
  * @brief Updates multiple records in the contacts database.
@@ -448,7 +448,7 @@ int contacts_db_insert_records( contacts_list_h record_list, int **ids, int *cou
  * @see contacts_db_insert_records()
  * @see contacts_db_delete_records()
  */
-int contacts_db_update_records( contacts_list_h record_list);
+int contacts_db_update_records(contacts_list_h record_list);
 
 /**
  * @brief Deletes multiple records in the contacts database with related child records.
@@ -527,7 +527,7 @@ int contacts_db_delete_records(const char* view_uri, int record_id_array[], int 
  * @see contacts_db_delete_record()
  * @see contacts_db_get_record()
  */
-int contacts_db_replace_records( contacts_list_h list, int record_id_array[], int count );
+int contacts_db_replace_records(contacts_list_h list, int record_id_array[], int count);
 
 /**
  * @brief Gets the current contacts database version.
@@ -555,7 +555,7 @@ int contacts_db_replace_records( contacts_list_h list, int record_id_array[], in
  * @see contacts_connect()
  * @see contacts_db_get_changes_by_version()
  */
-int contacts_db_get_current_version( int* contacts_db_version );
+int contacts_db_get_current_version(int* contacts_db_version);
 
 /**
  * @brief Registers a callback function to be invoked when a record changes.
@@ -599,7 +599,7 @@ int contacts_db_get_current_version( int* contacts_db_version );
  * @see contacts_db_changed_cb()
  * @see contacts_db_remove_changed_cb()
  */
-int contacts_db_add_changed_cb( const char* view_uri, contacts_db_changed_cb callback, void* user_data );
+int contacts_db_add_changed_cb(const char* view_uri, contacts_db_changed_cb callback, void* user_data);
 
 /**
  * @brief Unregisters a callback function.
@@ -638,7 +638,7 @@ int contacts_db_add_changed_cb( const char* view_uri, contacts_db_changed_cb cal
  * @see contacts_db_changed_cb()
  * @see contacts_db_add_changed_cb()
  */
-int contacts_db_remove_changed_cb( const char* view_uri, contacts_db_changed_cb callback, void* user_data );
+int contacts_db_remove_changed_cb(const char* view_uri, contacts_db_changed_cb callback, void* user_data);
 
 /**
  * @brief Retrieves records changes since the given database version.
@@ -677,8 +677,8 @@ int contacts_db_remove_changed_cb( const char* view_uri, contacts_db_changed_cb 
  * @see contacts_connect()
  * @see contacts_list_destroy()
  */
-int contacts_db_get_changes_by_version( const char* view_uri, int address_book_id, int contacts_db_version,
-                        contacts_list_h* change_record_list, int* current_contacts_db_version );
+int contacts_db_get_changes_by_version(const char* view_uri, int address_book_id, int contacts_db_version,
+                        contacts_list_h* change_record_list, int* current_contacts_db_version);
 
 /**
  * @brief Finds records based on a given keyword.
@@ -829,7 +829,7 @@ int contacts_db_search_records_with_range(const char* view_uri, const char *keyw
  *
  * @see contacts_connect()
  */
-int contacts_db_get_count( const char* view_uri, int *count);
+int contacts_db_get_count(const char* view_uri, int *count);
 
 /**
  * @brief Gets the number of records matching a query.
@@ -868,7 +868,7 @@ int contacts_db_get_count( const char* view_uri, int *count);
  *
  * @see contacts_connect()
  */
-int contacts_db_get_count_with_query( contacts_query_h query, int *count);
+int contacts_db_get_count_with_query(contacts_query_h query, int *count);
 
 /**
  * @brief Gets the last successful changed contacts database version on the current connection.

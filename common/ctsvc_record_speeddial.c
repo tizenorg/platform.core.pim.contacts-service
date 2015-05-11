@@ -30,10 +30,10 @@ static int __ctsvc_speeddial_create(contacts_record_h* out_record);
 static int __ctsvc_speeddial_destroy(contacts_record_h record, bool delete_child);
 static int __ctsvc_speeddial_clone(contacts_record_h record, contacts_record_h *out_record);
 static int __ctsvc_speeddial_get_int(contacts_record_h record, unsigned int property_id, int *out);
-static int __ctsvc_speeddial_get_str(contacts_record_h record, unsigned int property_id, char** out_str );
-static int __ctsvc_speeddial_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str );
+static int __ctsvc_speeddial_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
+static int __ctsvc_speeddial_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_speeddial_set_int(contacts_record_h record, unsigned int property_id, int value);
-static int __ctsvc_speeddial_set_str(contacts_record_h record, unsigned int property_id, const char* str );
+static int __ctsvc_speeddial_set_str(contacts_record_h record, unsigned int property_id, const char* str);
 
 
 ctsvc_record_plugin_cb_s speeddial_plugin_cbs = {
@@ -134,7 +134,7 @@ static int __ctsvc_speeddial_get_int(contacts_record_h record, unsigned int prop
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_speeddial_get_str_real(contacts_record_h record, unsigned int property_id, char** out_str, bool copy )
+static int __ctsvc_speeddial_get_str_real(contacts_record_h record, unsigned int property_id, char** out_str, bool copy)
 {
 	ctsvc_speeddial_s *speeddial = (ctsvc_speeddial_s*)record;
 
@@ -194,7 +194,7 @@ static int __ctsvc_speeddial_set_int(contacts_record_h record, unsigned int prop
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_speeddial_set_str(contacts_record_h record, unsigned int property_id, const char* str )
+static int __ctsvc_speeddial_set_str(contacts_record_h record, unsigned int property_id, const char* str)
 {
 	ctsvc_speeddial_s *speeddial = (ctsvc_speeddial_s*)record;
 

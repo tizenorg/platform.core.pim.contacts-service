@@ -224,7 +224,7 @@ int ctsvc_request_sim_get_initialization_status(int sim_slot_no, bool *completed
 	ret = __ctsvc_safe_read(__ctsvc_sockfd, dest, msg.attach_sizes[0]);
 	RETVM_IF(-1 == ret, CONTACTS_ERROR_IPC, "__ctsvc_safe_read() Failed(errno = %d)", errno);
 
-	if(atoi(dest) ==0)
+	if (atoi(dest) ==0)
 		*completed = false;
 	else
 		*completed = true;

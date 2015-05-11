@@ -30,11 +30,11 @@ static int __ctsvc_group_create(contacts_record_h *out_record);
 static int __ctsvc_group_destroy(contacts_record_h record, bool delete_child);
 static int __ctsvc_group_clone(contacts_record_h record, contacts_record_h *out_record);
 static int __ctsvc_group_get_int(contacts_record_h record, unsigned int property_id, int *out);
-static int __ctsvc_group_get_str(contacts_record_h record, unsigned int property_id, char** out_str );
-static int __ctsvc_group_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str );
-static int __ctsvc_group_get_bool( contacts_record_h record, unsigned int property_id, bool *value );
+static int __ctsvc_group_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
+static int __ctsvc_group_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
+static int __ctsvc_group_get_bool(contacts_record_h record, unsigned int property_id, bool *value);
 static int __ctsvc_group_set_int(contacts_record_h record, unsigned int property_id, int value);
-static int __ctsvc_group_set_str(contacts_record_h record, unsigned int property_id, const char* str );
+static int __ctsvc_group_set_str(contacts_record_h record, unsigned int property_id, const char* str);
 static int __ctsvc_group_set_bool(contacts_record_h record, unsigned int property_id, bool value);
 
 
@@ -133,7 +133,7 @@ static int __ctsvc_group_get_int(contacts_record_h record, unsigned int property
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_group_get_str_real(contacts_record_h record, unsigned int property_id, char** out_str, bool copy )
+static int __ctsvc_group_get_str_real(contacts_record_h record, unsigned int property_id, char** out_str, bool copy)
 {
 	ctsvc_group_s *group = (ctsvc_group_s*)record;
 
@@ -193,7 +193,7 @@ static int __ctsvc_group_set_int(contacts_record_h record, unsigned int property
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_group_set_str(contacts_record_h record, unsigned int property_id, const char* str )
+static int __ctsvc_group_set_str(contacts_record_h record, unsigned int property_id, const char* str)
 {
 	ctsvc_group_s *group = (ctsvc_group_s*)record;
 
@@ -223,7 +223,7 @@ static int __ctsvc_group_set_str(contacts_record_h record, unsigned int property
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_group_get_bool(contacts_record_h record, unsigned int property_id, bool *value )
+static int __ctsvc_group_get_bool(contacts_record_h record, unsigned int property_id, bool *value)
 {
 	ctsvc_group_s *group = (ctsvc_group_s*)record;
 	switch (property_id) {

@@ -154,7 +154,7 @@ int ctsvc_query_get_first_int_result(const char *query, int *result) {
 				usleep(CTSVC_QUERY_RETRY_INTERVAL);
 		} else
 			retry = false;
-	}while(retry);
+	} while (retry);
 
 	if (SQLITE_OK != ret) {
 		CTS_ERR("DB error : sqlite3_prepare_v2() Failed(%s)", sqlite3_errmsg(ctsvc_db));
@@ -181,7 +181,7 @@ int ctsvc_query_get_first_int_result(const char *query, int *result) {
 		}
 		else
 			retry = false;
-	}while(retry);
+	} while (retry);
 
 	if (SQLITE_ROW != ret) {
 		sqlite3_finalize(stmt);
@@ -246,7 +246,7 @@ int ctsvc_query_prepare(char *query, cts_stmt *stmt) {
 				usleep(CTSVC_QUERY_RETRY_INTERVAL);
 		} else
 			retry = false;
-	}while(retry);
+	} while (retry);
 
 	if (ret == SQLITE_BUSY || ret == SQLITE_LOCKED)
 		return CONTACTS_ERROR_DB_LOCKED;
@@ -278,7 +278,7 @@ int ctsvc_stmt_get_first_int_result(cts_stmt stmt, int *result) {
 		}
 		else
 			retry = false;
-	}while(retry);
+	} while (retry);
 
 	if (SQLITE_ROW != ret) {
 		CTS_ERR("sqlite3_step() Failed(%d, %s, %d)", ret, sqlite3_errmsg(ctsvc_db),
@@ -320,7 +320,7 @@ int ctsvc_stmt_step(cts_stmt stmt) {
 		}
 		else
 			retry = false;
-	}while(retry);
+	} while (retry);
 
 	switch (ret) {
 	case SQLITE_BUSY:

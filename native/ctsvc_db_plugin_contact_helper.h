@@ -37,7 +37,7 @@ int ctsvc_db_contact_update_changed_time(int contact_id);
 int ctsvc_contact_update_display_name(int contact_id, contacts_display_name_source_type_e changed_record_type);
 
 int ctsvc_db_contact_delete(int contact_id);
-int ctsvc_db_contact_get( int id, contacts_record_h* out_record );
+int ctsvc_db_contact_get(int id, contacts_record_h* out_record);
 
 int ctsvc_get_data_info_name(cts_stmt stmt, contacts_list_h name_list);
 int ctsvc_get_data_info_event(cts_stmt stmt, contacts_list_h list);

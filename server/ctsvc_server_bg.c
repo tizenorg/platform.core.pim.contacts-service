@@ -73,7 +73,7 @@ static int __ctsvc_server_bg_contact_delete_step1(__ctsvc_delete_data_s* data)
 		ret = ctsvc_query_prepare(query, &stmt);
 		RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
 
-		while(1 == (ret = ctsvc_stmt_step(stmt))) {
+		while (1 == (ret = ctsvc_stmt_step(stmt))) {
 			int id = 0;
 			id = ctsvc_stmt_get_int(stmt, 0);
 			data->contact_ids = g_slist_append(data->contact_ids, GINT_TO_POINTER(id));
@@ -118,7 +118,7 @@ static int __ctsvc_server_bg_contact_delete_step2(__ctsvc_delete_data_s* data)
 	ret = ctsvc_query_prepare(query, &stmt);
 	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
 
-	while(1 == (ret = ctsvc_stmt_step(stmt))) {
+	while (1 == (ret = ctsvc_stmt_step(stmt))) {
 		int id = 0;
 		id = ctsvc_stmt_get_int(stmt, 0);
 		list = g_slist_append(list, GINT_TO_POINTER(id));
@@ -130,10 +130,10 @@ static int __ctsvc_server_bg_contact_delete_step2(__ctsvc_delete_data_s* data)
 		return CONTACTS_ERROR_NO_DATA;
 
 	ret = ctsvc_begin_trans();
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, CONTACTS_ERROR_DB, "DB failed" );
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, CONTACTS_ERROR_DB, "DB failed");
 
 	cursor = g_slist_nth(list, 0);
-	while(cursor) {
+	while (cursor) {
 		int id = GPOINTER_TO_INT(cursor->data);
 		snprintf(query, sizeof(query), "DELETE FROM "CTS_TABLE_DATA" WHERE id = %d", id);
 
@@ -172,7 +172,7 @@ static int __ctsvc_server_bg_contact_delete_step3(__ctsvc_delete_data_s* data)
 	ret = ctsvc_query_prepare(query, &stmt);
 	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
 
-	while(1 == (ret = ctsvc_stmt_step(stmt))) {
+	while (1 == (ret = ctsvc_stmt_step(stmt))) {
 		int id = 0;
 		id = ctsvc_stmt_get_int(stmt, 0);
 		list = g_slist_append(list, GINT_TO_POINTER(id));
@@ -184,10 +184,10 @@ static int __ctsvc_server_bg_contact_delete_step3(__ctsvc_delete_data_s* data)
 		return CONTACTS_ERROR_NO_DATA;
 
 	ret = ctsvc_begin_trans();
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, CONTACTS_ERROR_DB, "DB failed" );
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, CONTACTS_ERROR_DB, "DB failed");
 
 	cursor = g_slist_nth(list, 0);
-	while(cursor) {
+	while (cursor) {
 		int id = GPOINTER_TO_INT(cursor->data);
 		snprintf(query, sizeof(query), "DELETE FROM "CTS_TABLE_ACTIVITIES" WHERE id = %d", id);
 
@@ -212,7 +212,7 @@ static int __ctsvc_server_bg_contact_delete_step4(__ctsvc_delete_data_s* data)
 	char query[CTS_SQL_MIN_LEN] = {0};
 
 	ret = ctsvc_begin_trans();
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, CONTACTS_ERROR_DB, "DB failed" );
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, CONTACTS_ERROR_DB, "DB failed");
 
 	snprintf(query, sizeof(query), "DELETE FROM "CTS_TABLE_SEARCH_INDEX" WHERE contact_id = %d",
 					data->current_contact_id);
@@ -239,7 +239,7 @@ static int __ctsvc_server_bg_contact_delete_step4(__ctsvc_delete_data_s* data)
 static bool __ctsvc_server_bg_contact_delete_step(int ret, __ctsvc_delete_data_s* data)
 {
 	if (ret != CONTACTS_ERROR_NONE && ret != CONTACTS_ERROR_NO_DATA) {
-		if(data->contact_ids)
+		if (data->contact_ids)
 			g_slist_free(data->contact_ids);
 		CTS_ERR("fail (%d)",ret);
 		return false;
@@ -248,7 +248,7 @@ static bool __ctsvc_server_bg_contact_delete_step(int ret, __ctsvc_delete_data_s
 	switch (data->step) {
 	case STEP_1:
 		if (ret == CONTACTS_ERROR_NO_DATA) {
-			if(data->contact_ids)
+			if (data->contact_ids)
 				g_slist_free(data->contact_ids);
 			CTS_ERR("step_1 no_data");
 			return false;
@@ -279,7 +279,7 @@ static bool  __ctsvc_server_db_delete_run(__ctsvc_delete_data_s* data)
 	CTS_FN_CALL;
 	int ret = CONTACTS_ERROR_NONE;
 
-	if(data == NULL) {
+	if (data == NULL) {
 		CTS_ERR("data is NULL");
 		return false;
 	}
@@ -303,7 +303,7 @@ static bool  __ctsvc_server_db_delete_run(__ctsvc_delete_data_s* data)
 			break;
 		default:
 			CTS_ERR("invalid step");
-			if(data->contact_ids)
+			if (data->contact_ids)
 			g_slist_free(data->contact_ids);
 			return false;
 	}
@@ -339,7 +339,7 @@ static process_stat* __ctsvc_get_cpu_stat()
 	}
 
 	result = calloc(1, sizeof(process_stat));
-	for(i=0; i < 10;i++) {
+	for (i=0; i < 10;i++) {
 		if (i < 3)
 			result->cpu_work_time += cpu_time[i];
 		result->cpu_total_time += cpu_time[i];
@@ -384,7 +384,7 @@ static gpointer __ctsvc_server_bg_delete(gpointer user_data)
 	int ret;
 	__ctsvc_delete_data_s *callback_data = NULL;
 
-	while(1) {
+	while (1) {
 		callback_data = calloc(1,sizeof(__ctsvc_delete_data_s));
 		if (callback_data == NULL) {
 			CTS_ERR("calloc fail");
@@ -400,7 +400,7 @@ static gpointer __ctsvc_server_bg_delete(gpointer user_data)
 		}
 		ctsvc_set_client_access_info(NULL, NULL);
 
-		while(1) {
+		while (1) {
 //			sleep(CTSVC_SERVER_BG_DELETE_STEP_TIME); // sleep 1 sec.
 			if (__ctsvc_cpu_is_busy()) {				// sleep 1 sec in function
 				CTS_ERR("Now CPU is busy.. waiting");

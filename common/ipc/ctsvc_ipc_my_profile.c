@@ -63,7 +63,7 @@ static int __ctsvc_ipc_unmarshal_my_profile(pims_ipc_data_h ipc_data, const char
 		if (ctsvc_ipc_unmarshal_child_list(ipc_data, (contacts_list_h*)&pmy_profile->extensions) != CONTACTS_ERROR_NONE) break;
 
 		return CONTACTS_ERROR_NONE;
-	} while(0);
+	} while (0);
 
 	CTS_ERR("_ctsvc_ipc_unmarshal fail");
 	return CONTACTS_ERROR_INVALID_PARAMETER;
@@ -84,23 +84,23 @@ static int __ctsvc_ipc_marshal_my_profile(const contacts_record_h record, pims_i
 		if (ctsvc_ipc_marshal_string((pcontact->uid),ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_string((pcontact->image_thumbnail_path),ipc_data) != CONTACTS_ERROR_NONE) break;
 
-		if (ctsvc_ipc_marshal_list( (contacts_list_h)pcontact->name, ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_list( (contacts_list_h)pcontact->note, ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_list( (contacts_list_h)pcontact->company, ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_list( (contacts_list_h)pcontact->numbers, ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_list( (contacts_list_h)pcontact->emails, ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_list( (contacts_list_h)pcontact->events, ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_list( (contacts_list_h)pcontact->messengers, ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_list( (contacts_list_h)pcontact->postal_addrs, ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_list( (contacts_list_h)pcontact->urls, ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_list( (contacts_list_h)pcontact->nicknames, ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_list( (contacts_list_h)pcontact->profiles, ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_list( (contacts_list_h)pcontact->relationships, ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_list( (contacts_list_h)pcontact->images, ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_list( (contacts_list_h)pcontact->extensions, ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_list((contacts_list_h)pcontact->name, ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_list((contacts_list_h)pcontact->note, ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_list((contacts_list_h)pcontact->company, ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_list((contacts_list_h)pcontact->numbers, ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_list((contacts_list_h)pcontact->emails, ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_list((contacts_list_h)pcontact->events, ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_list((contacts_list_h)pcontact->messengers, ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_list((contacts_list_h)pcontact->postal_addrs, ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_list((contacts_list_h)pcontact->urls, ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_list((contacts_list_h)pcontact->nicknames, ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_list((contacts_list_h)pcontact->profiles, ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_list((contacts_list_h)pcontact->relationships, ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_list((contacts_list_h)pcontact->images, ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_list((contacts_list_h)pcontact->extensions, ipc_data) != CONTACTS_ERROR_NONE) break;
 
 		return CONTACTS_ERROR_NONE;
-	} while(0);
+	} while (0);
 
 	CTS_ERR("_ctsvc_ipc_marshal fail");
 	return CONTACTS_ERROR_INVALID_PARAMETER;
@@ -109,6 +109,6 @@ static int __ctsvc_ipc_marshal_my_profile(const contacts_record_h record, pims_i
 static int __ctsvc_ipc_marshal_my_profile_get_primary_id(const contacts_record_h record, unsigned int *property_id, int *id)
 {
 	*property_id = CTSVC_PROPERTY_CONTACT_ID;
-	return contacts_record_get_int(record, *property_id, id );
+	return contacts_record_get_int(record, *property_id, id);
 }
 

@@ -47,7 +47,7 @@ static int __ctsvc_ipc_unmarshal_group_relation(pims_ipc_data_h ipc_data, const 
 
 		return CONTACTS_ERROR_NONE;
 
-	} while(0);
+	} while (0);
 
 	CTS_ERR("_ctsvc_ipc_unmarshal fail");
 	return CONTACTS_ERROR_INVALID_PARAMETER;
@@ -67,7 +67,7 @@ static int __ctsvc_ipc_marshal_group_relation(const contacts_record_h record, pi
 
 		return CONTACTS_ERROR_NONE;
 
-	} while(0);
+	} while (0);
 
 	CTS_ERR("_ctsvc_ipc_marshal fail");
 	return CONTACTS_ERROR_INVALID_PARAMETER;
@@ -76,5 +76,5 @@ static int __ctsvc_ipc_marshal_group_relation(const contacts_record_h record, pi
 static int __ctsvc_ipc_marshal_group_relation_get_primary_id(const contacts_record_h record, unsigned int *property_id, int *id)
 {
 	*property_id = CTSVC_PROPERTY_GROUP_RELATION_ID;
-	return contacts_record_get_int(record, *property_id, id );
+	return contacts_record_get_int(record, *property_id, id);
 }

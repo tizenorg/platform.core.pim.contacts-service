@@ -319,7 +319,7 @@ char* ctsvc_get_network_cc(bool reload)
 		temp[3] = '\0';
 	mcc = atoi(temp);
 	for (i=0;i<sizeof(__mcc_cc_list)/sizeof(ctsvc_mcc_cc_map);i++)
-		if(__mcc_cc_list[i].mcc == mcc)
+		if (__mcc_cc_list[i].mcc == mcc)
 			cc = __mcc_cc_list[i].cc;
 #endif
 	return cc;
@@ -651,7 +651,7 @@ static int __ctsvc_number_has_ip_and_cc(const char*number, int len, int *index)
 					case '1':		// '+01'
 						{
 							start_index++;
-							if (start_index >= len)	{
+							if (start_index >= len) {
 								*index = start_index-1;	// '+0 1'
 								return (have_plus?CTSVC_PLUS_IP_CC:CTSVC_IP_CC);
 							}
@@ -886,7 +886,7 @@ int ctsvc_clean_number(const char *src, char *dest, int dest_size, bool replace_
 
 	pos = 0;
 	d_pos = 0;
-	while(temp[pos] != 0) {
+	while (temp[pos] != 0) {
 		if ('0' <= temp[pos] && temp[pos] <= '9')
 			dest[d_pos++] = temp[pos];
 		else if (temp[pos] == '+' || temp[pos] == '#'
@@ -921,7 +921,7 @@ static int __ctsvc_minmatch_number(const char *src, char *dest, int dest_size, i
 	len = strlen(temp_number);
 
 	if (0 < len) {
-		while(0 <= (len-d_pos-1) && temp_number[len-d_pos-1]
+		while (0 <= (len-d_pos-1) && temp_number[len-d_pos-1]
 				&& d_pos < min_match) {
 			if (dest_size-d_pos == 0) {
 				CTS_ERR("Destination string buffer is not enough(%s)", src);
@@ -934,7 +934,7 @@ static int __ctsvc_minmatch_number(const char *src, char *dest, int dest_size, i
 		dest[d_pos] = 0;
 
 		len = strlen(dest);
-		for(i=0; i<len/2;i++) {
+		for (i=0; i<len/2;i++) {
 			char c;
 			c = dest[i];
 			dest[i] = dest[len-i-1];
@@ -972,7 +972,7 @@ static bool __ctsvc_is_phonenumber_halfwidth(const char* keyword)
 
 	// TODO: we should add predicate including '+'
 	// TODO: finally, we try to check the number with regular expression.
-	for(i=0; i<len; i++) {
+	for (i=0; i<len; i++) {
 		if ((keyword[i] < '0' || keyword[i] > '9') && keyword[i] != '+') {
 			CTS_ERR("keyword[%d]: %c is not number)", i, keyword[i]);
 			return false;
@@ -1016,7 +1016,7 @@ static bool __ctsvc_is_phonenumber_fullwidth(const char* keyword)
 
 bool ctsvc_is_phonenumber(const char* src)
 {
-	return ( __ctsvc_is_phonenumber_halfwidth(src) || __ctsvc_is_phonenumber_fullwidth(src) );
+	return (__ctsvc_is_phonenumber_halfwidth(src) || __ctsvc_is_phonenumber_fullwidth(src));
 }
 
 // numbers are cleaned number or normalized number

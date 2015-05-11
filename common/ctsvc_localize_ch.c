@@ -2183,7 +2183,7 @@ bool ctsvc_has_chinese(const char *src)
 	RETVM_IF(!*src, CONTACTS_ERROR_SYSTEM, "*src is NULL");
 
 	u_strFromUTF8(temp, array_sizeof(temp), NULL, src, -1, &status);
-	if (U_FAILURE(status)){
+	if (U_FAILURE(status)) {
 		CTS_ERR("u_strFromUTF8 Failed(%s)", u_errorName(status));
 		return false;
 	}
@@ -2207,7 +2207,7 @@ int ctsvc_convert_chinese_to_pinyin(const char *src, pinyin_name_s **name, int *
 	memset(spell, 0x0, CHINESE_PINYIN_MAX_LEN * CHINESE_DUOYINZI_MAX_COUNT * CHINESE_PINYIN_SPELL_MAX_LEN);
 
 	u_strFromUTF8(temp_result, array_sizeof(temp_result), NULL, src, -1, &status);
-	if (U_FAILURE(status)){
+	if (U_FAILURE(status)) {
 		CTS_ERR("u_strFromUTF8 Failed(%s)", u_errorName(status));
 		return CONTACTS_ERROR_SYSTEM;
 	}
@@ -2221,7 +2221,7 @@ int ctsvc_convert_chinese_to_pinyin(const char *src, pinyin_name_s **name, int *
 			RETVM_IF(ret < CONTACTS_ERROR_NONE, CONTACTS_ERROR_SYSTEM, "__ctsvc_get_pinyinspell() Failed(%d)", ret);
 			pinyin_spell_count[count] = ret;
 
-			if(total_count==0)
+			if (total_count==0)
 				total_count = ret;
 			else
 				total_count *= ret;
@@ -2256,7 +2256,7 @@ int ctsvc_convert_chinese_to_pinyin(const char *src, pinyin_name_s **name, int *
 			}
 
 			if (spell[i][index][0]) {
-				if(temp_name[j].pinyin_name[0])
+				if (temp_name[j].pinyin_name[0])
 					name_len[j] += snprintf(temp_name[j].pinyin_name + name_len[j], sizeof(temp_name[j].pinyin_name) - name_len[j], " ");
 
 				name_len[j] += snprintf(temp_name[j].pinyin_name + name_len[j], sizeof(temp_name[j].pinyin_name) - name_len[j],
