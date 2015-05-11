@@ -1969,7 +1969,7 @@ static int __ctsvc_url_set_int(contacts_record_h record, unsigned int property_i
 		break;
 	case CTSVC_PROPERTY_URL_TYPE:
 		RETVM_IF(value < CONTACTS_URL_TYPE_OTHER
-						|| value > CONTACTS_URL_TYPE_WORK ,
+						|| value > CONTACTS_URL_TYPE_WORK,
 				CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : url type is in invalid range (%d)", value);
 
 		url->type = value;

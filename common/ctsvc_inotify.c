@@ -334,7 +334,7 @@ static inline int __ctsvc_del_noti(GSList **noti_list, int wd,
 			if (cb == noti->cb && user_data == noti->cb_data
 				&& 0 == strcmp(noti->view_uri, view_uri)) {
 				it = it->next;
-				result = g_slist_remove(result , noti);
+				result = g_slist_remove(result, noti);
 				free(noti->view_uri);
 				free(noti);
 				del_cnt++;

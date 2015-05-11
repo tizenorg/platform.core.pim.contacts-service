@@ -2584,7 +2584,7 @@ static inline int __ctsvc_vcard_get_photo(contacts_record_h contact, ctsvc_list_
 	contacts_record_h image;
 	struct timeval tv;
 
-	temp = strchr(val , ':');
+	temp = strchr(val, ':');
 	RETVM_IF(NULL == temp, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : val is invalid");
 
 	*temp = '\0';
@@ -2832,7 +2832,7 @@ static inline int __ctsvc_vcard_get_company_logo(ctsvc_list_s *company_list, cha
 		contacts_list_add((contacts_list_h)company_list, company);
 	}
 
-	temp = strchr(val , ':');
+	temp = strchr(val, ':');
 	RETVM_IF(NULL == temp, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : val is invalid");
 
 	*temp = '\0';

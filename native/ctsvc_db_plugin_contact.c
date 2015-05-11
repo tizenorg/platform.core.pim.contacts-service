@@ -1975,7 +1975,7 @@ static int __ctsvc_db_contact_insert_record(contacts_record_h record, int *id)
 	}
 	else if (auto_link_enabled) {
 		ret = __ctsvc_find_person_to_link((contacts_record_h)contact, contact->addressbook_id, &person_id);
-		CTS_DBG("__ctsvc_find_person_to_link return %d , person_id(%d)", ret, person_id);
+		CTS_DBG("__ctsvc_find_person_to_link return %d, person_id(%d)", ret, person_id);
 		if (ret == CONTACTS_ERROR_NONE && person_id > 0) {
 			contact->person_id = person_id;
 			auto_linked = true;
@@ -2238,7 +2238,7 @@ static int __ctsvc_db_contact_replace_record(contacts_record_h record, int conta
 
 	len = snprintf(query, sizeof(query),
 			"UPDATE "CTS_TABLE_CONTACTS" SET changed_ver=%d, changed_time=%d, is_favorite=%d, "
-					"has_phonenumber=%d, has_email=%d , display_name=?, "
+					"has_phonenumber=%d, has_email=%d, display_name=?, "
 					"reverse_display_name=?, display_name_source=%d, "
 					"display_name_language=%d, reverse_display_name_language=%d, "
 					"sort_name=?, reverse_sort_name=?, "
