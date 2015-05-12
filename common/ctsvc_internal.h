@@ -122,11 +122,10 @@
 
 
 #define CONTACTS_FREE(ptr) \
- do { \
-  if (ptr) \
-    free(ptr); \
-  ptr = NULL; \
- } while (0)
+	do { \
+		free(ptr); \
+		ptr = NULL; \
+	} while (0)
 
 // Thread-local storage
 #ifdef _CONTACTS_IPC_SERVER
