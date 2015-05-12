@@ -91,13 +91,19 @@ int ctsvc_client_person_link_person(contacts_h contact, int base_person_id, int 
 	pims_ipc_data_destroy(indata);
 
 	if (outdata) {
-		// check result
-		unsigned int size = 0;
-		ret = *(int*) pims_ipc_data_get(outdata, &size);
+		if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(outdata, &ret)) {
+			CTS_ERR("ctsvc_ipc_unmarshal_int() Fail");
+			pims_ipc_data_destroy(outdata);
+			return CONTACTS_ERROR_IPC;
+		}
 
 		if (CONTACTS_ERROR_NONE == ret) {
 			int transaction_ver = 0;
-			transaction_ver = *(int*)pims_ipc_data_get(outdata,&size);
+			if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(outdata, &transaction_ver)) {
+				CTS_ERR("ctsvc_ipc_unmarshal_int() Fail");
+				pims_ipc_data_destroy(outdata);
+				return CONTACTS_ERROR_IPC;
+			}
 			ctsvc_client_ipc_set_change_version(contact, transaction_ver);
 		}
 
@@ -157,19 +163,29 @@ int ctsvc_client_person_unlink_contact(contacts_h contact, int person_id, int co
 	pims_ipc_data_destroy(indata);
 
 	if (outdata) {
-		// check result
-		unsigned int size = 0;
-		ret = *(int*) pims_ipc_data_get(outdata, &size);
+		if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(outdata, &ret)) {
+			CTS_ERR("ctsvc_ipc_unmarshal_int() Fail");
+			pims_ipc_data_destroy(outdata);
+			return CONTACTS_ERROR_IPC;
+		}
 
 		if (CONTACTS_ERROR_NONE == ret) {
 			int transaction_ver = 0;
-			transaction_ver = *(int*)pims_ipc_data_get(outdata,&size);
+			if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(outdata, &transaction_ver)) {
+				CTS_ERR("ctsvc_ipc_unmarshal_int() Fail");
+				pims_ipc_data_destroy(outdata);
+				return CONTACTS_ERROR_IPC;
+			}
 			ctsvc_client_ipc_set_change_version(contact, transaction_ver);
 
-			if (unlinked_person_id)
-				*unlinked_person_id = *(int*)pims_ipc_data_get(outdata,&size);
+			if (unlinked_person_id) {
+				if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(outdata, unlinked_person_id)) {
+					CTS_ERR("ctsvc_ipc_unmarshal_int() Fail");
+					pims_ipc_data_destroy(outdata);
+					return CONTACTS_ERROR_IPC;
+				}
+			}
 		}
-
 		pims_ipc_data_destroy(outdata);
 	}
 
@@ -224,13 +240,19 @@ int ctsvc_client_person_reset_usage(contacts_h contact, int person_id, contacts_
 	pims_ipc_data_destroy(indata);
 
 	if (outdata) {
-		// check result
-		unsigned int size = 0;
-		ret = *(int*) pims_ipc_data_get(outdata, &size);
+		if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(outdata, &ret)) {
+			CTS_ERR("ctsvc_ipc_unmarshal_int() Fail");
+			pims_ipc_data_destroy(outdata);
+			return CONTACTS_ERROR_IPC;
+		}
 
 		if (CONTACTS_ERROR_NONE == ret) {
 			int transaction_ver = 0;
-			transaction_ver = *(int*)pims_ipc_data_get(outdata,&size);
+			if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(outdata, &transaction_ver)) {
+				CTS_ERR("ctsvc_ipc_unmarshal_int() Fail");
+				pims_ipc_data_destroy(outdata);
+				return CONTACTS_ERROR_IPC;
+			}
 			ctsvc_client_ipc_set_change_version(contact, transaction_ver);
 		}
 
@@ -293,13 +315,19 @@ int ctsvc_client_person_set_favorite_order(contacts_h contact, int person_id, in
 	pims_ipc_data_destroy(indata);
 
 	if (outdata) {
-		// check result
-		unsigned int size = 0;
-		ret = *(int*) pims_ipc_data_get(outdata, &size);
+		if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(outdata, &ret)) {
+			CTS_ERR("ctsvc_ipc_unmarshal_int() Fail");
+			pims_ipc_data_destroy(outdata);
+			return CONTACTS_ERROR_IPC;
+		}
 
 		if (CONTACTS_ERROR_NONE == ret) {
 			int transaction_ver = 0;
-			transaction_ver = *(int*)pims_ipc_data_get(outdata,&size);
+			if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(outdata, &transaction_ver)) {
+				CTS_ERR("ctsvc_ipc_unmarshal_int() Fail");
+				pims_ipc_data_destroy(outdata);
+				return CONTACTS_ERROR_IPC;
+			}
 			ctsvc_client_ipc_set_change_version(contact, transaction_ver);
 		}
 
@@ -365,12 +393,18 @@ int ctsvc_client_person_set_default_property(contacts_h contact, contacts_person
 	pims_ipc_data_destroy(indata);
 
 	if (outdata) {
-		// check result
-		unsigned int size = 0;
-		ret = *(int*) pims_ipc_data_get(outdata, &size);
+		if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(outdata, &ret)) {
+			CTS_ERR("ctsvc_ipc_unmarshal_int() Fail");
+			pims_ipc_data_destroy(outdata);
+			return CONTACTS_ERROR_IPC;
+		}
 		if (CONTACTS_ERROR_NONE == ret) {
 			int transaction_ver = 0;
-			transaction_ver = *(int*)pims_ipc_data_get(outdata,&size);
+			if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(outdata, &transaction_ver)) {
+				CTS_ERR("ctsvc_ipc_unmarshal_int() Fail");
+				pims_ipc_data_destroy(outdata);
+				return CONTACTS_ERROR_IPC;
+			}
 			ctsvc_client_ipc_set_change_version(contact, transaction_ver);
 		}
 
@@ -431,12 +465,17 @@ int ctsvc_client_person_get_default_property(contacts_h contact, contacts_person
 	pims_ipc_data_destroy(indata);
 
 	if (outdata) {
-		// check result
-		unsigned int size = 0;
-		ret = *(int*) pims_ipc_data_get(outdata, &size);
-		if (ret == CONTACTS_ERROR_NONE) {
-			if (id)
-				*id = *(int*)pims_ipc_data_get(outdata,&size);
+		if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(outdata, &ret)) {
+			CTS_ERR("ctsvc_ipc_unmarshal_int() Fail");
+			pims_ipc_data_destroy(outdata);
+			return CONTACTS_ERROR_IPC;
+		}
+		if (ret == CONTACTS_ERROR_NONE && id) {
+			if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(outdata, id)) {
+				CTS_ERR("ctsvc_ipc_unmarshal_int() Fail");
+				pims_ipc_data_destroy(outdata);
+				return CONTACTS_ERROR_IPC;
+			}
 		}
 		pims_ipc_data_destroy(outdata);
 	}

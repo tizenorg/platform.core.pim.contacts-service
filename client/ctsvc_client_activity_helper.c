@@ -73,15 +73,22 @@ int ctsvc_client_activity_delete_by_contact_id(contacts_h contact, int contact_i
 	pims_ipc_data_destroy(indata);
 
 	if (outdata) {
+		int transaction_ver = 0;
+
 		// check result
-		unsigned int size = 0;
-		ret = *(int*) pims_ipc_data_get(outdata, &size);
+		if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(outdata, &ret)) {
+			CTS_ERR("ctsvc_ipc_unmarshal_int() Fail");
+			pims_ipc_data_destroy(outdata);
+			return CONTACTS_ERROR_IPC;
+		}
 		if (CONTACTS_ERROR_NONE == ret) {
-			int transaction_ver = 0;
-			transaction_ver = *(int*)pims_ipc_data_get(outdata,&size);
+			if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(outdata, &transaction_ver)) {
+				CTS_ERR("ctsvc_ipc_unmarshal_int() Fail");
+				pims_ipc_data_destroy(outdata);
+				return CONTACTS_ERROR_IPC;
+			}
 			ctsvc_client_ipc_set_change_version(contact, transaction_ver);
 		}
-
 		pims_ipc_data_destroy(outdata);
 	}
 
@@ -129,15 +136,21 @@ int ctsvc_client_activity_delete_by_account_id(contacts_h contact, int account_i
 	pims_ipc_data_destroy(indata);
 
 	if (outdata) {
-		// check result
-		unsigned int size = 0;
-		ret = *(int*) pims_ipc_data_get(outdata, &size);
-		if (CONTACTS_ERROR_NONE == ret) {
-			int transaction_ver = 0;
-			transaction_ver = *(int*)pims_ipc_data_get(outdata,&size);
-			ctsvc_client_ipc_set_change_version(contact, transaction_ver);
+		int transaction_ver = 0;
+		if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(outdata, &ret)) {
+			CTS_ERR("ctsvc_ipc_unmarshal_int() Fail");
+			pims_ipc_data_destroy(outdata);
+			return CONTACTS_ERROR_IPC;
 		}
 
+		if (CONTACTS_ERROR_NONE == ret) {
+			if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(outdata, &transaction_ver)) {
+				CTS_ERR("ctsvc_ipc_unmarshal_int() Fail");
+				pims_ipc_data_destroy(outdata);
+				return CONTACTS_ERROR_IPC;
+			}
+			ctsvc_client_ipc_set_change_version(contact, transaction_ver);
+		}
 		pims_ipc_data_destroy(outdata);
 	}
 

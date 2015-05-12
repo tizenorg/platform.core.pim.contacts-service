@@ -42,10 +42,18 @@ API int contacts_setting_get_name_display_order(contacts_name_display_order_e *n
 	}
 
 	if (outdata) {
-		unsigned int size = 0;
-		ret = *(int*) pims_ipc_data_get(outdata, &size);
+		if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(outdata, &ret)) {
+			CTS_ERR("ctsvc_ipc_unmarshal_int() Fail");
+			pims_ipc_data_destroy(outdata);
+			return CONTACTS_ERROR_IPC;
+		}
+
 		if (CONTACTS_ERROR_NONE == ret) {
-			*name_display_order = *(int*) pims_ipc_data_get(outdata, &size);
+			if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(outdata, (int *)name_display_order)) {
+				CTS_ERR("ctsvc_ipc_unmarshal_int() Fail");
+				pims_ipc_data_destroy(outdata);
+				return CONTACTS_ERROR_IPC;
+			}
 		}
 		pims_ipc_data_destroy(outdata);
 	}
@@ -67,10 +75,17 @@ API int contacts_setting_get_name_sorting_order(contacts_name_sorting_order_e *n
 	}
 
 	if (outdata) {
-		unsigned int size = 0;
-		ret = *(int*) pims_ipc_data_get(outdata, &size);
+		if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(outdata, &ret)) {
+			CTS_ERR("ctsvc_ipc_unmarshal_int() Fail");
+			pims_ipc_data_destroy(outdata);
+			return CONTACTS_ERROR_IPC;
+		}
 		if (CONTACTS_ERROR_NONE == ret) {
-			*name_sorting_order = *(int*) pims_ipc_data_get(outdata, &size);
+			if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(outdata, (int *)name_sorting_order)) {
+				CTS_ERR("ctsvc_ipc_unmarshal_int() Fail");
+				pims_ipc_data_destroy(outdata);
+				return CONTACTS_ERROR_IPC;
+			}
 		}
 		pims_ipc_data_destroy(outdata);
 	}
@@ -110,8 +125,11 @@ API int contacts_setting_set_name_display_order(contacts_name_display_order_e na
 	pims_ipc_data_destroy(indata);
 
 	if (outdata) {
-		unsigned int size = 0;
-		ret = *(int*) pims_ipc_data_get(outdata, &size);
+		if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(outdata, &ret)) {
+			CTS_ERR("ctsvc_ipc_unmarshal_int() Fail");
+			pims_ipc_data_destroy(outdata);
+			return CONTACTS_ERROR_IPC;
+		}
 		pims_ipc_data_destroy(outdata);
 	}
 
@@ -150,8 +168,11 @@ API int contacts_setting_set_name_sorting_order(contacts_name_sorting_order_e na
 	pims_ipc_data_destroy(indata);
 
 	if (outdata) {
-		unsigned int size = 0;
-		ret = *(int*) pims_ipc_data_get(outdata, &size);
+		if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(outdata, &ret)) {
+			CTS_ERR("ctsvc_ipc_unmarshal_int() Fail");
+			pims_ipc_data_destroy(outdata);
+			return CONTACTS_ERROR_IPC;
+		}
 		pims_ipc_data_destroy(outdata);
 	}
 

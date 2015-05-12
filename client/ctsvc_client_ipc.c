@@ -306,12 +306,18 @@ int ctsvc_ipc_client_check_permission(int permission, bool *result)
 	pims_ipc_data_destroy(indata);
 
 	if (outdata) {
-		unsigned int size = 0;
-		ret = *(int*) pims_ipc_data_get(outdata,&size);
+		if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(outdata, &ret)) {
+			CTS_ERR("ctsvc_ipc_unmarshal_int() Fail");
+			pims_ipc_data_destroy(outdata);
+			return CONTACTS_ERROR_IPC;
+		}
 
-		if (ret == CONTACTS_ERROR_NONE) {
-			if (result)
-				*result = *(bool*) pims_ipc_data_get(outdata, &size);
+		if (CONTACTS_ERROR_NONE == ret && result) {
+			if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_bool(outdata, result)) {
+				CTS_ERR("ctsvc_ipc_unmarshal_bool() Fail");
+				pims_ipc_data_destroy(outdata);
+				return CONTACTS_ERROR_IPC;
+			}
 		}
 		pims_ipc_data_destroy(outdata);
 	}

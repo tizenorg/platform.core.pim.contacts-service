@@ -48,8 +48,8 @@ static gboolean __ctsvc_publish_changes_with_data(const char *view_uri, char *da
 		return false;
 	}
 
-	if (pims_ipc_data_put(indata, data, strlen(data) + 1) != 0) {
-		CTS_ERR("pims_ipc_data_put error\n");
+	if (CONTACTS_ERROR_NONE != ctsvc_ipc_marshal_string(data, indata)) {
+		CTS_ERR("ctsvc_ipc_marshal_string() Fail");
 		pims_ipc_data_destroy(indata);
 		return false;
 	}
@@ -139,10 +139,10 @@ void ctsvc_change_subject_publish_setting(const char *setting_id, int value)
 {
 	pims_ipc_data_h indata = NULL;
 	indata = pims_ipc_data_create(0);
-	RETM_IF(NULL == indata, "pims_ipc_data_create error");
+	RETM_IF(NULL == indata, "pims_ipc_data_create() Fail");
 
-	if (pims_ipc_data_put(indata, (void*)&value, sizeof(int)) != 0) {
-		CTS_ERR("pims_ipc_data_put error");
+	if (CONTACTS_ERROR_NONE != ctsvc_ipc_marshal_int(value, indata)) {
+		CTS_ERR("ctsvc_ipc_marshal_int() Fail");
 		pims_ipc_data_destroy(indata);
 		return;
 	}
@@ -157,10 +157,10 @@ void ctsvc_change_subject_publish_status(contacts_db_status_e status)
 {
 	pims_ipc_data_h indata = NULL;
 	indata = pims_ipc_data_create(0);
-	RETM_IF(NULL == indata, "pims_ipc_data_create error");
+	RETM_IF(NULL == indata, "pims_ipc_data_create() Fail");
 
-	if (pims_ipc_data_put(indata, (void*)&status, sizeof(int)) != 0) {
-		CTS_ERR("pims_ipc_data_put error");
+	if (CONTACTS_ERROR_NONE != ctsvc_ipc_marshal_int(status, indata)) {
+		CTS_ERR("ctsvc_ipc_marshal_int() Fail");
 		pims_ipc_data_destroy(indata);
 		return;
 	}
