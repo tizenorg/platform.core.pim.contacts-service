@@ -156,7 +156,7 @@ API int contacts_db_add_changed_cb_with_info(const char* view_uri,
 		if (!it->data) continue;
 
 		info = it->data;
-		if (strcmp(info->view_uri, view_uri) == 0)
+		if (STRING_EQUAL == strcmp(info->view_uri, view_uri))
 			break;
 		else
 			info = NULL;
@@ -210,8 +210,8 @@ API int contacts_db_remove_changed_cb_with_info(const char* view_uri,
 	RETVM_IF(view_uri == NULL, CONTACTS_ERROR_INVALID_PARAMETER, "view_uri is NULL");
 	RETVM_IF(cb == NULL, CONTACTS_ERROR_INVALID_PARAMETER, "cb is NULL");
 
-	if (strcmp(view_uri, CTSVC_VIEW_URI_PHONELOG) != 0 &&
-			strcmp(view_uri, CTSVC_VIEW_URI_PERSON) != 0) {
+	if (STRING_EQUAL != strcmp(view_uri, CTSVC_VIEW_URI_PHONELOG) &&
+			STRING_EQUAL != strcmp(view_uri, CTSVC_VIEW_URI_PERSON)) {
 		CTS_ERR("We support this API for only %s and %s", CTSVC_VIEW_URI_PERSON, CTSVC_VIEW_URI_PHONELOG);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
@@ -222,7 +222,7 @@ API int contacts_db_remove_changed_cb_with_info(const char* view_uri,
 		if (!it->data) continue;
 
 		info = it->data;
-		if (strcmp(info->view_uri, view_uri) == 0)
+		if (STRING_EQUAL == strcmp(info->view_uri, view_uri))
 			break;
 		else
 			info = NULL;

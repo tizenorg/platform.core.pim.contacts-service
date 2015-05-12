@@ -388,7 +388,7 @@ static inline int __ctsvc_db_create_str_condition(ctsvc_composite_filter_s *com_
 						*bind_text = g_slist_append(*bind_text, __ctsvc_db_get_str_with_escape(min_match, strlen(min_match), with_escape));
 
 						// _NUMBER_COMPARE_(noraml_num, normalized keyword)
-						if (strcmp(normal_num, "+") != 0) {
+						if (STRING_EQUAL != strcmp(normal_num, "+")) {
 							const char *number_field = NULL;
 							if (filter->property_id == CTSVC_PROPERTY_NUMBER_NUMBER_FILTER)
 								number_field = __ctsvc_db_get_property_field_name(com_filter->properties,
@@ -449,7 +449,7 @@ static inline int __ctsvc_db_create_str_condition(ctsvc_composite_filter_s *com_
 					else
 						*bind_text = g_slist_append(*bind_text, __ctsvc_db_get_str_with_escape(clean_num, strlen(clean_num), with_escape));
 				}
-				else if (strcmp(clean_num, "+") != 0) {
+				else if (STRING_EQUAL != strcmp(clean_num, "+")) {
 					*bind_text = g_slist_append(*bind_text, __ctsvc_db_get_str_with_escape(clean_num, strlen(clean_num), with_escape));
 				}
 				else
@@ -889,7 +889,7 @@ static inline bool __ctsvc_db_view_has_display_name(const char *view_uri,
 {
 	int i;
 #ifdef ENABLE_LOG_FEATURE
-	if (0 == strcmp(view_uri, _contacts_person_phone_log._uri))
+	if (STRING_EQUAL == strcmp(view_uri, _contacts_person_phone_log._uri))
 		return false;
 #endif // ENABLE_LOG_FEATURE
 
@@ -1023,7 +1023,7 @@ int ctsvc_db_make_get_records_query_stmt(ctsvc_query_s *s_query, int offset, int
 		temp_len = SAFE_SNPRINTF(&query, &query_size, len, sortkey);
 		if (0 <= temp_len) len+= temp_len;
 	}
-	else if (0 == strcmp(s_query->view_uri, CTSVC_VIEW_URI_GROUP)) {
+	else if (STRING_EQUAL == strcmp(s_query->view_uri, CTSVC_VIEW_URI_GROUP)) {
 		temp_len = SAFE_SNPRINTF(&query, &query_size, len, " ORDER BY group_prio");
 		if (0 <= temp_len) len+= temp_len;
 	}
@@ -1150,7 +1150,7 @@ static int __ctsvc_db_get_all_records_exec(const char *view_uri, const property_
 	if (__ctsvc_db_view_has_display_name(view_uri, properties, ids_count)) {
 		sortkey = ctsvc_get_sort_column();
 		len += snprintf(query+len, sizeof(query)-len, " ORDER BY %s", sortkey);
-	} else if (0 == strcmp(view_uri, CTSVC_VIEW_URI_GROUP))
+	} else if (STRING_EQUAL == strcmp(view_uri, CTSVC_VIEW_URI_GROUP))
 		len += snprintf(query+len, sizeof(query)-len, " ORDER BY group_prio");
 
 	if (0 != limit) {
@@ -1217,13 +1217,13 @@ static inline bool __ctsvc_db_view_can_keyword_search(const char *view_uri)
 {
 	RETV_IF(NULL == view_uri, false);
 
-	if (0 == strcmp(view_uri, CTSVC_VIEW_URI_PERSON)
-		|| 0 == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_CONTACT)
-		|| 0 == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_NUMBER)
-		|| 0 == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_EMAIL)
-		|| 0 == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP)
-		|| 0 == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP_ASSIGNED)
-		|| 0 == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP_NOT_ASSIGNED)) {
+	if (STRING_EQUAL == strcmp(view_uri, CTSVC_VIEW_URI_PERSON)
+		|| STRING_EQUAL == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_CONTACT)
+		|| STRING_EQUAL == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_NUMBER)
+		|| STRING_EQUAL == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_EMAIL)
+		|| STRING_EQUAL == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP)
+		|| STRING_EQUAL == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP_ASSIGNED)
+		|| STRING_EQUAL == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP_NOT_ASSIGNED)) {
 		return true;
 	}
 	return false;
@@ -1310,7 +1310,7 @@ static int __ctsvc_db_append_search_query(const char *src, char **query, int *qu
 	int keyword_temp_len = 0;
 	int temp_len;
 
-	if (ctsvc_is_phonenumber(src) == false || strcmp(src, "+") == 0) {
+	if (ctsvc_is_phonenumber(src) == false || STRING_EQUAL == strcmp(src, "+")) {
 		phonenumber = false;
 	}
 
@@ -1319,7 +1319,7 @@ static int __ctsvc_db_append_search_query(const char *src, char **query, int *qu
 		range &= ~CONTACTS_SEARCH_RANGE_NAME;
 	}
 
-	if (strcmp(src, "+") == 0) {
+	if (STRING_EQUAL == strcmp(src, "+")) {
 		range &= ~CONTACTS_SEARCH_RANGE_NUMBER;
 	}
 
@@ -1692,7 +1692,7 @@ static int __ctsvc_db_search_records_append_sort(const char *view_uri,
 							temp_str_len += snprintf(temp_str+temp_str_len, sizeof(temp_str)-temp_str_len, " AND ");
 						if (ctsvc_is_chosung(temp)) {
 							for (k=0;k<19;k++) {
-								if (strcmp(hangul_syllable[k][0], temp) == 0)
+								if (STRING_EQUAL == strcmp(hangul_syllable[k][0], temp))
 									break;
 							}
 						}
@@ -1786,14 +1786,14 @@ static int __ctsvc_db_search_records_exec(const char *view_uri, const property_i
 	query = calloc(1, query_size);
 	len = 0;
 
-	if (strcmp(keyword, "+") == 0) {
+	if (STRING_EQUAL == strcmp(keyword, "+")) {
 		range &= ~CONTACTS_SEARCH_RANGE_NUMBER;
 	}
 
-	if (0 == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_CONTACT)
-			|| 0 == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP)
-			|| 0 == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP_ASSIGNED)
-			|| 0 == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP_NOT_ASSIGNED)) {
+	if (STRING_EQUAL == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_CONTACT)
+			|| STRING_EQUAL == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP)
+			|| STRING_EQUAL == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP_ASSIGNED)
+			|| STRING_EQUAL == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP_NOT_ASSIGNED)) {
 		if (range & CONTACTS_SEARCH_RANGE_EMAIL) {
 			free(query);
 			return CONTACTS_ERROR_INVALID_PARAMETER;
@@ -1813,7 +1813,7 @@ static int __ctsvc_db_search_records_exec(const char *view_uri, const property_i
 		temp_len = __ctsvc_db_append_search_query(keyword, &query, &query_size, len, range);
 		if (0 <= temp_len) len = temp_len;
 	}
-	else if (0 == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_NUMBER)) {
+	else if (STRING_EQUAL == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_NUMBER)) {
 		bool need_union = false;
 		if (range & CONTACTS_SEARCH_RANGE_DATA || range & CONTACTS_SEARCH_RANGE_EMAIL) {
 			free(query);
@@ -1921,7 +1921,7 @@ static int __ctsvc_db_search_records_exec(const char *view_uri, const property_i
 		temp_len = SAFE_SNPRINTF(&query, &query_size, len, ") ");
 		if (0 <= temp_len) len+= temp_len;
 	}
-	else if (0 == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_EMAIL)) {
+	else if (STRING_EQUAL == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_EMAIL)) {
 		bool need_union = false;
 		if (range & CONTACTS_SEARCH_RANGE_NUMBER || range & CONTACTS_SEARCH_RANGE_DATA) {
 			free(query);
@@ -2017,7 +2017,7 @@ static int __ctsvc_db_search_records_exec(const char *view_uri, const property_i
 	if (sortkey) {
 		len = __ctsvc_db_search_records_append_sort(view_uri, sortkey, keyword, len, &query, &query_size);
 	}
-	else if (0 == strcmp(view_uri, CTSVC_VIEW_URI_GROUP)) {
+	else if (STRING_EQUAL == strcmp(view_uri, CTSVC_VIEW_URI_GROUP)) {
 		temp_len = SAFE_SNPRINTF(&query, &query_size, len, " ORDER BY group_prio");
 		if (0 <= temp_len) len+= temp_len;
 	}
@@ -2182,10 +2182,10 @@ static inline int __ctsvc_db_search_records_with_query_exec(ctsvc_query_s *s_que
 	temp_len = SAFE_SNPRINTF(&query, &query_size, len, " FROM ");
 	if (0 <= temp_len) len+= temp_len;
 
-	if (0 == strcmp(s_query->view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_CONTACT)
-			|| 0 == strcmp(s_query->view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP)
-			|| 0 == strcmp(s_query->view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP_ASSIGNED)
-			|| 0 == strcmp(s_query->view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP_NOT_ASSIGNED)) {
+	if (STRING_EQUAL == strcmp(s_query->view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_CONTACT)
+			|| STRING_EQUAL == strcmp(s_query->view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP)
+			|| STRING_EQUAL == strcmp(s_query->view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP_ASSIGNED)
+			|| STRING_EQUAL == strcmp(s_query->view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP_NOT_ASSIGNED)) {
 		temp_len = SAFE_SNPRINTF(&query, &query_size, len, table);
 		if (0 <= temp_len) len+= temp_len;
 		temp_len = SAFE_SNPRINTF(&query, &query_size, len, " WHERE ");
@@ -2195,8 +2195,8 @@ static inline int __ctsvc_db_search_records_with_query_exec(ctsvc_query_s *s_que
 		temp_len = SAFE_SNPRINTF(&query, &query_size, len, ".contact_id IN ");
 		if (0 <= temp_len) len+= temp_len;
 	}
-	else if (0 == strcmp(s_query->view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_NUMBER)
-			|| 0 == strcmp(s_query->view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_EMAIL)) {
+	else if (STRING_EQUAL == strcmp(s_query->view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_NUMBER)
+			|| STRING_EQUAL == strcmp(s_query->view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_EMAIL)) {
 		free(query);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
@@ -2277,7 +2277,7 @@ static inline int __ctsvc_db_search_records_with_query_exec(ctsvc_query_s *s_que
 	else if (sortkey) {
 		len = __ctsvc_db_search_records_append_sort(s_query->view_uri, sortkey, keyword, len, &query, &query_size);
 	}
-	else if (0 == strcmp(s_query->view_uri, CTSVC_VIEW_URI_GROUP)) {
+	else if (STRING_EQUAL == strcmp(s_query->view_uri, CTSVC_VIEW_URI_GROUP)) {
 		temp_len = SAFE_SNPRINTF(&query, &query_size, len, " ORDER BY group_prio");
 		if (0 <= temp_len) len+= temp_len;
 	}
@@ -3078,27 +3078,27 @@ API int contacts_db_get_changes_by_version(const char* view_uri, int addressbook
 	RETV_IF(NULL == out_current_version, CONTACTS_ERROR_INVALID_PARAMETER);
 	*out_current_version = 0;
 
-	if (0 == strcmp(view_uri, _contacts_contact_updated_info._uri)) {
+	if (STRING_EQUAL == strcmp(view_uri, _contacts_contact_updated_info._uri)) {
 		ret = __ctsvc_db_get_contact_changes(view_uri, addressbook_id,
 					version, out_list, out_current_version);
 		return ret;
 	}
-	else if (0 == strcmp(view_uri, _contacts_group_updated_info._uri)) {
+	else if (STRING_EQUAL == strcmp(view_uri, _contacts_group_updated_info._uri)) {
 		ret = __ctsvc_db_get_group_changes(view_uri, addressbook_id,
 					version, out_list, out_current_version);
 		return ret;
 	}
-	else if (0 == strcmp(view_uri, _contacts_group_member_updated_info._uri)) {
+	else if (STRING_EQUAL == strcmp(view_uri, _contacts_group_member_updated_info._uri)) {
 		ret = __ctsvc_db_get_group_member_changes(view_uri, addressbook_id,
 					version, out_list, out_current_version);
 		return ret;
 	}
-	else if (0 == strcmp(view_uri, _contacts_grouprel_updated_info._uri)) {
+	else if (STRING_EQUAL == strcmp(view_uri, _contacts_grouprel_updated_info._uri)) {
 		ret = __ctsvc_db_get_group_relations_changes(view_uri, addressbook_id,
 					version, out_list, out_current_version);
 		return ret;
 	}
-	else if (0 == strcmp(view_uri, _contacts_my_profile_updated_info._uri)) {
+	else if (STRING_EQUAL == strcmp(view_uri, _contacts_my_profile_updated_info._uri)) {
 		ret = __ctsvc_db_get_my_profile_changes(view_uri, addressbook_id,
 					version, out_list, out_current_version);
 		return ret;

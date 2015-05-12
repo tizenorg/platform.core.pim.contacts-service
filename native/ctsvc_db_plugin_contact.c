@@ -917,7 +917,7 @@ static inline int __ctsvc_contact_refresh_lookup_data(int contact_id, ctsvc_cont
 					ctsvc_stmt_finalize(stmt);
 					return ret;
 				}
-				if (number_record->normalized && strcmp(number_record->cleaned, number_record->normalized) != 0) {
+				if (number_record->normalized && STRING_EQUAL != strcmp(number_record->cleaned, number_record->normalized)) {
 					ctsvc_stmt_reset(stmt);
 					if (*number_record->normalized)
 						ctsvc_stmt_bind_text(stmt, 1, number_record->normalized);
@@ -1144,7 +1144,7 @@ static int __ctsvc_db_contact_update_record(contacts_record_h record)
 
 			if ((NULL == contact->image_thumbnail_path && NULL != image->path) ||
 					(NULL != contact->image_thumbnail_path && NULL == image->path) ||
-					(contact->image_thumbnail_path && image->path && 0 != strcmp(contact->image_thumbnail_path, image->path))) {
+					(contact->image_thumbnail_path && image->path && STRING_EQUAL != strcmp(contact->image_thumbnail_path, image->path))) {
 				ctsvc_record_set_property_flag((ctsvc_record_s *)contact, _contacts_contact.image_thumbnail_path, CTSVC_PROPERTY_FLAG_DIRTY);
 
 				if (ctsvc_contact_check_image_location(image->path))
@@ -2209,7 +2209,7 @@ static int __ctsvc_db_contact_replace_record(contacts_record_h record, int conta
 			image = (ctsvc_image_s*)record_image;
 			if ((NULL == contact->image_thumbnail_path && NULL != image->path) ||
 					(NULL != contact->image_thumbnail_path && NULL == image->path) ||
-					(contact->image_thumbnail_path && image->path && 0 != strcmp(contact->image_thumbnail_path, image->path))) {
+					(contact->image_thumbnail_path && image->path && STRING_EQUAL != strcmp(contact->image_thumbnail_path, image->path))) {
 				ctsvc_record_set_property_flag((ctsvc_record_s *)contact, _contacts_contact.image_thumbnail_path, CTSVC_PROPERTY_FLAG_DIRTY);
 
 				if (ctsvc_contact_check_image_location(image->path))

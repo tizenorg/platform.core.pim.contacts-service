@@ -261,7 +261,7 @@ static int __ctsvc_db_group_update_record(contacts_record_h record)
 			char full_path[CTSVC_IMG_FULL_PATH_SIZE_MAX] = {0};
 			snprintf(full_path, sizeof(full_path), "%s/%s", CTS_GROUP_IMAGE_LOCATION, image);
 
-			if (group->image_thumbnail_path && strcmp(group->image_thumbnail_path, full_path) == 0) {
+			if (group->image_thumbnail_path && STRING_EQUAL == strcmp(group->image_thumbnail_path, full_path)) {
 				int index = _contacts_group.image_path & 0x000000FF;
 				((ctsvc_record_s *)record)->properties_flags[index] = 0;
 				same = true;

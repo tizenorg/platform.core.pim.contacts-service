@@ -727,7 +727,7 @@ static int __ctsvc_db_my_profile_update_record(contacts_record_h record)
 			image = (ctsvc_image_s*)record_image;
 			if ((NULL == my_profile->image_thumbnail_path && NULL != image->path) ||
 					(NULL != my_profile->image_thumbnail_path && NULL == image->path) ||
-					(my_profile->image_thumbnail_path && image->path && 0 != strcmp(my_profile->image_thumbnail_path, image->path))) {
+					(my_profile->image_thumbnail_path && image->path && STRING_EQUAL != strcmp(my_profile->image_thumbnail_path, image->path))) {
 				ctsvc_record_set_property_flag((ctsvc_record_s *)my_profile, _contacts_my_profile.image_thumbnail_path, CTSVC_PROPERTY_FLAG_DIRTY);
 
 				if (ctsvc_contact_check_image_location(image->path))

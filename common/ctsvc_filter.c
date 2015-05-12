@@ -90,7 +90,7 @@ API int contacts_filter_add_filter(contacts_filter_h filter1, contacts_filter_h 
 
 	RETVM_IF(g_slist_length(s_filter1->filter_ops) != (g_slist_length(s_filter1->filters)),
 				CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : Please check the operator of filter");
-	RETVM_IF (0 != strcmp(s_filter1->view_uri, s_filter2->view_uri), CONTACTS_ERROR_INVALID_PARAMETER,
+	RETVM_IF (STRING_EQUAL != strcmp(s_filter1->view_uri, s_filter2->view_uri), CONTACTS_ERROR_INVALID_PARAMETER,
 				"The filter view_uri is different (filter1:%s, filter2:%s)", s_filter1->view_uri, s_filter2->view_uri);
 	ret = ctsvc_filter_clone(filter2, &new_filter);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_filter_clone is Fail (%d)", ret);

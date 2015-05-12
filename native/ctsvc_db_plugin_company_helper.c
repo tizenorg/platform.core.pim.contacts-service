@@ -227,7 +227,7 @@ int ctsvc_db_company_update(contacts_record_h record, int contact_id, bool is_my
 		if (logo) {
 			char full_path[CTSVC_IMG_FULL_PATH_SIZE_MAX] = {0};
 			snprintf(full_path, sizeof(full_path), "%s/%s", CTS_LOGO_IMAGE_LOCATION, logo);
-			if (company->logo && strcmp(company->logo, full_path) == 0) {
+			if (company->logo && STRING_EQUAL == strcmp(company->logo, full_path)) {
 				int index = _contacts_company.logo & 0x000000FF;
 				((ctsvc_record_s *)record)->properties_flags[index] = 0;
 				same = true;
