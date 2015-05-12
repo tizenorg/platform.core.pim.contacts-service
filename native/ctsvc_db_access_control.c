@@ -93,7 +93,7 @@ int ctsvc_have_file_read_permission(const char *path)
 	ctsvc_mutex_lock(CTS_MUTEX_ACCESS_CONTROL);
 	thread_id = (unsigned int)pthread_self();
 	find = __ctsvc_find_access_info(thread_id);
-	if (!find) {
+	if (NULL == find) {
 		CTS_ERR("does not have access info of the thread");
 		free(file_label);
 		ctsvc_mutex_unlock(CTS_MUTEX_ACCESS_CONTROL);
@@ -309,7 +309,7 @@ bool ctsvc_have_ab_write_permission(int addressbook_id)
 	ctsvc_mutex_lock(CTS_MUTEX_ACCESS_CONTROL);
 	thread_id = (unsigned int)pthread_self();
 	find = __ctsvc_find_access_info(thread_id);
-	if (!find) {
+	if (NULL == find) {
 		ctsvc_mutex_unlock(CTS_MUTEX_ACCESS_CONTROL);
 		CTS_ERR("can not found access info");
 		return false;

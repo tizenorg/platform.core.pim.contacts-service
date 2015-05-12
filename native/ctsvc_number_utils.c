@@ -286,7 +286,7 @@ char* ctsvc_get_network_cc(bool reload)
 	TapiHandle *handle = NULL;
 	static bool cc_loaded = false;
 
-	if (cc_loaded && !reload)
+	if (cc_loaded && false == reload)
 		return cc;
 
 	cc_loaded = true;
@@ -698,7 +698,7 @@ static int __ctsvc_number_has_ip_and_cc(const char*number, int len, int *index)
 				break;		// end of '+0'
 			case '1':		// '+1'
 				start_index++;
-				if (start_index+2 <= len && strncmp(&number[start_index], "19", 2) == 0) {	// '+119'
+				if (start_index+2 <= len && STRING_EQUAL == strncmp(&number[start_index], "19", 2)) {	// '+119'
 					match_len = start_index + 2;
 					ret = (have_plus?CTSVC_PLUS_IP_ONLY:CTSVC_IP_ONLY);
 				}
@@ -709,7 +709,7 @@ static int __ctsvc_number_has_ip_and_cc(const char*number, int len, int *index)
 				break;
 			case '8':		// '+8'
 				start_index++;
-				if (start_index+2 <= len && strncmp(&number[start_index], "10", 2) == 0) {	// '+810'
+				if (start_index+2 <= len && STRING_EQUAL == strncmp(&number[start_index], "10", 2)) {	// '+810'
 					match_len = start_index + 2;
 					ret = (have_plus?CTSVC_PLUS_IP_ONLY:CTSVC_IP_ONLY);
 				}
@@ -1084,14 +1084,14 @@ static bool __ctsvc_number_compare(const char *number1, const char *number2)
 				&& (CTSVC_PLUS_CC_ONLY == n2 || CTSVC_CC_ONLY == n2)) {
 			int p = (CTSVC_PLUS_CC_ONLY == n2)?1:0;
 			cc_index = __ctsvc_phone_number_has_country_code(&number2[p], len2-p);
-			if (0 < cc_index && strncmp(&number1[index1], &number2[p], cc_index) == 0)
+			if (0 < cc_index && STRING_EQUAL == strncmp(&number1[index1], &number2[p], cc_index))
 				return true;
 		}
 		else if ((CTSVC_PLUS_IP_CC == n2 || CTSVC_IP_CC == n2)
 				&& (CTSVC_PLUS_CC_ONLY == n1 || CTSVC_CC_ONLY == n1)) {
 			int p = (CTSVC_PLUS_CC_ONLY == n1)?1:0;
 			cc_index = __ctsvc_phone_number_has_country_code(&number1[p], len1-p);
-			if (0 < cc_index && strncmp(&number2[index2], &number1[p], cc_index) == 0)
+			if (0 < cc_index && STRING_EQUAL == strncmp(&number2[index2], &number1[p], cc_index))
 				return true;
 		}
 		///////////////////////////////////////////////////

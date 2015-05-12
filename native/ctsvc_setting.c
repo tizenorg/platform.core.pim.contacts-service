@@ -86,8 +86,7 @@ API int contacts_setting_set_name_display_order(contacts_name_display_order_e or
 API int contacts_setting_get_name_sorting_order(contacts_name_sorting_order_e *order)
 {
 	int ret;
-	if (name_sorting_order < 0)
-	{
+	if (name_sorting_order < 0) {
 		ret = vconf_get_int(CTSVC_VCONF_SORTING_ORDER, &name_sorting_order);
 		RETVM_IF(ret<0, CONTACTS_ERROR_SYSTEM, "System : vconf_get_int(sort order) Fail(%d)", ret);
 	}

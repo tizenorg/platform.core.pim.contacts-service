@@ -453,7 +453,7 @@ int ctsvc_utils_copy_image(const char *dir, const char *src, const char *file)
 	char dest[strlen(dir) + strlen(file) + 2];
 	snprintf(dest, sizeof(dest), "%s/%s", dir, file);
 
-	if (!ctsvc_check_available_image_space())
+	if (false == ctsvc_check_available_image_space())
 		return CONTACTS_ERROR_FILE_NO_SPACE;
 
 	ret = __ctsvc_resize_and_copy_image(src, dest);

@@ -406,7 +406,7 @@ static void __ctsvc_make_my_profile_display_name(ctsvc_my_profile_s *my_profile)
 	free(my_profile->reverse_display_name);
 	my_profile->reverse_display_name = NULL;
 
-	if (0 < my_profile->name->count && my_profile->name->records != NULL && my_profile->name->records->data != NULL) {
+	if (0 < my_profile->name->count && my_profile->name->records && my_profile->name->records->data) {
 		name = (ctsvc_name_s *)my_profile->name->records->data;
 	}
 
@@ -617,7 +617,7 @@ static void __ctsvc_make_my_profile_display_name(ctsvc_my_profile_s *my_profile)
 			}
 		}
 
-		if (!ctsvc_record_check_property_flag((ctsvc_record_s *)my_profile, _contacts_my_profile.display_name, CTSVC_PROPERTY_FLAG_DIRTY) &&
+		if (false == ctsvc_record_check_property_flag((ctsvc_record_s *)my_profile, _contacts_my_profile.display_name, CTSVC_PROPERTY_FLAG_DIRTY) &&
 				my_profile->nicknames && my_profile->nicknames->records) {
 			for (cur=my_profile->nicknames->records;cur;cur=cur->next) {
 				ctsvc_nickname_s *nickname = (ctsvc_nickname_s *)cur->data;
@@ -629,7 +629,7 @@ static void __ctsvc_make_my_profile_display_name(ctsvc_my_profile_s *my_profile)
 			}
 		}
 
-		if (!ctsvc_record_check_property_flag((ctsvc_record_s *)my_profile, _contacts_my_profile.display_name, CTSVC_PROPERTY_FLAG_DIRTY) &&
+		if (false == ctsvc_record_check_property_flag((ctsvc_record_s *)my_profile, _contacts_my_profile.display_name, CTSVC_PROPERTY_FLAG_DIRTY) &&
 				my_profile->numbers && my_profile->numbers->records) {
 			for (cur=my_profile->numbers->records;cur;cur=cur->next) {
 				ctsvc_number_s *number = (ctsvc_number_s *)cur->data;
@@ -641,7 +641,7 @@ static void __ctsvc_make_my_profile_display_name(ctsvc_my_profile_s *my_profile)
 			}
 		}
 
-		if (!ctsvc_record_check_property_flag((ctsvc_record_s *)my_profile, _contacts_my_profile.display_name, CTSVC_PROPERTY_FLAG_DIRTY) &&
+		if (false == ctsvc_record_check_property_flag((ctsvc_record_s *)my_profile, _contacts_my_profile.display_name, CTSVC_PROPERTY_FLAG_DIRTY) &&
 				my_profile->emails && my_profile->emails->records) {
 			for (cur=my_profile->emails->records;cur;cur=cur->next) {
 				ctsvc_email_s *email = (ctsvc_email_s *)cur->data;
@@ -725,8 +725,8 @@ static int __ctsvc_db_my_profile_update_record(contacts_record_h record)
 			}
 
 			image = (ctsvc_image_s*)record_image;
-			if ((NULL == my_profile->image_thumbnail_path && NULL != image->path) ||
-					(NULL != my_profile->image_thumbnail_path && NULL == image->path) ||
+			if ((NULL == my_profile->image_thumbnail_path && image->path) ||
+					(my_profile->image_thumbnail_path && NULL == image->path) ||
 					(my_profile->image_thumbnail_path && image->path && STRING_EQUAL != strcmp(my_profile->image_thumbnail_path, image->path))) {
 				ctsvc_record_set_property_flag((ctsvc_record_s *)my_profile, _contacts_my_profile.image_thumbnail_path, CTSVC_PROPERTY_FLAG_DIRTY);
 
@@ -884,7 +884,7 @@ static int __ctsvc_db_my_profile_get_records_with_query(contacts_query_h query, 
 	else
 		had_my_profile_id = true;
 
-	if (!had_my_profile_id) {
+	if (false == had_my_profile_id) {
 		s_query->projection = realloc(s_query->projection, s_query->projection_count+1);
 		s_query->projection[s_query->projection_count] = CTSVC_PROPERTY_MY_PROFILE_ID;
 		s_query->projection_count++;

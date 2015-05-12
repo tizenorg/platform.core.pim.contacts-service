@@ -133,7 +133,7 @@ int ctsvc_db_extension_insert(contacts_record_h record, int contact_id, bool is_
 			*id = ctsvc_db_get_last_insert_id();
 		ctsvc_stmt_finalize(stmt);
 
-		if (!is_my_profile)
+		if (false == is_my_profile)
 			ctsvc_set_data_noti();
 	}
 
@@ -150,7 +150,7 @@ int ctsvc_db_extension_update(contacts_record_h record)
 	ctsvc_extension_s *extension = (ctsvc_extension_s*)record;
 	char query[CTS_SQL_MAX_LEN] = {0};
 
-	RETVM_IF(!extension->id, CONTACTS_ERROR_INVALID_PARAMETER, "extension of contact has no ID.");
+	RETVM_IF(0 == extension->id, CONTACTS_ERROR_INVALID_PARAMETER, "extension of contact has no ID.");
 	RETVM_IF(CTSVC_PROPERTY_FLAG_DIRTY != (extension->base.property_flag & CTSVC_PROPERTY_FLAG_DIRTY), CONTACTS_ERROR_NONE, "No update");
 
 	snprintf(query, sizeof(query),
@@ -184,7 +184,7 @@ int ctsvc_db_extension_delete(int id, bool is_my_profile)
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_query_exec() Fail(%d)", ret);
 
-	if (!is_my_profile)
+	if (false == is_my_profile)
 		ctsvc_set_data_noti();
 
 	return CONTACTS_ERROR_NONE;

@@ -542,7 +542,7 @@ static inline int __ctsvc_db_create_str_condition(ctsvc_composite_filter_s *com_
 				|| filter->property_id == CTSVC_PROPERTY_PERSON_IMAGE_THUMBNAIL
 				|| filter->property_id == CTSVC_PROPERTY_MY_PROFILE_IMAGE_THUMBNAIL
 				|| filter->property_id == CTSVC_PROPERTY_IMAGE_PATH) {
-			if (strncmp(filter->value.s, CTSVC_CONTACT_IMG_FULL_LOCATION, strlen(CTSVC_CONTACT_IMG_FULL_LOCATION)) == 0) {
+			if (STRING_EQUAL == strncmp(filter->value.s, CTSVC_CONTACT_IMG_FULL_LOCATION, strlen(CTSVC_CONTACT_IMG_FULL_LOCATION))) {
 				*bind_text = g_slist_append(*bind_text,
 									__ctsvc_db_get_str_with_escape(filter->value.s+strlen(CTSVC_CONTACT_IMG_FULL_LOCATION)+1,
 									strlen(filter->value.s)-strlen(CTSVC_CONTACT_IMG_FULL_LOCATION)-1, with_escape));
@@ -551,7 +551,7 @@ static inline int __ctsvc_db_create_str_condition(ctsvc_composite_filter_s *com_
 				*bind_text = g_slist_append(*bind_text, __ctsvc_db_get_str_with_escape(filter->value.s, strlen(filter->value.s), with_escape));
 		}
 		else if (filter->property_id == CTSVC_PROPERTY_GROUP_IMAGE) {
-			if (strncmp(filter->value.s, CTS_GROUP_IMAGE_LOCATION, strlen(CTS_GROUP_IMAGE_LOCATION)) == 0) {
+			if (STRING_EQUAL == strncmp(filter->value.s, CTS_GROUP_IMAGE_LOCATION, strlen(CTS_GROUP_IMAGE_LOCATION))) {
 				*bind_text = g_slist_append(*bind_text,
 									__ctsvc_db_get_str_with_escape(filter->value.s+strlen(CTS_GROUP_IMAGE_LOCATION)+1,
 									strlen(filter->value.s)-strlen(CTS_GROUP_IMAGE_LOCATION)-1, with_escape));
@@ -560,7 +560,7 @@ static inline int __ctsvc_db_create_str_condition(ctsvc_composite_filter_s *com_
 				*bind_text = g_slist_append(*bind_text, __ctsvc_db_get_str_with_escape(filter->value.s, strlen(filter->value.s), with_escape));
 		}
 		else if (filter->property_id == CTSVC_PROPERTY_COMPANY_LOGO) {
-			if (strncmp(filter->value.s, CTS_LOGO_IMAGE_LOCATION, strlen(CTS_LOGO_IMAGE_LOCATION)) == 0) {
+			if (STRING_EQUAL == strncmp(filter->value.s, CTS_LOGO_IMAGE_LOCATION, strlen(CTS_LOGO_IMAGE_LOCATION))) {
 				*bind_text = g_slist_append(*bind_text,
 									__ctsvc_db_get_str_with_escape(filter->value.s+strlen(CTS_LOGO_IMAGE_LOCATION)+1,
 									strlen(filter->value.s)-strlen(CTS_LOGO_IMAGE_LOCATION)-1, with_escape));
@@ -1236,7 +1236,7 @@ static char* __ctsvc_db_make_search_keyword(const char *keyword)
 		return NULL;
 
 	size = strlen(keyword);
-	if (strstr(keyword, " ") != NULL) {
+	if (strstr(keyword, " ")) {
 		int i = 0;
 		int j = 0;
 		char search_keyword[size * 2+1];

@@ -199,7 +199,7 @@ API int contacts_setting_add_name_display_order_changed_cb(
 
 	ctsvc_mutex_lock(CTS_MUTEX_PIMS_IPC_PUBSUB);
 
-	if (!__setting_name_display_order_subscribe_list) {
+	if (NULL == __setting_name_display_order_subscribe_list) {
 		if (pims_ipc_subscribe(ctsvc_ipc_get_handle_for_change_subsciption(),
 					CTSVC_IPC_SUBSCRIBE_MODULE, CTSVC_SETTING_DISPLAY_ORDER_CHANGED,
 					__ctsvc_setting_name_display_order_subscriber_callback, NULL) != 0) {
@@ -296,7 +296,7 @@ API int contacts_setting_add_name_sorting_order_changed_cb(
 
 	ctsvc_mutex_lock(CTS_MUTEX_PIMS_IPC_PUBSUB);
 
-	if (!__setting_name_sorting_order_subscribe_list) {
+	if (NULL == __setting_name_sorting_order_subscribe_list) {
 		if (pims_ipc_subscribe(ctsvc_ipc_get_handle_for_change_subsciption(),
 					CTSVC_IPC_SUBSCRIBE_MODULE, CTSVC_SETTING_SORTING_ORDER_CHANGED,
 					__ctsvc_setting_name_sorting_order_subscriber_callback, NULL) != 0) {

@@ -526,7 +526,7 @@ static inline int __ctsvc_contact_make_search_data(int contact_id, ctsvc_contact
 		contacts_list_first(number_list);
 		do {
 			contacts_list_get_current_record_p(number_list, (contacts_record_h*)&number_record);
-			if (NULL != number_record && number_record->cleaned) {
+			if (number_record && number_record->cleaned) {
 				buf_size = SAFE_STRLEN(number) + SAFE_STRLEN(number_record->cleaned) + SAFE_STRLEN(number_record->normalized) + 3;
 				temp_number = calloc(1, buf_size);
 				if (number)
@@ -545,7 +545,7 @@ static inline int __ctsvc_contact_make_search_data(int contact_id, ctsvc_contact
 		contacts_list_first(email_list);
 		do {
 			contacts_list_get_current_record_p(email_list, (contacts_record_h*)&email);
-			if (NULL != email && email->email_addr) {
+			if (email && email->email_addr) {
 				int len = strlen(email->email_addr);
 				char temp[len+1];
 				bool had = __ctsvc_contact_check_token(email->email_addr, temp, len);
@@ -568,7 +568,7 @@ static inline int __ctsvc_contact_make_search_data(int contact_id, ctsvc_contact
 		contacts_list_first(nickname_list);
 		do {
 			contacts_list_get_current_record_p(nickname_list, (contacts_record_h*)&nickname);
-			if (NULL != nickname && nickname->nickname) {
+			if (nickname && nickname->nickname) {
 				int len = strlen(nickname->nickname);
 				char temp[len+1];
 				bool had = __ctsvc_contact_check_token(nickname->nickname, temp, len);
@@ -591,7 +591,7 @@ static inline int __ctsvc_contact_make_search_data(int contact_id, ctsvc_contact
 		contacts_list_first(address_list);
 		do {
 			contacts_list_get_current_record_p(address_list, (contacts_record_h*)&address);
-			if (NULL != address) {
+			if (address) {
 				bool had;
 				int str_len = SAFE_STRLEN(address->country)
 							+ SAFE_STRLEN(address->pobox)
@@ -650,7 +650,7 @@ static inline int __ctsvc_contact_make_search_data(int contact_id, ctsvc_contact
 		contacts_list_first(note_list);
 		do {
 			contacts_list_get_current_record_p(note_list, (contacts_record_h*)&note);
-			if (NULL != note && note->note) {
+			if (note && note->note) {
 				int len = strlen(note->note);
 				char temp[len+1];
 				bool had = __ctsvc_contact_check_token(note->note, temp, len);
@@ -673,7 +673,7 @@ static inline int __ctsvc_contact_make_search_data(int contact_id, ctsvc_contact
 		contacts_list_first(messenger_list);
 		do {
 			contacts_list_get_current_record_p(messenger_list, (contacts_record_h*)&messenger);
-			if (NULL != messenger && messenger->im_id) {
+			if (messenger && messenger->im_id) {
 				int len = strlen(messenger->im_id);
 				char temp[len+1];
 				bool had = __ctsvc_contact_check_token(messenger->im_id, temp, len);
@@ -696,7 +696,7 @@ static inline int __ctsvc_contact_make_search_data(int contact_id, ctsvc_contact
 		contacts_list_first(relationship_list);
 		do {
 			contacts_list_get_current_record_p(relationship_list, (contacts_record_h*)&relationship);
-			if (NULL != relationship && relationship->name) {
+			if (relationship && relationship->name) {
 				int len = strlen(relationship->name);
 				char temp[len+1];
 				bool had = __ctsvc_contact_check_token(relationship->name, temp, len);
@@ -719,7 +719,7 @@ static inline int __ctsvc_contact_make_search_data(int contact_id, ctsvc_contact
 		contacts_list_first(company_list);
 		do {
 			contacts_list_get_current_record_p(company_list, (contacts_record_h*)&company);
-			if (NULL != company) {
+			if (company) {
 				bool had;
 				int str_len = SAFE_STRLEN(company->name)
 							+ SAFE_STRLEN(company->department)
@@ -817,7 +817,7 @@ static inline int __ctsvc_contact_refresh_lookup_data(int contact_id, ctsvc_cont
 		// name record of contact should be one
 		do {
 			contacts_list_get_current_record_p(name_list, (contacts_record_h*)&name_record);
-			if (NULL != name_record
+			if (name_record
 					&& (name_record->last || name_record->first || name_record->addition || name_record->suffix)) {
 				char *normalized_name = NULL;
 
@@ -897,7 +897,7 @@ static inline int __ctsvc_contact_refresh_lookup_data(int contact_id, ctsvc_cont
 		len = 0;
 		do {
 			contacts_list_get_current_record_p(number_list, (contacts_record_h*)&number_record);
-			if (NULL != number_record && number_record->number) {
+			if (number_record && number_record->number) {
 				if (NULL == number_record->cleaned)
 					continue;
 
@@ -940,7 +940,7 @@ static inline int __ctsvc_contact_refresh_lookup_data(int contact_id, ctsvc_cont
 		contacts_list_first(nickname_list);
 		do {
 			contacts_list_get_current_record_p(nickname_list, (contacts_record_h*)&nickname);
-			if (NULL != nickname && NULL != nickname->nickname) {
+			if (nickname && nickname->nickname) {
 				char *normalized_nickname = NULL;
 				ctsvc_normalize_str(nickname->nickname, &normalized_nickname);
 				snprintf(query, sizeof(query), "INSERT INTO %s(data_id, contact_id, name, type) "
@@ -1142,8 +1142,8 @@ static int __ctsvc_db_contact_update_record(contacts_record_h record)
 
 			image = (ctsvc_image_s*)record_image;
 
-			if ((NULL == contact->image_thumbnail_path && NULL != image->path) ||
-					(NULL != contact->image_thumbnail_path && NULL == image->path) ||
+			if ((NULL == contact->image_thumbnail_path && image->path) ||
+					(contact->image_thumbnail_path && NULL == image->path) ||
 					(contact->image_thumbnail_path && image->path && STRING_EQUAL != strcmp(contact->image_thumbnail_path, image->path))) {
 				ctsvc_record_set_property_flag((ctsvc_record_s *)contact, _contacts_contact.image_thumbnail_path, CTSVC_PROPERTY_FLAG_DIRTY);
 
@@ -1157,7 +1157,7 @@ static int __ctsvc_db_contact_update_record(contacts_record_h record)
 			free(contact->image_thumbnail_path);
 			contact->image_thumbnail_path = NULL;
 			bool is_changed = ctsvc_record_check_property_flag((ctsvc_record_s *)contact, _contacts_contact.image_thumbnail_path, CTSVC_PROPERTY_FLAG_DIRTY);
-			if ((!is_changed && !is_invalid) || (is_changed && !is_invalid)) {
+			if ((false == is_changed && false == is_invalid) || (is_changed && false == is_invalid)) {
 				ctsvc_record_set_property_flag((ctsvc_record_s *)contact, _contacts_contact.image_thumbnail_path, CTSVC_PROPERTY_FLAG_DIRTY);
 			}
 			else {
@@ -1374,7 +1374,7 @@ static int __ctsvc_db_contact_get_records_with_query(contacts_query_h query, int
 	else
 		had_contact_id = true;
 
-	if (!had_contact_id) {
+	if (0 == had_contact_id) {
 		s_query->projection = realloc(s_query->projection, s_query->projection_count+1);
 		s_query->projection[s_query->projection_count] = CTSVC_PROPERTY_CONTACT_ID;
 		s_query->projection_count++;
@@ -2014,7 +2014,7 @@ static int __ctsvc_db_contact_insert_record(contacts_record_h record, int *id)
 			"VALUES(%d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, ?, ?, %d, %d, %d, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 			contact->id, contact->person_id, contact->addressbook_id, contact->is_favorite,
 			version, version, (int)time(NULL), contact->link_mode,
-			(NULL !=contact->image_thumbnail_path)?version:0, contact->has_phonenumber, contact->has_email,
+			(contact->image_thumbnail_path)?version:0, contact->has_phonenumber, contact->has_email,
 			contact->display_source_type, contact->display_name_language, contact->reverse_display_name_language);
 
 	ret = ctsvc_query_prepare(query, &stmt);
@@ -2207,8 +2207,8 @@ static int __ctsvc_db_contact_replace_record(contacts_record_h record, int conta
 			}
 
 			image = (ctsvc_image_s*)record_image;
-			if ((NULL == contact->image_thumbnail_path && NULL != image->path) ||
-					(NULL != contact->image_thumbnail_path && NULL == image->path) ||
+			if ((NULL == contact->image_thumbnail_path && image->path) ||
+					(contact->image_thumbnail_path && NULL == image->path) ||
 					(contact->image_thumbnail_path && image->path && STRING_EQUAL != strcmp(contact->image_thumbnail_path, image->path))) {
 				ctsvc_record_set_property_flag((ctsvc_record_s *)contact, _contacts_contact.image_thumbnail_path, CTSVC_PROPERTY_FLAG_DIRTY);
 
@@ -2221,7 +2221,7 @@ static int __ctsvc_db_contact_replace_record(contacts_record_h record, int conta
 		else if (contact->image_thumbnail_path) {
 			free(contact->image_thumbnail_path);
 			contact->image_thumbnail_path = NULL;
-			if (!ctsvc_record_check_property_flag((ctsvc_record_s *)contact, _contacts_contact.image_thumbnail_path, CTSVC_PROPERTY_FLAG_DIRTY)) {
+			if (false == ctsvc_record_check_property_flag((ctsvc_record_s *)contact, _contacts_contact.image_thumbnail_path, CTSVC_PROPERTY_FLAG_DIRTY)) {
 				ctsvc_record_set_property_flag((ctsvc_record_s *)contact, _contacts_contact.image_thumbnail_path, CTSVC_PROPERTY_FLAG_DIRTY);
 			}
 			else {

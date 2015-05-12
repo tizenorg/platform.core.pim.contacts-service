@@ -391,7 +391,7 @@ static inline int __ctsvc_vcard_add_folding(char **buf, int *buf_size, int buf_l
 		if (false == content_start) {
 			if (':' == *s)
 				content_start = true;
-			else if (0 == strncmp(s, "ENCODING=BASE64", strlen("ENCODING=BASE64")))
+			else if (STRING_EQUAL == strncmp(s, "ENCODING=BASE64", strlen("ENCODING=BASE64")))
 				encode_64 = true;
 		}
 
@@ -915,7 +915,7 @@ static inline int __ctsvc_vcard_append_nicknames(ctsvc_list_s *nickname_list, ch
 			}
 		}
 	}
-	if (!first)
+	if (false == first)
 		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, CTSVC_CRLF);
 
 	return len;
@@ -1255,7 +1255,7 @@ static inline int __ctsvc_vcard_append_events(ctsvc_list_s *event_list, char **b
 
 	for (cursor=event_list->records;cursor;cursor=cursor->next) {
 		data = cursor->data;
-		if (!data->date) continue;
+		if (0 == data->date) continue;
 
 		event[0] = '\0';
 		if (CONTACTS_EVENT_TYPE_BIRTH == data->type) {
@@ -1467,7 +1467,7 @@ static inline int __ctsvc_vcard_put_photo(ctsvc_list_s *image_list, char **buf, 
 
 	for (cursor=image_list->records;cursor;cursor=cursor->next) {
 		data = cursor->data;
-		if (!data->path) continue;
+		if (NULL == data->path) continue;
 
 		suffix = strrchr(data->path, '.');
 		type = __ctsvc_vcard_get_image_type(suffix);
@@ -2080,7 +2080,7 @@ static inline bool __ctsvc_vcard_check_base64_encoded(char *src)
 	while (*tmp) {
 		if ('B' == *tmp) {
 			ret = strncmp(tmp, "BASE64", sizeof("BASE64") - 1);
-			if (!ret)
+			if (STRING_EQUAL == ret)
 				return true;
 		} else if (':' == *tmp || '\r' == *tmp) {
 			break;
@@ -2099,7 +2099,7 @@ static inline int __ctsvc_vcard_check_quoted(char *src, int max, int *quoted)
 	while (*src && max) {
 		if ('Q' == *src) {
 			ret = strncmp(src, "QUOTED-PRINTABLE", sizeof("QUOTED-PRINTABLE") - 1);
-			if (!ret) {
+			if (STRING_EQUAL == ret) {
 				*quoted = TRUE;
 				return TRUE;
 			}
@@ -2188,7 +2188,7 @@ static inline char* __ctsvc_vcard_translate_charset(char *src, int len)
 	while (*val) {
 		if ('C' == *val) {
 			ret = strncmp(val, "CHARSET", sizeof("CHARSET") - 1);
-			if (!ret) {
+			if (STRING_EQUAL == ret) {
 				val += sizeof("CHARSET");
 				break;
 			}
@@ -2655,7 +2655,7 @@ static inline void __ctsvc_vcard_get_event_type(contacts_record_h event, char *v
 		}
 		if (strstr(lower, "anniversary"))
 			type = CONTACTS_EVENT_TYPE_ANNIVERSARY;
-		else if (NULL != (result = strstr(lower, "x-"))) {
+		else if ((result = strstr(lower, "x-"))) {
 			type = CONTACTS_EVENT_TYPE_CUSTOM;
 			contacts_record_set_str(event, _contacts_event.label, temp+(result-lower)+2);
 		}
@@ -3232,7 +3232,7 @@ static inline bool __ctsvc_vcard_get_email_type(contacts_record_h email, char *v
 			type = CONTACTS_EMAIL_TYPE_WORK;
 		else if (strstr(lower, "cell"))
 			type = CONTACTS_EMAIL_TYPE_MOBILE;
-		else if (NULL != (result = strstr(lower, "x-"))) {
+		else if ((result = strstr(lower, "x-"))) {
 			type = CONTACTS_EMAIL_TYPE_CUSTOM;
 			contacts_record_set_str(email, _contacts_email.label, temp+(result-lower)+2);
 		}
@@ -3478,7 +3478,7 @@ static inline void __ctsvc_vcard_get_relationship_type(contacts_record_h relatio
 			type = CONTACTS_RELATIONSHIP_TYPE_SISTER;
 		else if (strstr(lower, "spouse"))
 			type = CONTACTS_RELATIONSHIP_TYPE_SPOUSE;
-		else if (NULL != (result = strstr(lower, "x-"))) {
+		else if ((result = strstr(lower, "x-"))) {
 			type = CONTACTS_RELATIONSHIP_TYPE_CUSTOM;
 			contacts_record_set_str(relationship, _contacts_relationship.label, temp+(result-lower)+2);
 		}
@@ -3718,7 +3718,7 @@ static inline void __ctsvc_vcard_make_contact_display_name(ctsvc_contact_s *cont
 	free(contact->reverse_display_name);
 	contact->reverse_display_name = NULL;
 
-	if (0 < contact->name->count && contact->name->records != NULL && contact->name->records->data != NULL) {
+	if (0 < contact->name->count && contact->name->records && contact->name->records->data) {
 		name = (ctsvc_name_s *)contact->name->records->data;
 	}
 
@@ -3943,7 +3943,7 @@ static inline void __ctsvc_vcard_make_contact_display_name(ctsvc_contact_s *cont
 			}
 		}
 
-		if (!set_display_name &&
+		if (false == set_display_name &&
 				contact->nicknames && contact->nicknames->records) {
 			for (cur=contact->nicknames->records;cur;cur=cur->next) {
 				ctsvc_nickname_s *nickname = (ctsvc_nickname_s *)cur->data;
@@ -3956,7 +3956,7 @@ static inline void __ctsvc_vcard_make_contact_display_name(ctsvc_contact_s *cont
 			}
 		}
 
-		if (!set_display_name &&
+		if (false == set_display_name &&
 				contact->numbers && contact->numbers->records) {
 			for (cur=contact->numbers->records;cur;cur=cur->next) {
 				ctsvc_number_s *number = (ctsvc_number_s *)cur->data;
@@ -3969,7 +3969,7 @@ static inline void __ctsvc_vcard_make_contact_display_name(ctsvc_contact_s *cont
 			}
 		}
 
-		if (!set_display_name &&
+		if (false == set_display_name &&
 				contact->emails && contact->emails->records) {
 			for (cur=contact->emails->records;cur;cur=cur->next) {
 				ctsvc_email_s *email = (ctsvc_email_s *)cur->data;
@@ -4100,7 +4100,7 @@ static const char* __contacts_vcard_parse_get_vcard_object(const char *cursor, G
 
 	vcard_start_cursor = __contacts_vcard_remove_line_break(vcard_start_cursor);
 
-	if (0 != strncmp(vcard_start_cursor, begin, strlen(begin)))
+	if (STRING_EQUAL != strncmp(vcard_start_cursor, begin, strlen(begin)))
 		return vcard_start_cursor;
 
 	vcard_cursor = vcard_start_cursor;
@@ -4110,7 +4110,7 @@ static const char* __contacts_vcard_parse_get_vcard_object(const char *cursor, G
 
 	while (*vcard_cursor) {
 		if (new_line) {
-			if (0 == strncmp(vcard_cursor, end, strlen(end))) {
+			if (STRING_EQUAL == strncmp(vcard_cursor, end, strlen(end))) {
 				GList *sub_vcard_cursor = NULL;
 				int vcard_len = 0;
 				const char *pos_start = NULL;
@@ -4143,7 +4143,7 @@ static const char* __contacts_vcard_parse_get_vcard_object(const char *cursor, G
 
 				return vcard_cursor;
 			}
-			else if (0 == strncmp(vcard_cursor, begin, strlen(begin))) { // sub vcard
+			else if (STRING_EQUAL == strncmp(vcard_cursor, begin, strlen(begin))) { // sub vcard
 				sub_vcard_info_s *sub_vcard_info = calloc(1, sizeof(sub_vcard_info_s));
 				sub_vcard_info->pos_start = vcard_cursor;
 
@@ -4239,7 +4239,7 @@ API int contacts_vcard_parse_to_contact_foreach(const char *vcard_file_name,
 
 	while (fgets(line, sizeof(line), file)) {
 		if (0 == len)
-			if (strncmp(line, "BEGIN:VCARD", strlen("BEGIN:VCARD")))
+			if (STRING_EQUAL != strncmp(line, "BEGIN:VCARD", strlen("BEGIN:VCARD")))
 				continue;
 
 		if (len + sizeof(line) < buf_size)
@@ -4259,7 +4259,7 @@ API int contacts_vcard_parse_to_contact_foreach(const char *vcard_file_name,
 			len += snprintf(stream + len, buf_size - len, "%s", line);
 		}
 
-		if (0 == strncmp(line, "END:VCARD", 9)) {
+		if (STRING_EQUAL == strncmp(line, "END:VCARD", 9)) {
 			vcard_depth--;
 
 			if (0 == vcard_depth) {
@@ -4288,7 +4288,7 @@ API int contacts_vcard_parse_to_contact_foreach(const char *vcard_file_name,
 							return ret;
 						}
 
-						if (!cb(record, data)) {
+						if (false == cb(record, data)) {
 							free(stream);
 							fclose(file);
 							__contacts_vcard_free_vcard_object_list(list_vcard_object);
@@ -4302,7 +4302,7 @@ API int contacts_vcard_parse_to_contact_foreach(const char *vcard_file_name,
 				}
 			}
 		}
-		else if (0 == strncmp(line, "BEGIN:VCARD", 11)) { // sub vcard object
+		else if (STRING_EQUAL == strncmp(line, "BEGIN:VCARD", 11)) { // sub vcard object
 			vcard_depth++;
 		}
 	}
@@ -4327,7 +4327,7 @@ API int contacts_vcard_get_entity_count(const char *vcard_file_name, int *count)
 
 	cnt = 0;
 	while (fgets(line, sizeof(line), file)) {
-		if (0 == strncmp(line, "END:VCARD", 9))
+		if (STRING_EQUAL == strncmp(line, "END:VCARD", 9))
 			cnt++;
 	}
 	fclose(file);

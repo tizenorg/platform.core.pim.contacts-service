@@ -62,7 +62,7 @@ ERROR_RETURN:
 
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
-		if (!*outdata) {
+		if (NULL == *outdata) {
 			CTS_ERR("pims_ipc_data_create fail");
 			return;
 		}
@@ -117,7 +117,7 @@ ERROR_RETURN:
 
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
-		if (!*outdata) {
+		if (NULL == *outdata) {
 			CTS_ERR("pims_ipc_data_create fail");
 			return;
 		}
@@ -179,7 +179,7 @@ ERROR_RETURN:
 
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
-		if (!*outdata) {
+		if (NULL == *outdata) {
 			CTS_ERR("pims_ipc_data_create fail");
 			return;
 		}
@@ -242,7 +242,7 @@ ERROR_RETURN:
 
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
-		if (!*outdata) {
+		if (NULL == *outdata) {
 			CTS_ERR("pims_ipc_data_create fail");
 			return;
 		}
@@ -310,7 +310,7 @@ ERROR_RETURN:
 
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
-		if (!*outdata) {
+		if (NULL == *outdata) {
 			CTS_ERR("pims_ipc_data_create fail");
 			return;
 		}
@@ -371,7 +371,7 @@ ERROR_RETURN:
 
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
-		if (!*outdata) {
+		if (NULL == *outdata) {
 			CTS_ERR("pims_ipc_data_create fail");
 			return;
 		}
@@ -432,7 +432,7 @@ ERROR_RETURN:
 
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
-		if (!*outdata) {
+		if (NULL == *outdata) {
 			CTS_ERR("pims_ipc_data_create fail");
 			return;
 		}
@@ -500,7 +500,7 @@ ERROR_RETURN:
 
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
-		if (!*outdata) {
+		if (NULL == *outdata) {
 			CTS_ERR("pims_ipc_data_create fail");
 			return;
 		}
@@ -566,7 +566,7 @@ ERROR_RETURN:
 
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
-		if (!*outdata) {
+		if (NULL == *outdata) {
 			CTS_ERR("pims_ipc_data_create fail");
 			return;
 		}
@@ -628,7 +628,7 @@ ERROR_RETURN:
 
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
-		if (!*outdata) {
+		if (NULL == *outdata) {
 			CTS_ERR("pims_ipc_data_create fail");
 			return;
 		}
@@ -691,7 +691,7 @@ ERROR_RETURN:
 
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
-		if (!*outdata) {
+		if (NULL == *outdata) {
 			CTS_ERR("pims_ipc_data_create fail");
 			return;
 		}
@@ -730,7 +730,7 @@ void ctsvc_ipc_phone_log_reset_statistics(pims_ipc_h ipc, pims_ipc_data_h indata
 ERROR_RETURN:
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
-		if (!*outdata) {
+		if (NULL == *outdata) {
 			CTS_ERR("pims_ipc_data_create fail");
 			return;
 		}
@@ -805,7 +805,7 @@ void ctsvc_ipc_phone_log_delete(pims_ipc_h ipc, pims_ipc_data_h indata,
 ERROR_RETURN:
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
-		if (!*outdata) {
+		if (NULL == *outdata) {
 			CTS_ERR("pims_ipc_data_create fail");
 			goto DATA_FREE;
 		}
@@ -848,7 +848,7 @@ void ctsvc_ipc_setting_get_name_display_order(pims_ipc_h ipc, pims_ipc_data_h in
 ERROR_RETURN:
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
-		if (!*outdata) {
+		if (NULL == *outdata) {
 			CTS_ERR("pims_ipc_data_create fail");
 			return;
 		}
@@ -888,7 +888,7 @@ void ctsvc_ipc_setting_get_name_sorting_order(pims_ipc_h ipc, pims_ipc_data_h in
 ERROR_RETURN:
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
-		if (!*outdata) {
+		if (NULL == *outdata) {
 			CTS_ERR("pims_ipc_data_create fail");
 			return;
 		}
@@ -940,7 +940,7 @@ void ctsvc_ipc_setting_set_name_display_order(pims_ipc_h ipc,
 ERROR_RETURN:
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
-		if (!*outdata) {
+		if (NULL == *outdata) {
 			CTS_ERR("pims_ipc_data_create fail");
 			return;
 		}
@@ -986,7 +986,7 @@ void ctsvc_ipc_setting_set_name_sorting_order(pims_ipc_h ipc,
 ERROR_RETURN:
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
-		if (!*outdata) {
+		if (NULL == *outdata) {
 			CTS_ERR("pims_ipc_data_create fail");
 			return;
 		}

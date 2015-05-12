@@ -107,7 +107,7 @@ int ctsvc_db_number_insert(contacts_record_h record, int contact_id, bool is_my_
 			__ctsvc_db_number_reset_default(number_id, contact_id);
 	}
 
-	if (!is_my_profile) {
+	if (false == is_my_profile) {
 #ifdef ENABLE_LOG_FEATURE
 		// updata phonelog
 		int person_id = -1;
@@ -170,7 +170,7 @@ int ctsvc_db_number_update(contacts_record_h record, bool is_my_profile)
 	cts_stmt stmt = NULL;
 #endif // ENABLE_LOG_FEATURE
 
-	RETVM_IF(!number->id, CONTACTS_ERROR_INVALID_PARAMETER, "number of contact has no ID.");
+	RETVM_IF(0 == number->id, CONTACTS_ERROR_INVALID_PARAMETER, "number of contact has no ID.");
 	RETVM_IF(CTSVC_PROPERTY_FLAG_DIRTY != (number->base.property_flag & CTSVC_PROPERTY_FLAG_DIRTY),
 				CONTACTS_ERROR_NONE, "No update");
 
@@ -197,7 +197,7 @@ int ctsvc_db_number_update(contacts_record_h record, bool is_my_profile)
 											"ON "CTS_TABLE_CONTACTS".contact_id = "CTS_TABLE_DATA".contact_id "
 											"WHERE data.id = %d", number->id);
 			ret = ctsvc_query_prepare(query, &stmt);
-			if (stmt != NULL) {
+			if (stmt) {
 				ret = ctsvc_stmt_step(stmt);
 				if (ret == 1) {
 					person_id = ctsvc_stmt_get_int(stmt, 0);
@@ -241,7 +241,7 @@ int ctsvc_db_number_update(contacts_record_h record, bool is_my_profile)
 												"ON "CTS_TABLE_CONTACTS".contact_id = "CTS_TABLE_DATA".contact_id "
 												"WHERE data.id = %d", number->id);
 				ret = ctsvc_query_prepare(query, &stmt);
-				if (stmt != NULL) {
+				if (stmt) {
 					ret = ctsvc_stmt_step(stmt);
 					if (ret == 1) {
 						person_id = ctsvc_stmt_get_int(stmt, 0);
@@ -258,12 +258,12 @@ int ctsvc_db_number_update(contacts_record_h record, bool is_my_profile)
 
 		if (CONTACTS_ERROR_NONE != (ret = ctsvc_db_update_record_with_set_query(set, bind_text, CTS_TABLE_DATA, number->id))) break;
 
-		if (!is_my_profile)
+		if (false == is_my_profile)
 			ctsvc_set_number_noti();
 
 #ifdef ENABLE_LOG_FEATURE
 		// update phone log
-		if (0 < person_id && pre_number != NULL)
+		if (0 < person_id && pre_number)
 			ctsvc_db_phone_log_update_person_id(pre_number, person_id, -1, false);
 		if (0 < person_id)
 			ctsvc_db_phone_log_update_person_id(number->number, -1, person_id, false);
@@ -298,7 +298,7 @@ int ctsvc_db_number_delete(int id, bool is_my_profile)
 									"ON "CTS_TABLE_CONTACTS".contact_id = "CTS_TABLE_DATA".contact_id "
 									"WHERE data.id = %d", id);
 	ret = ctsvc_query_prepare(query, &stmt);
-	if (stmt != NULL) {
+	if (stmt) {
 		ret = ctsvc_stmt_step(stmt);
 		if (ret == 1) {
 			person_id = ctsvc_stmt_get_int(stmt, 0);
@@ -325,12 +325,12 @@ int ctsvc_db_number_delete(int id, bool is_my_profile)
 
 #ifdef ENABLE_LOG_FEATURE
 	// update phone log
-	if (0 < person_id && pre_number != NULL)
+	if (0 < person_id && pre_number)
 		ctsvc_db_phone_log_update_person_id(pre_number, person_id, -1, false);
 	ctsvc_stmt_finalize(stmt);
 #endif // ENABLE_LOG_FEATURE
 
-	if (!is_my_profile)
+	if (false == is_my_profile)
 		ctsvc_set_number_noti();
 
 	return CONTACTS_ERROR_NONE;

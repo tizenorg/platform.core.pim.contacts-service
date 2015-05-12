@@ -689,7 +689,7 @@ int ctsvc_ipc_marshal_string(const char* bufchar, pims_ipc_data_h ipc_data)
 
 	RETV_IF(ipc_data==NULL,CONTACTS_ERROR_INVALID_PARAMETER);
 
-	if (bufchar != NULL) {
+	if (bufchar) {
 		int length = strlen(bufchar);
 		if (pims_ipc_data_put(ipc_data,(void*)&length,sizeof(int)) != 0) {
 			ret = CONTACTS_ERROR_OUT_OF_MEMORY;
