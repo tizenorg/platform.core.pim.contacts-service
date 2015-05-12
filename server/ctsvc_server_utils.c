@@ -81,12 +81,12 @@ static void __ctsvc_server_change_language_cb(keynode_t *key, void *data)
 			RETM_IF(ret<0, "ctsvc_get_secondary_sort() Fail(%d)", ret);
 		}
 
-		if (strncmp(langset, "zh", strlen("zh")) == 0 ||
-			strncmp(langset, "ko", strlen("ko")) == 0 ||
-			strncmp(langset, "ja", strlen("ja")) == 0 ||
-			strncmp(new_langset, "zh", strlen("zh")) == 0 ||
-			strncmp(new_langset, "ko", strlen("ko")) == 0 ||
-			strncmp(new_langset, "ja", strlen("ja")) == 0) {
+		if (STRING_EQUAL == strncmp(langset, "zh", strlen("zh")) ||
+				STRING_EQUAL == strncmp(langset, "ko", strlen("ko")) ||
+				STRING_EQUAL == strncmp(langset, "ja", strlen("ja")) ||
+				STRING_EQUAL == strncmp(new_langset, "zh", strlen("zh")) ||
+				STRING_EQUAL == strncmp(new_langset, "ko", strlen("ko")) ||
+				STRING_EQUAL == strncmp(new_langset, "ja", strlen("ja"))) {
 			sort_name_update = true;
 		}
 		ctsvc_set_langset(strdup(new_langset));

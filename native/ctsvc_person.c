@@ -317,7 +317,7 @@ static inline int __ctsvc_put_person_default_image(int person_id, int id)
 	}
 
 	// unset is_default of all data of person if the data is not default
-	if (!is_default) {
+	if (false == is_default) {
 		snprintf(query, sizeof(query),
 				"UPDATE "CTS_TABLE_DATA" SET is_default=0 WHERE datatype=%d  AND is_my_profile = 0 "
 					"AND contact_id = (SELECT contact_id FROM "CTS_TABLE_DATA" WHERE id=%d) ",
@@ -442,7 +442,7 @@ static inline int __ctsvc_put_person_default_data(int person_id, int id, int dat
 	}
 
 	// unset is_default of all data of person if the data is not default
-	if (!is_default) {
+	if (false == is_default) {
 		snprintf(query, sizeof(query),
 				"UPDATE "CTS_TABLE_DATA" SET is_default=0 WHERE datatype=%d AND is_my_profile = 0 "
 					"AND contact_id = (SELECT contact_id FROM "CTS_TABLE_DATA" WHERE id=%d) ",
@@ -787,7 +787,7 @@ int ctsvc_person_aggregate(int person_id)
 
 		len += snprintf(addressbook_ids + len, addressbooks_len -len, "%d%s", addressbook_id, ADDRESSBOOK_ID_DELIM);
 
-		if (!image_thumbnail_path && contact_image_thumbnail_path && *contact_image_thumbnail_path) {
+		if (NULL == image_thumbnail_path && contact_image_thumbnail_path && *contact_image_thumbnail_path) {
 			temp = __ctsvc_get_image_filename(contact_image_thumbnail_path);
 			image_thumbnail_path = SAFE_STRDUP(temp);
 			// update data table : is_primary_default
@@ -795,17 +795,17 @@ int ctsvc_person_aggregate(int person_id)
 		free(contact_image_thumbnail_path);
 
 		temp_str = contact_ringtone_path;
-		if (!ringtone_path && temp_str && strlen(temp_str))
+		if (NULL == ringtone_path && temp_str && strlen(temp_str))
 			ringtone_path = SAFE_STRDUP(temp_str);
 		free(contact_ringtone_path);
 
 		temp_str = contact_vibration;
-		if (!vibration && temp_str && strlen(temp_str))
+		if (NULL == vibration && temp_str && strlen(temp_str))
 			vibration = SAFE_STRDUP(temp_str);
 		free(contact_vibration);
 
 		temp_str = contact_message_alert;
-		if (!message_alert && temp_str && strlen(temp_str))
+		if (NULL == message_alert && temp_str && strlen(temp_str))
 			message_alert = SAFE_STRDUP(temp_str);
 		free(contact_message_alert);
 
@@ -873,7 +873,7 @@ int ctsvc_person_aggregate(int person_id)
 	free(message_alert);
 	free(status);
 
-	if (!person_is_favorite) {
+	if (false == person_is_favorite) {
 		snprintf(query, sizeof(query),
 				"DELETE FROM "CTS_TABLE_FAVORITES" WHERE person_id = %d", person_id);
 		ret = ctsvc_query_exec(query);
@@ -969,7 +969,7 @@ API int contacts_person_link_person(int base_person_id, int person_id)
 	}
 
 	base_is_favorite = __ctsvc_get_person_favorite_info(base_person_id, &favorite_prio);
-	if (!base_is_favorite)
+	if (false == base_is_favorite)
 		is_favorite = __ctsvc_get_person_favorite_info(person_id, &favorite_prio);
 
 	snprintf(query, sizeof(query),

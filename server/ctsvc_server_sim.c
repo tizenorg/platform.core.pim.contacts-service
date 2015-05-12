@@ -107,7 +107,7 @@ static TapiHandle* __ctsvc_server_sim_get_tapi_handle(ctsvc_sim_info_s *info)
 		// TODO: it should be changed API
 		vconf_get_bool(VCONFKEY_TELEPHONY_READY, &bReady);
 
-		if (!bReady) {
+		if (0 == bReady) {
 			CTS_ERR("telephony is not ready ");
 			return NULL;
 		}
@@ -406,7 +406,7 @@ static void __ctsvc_server_sim_import_contact_cb(TapiHandle *handle, int result,
 
 	if (access_rt == TAPI_SIM_PB_INVALID_INDEX) {
 		int start_index = 0;
-		if (user_data != NULL)
+		if (user_data)
 			start_index = (int)user_data;
 		CTS_DBG("TAPI_SIM_PB_INVALID_INDEX : start_index = %d",start_index);
 		start_index++;
@@ -484,7 +484,7 @@ int ctsvc_server_sim_import_contact(void* data, int sim_slot_no)
 	info = __ctsvc_server_sim_get_handle_by_sim_slot_no(sim_slot_no);
 	RETVM_IF(NULL == info, CONTACTS_ERROR_SYSTEM, "sim init is not completed");
 	RETVM_IF(false == info->initialized, CONTACTS_ERROR_SYSTEM, "sim init is not completed");
-	RETVM_IF(NULL != __ctsvc_server_sim_get_return_data(), CONTACTS_ERROR_INTERNAL,
+	RETVM_IF(__ctsvc_server_sim_get_return_data(), CONTACTS_ERROR_INTERNAL,
 			"Server is already processing with sim");
 
 	__ctsvc_server_sim_set_return_data(data);
@@ -601,7 +601,7 @@ static int __ctsvc_server_sim_sdn_read(ctsvc_sim_info_s* info)
 	int card_changed = 0;
 	TelSimCardStatus_t sim_status;
 
-	RETVM_IF(NULL != __ctsvc_server_sim_get_return_data(), CONTACTS_ERROR_INTERNAL,
+	RETVM_IF(__ctsvc_server_sim_get_return_data(), CONTACTS_ERROR_INTERNAL,
 			"Server is already processing with sim");
 
 	ret = tel_get_sim_init_info(info->handle, &sim_status, &card_changed);
@@ -697,7 +697,7 @@ static void __ctsvc_server_sim_get_meta_info_cb(TapiHandle *handle, int result, 
 		return;
 	}
 
-	if (!info->initialized) {
+	if (false == info->initialized) {
 		info->initialized = true;
 		ret = __ctsvc_server_sim_sdn_read(info);
 		WARN_IF(CONTACTS_ERROR_NONE != ret, "__ctsvc_server_sim_sdn_read() Fail(%d)", ret);
@@ -921,7 +921,7 @@ static void __ctsvc_server_telephony_ready_cb(keynode_t *key, void *data)
 	// TODO: it should be changed API
 	vconf_get_bool(VCONFKEY_TELEPHONY_TAPI_STATE, &bReady);
 
-	if (!bReady) {
+	if (0 == bReady) {
 		CTS_ERR("telephony is not ready ");
 		return;
 	}
@@ -949,7 +949,7 @@ int ctsvc_server_sim_init()
 	// TODO: it should be changed API
 	vconf_get_bool(VCONFKEY_TELEPHONY_TAPI_STATE, &bReady);
 
-	if (!bReady) {
+	if (0 == bReady) {
 		CTS_ERR("telephony is not ready ");
 		vconf_notify_key_changed(VCONFKEY_TELEPHONY_TAPI_STATE, __ctsvc_server_telephony_ready_cb, NULL);
 		__ctsvc_tapi_cb = true;

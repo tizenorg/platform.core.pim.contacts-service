@@ -53,7 +53,7 @@ static void __ctsvc_db_subscriber_callback(pims_ipc_h ipc, pims_ipc_data_h data,
 	if (data)
 		str = (char*)pims_ipc_data_get(data, &size);
 
-	if (!str) {
+	if (NULL == str) {
 		CTS_ERR("There is no changed data");
 		return;
 	}
@@ -85,11 +85,11 @@ int ctsvc_ipc_create_for_change_subscription()
 		return CONTACTS_ERROR_NONE;
 	}
 
-	if (!__ipc) {
+	if (NULL == __ipc) {
 		char sock_file[CTSVC_PATH_MAX_LEN] = {0};
 		snprintf(sock_file, sizeof(sock_file), CTSVC_SOCK_PATH"/.%s_for_subscribe", getuid(), CTSVC_IPC_SERVICE);
 		__ipc = pims_ipc_create_for_subscribe(sock_file);
-		if (!__ipc) {
+		if (NULL == __ipc) {
 			CTS_ERR("pims_ipc_create_for_subscribe error\n");
 			ctsvc_mutex_unlock(CTS_MUTEX_PIMS_IPC_PUBSUB);
 			return CONTACTS_ERROR_IPC;
@@ -135,12 +135,12 @@ API int contacts_db_add_changed_cb_with_info(const char* view_uri,
 	RETVM_IF(view_uri == NULL, CONTACTS_ERROR_INVALID_PARAMETER, "view_uri is NULL");
 	RETVM_IF(cb == NULL, CONTACTS_ERROR_INVALID_PARAMETER, "cb is NULL");
 
-	if (strncmp(view_uri, CTSVC_VIEW_URI_PHONELOG, strlen(CTSVC_VIEW_URI_PHONELOG)) == 0) {
+	if (STRING_EQUAL == strncmp(view_uri, CTSVC_VIEW_URI_PHONELOG, strlen(CTSVC_VIEW_URI_PHONELOG))) {
 		ret = ctsvc_ipc_client_check_permission(CTSVC_PERMISSION_PHONELOG_READ, &result);
 		RETVM_IF(ret != CONTACTS_ERROR_NONE, ret, "ctsvc_ipc_client_check_permission fail (%d)", ret);
 		RETVM_IF(result == false, CONTACTS_ERROR_PERMISSION_DENIED, "Permission denied (phonelog read)");
 	}
-	else if (strncmp(view_uri, CTSVC_VIEW_URI_PERSON, strlen(CTSVC_VIEW_URI_PERSON)) == 0) {
+	else if (STRING_EQUAL == strncmp(view_uri, CTSVC_VIEW_URI_PERSON, strlen(CTSVC_VIEW_URI_PERSON))) {
 		ret = ctsvc_ipc_client_check_permission(CTSVC_PERMISSION_CONTACT_READ, &result);
 		RETVM_IF(ret != CONTACTS_ERROR_NONE, ret, "ctsvc_ipc_client_check_permission fail (%d)", ret);
 		RETVM_IF(result == false, CONTACTS_ERROR_PERMISSION_DENIED, "Permission denied (contact read)");
@@ -153,7 +153,7 @@ API int contacts_db_add_changed_cb_with_info(const char* view_uri,
 	ctsvc_mutex_lock(CTS_MUTEX_PIMS_IPC_PUBSUB);
 
 	for (it=__db_change_subscribe_list;it;it=it->next) {
-		if (!it->data) continue;
+		if (NULL == it->data) continue;
 
 		info = it->data;
 		if (STRING_EQUAL == strcmp(info->view_uri, view_uri))
@@ -162,7 +162,7 @@ API int contacts_db_add_changed_cb_with_info(const char* view_uri,
 			info = NULL;
 	}
 
-	if (!info) {
+	if (NULL == info) {
 		info = calloc(1, sizeof(subscribe_info_s));
 		if (NULL == info) {
 			CTS_ERR("calloc() Fail");
@@ -219,7 +219,7 @@ API int contacts_db_remove_changed_cb_with_info(const char* view_uri,
 	ctsvc_mutex_lock(CTS_MUTEX_PIMS_IPC_PUBSUB);
 
 	for (it=__db_change_subscribe_list;it;it=it->next) {
-		if (!it->data) continue;
+		if (NULL == it->data) continue;
 
 		info = it->data;
 		if (STRING_EQUAL == strcmp(info->view_uri, view_uri))

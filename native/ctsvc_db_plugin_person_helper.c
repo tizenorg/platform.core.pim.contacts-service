@@ -549,7 +549,7 @@ int ctsvc_db_update_person(contacts_record_h record)
 			return ret;
 		}
 	}
-	else if (CONTACTS_ERROR_NONE == ret && !is_favorite) {
+	else if (CONTACTS_ERROR_NONE == ret && false == is_favorite) {
 		snprintf(query, sizeof(query),
 			"SELECT person_id FROM "CTS_TABLE_CONTACTS" WHERE person_id =%d AND is_favorite = 1", contact->person_id);
 		ret = ctsvc_query_get_first_int_result(query, &person_id);

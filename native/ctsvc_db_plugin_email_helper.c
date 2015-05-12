@@ -107,7 +107,7 @@ int ctsvc_db_email_insert(contacts_record_h record, int contact_id, bool is_my_p
 			__ctsvc_db_email_reset_default(email_id, contact_id);
 	}
 
-	if (!is_my_profile)
+	if (false == is_my_profile)
 		ctsvc_set_email_noti();
 
 	return CONTACTS_ERROR_NONE;
@@ -123,7 +123,7 @@ int ctsvc_db_email_update(contacts_record_h record, bool is_my_profile)
 	ctsvc_email_s *email = (ctsvc_email_s*)record;
 	char query[CTS_SQL_MAX_LEN] = {0};
 
-	RETVM_IF(!email->id, CONTACTS_ERROR_INVALID_PARAMETER, "email of contact has no ID.");
+	RETVM_IF(0 == email->id, CONTACTS_ERROR_INVALID_PARAMETER, "email of contact has no ID.");
 	RETVM_IF(CTSVC_PROPERTY_FLAG_DIRTY != (email->base.property_flag & CTSVC_PROPERTY_FLAG_DIRTY), CONTACTS_ERROR_NONE, "No update");
 
 	snprintf(query, sizeof(query),
@@ -139,7 +139,7 @@ int ctsvc_db_email_update(contacts_record_h record, bool is_my_profile)
 	do {
 		if (CONTACTS_ERROR_NONE != (ret = ctsvc_db_create_set_query(record, &set, &bind_text))) break;
 		if (CONTACTS_ERROR_NONE != (ret = ctsvc_db_update_record_with_set_query(set, bind_text, CTS_TABLE_DATA, email->id))) break;
-		if (!is_my_profile)
+		if (false == is_my_profile)
 			ctsvc_set_email_noti();
 	} while (0);
 
@@ -164,7 +164,7 @@ int ctsvc_db_email_delete(int id, bool is_my_profile)
 
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_query_exec() Fail(%d)", ret);
-	if (!is_my_profile)
+	if (false == is_my_profile)
 		ctsvc_set_email_noti();
 
 	return CONTACTS_ERROR_NONE;

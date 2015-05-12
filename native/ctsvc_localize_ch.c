@@ -2176,8 +2176,8 @@ bool ctsvc_has_chinese(const char *src)
 	UChar	temp[strlen(src)+1];
 	UErrorCode status = 0;
 
-	RETVM_IF(src==NULL, false, "src is NULL");
-	RETVM_IF(!*src, false, "*src is NULL");
+	RETVM_IF(NULL == src, false, "src is NULL");
+	RETVM_IF('\0' == *src, false, "*src is NULL");
 
 	u_strFromUTF8(temp, array_sizeof(temp), NULL, src, -1, &status);
 	if (U_FAILURE(status)) {
@@ -2208,8 +2208,8 @@ int ctsvc_convert_chinese_to_pinyin(const char *src, pinyin_name_s **name, int *
 
 	*size = 0;
 
-	RETVM_IF(src==NULL, CONTACTS_ERROR_SYSTEM, "src is NULL");
-	RETVM_IF(!*src, CONTACTS_ERROR_SYSTEM, "*src is NULL");
+	RETVM_IF(NULL == src, CONTACTS_ERROR_SYSTEM, "src is NULL");
+	RETVM_IF('\0' == *src, CONTACTS_ERROR_SYSTEM, "*src is NULL");
 
 	u_strFromUTF8(temp_result, array_sizeof(temp_result), NULL, src, -1, &status);
 	if (U_FAILURE(status)) {

@@ -153,17 +153,17 @@ void ctsvc_hangul_compatibility2jamo(UChar *src)
 
 	if (CTSVC_COMPARE_BETWEEN(CTSVC_HAN_C_START, *src, CTSVC_HAN_C_END)) {
 		char *pos;
-		if (NULL != (pos = strchr(hangul_compatibility_choseong, unicode_value2))) {
+		if ((pos = strchr(hangul_compatibility_choseong, unicode_value2))) {
 			unicode_value1 = 0x11;
 			unicode_value2 = hangul_jamo_choseong[pos - hangul_compatibility_choseong];
 			(*src) = unicode_value1 << 8 | unicode_value2;
 		}
-		else if (NULL != (pos = strchr(hangul_compatibility_jungseong, unicode_value2))) {
+		else if ((pos = strchr(hangul_compatibility_jungseong, unicode_value2))) {
 			unicode_value1 = 0x11;
 			unicode_value2 = hangul_jamo_jungseong[pos - hangul_compatibility_jungseong];
 			(*src) = unicode_value1 << 8 | unicode_value2;
 		}
-		else if (NULL != (pos = strchr(hangul_compatibility_jongseong, unicode_value2))) {
+		else if ((pos = strchr(hangul_compatibility_jongseong, unicode_value2))) {
 			unicode_value1 = 0x11;
 			unicode_value2 = hangul_jamo_jongseong[pos - hangul_compatibility_jongseong];
 			(*src) = unicode_value1 << 8 | unicode_value2;

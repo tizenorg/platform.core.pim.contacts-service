@@ -49,7 +49,7 @@ void ctsvc_ipc_server_connect(pims_ipc_h ipc, pims_ipc_data_h indata, pims_ipc_d
 
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
-		if (!*outdata) {
+		if (NULL == *outdata) {
 			CTS_ERR("pims_ipc_data_create fail");
 			return;
 		}
@@ -79,7 +79,7 @@ void ctsvc_ipc_server_disconnect(pims_ipc_h ipc, pims_ipc_data_h indata, pims_ip
 	if (outdata)
 	{
 		*outdata = pims_ipc_data_create(0);
-		if (!*outdata)
+		if (NULL == *outdata)
 		{
 			CTS_ERR("pims_ipc_data_create fail");
 			return;
@@ -122,7 +122,7 @@ void ctsvc_ipc_server_check_permission(pims_ipc_h ipc, pims_ipc_data_h indata,
 
 ERROR_RETURN:
 	*outdata = pims_ipc_data_create(0);
-	if (!*outdata) {
+	if (NULL == *outdata) {
 		CTS_ERR("pims_ipc_data_create fail");
 		return;
 	}
@@ -172,7 +172,7 @@ void ctsvc_ipc_server_db_insert_record(pims_ipc_h ipc, pims_ipc_data_h indata, p
 
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
-		if (!*outdata) {
+		if (NULL == *outdata) {
 			CTS_ERR("pims_ipc_data_create fail");
 			goto DATA_FREE;
 		}
@@ -207,7 +207,7 @@ void ctsvc_ipc_server_db_insert_record(pims_ipc_h ipc, pims_ipc_data_h indata, p
 ERROR_RETURN:
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
-		if (!*outdata) {
+		if (NULL == *outdata) {
 			CTS_ERR("pims_ipc_data_create fail");
 			goto DATA_FREE;
 		}
@@ -264,7 +264,7 @@ void ctsvc_ipc_server_db_get_record(pims_ipc_h ipc, pims_ipc_data_h indata, pims
 ERROR_RETURN:
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
-		if (!*outdata) {
+		if (NULL == *outdata) {
 			CTS_ERR("pims_ipc_data_create fail");
 			goto DATA_FREE;
 		}
@@ -328,7 +328,7 @@ void ctsvc_ipc_server_db_update_record(pims_ipc_h ipc, pims_ipc_data_h indata, p
 
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
-		if (!*outdata) {
+		if (NULL == *outdata) {
 			CTS_ERR("pims_ipc_data_create fail");
 			goto DATA_FREE;
 		}
@@ -356,7 +356,7 @@ void ctsvc_ipc_server_db_update_record(pims_ipc_h ipc, pims_ipc_data_h indata, p
 ERROR_RETURN:
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
-		if (!*outdata) {
+		if (NULL == *outdata) {
 			CTS_ERR("pims_ipc_data_create fail");
 			goto DATA_FREE;
 		}
@@ -410,7 +410,7 @@ void ctsvc_ipc_server_db_delete_record(pims_ipc_h ipc, pims_ipc_data_h indata, p
 
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
-		if (!*outdata) {
+		if (NULL == *outdata) {
 			CTS_ERR("pims_ipc_data_create fail");
 			goto DATA_FREE;
 		}
@@ -438,7 +438,7 @@ void ctsvc_ipc_server_db_delete_record(pims_ipc_h ipc, pims_ipc_data_h indata, p
 ERROR_RETURN:
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
-		if (!*outdata) {
+		if (NULL == *outdata) {
 			CTS_ERR("pims_ipc_data_create fail");
 			goto DATA_FREE;
 		}
@@ -494,7 +494,7 @@ void ctsvc_ipc_server_db_replace_record(pims_ipc_h ipc, pims_ipc_data_h indata,
 
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
-		if (!*outdata) {
+		if (NULL == *outdata) {
 			CTS_ERR("pims_ipc_data_create fail");
 			goto DATA_FREE;
 		}
@@ -524,7 +524,7 @@ void ctsvc_ipc_server_db_replace_record(pims_ipc_h ipc, pims_ipc_data_h indata,
 ERROR_RETURN:
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
-		if (!*outdata) {
+		if (NULL == *outdata) {
 			CTS_ERR("pims_ipc_data_create fail");
 			goto DATA_FREE;
 		}
@@ -585,7 +585,7 @@ void ctsvc_ipc_server_db_get_all_records(pims_ipc_h ipc, pims_ipc_data_h indata,
 
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
-		if (!*outdata) {
+		if (NULL == *outdata) {
 			CTS_ERR("pims_ipc_data_create fail");
 			goto DATA_FREE;
 		}
@@ -618,7 +618,7 @@ void ctsvc_ipc_server_db_get_all_records(pims_ipc_h ipc, pims_ipc_data_h indata,
 ERROR_RETURN:
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
-		if (!*outdata) {
+		if (NULL == *outdata) {
 			CTS_ERR("pims_ipc_data_create fail");
 			goto DATA_FREE;
 		}
@@ -681,7 +681,7 @@ void ctsvc_ipc_server_db_get_records_with_query(pims_ipc_h ipc, pims_ipc_data_h 
 
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
-		if (!*outdata) {
+		if (NULL == *outdata) {
 			CTS_ERR("pims_ipc_data_create fail");
 			goto DATA_FREE;
 		}
@@ -712,7 +712,7 @@ void ctsvc_ipc_server_db_get_records_with_query(pims_ipc_h ipc, pims_ipc_data_h 
 ERROR_RETURN:
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
-		if (!*outdata) {
+		if (NULL == *outdata) {
 			CTS_ERR("pims_ipc_data_create fail");
 			goto DATA_FREE;
 		}
@@ -767,7 +767,7 @@ void ctsvc_ipc_server_db_get_count(pims_ipc_h ipc, pims_ipc_data_h indata, pims_
 
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
-		if (!*outdata) {
+		if (NULL == *outdata) {
 			CTS_ERR("pims_ipc_data_create fail");
 			goto DATA_FREE;
 		}
@@ -798,7 +798,7 @@ void ctsvc_ipc_server_db_get_count(pims_ipc_h ipc, pims_ipc_data_h indata, pims_
 ERROR_RETURN:
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
-		if (!*outdata) {
+		if (NULL == *outdata) {
 			CTS_ERR("pims_ipc_data_create fail");
 			goto DATA_FREE;
 		}
@@ -844,7 +844,7 @@ void ctsvc_ipc_server_db_get_count_with_query(pims_ipc_h ipc, pims_ipc_data_h in
 
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
-		if (!*outdata) {
+		if (NULL == *outdata) {
 			CTS_ERR("pims_ipc_data_create fail");
 			goto DATA_FREE;
 		}
@@ -875,7 +875,7 @@ void ctsvc_ipc_server_db_get_count_with_query(pims_ipc_h ipc, pims_ipc_data_h in
 ERROR_RETURN:
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
-		if (!*outdata) {
+		if (NULL == *outdata) {
 			CTS_ERR("pims_ipc_data_create fail");
 			goto DATA_FREE;
 		}
@@ -940,7 +940,7 @@ void ctsvc_ipc_server_db_insert_records(pims_ipc_h ipc, pims_ipc_data_h indata,
 
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
-		if (!*outdata) {
+		if (NULL == *outdata) {
 			CTS_ERR("pims_ipc_data_create fail");
 			goto DATA_FREE;
 		}
@@ -990,7 +990,7 @@ void ctsvc_ipc_server_db_insert_records(pims_ipc_h ipc, pims_ipc_data_h indata,
 ERROR_RETURN:
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
-		if (!*outdata) {
+		if (NULL == *outdata) {
 			CTS_ERR("pims_ipc_data_create fail");
 			goto DATA_FREE;
 		}
@@ -1053,7 +1053,7 @@ void ctsvc_ipc_server_db_update_records(pims_ipc_h ipc, pims_ipc_data_h indata,
 
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
-		if (!*outdata) {
+		if (NULL == *outdata) {
 			CTS_ERR("pims_ipc_data_create fail");
 			goto DATA_FREE;
 		}
@@ -1083,7 +1083,7 @@ void ctsvc_ipc_server_db_update_records(pims_ipc_h ipc, pims_ipc_data_h indata,
 ERROR_RETURN:
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
-		if (!*outdata) {
+		if (NULL == *outdata) {
 			CTS_ERR("pims_ipc_data_create fail");
 			goto DATA_FREE;
 		}
@@ -1152,7 +1152,7 @@ void ctsvc_ipc_server_db_delete_records(pims_ipc_h ipc, pims_ipc_data_h indata,
 
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
-		if (!*outdata) {
+		if (NULL == *outdata) {
 			CTS_ERR("pims_ipc_data_create fail");
 		}
 		if (pims_ipc_data_put(*outdata,(void*)&ret,sizeof(int)) != 0) {
@@ -1182,7 +1182,7 @@ void ctsvc_ipc_server_db_delete_records(pims_ipc_h ipc, pims_ipc_data_h indata,
 ERROR_RETURN:
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
-		if (!*outdata) {
+		if (NULL == *outdata) {
 			CTS_ERR("pims_ipc_data_create fail");
 			goto DATA_FREE;
 		}
@@ -1265,7 +1265,7 @@ void ctsvc_ipc_server_db_replace_records(pims_ipc_h ipc, pims_ipc_data_h indata,
 
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
-		if (!*outdata) {
+		if (NULL == *outdata) {
 			CTS_ERR("pims_ipc_data_create fail");
 			goto DATA_FREE;
 		}
@@ -1294,7 +1294,7 @@ void ctsvc_ipc_server_db_replace_records(pims_ipc_h ipc, pims_ipc_data_h indata,
 ERROR_RETURN:
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
-		if (!*outdata) {
+		if (NULL == *outdata) {
 			CTS_ERR("pims_ipc_data_create fail");
 			goto DATA_FREE;
 		}
@@ -1356,7 +1356,7 @@ void ctsvc_ipc_server_db_get_changes_by_version(pims_ipc_h ipc, pims_ipc_data_h 
 
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
-		if (!*outdata) {
+		if (NULL == *outdata) {
 			CTS_ERR("pims_ipc_data_create fail");
 			goto DATA_FREE;
 		}
@@ -1397,7 +1397,7 @@ void ctsvc_ipc_server_db_get_changes_by_version(pims_ipc_h ipc, pims_ipc_data_h 
 ERROR_RETURN:
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
-		if (!*outdata) {
+		if (NULL == *outdata) {
 			CTS_ERR("pims_ipc_data_create fail");
 			goto DATA_FREE;
 		}
@@ -1436,7 +1436,7 @@ void ctsvc_ipc_server_db_get_current_version(pims_ipc_h ipc, pims_ipc_data_h ind
 ERROR_RETURN:
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
-		if (!*outdata) {
+		if (NULL == *outdata) {
 			CTS_ERR("pims_ipc_data_create fail");
 			return;
 		}
@@ -1509,7 +1509,7 @@ void ctsvc_ipc_server_db_search_records(pims_ipc_h ipc, pims_ipc_data_h indata, 
 
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
-		if (!*outdata) {
+		if (NULL == *outdata) {
 			CTS_ERR("pims_ipc_data_create fail");
 			goto DATA_FREE;
 		}
@@ -1540,7 +1540,7 @@ void ctsvc_ipc_server_db_search_records(pims_ipc_h ipc, pims_ipc_data_h indata, 
 ERROR_RETURN:
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
-		if (!*outdata) {
+		if (NULL == *outdata) {
 			CTS_ERR("pims_ipc_data_create fail");
 			goto DATA_FREE;
 		}
@@ -1616,7 +1616,7 @@ void ctsvc_ipc_server_db_search_records_with_range(pims_ipc_h ipc, pims_ipc_data
 
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
-		if (!*outdata) {
+		if (NULL == *outdata) {
 			CTS_ERR("pims_ipc_data_create fail");
 			goto DATA_FREE;
 		}
@@ -1647,7 +1647,7 @@ void ctsvc_ipc_server_db_search_records_with_range(pims_ipc_h ipc, pims_ipc_data
 ERROR_RETURN:
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
-		if (!*outdata) {
+		if (NULL == *outdata) {
 			CTS_ERR("pims_ipc_data_create fail");
 			goto DATA_FREE;
 		}
@@ -1718,7 +1718,7 @@ void ctsvc_ipc_server_db_search_records_with_query(pims_ipc_h ipc, pims_ipc_data
 
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
-		if (!*outdata) {
+		if (NULL == *outdata) {
 			CTS_ERR("pims_ipc_data_create fail");
 			goto DATA_FREE;
 		}
@@ -1749,7 +1749,7 @@ void ctsvc_ipc_server_db_search_records_with_query(pims_ipc_h ipc, pims_ipc_data
 ERROR_RETURN:
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
-		if (!*outdata) {
+		if (NULL == *outdata) {
 			CTS_ERR("pims_ipc_data_create fail");
 			goto DATA_FREE;
 		}

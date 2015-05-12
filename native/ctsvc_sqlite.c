@@ -50,7 +50,7 @@ int ctsvc_db_open(void) {
 	CTS_FN_CALL;
 	int ret;
 
-	if (!ctsvc_db) {
+	if (NULL == ctsvc_db) {
 		ret = db_util_open(CTSVC_DB_PATH, &ctsvc_db, 0);
 		RETVM_IF(SQLITE_OK != ret, CONTACTS_ERROR_DB /*CTS_ERR_DB_NOT_OPENED*/,
 				"DB error : db_util_open() Fail(%d)", ret);

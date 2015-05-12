@@ -39,9 +39,9 @@ enum{
 static inline void __ctsvc_make_name_lookup(int op_code, const char *name_first,
 		const char *name_last, char **name_lookup)
 {
-	if (name_first && !name_last)
+	if (name_first && NULL == name_last)
 		*name_lookup = SAFE_STRDUP(name_first);
-	else if (!name_first && name_last)
+	else if (NULL == name_first && name_last)
 		*name_lookup = SAFE_STRDUP(name_last);
 	else {
 		if (CONTACTS_NAME_DISPLAY_ORDER_FIRSTLAST == op_code) {
@@ -221,7 +221,7 @@ int ctsvc_db_name_insert(contacts_record_h record, int contact_id, bool is_my_pr
 		name->contact_id = contact_id;
 		ctsvc_stmt_finalize(stmt);
 
-		if (!is_my_profile)
+		if (false == is_my_profile)
 			ctsvc_set_name_noti();
 	}
 
@@ -283,7 +283,7 @@ int ctsvc_db_name_update(contacts_record_h record, bool is_my_profile)
 	char *temp_normal_last = NULL;
 	char query[CTS_SQL_MIN_LEN] = {0};
 
-	RETVM_IF(!name->id, CONTACTS_ERROR_INVALID_PARAMETER, "name of contact has no ID.");
+	RETVM_IF(0 == name->id, CONTACTS_ERROR_INVALID_PARAMETER, "name of contact has no ID.");
 	RETVM_IF(CTSVC_PROPERTY_FLAG_DIRTY != (name->base.property_flag & CTSVC_PROPERTY_FLAG_DIRTY), CONTACTS_ERROR_NONE, "No update");
 
 	snprintf(query, sizeof(query),
@@ -355,7 +355,7 @@ int ctsvc_db_name_update(contacts_record_h record, bool is_my_profile)
 		bind_text = g_slist_append(bind_text, strdup(SAFE_STR(name->reverse_lookup)));
 		if (CONTACTS_ERROR_NONE != (ret = ctsvc_db_update_record_with_set_query(query_set, bind_text, CTS_TABLE_DATA, name->id))) break;
 
-		if (!is_my_profile)
+		if (false == is_my_profile)
 			ctsvc_set_name_noti();
 	} while (0);
 
@@ -380,7 +380,7 @@ int ctsvc_db_name_delete(int id, bool is_my_profile)
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_query_exec() Fail(%d)", ret);
 
-	if (!is_my_profile)
+	if (false == is_my_profile)
 		ctsvc_set_name_noti();
 
 	return CONTACTS_ERROR_NONE;

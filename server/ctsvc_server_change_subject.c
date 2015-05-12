@@ -43,7 +43,7 @@ static gboolean __ctsvc_publish_changes_with_data(const char *view_uri, char *da
 		return true;
 
 	indata = pims_ipc_data_create(0);
-	if (!indata) {
+	if (NULL == indata) {
 		CTS_ERR("pims_ipc_data_create error\n");
 		return false;
 	}
@@ -120,7 +120,7 @@ void ctsvc_change_subject_add_changed_person_id(contacts_changed_e type, int id)
 	int info_len = 0;
 	char changed_info[30] = {0};
 
-	if (!__person_changed_info) {
+	if (NULL == __person_changed_info) {
 		__person_changed_info = (char*)calloc(CTSVC_SUBSCRIBE_MAX_LEN, sizeof(char));
 		__person_buf_size = CTSVC_SUBSCRIBE_MAX_LEN;
 		__person_changed_info[0] = '\0';

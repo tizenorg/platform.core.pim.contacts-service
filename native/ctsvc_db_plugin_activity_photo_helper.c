@@ -100,7 +100,7 @@ int ctsvc_db_activity_photo_update(contacts_record_h record)
 	ctsvc_activity_photo_s *activity_photo = (ctsvc_activity_photo_s*)record;
 	char query[CTS_SQL_MIN_LEN] = {0};
 
-	RETVM_IF(!activity_photo->id, CONTACTS_ERROR_INVALID_PARAMETER, "activity_photo has no ID.");
+	RETVM_IF(0 == activity_photo->id, CONTACTS_ERROR_INVALID_PARAMETER, "activity_photo has no ID.");
 	RETVM_IF(CTSVC_PROPERTY_FLAG_DIRTY != (activity_photo->base.property_flag & CTSVC_PROPERTY_FLAG_DIRTY), CONTACTS_ERROR_NONE, "No update");
 
 	snprintf(query, sizeof(query),

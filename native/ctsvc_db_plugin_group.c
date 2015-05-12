@@ -285,7 +285,7 @@ static int __ctsvc_db_group_update_record(contacts_record_h record)
 		}
 
 		// add new image file
-		if (!same && group->image_thumbnail_path) {
+		if (false == same && group->image_thumbnail_path) {
 			char dest[CTS_SQL_MAX_LEN] = {0};
 			if (false == check_permission) {
 				ret = ctsvc_have_file_read_permission(group->image_thumbnail_path);

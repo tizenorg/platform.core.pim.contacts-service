@@ -358,7 +358,7 @@ static int __ctsvc_db_activity_get_records_with_query(contacts_query_h query, in
 	else
 		had_activity_id = true;
 
-	if (!had_activity_id) {
+	if (false == had_activity_id) {
 		s_query->projection = realloc(s_query->projection, s_query->projection_count+1);
 		s_query->projection[s_query->projection_count] = CTSVC_PROPERTY_ACTIVITY_ID;
 		s_query->projection_count++;

@@ -168,7 +168,7 @@ int ctsvc_db_plugin_deinit()
 		return;
 #endif
 
-	if (!__ctsvc_db_view_hash_table) {
+	if (NULL == __ctsvc_db_view_hash_table) {
 		return CONTACTS_ERROR_NONE;
 	}
 	g_hash_table_destroy(__ctsvc_db_view_hash_table);

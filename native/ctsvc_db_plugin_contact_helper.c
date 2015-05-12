@@ -146,7 +146,7 @@ bool ctsvc_contact_check_image_location(const char *path)
 	if (len != strlen(CTSVC_CONTACT_IMG_FULL_LOCATION))
 		return false;
 
-	if (strncmp(path, CTSVC_CONTACT_IMG_FULL_LOCATION, len) == 0)
+	if (STRING_EQUAL == strncmp(path, CTSVC_CONTACT_IMG_FULL_LOCATION, len))
 		return true;
 
 	return false;
@@ -329,7 +329,7 @@ static inline void __ctsvc_contact_get_initial(char *src, char *dest, int dest_s
 			int k;
 			for (k=0;k<char_len && j < (dest_size-1) ;k++)
 				dest[j++] = src[i++];
-			if (!pinyin && j < (dest_size-1))
+			if (false == pinyin && j < (dest_size-1))
 				dest[j++] = ' ';
 			bFirst = false;
 		}
@@ -380,7 +380,7 @@ int ctsvc_contact_make_search_name(ctsvc_contact_s *contact, char **search_name)
 			}
 			else {
 				char *langset = ctsvc_get_langset();
-				if (strncmp(langset, "zh_CN", strlen("zh_CN")) == 0) {
+				if (STRING_EQUAL == strncmp(langset, "zh_CN", strlen("zh_CN"))) {
 					pinyin_name_s *pinyinname;
 					int size, i, len;
 
@@ -511,7 +511,7 @@ int ctsvc_contact_make_search_name(ctsvc_contact_s *contact, char **search_name)
 		int temp_len = 0;
 
 		contacts_list_get_current_record_p(name_list, (contacts_record_h*)&name_record);
-		if (NULL != name_record) {
+		if (name_record) {
 			buf_size = SAFE_STRLEN(name_record->phonetic_first) + SAFE_STRLEN(name_record->phonetic_last) + SAFE_STRLEN(name_record->phonetic_middle);
 			if (0 < buf_size) {
 				buf_size += 3; // for space and null string
@@ -661,8 +661,8 @@ void ctsvc_contact_make_sortkey(ctsvc_contact_s *contact)
 	int sort_type = -1;
 
 	if (contact->display_source_type == CONTACTS_DISPLAY_NAME_SOURCE_TYPE_NAME) {
-		if ( 0 < contact->name->count && contact->name->records != NULL
-				&& contact->name->records->data != NULL) {
+		if (0 < contact->name->count && contact->name->records
+				&& contact->name->records->data) {
 			ctsvc_name_s *name = (ctsvc_name_s *)contact->name->records->data;
 			__ctsvc_make_phonetic_name(name, &phonetic, CONTACTS_NAME_DISPLAY_ORDER_FIRSTLAST);
 		}
@@ -681,7 +681,7 @@ void ctsvc_contact_make_sortkey(ctsvc_contact_s *contact)
 	switch (sort_type) {
 	case CTSVC_SORT_CJK:
 		{
-			if (strncmp(langset, "zh_CN", strlen("zh_CN")) == 0) { // chinese to pinyin
+			if (STRING_EQUAL == strncmp(langset, "zh_CN", strlen("zh_CN"))) { // chinese to pinyin
 				char *pinyin = NULL;
 				if (phonetic)
 					__ctsvc_get_sort_name_to_pinyin(phonetic, &pinyin);
@@ -694,7 +694,7 @@ void ctsvc_contact_make_sortkey(ctsvc_contact_s *contact)
 					sort_type = CTSVC_SORT_WESTERN;
 				}
 			}
-			else if (strncmp(langset, "ko_KR", strlen("ko_KR")) == 0) {
+			else if (STRING_EQUAL == strncmp(langset, "ko_KR", strlen("ko_KR"))) {
 					sort_type = CTSVC_SORT_KOREAN;
 			}
 		}
@@ -733,8 +733,8 @@ void ctsvc_contact_make_sortkey(ctsvc_contact_s *contact)
 	// check reverse sort_name, reverser_display_name_language
 	// make reverse phonetic name
 	if (contact->display_source_type == CONTACTS_DISPLAY_NAME_SOURCE_TYPE_NAME) {
-		if ( 0 < contact->name->count && contact->name->records != NULL
-				&& contact->name->records->data != NULL) {
+		if (0 < contact->name->count && contact->name->records
+				&& contact->name->records->data) {
 			ctsvc_name_s *name = (ctsvc_name_s *)contact->name->records->data;
 			__ctsvc_make_phonetic_name(name, &phonetic, CONTACTS_NAME_DISPLAY_ORDER_LASTFIRST);
 		}
@@ -752,7 +752,7 @@ void ctsvc_contact_make_sortkey(ctsvc_contact_s *contact)
 	switch (sort_type) {
 	case CTSVC_SORT_CJK:
 		{
-			if (strncmp(langset, "zh_CN", strlen("zh_CN")) == 0) {
+			if (STRING_EQUAL == strncmp(langset, "zh_CN", strlen("zh_CN"))) {
 				char *pinyin = NULL;
 				if (phonetic)
 					__ctsvc_get_sort_name_to_pinyin(phonetic, &pinyin);
@@ -765,7 +765,7 @@ void ctsvc_contact_make_sortkey(ctsvc_contact_s *contact)
 					sort_type = CTSVC_SORT_WESTERN;
 				}
 			}
-			else if (strncmp(langset, "ko_KR", strlen("ko_KR")) == 0) {
+			else if (STRING_EQUAL == strncmp(langset, "ko_KR", strlen("ko_KR"))) {
 					sort_type = CTSVC_SORT_KOREAN;
 			}
 		}
@@ -932,7 +932,7 @@ void ctsvc_contact_make_display_name(ctsvc_contact_s *contact)
 
 	contact->display_source_type = CONTACTS_DISPLAY_NAME_SOURCE_TYPE_INVALID;
 
-	if ( 0 < contact->name->count && contact->name->records != NULL && contact->name->records->data != NULL) {
+	if (0 < contact->name->count && contact->name->records && contact->name->records->data) {
 		name = (ctsvc_name_s *)contact->name->records->data;
 	}
 
@@ -1171,7 +1171,7 @@ void ctsvc_contact_make_display_name(ctsvc_contact_s *contact)
 			}
 		}
 
-		if (!ctsvc_record_check_property_flag((ctsvc_record_s *)contact, _contacts_contact.display_name, CTSVC_PROPERTY_FLAG_DIRTY) &&
+		if (false == ctsvc_record_check_property_flag((ctsvc_record_s *)contact, _contacts_contact.display_name, CTSVC_PROPERTY_FLAG_DIRTY) &&
 				contact->nicknames && contact->nicknames->records) {
 			for (cur=contact->nicknames->records;cur;cur=cur->next) {
 				ctsvc_nickname_s *nickname = (ctsvc_nickname_s *)cur->data;
@@ -1184,7 +1184,7 @@ void ctsvc_contact_make_display_name(ctsvc_contact_s *contact)
 			}
 		}
 
-		if (!ctsvc_record_check_property_flag((ctsvc_record_s *)contact, _contacts_contact.display_name, CTSVC_PROPERTY_FLAG_DIRTY) &&
+		if (false == ctsvc_record_check_property_flag((ctsvc_record_s *)contact, _contacts_contact.display_name, CTSVC_PROPERTY_FLAG_DIRTY) &&
 				contact->numbers && contact->numbers->records) {
 			for (cur=contact->numbers->records;cur;cur=cur->next) {
 				ctsvc_number_s *number = (ctsvc_number_s *)cur->data;
@@ -1197,7 +1197,7 @@ void ctsvc_contact_make_display_name(ctsvc_contact_s *contact)
 			}
 		}
 
-		if (!ctsvc_record_check_property_flag((ctsvc_record_s *)contact, _contacts_contact.display_name, CTSVC_PROPERTY_FLAG_DIRTY) &&
+		if (false == ctsvc_record_check_property_flag((ctsvc_record_s *)contact, _contacts_contact.display_name, CTSVC_PROPERTY_FLAG_DIRTY) &&
 				contact->emails && contact->emails->records) {
 			for (cur=contact->emails->records;cur;cur=cur->next) {
 				ctsvc_email_s *email = (ctsvc_email_s *)cur->data;
@@ -1390,7 +1390,7 @@ bool ctsvc_contact_check_default_number(contacts_list_h number_list)
 	contacts_list_first(number_list);
 	do {
 		contacts_list_get_current_record_p(number_list, (contacts_record_h*)&number);
-		if (NULL != number && number->number && *number->number) {
+		if (number && number->number && *number->number) {
 			if (number->is_default && false == has_default)
 				has_default = true;
 			else if (has_default)
@@ -1402,7 +1402,7 @@ bool ctsvc_contact_check_default_number(contacts_list_h number_list)
 		contacts_list_first(number_list);
 		do {
 			contacts_list_get_current_record_p(number_list, (contacts_record_h*)&number);
-			if (NULL != number && number->number && *number->number) {
+			if (number && number->number && *number->number) {
 				number->is_default = true;
 				ctsvc_record_set_property_flag((ctsvc_record_s *)number, _contacts_number.is_default, CTSVC_PROPERTY_FLAG_DIRTY);
 				has_default = true;
@@ -1429,7 +1429,7 @@ bool ctsvc_contact_check_default_email(contacts_list_h email_list)
 	contacts_list_first(email_list);
 	do {
 		contacts_list_get_current_record_p(email_list, (contacts_record_h*)&email);
-		if (NULL != email && email->email_addr && *email->email_addr) {
+		if (email && email->email_addr && *email->email_addr) {
 			if (email->is_default && false == has_default)
 				has_default = true;
 			else if (has_default)
@@ -1441,7 +1441,7 @@ bool ctsvc_contact_check_default_email(contacts_list_h email_list)
 		contacts_list_first(email_list);
 		do {
 			contacts_list_get_current_record_p(email_list, (contacts_record_h*)&email);
-			if (NULL != email && email->email_addr && *email->email_addr) {
+			if (email && email->email_addr && *email->email_addr) {
 				email->is_default = true;
 				ctsvc_record_set_property_flag((ctsvc_record_s *)email, _contacts_email.is_default, CTSVC_PROPERTY_FLAG_DIRTY);
 				has_default = true;
@@ -1470,7 +1470,7 @@ bool ctsvc_contact_check_default_image(contacts_list_h image_list)
 	contacts_list_first(image_list);
 	do {
 		contacts_list_get_current_record_p(image_list, (contacts_record_h*)&image);
-		if (NULL != image && image->path && *image->path) {
+		if (image && image->path && *image->path) {
 			if (image->is_default && false == has_default)
 				has_default = true;
 			else if (has_default)
@@ -1482,7 +1482,7 @@ bool ctsvc_contact_check_default_image(contacts_list_h image_list)
 		contacts_list_first(image_list);
 		do {
 			contacts_list_get_current_record_p(image_list, (contacts_record_h*)&image);
-			if (NULL != image && image->path && *image->path) {
+			if (image && image->path && *image->path) {
 				image->is_default = true;
 				ctsvc_record_set_property_flag((ctsvc_record_s *)image, _contacts_image.is_default, CTSVC_PROPERTY_FLAG_DIRTY);
 				has_default = true;
@@ -1511,7 +1511,7 @@ bool ctsvc_contact_check_default_address(contacts_list_h address_list)
 	contacts_list_first(address_list);
 	do {
 		contacts_list_get_current_record_p(address_list, (contacts_record_h*)&address);
-		if (NULL != address &&
+		if (address &&
 						(address->pobox || address->postalcode || address->region || address->locality
 							|| address->street || address->extended || address->country)) {
 			if (address->is_default && false == has_default)
@@ -1525,7 +1525,7 @@ bool ctsvc_contact_check_default_address(contacts_list_h address_list)
 		contacts_list_first(address_list);
 		do {
 			contacts_list_get_current_record_p(address_list, (contacts_record_h*)&address);
-			if (NULL != address &&
+			if (address &&
 						(address->pobox || address->postalcode || address->region || address->locality
 							|| address->street || address->extended || address->country)) {
 				address->is_default = true;

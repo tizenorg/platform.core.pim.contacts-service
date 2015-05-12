@@ -179,13 +179,13 @@ const char *ctsvc_get_language_locale(int lang)
 	case CTSVC_LANG_GALICIAN: // gl, Spain - Galician
 		return "gl";
 	case CTSVC_LANG_HINDI: // hi, India - Hindi, Marathi, Nepali
-		if (!strncmp(langset, "hi", strlen("hi"))) {
+		if (STRING_EQUAL == strncmp(langset, "hi", strlen("hi"))) {
 			return "hi";
 		}
-		else if (!strncmp(langset, "mr", strlen("mr"))) {
+		else if (STRING_EQUAL == strncmp(langset, "mr", strlen("mr"))) {
 			return "mr";
 		}
-		else if (!strncmp(langset, "ne", strlen("ne"))) {
+		else if (STRING_EQUAL == strncmp(langset, "ne", strlen("ne"))) {
 			return "ne";
 		}
 		return "hi";
@@ -242,7 +242,7 @@ const char *ctsvc_get_language_locale(int lang)
 	case CTSVC_LANG_THAI: // th_TH, Thai
 		return "th";
 	case CTSVC_LANG_BENGALI: // as, bn
-		if (!strncmp(langset, "as", strlen("as"))) {
+		if (STRING_EQUAL == strncmp(langset, "as", strlen("as"))) {
 			return "as";
 		}
 		return "bn";
@@ -299,183 +299,183 @@ int ctsvc_get_language_type(const char *system_lang)
 	RETV_IF(NULL == system_lang, CTSVC_LANG_OTHERS);
 
 	// az, Azerbaijan
-	if (!strncmp(system_lang, "az", strlen("az")))
+	if (STRING_EQUAL == strncmp(system_lang, "az", strlen("az")))
 		type = CTSVC_LANG_AZERBAIJAN;
 	// ar, Bahrain - Arabic
-	else if (!strncmp(system_lang, "ar", strlen("ar")))
+	else if (STRING_EQUAL == strncmp(system_lang, "ar", strlen("ar")))
 		type = CTSVC_LANG_ARABIC;
 	// bg, Bulgaria - Bulgarian
-	else if (!strncmp(system_lang, "bg", strlen("bg")))
+	else if (STRING_EQUAL == strncmp(system_lang, "bg", strlen("bg")))
 		type = CTSVC_LANG_BULGARIAN;
 	// ca, Spain - Catalan
-	else if (!strncmp(system_lang, "ca", strlen("ca")))
+	else if (STRING_EQUAL == strncmp(system_lang, "ca", strlen("ca")))
 		type = CTSVC_LANG_CATALAN;
 	// cs, Czech Republic - Czech
-	else if (!strncmp(system_lang, "cs", strlen("cs")))
+	else if (STRING_EQUAL == strncmp(system_lang, "cs", strlen("cs")))
 		type = CTSVC_LANG_CZECH;
 	// da, Denmark - Danish
-	else if (!strncmp(system_lang, "da", strlen("da")))
+	else if (STRING_EQUAL == strncmp(system_lang, "da", strlen("da")))
 		type = CTSVC_LANG_DANISH;
 	// de, Germany - German
-	else if (!strncmp(system_lang, "de", strlen("de")))
+	else if (STRING_EQUAL == strncmp(system_lang, "de", strlen("de")))
 		type = CTSVC_LANG_GERMAN;
 	// el, Greece - Greek
-	else if (!strncmp(system_lang, "el", strlen("el")))
+	else if (STRING_EQUAL == strncmp(system_lang, "el", strlen("el")))
 		type = CTSVC_LANG_GREEK;
 	// en, en_PH, en_US
-	else if (!strncmp(system_lang, "en", strlen("en")))
+	else if (STRING_EQUAL == strncmp(system_lang, "en", strlen("en")))
 		type = CTSVC_LANG_ENGLISH;
 	// es_ES, es_US, El Salvador - Spanish
-	else if (!strncmp(system_lang, "es", strlen("es")))
+	else if (STRING_EQUAL == strncmp(system_lang, "es", strlen("es")))
 		type = CTSVC_LANG_SPANISH;
 	// et, Estonia - Estonian
-	else if (!strncmp(system_lang, "et", strlen("et")))
+	else if (STRING_EQUAL == strncmp(system_lang, "et", strlen("et")))
 		type = CTSVC_LANG_ESTONIAN;
 	// eu, Spain - Basque
-	else if (!strncmp(system_lang, "eu", strlen("eu")))
+	else if (STRING_EQUAL == strncmp(system_lang, "eu", strlen("eu")))
 		type = CTSVC_LANG_BASQUE;
 	// fi, Finland - Finnish
-	else if (!strncmp(system_lang, "fi", strlen("fi")))
+	else if (STRING_EQUAL == strncmp(system_lang, "fi", strlen("fi")))
 		type = CTSVC_LANG_FINNISH;
 	// fr_CA, fr_FR
-	else if (!strncmp(system_lang, "fr", strlen("fr")))
+	else if (STRING_EQUAL == strncmp(system_lang, "fr", strlen("fr")))
 		type = CTSVC_LANG_FRENCH;
 	// ga, Ireland - Irish
-	else if (!strncmp(system_lang, "ga", strlen("ga")))
+	else if (STRING_EQUAL == strncmp(system_lang, "ga", strlen("ga")))
 		type = CTSVC_LANG_IRISH;
 	// gl, Spain - Galician
-	else if (!strncmp(system_lang, "gl", strlen("gl")))
+	else if (STRING_EQUAL == strncmp(system_lang, "gl", strlen("gl")))
 		type = CTSVC_LANG_GALICIAN;
 	// hi, India - Hindi
-	else if (!strncmp(system_lang, "hi", strlen("hi")))
+	else if (STRING_EQUAL == strncmp(system_lang, "hi", strlen("hi")))
 		type = CTSVC_LANG_HINDI;
 	// mr, India - marathi
-	else if (!strncmp(system_lang, "mr", strlen("mr")))
+	else if (STRING_EQUAL == strncmp(system_lang, "mr", strlen("mr")))
 		type = CTSVC_LANG_HINDI;
 	// ne, India - nepal
-	else if (!strncmp(system_lang, "ne", strlen("ne")))
+	else if (STRING_EQUAL == strncmp(system_lang, "ne", strlen("ne")))
 		type = CTSVC_LANG_HINDI;
 	// hr, Bosnia and Herzegovina - Croatian
-	else if (!strncmp(system_lang, "hr", strlen("hr")))
+	else if (STRING_EQUAL == strncmp(system_lang, "hr", strlen("hr")))
 		type = CTSVC_LANG_CROATIAN;
 	// hu, Hungary - Hungarian
-	else if (!strncmp(system_lang, "hu", strlen("hu")))
+	else if (STRING_EQUAL == strncmp(system_lang, "hu", strlen("hu")))
 		type = CTSVC_LANG_HUNGARIAN;
 	// hy, Armenia - Armenian
-	else if (!strncmp(system_lang, "hy", strlen("hy")))
+	else if (STRING_EQUAL == strncmp(system_lang, "hy", strlen("hy")))
 		type = CTSVC_LANG_ARMENIAN;
 	// is, Iceland - Icelandic
-	else if (!strncmp(system_lang, "is", strlen("is")))
+	else if (STRING_EQUAL == strncmp(system_lang, "is", strlen("is")))
 		type = CTSVC_LANG_ICELANDIC;
 	// it_IT, Italy - Italian
-	else if (!strncmp(system_lang, "it", strlen("it")))
+	else if (STRING_EQUAL == strncmp(system_lang, "it", strlen("it")))
 		type = CTSVC_LANG_ITALIAN;
 	// ja_JP, japan
-	else if (!strncmp(system_lang, "ja", strlen("ja")))
+	else if (STRING_EQUAL == strncmp(system_lang, "ja", strlen("ja")))
 		type = CTSVC_LANG_JAPANESE;
 	// ka, Georgia - Georgian
-	else if (!strncmp(system_lang, "ka", strlen("ka")))
+	else if (STRING_EQUAL == strncmp(system_lang, "ka", strlen("ka")))
 		type = CTSVC_LANG_GEORGIAN;
 	// kk, Kazakhstan
-	else if (!strncmp(system_lang, "kk", strlen("kk")))
+	else if (STRING_EQUAL == strncmp(system_lang, "kk", strlen("kk")))
 		type = CTSVC_LANG_KAZAKHSTAN;
 	// ko, ko_KR
-	else if (!strncmp(system_lang, "ko", strlen("ko")))
+	else if (STRING_EQUAL == strncmp(system_lang, "ko", strlen("ko")))
 		type = CTSVC_LANG_KOREAN;
 	// lt, Lithuania - Lithuanian
-	else if (!strncmp(system_lang, "lt", strlen("lt")))
+	else if (STRING_EQUAL == strncmp(system_lang, "lt", strlen("lt")))
 		type = CTSVC_LANG_LITHUANIAN;
 	// lv, Latvia - Latvian
-	else if (!strncmp(system_lang, "lv", strlen("lv")))
+	else if (STRING_EQUAL == strncmp(system_lang, "lv", strlen("lv")))
 		type = CTSVC_LANG_LATVIAN;
 	// mk, Macedonia
-	else if (!strncmp(system_lang, "mk", strlen("mk")))
+	else if (STRING_EQUAL == strncmp(system_lang, "mk", strlen("mk")))
 		type = CTSVC_LANG_MACEDONIA;
 	// nb, Norway
-	else if (!strncmp(system_lang, "nb", strlen("nb")))
+	else if (STRING_EQUAL == strncmp(system_lang, "nb", strlen("nb")))
 		type = CTSVC_LANG_NORWAY;
 	// nl_Nl, Netherlands Dutch
-	else if (!strncmp(system_lang, "nl", strlen("nl")))
+	else if (STRING_EQUAL == strncmp(system_lang, "nl", strlen("nl")))
 		type = CTSVC_LANG_DUTCH;
 	// pl, Polish
-	else if (!strncmp(system_lang, "pl", strlen("pl")))
+	else if (STRING_EQUAL == strncmp(system_lang, "pl", strlen("pl")))
 		type = CTSVC_LANG_POLISH;
 	// pt_BR, pt_PT, Portugal
-	else if (!strncmp(system_lang, "pt", strlen("pt")))
+	else if (STRING_EQUAL == strncmp(system_lang, "pt", strlen("pt")))
 		type = CTSVC_LANG_PORTUGUESE;
 	// ro, Romania
-	else if (!strncmp(system_lang, "ro", strlen("ro")))
+	else if (STRING_EQUAL == strncmp(system_lang, "ro", strlen("ro")))
 		type = CTSVC_LANG_ROMANIA;
 	// ru_RU, Russia
-	else if (!strncmp(system_lang, "ru", strlen("ru")))
+	else if (STRING_EQUAL == strncmp(system_lang, "ru", strlen("ru")))
 		type = CTSVC_LANG_RUSSIAN;
 	// sk, Slovakia - Slovak
-	else if (!strncmp(system_lang, "sk", strlen("sk")))
+	else if (STRING_EQUAL == strncmp(system_lang, "sk", strlen("sk")))
 		type = CTSVC_LANG_SLOVAK;
 	// sl, Slovenia - Slovenian
-	else if (!strncmp(system_lang, "sl", strlen("sl")))
+	else if (STRING_EQUAL == strncmp(system_lang, "sl", strlen("sl")))
 		type = CTSVC_LANG_SLOVENIAN;
 	// sr, Serbia - Serbian
-	else if (!strncmp(system_lang, "sr", strlen("sr")))
+	else if (STRING_EQUAL == strncmp(system_lang, "sr", strlen("sr")))
 		type = CTSVC_LANG_SERBIAN;
 	// sv, Finland - Swedish
-	else if (!strncmp(system_lang, "sv", strlen("sv")))
+	else if (STRING_EQUAL == strncmp(system_lang, "sv", strlen("sv")))
 		type = CTSVC_LANG_SWEDISH;
 	// tr_TR, Turkey - Turkish
-	else if (!strncmp(system_lang, "tr", strlen("tr")))
+	else if (STRING_EQUAL == strncmp(system_lang, "tr", strlen("tr")))
 		type = CTSVC_LANG_TURKISH;
 	// uk, Ukraine
-	else if (!strncmp(system_lang, "uk", strlen("uk")))
+	else if (STRING_EQUAL == strncmp(system_lang, "uk", strlen("uk")))
 		type = CTSVC_LANG_UKRAINE;
 	// zh_CN, zh_HK, zh_SG, zh_TW
-	else if (!strncmp(system_lang, "zh", strlen("zh")))
+	else if (STRING_EQUAL == strncmp(system_lang, "zh", strlen("zh")))
 		type = CTSVC_LANG_CHINESE;
 	// th_TH
-	else if (!strncmp(system_lang, "th", strlen("th")))
+	else if (STRING_EQUAL == strncmp(system_lang, "th", strlen("th")))
 		type = CTSVC_LANG_THAI;
-	else if (!strncmp(system_lang, "as", strlen("as")))
+	else if (STRING_EQUAL == strncmp(system_lang, "as", strlen("as")))
 		type = CTSVC_LANG_BENGALI;
-	else if (!strncmp(system_lang, "bn", strlen("bn")))
+	else if (STRING_EQUAL == strncmp(system_lang, "bn", strlen("bn")))
 		type = CTSVC_LANG_BENGALI;
-	else if (!strncmp(system_lang, "pa", strlen("pa")))
+	else if (STRING_EQUAL == strncmp(system_lang, "pa", strlen("pa")))
 		type = CTSVC_LANG_PUNJABI;
-	else if (!strncmp(system_lang, "ml", strlen("ml")))
+	else if (STRING_EQUAL == strncmp(system_lang, "ml", strlen("ml")))
 		type = CTSVC_LANG_MALAYALAM;
-	else if (!strncmp(system_lang, "te", strlen("te")))
+	else if (STRING_EQUAL == strncmp(system_lang, "te", strlen("te")))
 		type = CTSVC_LANG_TELUGU;
-	else if (!strncmp(system_lang, "ta", strlen("ta")))
+	else if (STRING_EQUAL == strncmp(system_lang, "ta", strlen("ta")))
 		type = CTSVC_LANG_TAMIL;
-	else if (!strncmp(system_lang, "or", strlen("or")))
+	else if (STRING_EQUAL == strncmp(system_lang, "or", strlen("or")))
 		type = CTSVC_LANG_ORIYA;
-	else if (!strncmp(system_lang, "si", strlen("si")))
+	else if (STRING_EQUAL == strncmp(system_lang, "si", strlen("si")))
 		type = CTSVC_LANG_SINHALA;
-	else if (!strncmp(system_lang, "gu", strlen("gu")))
+	else if (STRING_EQUAL == strncmp(system_lang, "gu", strlen("gu")))
 		type = CTSVC_LANG_GUJARATI;
-	else if (!strncmp(system_lang, "kn", strlen("kn")))
+	else if (STRING_EQUAL == strncmp(system_lang, "kn", strlen("kn")))
 		type = CTSVC_LANG_KANNADA;
-	else if (!strncmp(system_lang, "lo", strlen("lo")))
+	else if (STRING_EQUAL == strncmp(system_lang, "lo", strlen("lo")))
 		type = CTSVC_LANG_LAO;
-	else if (!strncmp(system_lang, "he", strlen("he")))
+	else if (STRING_EQUAL == strncmp(system_lang, "he", strlen("he")))
 		type = CTSVC_LANG_HEBREW;
-	else if (!strncmp(system_lang, "vi", strlen("vi")))
+	else if (STRING_EQUAL == strncmp(system_lang, "vi", strlen("vi")))
 		type = CTSVC_LANG_VIETNAMESE;
-	else if (!strncmp(system_lang, "fa", strlen("fa")))
+	else if (STRING_EQUAL == strncmp(system_lang, "fa", strlen("fa")))
 		type = CTSVC_LANG_PERSIAN;
-	else if (!strncmp(system_lang, "uz", strlen("uz")))
+	else if (STRING_EQUAL == strncmp(system_lang, "uz", strlen("uz")))
 		type = CTSVC_LANG_UZBEK;
-	else if (!strncmp(system_lang, "ur", strlen("ur")))
+	else if (STRING_EQUAL == strncmp(system_lang, "ur", strlen("ur")))
 		type = CTSVC_LANG_URDU;
-	else if (!strncmp(system_lang, "sq", strlen("sq")))
+	else if (STRING_EQUAL == strncmp(system_lang, "sq", strlen("sq")))
 		type = CTSVC_LANG_ALBANIAN;
-	else if (!strncmp(system_lang, "my", strlen("my")))
+	else if (STRING_EQUAL == strncmp(system_lang, "my", strlen("my")))
 		type = CTSVC_LANG_BURMESE;
-	else if (!strncmp(system_lang, "ms", strlen("ms")))
+	else if (STRING_EQUAL == strncmp(system_lang, "ms", strlen("ms")))
 		type = CTSVC_LANG_MALAY;
-	else if (!strncmp(system_lang, "km", strlen("km")))
+	else if (STRING_EQUAL == strncmp(system_lang, "km", strlen("km")))
 		type = CTSVC_LANG_KHMER;
-	else if (!strncmp(system_lang, "id", strlen("id")))
+	else if (STRING_EQUAL == strncmp(system_lang, "id", strlen("id")))
 		type = CTSVC_LANG_INDONESIAN;
-	else if (!strncmp(system_lang, "tl", strlen("tl")))
+	else if (STRING_EQUAL == strncmp(system_lang, "tl", strlen("tl")))
 		type = CTSVC_LANG_TAGALOG;
 	else
 		type = CTSVC_LANG_OTHERS;
