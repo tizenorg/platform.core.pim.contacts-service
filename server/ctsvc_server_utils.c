@@ -70,7 +70,7 @@ static void __ctsvc_server_change_language_cb(keynode_t *key, void *data)
 	new_langset = vconf_keynode_get_str(key);
 	langset = ctsvc_get_langset();
 	INFO("%s --> %s", langset, new_langset);
-	if (strcmp(langset, new_langset) != 0) {
+	if (STRING_EQUAL != strcmp(langset, new_langset)) {
 		bool sort_name_update = false;
 		old_primary_sort = ctsvc_get_primary_sort();
 		if (old_primary_sort < 0) {

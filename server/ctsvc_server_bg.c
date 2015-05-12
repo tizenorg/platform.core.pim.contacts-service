@@ -461,7 +461,7 @@ static bool __ctsvc_server_account_delete_cb(const char* event_type, int account
 {
 	CTS_FN_CALL;
 	CTS_INFO("event_type : %s, account_id : %d", event_type, account_id);
-	if (strcmp(event_type, ACCOUNT_NOTI_NAME_DELETE) == 0)
+	if (STRING_EQUAL == strcmp(event_type, ACCOUNT_NOTI_NAME_DELETE))
 		ctsvc_addressbook_delete(account_id);
 	return true;
 }

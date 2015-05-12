@@ -186,7 +186,7 @@ int main(int argc, char *argv[])
 	}
 
 	ctsvc_server_check_schema();
-	if (2 <= argc && !strcmp(argv[1], "schema"))
+	if (2 <= argc && STRING_EQUAL ==strcmp(argv[1], "schema"))
 		return CONTACTS_ERROR_NONE;
 
 	ctsvc_create_rep_set_permission(DATA_REPERTORY, 0755);

@@ -288,7 +288,7 @@ int ctsvc_inotify_subscribe(const char *view_uri,
 		if (it->data) {
 			same_noti = it->data;
 			if (same_noti->wd == wd && same_noti->cb == cb &&
-					strcmp(same_noti->view_uri, view_uri) == 0 && same_noti->cb_data == data)
+					STRING_EQUAL == strcmp(same_noti->view_uri, view_uri) && same_noti->cb_data == data)
 				break;
 			else
 				same_noti = NULL;
@@ -332,7 +332,7 @@ static inline int __ctsvc_del_noti(GSList **noti_list, int wd,
 		noti_info *noti = it->data;
 		if (noti && wd == noti->wd) {
 			if (cb == noti->cb && user_data == noti->cb_data
-				&& 0 == strcmp(noti->view_uri, view_uri)) {
+				&& STRING_EQUAL == strcmp(noti->view_uri, view_uri)) {
 				it = it->next;
 				result = g_slist_remove(result, noti);
 				free(noti->view_uri);

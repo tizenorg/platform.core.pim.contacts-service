@@ -3301,7 +3301,7 @@ static int __ctsvc_company_set_str(contacts_record_h record, unsigned int proper
 		FREEandSTRDUP(company->role, str);
 		break;
 	case CTSVC_PROPERTY_COMPANY_LOGO:
-		if (company->logo && company->is_vcard && (NULL == str || 0 != strcmp(company->logo, str))) {
+		if (company->logo && company->is_vcard && (NULL == str || STRING_EQUAL != strcmp(company->logo, str))) {
 			company->is_vcard = false;
 			__ctsvc_temp_image_hash_table_remove(company->logo);
 		}
@@ -3597,7 +3597,7 @@ static int __ctsvc_image_set_str(contacts_record_h record, unsigned int property
 		FREEandSTRDUP(image->label, str);
 		break;
 	case CTSVC_PROPERTY_IMAGE_PATH:
-		if (image->path && image->is_vcard && (NULL == str || 0 != strcmp(image->path, str))) {
+		if (image->path && image->is_vcard && (NULL == str || STRING_EQUAL != strcmp(image->path, str))) {
 			image->is_vcard = false;
 			__ctsvc_temp_image_hash_table_remove(image->path);
 		}

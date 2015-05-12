@@ -163,7 +163,7 @@ int ctsvc_contact_update_image_file(int parent_id, int img_id,
 	WARN_IF(CONTACTS_ERROR_NONE != ret && CONTACTS_ERROR_NO_DATA != ret,
 			"__ctsvc_contact_get_current_image_file() Fail(%d)", ret);
 	if (*dest) {
-		if (src_img && strcmp(dest, src_img) == 0) {
+		if (src_img && STRING_EQUAL == strcmp(dest, src_img)) {
 			snprintf(dest_name, dest_size, "%s", src_img + strlen(CTSVC_CONTACT_IMG_FULL_LOCATION) + 1);
 			return CONTACTS_ERROR_NONE;
 		}

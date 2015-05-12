@@ -182,7 +182,7 @@ static void __ctsvc_set_permission_info(ctsvc_permission_info_s *info)
 			info->write_list[write_index++] = id;
 		else if (NULL == info->ipc) // contacts-service daemon
 			info->write_list[write_index++] = id;
-		else if (info->smack && temp && 0 == strcmp(temp, info->smack)) // owner
+		else if (info->smack && temp && STRING_EQUAL == strcmp(temp, info->smack)) // owner
 			info->write_list[write_index++] = id;
 		else if (CONTACTS_ADDRESS_BOOK_MODE_NONE == mode)
 			info->write_list[write_index++] = id;
@@ -403,7 +403,7 @@ int ctsvc_is_owner(int addressbook_id)
 	saved_smack = ctsvc_stmt_get_text(stmt, 1);
 	smack = ctsvc_get_client_smack_label();
 
-	if (smack && strcmp(smack, saved_smack) == 0)
+	if (smack && STRING_EQUAL == strcmp(smack, saved_smack))
 		ret = CONTACTS_ERROR_NONE;
 
 	ctsvc_stmt_finalize(stmt);

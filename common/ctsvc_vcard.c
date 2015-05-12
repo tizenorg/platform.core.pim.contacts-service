@@ -3702,7 +3702,7 @@ static inline int __ctsvc_vcard_check_version(const char *src)
 		if (start) break;
 	}
 
-	if (0 == strcmp(src, ver3))
+	if (STRING_EQUAL == strcmp(src, ver3))
 		return CTSVC_VCARD_VER_3_0;
 	else
 		return CTSVC_VCARD_VER_2_1;
