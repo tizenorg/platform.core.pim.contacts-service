@@ -142,7 +142,6 @@ int ctsvc_convert_japanese_to_hiragana_unicode(UChar *src, UChar *dest, int dest
 
 int ctsvc_convert_japanese_to_hiragana(const char *src, char **dest)
 {
-	int ret = CONTACTS_ERROR_NONE;
 	UChar *tmp_result = NULL;
 	UChar *result = NULL;
 	UErrorCode status = 0;
@@ -151,44 +150,60 @@ int ctsvc_convert_japanese_to_hiragana(const char *src, char **dest)
 	u_strFromUTF8(NULL, 0, &size, src, strlen(src), &status);
 	if (U_FAILURE(status) && status != U_BUFFER_OVERFLOW_ERROR) {
 		CTS_ERR("u_strFromUTF8 to get the dest length Failed(%s)", u_errorName(status));
-		ret = CONTACTS_ERROR_SYSTEM;
-		goto DATA_FREE;
+		return CONTACTS_ERROR_SYSTEM;
 	}
 	status = U_ZERO_ERROR;
 	tmp_result = calloc(1, sizeof(UChar) * (size + 1));
+	if (NULL == tmp_result) {
+		CTS_ERR("calloc Fail");
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
+	}
+
 	u_strFromUTF8(tmp_result, size + 1, NULL, src, -1, &status);
 	if (U_FAILURE(status)) {
 		CTS_ERR("u_strFromUTF8 Failed(%s)", u_errorName(status));
-		ret = CONTACTS_ERROR_SYSTEM;
-		goto DATA_FREE;
+		free(tmp_result);
+		return CONTACTS_ERROR_SYSTEM;
 	}
 
 	result = calloc(1, sizeof(UChar) * (size + 1));
+	if (NULL == tmp_result) {
+		CTS_ERR("calloc() Fail");
+		free(tmp_result);
+		free(result);
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
+	}
 
 	ctsvc_convert_japanese_to_hiragana_unicode(tmp_result, result, size + 1);
-
 	u_strToUTF8(NULL, 0, &size, result, -1, &status);
 	if (U_FAILURE(status) && status != U_BUFFER_OVERFLOW_ERROR) {
 		CTS_ERR("u_strToUTF8 to get the dest length Failed(%s)", u_errorName(status));
-		ret = CONTACTS_ERROR_SYSTEM;
-		goto DATA_FREE;
+		free(tmp_result);
+		free(result);
+		return CONTACTS_ERROR_SYSTEM;
 	}
 
 	status = U_ZERO_ERROR;
 	*dest = calloc(1, sizeof(char)*(size+1));
-
-	u_strToUTF8(*dest, size + 1, &size, result, -1, &status);
-
-	if (U_FAILURE(status)) {
-		CTS_ERR("u_strToUTF8 Failed(%s)", u_errorName(status));
-		ret =  CONTACTS_ERROR_SYSTEM;
-		goto DATA_FREE;
+	if (NULL == *dest) {
+		CTS_ERR("calloc() Fail");
+		free(tmp_result);
+		free(result);
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
 	}
 
-DATA_FREE:
+	u_strToUTF8(*dest, size + 1, &size, result, -1, &status);
+	if (U_FAILURE(status)) {
+		CTS_ERR("u_strToUTF8 Failed(%s)", u_errorName(status));
+		free(tmp_result);
+		free(result);
+		free(*dest);
+		*dest = NULL;
+		return CONTACTS_ERROR_SYSTEM;
+	}
+
 	free(tmp_result);
 	free(result);
-
-	return ret;
+	return CONTACTS_ERROR_NONE;
 }
 

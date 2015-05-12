@@ -102,6 +102,7 @@ int ctsvc_server_socket_return(GIOChannel *src, int value, int attach_num, int *
 	CTS_FN_CALL;
 	int ret;
 	ctsvc_socket_msg_s msg = {0};
+	RETVM_IF(NULL == src, CONTACTS_ERROR_INVALID_PARAMETER, "src is NULL");
 
 	//	RETVM_IF(CONTACTS_ERROR_SYSTEM == value, value, "Socket has problems");
 	RETVM_IF(CTSVC_SOCKET_MSG_REQUEST_MAX_ATTACH < attach_num, CONTACTS_ERROR_INTERNAL,
