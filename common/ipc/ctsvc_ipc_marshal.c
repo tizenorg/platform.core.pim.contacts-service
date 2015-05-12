@@ -166,7 +166,6 @@ static void __ctsvc_ipc_unmarshal_composite_filter_free(ctsvc_composite_filter_s
 
 static int __ctsvc_ipc_unmarshal_composite_filter(const pims_ipc_data_h ipc_data, ctsvc_composite_filter_s* filter)
 {
-	int ret = CONTACTS_ERROR_NONE;
 	unsigned int size = 0;
 	char* str = NULL;
 	int count =0, i=0;
@@ -180,63 +179,63 @@ static int __ctsvc_ipc_unmarshal_composite_filter(const pims_ipc_data_h ipc_data
 	filter->view_uri = (char*)SAFE_STRDUP(str);
 
 	// filters
-	if (ctsvc_ipc_unmarshal_int(ipc_data,&count) != CONTACTS_ERROR_NONE) {
-		CTS_ERR("_ctsvc_ipc_unmarshal fail");
+	if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(ipc_data,&count)) {
+		CTS_ERR("ctsvc_ipc_unmarshal_int() Fail");
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 
 	for (i=0;i<count;i++) {
-		if (ctsvc_ipc_unmarshal_int(ipc_data,(int*)&filter_type) != CONTACTS_ERROR_NONE) {
-			CTS_ERR("_ctsvc_ipc_unmarshal fail");
-			ret = CONTACTS_ERROR_INVALID_PARAMETER;
-			goto ERROR_RETURN;
+		if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(ipc_data, (int*)&filter_type)) {
+			CTS_ERR("ctsvc_ipc_unmarshal_int() Fail");
+			__ctsvc_ipc_unmarshal_composite_filter_free(filter);
+			return CONTACTS_ERROR_IPC;
 		}
 		if (filter_type == CTSVC_FILTER_COMPOSITE) {
-			ctsvc_composite_filter_s* com_filter = NULL;
+			ctsvc_composite_filter_s *com_filter = NULL;
 			com_filter = (ctsvc_composite_filter_s*)calloc(1,sizeof(ctsvc_composite_filter_s));
 			if (com_filter == NULL) {
-				CTS_ERR("calloc fail");
-				ret = CONTACTS_ERROR_OUT_OF_MEMORY;
-				goto ERROR_RETURN;
+				CTS_ERR("calloc() Fail");
+				__ctsvc_ipc_unmarshal_composite_filter_free(filter);
+				return CONTACTS_ERROR_OUT_OF_MEMORY;
 			}
-			if (__ctsvc_ipc_unmarshal_composite_filter(ipc_data, com_filter) != CONTACTS_ERROR_NONE) {
-				CTS_ERR("_ctsvc_ipc_unmarshal fail");
-				ret = CONTACTS_ERROR_INVALID_PARAMETER;
+			if (CONTACTS_ERROR_NONE != __ctsvc_ipc_unmarshal_composite_filter(ipc_data, com_filter)) {
+				CTS_ERR("__ctsvc_ipc_unmarshal_composite_filter() Fail");
 				CONTACTS_FREE(com_filter);
-				goto ERROR_RETURN;
+				__ctsvc_ipc_unmarshal_composite_filter_free(filter);
+				return CONTACTS_ERROR_IPC;
 			}
-			filter->filters = g_slist_append(filter->filters,com_filter);
+			filter->filters = g_slist_append(filter->filters, com_filter);
 		}
 		else {
-			ctsvc_attribute_filter_s* attr_filter = NULL;
+			ctsvc_attribute_filter_s *attr_filter = NULL;
 			attr_filter = (ctsvc_attribute_filter_s*)calloc(1,sizeof(ctsvc_attribute_filter_s));
 			if (attr_filter == NULL) {
-				CTS_ERR("calloc fail");
-				ret = CONTACTS_ERROR_OUT_OF_MEMORY;
-				goto ERROR_RETURN;
+				CTS_ERR("calloc() Fail");
+				__ctsvc_ipc_unmarshal_composite_filter_free(filter);
+				return CONTACTS_ERROR_OUT_OF_MEMORY;
 			}
-			if (__ctsvc_ipc_unmarshal_attribute_filter(ipc_data, filter_type, attr_filter) != CONTACTS_ERROR_NONE) {
-				CTS_ERR("_ctsvc_ipc_unmarshal fail");
-				ret =  CONTACTS_ERROR_INVALID_PARAMETER;
+			if (CONTACTS_ERROR_NONE != __ctsvc_ipc_unmarshal_attribute_filter(ipc_data, filter_type, attr_filter)) {
+				CTS_ERR("__ctsvc_ipc_unmarshal_attribute_filter() Fail");
 				CONTACTS_FREE(attr_filter);
-				goto ERROR_RETURN;
+				__ctsvc_ipc_unmarshal_composite_filter_free(filter);
+				return CONTACTS_ERROR_IPC;
 			}
 			filter->filters = g_slist_append(filter->filters,attr_filter);
 		}
 	}
 
 	// filters
-	if (ctsvc_ipc_unmarshal_int(ipc_data,&count) != CONTACTS_ERROR_NONE) {
-		CTS_ERR("_ctsvc_ipc_unmarshal fail");
-		ret =  CONTACTS_ERROR_INVALID_PARAMETER;
-		goto ERROR_RETURN;
+	if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(ipc_data, &count)) {
+		CTS_ERR("ctsvc_ipc_unmarshal_int() Fail");
+		__ctsvc_ipc_unmarshal_composite_filter_free(filter);
+		return CONTACTS_ERROR_IPC;
 	}
 
 	for (i=0;i<count;i++) {
-		if (ctsvc_ipc_unmarshal_int(ipc_data,(int*)&op) != CONTACTS_ERROR_NONE) {
-			CTS_ERR("_ctsvc_ipc_unmarshal fail");
-			ret =  CONTACTS_ERROR_INVALID_PARAMETER;
-			goto ERROR_RETURN;
+		if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(ipc_data, (int *)&op)) {
+			CTS_ERR("ctsvc_ipc_unmarshal_int() Fail");
+			__ctsvc_ipc_unmarshal_composite_filter_free(filter);
+			return CONTACTS_ERROR_IPC;
 		}
 		filter->filter_ops = g_slist_append(filter->filter_ops, (void*)op);
 	}
@@ -245,23 +244,19 @@ static int __ctsvc_ipc_unmarshal_composite_filter(const pims_ipc_data_h ipc_data
 	filter->properties = (property_info_s *)ctsvc_view_get_all_property_infos(filter->view_uri, &filter->property_count);
 
 	return CONTACTS_ERROR_NONE;
-
-ERROR_RETURN:
-	__ctsvc_ipc_unmarshal_composite_filter_free(filter);
-	return ret;
 }
 
 static int __ctsvc_ipc_marshal_composite_filter(const ctsvc_composite_filter_s* filter, pims_ipc_data_h ipc_data)
 {
-	if (ctsvc_ipc_marshal_int((filter->filter_type),ipc_data) != CONTACTS_ERROR_NONE) {
-		CTS_ERR("_ctsvc_ipc_marshal fail");
+	if (CONTACTS_ERROR_NONE != ctsvc_ipc_marshal_int((filter->filter_type),ipc_data)) {
+		CTS_ERR("ctsvc_ipc_marshal_int() Fail");
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 
 	// view_uri
 	int length = strlen(filter->view_uri);
 	if (pims_ipc_data_put(ipc_data,(void*)filter->view_uri,length+1) < 0) {
-		CTS_ERR("_ctsvc_ipc_marshal fail");
+		CTS_ERR("pims_ipc_data_put() Fail");
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	// filter->filters
@@ -270,22 +265,22 @@ static int __ctsvc_ipc_marshal_composite_filter(const ctsvc_composite_filter_s* 
 		GSList *cursor = filter->filters;
 		ctsvc_filter_s* child_filter;
 
-		if (ctsvc_ipc_marshal_int(count,ipc_data) != CONTACTS_ERROR_NONE) {
-			CTS_ERR("_ctsvc_ipc_marshal fail");
+		if (CONTACTS_ERROR_NONE != ctsvc_ipc_marshal_int(count,ipc_data)) {
+			CTS_ERR("ctsvc_ipc_marshal_int() Fail");
 			return CONTACTS_ERROR_INVALID_PARAMETER;
 		}
 		while (cursor) {
 			child_filter = (ctsvc_filter_s*)cursor->data;
 
 			if (child_filter->filter_type == CTSVC_FILTER_COMPOSITE) {
-				if (__ctsvc_ipc_marshal_composite_filter((ctsvc_composite_filter_s*)child_filter, ipc_data) != CONTACTS_ERROR_NONE) {
-					CTS_ERR("__ctsvc_ipc_marshal_composite_filter fail");
+				if (CONTACTS_ERROR_NONE != __ctsvc_ipc_marshal_composite_filter((ctsvc_composite_filter_s*)child_filter, ipc_data)) {
+					CTS_ERR("__ctsvc_ipc_marshal_composite_filter() Fail");
 					return CONTACTS_ERROR_INVALID_PARAMETER;
 				}
 			}
 			else {
-				if (__ctsvc_ipc_marshal_attribute_filter((ctsvc_attribute_filter_s*)child_filter, ipc_data) != CONTACTS_ERROR_NONE) {
-					CTS_ERR("__ctsvc_ipc_marshal_attribute_filter fail");
+				if (CONTACTS_ERROR_NONE != __ctsvc_ipc_marshal_attribute_filter((ctsvc_attribute_filter_s*)child_filter, ipc_data)) {
+					CTS_ERR("__ctsvc_ipc_marshal_attribute_filter() Fail");
 					return CONTACTS_ERROR_INVALID_PARAMETER;
 				}
 			}
@@ -293,8 +288,8 @@ static int __ctsvc_ipc_marshal_composite_filter(const ctsvc_composite_filter_s* 
 		}
 	}
 	else {
-		if (ctsvc_ipc_marshal_int(0,ipc_data) != CONTACTS_ERROR_NONE) {
-			CTS_ERR("_ctsvc_ipc_marshal fail");
+		if (CONTACTS_ERROR_NONE != ctsvc_ipc_marshal_int(0,ipc_data)) {
+			CTS_ERR("ctsvc_ipc_marshal_int() Fail");
 			return CONTACTS_ERROR_INVALID_PARAMETER;
 		}
 	}
@@ -303,15 +298,15 @@ static int __ctsvc_ipc_marshal_composite_filter(const ctsvc_composite_filter_s* 
 		int count = g_slist_length(filter->filter_ops);
 		GSList *cursor = filter->filter_ops;
 
-		if (ctsvc_ipc_marshal_int(count,ipc_data) != CONTACTS_ERROR_NONE) {
-			CTS_ERR("_ctsvc_ipc_marshal fail");
+		if (CONTACTS_ERROR_NONE != ctsvc_ipc_marshal_int(count,ipc_data)) {
+			CTS_ERR("ctsvc_ipc_marshal_int() Fail");
 			return CONTACTS_ERROR_INVALID_PARAMETER;
 		}
 		while (cursor) {
 			contacts_filter_operator_e op = (contacts_filter_operator_e)cursor->data;
 
-			if (ctsvc_ipc_marshal_int(op,ipc_data) != CONTACTS_ERROR_NONE) {
-				CTS_ERR("_ctsvc_ipc_marshal fail");
+			if (CONTACTS_ERROR_NONE != ctsvc_ipc_marshal_int(op,ipc_data)) {
+				CTS_ERR("ctsvc_ipc_marshal_int() Fail");
 				return CONTACTS_ERROR_INVALID_PARAMETER;
 			}
 
@@ -319,8 +314,8 @@ static int __ctsvc_ipc_marshal_composite_filter(const ctsvc_composite_filter_s* 
 		}
 	}
 	else {
-		if (ctsvc_ipc_marshal_int(0,ipc_data) != CONTACTS_ERROR_NONE) {
-			CTS_ERR("_ctsvc_ipc_marshal fail");
+		if (CONTACTS_ERROR_NONE != ctsvc_ipc_marshal_int(0,ipc_data)) {
+			CTS_ERR("ctsvc_ipc_marshal_int() Fail");
 			return CONTACTS_ERROR_INVALID_PARAMETER;
 		}
 	}
@@ -333,42 +328,42 @@ static int __ctsvc_ipc_marshal_composite_filter(const ctsvc_composite_filter_s* 
 static int __ctsvc_ipc_unmarshal_attribute_filter(const pims_ipc_data_h ipc_data, const ctsvc_filter_type_e filter_type, ctsvc_attribute_filter_s* filter)
 {
 	filter->filter_type = filter_type;
-	if (ctsvc_ipc_unmarshal_int(ipc_data,&filter->property_id) != CONTACTS_ERROR_NONE) {
-		CTS_ERR("_ctsvc_ipc_unmarshal fail");
+	if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(ipc_data,&filter->property_id)) {
+		CTS_ERR("ctsvc_ipc_unmarshal_int() Fail");
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
-	if (ctsvc_ipc_unmarshal_int(ipc_data,&filter->match) != CONTACTS_ERROR_NONE) {
-		CTS_ERR("_ctsvc_ipc_unmarshal fail");
+	if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(ipc_data,&filter->match)) {
+		CTS_ERR("ctsvc_ipc_unmarshal_int() Fail");
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	switch(filter->filter_type) {
 	case CTSVC_FILTER_STR:
-		if (ctsvc_ipc_unmarshal_string(ipc_data,&filter->value.s) != CONTACTS_ERROR_NONE) {
-			CTS_ERR("_ctsvc_ipc_unmarshal fail");
+		if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_string(ipc_data,&filter->value.s)) {
+			CTS_ERR("ctsvc_ipc_unmarshal_string() Fail");
 			return CONTACTS_ERROR_INVALID_PARAMETER;
 		}
 		break;
 	case CTSVC_FILTER_INT:
-		if (ctsvc_ipc_unmarshal_int(ipc_data,&filter->value.i) != CONTACTS_ERROR_NONE) {
-			CTS_ERR("_ctsvc_ipc_unmarshal fail");
+		if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(ipc_data,&filter->value.i)) {
+			CTS_ERR("ctsvc_ipc_unmarshal_int() Fail");
 			return CONTACTS_ERROR_INVALID_PARAMETER;
 		}
 		break;
 	case CTSVC_FILTER_BOOL:
-		if (ctsvc_ipc_unmarshal_bool(ipc_data,&filter->value.b) != CONTACTS_ERROR_NONE) {
-			CTS_ERR("_ctsvc_ipc_unmarshal fail");
+		if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_bool(ipc_data,&filter->value.b)) {
+			CTS_ERR("ctsvc_ipc_unmarshal_bool() Fail");
 			return CONTACTS_ERROR_INVALID_PARAMETER;
 		}
 		break;
 	case CTSVC_FILTER_DOUBLE:
-		if (ctsvc_ipc_unmarshal_double(ipc_data,&filter->value.d) != CONTACTS_ERROR_NONE) {
-			CTS_ERR("_ctsvc_ipc_unmarshal fail");
+		if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_double(ipc_data,&filter->value.d)) {
+			CTS_ERR("ctsvc_ipc_unmarshal_double() Fail");
 			return CONTACTS_ERROR_INVALID_PARAMETER;
 		}
 		break;
 	case CTSVC_FILTER_LLI:
-		if (ctsvc_ipc_unmarshal_lli(ipc_data,&filter->value.l) != CONTACTS_ERROR_NONE) {
-			CTS_ERR("_ctsvc_ipc_unmarshal fail");
+		if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_lli(ipc_data,&filter->value.l)) {
+			CTS_ERR("ctsvc_ipc_unmarshal_lli() Fail");
 			return CONTACTS_ERROR_INVALID_PARAMETER;
 		}
 		break;
@@ -380,46 +375,46 @@ static int __ctsvc_ipc_unmarshal_attribute_filter(const pims_ipc_data_h ipc_data
 
 static int __ctsvc_ipc_marshal_attribute_filter(const ctsvc_attribute_filter_s* filter, pims_ipc_data_h ipc_data)
 {
-	if (ctsvc_ipc_marshal_int((filter->filter_type),ipc_data) != CONTACTS_ERROR_NONE) {
-		CTS_ERR("_ctsvc_ipc_marshal fail");
+	if (CONTACTS_ERROR_NONE != ctsvc_ipc_marshal_int((filter->filter_type),ipc_data)) {
+		CTS_ERR("ctsvc_ipc_marshal_int() Fail");
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
-	if (ctsvc_ipc_marshal_int((filter->property_id),ipc_data) != CONTACTS_ERROR_NONE) {
-		CTS_ERR("_ctsvc_ipc_marshal fail");
+	if (CONTACTS_ERROR_NONE != ctsvc_ipc_marshal_int((filter->property_id),ipc_data)) {
+		CTS_ERR("ctsvc_ipc_marshal_int() Fail");
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
-	if (ctsvc_ipc_marshal_int((filter->match),ipc_data) != CONTACTS_ERROR_NONE) {
-		CTS_ERR("_ctsvc_ipc_marshal fail");
+	if (CONTACTS_ERROR_NONE != ctsvc_ipc_marshal_int((filter->match),ipc_data)) {
+		CTS_ERR("ctsvc_ipc_marshal_int() Fail");
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	switch(filter->filter_type) {
 	case CTSVC_FILTER_STR:
-		if (ctsvc_ipc_marshal_string((filter->value.s),ipc_data) != CONTACTS_ERROR_NONE) {
-			CTS_ERR("_ctsvc_ipc_marshal fail");
+		if (CONTACTS_ERROR_NONE != ctsvc_ipc_marshal_string((filter->value.s),ipc_data)) {
+			CTS_ERR("ctsvc_ipc_marshal_string() Fail");
 			return CONTACTS_ERROR_INVALID_PARAMETER;
 		}
 		break;
 	case CTSVC_FILTER_INT:
-		if (ctsvc_ipc_marshal_int((filter->value.i),ipc_data) != CONTACTS_ERROR_NONE) {
-			CTS_ERR("_ctsvc_ipc_marshal fail");
+		if (CONTACTS_ERROR_NONE != ctsvc_ipc_marshal_int((filter->value.i),ipc_data)) {
+			CTS_ERR("ctsvc_ipc_marshal_int() Fail");
 			return CONTACTS_ERROR_INVALID_PARAMETER;
 		}
 		break;
 	case CTSVC_FILTER_BOOL:
-		if (ctsvc_ipc_marshal_bool((filter->value.b),ipc_data) != CONTACTS_ERROR_NONE) {
-			CTS_ERR("_ctsvc_ipc_marshal fail");
+		if (CONTACTS_ERROR_NONE != ctsvc_ipc_marshal_bool((filter->value.b),ipc_data)) {
+			CTS_ERR("ctsvc_ipc_marshal_bool() Fail");
 			return CONTACTS_ERROR_INVALID_PARAMETER;
 		}
 		break;
 	case CTSVC_FILTER_DOUBLE:
-		if (ctsvc_ipc_marshal_double((filter->value.d),ipc_data) != CONTACTS_ERROR_NONE) {
-			CTS_ERR("_ctsvc_ipc_marshal fail");
+		if (CONTACTS_ERROR_NONE != ctsvc_ipc_marshal_double((filter->value.d),ipc_data)) {
+			CTS_ERR("ctsvc_ipc_marshal_double() Fail");
 			return CONTACTS_ERROR_INVALID_PARAMETER;
 		}
 		break;
 	case CTSVC_FILTER_LLI:
-		if (ctsvc_ipc_marshal_lli((filter->value.l),ipc_data) != CONTACTS_ERROR_NONE) {
-			CTS_ERR("_ctsvc_ipc_marshal fail");
+		if (CONTACTS_ERROR_NONE != ctsvc_ipc_marshal_lli((filter->value.l),ipc_data)) {
+			CTS_ERR("ctsvc_ipc_marshal_lli() Fail");
 			return CONTACTS_ERROR_INVALID_PARAMETER;
 		}
 		break;
@@ -440,8 +435,8 @@ int ctsvc_ipc_unmarshal_record(const pims_ipc_data_h ipc_data, contacts_record_h
 
 	RETVM_IF(NULL == precord || NULL == ipc_data, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter");
 
-	if (ctsvc_ipc_unmarshal_record_common(ipc_data, &common) != CONTACTS_ERROR_NONE) {
-		CTS_ERR("ctsvc_ipc_unmarshal_common fail");
+	if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_record_common(ipc_data, &common)) {
+		CTS_ERR("ctsvc_ipc_unmarshal_record_common() Fail");
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 
@@ -453,8 +448,8 @@ int ctsvc_ipc_unmarshal_record(const pims_ipc_data_h ipc_data, contacts_record_h
 	}
 
 	ret = contacts_record_create(common.view_uri, precord);
-	if (ret != CONTACTS_ERROR_NONE) {
-		CTS_ERR("create activity record fail");
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("contacts_record_create() Fail");
 		free(common.properties_flags);
 		return ret;
 	}
@@ -480,8 +475,8 @@ int ctsvc_ipc_marshal_record(const contacts_record_h record, pims_ipc_data_h ipc
 
 	ctsvc_record_s *common = (ctsvc_record_s*)(record);
 
-	if (ctsvc_ipc_marshal_record_common(common, ipc_data) != CONTACTS_ERROR_NONE) {
-		CTS_ERR("ctsvc_ipc_marshal_common fail");
+	if (CONTACTS_ERROR_NONE != ctsvc_ipc_marshal_record_common(common, ipc_data)) {
+		CTS_ERR("ctsvc_ipc_marshal_record_common() Fail");
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 
@@ -525,7 +520,7 @@ int ctsvc_ipc_unmarshal_string(const pims_ipc_data_h ipc_data, char** ppbufchar)
 
 	tmp = pims_ipc_data_get(ipc_data,&size);
 	if (tmp == NULL) {
-		CTS_ERR("pims_ipc_data_get string fail");
+		CTS_ERR("pims_ipc_data_get() Fail");
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	length = *(int*)tmp;
@@ -553,7 +548,7 @@ int ctsvc_ipc_unmarshal_int(const pims_ipc_data_h data, int *pout)
 	unsigned int size = 0;
 	void *tmp = pims_ipc_data_get(data,&size);
 	if (tmp == NULL) {
-		CTS_ERR("pims_ipc_data_get int fail");
+		CTS_ERR("pims_ipc_data_get() Fail");
 		return CONTACTS_ERROR_NO_DATA;
 	}
 	else {
@@ -570,7 +565,7 @@ int ctsvc_ipc_unmarshal_unsigned_int(const pims_ipc_data_h data, unsigned int *p
 	unsigned int size = 0;
 	void *tmp = pims_ipc_data_get(data,&size);
 	if (tmp == NULL) {
-		CTS_ERR("pims_ipc_data_get unsigned int fail");
+		CTS_ERR("pims_ipc_data_get() Fail");
 		return CONTACTS_ERROR_NO_DATA;
 	}
 	else {
@@ -587,7 +582,7 @@ int ctsvc_ipc_unmarshal_bool(const pims_ipc_data_h data, bool *pout)
 	unsigned int size = 0;
 	void *tmp = pims_ipc_data_get(data,&size);
 	if (tmp == NULL) {
-		CTS_ERR("pims_ipc_data_get bool fail");
+		CTS_ERR("pims_ipc_data_get() Fail");
 		return CONTACTS_ERROR_NO_DATA;
 	}
 	else {
@@ -604,7 +599,7 @@ int ctsvc_ipc_unmarshal_lli(const pims_ipc_data_h data, long long int *pout)
 	unsigned int size = 0;
 	void *tmp = pims_ipc_data_get(data,&size);
 	if (tmp == NULL) {
-		CTS_ERR("pims_ipc_data_get lli fail");
+		CTS_ERR("pims_ipc_data_get() Fail");
 		return CONTACTS_ERROR_NO_DATA;
 	}
 	else {
@@ -621,7 +616,7 @@ int ctsvc_ipc_unmarshal_long(const pims_ipc_data_h data, long *pout)
 	unsigned int size = 0;
 	void *tmp = pims_ipc_data_get(data, &size);
 	if (tmp == NULL) {
-		CTS_ERR("pims_ipc_data_get long fail");
+		CTS_ERR("pims_ipc_data_get() Fail");
 		return CONTACTS_ERROR_NO_DATA;
 	}
 	else {
@@ -638,7 +633,7 @@ int ctsvc_ipc_unmarshal_double(const pims_ipc_data_h data, double *pout)
 	unsigned int size = 0;
 	void* tmp = pims_ipc_data_get(data,&size);
 	if (tmp == NULL) {
-		CTS_ERR("pims_ipc_data_get double fail");
+		CTS_ERR("pims_ipc_data_get() Fail");
 		return CONTACTS_ERROR_NO_DATA;
 	}
 	else {
@@ -656,7 +651,7 @@ int ctsvc_ipc_unmarshal_record_common(const pims_ipc_data_h ipc_data, ctsvc_reco
 	RETV_IF(ipc_data==NULL,CONTACTS_ERROR_NO_DATA);
 	tmp = pims_ipc_data_get(ipc_data,&size);
 	if (tmp == NULL) {
-		CTS_ERR("pims_ipc_data_get fail");
+		CTS_ERR("pims_ipc_data_get() Fail");
 		return CONTACTS_ERROR_NO_DATA;
 	}
 	else {
@@ -672,7 +667,7 @@ int ctsvc_ipc_unmarshal_record_common(const pims_ipc_data_h ipc_data, ctsvc_reco
 		tmp_properties_flags = (unsigned char*)pims_ipc_data_get(ipc_data, &size);
 		common->properties_flags  = calloc(common->property_max_count, sizeof(char));
 		if (common->properties_flags == NULL) {
-			CTS_ERR("calloc fail");
+			CTS_ERR("calloc() Fail");
 			return CONTACTS_ERROR_OUT_OF_MEMORY;
 		}
 		memcpy(common->properties_flags, tmp_properties_flags, sizeof(char)*common->property_max_count);
@@ -782,7 +777,7 @@ int ctsvc_ipc_marshal_record_common(const ctsvc_record_s* common, pims_ipc_data_
 
 	int length = strlen(common->view_uri);
 	if (pims_ipc_data_put(ipc_data,(void*)common->view_uri,length+1) < 0) {
-		CTS_ERR("_ctsvc_ipc_marshal fail");
+		CTS_ERR("pims_ipc_data_put() Fail");
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 
@@ -792,7 +787,7 @@ int ctsvc_ipc_marshal_record_common(const ctsvc_record_s* common, pims_ipc_data_
 
 	if (0 < common->property_max_count) {
 		if (pims_ipc_data_put(ipc_data,(void*)common->properties_flags,sizeof(unsigned char)*common->property_max_count) < 0) {
-			CTS_ERR("_ctsvc_ipc_marshal fail");
+			CTS_ERR("pims_ipc_data_put() Fail");
 			return CONTACTS_ERROR_NO_DATA;
 		}
 	}
@@ -803,113 +798,116 @@ int ctsvc_ipc_marshal_record_common(const ctsvc_record_s* common, pims_ipc_data_
 	return CONTACTS_ERROR_NONE;
 }
 
-int ctsvc_ipc_unmarshal_query(const pims_ipc_data_h ipc_data, contacts_query_h *query)
+int ctsvc_ipc_unmarshal_query(const pims_ipc_data_h ipc_data, contacts_query_h *out_query)
 {
-	ctsvc_query_s *que = NULL;
+	ctsvc_query_s *query = NULL;
 	unsigned int size = 0;
 	char* str = NULL;
 	unsigned int count = 0, i = 0;
 	int ret = CONTACTS_ERROR_NONE;
 
-	RETV_IF(NULL == query, CONTACTS_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == out_query, CONTACTS_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == ipc_data, CONTACTS_ERROR_INVALID_PARAMETER);
 
 	// view_uri
-	str = (char*)pims_ipc_data_get(ipc_data,&size);
+	str = (char*)pims_ipc_data_get(ipc_data, &size);
 
-	ret = contacts_query_create(str, query);
-	if (ret != CONTACTS_ERROR_NONE) {
-		CTS_ERR("contacts_query_create fail");
+	ret = contacts_query_create(str, out_query);
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("contacts_query_create() Fail");
 		return ret;
 	}
+	query = (ctsvc_query_s *)*out_query;
 
-	que = (ctsvc_query_s *) *query;
-
-	if (ctsvc_ipc_unmarshal_unsigned_int(ipc_data,&count) != CONTACTS_ERROR_NONE) {
-		CTS_ERR("_ctsvc_ipc_unmarshal fail");
-		ret = CONTACTS_ERROR_INVALID_PARAMETER;
-		goto ERROR_RETURN;
+	if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_unsigned_int(ipc_data, &count)) {
+		CTS_ERR("contacts_query_create() Fail");
+		contacts_query_destroy(*out_query);
+		*out_query = NULL;
+		return CONTACTS_ERROR_IPC;
 	}
 
-	if (count == 0) {
-		que->filter = NULL;
+	if (0 == count) {
+		query->filter = NULL;
 	}
 	else {
 		ctsvc_composite_filter_s *filter = NULL;
 		filter = (ctsvc_composite_filter_s *)calloc(1, sizeof(ctsvc_composite_filter_s));
 		if (NULL == filter) {
-			CTS_ERR("calloc fail");
-			ret = CONTACTS_ERROR_OUT_OF_MEMORY;
-			goto ERROR_RETURN;
+			CTS_ERR("calloc() Fail");
+			contacts_query_destroy(*out_query);
+			*out_query = NULL;
+			return CONTACTS_ERROR_OUT_OF_MEMORY;
 		}
 		filter->filter_type = CTSVC_FILTER_COMPOSITE;
-		filter->properties = (property_info_s *)ctsvc_view_get_all_property_infos(que->view_uri, &filter->property_count);
-		que->filter = filter;
+		filter->properties = (property_info_s *)ctsvc_view_get_all_property_infos(query->view_uri, &filter->property_count);
+		query->filter = filter;
 
 		// for filter_type
-		if (ctsvc_ipc_unmarshal_unsigned_int(ipc_data, &count) != CONTACTS_ERROR_NONE) {
-			CTS_ERR("_ctsvc_ipc_unmarshal fail");
-			ret = CONTACTS_ERROR_INVALID_PARAMETER;
-			goto ERROR_RETURN;
+		if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_unsigned_int(ipc_data, &count)) {
+			CTS_ERR("ctsvc_ipc_unmarshal_unsigned_int() Fail");
+			contacts_query_destroy(*out_query);
+			*out_query = NULL;
+			return CONTACTS_ERROR_IPC;
 		}
 
-		if (__ctsvc_ipc_unmarshal_composite_filter(ipc_data,que->filter) != CONTACTS_ERROR_NONE) {
-			CTS_ERR("_ctsvc_ipc_unmarshal fail");
-			ret = CONTACTS_ERROR_INVALID_PARAMETER;
-			goto ERROR_RETURN;
+		if (CONTACTS_ERROR_NONE != __ctsvc_ipc_unmarshal_composite_filter(ipc_data, query->filter)) {
+			CTS_ERR("__ctsvc_ipc_unmarshal_composite_filter() Fail");
+			contacts_query_destroy(*out_query);
+			*out_query = NULL;
+			return CONTACTS_ERROR_IPC;
 		}
 	}
 
-	if (ctsvc_ipc_unmarshal_unsigned_int(ipc_data,&(que->projection_count)) != CONTACTS_ERROR_NONE) {
-		CTS_ERR("_ctsvc_ipc_unmarshal fail");
-		ret = CONTACTS_ERROR_INVALID_PARAMETER;
-		goto ERROR_RETURN;
+	if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_unsigned_int(ipc_data, &(query->projection_count))) {
+		CTS_ERR("ctsvc_ipc_unmarshal_unsigned_int() Fail");
+		contacts_query_destroy(*out_query);
+		*out_query = NULL;
+		return CONTACTS_ERROR_IPC;
 	}
 
-	if (0 < que->projection_count) {
-		que->projection = (unsigned int*)malloc(sizeof(unsigned int)*que->projection_count);
-		if (que->projection == NULL) {
-			CTS_ERR("malloc fail");
-			ret = CONTACTS_ERROR_OUT_OF_MEMORY;
-			goto ERROR_RETURN;
+	if (0 < query->projection_count) {
+		query->projection = (unsigned int*)malloc(sizeof(unsigned int)*query->projection_count);
+		if (query->projection == NULL) {
+			CTS_ERR("malloc() Fail");
+			contacts_query_destroy(*out_query);
+			*out_query = NULL;
+			return CONTACTS_ERROR_OUT_OF_MEMORY;
 		}
-		for (i=0;i<que->projection_count;i++) {
-			if (ctsvc_ipc_unmarshal_unsigned_int(ipc_data,&(que->projection[i])) != CONTACTS_ERROR_NONE) {
-				CTS_ERR("_ctsvc_ipc_unmarshal fail");
-				ret = CONTACTS_ERROR_INVALID_PARAMETER;
-				goto ERROR_RETURN;
+		for (i=0;i<query->projection_count;i++) {
+			if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_unsigned_int(ipc_data,&(query->projection[i]))) {
+				CTS_ERR("ctsvc_ipc_unmarshal_unsigned_int() Fail");
+				contacts_query_destroy(*out_query);
+				*out_query = NULL;
+				return CONTACTS_ERROR_IPC;
 			}
 		}
 	}
 	else {
-		que->projection = NULL;
+		query->projection = NULL;
 	}
 
-	if (ctsvc_ipc_unmarshal_unsigned_int(ipc_data,&(que->sort_property_id)) != CONTACTS_ERROR_NONE) {
-		CTS_ERR("_ctsvc_ipc_unmarshal fail");
-		ret = CONTACTS_ERROR_INVALID_PARAMETER;
-		goto ERROR_RETURN;
+	if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_unsigned_int(ipc_data,&(query->sort_property_id))) {
+		CTS_ERR("ctsvc_ipc_unmarshal_unsigned_int() Fail");
+		contacts_query_destroy(*out_query);
+		*out_query = NULL;
+		return CONTACTS_ERROR_IPC;
 	}
 
-	if (ctsvc_ipc_unmarshal_bool(ipc_data,&(que->sort_asc)) != CONTACTS_ERROR_NONE) {
-		CTS_ERR("_ctsvc_ipc_unmarshal fail");
-		ret = CONTACTS_ERROR_INVALID_PARAMETER;
-		goto ERROR_RETURN;
+	if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_bool(ipc_data,&(query->sort_asc))) {
+		CTS_ERR("ctsvc_ipc_unmarshal_bool() Fail");
+		contacts_query_destroy(*out_query);
+		*out_query = NULL;
+		return CONTACTS_ERROR_IPC;
 	}
 
-	if (ctsvc_ipc_unmarshal_bool(ipc_data,&(que->distinct)) != CONTACTS_ERROR_NONE) {
-		CTS_ERR("_ctsvc_ipc_unmarshal fail");
-		ret = CONTACTS_ERROR_INVALID_PARAMETER;
-		goto ERROR_RETURN;
+	if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_bool(ipc_data,&(query->distinct))) {
+		CTS_ERR("ctsvc_ipc_unmarshal_bool() Fail");
+		contacts_query_destroy(*out_query);
+		*out_query = NULL;
+		return CONTACTS_ERROR_IPC;
 	}
 
 	return CONTACTS_ERROR_NONE;
-
-ERROR_RETURN:
-	contacts_query_destroy(*query);
-	*query = NULL;
-
-	return ret;
 }
 
 int ctsvc_ipc_marshal_query(const contacts_query_h query, pims_ipc_data_h ipc_data)
@@ -925,51 +923,51 @@ int ctsvc_ipc_marshal_query(const contacts_query_h query, pims_ipc_data_h ipc_da
 	//view_uri
 	length = strlen(que->view_uri);
 	if (pims_ipc_data_put(ipc_data,(void*)que->view_uri,length+1) < 0) {
-		CTS_ERR("_ctsvc_ipc_marshal fail");
+		CTS_ERR("pims_ipc_data_put() Fail");
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 
 	if (que->filter) {
-		if (ctsvc_ipc_marshal_int(1,ipc_data) != CONTACTS_ERROR_NONE) {
-			CTS_ERR("_ctsvc_ipc_marshal fail");
+		if (CONTACTS_ERROR_NONE != ctsvc_ipc_marshal_int(1,ipc_data)) {
+			CTS_ERR("ctsvc_ipc_marshal_int() Fail");
 			return CONTACTS_ERROR_INVALID_PARAMETER;
 		}
 
-		if (__ctsvc_ipc_marshal_composite_filter(que->filter,ipc_data) != CONTACTS_ERROR_NONE) {
-			CTS_ERR("_ctsvc_ipc_marshal fail");
+		if (CONTACTS_ERROR_NONE != __ctsvc_ipc_marshal_composite_filter(que->filter,ipc_data)) {
+			CTS_ERR("__ctsvc_ipc_marshal_composite_filter() Fail");
 			return CONTACTS_ERROR_INVALID_PARAMETER;
 		}
 	}
 	else {
-		if (ctsvc_ipc_marshal_int(0,ipc_data) != CONTACTS_ERROR_NONE) {
-			CTS_ERR("_ctsvc_ipc_marshal fail");
+		if (CONTACTS_ERROR_NONE != ctsvc_ipc_marshal_int(0,ipc_data)) {
+			CTS_ERR("ctsvc_ipc_marshal_int() Fail");
 			return CONTACTS_ERROR_INVALID_PARAMETER;
 		}
 	}
 
-	if (ctsvc_ipc_marshal_unsigned_int(que->projection_count,ipc_data) != CONTACTS_ERROR_NONE) {
-		CTS_ERR("_ctsvc_ipc_marshal fail");
+	if (CONTACTS_ERROR_NONE != ctsvc_ipc_marshal_unsigned_int(que->projection_count,ipc_data)) {
+		CTS_ERR("ctsvc_ipc_marshal_unsigned_int() Fail");
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	for (i=0;i<que->projection_count;i++) {
-		if (ctsvc_ipc_marshal_unsigned_int(que->projection[i],ipc_data) != CONTACTS_ERROR_NONE) {
-			CTS_ERR("_ctsvc_ipc_marshal fail");
+		if (CONTACTS_ERROR_NONE != ctsvc_ipc_marshal_unsigned_int(que->projection[i],ipc_data)) {
+			CTS_ERR("ctsvc_ipc_marshal_unsigned_int() Fail");
 			return CONTACTS_ERROR_INVALID_PARAMETER;
 		}
 	}
 
-	if (ctsvc_ipc_marshal_unsigned_int(que->sort_property_id,ipc_data) != CONTACTS_ERROR_NONE) {
-		CTS_ERR("_ctsvc_ipc_marshal fail");
+	if (CONTACTS_ERROR_NONE != ctsvc_ipc_marshal_unsigned_int(que->sort_property_id,ipc_data)) {
+		CTS_ERR("ctsvc_ipc_marshal_unsigned_int() Fail");
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 
-	if (ctsvc_ipc_marshal_bool(que->sort_asc,ipc_data) != CONTACTS_ERROR_NONE) {
-		CTS_ERR("_ctsvc_ipc_marshal fail");
+	if (CONTACTS_ERROR_NONE != ctsvc_ipc_marshal_bool(que->sort_asc,ipc_data)) {
+		CTS_ERR("ctsvc_ipc_marshal_bool() Fail");
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 
-	if (ctsvc_ipc_marshal_bool(que->distinct,ipc_data) != CONTACTS_ERROR_NONE) {
-		CTS_ERR("_ctsvc_ipc_marshal fail");
+	if (CONTACTS_ERROR_NONE != ctsvc_ipc_marshal_bool(que->distinct,ipc_data)) {
+		CTS_ERR("ctsvc_ipc_marshal_bool() Fail");
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 
@@ -983,67 +981,64 @@ int ctsvc_ipc_unmarshal_list(const pims_ipc_data_h ipc_data, contacts_list_h* li
 	int count = 0;
 	unsigned int deleted_count = 0;
 	contacts_record_h record;
-	int ret = CONTACTS_ERROR_NONE;
 
 	RETV_IF(NULL == list, CONTACTS_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == ipc_data, CONTACTS_ERROR_INVALID_PARAMETER);
 
-	if (contacts_list_create(list) != CONTACTS_ERROR_NONE) {
-		CTS_ERR("contacts_list_create fail");
+	if (CONTACTS_ERROR_NONE != contacts_list_create(list)) {
+		CTS_ERR("contacts_list_create() Fail");
 		return CONTACTS_ERROR_OUT_OF_MEMORY;
 	}
 
-	if (ctsvc_ipc_unmarshal_int(ipc_data,&(count)) != CONTACTS_ERROR_NONE) {
+	if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(ipc_data, &(count))) {
+		CTS_ERR("ctsvc_ipc_unmarshal_int() Fail");
 		contacts_list_destroy(*list, true);
-		CTS_ERR("_ctsvc_ipc_unmarshal fail");
-		return CONTACTS_ERROR_INVALID_PARAMETER;
+		*list = NULL;
+		return CONTACTS_ERROR_IPC;
 	}
 
 	unsigned int i = 0;
 	for (i=0;i<count;i++) {
-		if (ctsvc_ipc_unmarshal_record(ipc_data,&record) != CONTACTS_ERROR_NONE) {
-			CTS_ERR("_ctsvc_ipc_unmarshal fail");
-			ret = CONTACTS_ERROR_INVALID_PARAMETER;
-			goto ERROR_RETURN;
+		if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_record(ipc_data, &record)) {
+			CTS_ERR("ctsvc_ipc_unmarshal_record() Fail");
+			contacts_list_destroy(*list, true);
+			*list = NULL;
+			return CONTACTS_ERROR_IPC;
 		}
 
-		if (contacts_list_add(*list,record) != CONTACTS_ERROR_NONE) {
-			CTS_ERR("contacts_list_add fail");
-			ret = CONTACTS_ERROR_INVALID_PARAMETER;
-			goto ERROR_RETURN;
+		if (CONTACTS_ERROR_NONE != contacts_list_add(*list, record)) {
+			CTS_ERR("contacts_list_add() Fail");
+			contacts_list_destroy(*list, true);
+			*list = NULL;
+			return CONTACTS_ERROR_INVALID_PARAMETER;
 		}
 	}
 
-	if (ctsvc_ipc_unmarshal_unsigned_int(ipc_data,&deleted_count) != CONTACTS_ERROR_NONE) {
-		CTS_ERR("_ctsvc_ipc_unmarshal fail");
-		ret = CONTACTS_ERROR_INVALID_PARAMETER;
-		goto ERROR_RETURN;
+	if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_unsigned_int(ipc_data, &deleted_count)) {
+		CTS_ERR("ctsvc_ipc_unmarshal_unsigned_int() Fail");
+		contacts_list_destroy(*list, true);
+		*list = NULL;
+		return CONTACTS_ERROR_IPC;
 	}
 
 	i = 0;
 	for (i=0;i<deleted_count;i++) {
-		if (ctsvc_ipc_unmarshal_record(ipc_data,&record) != CONTACTS_ERROR_NONE) {
-			CTS_ERR("_ctsvc_ipc_unmarshal fail");
-			ret = CONTACTS_ERROR_INVALID_PARAMETER;
-			goto ERROR_RETURN;
+		if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_record(ipc_data, &record)) {
+			CTS_ERR("ctsvc_ipc_unmarshal_record() Fail");
+			contacts_list_destroy(*list, true);
+			*list = NULL;
+			return CONTACTS_ERROR_IPC;
 		}
 
-		if (ctsvc_list_append_deleted_record(*list,record) != CONTACTS_ERROR_NONE) {
-			CTS_ERR("contacts_list_add fail");
-			ret = CONTACTS_ERROR_INVALID_PARAMETER;
-			goto ERROR_RETURN;
+		if (CONTACTS_ERROR_NONE != ctsvc_list_append_deleted_record(*list, record)) {
+			CTS_ERR("ctsvc_list_append_deleted_record() Fail");
+			contacts_list_destroy(*list, true);
+			*list = NULL;
+			return CONTACTS_ERROR_IPC;
 		}
 	}
 
 	return CONTACTS_ERROR_NONE;
-
-ERROR_RETURN:
-	if (*list) {
-		contacts_list_destroy(*list, true);
-		*list = NULL;
-	}
-
-	return ret;
 }
 
 int ctsvc_ipc_unmarshal_child_list(const pims_ipc_data_h ipc_data, contacts_list_h* list)
@@ -1056,37 +1051,37 @@ int ctsvc_ipc_unmarshal_child_list(const pims_ipc_data_h ipc_data, contacts_list
 	RETV_IF(NULL == list, CONTACTS_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == ipc_data, CONTACTS_ERROR_INVALID_PARAMETER);
 
-	if (ctsvc_ipc_unmarshal_int(ipc_data,&(count)) != CONTACTS_ERROR_NONE) {
-		CTS_ERR("ctsvc_ipc_unmarshal_int fail");
+	if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(ipc_data,&(count))) {
+		CTS_ERR("ctsvc_ipc_unmarshal_int() Fail");
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 
 	for (i=0;i<count;i++) {
-		if (ctsvc_ipc_unmarshal_record(ipc_data,&record) != CONTACTS_ERROR_NONE) {
-			CTS_ERR("ctsvc_ipc_unmarshal_record fail");
+		if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_record(ipc_data,&record)) {
+			CTS_ERR("ctsvc_ipc_unmarshal_record() Fail");
 			return CONTACTS_ERROR_INVALID_PARAMETER;
 		}
 
-		if (contacts_list_add(*list,record) != CONTACTS_ERROR_NONE) {
-			CTS_ERR("contacts_list_add fail");
+		if (CONTACTS_ERROR_NONE != contacts_list_add(*list,record)) {
+			CTS_ERR("contacts_list_add() Fail");
 			return CONTACTS_ERROR_INVALID_PARAMETER;
 		}
 	}
 
-	if (ctsvc_ipc_unmarshal_unsigned_int(ipc_data,&deleted_count) != CONTACTS_ERROR_NONE) {
-		CTS_ERR("ctsvc_ipc_unmarshal_unsigned_int fail");
+	if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_unsigned_int(ipc_data,&deleted_count)) {
+		CTS_ERR("ctsvc_ipc_unmarshal_unsigned_int() Fail");
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 
 	i = 0;
 	for (i=0;i<deleted_count;i++) {
-		if (ctsvc_ipc_unmarshal_record(ipc_data,&record) != CONTACTS_ERROR_NONE) {
-			CTS_ERR("ctsvc_ipc_unmarshal_record fail");
+		if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_record(ipc_data,&record)) {
+			CTS_ERR("ctsvc_ipc_unmarshal_record() Fail");
 			return CONTACTS_ERROR_INVALID_PARAMETER;
 		}
 
-		if (ctsvc_list_append_deleted_record(*list,record) != CONTACTS_ERROR_NONE) {
-			CTS_ERR("ctsvc_list_append_deleted_record fail");
+		if (CONTACTS_ERROR_NONE != ctsvc_list_append_deleted_record(*list,record)) {
+			CTS_ERR("ctsvc_list_append_deleted_record() Fail");
 			return CONTACTS_ERROR_INVALID_PARAMETER;
 		}
 	}
@@ -1104,12 +1099,12 @@ int ctsvc_ipc_marshal_list(const contacts_list_h list, pims_ipc_data_h ipc_data)
 	RETV_IF(NULL == ipc_data, CONTACTS_ERROR_INVALID_PARAMETER);
 
 	// count
-	if (contacts_list_get_count(list, &count) != CONTACTS_ERROR_NONE) {
-		CTS_ERR("contacts_list_get_count fail");
+	if (CONTACTS_ERROR_NONE != contacts_list_get_count(list, &count)) {
+		CTS_ERR("contacts_list_get_count() Fail");
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
-	if (ctsvc_ipc_marshal_int(count,ipc_data) != CONTACTS_ERROR_NONE) {
-		CTS_ERR("_ctsvc_ipc_marshal fail");
+	if (CONTACTS_ERROR_NONE != ctsvc_ipc_marshal_int(count,ipc_data)) {
+		CTS_ERR("ctsvc_ipc_marshal_int() Fail");
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 
@@ -1117,37 +1112,37 @@ int ctsvc_ipc_marshal_list(const contacts_list_h list, pims_ipc_data_h ipc_data)
 
 	unsigned int i = 0;
 	for (i=0;i<count;i++) {
-		if (contacts_list_get_current_record_p(list,&record) != CONTACTS_ERROR_NONE) {
-			CTS_ERR("contacts_list_get_count fail");
+		if (CONTACTS_ERROR_NONE != contacts_list_get_current_record_p(list,&record)) {
+			CTS_ERR("contacts_list_get_current_record_p() Fail");
 			return CONTACTS_ERROR_INVALID_PARAMETER;
 		}
-		if (ctsvc_ipc_marshal_record(record,ipc_data) != CONTACTS_ERROR_NONE) {
-			CTS_ERR("_ctsvc_ipc_marshal fail");
+		if (CONTACTS_ERROR_NONE != ctsvc_ipc_marshal_record(record,ipc_data)) {
+			CTS_ERR("ctsvc_ipc_marshal_record() Fail");
 			return CONTACTS_ERROR_INVALID_PARAMETER;
 		}
-		if (contacts_list_next(list) == CONTACTS_ERROR_NO_DATA) {
+		if (CONTACTS_ERROR_NO_DATA == contacts_list_next(list)) {
 			break;
 		}
 	}
 
 	// count
-	if (ctsvc_list_get_deleted_count(list, &deleted_count) != CONTACTS_ERROR_NONE) {
-		CTS_ERR("contacts_list_get_count fail");
+	if (ctsvc_list_get_deleted_count(list, &deleted_count)) {
+		CTS_ERR("ctsvc_list_get_deleted_count() Fail");
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
-	if (ctsvc_ipc_marshal_int(deleted_count,ipc_data) != CONTACTS_ERROR_NONE) {
-		CTS_ERR("_ctsvc_ipc_marshal fail");
+	if (CONTACTS_ERROR_NONE != ctsvc_ipc_marshal_int(deleted_count,ipc_data)) {
+		CTS_ERR("ctsvc_ipc_marshal_int() Fail");
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 
 	i = 0;
 	for (i=0;i<deleted_count;i++) {
-		if (ctsvc_list_get_deleted_nth_record_p(list, i, &record) != CONTACTS_ERROR_NONE) {
-			CTS_ERR("contacts_list_get_count fail");
+		if (CONTACTS_ERROR_NONE != ctsvc_list_get_deleted_nth_record_p(list, i, &record)) {
+			CTS_ERR("ctsvc_list_get_deleted_nth_record_p() Fail");
 			return CONTACTS_ERROR_INVALID_PARAMETER;
 		}
-		if (ctsvc_ipc_marshal_record(record,ipc_data) != CONTACTS_ERROR_NONE) {
-			CTS_ERR("_ctsvc_ipc_marshal fail");
+		if (CONTACTS_ERROR_NONE != ctsvc_ipc_marshal_record(record,ipc_data)) {
+			CTS_ERR("ctsvc_ipc_marshal_record() Fail");
 			return CONTACTS_ERROR_INVALID_PARAMETER;
 		}
 	}

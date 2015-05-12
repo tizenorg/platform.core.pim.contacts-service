@@ -154,7 +154,6 @@ int ctsvc_collation_str(char *src, char **dest)
 
 static int __ctsvc_normalize_str(const char *src, char **dest)
 {
-	int ret = CONTACTS_ERROR_NONE;
 	int32_t tmp_size = 100;
 	int32_t upper_size;
 	int32_t size = 100;
@@ -164,71 +163,119 @@ static int __ctsvc_normalize_str(const char *src, char **dest)
 	UChar *result = NULL;
 
 	tmp_result = calloc(1, sizeof(UChar)*(tmp_size+1));
-	u_strFromUTF8(tmp_result, tmp_size + 1, &tmp_size, src, -1, &status);
+	if (NULL == tmp_result) {
+		CTS_ERR("calloc() Fail");
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
+	}
 
+	u_strFromUTF8(tmp_result, tmp_size + 1, &tmp_size, src, -1, &status);
 	if (status == U_BUFFER_OVERFLOW_ERROR) {
 		status = U_ZERO_ERROR;
 		free(tmp_result);
 		tmp_result = calloc(1, sizeof(UChar) * (tmp_size + 1));
+		if (NULL == tmp_result) {
+			CTS_ERR("calloc() Fail");
+			return CONTACTS_ERROR_OUT_OF_MEMORY;
+		}
+
 		u_strFromUTF8(tmp_result, tmp_size + 1, NULL, src, -1, &status);
 		if (U_FAILURE(status)) {
 			CTS_ERR("u_strFromUTF8()Fail(%s)", u_errorName(status));
-			ret = CONTACTS_ERROR_SYSTEM;
-			goto DATA_FREE;
+			free(tmp_result);
+			return CONTACTS_ERROR_SYSTEM;
 		}
 	}
 	else if (U_FAILURE(status)) {
 		CTS_ERR("u_strFromUTF8() Fail(%s)", u_errorName(status));
-		ret = CONTACTS_ERROR_SYSTEM;
-		goto DATA_FREE;
+		free(tmp_result);
+		return CONTACTS_ERROR_SYSTEM;
 	}
 
 	tmp_upper = calloc(1, sizeof(UChar)*(tmp_size+1));
+	if (NULL == tmp_upper) {
+		CTS_ERR("calloc() Fail");
+		free(tmp_result);
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
+	}
+
 	upper_size = u_strToUpper(tmp_upper, tmp_size+1, tmp_result, -1, NULL, &status);
 	if (status == U_BUFFER_OVERFLOW_ERROR) {
 		status = U_ZERO_ERROR;
 		free(tmp_upper);
 		tmp_upper = calloc(1, sizeof(UChar) * (upper_size + 1));
+		if (NULL == tmp_upper) {
+			CTS_ERR("calloc() Fail");
+			free(tmp_result);
+			return CONTACTS_ERROR_OUT_OF_MEMORY;
+		}
+
 		u_strFromUTF8(tmp_upper, upper_size + 1, NULL, src, -1, &status);
 		if (U_FAILURE(status)) {
 			CTS_ERR("u_strFromUTF8()Fail(%s)", u_errorName(status));
-			ret = CONTACTS_ERROR_SYSTEM;
-			goto DATA_FREE;
+			free(tmp_result);
+			free(tmp_upper);
+			return CONTACTS_ERROR_SYSTEM;
 		}
 	}
 	else if (U_FAILURE(status)) {
 		CTS_ERR("u_strToUpper() Fail(%s)", u_errorName(status));
-		ret = CONTACTS_ERROR_SYSTEM;
-		goto DATA_FREE;
+		free(tmp_result);
+		free(tmp_upper);
+		return CONTACTS_ERROR_SYSTEM;
 	}
 
 	result = calloc(1, sizeof(UChar)*(size+1));
-	size = unorm_normalize(tmp_upper, -1, UNORM_NFD, 0,
-			result, size+1, &status);
+	if (NULL == result) {
+		CTS_ERR("calloc() Fail");
+		free(tmp_result);
+		free(tmp_upper);
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
+	}
+
+	size = unorm_normalize(tmp_upper, -1, UNORM_NFD, 0, result, size+1, &status);
 	if (status == U_BUFFER_OVERFLOW_ERROR) {
 		status = U_ZERO_ERROR;
 		free(result);
 		result = calloc(1, sizeof(UChar)*(size + 1));
+		if (NULL == result) {
+			CTS_ERR("calloc() Fail");
+			free(tmp_result);
+			free(tmp_upper);
+			return CONTACTS_ERROR_OUT_OF_MEMORY;
+		}
+
 		unorm_normalize(tmp_upper, -1, UNORM_NFD, 0, result, size+1, &status);
 		if (U_FAILURE(status)) {
 			CTS_ERR("unorm_normalize() Fail(%s)", u_errorName(status));
-			ret = CONTACTS_ERROR_SYSTEM;
-			goto DATA_FREE;
+			free(tmp_result);
+			free(tmp_upper);
+			free(result);
+			return CONTACTS_ERROR_SYSTEM;
 		}
 	}
 	else if (U_FAILURE(status)) {
 		CTS_ERR("unorm_normalize() Fail(%s)", u_errorName(status));
-		ret = CONTACTS_ERROR_SYSTEM;
-		goto DATA_FREE;
+		free(tmp_result);
+		free(tmp_upper);
+		free(result);
+		return CONTACTS_ERROR_SYSTEM;
 	}
 
-	ret = ctsvc_check_language(result);
+	ctsvc_check_language(result);
 	ctsvc_extra_normalize(result, size);
 
 	// remove diacritical : U+3000 ~ U+034F
 	int i, j;
 	UChar *temp_result = NULL;
 	temp_result = calloc(1, sizeof(UChar)*(size+1));
+	if (NULL == temp_result) {
+		CTS_ERR("calloc() Fail");
+		free(tmp_result);
+		free(tmp_upper);
+		free(result);
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
+	}
+
 	bool replaced = false;
 	for (i=0,j=0; i<size;i++) {
 		if (CTSVC_COMPARE_BETWEEN((UChar)CTSVC_COMBINING_DIACRITICAL_MARKS_START,
@@ -250,21 +297,28 @@ static int __ctsvc_normalize_str(const char *src, char **dest)
 	u_strToUTF8(NULL, 0, &size, result, -1, &status);
 	status = U_ZERO_ERROR;
 	*dest = calloc(1, sizeof(char) * (size+1));
+	if (NULL == *dest) {
+		CTS_ERR("calloc() Fail");
+		free(tmp_result);
+		free(tmp_upper);
+		free(result);
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
+	}
 
 	u_strToUTF8(*dest, size+1, NULL, result, -1, &status);
 	if (U_FAILURE(status)) {
 		CTS_ERR("u_strToUTF8() Fail(%s)", u_errorName(status));
-		ret = CONTACTS_ERROR_SYSTEM;
 		free(*dest);
 		*dest = NULL;
-		goto DATA_FREE;
+		free(tmp_result);
+		free(tmp_upper);
+		free(result);
+		return CONTACTS_ERROR_SYSTEM;
 	}
-
-DATA_FREE:
 	free(tmp_result);
 	free(tmp_upper);
 	free(result);
-	return ret;
+	return CONTACTS_ERROR_NONE;
 }
 
 static int __ctsvc_convert_halfwidth_ascii_and_symbol(const char *src, UChar *dest, int dest_size, int* str_size)
@@ -335,7 +389,7 @@ int ctsvc_get_halfwidth_string(const char *src, char** dest, int* dest_size)
 	UChar unicodes[LARGE_BUFFER_SIZE+1];
 	int ustr_size = 0;
 
-	if (__ctsvc_convert_halfwidth_ascii_and_symbol(src, unicodes, LARGE_BUFFER_SIZE, &ustr_size) != CONTACTS_ERROR_NONE) {
+	if (CONTACTS_ERROR_NONE != __ctsvc_convert_halfwidth_ascii_and_symbol(src, unicodes, LARGE_BUFFER_SIZE, &ustr_size)) {
 		CTS_ERR("convert to halfwidth Fail! %s ", src);
 
 		return CONTACTS_ERROR_SYSTEM;
@@ -416,7 +470,8 @@ int ctsvc_normalize_index(const char *src, char **dest)
 
 	if (first_str[0] == '\0' || __ctsvc_check_range_out_index(first_str)) {
 		length = ctsvc_check_utf8(src[0]);
-		RETVM_IF(length <= 0, CONTACTS_ERROR_INTERNAL, "check_utf8 is Fail");
+
+		RETVM_IF(length <= 0, CONTACTS_ERROR_INTERNAL, "check_utf8() Fail");
 		memset(first_str,0x00, sizeof(first_str));
 		strncpy(first_str, src, length);
 		if (length != strlen(first_str)) {
@@ -425,7 +480,8 @@ int ctsvc_normalize_index(const char *src, char **dest)
 		}
 	}
 	ret = __ctsvc_normalize_str(first_str, dest);
-	RETVM_IF(dest == NULL, ret, "__ctsvc_normalize_str is Fail");
+
+	RETVM_IF(dest == NULL, ret, "__ctsvc_normalize_str() Fail");
 
 	if ((*dest)[0] != '\0') {
 		length = ctsvc_check_utf8((*dest)[0]);
