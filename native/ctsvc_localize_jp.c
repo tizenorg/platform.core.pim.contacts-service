@@ -167,10 +167,9 @@ int ctsvc_convert_japanese_to_hiragana(const char *src, char **dest)
 	}
 
 	result = calloc(1, sizeof(UChar) * (size + 1));
-	if (NULL == tmp_result) {
+	if (NULL == result) {
 		CTS_ERR("calloc() Fail");
 		free(tmp_result);
-		free(result);
 		return CONTACTS_ERROR_OUT_OF_MEMORY;
 	}
 
