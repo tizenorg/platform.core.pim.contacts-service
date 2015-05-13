@@ -226,8 +226,10 @@ int ctsvc_ipc_disconnect(void)
 		ret = *(int*) pims_ipc_data_get(outdata,&size);
 		pims_ipc_data_destroy(outdata);
 
-		if (ret != CONTACTS_ERROR_NONE)
+		if (ret != CONTACTS_ERROR_NONE) {
 			CTS_ERR("[GLOBAL_IPC_CHANNEL] pims_ipc didn't destroyed!!!(%d)", ret);
+			return ret;
+		}
 
 		pims_ipc_destroy(__contacts_global_ipc);
 		__contacts_global_ipc = NULL;
