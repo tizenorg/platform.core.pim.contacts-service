@@ -461,20 +461,12 @@ static void __ctsvc_server_sim_import_contact_cb(TapiHandle *handle, int result,
 		CTS_DBG("NextIndex = %d", sim_info->next_index);
 		ret = tel_read_sim_pb_record(__ctsvc_server_sim_get_tapi_handle(info), sim_info->phonebook_type,
 				sim_info->next_index, __ctsvc_server_sim_import_contact_cb, NULL);
-		if (TAPI_API_SUCCESS != ret) {
-			CTS_ERR("tel_read_sim_pb_record() Fail(%d)", ret);
-			ret = ctsvc_server_socket_return(__ctsvc_server_sim_get_return_data(), ret, 0, NULL);
-			WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_server_socket_return() Fail(%d)", ret);
-			__ctsvc_server_sim_set_return_data(NULL);
-			return;
-		}
+
+		WARN_IF(TAPI_API_SUCCESS != ret, "tel_read_sim_pb_record() Fail(%d)", ret);
 	}
 	else {
 		// insert imported contact to DB
 		__ctsvc_server_sim_insert_records_to_db(info);
-		ret = ctsvc_server_socket_return(__ctsvc_server_sim_get_return_data(), ret, 0, NULL);
-		WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_server_socket_return() Fail(%d)", ret);
-		__ctsvc_server_sim_set_return_data(NULL);
 	}
 
 	ret = ctsvc_server_socket_return(__ctsvc_server_sim_get_return_data(), ret, 0, NULL);
@@ -645,6 +637,7 @@ static int __ctsvc_server_sim_sdn_read(ctsvc_sim_info_s* info)
 	}
 	else {
 		CTS_ERR("sim_status Fail(%d)", sim_status);
+		return CONTACTS_ERROR_SYSTEM;
 	}
 
 	return CONTACTS_ERROR_NONE;
