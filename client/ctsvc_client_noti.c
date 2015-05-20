@@ -26,6 +26,7 @@
 #include "ctsvc_ipc_define.h"
 #include "ctsvc_mutex.h"
 #include "ctsvc_client_ipc.h"
+#include "contacts_extension.h"
 
 typedef struct
 {
