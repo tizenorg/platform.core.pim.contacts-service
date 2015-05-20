@@ -2507,33 +2507,6 @@ static int __ctsvc_db_insert_records(contacts_list_h list, int **ids)
 	return CONTACTS_ERROR_NONE;
 }
 
-#ifdef _CONTACTS_NATIVE
-static gboolean __ctsvc_db_insert_idler(void *data)
-{
-	int ret;
-	ctsvc_bulk_info_s *info = data;
-	contacts_db_insert_result_cb cb;
-
-	ret = __ctsvc_db_insert_records(info->list, &info->ids);
-
-	if (info->cb) {
-		cb = info->cb;
-		if( CONTACTS_ERROR_NONE != ret) {
-			cb(ret, NULL, 0, info->user_data);
-		}
-		else {
-			int count = 0;
-			contacts_list_get_count(info->list, &count);
-			cb(ret, info->ids, count, info->user_data);
-		}
-	}
-	contacts_list_destroy(info->list, true);
-	free(info->ids);
-	free(info);
-	return false;
-}
-#endif
-
 static int __ctsvc_db_delete_records(const char* view_uri, int ids[], int count)
 {
 	int ret = CONTACTS_ERROR_NONE;
@@ -2565,25 +2538,6 @@ static int __ctsvc_db_delete_records(const char* view_uri, int ids[], int count)
 
 	return CONTACTS_ERROR_NONE;
 }
-
-#ifdef _CONTACTS_NATIVE
-static gboolean __ctsvc_db_delete_idler(void *data)
-{
-	int ret;
-	ctsvc_bulk_info_s *info = data;
-	contacts_db_result_cb cb;
-
-	ret = __ctsvc_db_delete_records(info->view_uri, info->ids, info->count);
-
-	if (info->cb) {
-		cb = info->cb;
-		cb(ret, info->user_data);
-	}
-	free(info->ids);
-	free(info);
-	return false;
-}
-#endif
 
 static int __ctsvc_db_update_records( contacts_list_h list)
 {
@@ -2623,25 +2577,6 @@ static int __ctsvc_db_update_records( contacts_list_h list)
 
 	return CONTACTS_ERROR_NONE;
 }
-
-#ifdef _CONTACTS_NATIVE
-static gboolean __ctsvc_db_update_idler(void *data)
-{
-	int ret;
-	ctsvc_bulk_info_s *info = data;
-	contacts_db_result_cb cb;
-
-	ret = __ctsvc_db_update_records(info->list);
-
-	if (info->cb) {
-		cb = info->cb;
-		cb(ret, info->user_data);
-	}
-	contacts_list_destroy(info->list, true);
-	free(info);
-	return false;
-}
-#endif
 
 static int __ctsvc_db_get_count_exec(const char *view_uri, const property_info_s* properties, int ids_count,
 		const char *projection, int *out_count )
@@ -3379,25 +3314,6 @@ int ctsvc_db_insert_records(contacts_list_h list, int **ids, int *count)
 	return __ctsvc_db_insert_records(list, ids);
 }
 
-API int contacts_db_insert_records_async( contacts_list_h list,
-		contacts_db_insert_result_cb callback, void *user_data)
-{
-	RETVM_IF(NULL == list, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter");
-
-#ifdef _CONTACTS_NATIVE
-	if (callback) {
-		ctsvc_bulk_info_s *info;
-		info = (ctsvc_bulk_info_s *)calloc(1, sizeof(ctsvc_bulk_info_s));
-		ctsvc_list_clone(list, &info->list);
-		info->cb = callback;
-		info->user_data = user_data;
-		g_idle_add(__ctsvc_db_insert_idler, info);		// should be changed after ipc implementation
-		return CONTACTS_ERROR_NONE;
-	}
-#endif
-	return ctsvc_db_insert_records(list, NULL, NULL);
-}
-
 int ctsvc_db_update_records(contacts_list_h list)
 {
 	int ret = CONTACTS_ERROR_NONE;
@@ -3415,25 +3331,6 @@ int ctsvc_db_update_records(contacts_list_h list)
 	return __ctsvc_db_update_records(list);
 }
 
-API int contacts_db_update_records_async( contacts_list_h list,
-		contacts_db_result_cb callback, void *user_data)
-{
-	RETVM_IF(NULL == list, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter");
-
-#ifdef _CONTACTS_NATIVE
-	if (callback) {
-		ctsvc_bulk_info_s *info;
-		info = (ctsvc_bulk_info_s *)calloc(1, sizeof(ctsvc_bulk_info_s));
-		ctsvc_list_clone(list, &info->list);
-		info->cb = callback;
-		info->user_data = user_data;
-		g_idle_add(__ctsvc_db_update_idler, info);		// should be changed after ipc implementation
-		return CONTACTS_ERROR_NONE;
-	}
-#endif
-	return ctsvc_db_update_records(list);
-}
-
 int ctsvc_db_delete_records(const char* view_uri, int* ids, int count)
 {
 	int ret = CONTACTS_ERROR_NONE;
@@ -3449,29 +3346,6 @@ int ctsvc_db_delete_records(const char* view_uri, int* ids, int count)
 	}
 
 	return __ctsvc_db_delete_records(view_uri, ids, count);
-}
-
-API int contacts_db_delete_records_async( const char* view_uri, int* ids, int count,
-		contacts_db_result_cb callback, void *user_data)
-{
-	RETVM_IF(NULL == view_uri, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter");
-	RETVM_IF(NULL == ids, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter");
-
-#ifdef _CONTACTS_NATIVE
-	if (callback) {
-		ctsvc_bulk_info_s *info;
-		info = (ctsvc_bulk_info_s *)calloc(1, sizeof(ctsvc_bulk_info_s));
-		info->ids = calloc(count, sizeof(int));
-		memcpy(info->ids, ids, sizeof(int)*count);
-		info->view_uri = view_uri;
-		info->count = count;
-		info->cb = callback;
-		info->user_data = user_data;
-		g_idle_add(__ctsvc_db_delete_idler, info);		// should be changed after ipc implementation
-		return CONTACTS_ERROR_NONE;
-	}
-#endif
-	return ctsvc_db_delete_records(view_uri, ids, count);
 }
 
 static int __ctsvc_db_replace_records( contacts_list_h list, int ids[], int count)
@@ -3513,27 +3387,6 @@ static int __ctsvc_db_replace_records( contacts_list_h list, int ids[], int coun
 	return ret;
 }
 
-
-#ifdef _CONTACTS_NATIVE
-static gboolean __ctsvc_db_replace_idler(void *data)
-{
-	int ret;
-	ctsvc_bulk_info_s *info = data;
-	contacts_db_result_cb cb;
-
-	ret = __ctsvc_db_replace_records(info->list, info->ids, info->count);
-
-	if (info->cb) {
-		cb = info->cb;
-		cb(ret, info->user_data);
-	}
-	contacts_list_destroy(info->list, true);
-	free(info->ids);
-	free(info);
-	return false;
-}
-#endif
-
 int ctsvc_db_replace_records(contacts_list_h list, int ids[], unsigned int count)
 {
 	int ret = CONTACTS_ERROR_NONE;
@@ -3550,29 +3403,6 @@ int ctsvc_db_replace_records(contacts_list_h list, int ids[], unsigned int count
 	}
 
 	return __ctsvc_db_replace_records(list, ids, count);
-}
-
-API int contacts_db_replace_records_async( contacts_list_h list, int ids[], int count,
-		contacts_db_result_cb callback, void *user_data )
-{
-	RETVM_IF(NULL == list, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter");
-	RETVM_IF(NULL == ids, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter");
-
-#ifdef _CONTACTS_NATIVE
-	if (callback) {
-		ctsvc_bulk_info_s *info;
-		info = (ctsvc_bulk_info_s *)calloc(1, sizeof(ctsvc_bulk_info_s));
-		ctsvc_list_clone(list, &info->list);
-		info->ids = calloc(count, sizeof(int));
-		memcpy(info->ids, ids, sizeof(int)*count);
-		info->count = count;
-		info->cb = callback;
-		info->user_data = user_data;
-		g_idle_add(__ctsvc_db_replace_idler, info);		// should be changed after ipc implementation
-		return CONTACTS_ERROR_NONE;
-	}
-#endif
-	return ctsvc_db_replace_records(list, ids, count);
 }
 
 API int contacts_db_insert_records( contacts_list_h record_list, int **ids, int *count)
