@@ -171,6 +171,11 @@ int ctsvc_ipc_connect(contacts_h contact, unsigned int handle_id)
 
 	if (NULL == ipc_data) {
 		ipc_data = calloc(1, sizeof(struct ctsvc_ipc_s));
+		if (NULL == ipc_data)
+		{
+			CTS_ERR("calloc() Fail");
+			return CONTACTS_ERROR_OUT_OF_MEMORY;
+		}
 		ret = _ctsvc_ipc_create(&(ipc_data->ipc));
 		if (CONTACTS_ERROR_NONE != ret) {
 			_ctsvc_ipc_data_free(ipc_data);

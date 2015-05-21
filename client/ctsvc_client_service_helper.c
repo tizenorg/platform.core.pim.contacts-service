@@ -166,7 +166,7 @@ int ctsvc_client_disconnect(contacts_h contact)
 	else {
 		CTS_DBG("System : please call contacts_connect(), connection count is (%d)", _ctsvc_connection);
 		ctsvc_mutex_unlock(CTS_MUTEX_CONNECTION);
-		return CONTACTS_ERROR_INVALID_PARAMETER;
+		return CONTACTS_ERROR_DB;
 	}
 
 	_ctsvc_connection--;
@@ -234,7 +234,7 @@ int ctsvc_client_disconnect_on_thread(contacts_h contact)
 	if (1 == base->connection_count) {
 		ret = ctsvc_ipc_disconnect(contact, ctsvc_client_get_tid(), _ctsvc_connection_on_thread);
 		if (ret != CONTACTS_ERROR_NONE) {
-			CTS_ERR("ctsvc_ipc_disconnect_on_thread() Fail(%d)", ret);
+			CTS_ERR("ctsvc_ipc_disconnect() Fail(%d)", ret);
 			ctsvc_mutex_unlock(CTS_MUTEX_CONNECTION);
 			return ret;
 		}
@@ -256,7 +256,7 @@ int ctsvc_client_disconnect_on_thread(contacts_h contact)
 	else {
 		CTS_DBG("System : please call contacts_connect_on_thread(), connection count is (%d)", _ctsvc_connection_on_thread);
 		ctsvc_mutex_unlock(CTS_MUTEX_CONNECTION);
-		return CONTACTS_ERROR_INVALID_PARAMETER;
+		return CONTACTS_ERROR_DB;
 	}
 
 	_ctsvc_connection_on_thread--;

@@ -35,9 +35,15 @@ API int contacts_connect_with_flags(unsigned int flags)
 	unsigned int id = ctsvc_client_get_pid();
 
 	ret = ctsvc_client_handle_get_p_with_id(id, &contact);
-	if (NULL == contact) {
+	if (CONTACTS_ERROR_NO_DATA == ret) {
 		ret = ctsvc_client_handle_create(id, &contact);
-		RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_client_handle_create() Fail(%d)", ret);
+		if (CONTACTS_ERROR_NONE != ret)
+		{
+			CTS_ERR("ctsvc_client_handle_create() Fail(%d)", ret);
+			if (CONTACTS_ERROR_INVALID_PARAMETER == ret)
+				return CONTACTS_ERROR_INTERNAL;
+			return ret;
+		}
 	}
 	else if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("ctsvc_client_handle_get_p_with_id() Fail(%d)", ret);
@@ -45,6 +51,9 @@ API int contacts_connect_with_flags(unsigned int flags)
 	}
 
 	ret = ctsvc_client_connect_with_flags(contact, flags);
+	if ((CONTACTS_ERROR_IPC_NOT_AVALIABLE == ret)
+			|| (CONTACTS_ERROR_PERMISSION_DENIED == ret))
+		return CONTACTS_ERROR_IPC;
 
 	return ret;
 }
@@ -57,15 +66,24 @@ API int contacts_connect(void)
 	unsigned int id = ctsvc_client_get_pid();
 
 	ret = ctsvc_client_handle_get_p_with_id(id, &contact);
-	if (NULL == contact) {
+	if (CONTACTS_ERROR_NO_DATA == ret) {
 		ret = ctsvc_client_handle_create(id, &contact);
-		RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_client_handle_create() Fail(%d)", ret);
+		if (CONTACTS_ERROR_NONE != ret)
+		{
+			CTS_ERR("ctsvc_client_handle_create() Fail(%d)", ret);
+			if (CONTACTS_ERROR_INVALID_PARAMETER == ret)
+				return CONTACTS_ERROR_INTERNAL;
+			return ret;
+		}
 	}
 	else if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("ctsvc_client_handle_get_p_with_id() Fail(%d)", ret);
 		return ret;
 	}
 	ret = ctsvc_client_connect(contact);
+	if ((CONTACTS_ERROR_IPC_NOT_AVALIABLE == ret)
+			|| (CONTACTS_ERROR_PERMISSION_DENIED == ret))
+		return CONTACTS_ERROR_IPC;
 
 	return ret;
 }
@@ -78,12 +96,13 @@ API int contacts_disconnect(void)
 	unsigned int id = ctsvc_client_get_pid();
 
 	ret = ctsvc_client_handle_get_p_with_id(id, &contact);
-	RETV_IF(NULL == contact, CONTACTS_ERROR_NONE);
 	RETV_IF(CONTACTS_ERROR_NO_DATA == ret, CONTACTS_ERROR_NONE);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_client_handle_get_p_with_id() Fail(%d)", ret);
 
 	ret = ctsvc_client_disconnect(contact);
 	WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_client_disconnect() Fail(%d)", ret);
+	if (CONTACTS_ERROR_INVALID_PARAMETER == ret)
+		ret = CONTACTS_ERROR_IPC;
 
 	if (0 == ((ctsvc_base_s *)contact)->connection_count) {
 		ret = ctsvc_client_handle_remove(id, contact);
@@ -101,9 +120,15 @@ API int contacts_connect_on_thread(void)
 	unsigned int id = ctsvc_client_get_tid();
 
 	ret = ctsvc_client_handle_get_p_with_id(id, &contact);
-	if (NULL == contact) {
+	if (CONTACTS_ERROR_NO_DATA == ret) {
 		ret = ctsvc_client_handle_create(id, &contact);
-		RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_client_handle_create() Fail(%d)", ret);
+		if (CONTACTS_ERROR_NONE != ret)
+		{
+			CTS_ERR("ctsvc_client_handle_create() Fail(%d)", ret);
+			if (CONTACTS_ERROR_INVALID_PARAMETER == ret)
+				return CONTACTS_ERROR_INTERNAL;
+			return ret;
+		}
 	}
 	else if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("ctsvc_client_handle_get_p_with_id() Fail(%d)", ret);
@@ -112,6 +137,9 @@ API int contacts_connect_on_thread(void)
 
 	ret = ctsvc_client_connect_on_thread(contact);
 	WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_client_connect_on_thread() Fail(%d)", ret);
+	if ((CONTACTS_ERROR_IPC_NOT_AVALIABLE == ret)
+			|| (CONTACTS_ERROR_PERMISSION_DENIED == ret))
+		return CONTACTS_ERROR_IPC;
 
 	return ret;
 }
@@ -124,12 +152,13 @@ API int contacts_disconnect_on_thread(void)
 	unsigned int id = ctsvc_client_get_tid();
 
 	ret = ctsvc_client_handle_get_p_with_id(id, &contact);
-	RETV_IF(NULL == contact, CONTACTS_ERROR_NONE);
 	RETV_IF(CONTACTS_ERROR_NO_DATA == ret, CONTACTS_ERROR_NONE);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_client_handle_get_p_with_id() Fail(%d)", ret);
 
 	ret = ctsvc_client_disconnect_on_thread(contact);
 	WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_client_disconnect_on_thread() Fail(%d)", ret);
+	if (CONTACTS_ERROR_INVALID_PARAMETER == ret)
+		ret = CONTACTS_ERROR_IPC;
 
 	if (0 == ((ctsvc_base_s *)contact)->connection_count) {
 		ret = ctsvc_client_handle_remove(id, contact);

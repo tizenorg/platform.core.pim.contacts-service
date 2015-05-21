@@ -57,11 +57,10 @@ extern "C"
  *          otherwise a negative error value
  *
  * @retval  #CONTACTS_ERROR_NONE                Successful
- * @retval  #CONTACTS_ERROR_DB                  Database operation failure
- * @retval  #CONTACTS_ERROR_IPC_NOT_AVALIABLE   IPC server is not available
  * @retval  #CONTACTS_ERROR_IPC                 IPC error
+ * @retval  #CONTACTS_ERROR_OUT_OF_MEMORY       Out of memory
  * @retval  #CONTACTS_ERROR_SYSTEM              System error
- * @retval  #CONTACTS_ERROR_PERMISSION_DENIED   Permission denied. This application does not have the privilege to call this method.
+ * @retval  #CONTACTS_ERROR_INTERNAL            Internal error
  *
  * @see contacts_disconnect()
  */
@@ -78,9 +77,10 @@ int contacts_connect(void);
  *          otherwise a negative error value
  *
  * @retval  #CONTACTS_ERROR_NONE                  Successful
- * @retval  #CONTACTS_ERROR_INVALID_PARAMETER     Invalid parameter
- * @retval  #CONTACTS_ERROR_DB                    Database operation failure
  * @retval  #CONTACTS_ERROR_IPC                   IPC error
+ * @retval  #CONTACTS_ERROR_OUT_OF_MEMORY         Out of memory
+ * @retval  #CONTACTS_ERROR_SYSTEM                System error
+ * @retval  #CONTACTS_ERROR_DB                    Database operation failure
  *
  * @see contacts_connect()
  */
@@ -99,10 +99,8 @@ int contacts_disconnect(void);
  *          otherwise a negative error value
  *
  * @retval  #CONTACTS_ERROR_NONE                Successful
- * @retval  #CONTACTS_ERROR_OUT_OF_MEMORY       Out of memory
- * @retval  #CONTACTS_ERROR_DB                  Database operation failure
- * @retval  #CONTACTS_ERROR_IPC_NOT_AVALIABLE   IPC server is not available
  * @retval  #CONTACTS_ERROR_IPC                 IPC error
+ * @retval  #CONTACTS_ERROR_OUT_OF_MEMORY       Out of memory
  * @retval  #CONTACTS_ERROR_SYSTEM              System error
  * @retval  #CONTACTS_ERROR_INTERNAL            Internal error
  * @retval  #CONTACTS_ERROR_PERMISSION_DENIED   Permission denied. This application does not have the privilege to call this method.
@@ -116,13 +114,16 @@ int contacts_connect_on_thread(void);
  *
  * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
  *
+ * @remarks If there is no opened connection, this function returns #CONTACTS_ERROR_DB.
+ *
  * @return  @c 0 on success,
  *          otherwise a negative error value
  *
  * @retval  #CONTACTS_ERROR_NONE                  Successful
- * @retval  #CONTACTS_ERROR_INVALID_PARAMETER     Invalid parameter
- * @retval  #CONTACTS_ERROR_DB                    Database operation failure
  * @retval  #CONTACTS_ERROR_IPC                   IPC error
+ * @retval  #CONTACTS_ERROR_OUT_OF_MEMORY         Out of memory
+ * @retval  #CONTACTS_ERROR_SYSTEM                System error
+ * @retval  #CONTACTS_ERROR_DB                    Database operation failure
  *
  * @see contacts_connect_on_thread()
  */
@@ -163,11 +164,10 @@ int contacts_disconnect_on_thread(void);
  *          otherwise a negative error value
  *
  * @retval  #CONTACTS_ERROR_NONE                Successful
- * @retval  #CONTACTS_ERROR_DB                  Database operation failure
- * @retval  #CONTACTS_ERROR_IPC_NOT_AVALIABLE   IPC server is not available
  * @retval  #CONTACTS_ERROR_IPC                 IPC error
+ * @retval  #CONTACTS_ERROR_OUT_OF_MEMORY       Out of memory
  * @retval  #CONTACTS_ERROR_SYSTEM              System error
- * @retval  #CONTACTS_ERROR_PERMISSION_DENIED   Permission denied. This application does not have the privilege to call this method.
+ * @retval  #CONTACTS_ERROR_INTERNAL            Internal error
  *
  * @see  contacts_disconnect()
  */
