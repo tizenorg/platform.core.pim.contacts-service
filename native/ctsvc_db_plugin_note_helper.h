@@ -28,4 +28,4 @@ int ctsvc_db_note_update(contacts_record_h record, bool is_my_profile);
 int ctsvc_db_note_delete(int id, bool is_my_profile);
 int ctsvc_db_note_get_value_from_stmt(cts_stmt stmt, contacts_record_h *record, int start_count);
 
-#endif // __CTSVC_DB_PLUGIN_NOTE_HELPER_H__
+#endif /* __CTSVC_DB_PLUGIN_NOTE_HELPER_H__ */

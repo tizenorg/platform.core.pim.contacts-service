@@ -861,7 +861,7 @@ static int __ctsvc_url_create(contacts_record_h *out_record)
 static int __ctsvc_name_destroy(contacts_record_h record, bool delete_child)
 {
 	ctsvc_name_s *name = (ctsvc_name_s*)record;
-	name->base.plugin_cbs = NULL;	// help to find double destroy bug (refer to the contacts_record_destroy)
+	name->base.plugin_cbs = NULL; /* help to find double destroy bug (refer to the contacts_record_destroy) */
 	free(name->base.properties_flags);
 
 	free(name->first);
@@ -921,7 +921,7 @@ static void __ctsvc_temp_image_hash_table_remove(char *filename)
 static int __ctsvc_company_destroy(contacts_record_h record, bool delete_child)
 {
 	ctsvc_company_s *company = (ctsvc_company_s*)record;
-	company->base.plugin_cbs = NULL;	// help to find double destroy bug (refer to the contacts_record_destroy)
+	company->base.plugin_cbs = NULL; /* help to find double destroy bug (refer to the contacts_record_destroy) */
 	free(company->base.properties_flags);
 
 	free(company->label);
@@ -944,7 +944,7 @@ static int __ctsvc_company_destroy(contacts_record_h record, bool delete_child)
 static int __ctsvc_note_destroy(contacts_record_h record, bool delete_child)
 {
 	ctsvc_note_s *note = (ctsvc_note_s*)record;
-	note->base.plugin_cbs = NULL;	// help to find double destroy bug (refer to the contacts_record_destroy)
+	note->base.plugin_cbs = NULL; /* help to find double destroy bug (refer to the contacts_record_destroy) */
 	free(note->base.properties_flags);
 
 	free(note->note);
@@ -956,7 +956,7 @@ static int __ctsvc_note_destroy(contacts_record_h record, bool delete_child)
 static int __ctsvc_number_destroy(contacts_record_h record, bool delete_child)
 {
 	ctsvc_number_s *number = (ctsvc_number_s*)record;
-	number->base.plugin_cbs = NULL;	// help to find double destroy bug (refer to the contacts_record_destroy)
+	number->base.plugin_cbs = NULL; /* help to find double destroy bug (refer to the contacts_record_destroy) */
 	free(number->base.properties_flags);
 
 	free(number->label);
@@ -972,7 +972,7 @@ static int __ctsvc_number_destroy(contacts_record_h record, bool delete_child)
 static int __ctsvc_email_destroy(contacts_record_h record, bool delete_child)
 {
 	ctsvc_email_s *email = (ctsvc_email_s*)record;
-	email->base.plugin_cbs = NULL;	// help to find double destroy bug (refer to the contacts_record_destroy)
+	email->base.plugin_cbs = NULL; /* help to find double destroy bug (refer to the contacts_record_destroy) */
 	free(email->base.properties_flags);
 
 	free(email->label);
@@ -985,7 +985,7 @@ static int __ctsvc_email_destroy(contacts_record_h record, bool delete_child)
 static int __ctsvc_group_relation_destroy(contacts_record_h record, bool delete_child)
 {
 	ctsvc_group_relation_s *group = (ctsvc_group_relation_s*)record;
-	group->base.plugin_cbs = NULL;	// help to find double destroy bug (refer to the contacts_record_destroy)
+	group->base.plugin_cbs = NULL; /* help to find double destroy bug (refer to the contacts_record_destroy) */
 	free(group->base.properties_flags);
 
 	free(group->group_name);
@@ -997,7 +997,7 @@ static int __ctsvc_group_relation_destroy(contacts_record_h record, bool delete_
 static int __ctsvc_activity_destroy(contacts_record_h record, bool delete_child)
 {
 	ctsvc_activity_s *activity = (ctsvc_activity_s*)record;
-	activity->base.plugin_cbs = NULL;	// help to find double destroy bug (refer to the contacts_record_destroy)
+	activity->base.plugin_cbs = NULL; /* help to find double destroy bug (refer to the contacts_record_destroy) */
 	free(activity->base.properties_flags);
 
 	free(activity->source_name);
@@ -1013,7 +1013,7 @@ static int __ctsvc_activity_destroy(contacts_record_h record, bool delete_child)
 static int __ctsvc_activity_photo_destroy(contacts_record_h record, bool delete_child)
 {
 	ctsvc_activity_photo_s *photo = (ctsvc_activity_photo_s*)record;
-	photo->base.plugin_cbs = NULL;	// help to find double destroy bug (refer to the contacts_record_destroy)
+	photo->base.plugin_cbs = NULL; /* help to find double destroy bug (refer to the contacts_record_destroy) */
 	free(photo->base.properties_flags);
 
 	free(photo->photo_url);
@@ -1025,7 +1025,7 @@ static int __ctsvc_activity_photo_destroy(contacts_record_h record, bool delete_
 static int __ctsvc_event_destroy(contacts_record_h record, bool delete_child)
 {
 	ctsvc_event_s *event = (ctsvc_event_s*)record;
-	event->base.plugin_cbs = NULL;	// help to find double destroy bug (refer to the contacts_record_destroy)
+	event->base.plugin_cbs = NULL; /* help to find double destroy bug (refer to the contacts_record_destroy) */
 	free(event->base.properties_flags);
 
 	free(event->label);
@@ -1050,7 +1050,7 @@ static int __ctsvc_messenger_destroy(contacts_record_h record, bool delete_child
 static int __ctsvc_address_destroy(contacts_record_h record, bool delete_child)
 {
 	ctsvc_address_s *address = (ctsvc_address_s*)record;
-	address->base.plugin_cbs = NULL;	// help to find double destroy bug (refer to the contacts_record_destroy)
+	address->base.plugin_cbs = NULL; /* help to find double destroy bug (refer to the contacts_record_destroy) */
 	free(address->base.properties_flags);
 
 	free(address->label);
@@ -1068,7 +1068,7 @@ static int __ctsvc_address_destroy(contacts_record_h record, bool delete_child)
 static int __ctsvc_url_destroy(contacts_record_h record, bool delete_child)
 {
 	ctsvc_url_s *url = (ctsvc_url_s*)record;
-	url->base.plugin_cbs = NULL;	// help to find double destroy bug (refer to the contacts_record_destroy)
+	url->base.plugin_cbs = NULL; /* help to find double destroy bug (refer to the contacts_record_destroy) */
 	free(url->base.properties_flags);
 
 	free(url->label);
@@ -1080,7 +1080,7 @@ static int __ctsvc_url_destroy(contacts_record_h record, bool delete_child)
 static int __ctsvc_nickname_destroy(contacts_record_h record, bool delete_child)
 {
 	ctsvc_nickname_s *nickname = (ctsvc_nickname_s*)record;
-	nickname->base.plugin_cbs = NULL;	// help to find double destroy bug (refer to the contacts_record_destroy)
+	nickname->base.plugin_cbs = NULL; /* help to find double destroy bug (refer to the contacts_record_destroy) */
 	free(nickname->base.properties_flags);
 
 	free(nickname->label);
@@ -1093,7 +1093,7 @@ static int __ctsvc_nickname_destroy(contacts_record_h record, bool delete_child)
 static int __ctsvc_profile_destroy(contacts_record_h record, bool delete_child)
 {
 	ctsvc_profile_s *profile = (ctsvc_profile_s*)record;
-	profile->base.plugin_cbs = NULL;	// help to find double destroy bug (refer to the contacts_record_destroy)
+	profile->base.plugin_cbs = NULL; /* help to find double destroy bug (refer to the contacts_record_destroy) */
 	free(profile->base.properties_flags);
 
 	free(profile->uid);
@@ -1111,7 +1111,7 @@ static int __ctsvc_profile_destroy(contacts_record_h record, bool delete_child)
 static int __ctsvc_relationship_destroy(contacts_record_h record, bool delete_child)
 {
 	ctsvc_relationship_s *relationship = (ctsvc_relationship_s*)record;
-	relationship->base.plugin_cbs = NULL;	// help to find double destroy bug (refer to the contacts_record_destroy)
+	relationship->base.plugin_cbs = NULL; /* help to find double destroy bug (refer to the contacts_record_destroy) */
 	free(relationship->base.properties_flags);
 
 	free(relationship->label);
@@ -1124,7 +1124,7 @@ static int __ctsvc_relationship_destroy(contacts_record_h record, bool delete_ch
 static int __ctsvc_image_destroy(contacts_record_h record, bool delete_child)
 {
 	ctsvc_image_s *image = (ctsvc_image_s*)record;
-	image->base.plugin_cbs = NULL;	// help to find double destroy bug (refer to the contacts_record_destroy)
+	image->base.plugin_cbs = NULL; /* help to find double destroy bug (refer to the contacts_record_destroy) */
 	free(image->base.properties_flags);
 
 	free(image->label);
@@ -1139,7 +1139,7 @@ static int __ctsvc_image_destroy(contacts_record_h record, bool delete_child)
 static int __ctsvc_extension_destroy(contacts_record_h record, bool delete_child)
 {
 	ctsvc_extension_s *data = (ctsvc_extension_s*)record;
-	data->base.plugin_cbs = NULL;	// help to find double destroy bug (refer to the contacts_record_destroy)
+	data->base.plugin_cbs = NULL; /* help to find double destroy bug (refer to the contacts_record_destroy) */
 	free(data->base.properties_flags);
 
 	free(data->data2);
@@ -1161,7 +1161,7 @@ static int __ctsvc_extension_destroy(contacts_record_h record, bool delete_child
 static int __ctsvc_simple_contact_destroy(contacts_record_h record, bool delete_child)
 {
 	ctsvc_simple_contact_s *contact= (ctsvc_simple_contact_s*)record;
-	contact->base.plugin_cbs = NULL;	// help to find double destroy bug (refer to the contacts_record_destroy)
+	contact->base.plugin_cbs = NULL; /* help to find double destroy bug (refer to the contacts_record_destroy) */
 	free(contact->base.properties_flags);
 
 	free(contact->display_name);
@@ -1235,7 +1235,7 @@ static int __ctsvc_contact_create(contacts_record_h *out_record)
 static int __ctsvc_contact_destroy(contacts_record_h record, bool delete_child)
 {
 	ctsvc_contact_s *contact = (ctsvc_contact_s*)record;
-	contact->base.plugin_cbs = NULL;	// help to find double destroy bug (refer to the contacts_record_destroy)
+	contact->base.plugin_cbs = NULL; /* help to find double destroy bug (refer to the contacts_record_destroy) */
 	free(contact->base.properties_flags);
 
 	free(contact->display_name);
@@ -3728,7 +3728,7 @@ static int __ctsvc_event_get_bool(contacts_record_h record, unsigned int propert
 {
 	ctsvc_event_s *event = (ctsvc_event_s *)record;
 	switch (property_id) {
-	case CTSVC_PROPERTY_EVENT_IS_LEAP_MONTH: // deprecated
+	case CTSVC_PROPERTY_EVENT_IS_LEAP_MONTH: /* deprecated */
 		*value = event->is_leap_month;
 		break;
 	default:
@@ -3826,7 +3826,7 @@ static int __ctsvc_event_set_bool(contacts_record_h record, unsigned int propert
 	ctsvc_event_s *event = (ctsvc_event_s *)record;
 
 	switch(property_id) {
-	case CTSVC_PROPERTY_EVENT_IS_LEAP_MONTH: // deprecated
+	case CTSVC_PROPERTY_EVENT_IS_LEAP_MONTH: /* deprecated */
 		event->is_leap_month = value;
 		break;
 	default:
@@ -4124,7 +4124,7 @@ static int __ctsvc_extension_clone(contacts_record_h record, contacts_record_h *
 
 	out_data->id = src_data->id;
 	out_data->contact_id = src_data->contact_id;
-//	out_data->is_default = src_data->is_default;
+	/* out_data->is_default = src_data->is_default; */
 	out_data->data1 = src_data->data1;
 	out_data->data2 = SAFE_STRDUP(src_data->data2);
 	out_data->data3 = SAFE_STRDUP(src_data->data3);

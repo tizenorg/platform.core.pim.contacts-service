@@ -137,4 +137,4 @@ int contacts_group_set_group_order(int group_id, int previous_group_id, int next
 #endif
 
 
-#endif //__TIZEN_SOCIAL_CONTACTS_GROUP_H__
+#endif /* __TIZEN_SOCIAL_CONTACTS_GROUP_H__ */

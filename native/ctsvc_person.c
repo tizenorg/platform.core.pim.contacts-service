@@ -31,7 +31,7 @@
 
 #ifdef ENABLE_LOG_FEATURE
 #include "ctsvc_phonelog.h"
-#endif // ENABLE_LOG_FEATURE
+#endif /* ENABLE_LOG_FEATURE */
 
 #ifdef _CONTACTS_IPC_SERVER
 #include "ctsvc_server_change_subject.h"
@@ -302,7 +302,7 @@ static inline int __ctsvc_put_person_default_image(int person_id, int id)
 	image_path = SAFE_STRDUP(ctsvc_stmt_get_text(stmt, 2));
 	ctsvc_stmt_finalize(stmt);
 
-	// unset is_primary_default of all data of the person
+	/* unset is_primary_default of all data of the person */
 	snprintf(query, sizeof(query),
 			"UPDATE "CTS_TABLE_DATA" SET is_primary_default=0 WHERE datatype=%d AND is_my_profile = 0 "
 				"AND contact_id IN (SELECT contact_id FROM "CTS_TABLE_CONTACTS" "
@@ -316,7 +316,7 @@ static inline int __ctsvc_put_person_default_image(int person_id, int id)
 		return ret;
 	}
 
-	// unset is_default of all data of person if the data is not default
+	/* unset is_default of all data of person if the data is not default */
 	if (false == is_default) {
 		snprintf(query, sizeof(query),
 				"UPDATE "CTS_TABLE_DATA" SET is_default=0 WHERE datatype=%d  AND is_my_profile = 0 "
@@ -332,7 +332,7 @@ static inline int __ctsvc_put_person_default_image(int person_id, int id)
 		}
 	}
 
-	// set is_default, is _primary_default
+	/* set is_default, is _primary_default */
 	snprintf(query, sizeof(query),
 				"UPDATE "CTS_TABLE_DATA" SET is_primary_default=1, is_default=1 WHERE id=%d ", id);
 	ret = ctsvc_query_exec(query);
@@ -343,7 +343,7 @@ static inline int __ctsvc_put_person_default_image(int person_id, int id)
 		return ret;
 	}
 
-	// update person's image_thumbnail_path
+	/* update person's image_thumbnail_path */
 	snprintf(query, sizeof(query),
 			"UPDATE "CTS_TABLE_PERSONS" SET image_thumbnail_path=? WHERE person_id=%d ", person_id);
 	ret = ctsvc_query_prepare(query, &stmt);
@@ -365,7 +365,7 @@ static inline int __ctsvc_put_person_default_image(int person_id, int id)
 	}
 	ctsvc_stmt_finalize(stmt);
 
-	// update contact's image_thumbnail_path
+	/* update contact's image_thumbnail_path */
 	snprintf(query, sizeof(query),
 			"UPDATE "CTS_TABLE_CONTACTS" SET image_thumbnail_path=? WHERE contact_id=%d ", contact_id);
 	ret = ctsvc_query_prepare(query, &stmt);
@@ -427,7 +427,7 @@ static inline int __ctsvc_put_person_default_data(int person_id, int id, int dat
 	ret = ctsvc_begin_trans();
 	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "DB error : ctsvc_begin_trans() Fail(%d)", ret);
 
-	// unset is_primary_default of all data of the person
+	/* unset is_primary_default of all data of the person */
 	snprintf(query, sizeof(query),
 			"UPDATE "CTS_TABLE_DATA" SET is_primary_default=0 WHERE datatype=%d AND is_my_profile = 0 "
 				"AND contact_id IN (SELECT contact_id FROM "CTS_TABLE_CONTACTS" "
@@ -441,7 +441,7 @@ static inline int __ctsvc_put_person_default_data(int person_id, int id, int dat
 		return ret;
 	}
 
-	// unset is_default of all data of person if the data is not default
+	/* unset is_default of all data of person if the data is not default */
 	if (false == is_default) {
 		snprintf(query, sizeof(query),
 				"UPDATE "CTS_TABLE_DATA" SET is_default=0 WHERE datatype=%d AND is_my_profile = 0 "
@@ -456,7 +456,7 @@ static inline int __ctsvc_put_person_default_data(int person_id, int id, int dat
 		}
 	}
 
-	// set is_default, is _primary_default
+	/* set is_default, is _primary_default */
 	snprintf(query, sizeof(query),
 			"UPDATE "CTS_TABLE_DATA" SET is_primary_default=1, is_default=1 WHERE id=%d ", id);
 
@@ -532,8 +532,10 @@ void ctsvc_db_person_delete_callback(sqlite3_context * context,
 	ctsvc_change_subject_add_changed_person_id(CONTACTS_CHANGE_DELETED, person_id);
 
 #ifdef ENABLE_LOG_FEATURE
-	// update phonelog
-	// CASE : do not know the proper new person_id
+	/*
+	 * update phonelog
+	 * CASE : do not know the proper new person_id
+	 */
 	ctsvc_db_phone_log_update_person_id(NULL, person_id, -1, false);
 #endif // ENABLE_LOG_FEATURE
 	sqlite3_result_null(context);
@@ -577,9 +579,12 @@ int ctsvc_person_aggregate(int person_id)
 	ctsvc_person_s *person;
 	bool person_is_favorite = false;
 
-	// person aggregation : person link/unlink, contact insert (auto link), contact delete, garbage collection (addressbook delete)
-	// It should be get all contacts of person regardless of permission
-	// Get person info directly instead of contacts_db_get_record(_contacts_person._uri, person_id, (contacts_record_h*)&person);
+	/*
+	 * person aggregation : person link/unlink, contact insert (auto link),
+	 *  contact delete, garbage collection (addressbook delete)
+	 * It should be get all contacts of person regardless of permission
+	 * Get person info directly instead of contacts_db_get_record(_contacts_person._uri, person_id, (contacts_record_h*)&person);
+	 */
 	snprintf(query, sizeof(query),
 			"SELECT person_id, "
 					"name_contact_id, "
@@ -613,7 +618,7 @@ int ctsvc_person_aggregate(int person_id)
 	person->message_alert = SAFE_STRDUP(temp);
 	ctsvc_stmt_finalize(stmt);
 
-	// check image_thumbnail_path
+	/* check image_thumbnail_path */
 	if (person->image_thumbnail_path) {
 		temp = __ctsvc_get_image_filename(person->image_thumbnail_path);
 		snprintf(query, sizeof(query),
@@ -630,7 +635,7 @@ int ctsvc_person_aggregate(int person_id)
 		image_thumbnail_path = NULL;
 	}
 
-	// check name_contact_id
+	/* check name_contact_id */
 	snprintf(query, sizeof(query),
 			"SELECT contact_id FROM %s "
 			"WHERE person_id=%d AND contact_id=%d AND deleted = 0",
@@ -646,7 +651,7 @@ int ctsvc_person_aggregate(int person_id)
 		person_name_contact_id = 0;
 	}
 
-	// get status of person
+	/* get status of person */
 	snprintf(query, sizeof(query),
 		"SELECT a.status FROM %s c, %s a "
 		"ON c.contact_id = a.contact_id AND c.deleted = 0 "
@@ -667,7 +672,7 @@ int ctsvc_person_aggregate(int person_id)
 	}
 	ctsvc_stmt_finalize(stmt);
 
-	// check ringtone_path
+	/* check ringtone_path */
 	if (person->ringtone_path) {
 		snprintf(query, sizeof(query),
 			"SELECT C.contact_id FROM "CTS_TABLE_CONTACTS" C "
@@ -683,7 +688,7 @@ int ctsvc_person_aggregate(int person_id)
 		ringtone_path = NULL;
 	}
 
-	// check vibration
+	/* check vibration */
 	if (person->vibration) {
 		snprintf(query, sizeof(query),
 			"SELECT C.contact_idFROM "CTS_TABLE_CONTACTS" C "
@@ -699,7 +704,7 @@ int ctsvc_person_aggregate(int person_id)
 		vibration = NULL;
 	}
 
-	// check vibration
+	/* check vibration */
 	if (person->message_alert) {
 		snprintf(query, sizeof(query),
 			"SELECT C.contact_id FROM "CTS_TABLE_CONTACTS" C "
@@ -790,7 +795,7 @@ int ctsvc_person_aggregate(int person_id)
 		if (NULL == image_thumbnail_path && contact_image_thumbnail_path && *contact_image_thumbnail_path) {
 			temp = __ctsvc_get_image_filename(contact_image_thumbnail_path);
 			image_thumbnail_path = SAFE_STRDUP(temp);
-			// update data table : is_primary_default
+			/* update data table : is_primary_default */
 		}
 		free(contact_image_thumbnail_path);
 
@@ -994,12 +999,14 @@ API int contacts_person_link_person(int base_person_id, int person_id)
 		__ctsvc_put_person_default_image(base_person_id, default_image_id);
 
 #ifdef ENABLE_LOG_FEATURE
-	// update phonelog
-	// Updating phonelog person_id before deleting person
-	// Because, when deleting, ctsvc_db_person_delete_callback will be called
-	// the logic takes more time to find proper person_id (base_person_id)
+	/*
+	 * update phonelog
+	 * Updating phonelog person_id before deleting person
+	 * Because, when deleting, ctsvc_db_person_delete_callback will be called
+	 * the logic takes more time to find proper person_id (base_person_id)
+	 */
 	ctsvc_db_phone_log_update_person_id(NULL, person_id, base_person_id, true);
-#endif // ENABLE_LOG_FEATURE
+#endif /* ENABLE_LOG_FEATURE */
 
 	snprintf(query, sizeof(query), "DELETE FROM %s WHERE person_id = %d",
 			CTS_TABLE_PERSONS, person_id);
@@ -1009,10 +1016,12 @@ API int contacts_person_link_person(int base_person_id, int person_id)
 		ctsvc_end_trans(false);
 		return ret;
 	}
-//#ifdef _CONTACTS_IPC_SERVER
-//	It will be added in ctsvc_db_person_delete_callback
-//	ctsvc_change_subject_add_changed_person_id(CONTACTS_CHANGE_DELETED, person_id);
-//#endif
+/*
+ *#ifdef _CONTACTS_IPC_SERVER
+ *  It will be added in ctsvc_db_person_delete_callback
+ *  ctsvc_change_subject_add_changed_person_id(CONTACTS_CHANGE_DELETED, person_id);
+ *#endif
+ */
 
 	if (is_favorite) {
 		snprintf(query, sizeof(query),
@@ -1208,7 +1217,7 @@ API int contacts_person_unlink_contact(int person_id, int contact_id, int* out_p
 		return ret;
 	}
 
-	// create new person
+	/* create new person */
 	id = ctsvc_db_insert_person(record);
 	if (id < CONTACTS_ERROR_NONE) {
 		CTS_ERR("ctsvc_db_insert_person() Fail(%d)", id);
@@ -1217,7 +1226,7 @@ API int contacts_person_unlink_contact(int person_id, int contact_id, int* out_p
 		return id;
 	}
 
-	// insert statistic info for new person
+	/* insert statistic info for new person */
 	snprintf(query, sizeof(query),
 			"INSERT INTO %s (person_id, usage_type, times_used) "
 			"SELECT %d, usage_type, times_used FROM %s WHERE person_id = %d",
@@ -1232,7 +1241,7 @@ API int contacts_person_unlink_contact(int person_id, int contact_id, int* out_p
 
 	is_favorite = __ctsvc_get_person_favorite_info(person_id, &priority);
 
-	// update person_id of unlinked contact
+	/* update person_id of unlinked contact */
 	snprintf(query, sizeof(query),
 			"UPDATE %s SET person_id = %d WHERE contact_id = %d",
 			CTS_TABLE_CONTACTS, id, contact_id);
@@ -1244,7 +1253,7 @@ API int contacts_person_unlink_contact(int person_id, int contact_id, int* out_p
 		return ret;
 	}
 
-	// update bsae person info
+	/* update bsae person info */
 	ret = ctsvc_person_aggregate(person_id);
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("ctsvc_person_aggregate(%d) Fail(%d)", person_id, ret);
@@ -1269,9 +1278,9 @@ API int contacts_person_unlink_contact(int person_id, int contact_id, int* out_p
 	__ctsvc_update_primary_default_data(person_id);
 
 #ifdef ENABLE_LOG_FEATURE
-	// update phonelog
+	/* update phonelog */
 	ctsvc_db_phone_log_update_person_id(NULL, person_id, id, false);
-#endif // ENABLE_LOG_FEATURE
+#endif /* ENABLE_LOG_FEATURE */
 
 	if (out_person_id)
 		*out_person_id = id;
@@ -1301,9 +1310,9 @@ int ctsvc_person_do_garbage_collection(void)
 		person_id = ctsvc_stmt_get_int(stmt, 0);
 		ctsvc_person_aggregate(person_id);
 #ifdef ENABLE_LOG_FEATURE
-		// update phonelog
+		/* update phonelog */
 		ctsvc_db_phone_log_update_person_id(NULL, person_id, -1, false);
-#endif // ENABLE_LOG_FEATURE
+#endif /* ENABLE_LOG_FEATURE */
 	}
 	ctsvc_stmt_finalize(stmt);
 
@@ -1408,16 +1417,16 @@ API int contacts_person_set_default_property(contacts_person_property_e property
 
 	switch(property) {
 	case CONTACTS_PERSON_PROPERTY_NAME_CONTACT:
-		ret = __ctsvc_put_person_default_name(person_id, id);		// contact id
+		ret = __ctsvc_put_person_default_name(person_id, id);		/* contact id */
 		break;
 	case CONTACTS_PERSON_PROPERTY_NUMBER:
-		ret = __ctsvc_put_person_default_data(person_id, id, CTSVC_DATA_NUMBER);	// number id
+		ret = __ctsvc_put_person_default_data(person_id, id, CTSVC_DATA_NUMBER);	/* number id */
 		break;
 	case CONTACTS_PERSON_PROPERTY_EMAIL:
-		ret = __ctsvc_put_person_default_data(person_id, id, CTSVC_DATA_EMAIL);		// email id
+		ret = __ctsvc_put_person_default_data(person_id, id, CTSVC_DATA_EMAIL);		/* email id */
 		break;
 	case CONTACTS_PERSON_PROPERTY_IMAGE:
-		ret = __ctsvc_put_person_default_image(person_id, id);		// image id
+		ret = __ctsvc_put_person_default_image(person_id, id);		/* image id */
 		break;
 	default:
 		ret = CONTACTS_ERROR_INVALID_PARAMETER;

@@ -40,7 +40,7 @@ static GList *__thread_list = NULL;
 
 static int have_smack = -1;
 
-// check SMACK enable or disable
+/* check SMACK enable or disable */
 static int __ctsvc_have_smack(void)
 {
 	if (-1 == have_smack) {
@@ -52,7 +52,7 @@ static int __ctsvc_have_smack(void)
 	return have_smack;
 }
 
-// this function is called in mutex lock
+/* this function is called in mutex lock */
 static ctsvc_permission_info_s * __ctsvc_find_access_info(unsigned int thread_id)
 {
 	GList *cursor;
@@ -66,9 +66,11 @@ static ctsvc_permission_info_s * __ctsvc_find_access_info(unsigned int thread_id
 	return NULL;
 }
 
-// Check the client has read permission of the file(path)
-// success : CONTACTS_ERROR_NONE
-// fail : return negative value
+/*
+ * Check the client has read permission of the file(path)
+ * success : CONTACTS_ERROR_NONE
+ * fail : return negative value
+ */
 int ctsvc_have_file_read_permission(const char *path)
 {
 	int ret;
@@ -80,10 +82,10 @@ int ctsvc_have_file_read_permission(const char *path)
 	unsigned int thread_id;
 
 	have_smack = __ctsvc_have_smack();
-	if (have_smack != 1)		// smack disable
+	if (have_smack != 1)   /* smack disable */
 		return CONTACTS_ERROR_NONE;
 
-	// Get SMACK label of the file
+	/* Get SMACK label of the file */
 	ret = smack_getlabel(path, &file_label, SMACK_LABEL_ACCESS);
 	if (ret < 0) {
 		CTS_ERR("smack_getlabel Fail (%d)", ret);
@@ -119,7 +121,7 @@ int ctsvc_have_file_read_permission(const char *path)
 	return ret;
 }
 
-// this function is called in mutex lock
+/* this function is called in mutex lock */
 static void __ctsvc_set_permission_info(ctsvc_permission_info_s *info)
 {
 	int ret;
@@ -134,12 +136,12 @@ static void __ctsvc_set_permission_info(ctsvc_permission_info_s *info)
 	else
 		INFO("SAMCK disabled");
 
-	// white listing : core module
+	/* white listing : core module */
 	free(info->write_list);
 	info->write_list = NULL;
 	info->write_list_count = 0;
 
-	// don't have write permission
+	/* don't have write permission */
 	if (!ctsvc_have_permission(info->ipc, CTSVC_PERMISSION_CONTACT_WRITE))
 		return;
 
@@ -206,8 +208,10 @@ void ctsvc_unset_client_access_info()
 	ctsvc_mutex_unlock(CTS_MUTEX_ACCESS_CONTROL);
 }
 
-// release permission info resource when disconnecting client
-// It is set as callback function using pims-ipc API
+/*
+ * release permission info resource when disconnecting client
+ * It is set as callback function using pims-ipc API
+ */
 static void __ctsvc_client_disconnected_cb(pims_ipc_h ipc, void *user_data)
 {
 	ctsvc_permission_info_s *info;
@@ -224,8 +228,11 @@ static void __ctsvc_client_disconnected_cb(pims_ipc_h ipc, void *user_data)
 
 	ctsvc_mutex_unlock(CTS_MUTEX_ACCESS_CONTROL);
 
-	// if client did not call disconnect function such as contacts_disconnect, contacts_disconnect_on_thread
-	// DB will be closed in ctsvc_contacts_internal_disconnect()
+	/*
+	 * if client did not call disconnect function
+	 * such as contacts_disconnect, contacts_disconnect_on_thread
+	 * DB will be closed in ctsvc_contacts_internal_disconnect()
+	 */
 	ctsvc_contacts_internal_disconnect();
 }
 
@@ -254,8 +261,10 @@ void ctsvc_set_client_access_info(pims_ipc_h ipc, const char *smack)
 	ctsvc_mutex_unlock(CTS_MUTEX_ACCESS_CONTROL);
 }
 
-// Whenever changing addressbook this function will be called
-// to reset read/write permssion info of each addressbook
+/*
+ * Whenever changing addressbook this function will be called
+ * to reset read/write permssion info of each addressbook
+ */
 void ctsvc_reset_all_client_access_info()
 {
 	GList *cursor;
@@ -271,7 +280,7 @@ void ctsvc_reset_all_client_access_info()
 bool ctsvc_have_permission(pims_ipc_h ipc, int permission)
 {
 	have_smack = __ctsvc_have_smack();
-	if (have_smack != 1)		// smack disable
+	if (have_smack != 1)   /* smack disable */
 		return true;
 
 	if (NULL == ipc) // contacts-service daemon
@@ -303,7 +312,7 @@ bool ctsvc_have_ab_write_permission(int addressbook_id)
 	ctsvc_permission_info_s *find = NULL;
 
 	have_smack = __ctsvc_have_smack();
-	if (have_smack != 1)		// smack disable
+	if (have_smack != 1)   /* smack disable */
 		return true;
 
 	ctsvc_mutex_lock(CTS_MUTEX_ACCESS_CONTROL);

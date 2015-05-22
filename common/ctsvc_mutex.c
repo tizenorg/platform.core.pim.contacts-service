@@ -85,11 +85,13 @@ void ctsvc_mutex_lock(int type)
 	int ret;
 	pthread_mutex_t *mutex;
 
-	// If user use pthread_cancel, lock can be occured
-	// protect it, call pthread_set_canceltype as PTHREAD_CANCEL_DEFERRED
-	// But, if another module call PTHREAD_CANCEL_ASYNCHRONOUS,
-	// it can be occured again
-	// So, Do not use the pthread_cancel with contacts_service API
+	/*
+	 * If user use pthread_cancel, lock can be occured
+	 * protect it, call pthread_set_canceltype as PTHREAD_CANCEL_DEFERRED
+	 * But, if another module call PTHREAD_CANCEL_ASYNCHRONOUS,
+	 * it can be occured again
+	 * So, Do not use the pthread_cancel with contacts_service API
+	 */
 	if (__defered_ref == 0)
 		pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, &__old_type);
 	else

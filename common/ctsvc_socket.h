@@ -29,8 +29,8 @@
 #define CTSVC_SOCKET_FILE ".contacts-svc.sock"
 #define CTSVC_SOCKET_MSG_SIZE 1024
 
-// for use current contacts-svc-helper daemon
-// Message type
+/* for use current contacts-svc-helper daemon */
+/* Message type */
 enum{
 	CTSVC_SOCKET_MSG_TYPE_REQUEST_RETURN_VALUE,
 	CTSVC_SOCKET_MSG_TYPE_REQUEST_IMPORT_SIM,
@@ -49,10 +49,10 @@ typedef struct{
 #ifdef ENABLE_SIM_FEATURE
 int ctsvc_request_sim_import(int sim_slot_no);
 int ctsvc_request_sim_get_initialization_status(int sim_slot_no, bool* completed);
-#endif // ENABLE_SIM_FEATURE
+#endif /* ENABLE_SIM_FEATURE */
 
 int ctsvc_socket_init(void);
 void ctsvc_socket_final(void);
 
-#endif /*  __TIZEN_SOCIAL_CTSVC_SOCKET_H__ */
+#endif /* __TIZEN_SOCIAL_CTSVC_SOCKET_H__ */
 

@@ -33,4 +33,4 @@ int ctsvc_db_person_create_record_from_stmt_with_projection(cts_stmt stmt, unsig
 void ctsvc_db_normalize_str_callback(sqlite3_context * context,	int argc, sqlite3_value ** argv);
 int ctsvc_db_person_set_favorite(int person_id, bool set, bool propagate);
 
-#endif // __CTSVC_DB_PLUGIN_PERSON_HELPER_H__
+#endif /* __CTSVC_DB_PLUGIN_PERSON_HELPER_H__ */

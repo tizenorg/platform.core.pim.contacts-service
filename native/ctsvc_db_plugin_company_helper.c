@@ -56,7 +56,7 @@ static int __ctsvc_company_bind_stmt(cts_stmt stmt, ctsvc_company_s *company, in
 		sqlite3_bind_text(stmt, start_cnt+7, company->assistant_name,
 			strlen(company->assistant_name), SQLITE_STATIC);
 
-	// skip logo here
+	/* skip logo here */
 
 	if (company->location)
 		sqlite3_bind_text(stmt, start_cnt+9, company->location,
@@ -223,7 +223,7 @@ int ctsvc_db_company_update(contacts_record_h record, int contact_id, bool is_my
 		bool same = false;
 		bool check_permission = false;
 
-		// delete current logo image
+		/* delete current logo image */
 		if (logo) {
 			char full_path[CTSVC_IMG_FULL_PATH_SIZE_MAX] = {0};
 			snprintf(full_path, sizeof(full_path), "%s/%s", CTS_LOGO_IMAGE_LOCATION, logo);
@@ -249,7 +249,7 @@ int ctsvc_db_company_update(contacts_record_h record, int contact_id, bool is_my
 			}
 		}
 
-		// add new logo file
+		/* add new logo file */
 		if (false == same && company->logo) {
 			char dest[CTSVC_IMG_FULL_PATH_SIZE_MAX] = {0};
 			if (false == check_permission) {
@@ -307,8 +307,10 @@ int ctsvc_db_company_delete(int id, bool is_my_profile)
 	return CONTACTS_ERROR_NONE;
 }
 
-// Whenever deleting company record in data table, this function will be called
-// in order to delete company logo image file
+/*
+ * Whenever deleting company record in data table, this function will be called
+ * in order to delete company logo image file
+ */
 void ctsvc_db_company_delete_callback(sqlite3_context *context, int argc, sqlite3_value ** argv)
 {
 	int ret;

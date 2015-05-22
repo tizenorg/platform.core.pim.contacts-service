@@ -256,7 +256,7 @@ static int __ctsvc_db_group_update_record(contacts_record_h record)
 	if (ctsvc_record_check_property_flag((ctsvc_record_s *)group, _contacts_group.image_path, CTSVC_PROPERTY_FLAG_DIRTY)) {
 		bool same = false;
 		bool check_permission = 0;
-		// delete current image
+		/* delete current image */
 		if (image) {
 			char full_path[CTSVC_IMG_FULL_PATH_SIZE_MAX] = {0};
 			snprintf(full_path, sizeof(full_path), "%s/%s", CTS_GROUP_IMAGE_LOCATION, image);
@@ -284,7 +284,7 @@ static int __ctsvc_db_group_update_record(contacts_record_h record)
 			}
 		}
 
-		// add new image file
+		/* add new image file */
 		if (false == same && group->image_thumbnail_path) {
 			char dest[CTS_SQL_MAX_LEN] = {0};
 			if (false == check_permission) {

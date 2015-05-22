@@ -39,7 +39,7 @@ void ctsvc_ipc_person_get_default_property(pims_ipc_h ipc, pims_ipc_data_h indat
 #ifdef ENABLE_LOG_FEATURE
 void ctsvc_ipc_phone_log_reset_statistics(pims_ipc_h ipc, pims_ipc_data_h indata, pims_ipc_data_h *outdata, void *userdata);
 void ctsvc_ipc_phone_log_delete(pims_ipc_h ipc, pims_ipc_data_h indata, pims_ipc_data_h *outdata, void *userdata);
-#endif // ENABLE_LOG_FEATURE
+#endif /* ENABLE_LOG_FEATURE */
 
 void ctsvc_ipc_setting_get_name_display_order(pims_ipc_h ipc, pims_ipc_data_h indata, pims_ipc_data_h *outdata, void *userdata);
 void ctsvc_ipc_setting_set_name_display_order(pims_ipc_h ipc, pims_ipc_data_h indata, pims_ipc_data_h *outdata, void *userdata);

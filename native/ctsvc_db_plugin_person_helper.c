@@ -105,13 +105,11 @@ int ctsvc_db_person_create_record_from_stmt_with_projection(cts_stmt stmt, unsig
 			break;
 		case CTSVC_PROPERTY_PERSON_FAVORITE_PRIORITY:
 			{
-			// TODO: Fixme (BS)
+			/* TODO: Fixme (BS) */
 				int value = ctsvc_stmt_get_int(stmt, i);
-				value++; // fix warning
+				value++; /* fix warning */
 			}
 			break;
-			//	ASSERT_NOT_REACHED("Invalid parameter : property_id(0x%0x) is not supported in projection value(person)", property_id);
-			// return CONTACTS_ERROR_INVALID_PARAMETER;
 		default:
 			ASSERT_NOT_REACHED("Invalid parameter : property_id(0x%0x) is not supported in value(person)", property_id);
 			return CONTACTS_ERROR_INVALID_PARAMETER;
@@ -330,7 +328,7 @@ int ctsvc_db_insert_person(contacts_record_h record)
 		return ret;
 	}
 
-	// set favorite
+	/* set favorite */
 	if (contact->is_favorite) {
 		ret = ctsvc_db_person_set_favorite(index, contact->is_favorite, false);
 		if (CONTACTS_ERROR_NONE != ret) {
@@ -528,7 +526,7 @@ int ctsvc_db_update_person(contacts_record_h record)
 	}
 	ctsvc_stmt_finalize(stmt);
 
-	// update favorite
+	/* update favorite */
 	snprintf(query, sizeof(query),
 			"SELECT is_favorite FROM "CTS_TABLE_CONTACTS" WHERE contact_id =%d ", contact->id);
 	ret = ctsvc_query_get_first_int_result(query, &is_favorite);
@@ -588,7 +586,7 @@ int ctsvc_db_update_person(contacts_record_h record)
 		return CONTACTS_ERROR_NONE;
 }
 
-// This function will return group letter of the person
+/* This function will return group letter of the person */
 void ctsvc_db_normalize_str_callback(sqlite3_context * context,
 		int argc, sqlite3_value ** argv)
 {

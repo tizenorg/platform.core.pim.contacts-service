@@ -100,4 +100,4 @@ int ctsvc_check_utf8(char c);
 int ctsvc_check_language(UChar *word);
 int ctsvc_check_language_type(const char *src);
 
-#endif // __TIZEN_SOCIAL_CTSVC_LOCALIZE_UTILS_H__
+#endif /* __TIZEN_SOCIAL_CTSVC_LOCALIZE_UTILS_H__ */

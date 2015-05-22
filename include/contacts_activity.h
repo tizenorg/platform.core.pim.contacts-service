@@ -108,5 +108,5 @@ int contacts_activity_delete_by_account_id(int account_id);
 #endif
 
 
-#endif //__TIZEN_SOCIAL_CONTACTS_ACTIVITY_H__
+#endif /* __TIZEN_SOCIAL_CONTACTS_ACTIVITY_H__ */
 

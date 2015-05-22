@@ -17,7 +17,7 @@
  *
  */
 
-#include <stdlib.h> //calloc
+#include <stdlib.h>
 #include <string.h>
 #include "ctsvc_ipc_marshal.h"
 #include "contacts_record.h"
@@ -34,12 +34,12 @@ extern ctsvc_ipc_marshal_record_plugin_cb_s _ctsvc_ipc_record_group_plugin_cb;
 extern ctsvc_ipc_marshal_record_plugin_cb_s _ctsvc_ipc_record_person_plugin_cb;
 #ifdef ENABLE_LOG_FEATURE
 extern ctsvc_ipc_marshal_record_plugin_cb_s _ctsvc_ipc_record_phonelog_plugin_cb;
-#endif // ENABLE_LOG_FEATURE
+#endif /* ENABLE_LOG_FEATURE */
 extern ctsvc_ipc_marshal_record_plugin_cb_s _ctsvc_ipc_record_result_plugin_cb;
 #ifdef ENABLE_SIM_FEATURE
 extern ctsvc_ipc_marshal_record_plugin_cb_s _ctsvc_ipc_record_sdn_plugin_cb;
 extern ctsvc_ipc_marshal_record_plugin_cb_s _ctsvc_ipc_record_speeddial_plugin_cb;
-#endif // ENABLE_SIM_FEATURE
+#endif /* ENABLE_SIM_FEATURE */
 extern ctsvc_ipc_marshal_record_plugin_cb_s _ctsvc_ipc_record_updated_info_plugin_cb;
 
 extern ctsvc_ipc_marshal_record_plugin_cb_s _ctsvc_ipc_record_simple_contact_plugin_cb;
@@ -88,13 +88,13 @@ static ctsvc_ipc_marshal_record_plugin_cb_s* __ctsvc_ipc_marshal_get_plugin_cb(c
 #ifdef ENABLE_LOG_FEATURE
 	case CTSVC_RECORD_PHONELOG:
 		return (&_ctsvc_ipc_record_phonelog_plugin_cb);
-#endif // ENABLE_LOG_FEATURE
+#endif /* ENABLE_LOG_FEATURE */
 #ifdef ENABLE_SIM_FEATURE
 	case CTSVC_RECORD_SPEEDDIAL:
 		return (&_ctsvc_ipc_record_speeddial_plugin_cb);
 	case CTSVC_RECORD_SDN:
 		return (&_ctsvc_ipc_record_sdn_plugin_cb);
-#endif // ENABLE_SIM_FEATURE
+#endif /* ENABLE_SIM_FEATURE */
 	case CTSVC_RECORD_RESULT:
 		return (&_ctsvc_ipc_record_result_plugin_cb);
 	case CTSVC_RECORD_SIMPLE_CONTACT:
@@ -174,11 +174,11 @@ static int __ctsvc_ipc_unmarshal_composite_filter(const pims_ipc_data_h ipc_data
 
 	filter->filter_type = CTSVC_FILTER_COMPOSITE;
 
-	// view_uri
+	/* view_uri */
 	str = (char*)pims_ipc_data_get(ipc_data,&size);
 	filter->view_uri = (char*)SAFE_STRDUP(str);
 
-	// filters
+	/* filters */
 	if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(ipc_data,&count)) {
 		CTS_ERR("ctsvc_ipc_unmarshal_int() Fail");
 		return CONTACTS_ERROR_INVALID_PARAMETER;
@@ -224,7 +224,7 @@ static int __ctsvc_ipc_unmarshal_composite_filter(const pims_ipc_data_h ipc_data
 		}
 	}
 
-	// filters
+	/* filters */
 	if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(ipc_data, &count)) {
 		CTS_ERR("ctsvc_ipc_unmarshal_int() Fail");
 		__ctsvc_ipc_unmarshal_composite_filter_free(filter);
@@ -240,7 +240,7 @@ static int __ctsvc_ipc_unmarshal_composite_filter(const pims_ipc_data_h ipc_data
 		filter->filter_ops = g_slist_append(filter->filter_ops, (void*)op);
 	}
 
-	// properties //property_count
+	/* properties  property_count */
 	filter->properties = (property_info_s *)ctsvc_view_get_all_property_infos(filter->view_uri, &filter->property_count);
 
 	return CONTACTS_ERROR_NONE;
@@ -253,13 +253,13 @@ static int __ctsvc_ipc_marshal_composite_filter(const ctsvc_composite_filter_s* 
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 
-	// view_uri
+	/* view_uri */
 	int length = strlen(filter->view_uri);
 	if (pims_ipc_data_put(ipc_data,(void*)filter->view_uri,length+1) < 0) {
 		CTS_ERR("pims_ipc_data_put() Fail");
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
-	// filter->filters
+	/* filter->filters */
 	if (filter->filters) {
 		int count = g_slist_length(filter->filters);
 		GSList *cursor = filter->filters;
@@ -319,8 +319,6 @@ static int __ctsvc_ipc_marshal_composite_filter(const ctsvc_composite_filter_s* 
 			return CONTACTS_ERROR_INVALID_PARAMETER;
 		}
 	}
-
-	// properties //property_count
 
 	return CONTACTS_ERROR_NONE;
 }
@@ -809,7 +807,7 @@ int ctsvc_ipc_unmarshal_query(const pims_ipc_data_h ipc_data, contacts_query_h *
 	RETV_IF(NULL == out_query, CONTACTS_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == ipc_data, CONTACTS_ERROR_INVALID_PARAMETER);
 
-	// view_uri
+	/* view_uri */
 	str = (char*)pims_ipc_data_get(ipc_data, &size);
 
 	ret = contacts_query_create(str, out_query);
@@ -842,7 +840,7 @@ int ctsvc_ipc_unmarshal_query(const pims_ipc_data_h ipc_data, contacts_query_h *
 		filter->properties = (property_info_s *)ctsvc_view_get_all_property_infos(query->view_uri, &filter->property_count);
 		query->filter = filter;
 
-		// for filter_type
+		/* for filter_type */
 		if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_unsigned_int(ipc_data, &count)) {
 			CTS_ERR("ctsvc_ipc_unmarshal_unsigned_int() Fail");
 			contacts_query_destroy(*out_query);
@@ -920,7 +918,7 @@ int ctsvc_ipc_marshal_query(const contacts_query_h query, pims_ipc_data_h ipc_da
 	RETV_IF(NULL == ipc_data, CONTACTS_ERROR_INVALID_PARAMETER);
 	que = (ctsvc_query_s *)query;
 
-	//view_uri
+	/* view_uri */
 	length = strlen(que->view_uri);
 	if (pims_ipc_data_put(ipc_data,(void*)que->view_uri,length+1) < 0) {
 		CTS_ERR("pims_ipc_data_put() Fail");
@@ -970,8 +968,6 @@ int ctsvc_ipc_marshal_query(const contacts_query_h query, pims_ipc_data_h ipc_da
 		CTS_ERR("ctsvc_ipc_marshal_bool() Fail");
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
-
-	//properties // property_count
 
 	return CONTACTS_ERROR_NONE;
 }
@@ -1098,7 +1094,7 @@ int ctsvc_ipc_marshal_list(const contacts_list_h list, pims_ipc_data_h ipc_data)
 	RETV_IF(NULL == list, CONTACTS_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == ipc_data, CONTACTS_ERROR_INVALID_PARAMETER);
 
-	// count
+	/* count */
 	if (CONTACTS_ERROR_NONE != contacts_list_get_count(list, &count)) {
 		CTS_ERR("contacts_list_get_count() Fail");
 		return CONTACTS_ERROR_INVALID_PARAMETER;
@@ -1125,7 +1121,7 @@ int ctsvc_ipc_marshal_list(const contacts_list_h list, pims_ipc_data_h ipc_data)
 		}
 	}
 
-	// count
+	/* count */
 	if (ctsvc_list_get_deleted_count(list, &deleted_count)) {
 		CTS_ERR("ctsvc_list_get_deleted_count() Fail");
 		return CONTACTS_ERROR_INVALID_PARAMETER;

@@ -35,7 +35,7 @@
 #define CTSVC_SOCK_PATH "/run/user/%d"
 #define CTSVC_PATH_MAX_LEN 1024
 
-#define CTSVC_IMG_FULL_PATH_SIZE_MAX 1024		// current max length file path is 256
+#define CTSVC_IMG_FULL_PATH_SIZE_MAX 1024		/* current max length file path is 256 */
 #define STRING_EQUAL 0
 
 #define SAFE_STR(src) (src)?src:""
@@ -182,8 +182,8 @@ typedef struct  {
 typedef struct {
 	int filter_type;
 	char *view_uri;
-	GSList *filter_ops;	//ctsvc_filter_operator_e op;
-	GSList *filters;	//ctsvc_filter_h l_filter;
+	GSList *filter_ops; /* ctsvc_filter_operator_e op; */
+	GSList *filters;    /* ctsvc_filter_h l_filter; */
 	property_info_s *properties;
 	unsigned int property_count;
 }ctsvc_composite_filter_s;
@@ -304,9 +304,9 @@ typedef struct {
 	int type;
 	char *label;
 	char *number;
-	char *cleaned;		// internally used
-	char *normalized;	// internally used
-	char *lookup;		// internally used : for min match
+	char *cleaned;     /* internally used */
+	char *normalized;  /* internally used */
+	char *lookup;      /* internally used : for min match */
 }ctsvc_number_s;
 
 typedef struct {
@@ -351,7 +351,7 @@ typedef struct {
 	int type;
 	char *label;
 	int date;
-	bool is_leap_month; // deprecated
+	bool is_leap_month;  /* deprecated */
 	int calendar_type;
 }ctsvc_event_s;
 
@@ -498,7 +498,7 @@ typedef struct {
 	int id;
 	int person_id;
 	int changed_time;
-	int changed_ver;		// internally used, check when updating contact
+	int changed_ver;   /* internally used, check when updating contact */
 	int addressbook_id;
 	int link_mode;
 	bool has_phonenumber;
@@ -575,7 +575,7 @@ typedef struct {
 	int changed_ver;
 	int addressbook_id;
 	bool image_changed;
-	int last_changed_type;	// it is used for _contacts_my_profile_updated_info
+	int last_changed_type;  /* it is used for _contacts_my_profile_updated_info */
 }ctsvc_updated_info_s;
 
 typedef struct {

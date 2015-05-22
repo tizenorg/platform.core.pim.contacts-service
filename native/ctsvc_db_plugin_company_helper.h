@@ -30,4 +30,4 @@ int ctsvc_db_company_delete(int id, bool is_my_profile);
 int ctsvc_db_company_get_value_from_stmt(cts_stmt stmt, contacts_record_h *record, int start_count);
 void ctsvc_db_company_delete_callback(sqlite3_context *context, int argc, sqlite3_value ** argv);
 
-#endif // __CTSVC_DB_PLUGIN_COMPANY_HELPER_H__
+#endif /* __CTSVC_DB_PLUGIN_COMPANY_HELPER_H__ */

@@ -37,9 +37,9 @@ static int __ctsvc_db_activity_update_record(contacts_record_h record);
 static int __ctsvc_db_activity_delete_record(int id);
 static int __ctsvc_db_activity_get_all_records(int offset, int limit, contacts_list_h* out_list);
 static int __ctsvc_db_activity_get_records_with_query(contacts_query_h query, int offset, int limit, contacts_list_h* out_list);
-//static int __ctsvc_db_activity_insert_records(const contacts_list_h in_list, int **ds);
-//static int __ctsvc_db_activity_update_records(const contacts_list_h in_list);
-//static int __ctsvc_db_activity_delete_records(int ids[], int count);
+/* static int __ctsvc_db_activity_insert_records(const contacts_list_h in_list, int **ds); */
+/* static int __ctsvc_db_activity_update_records(const contacts_list_h in_list); */
+/* static int __ctsvc_db_activity_delete_records(int ids[], int count); */
 
 ctsvc_db_plugin_info_s ctsvc_db_plugin_activity = {
 	.is_query_only = false,

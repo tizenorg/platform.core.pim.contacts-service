@@ -34,7 +34,7 @@ int ctsvc_db_event_insert(contacts_record_h record, int contact_id, bool is_my_p
 	char query[CTS_SQL_MAX_LEN] = {0};
 	ctsvc_event_s *event = (ctsvc_event_s *)record;
 
-	// These check should be done in client side
+	/* These check should be done in client side */
 	RETV_IF(event->date <= 0, CONTACTS_ERROR_NONE);
 	RETVM_IF(contact_id <= 0, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : contact_id(%d) is mandatory field to insert event record", event->contact_id);
@@ -60,7 +60,7 @@ int ctsvc_db_event_insert(contacts_record_h record, int contact_id, bool is_my_p
 		return ret;
 	}
 
-//	event->id = ctsvc_db_get_last_insert_id();
+	/* event->id = ctsvc_db_get_last_insert_id(); */
 	if (id)
 		*id = ctsvc_db_get_last_insert_id();
 
@@ -84,7 +84,7 @@ int ctsvc_db_event_get_value_from_stmt(cts_stmt stmt, contacts_record_h *record,
 
 	event->id = ctsvc_stmt_get_int(stmt, start_count++);
 	event->contact_id = ctsvc_stmt_get_int(stmt, start_count++);
-	start_count++;	// skip is default
+	start_count++; /* skip is default */
 	event->type = ctsvc_stmt_get_int(stmt, start_count++);
 	temp = ctsvc_stmt_get_text(stmt, start_count++);
 	event->label = SAFE_STRDUP(temp);

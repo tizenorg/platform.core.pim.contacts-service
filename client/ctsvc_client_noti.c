@@ -69,7 +69,7 @@ static void __ctsvc_db_subscriber_callback(pims_ipc_h ipc, pims_ipc_data_h data,
 	}
 }
 
-// This API should be called in CTS_MUTEX_PIMS_IPC_PUBSUB mutex
+/* This API should be called in CTS_MUTEX_PIMS_IPC_PUBSUB mutex */
 pims_ipc_h ctsvc_ipc_get_handle_for_change_subsciption()
 {
 	return __ipc;

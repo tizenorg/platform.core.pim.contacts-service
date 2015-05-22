@@ -313,4 +313,4 @@ int contacts_setting_remove_name_sorting_order_changed_cb(contacts_setting_name_
 #endif
 
 
-#endif //__TIZEN_SOCIAL_CONTACTS_SETTING_H__
+#endif /* __TIZEN_SOCIAL_CONTACTS_SETTING_H__ */

@@ -62,7 +62,7 @@ struct image_transform{
 #define CTS_SECURITY_IMAGE_PERMISSION 0440
 #define CTS_IMAGE_ENCODE_QUALITY 50
 #define CTS_IMAGE_MAX_SIZE 1080
-#define CTS_COMMIT_TRY_MAX 500000 // For 3second
+#define CTS_COMMIT_TRY_MAX 500000 /* For 3second */
 #define CTS_IMAGE_TRANSFORM_WAIT_TIME 500 * G_TIME_SPAN_MILLISECOND /* 0.5 sec */
 
 int ctsvc_begin_trans(void)
@@ -223,7 +223,7 @@ static inline bool ctsvc_check_available_image_space(void) {
 
 	size = (long long)buf.f_bavail * (buf.f_bsize);
 
-	if (1024*1024 < size) // if available space to copy a image is larger than 1M
+	if (1024*1024 < size)  /* if available space to copy a image is larger than 1M */
 		return true;
 	return false;
 }
@@ -842,7 +842,7 @@ int ctsvc_get_next_ver(void)
 	query = "SELECT ver FROM "CTS_TABLE_VERSION;
 	ret = ctsvc_query_get_first_int_result(query, &version);
 
-	// In this case, contacts-service already works abnormally.
+	/* In this case, contacts-service already works abnormally. */
 	if (CONTACTS_ERROR_NONE != ret)
 		CTS_ERR("ctsvc_query_get_first_int_result : get version error(%d)", ret);
 

@@ -190,7 +190,7 @@ static int __ctsvc_db_event_update_record(contacts_record_h record)
 		return ret;
 	}
 
-	// TODO ; contact display event update
+	/* TODO ; contact display event update */
 	ret = ctsvc_db_contact_update_changed_time(event->contact_id);
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("DB error : ctsvc_db_contact_update_changed_time() Fail(%d)", ret);

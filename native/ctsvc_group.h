@@ -28,4 +28,4 @@ int ctsvc_group_add_contacts_in_person(int group_id, int person_id);
 int ctsvc_group_remove_contacts_in_person(int group_id, int person_id);
 */
 
-#endif // __CTSVC_GROUP_H__
+#endif /* __CTSVC_GROUP_H__ */

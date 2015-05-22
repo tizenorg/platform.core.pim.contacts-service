@@ -31,7 +31,7 @@
 #ifdef ENABLE_LOG_FEATURE
 static __thread char *__phone_log_chanaged_info = NULL;
 static __thread unsigned int __phone_log_buf_size = 0;
-#endif // ENABLE_LOG_FEATURE
+#endif /* ENABLE_LOG_FEATURE */
 
 static __thread char *__person_changed_info = NULL;
 static __thread unsigned int __person_buf_size = 0;
@@ -69,7 +69,7 @@ void ctsvc_change_subject_publish_changed_info()
 	__ctsvc_publish_changes_with_data(_contacts_person._uri, __person_changed_info);
 #ifdef ENABLE_LOG_FEATURE
 	__ctsvc_publish_changes_with_data(_contacts_phone_log._uri, __phone_log_chanaged_info);
-#endif // ENABLE_LOG_FEATURE
+#endif /* ENABLE_LOG_FEATURE */
 	ctsvc_change_subject_clear_changed_info();
 }
 
@@ -79,7 +79,7 @@ void ctsvc_change_subject_clear_changed_info()
 	free(__phone_log_chanaged_info);
 	__phone_log_chanaged_info = NULL;
 	__phone_log_buf_size = 0;
-#endif // ENABLE_LOG_FEATURE
+#endif /* ENABLE_LOG_FEATURE */
 
 	free(__person_changed_info);
 	__person_changed_info = NULL;
@@ -111,7 +111,7 @@ void ctsvc_change_subject_add_changed_phone_log_id(contacts_changed_e type, int 
 	snprintf(__phone_log_chanaged_info + info_len, __phone_log_buf_size - info_len, "%s", changed_info);
 	CTS_DBG("%s", __phone_log_chanaged_info);
 }
-#endif // ENABLE_LOG_FEATURE
+#endif /* ENABLE_LOG_FEATURE */
 
 void ctsvc_change_subject_add_changed_person_id(contacts_changed_e type, int id)
 {

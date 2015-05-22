@@ -99,7 +99,7 @@ int ctsvc_addressbook_reset_internal_addressbook(void)
 
 		ctsvc_set_contact_noti();
 		ctsvc_set_my_profile_noti();
-		// person noti will set in ctsvc_person_do_garbage_collection : ctsvc_set_person_noti();
+		/* person noti will set in ctsvc_person_do_garbage_collection : ctsvc_set_person_noti(); */
 		ctsvc_set_group_noti();
 		ret = ctsvc_end_trans(true);
 		if (ret < CONTACTS_ERROR_NONE) {
@@ -124,7 +124,7 @@ int ctsvc_addressbook_delete(int account_id)
 	char query[CTS_SQL_MAX_LEN] = {0};
 	RETVM_IF(account_id <= 0, CONTACTS_ERROR_INVALID_PARAMETER, "Account_id(%d) is invalid", account_id);
 
-	// delete addressbook whish has account_id
+	/* delete addressbook whish has account_id */
 	ret = ctsvc_begin_trans();
 	RETVM_IF (CONTACTS_ERROR_NONE != ret, ret, "ctsvc_begin_trans() Fail(%d)", ret);
 
@@ -159,7 +159,7 @@ int ctsvc_addressbook_delete(int account_id)
 	if (0 < ret) {
 		ctsvc_set_my_profile_noti();
 		ctsvc_set_contact_noti();
-		// person noti will set in ctsvc_person_do_garbage_collection : ctsvc_set_person_noti();
+		/* person noti will set in ctsvc_person_do_garbage_collection : ctsvc_set_person_noti(); */
 		ctsvc_set_group_noti();
 		ctsvc_set_addressbook_noti();
 	}

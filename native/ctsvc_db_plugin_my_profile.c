@@ -417,14 +417,14 @@ static void __ctsvc_make_my_profile_display_name(ctsvc_my_profile_s *my_profile)
 		int temp_display_len;
 		char *temp_display = NULL;
 
-		///////////////////////////////////////////////
-		// Make reverse display name (Last name first)
-		// Default         : Prefix Last, First Middle(addition), Suffix
-		// Korean, Chinese : Prefix LastFirstMiddleSuffix
-		// Japanese        : Prefix Last Middle First Suffix
-		// reverse sort name does not include prefix
-		//    But, if there is only prefix, reverse sort_name is prefix
-		//////////////////////////////////////////////
+		/*
+		 * Make reverse display name (Last name first)
+		 * Default         : Prefix Last, First Middle(addition), Suffix
+		 * Korean, Chinese : Prefix LastFirstMiddleSuffix
+		 * Japanese        : Prefix Last Middle First Suffix
+		 * reverse sort name does not include prefix
+		 *    But, if there is only prefix, reverse sort_name is prefix
+		 */
 		temp_display_len = SAFE_STRLEN(name->first)
 						+ SAFE_STRLEN(name->addition)
 						+ SAFE_STRLEN(name->last)
@@ -462,7 +462,7 @@ static void __ctsvc_make_my_profile_display_name(ctsvc_my_profile_s *my_profile)
 			}
 
 			if (reverse_lang_type == CTSVC_LANG_JAPANESE) {
-				// make temp_display name Prefix - Last - Middle - First - Suffix
+				/* make temp_display name Prefix - Last - Middle - First - Suffix */
 				if (name->addition) {
 					if (*temp_display)
 						len += snprintf(temp_display + len, temp_display_len - len, " ");
@@ -533,14 +533,14 @@ static void __ctsvc_make_my_profile_display_name(ctsvc_my_profile_s *my_profile)
 			my_profile->reverse_display_name = strdup(name->prefix);
 		}
 
-		///////////////////////////////////////////////
-		// Make display name (First name first)
-		// Default         : Prefix First Middle Last, Suffix
-		// Korean, Chinese : Prefix LastFirstMiddleSuffix (Same as reverse display name)
-		// Japanese        : Prefix First Middle Last Suffix
-		// sort name does not include prefix
-		//    But, if there is only prefix, sort_name is prefix
-		//////////////////////////////////////////////
+		/*
+		 * Make display name (First name first)
+		 * Default         : Prefix First Middle Last, Suffix
+		 * Korean, Chinese : Prefix LastFirstMiddleSuffix (Same as reverse display name)
+		 * Japanese        : Prefix First Middle Last Suffix
+		 * sort name does not include prefix
+		 *    But, if there is only prefix, sort_name is prefix
+		 */
 		if (reverse_lang_type == CTSVC_LANG_KOREAN ||
 			reverse_lang_type == CTSVC_LANG_CHINESE)
 			my_profile->display_name = SAFE_STRDUP(my_profile->reverse_display_name);
@@ -553,7 +553,7 @@ static void __ctsvc_make_my_profile_display_name(ctsvc_my_profile_s *my_profile)
 								+ SAFE_STRLEN(name->suffix);
 			if (0 < temp_display_len) {
 				temp_display_len += 6;
-				// make reverse_temp_display_name
+				/* make reverse_temp_display_name */
 				temp_display = calloc(1, temp_display_len);
 				len = 0;
 
@@ -657,7 +657,7 @@ static void __ctsvc_make_my_profile_display_name(ctsvc_my_profile_s *my_profile)
 			my_profile->reverse_display_name = SAFE_STRDUP(my_profile->display_name);
 		}
 		else {
-			// Update as NULL
+			/* Update as NULL */
 			ctsvc_record_set_property_flag((ctsvc_record_s *)my_profile, _contacts_my_profile.display_name, CTSVC_PROPERTY_FLAG_DIRTY);
 		}
 	}
@@ -697,7 +697,7 @@ static int __ctsvc_db_my_profile_update_record(contacts_record_h record)
 	__ctsvc_make_my_profile_display_name(my_profile);
 	__ctsvc_my_profile_check_default_data(my_profile);
 
-	//update data
+	/* update data */
 	ret = __ctsvc_my_profile_update_data(my_profile);
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("__ctsvc_my_profile_update_data() Fail(%d)", ret);
@@ -705,8 +705,8 @@ static int __ctsvc_db_my_profile_update_record(contacts_record_h record)
 		return ret;
 	}
 
-	//////////////////////////////////////////////////////////////////////
-	// this code will be removed.
+	/******************************/
+	/* this code will be removed. */
 	if (my_profile->images) {
 		int ret = CONTACTS_ERROR_NONE;
 		contacts_record_h record_image = NULL;
@@ -742,8 +742,8 @@ static int __ctsvc_db_my_profile_update_record(contacts_record_h record)
 			ctsvc_record_set_property_flag((ctsvc_record_s *)my_profile, _contacts_my_profile.image_thumbnail_path, CTSVC_PROPERTY_FLAG_DIRTY);
 		}
 	}
-	// this code will be removed.
-	//////////////////////////////////////////////////////////////////////
+	/* this code will be removed. */
+	/******************************/
 
 	do {
 		int len = 0;
@@ -981,7 +981,7 @@ static int __ctsvc_my_profile_insert_data(ctsvc_my_profile_s *contact)
 {
 	int ret;
 
-	//Insert the name
+	/* Insert the name */
 	if (contact->name) {
 		ret = ctsvc_contact_insert_data_name((contacts_list_h)contact->name, contact->id, true);
 		if (CONTACTS_ERROR_NONE != ret) {
@@ -990,7 +990,7 @@ static int __ctsvc_my_profile_insert_data(ctsvc_my_profile_s *contact)
 		}
 	}
 
-	//Insert the company
+	/* Insert the company */
 	if (contact->company) {
 		ret = ctsvc_contact_insert_data_company((contacts_list_h)contact->company, contact->id, true);
 		if (CONTACTS_ERROR_NONE != ret) {
@@ -999,7 +999,7 @@ static int __ctsvc_my_profile_insert_data(ctsvc_my_profile_s *contact)
 		}
 	}
 
-	//Insert the events
+	/* Insert the events */
 	if (contact->events) {
 		ret = ctsvc_contact_insert_data_event((contacts_list_h)contact->events, contact->id, true);
 		if (CONTACTS_ERROR_NONE != ret) {
@@ -1008,7 +1008,7 @@ static int __ctsvc_my_profile_insert_data(ctsvc_my_profile_s *contact)
 		}
 	}
 
-	//Insert the messengers
+	/* Insert the messengers */
 	if (contact->messengers) {
 		ret = ctsvc_contact_insert_data_messenger((contacts_list_h)contact->messengers, contact->id, true);
 		if (CONTACTS_ERROR_NONE != ret) {
@@ -1017,7 +1017,7 @@ static int __ctsvc_my_profile_insert_data(ctsvc_my_profile_s *contact)
 		}
 	}
 
-	//Insert the postals
+	/* Insert the postals */
 	if (contact->postal_addrs) {
 		ret = ctsvc_contact_insert_data_address((contacts_list_h)contact->postal_addrs, contact->id, true);
 		if (CONTACTS_ERROR_NONE != ret) {
@@ -1026,7 +1026,7 @@ static int __ctsvc_my_profile_insert_data(ctsvc_my_profile_s *contact)
 		}
 	}
 
-	//Insert the Web addrs
+	/* Insert the Web addrs */
 	if (contact->urls) {
 		ret = ctsvc_contact_insert_data_url((contacts_list_h)contact->urls, contact->id, true);
 		if (CONTACTS_ERROR_NONE != ret) {
@@ -1035,7 +1035,7 @@ static int __ctsvc_my_profile_insert_data(ctsvc_my_profile_s *contact)
 		}
 	}
 
-	//Insert the Nick names
+	/* Insert the Nick names */
 	if (contact->nicknames) {
 		ret = ctsvc_contact_insert_data_nickname((contacts_list_h)contact->nicknames, contact->id, true);
 		if (CONTACTS_ERROR_NONE != ret) {
@@ -1044,7 +1044,7 @@ static int __ctsvc_my_profile_insert_data(ctsvc_my_profile_s *contact)
 		}
 	}
 
-	//Insert the numbers
+	/* Insert the numbers */
 	if (contact->numbers) {
 		ret = ctsvc_contact_insert_data_number((contacts_list_h)contact->numbers, contact->id, true);
 		if (ret < CONTACTS_ERROR_NONE) {
@@ -1053,7 +1053,7 @@ static int __ctsvc_my_profile_insert_data(ctsvc_my_profile_s *contact)
 		}
 	}
 
-	//Insert the emails
+	/* Insert the emails */
 	if (contact->emails) {
 		ret = ctsvc_contact_insert_data_email((contacts_list_h)contact->emails, contact->id, true);
 		if (ret < CONTACTS_ERROR_NONE) {
@@ -1062,7 +1062,7 @@ static int __ctsvc_my_profile_insert_data(ctsvc_my_profile_s *contact)
 		}
 	}
 
-	//Insert the profile values
+	/* Insert the profile values */
 	if (contact->profiles) {
 		ret = ctsvc_contact_insert_data_profile((contacts_list_h)contact->profiles, contact->id, true);
 		if (CONTACTS_ERROR_NONE != ret) {
@@ -1071,7 +1071,7 @@ static int __ctsvc_my_profile_insert_data(ctsvc_my_profile_s *contact)
 		}
 	}
 
-	//Insert the relationship values
+	/* Insert the relationship values */
 	if (contact->relationships) {
 		ret = ctsvc_contact_insert_data_relationship((contacts_list_h)contact->relationships, contact->id, true);
 		if (CONTACTS_ERROR_NONE != ret) {
@@ -1080,7 +1080,7 @@ static int __ctsvc_my_profile_insert_data(ctsvc_my_profile_s *contact)
 		}
 	}
 
-	//Insert the image values
+	/* Insert the image values */
 	if (contact->images) {
 		ret = ctsvc_contact_insert_data_image((contacts_list_h)contact->images, contact->id, true);
 		if (CONTACTS_ERROR_NONE != ret) {
@@ -1089,7 +1089,7 @@ static int __ctsvc_my_profile_insert_data(ctsvc_my_profile_s *contact)
 		}
 	}
 
-	//Insert the note values
+	/* Insert the note values */
 	if (contact->note) {
 		ret = ctsvc_contact_insert_data_note((contacts_list_h)contact->note, contact->id, true);
 		if (CONTACTS_ERROR_NONE != ret) {
@@ -1098,7 +1098,7 @@ static int __ctsvc_my_profile_insert_data(ctsvc_my_profile_s *contact)
 		}
 	}
 
-	//Insert the extensions values
+	/* Insert the extensions values */
 	if (contact->extensions) {
 		ret = ctsvc_contact_insert_data_extension((contacts_list_h)contact->extensions, contact->id, true);
 		if (CONTACTS_ERROR_NONE != ret) {
@@ -1120,7 +1120,7 @@ static int __ctsvc_db_my_profile_insert_record(contacts_record_h record, int *id
 	ctsvc_my_profile_s *my_profile = (ctsvc_my_profile_s*)record;
 	cts_stmt stmt;
 
-	// These check should be done in client side
+	/* These check should be done in client side */
 	RETVM_IF(NULL == my_profile, CONTACTS_ERROR_INVALID_PARAMETER,
 					"Invalid parameter : my_profile is NULL");
 	RETVM_IF(my_profile->addressbook_id < 0, CONTACTS_ERROR_INVALID_PARAMETER,
@@ -1155,7 +1155,7 @@ static int __ctsvc_db_my_profile_insert_record(contacts_record_h record, int *id
 	__ctsvc_make_my_profile_display_name(my_profile);
 	__ctsvc_my_profile_check_default_data(my_profile);
 
-	//Insert Data
+	/* Insert Data */
 	ret = __ctsvc_my_profile_insert_data(my_profile);
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("cts_insert_my_profile_data() Fail(%d)", ret);
@@ -1163,8 +1163,8 @@ static int __ctsvc_db_my_profile_insert_record(contacts_record_h record, int *id
 		return ret;
 	}
 
-	//////////////////////////////////////////////////////////////////////
-	// this code will be removed.
+	/******************************/
+	/* this code will be removed. */
 	free(my_profile->image_thumbnail_path);
 	my_profile->image_thumbnail_path = NULL;
 
@@ -1190,8 +1190,8 @@ static int __ctsvc_db_my_profile_insert_record(contacts_record_h record, int *id
 			count--;
 		}
 	}
-	// this code will be removed.
-	//////////////////////////////////////////////////////////////////////
+	/* this code will be removed. */
+	/******************************/
 
 	version = ctsvc_get_next_ver();
 

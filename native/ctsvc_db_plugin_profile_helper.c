@@ -117,7 +117,7 @@ int ctsvc_db_profile_insert(contacts_record_h record, int contact_id, bool is_my
 		return ret;
 	}
 
-	//profile->id = ctsvc_db_get_last_insert_id();
+	/* profile->id = ctsvc_db_get_last_insert_id(); */
 	if (id)
 		*id = ctsvc_db_get_last_insert_id();
 	ctsvc_stmt_finalize(stmt);

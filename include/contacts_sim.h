@@ -117,4 +117,4 @@ int contacts_sim_get_initialization_status(bool *completed);
 #endif
 
 
-#endif //__TIZEN_SOCIAL_CONTACTS_SIM_H__
+#endif /* __TIZEN_SOCIAL_CONTACTS_SIM_H__ */

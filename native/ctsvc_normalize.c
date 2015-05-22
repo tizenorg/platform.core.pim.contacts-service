@@ -40,19 +40,19 @@ typedef struct {
 }hiragana_group_letter;
 
 static hiragana_group_letter hiragana_group[13] = {
-	{0x3042, 0x41, 0x4a}, // ぁ	あ	ぃ	い	ぅ	う	ぇ	え	ぉ	お
-	{0x3042, 0x94, 0x94}, // ゔ
-	{0x304b, 0x4b, 0x54}, // か	が	き	ぎ	く	ぐ	け	げ	こ	ご
-	{0x304b, 0x95, 0x96}, // ゕ	ゖ
-	{0x3055, 0x55, 0x5e}, // さ	ざ	し	じ	す	ず	せ	ぜ	そ	ぞ
-	{0x305f, 0x5f, 0x69}, // た	だ	ち	ぢ	っ	つ	づ	て	で	と	ど
-	{0x306a, 0x6a, 0x6e}, // な	に	ぬ	ね	の
-	{0x306f, 0x6f, 0x7d}, // は	ば	ぱ	ひ	び	ぴ	ふ	ぶ	ぷ	へ	べ	ぺ	ほ	ぼ	ぽ
-	{0x307e, 0x7e, 0x82}, // ま	み	む	め	も
-	{0x3084, 0x83, 0x88}, // ゃ	や	ゅ	ゆ	ょ	よ
-	{0x3089, 0x89, 0x8d}, // ら	り	る	れ	ろ
-	{0x308f, 0x8e, 0x92}, // ゎ	わ
-	{0x3093, 0x93, 0x93}, // ゐ	ゑ	を
+	{0x3042, 0x41, 0x4a}, /* ぁ あ ぃ い ぅ う ぇ え ぉ お */
+	{0x3042, 0x94, 0x94}, /* ゔ */
+	{0x304b, 0x4b, 0x54}, /* か が き ぎ く ぐ け げ こ ご */
+	{0x304b, 0x95, 0x96}, /* ゕ ゖ */
+	{0x3055, 0x55, 0x5e}, /* さ ざ し じ す ず せ ぜ そ ぞ */
+	{0x305f, 0x5f, 0x69}, /* た だ ち ぢ っ つ づ て で と ど */
+	{0x306a, 0x6a, 0x6e}, /* な に ぬ ね の */
+	{0x306f, 0x6f, 0x7d}, /* は ば ぱ ひ び ぴ ふ ぶ ぷ へ べ ぺ ほ ぼ ぽ */
+	{0x307e, 0x7e, 0x82}, /* ま み む め も */
+	{0x3084, 0x83, 0x88}, /* ゃ や ゅ ゆ ょ よ*/
+	{0x3089, 0x89, 0x8d}, /* ら り る れ ろ */
+	{0x308f, 0x8e, 0x92}, /* ゎ わ */
+	{0x3093, 0x93, 0x93}, /* ゐ ゑ を */
 };
 
 static int __ctsvc_remove_special_char(const char *src, char *dest, int dest_size)
@@ -105,7 +105,7 @@ static inline int __ctsvc_collation_str(const char *src, char **dest)
 		return CONTACTS_ERROR_SYSTEM;
 	}
 
-	// TODO: ucol_setAttribute is not called
+	/* TODO: ucol_setAttribute is not called */
 	if (U_FAILURE(status)) {
 		CTS_ERR("ucol_setAttribute Fail(%s)", u_errorName(status));
 		free(region);
@@ -264,7 +264,7 @@ static int __ctsvc_normalize_str(const char *src, char **dest)
 	ctsvc_check_language(result);
 	ctsvc_extra_normalize(result, size);
 
-	// remove diacritical : U+3000 ~ U+034F
+	/* remove diacritical : U+3000 ~ U+034F */
 	int i, j;
 	UChar *temp_result = NULL;
 	temp_result = calloc(1, sizeof(UChar)*(size+1));
@@ -335,9 +335,9 @@ static int __ctsvc_convert_halfwidth_ascii_and_symbol(const char *src, UChar *de
 
 	*str_size = size;
 
-	// full width -> half width
+	/* full width -> half width */
 	for (i=0;i<size;i++) {
-		// FF00 ~ FF60: Fullwidth ASCII variants
+		/* FF00 ~ FF60: Fullwidth ASCII variants */
 		if (CTSVC_COMPARE_BETWEEN((UChar)0xFF00, dest[i], (UChar)0xFF60)) {
 			int unicode_value1 = 0;
 			int unicode_value2 = 0;
@@ -345,7 +345,7 @@ static int __ctsvc_convert_halfwidth_ascii_and_symbol(const char *src, UChar *de
 			unicode_value2 = (0xFF & dest[i]) + 0x20;
 			dest[i] = unicode_value1 << 8 | unicode_value2;
 		}
-		// FFE0~FFE6: Fullwidth symbol variants
+		/* FFE0~FFE6: Fullwidth symbol variants */
 		else if (CTSVC_COMPARE_BETWEEN((UChar)0xFFE0, dest[i], (UChar)0xFFE6)) {
 			if (dest[i] == (UChar)0xFFE0) {
 				dest[i] = (UChar)0x00A2;
@@ -397,7 +397,7 @@ int ctsvc_get_halfwidth_string(const char *src, char** dest, int* dest_size)
 
 	UErrorCode status = 0;
 
-	// pre-flighting
+	/* pre-flighting */
 	int size = 0;
 	u_strToUTF8(NULL, 0, &size, unicodes, -1, &status);
 	status = U_ZERO_ERROR;

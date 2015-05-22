@@ -26,4 +26,4 @@
 
 void ctsvc_db_group_delete_callback(sqlite3_context *context, int argc, sqlite3_value ** argv);
 
-#endif // __CTSVC_DB_PLUGIN_GROUP_HELPER_H__
+#endif /* __CTSVC_DB_PLUGIN_GROUP_HELPER_H__ */

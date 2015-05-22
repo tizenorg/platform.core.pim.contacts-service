@@ -30,7 +30,7 @@
 #include "ctsvc_schema_recovery.h"
 #include "ctsvc_schema.h"
 
-// Additional Error
+/* Additional Error */
 enum {
 	CTSVC_ERR_NO_DB_FILE = -10000,
 	CTSVC_ERR_NO_TABLE,

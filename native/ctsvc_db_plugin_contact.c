@@ -43,7 +43,7 @@
 
 #ifdef ENABLE_LOG_FEATURE
 #include "ctsvc_phonelog.h"
-#endif // ENABLE_LOG_FEATURE
+#endif /* ENABLE_LOG_FEATURE */
 #include "ctsvc_db_access_control.h"
 
 #include "ctsvc_db_plugin_contact_helper.h"
@@ -503,7 +503,7 @@ static bool __ctsvc_contact_check_token(char *src, char *dest, int len)
 	return had;
 }
 
-// Make search data by number, email, nicknames, address, note, messenger, relationship, company
+/* Make search data by number, email, nicknames, address, note, messenger, relationship, company */
 static inline int __ctsvc_contact_make_search_data(int contact_id, ctsvc_contact_s *contact,
 		char **search_name, char **search_number, char **search_data)
 {
@@ -814,22 +814,22 @@ static inline int __ctsvc_contact_refresh_lookup_data(int contact_id, ctsvc_cont
 		char *temp_name = NULL;
 		contacts_list_first(name_list);
 		len = 0;
-		// name record of contact should be one
+		/* name record of contact should be one */
 		do {
 			contacts_list_get_current_record_p(name_list, (contacts_record_h*)&name_record);
 			if (name_record
 					&& (name_record->last || name_record->first || name_record->addition || name_record->suffix)) {
 				char *normalized_name = NULL;
 
-				///////////////////////////////////////////////
-				// Make reverse display name (Last name first)
-				// Default			 : Prefix Last, First Middle(addition), Suffix
-				// Korean, Chinese : Prefix LastMiddleFirstSuffix
-				// Japanese 		 : Prefix Last Middle First Suffix
-				// reverse sort name does not include prefix
-				// 	But, if there is only prefix, reverse sort_name is prefix
-				//////////////////////////////////////////////
-				// make display name
+				/*
+				 * Make reverse display name (Last name first)
+				 * Default         : Prefix Last, First Middle(addition), Suffix
+				 * Korean, Chinese : Prefix LastMiddleFirstSuffix
+				 * Japanese        : Prefix Last Middle First Suffix
+				 * reverse sort name does not include prefix
+				 * 	But, if there is only prefix, reverse sort_name is prefix
+				 */
+				/* make display name */
 				temp_len = SAFE_STRLEN(name_record->first) + SAFE_STRLEN(name_record->addition)
 									+ SAFE_STRLEN(name_record->last)+ SAFE_STRLEN(name_record->suffix) + 1;
 				int reverse_lang_type = ctsvc_contact_get_name_language(name_record);
@@ -901,7 +901,7 @@ static inline int __ctsvc_contact_refresh_lookup_data(int contact_id, ctsvc_cont
 				if (NULL == number_record->cleaned)
 					continue;
 
-				// actually phone_lookup minmatch is not used
+				/* actually phone_lookup minmatch is not used */
 				snprintf(query, sizeof(query), "INSERT INTO %s(data_id, contact_id, number, min_match) "
 								"VALUES(%d, %d, ?, ?)", CTS_TABLE_PHONE_LOOKUP, number_record->id,
 								contact_id);
@@ -1051,7 +1051,7 @@ static inline int __ctsvc_contact_update_search_data(int contact_id)
 	}
 	ctsvc_stmt_finalize(stmt);
 
-	// update phone_lookup, name_lookup
+	/* update phone_lookup, name_lookup */
 	ret = __ctsvc_contact_refresh_lookup_data(contact_id, contact);
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("__ctsvc_contact_refresh_lookup_data() Fail(%d)", ret);
@@ -1104,7 +1104,7 @@ static int __ctsvc_db_contact_update_record(contacts_record_h record)
 		is_invalid = true;
 	__ctsvc_contact_check_default_data(contact);
 
-	//update data
+	/* update data */
 	ret = __ctsvc_contact_update_data(contact);
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("__ctsvc_contact_update_data() Fail(%d)", ret);
@@ -1121,8 +1121,8 @@ static int __ctsvc_db_contact_update_record(contacts_record_h record)
 		}
 	}
 
-	//////////////////////////////////////////////////////////////////////
-	// this code will be removed.
+	/******************************/
+	/* this code will be removed. */
 	if (contact->images) {
 		int ret = CONTACTS_ERROR_NONE;
 		contacts_record_h record_image = NULL;
@@ -1168,8 +1168,8 @@ static int __ctsvc_db_contact_update_record(contacts_record_h record)
 			}
 		}
 	}
-	// this code will be removed.
-	//////////////////////////////////////////////////////////////////////
+	/* this code will be removed. */
+	/******************************/
 
 	if (is_invalid) {
 		ctsvc_contact_s* temp_contact;
@@ -1475,7 +1475,7 @@ static int __ctsvc_db_contact_get_records_with_query(contacts_query_h query, int
 				break;
 			}
 		}
-		// get changed_ver
+		/* get changed_ver */
 		ret = __ctsvc_db_contact_get_changed_ver(contact_id, contact);
 		if (CONTACTS_ERROR_NONE != ret) {
 			CTS_ERR("__ctsvc_db_contact_get_changed_ver Fail(%d)", ret);
@@ -1510,15 +1510,17 @@ static int __ctsvc_db_contact_get_records_with_query(contacts_query_h query, int
 	return CONTACTS_ERROR_NONE;
 }
 
-//static int __ctsvc_db_contact_insert_records(const contacts_list_h in_list, int **ids) { return CONTACTS_ERROR_NONE; }
-//static int __ctsvc_db_contact_update_records(const contacts_list_h in_list) { return CONTACTS_ERROR_NONE; }
-//static int __ctsvc_db_contact_delete_records(int ids[], int count) { return CONTACTS_ERROR_NONE; }
+/*
+ * static int __ctsvc_db_contact_insert_records(const contacts_list_h in_list, int **ids) { return CONTACTS_ERROR_NONE; }
+ * static int __ctsvc_db_contact_update_records(const contacts_list_h in_list) { return CONTACTS_ERROR_NONE; }
+ * static int __ctsvc_db_contact_delete_records(int ids[], int count) { return CONTACTS_ERROR_NONE; }
+ */
 
 static int __ctsvc_contact_insert_data(ctsvc_contact_s *contact)
 {
 	int ret;
 
-	//Insert the name
+	/* Insert the name */
 	if (contact->name) {
 		ret = ctsvc_contact_insert_data_name((contacts_list_h)contact->name, contact->id, false);
 		if (CONTACTS_ERROR_NONE != ret) {
@@ -1527,7 +1529,7 @@ static int __ctsvc_contact_insert_data(ctsvc_contact_s *contact)
 		}
 	}
 
-	//Insert the company
+	/* Insert the company */
 	if (contact->company) {
 		ret = ctsvc_contact_insert_data_company((contacts_list_h)contact->company, contact->id, false);
 		if (CONTACTS_ERROR_NONE != ret) {
@@ -1536,7 +1538,7 @@ static int __ctsvc_contact_insert_data(ctsvc_contact_s *contact)
 		}
 	}
 
-	//Insert the events
+	/* Insert the events */
 	if (contact->events) {
 		ret = ctsvc_contact_insert_data_event((contacts_list_h)contact->events, contact->id, false);
 		if (CONTACTS_ERROR_NONE != ret) {
@@ -1545,7 +1547,7 @@ static int __ctsvc_contact_insert_data(ctsvc_contact_s *contact)
 		}
 	}
 
-	//Insert the messengers
+	/* Insert the messengers */
 	if (contact->messengers) {
 		ret = ctsvc_contact_insert_data_messenger((contacts_list_h)contact->messengers, contact->id, false);
 		if (CONTACTS_ERROR_NONE != ret) {
@@ -1554,7 +1556,7 @@ static int __ctsvc_contact_insert_data(ctsvc_contact_s *contact)
 		}
 	}
 
-	//Insert the postals
+	/* Insert the postals */
 	if (contact->postal_addrs) {
 		ret = ctsvc_contact_insert_data_address((contacts_list_h)contact->postal_addrs, contact->id, false);
 		if (CONTACTS_ERROR_NONE != ret) {
@@ -1563,7 +1565,7 @@ static int __ctsvc_contact_insert_data(ctsvc_contact_s *contact)
 		}
 	}
 
-	//Insert the Web addrs
+	/* Insert the Web addrs */
 	if (contact->urls) {
 		ret = ctsvc_contact_insert_data_url((contacts_list_h)contact->urls, contact->id, false);
 		if (CONTACTS_ERROR_NONE != ret) {
@@ -1572,7 +1574,7 @@ static int __ctsvc_contact_insert_data(ctsvc_contact_s *contact)
 		}
 	}
 
-	//Insert the Nick names
+	/* Insert the Nick names */
 	if (contact->nicknames) {
 		ret = ctsvc_contact_insert_data_nickname((contacts_list_h)contact->nicknames, contact->id, false);
 		if (CONTACTS_ERROR_NONE != ret) {
@@ -1581,7 +1583,7 @@ static int __ctsvc_contact_insert_data(ctsvc_contact_s *contact)
 		}
 	}
 
-	//Insert the numbers
+	/* Insert the numbers */
 	if (contact->numbers) {
 		ret = ctsvc_contact_insert_data_number((contacts_list_h)contact->numbers, contact->id, false);
 		if (ret < CONTACTS_ERROR_NONE) {
@@ -1590,7 +1592,7 @@ static int __ctsvc_contact_insert_data(ctsvc_contact_s *contact)
 		}
 	}
 
-	//Insert the emails
+	/* Insert the emails */
 	if (contact->emails) {
 		ret = ctsvc_contact_insert_data_email((contacts_list_h)contact->emails, contact->id, false);
 		if (ret < CONTACTS_ERROR_NONE) {
@@ -1599,7 +1601,7 @@ static int __ctsvc_contact_insert_data(ctsvc_contact_s *contact)
 		}
 	}
 
-	//Insert the profile values
+	/* Insert the profile values */
 	if (contact->profiles) {
 		ret = ctsvc_contact_insert_data_profile((contacts_list_h)contact->profiles, contact->id, false);
 		if (CONTACTS_ERROR_NONE != ret) {
@@ -1608,7 +1610,7 @@ static int __ctsvc_contact_insert_data(ctsvc_contact_s *contact)
 		}
 	}
 
-	//Insert the relationship values
+	/* Insert the relationship values */
 	if (contact->relationships) {
 		ret = ctsvc_contact_insert_data_relationship((contacts_list_h)contact->relationships, contact->id, false);
 		if (CONTACTS_ERROR_NONE != ret) {
@@ -1617,7 +1619,7 @@ static int __ctsvc_contact_insert_data(ctsvc_contact_s *contact)
 		}
 	}
 
-	//Insert the image values
+	/* Insert the image values */
 	if (contact->images) {
 		ret = ctsvc_contact_insert_data_image((contacts_list_h)contact->images, contact->id, false);
 		if (CONTACTS_ERROR_NONE != ret) {
@@ -1626,7 +1628,7 @@ static int __ctsvc_contact_insert_data(ctsvc_contact_s *contact)
 		}
 	}
 
-	//Insert the note values
+	/* Insert the note values */
 	if (contact->note) {
 		ret = ctsvc_contact_insert_data_note((contacts_list_h)contact->note, contact->id, false);
 		if (CONTACTS_ERROR_NONE != ret) {
@@ -1635,7 +1637,7 @@ static int __ctsvc_contact_insert_data(ctsvc_contact_s *contact)
 		}
 	}
 
-	//Insert the extensions values
+	/* Insert the extensions values */
 	if (contact->extensions) {
 		ret = ctsvc_contact_insert_data_extension((contacts_list_h)contact->extensions, contact->id, false);
 		if (CONTACTS_ERROR_NONE != ret) {
@@ -1713,7 +1715,7 @@ static inline int __ctsvc_contact_insert_search_data(int contact_id)
 	}
 	ctsvc_stmt_finalize(stmt);
 
-	// update phone_lookup, name_lookup
+	/* update phone_lookup, name_lookup */
 	ret = __ctsvc_contact_refresh_lookup_data(contact_id, contact);
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("__ctsvc_contact_refresh_lookup_data() Fail(%d)", ret);
@@ -1785,14 +1787,14 @@ inline static int __ctsvc_find_person_to_link_with_number(const char *number, in
 				"ON C.contact_id=D.contact_id AND D.datatype=%d AND C.deleted = 0 "
 				"AND C.addressbook_id <> %d AND D.is_my_profile = 0 "
 				"WHERE D.data4 = ?",
-				// Below condition takes long time, so omit the condition
-				// AND _NUMBER_COMPARE_(D.data5, ?, NULL, NULL)
+				/* Below condition takes long time, so omit the condition */
+				/* AND _NUMBER_COMPARE_(D.data5, ?, NULL, NULL) */
 				CTSVC_DATA_NUMBER, addressbook_id);
 
 		ret = ctsvc_query_prepare(query, &stmt);
 		RETVM_IF(NULL == stmt, ret, "ctsvc_query_prepare fail(%d)", ret);
 		ctsvc_stmt_bind_text(stmt, 1, minmatch);
-//		ctsvc_stmt_bind_text(stmt, 2, normal_num);
+		/* ctsvc_stmt_bind_text(stmt, 2, normal_num); */
 		ret = ctsvc_stmt_step(stmt);
 		if (1 == ret) {
 			*person_id = ctsvc_stmt_get_int(stmt, 0);
@@ -1884,7 +1886,7 @@ static int __ctsvc_db_contact_insert_record(contacts_record_h record, int *id)
 	int rel_changed = 0;
 	cts_stmt stmt = NULL;
 
-	// These check should be done in client side
+	/* These check should be done in client side */
 	RETVM_IF(NULL == contact, CONTACTS_ERROR_INVALID_PARAMETER,
 					"Invalid parameter : contact is NULL");
 	RETVM_IF(contact->addressbook_id < 0, CONTACTS_ERROR_INVALID_PARAMETER,
@@ -1918,7 +1920,7 @@ static int __ctsvc_db_contact_insert_record(contacts_record_h record, int *id)
 	ctsvc_contact_make_display_name(contact);
 	__ctsvc_contact_check_default_data(contact);
 
-	//Insert Data
+	/* Insert Data */
 	ret = __ctsvc_contact_insert_data(contact);
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("cts_insert_contact_data() Fail(%d)", ret);
@@ -1926,8 +1928,8 @@ static int __ctsvc_db_contact_insert_record(contacts_record_h record, int *id)
 		return ret;
 	}
 
-	//////////////////////////////////////////////////////////////////////
-	// this code will be removed.
+	/******************************/
+	/* this code will be removed. */
 	free(contact->image_thumbnail_path);
 	contact->image_thumbnail_path = NULL;
 
@@ -1953,8 +1955,8 @@ static int __ctsvc_db_contact_insert_record(contacts_record_h record, int *id)
 			count--;
 		}
 	}
-	// this code will be removed.
-	//////////////////////////////////////////////////////////////////////
+	/* this code will be removed. */
+	/******************************/
 
 	version = ctsvc_get_next_ver();
 
@@ -2056,7 +2058,7 @@ static int __ctsvc_db_contact_insert_record(contacts_record_h record, int *id)
 	}
 	ctsvc_stmt_finalize(stmt);
 
-	//Insert group Info
+	/* Insert group Info */
 	if (contact->grouprelations) {
 		rel_changed = __ctsvc_contact_insert_grouprel(contact->id, (contacts_list_h)contact->grouprelations);
 		if (rel_changed < CONTACTS_ERROR_NONE) {
@@ -2073,12 +2075,12 @@ static int __ctsvc_db_contact_insert_record(contacts_record_h record, int *id)
 		return ret;
 	}
 
-	// person aggregation when auto_linked
+	/* person aggregation when auto_linked */
 	if (auto_linked)
 		ctsvc_person_aggregate(contact->person_id);
 
 #ifdef ENABLE_LOG_FEATURE
-	// update phonelog
+	/* update phonelog */
 	if (contact->numbers) {
 		int count;
 		ret = contacts_list_get_count((contacts_list_h)contact->numbers, &count);
@@ -2092,7 +2094,7 @@ static int __ctsvc_db_contact_insert_record(contacts_record_h record, int *id)
 			} while(CONTACTS_ERROR_NONE == contacts_list_next((contacts_list_h)contact->numbers));
 		}
 	}
-#endif // ENABLE_LOG_FEATURE
+#endif /* ENABLE_LOG_FEATURE */
 	if (rel_changed)
 		ctsvc_set_group_rel_noti();
 	ctsvc_set_contact_noti();
@@ -2153,7 +2155,7 @@ static int __ctsvc_db_contact_replace_record(contacts_record_h record, int conta
 	ctsvc_contact_make_display_name(contact);
 	__ctsvc_contact_check_default_data(contact);
 
-	//remove current child data
+	/* remove current child data */
 	snprintf(query, sizeof(query), "DELETE FROM "CTS_TABLE_DATA" WHERE contact_id = %d", contact_id);
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
@@ -2169,7 +2171,7 @@ static int __ctsvc_db_contact_replace_record(contacts_record_h record, int conta
 		return ret;
 	}
 
-	//remove current child data
+	/* remove current child data */
 	snprintf(query, sizeof(query), "DELETE FROM "CTS_TABLE_GROUP_RELATIONS" WHERE contact_id = %d", contact_id);
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
@@ -2187,8 +2189,8 @@ static int __ctsvc_db_contact_replace_record(contacts_record_h record, int conta
 		}
 	}
 
-	//////////////////////////////////////////////////////////////////////
-	// this code will be removed.
+	/******************************/
+	/* this code will be removed. */
 	if (contact->images) {
 		int ret = CONTACTS_ERROR_NONE;
 		contacts_record_h record_image = NULL;
@@ -2232,8 +2234,8 @@ static int __ctsvc_db_contact_replace_record(contacts_record_h record, int conta
 			}
 		}
 	}
-	// this code will be removed.
-	//////////////////////////////////////////////////////////////////////
+	/* this code will be removed. */
+	/******************************/
 	version = ctsvc_get_next_ver();
 
 	len = snprintf(query, sizeof(query),

@@ -71,7 +71,7 @@ static int __ctsvc_sdn_create(contacts_record_h* out_record)
 static int __ctsvc_sdn_destroy(contacts_record_h record, bool delete_child)
 {
 	ctsvc_sdn_s* sdn = (ctsvc_sdn_s*)record;
-	sdn->base.plugin_cbs = NULL;	// help to find double destroy bug (refer to the contacts_record_destroy)
+	sdn->base.plugin_cbs = NULL; /* help to find double destroy bug (refer to the contacts_record_destroy) */
 	free(sdn->base.properties_flags);
 
 	free(sdn->name);

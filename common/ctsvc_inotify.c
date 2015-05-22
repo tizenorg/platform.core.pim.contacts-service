@@ -76,7 +76,7 @@ static inline void __ctsvc_inotify_handle_callback(GSList *noti_list, int wd, ui
 
 #ifdef _CONTACTS_IPC_CLIENT
 			if (ctsvc_ipc_is_busy()) {
-				// hold the line
+				/* hold the line */
 				noti->blocked = true;
 				continue;
 			}

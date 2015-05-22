@@ -40,7 +40,7 @@
 #include "ctsvc_list.h"
 #include "ctsvc_db_access_control.h"
 
-//#define CTSVC_SIM_FIELD_FULL_SUPPORT// support ANR,EMAIL2,3,NICK NAME
+/* #define CTSVC_SIM_FIELD_FULL_SUPPORT// support ANR,EMAIL2,3,NICK NAME */
 #define DEFAULT_ADDRESS_BOOK_ID 0
 
 #define CTSVC_TAPI_SIM_PB_MAX 0xFFFF
@@ -58,35 +58,41 @@ typedef struct {
 }sim_file_s;
 
 typedef struct {
-	// SIM slot number
+	/* SIM slot number */
 	int sim_slot_no;
 
-	// SIM info table id
-	// it is used when inserting/seaching phonelog
+	/*
+	 * SIM info table id
+	 * it is used when inserting/seaching phonelog
+	 */
 	int sim_info_id;
 
-	// SIM slot id
+	/* SIM slot id */
 	char *cp_name;
 
-	// Tapi handle to control each SIM slot
+	/* Tapi handle to control each SIM slot */
 	TapiHandle *handle;
 
-	// SIM type
+	/* SIM type */
 	TelSimPbType_t sim_type;
 
-	// Each sim file info (max index, max text length, used count)
+	/* Each sim file info (max index, max text length, used count) */
 	sim_file_s file_record[TAPI_PB_MAX_FILE_CNT];
 
-	//To bulk insert SIM contact, Free after insert them
+	/* To bulk insert SIM contact, Free after insert them */
 	GSList *import_contacts;
 
-	// Set true after read SIM meta info
-	// in case of private : set true after reading all SIM contact and save to DB
+	/*
+	 * Set true after read SIM meta info
+	 * in case of private : set true after reading all SIM contact and save to DB
+	 */
 	bool initialized;
 
-	// unique info of SIM : iccid
-	// It should be save to phone log table
-	// in order to find which SIM is used to the call/message log
+	/*
+	 * unique info of SIM : iccid
+	 * It should be save to phone log table
+	 * in order to find which SIM is used to the call/message log
+	 */
 	char* sim_unique_id;
 
 } ctsvc_sim_info_s;
@@ -104,7 +110,7 @@ static TapiHandle* __ctsvc_server_sim_get_tapi_handle(ctsvc_sim_info_s *info)
 {
 	if (info->handle == NULL) {
 		int bReady = 0;
-		// TODO: it should be changed API
+		/* TODO: it should be changed API */
 		vconf_get_bool(VCONFKEY_TELEPHONY_READY, &bReady);
 
 		if (0 == bReady) {
@@ -239,7 +245,7 @@ static int __ctsvc_server_sim_ctsvc_record_clone(sim_contact_s *record,
 			contacts_record_add_child_record(*contact, _contacts_contact.nickname, nick);
 		}
 	}
-#endif //CTSVC_SIM_FIELD_FULL_SUPPORT
+#endif /* CTSVC_SIM_FIELD_FULL_SUPPORT */
 
 	ret = __ctsvc_server_sim_record_add_num(&number, (char *)record->number);
 	if (CONTACTS_ERROR_NONE == ret)
@@ -257,7 +263,7 @@ static int __ctsvc_server_sim_ctsvc_record_clone(sim_contact_s *record,
 	ret = __ctsvc_server_sim_record_add_num(&number, (char *)record->anr3);
 	if (CONTACTS_ERROR_NONE == ret)
 		contacts_record_add_child_record(*contact, _contacts_contact.number, number);
-#endif //CTSVC_SIM_FIELD_FULL_SUPPORT
+#endif /* CTSVC_SIM_FIELD_FULL_SUPPORT */
 
 	ret = __ctsvc_server_sim_record_add_email(&email, (char *)record->email1);
 	if (CONTACTS_ERROR_NONE == ret)
@@ -275,7 +281,7 @@ static int __ctsvc_server_sim_ctsvc_record_clone(sim_contact_s *record,
 	ret = __ctsvc_server_sim_record_add_email(&email, (char *)record->email4);
 	if (CONTACTS_ERROR_NONE == ret)
 		contacts_record_add_child_record(*contact, _contacts_contact.email, email);
-#endif //CTSVC_SIM_FIELD_FULL_SUPPORT
+#endif /* CTSVC_SIM_FIELD_FULL_SUPPORT */
 
 	contacts_record_set_int(*contact, _contacts_contact.address_book_id, addressbook_id);
 
@@ -353,7 +359,7 @@ static int __ctsvc_server_sim_insert_records_to_db(ctsvc_sim_info_s *info)
 	contacts_list_h list = NULL;
 	GSList *cursor = NULL;
 
-	// insert contacts to DB
+	/* insert contacts to DB */
 	for (cursor = info->import_contacts, i=0;cursor;i++) {
 		if (list == NULL)
 			contacts_list_create(&list);
@@ -465,7 +471,7 @@ static void __ctsvc_server_sim_import_contact_cb(TapiHandle *handle, int result,
 		WARN_IF(TAPI_API_SUCCESS != ret, "tel_read_sim_pb_record() Fail(%d)", ret);
 	}
 	else {
-		// insert imported contact to DB
+		/* insert imported contact to DB */
 		__ctsvc_server_sim_insert_records_to_db(info);
 	}
 
@@ -758,7 +764,7 @@ static int __ctsvc_server_sim_init_info(ctsvc_sim_info_s *info)
 	int ret;
 	TelSimCardType_t cardtype = TAPI_SIM_PB_UNKNOWNN;
 
-	// get sim_type
+	/* get sim_type */
 	ret = tel_get_sim_type(info->handle, &cardtype);
 	RETVM_IF(ret != TAPI_API_SUCCESS, CONTACTS_ERROR_SYSTEM, "tel_get_sim_type Fail(%d)slot no(%d)", ret, info->sim_slot_no);
 	if (cardtype == TAPI_SIM_CARD_TYPE_USIM) {
@@ -772,7 +778,7 @@ static int __ctsvc_server_sim_init_info(ctsvc_sim_info_s *info)
 		return CONTACTS_ERROR_SYSTEM;
 	}
 
-	// set iccid : unique info of SIM
+	/* set iccid : unique info of SIM */
 	ret = tel_get_sim_iccid (info->handle, __ctsvc_server_sim_get_iccid_cb, info);
 	RETVM_IF(ret != TAPI_API_SUCCESS, CONTACTS_ERROR_SYSTEM, "tel_get_sim_iccid Fail(%d)", ret);
 
@@ -808,7 +814,7 @@ static void __ctsvc_server_sim_noti_pb_status(TapiHandle *handle, const char *no
 		ret = __ctsvc_server_sim_init_meta_info(info);
 		WARN_IF(CONTACTS_ERROR_NONE != ret, "__ctsvc_server_sim_init_meta_info() Fail(%d)", ret);
 	}
-	// FDN on : can not import sim contacts
+	/* FDN on : can not import sim contacts */
 	else if (pb_status->pb_list.b_fdn ==1 && pb_status->pb_list.b_adn == 0 && info->sim_type == TAPI_SIM_PB_ADN) {
 		CTS_INFO("This is sim card is 2G and FDN on status. sim phonebook will be block");
 		info->initialized = false;
@@ -864,7 +870,7 @@ static int __ctsvc_server_sim_info_init()
 		info->import_contacts = NULL;
 		info->sim_unique_id = NULL;
 
-		// initialize file_record meta info
+		/* initialize file_record meta info */
 		for (i = 0 ;i <TAPI_PB_MAX_FILE_CNT; i++) {
 			info->file_record[i].support = false;
 			info->file_record[i].index_max = 0;
@@ -920,7 +926,7 @@ static void __ctsvc_server_sim_ready_cb(keynode_t *key, void *data)
 static void __ctsvc_server_telephony_ready_cb(keynode_t *key, void *data)
 {
 	int bReady = 0;
-	// TODO: it should be changed API
+	/* TODO: it should be changed API */
 	vconf_get_bool(VCONFKEY_TELEPHONY_TAPI_STATE, &bReady);
 
 	if (0 == bReady) {
@@ -948,7 +954,7 @@ static void __ctsvc_server_telephony_ready_cb(keynode_t *key, void *data)
 int ctsvc_server_sim_init()
 {
 	int bReady = 0;
-	// TODO: it should be changed API
+	/* TODO: it should be changed API */
 	vconf_get_bool(VCONFKEY_TELEPHONY_TAPI_STATE, &bReady);
 
 	if (0 == bReady) {

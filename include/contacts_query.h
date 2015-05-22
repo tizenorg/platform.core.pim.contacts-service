@@ -168,4 +168,4 @@ int contacts_query_set_sort(contacts_query_h query, unsigned int property_id, bo
 #endif
 
 
-#endif //__TIZEN_SOCIAL_CONTACTS_QUERY_H__
+#endif /* __TIZEN_SOCIAL_CONTACTS_QUERY_H__ */

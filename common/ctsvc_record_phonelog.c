@@ -74,7 +74,7 @@ static int __ctsvc_phonelog_create(contacts_record_h *out_record)
 static int __ctsvc_phonelog_destroy(contacts_record_h record, bool delete_child)
 {
 	ctsvc_phonelog_s* phonelog = (ctsvc_phonelog_s*)record;
-	phonelog->base.plugin_cbs = NULL;	// help to find double destroy bug (refer to the contacts_record_destroy)
+	phonelog->base.plugin_cbs = NULL; /* help to find double destroy bug (refer to the contacts_record_destroy) */
 	free(phonelog->base.properties_flags);
 
 	free(phonelog->address);

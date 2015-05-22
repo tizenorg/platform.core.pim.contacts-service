@@ -21,5 +21,5 @@
 
 int ctsvc_server_db_update(void);
 
-#endif // __CTSVC_SERVER_UDATE_H__
+#endif /* __CTSVC_SERVER_UDATE_H__ */
 

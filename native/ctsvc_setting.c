@@ -118,7 +118,7 @@ static void ctsvc_vconf_display_order_cb(keynode_t *key, void *data)
 	name_display_order = vconf_keynode_get_int(key);
 
 #ifdef _CONTACTS_IPC_SERVER
-	// publish display order changed
+	/* publish display order changed */
 	ctsvc_change_subject_publish_setting(CTSVC_SETTING_DISPLAY_ORDER_CHANGED, name_display_order);
 #endif
 }
@@ -128,7 +128,7 @@ static void ctsvc_vconf_sorting_order_cb(keynode_t *key, void *data)
 	name_sorting_order = vconf_keynode_get_int(key);
 
 #ifdef _CONTACTS_IPC_SERVER
-	// publish sort order changed
+	/* publish sort order changed */
 	ctsvc_change_subject_publish_setting(CTSVC_SETTING_SORTING_ORDER_CHANGED, name_sorting_order);
 #endif
 }
@@ -175,7 +175,7 @@ int ctsvc_register_vconf(void)
 			ctsvc_vconf_sorting_order_cb, NULL);
 	RETVM_IF(ret<0, CONTACTS_ERROR_SYSTEM, "vconf_notify_key_changed(sort order) Fail(%d)", ret);
 
-	// phonenumber min match digit
+	/* phonenumber min match digit */
 	ret = vconf_get_int(CTSVC_VCONF_PHONENUMBER_MIN_MATCH_DIGIT, &phonenumber_min_match_digit);
 	if (ret < 0) {
 		CTS_ERR("vconf_get_int() Fail(%d)", ret);

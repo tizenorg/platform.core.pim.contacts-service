@@ -120,7 +120,7 @@ static int __ctsvc_my_profile_create(contacts_record_h *out_record)
 static int __ctsvc_my_profile_destroy(contacts_record_h record, bool delete_child)
 {
 	ctsvc_my_profile_s *my_profile = (ctsvc_my_profile_s*)record;
-	my_profile->base.plugin_cbs = NULL;	// help to find double destroy bug (refer to the contacts_record_destroy)
+	my_profile->base.plugin_cbs = NULL; /* help to find double destroy bug (refer to the contacts_record_destroy) */
 	free(my_profile->base.properties_flags);
 
 	free(my_profile->display_name);

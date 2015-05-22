@@ -28,8 +28,10 @@
 #include "ctsvc_db_plugin_group_helper.h"
 #include "ctsvc_notify.h"
 
-// Whenever deleting group, this function will be called
-// in order to deleting group image file
+/*
+ * Whenever deleting group, this function will be called
+ * in order to deleting group image file
+ */
 void ctsvc_db_group_delete_callback(sqlite3_context *context, int argc, sqlite3_value ** argv)
 {
 	int ret;

@@ -21,6 +21,6 @@
 
 #include <contacts_phone_log_internal.h>
 
-#endif //__TIZEN_SOCIAL_CONTACTS_INTERNAL_H__
+#endif /* __TIZEN_SOCIAL_CONTACTS_INTERNAL_H__ */
 
 

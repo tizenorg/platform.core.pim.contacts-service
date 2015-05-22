@@ -23,4 +23,4 @@
 int ctsvc_convert_japanese_to_hiragana(const char *src, char **dest);
 int ctsvc_convert_japanese_to_hiragana_unicode(UChar *src, UChar *dest, int dest_size);
 
-#endif		//__TIZEN_SOCIAL_CTSVC_LOCALIZE_JAPAN_H__
+#endif /* __TIZEN_SOCIAL_CTSVC_LOCALIZE_JAPAN_H__ */

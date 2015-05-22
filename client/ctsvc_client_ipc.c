@@ -183,7 +183,7 @@ int ctsvc_ipc_connect(void)
 		return CONTACTS_ERROR_NONE;
 	}
 
-	// ipc call
+	/* ipc call */
 	if (pims_ipc_call(__contacts_global_ipc, CTSVC_IPC_MODULE, CTSVC_IPC_SERVER_CONNECT, NULL, &outdata) != 0) {
 		CTS_ERR("[GLOBAL_IPC_CHANNEL] pims_ipc_call Fail");
 		ret = CONTACTS_ERROR_IPC;

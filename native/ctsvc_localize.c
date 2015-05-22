@@ -127,7 +127,7 @@ void ctsvc_extra_normalize(UChar *word, int32_t word_size)
 {
 	int i;
 	for (i=0;i<word_size;i++) {
-		// FF00 ~ FF60, FFE0~FFE6 : fullwidth -> halfwidth
+		/* FF00 ~ FF60, FFE0~FFE6 : fullwidth -> halfwidth */
 		if (CTSVC_COMPARE_BETWEEN((UChar)0xFF00, word[i], (UChar)0xFF60)) {
 			int unicode_value1 = 0;
 			int unicode_value2 = 0;
@@ -146,39 +146,39 @@ const char *ctsvc_get_language_locale(int lang)
 	char *langset = ctsvc_get_langset();
 
 	switch(lang) {
-	case CTSVC_LANG_AZERBAIJAN: // az, Azerbaijan
+	case CTSVC_LANG_AZERBAIJAN: /* az, Azerbaijan */
 		return "az";
-	case CTSVC_LANG_ARABIC: // ar, Bahrain - Arabic
+	case CTSVC_LANG_ARABIC: /* ar, Bahrain - Arabic */
 		return "ar";
-	case CTSVC_LANG_BULGARIAN: // bg, Bulgaria - Bulgarian
+	case CTSVC_LANG_BULGARIAN: /* bg, Bulgaria - Bulgarian */
 		return "bg";
-	case CTSVC_LANG_CATALAN: // ca, Spain - Catalan
+	case CTSVC_LANG_CATALAN: /* ca, Spain - Catalan */
 		return "ca";
-	case CTSVC_LANG_CZECH: // cs, Czech Republic - Czech
+	case CTSVC_LANG_CZECH: /* cs, Czech Republic - Czech */
 		return "cs";
-	case CTSVC_LANG_DANISH: // da, Denmark - Danish
+	case CTSVC_LANG_DANISH: /* da, Denmark - Danish */
 		return "da";
-	case CTSVC_LANG_GERMAN: // de, Germany - German
+	case CTSVC_LANG_GERMAN: /* de, Germany - German */
 		return "de";
-	case CTSVC_LANG_GREEK: // el, Greece - Greek
+	case CTSVC_LANG_GREEK: /* el, Greece - Greek */
 		return "el";
-	case CTSVC_LANG_ENGLISH: // en, en_PH, en_US
+	case CTSVC_LANG_ENGLISH: /* en, en_PH, en_US */
 		return "en";
-	case CTSVC_LANG_SPANISH: // es_ES, es_US, El Salvador - Spanish
+	case CTSVC_LANG_SPANISH: /* es_ES, es_US, El Salvador - Spanish */
 		return "es";
-	case CTSVC_LANG_ESTONIAN: // et, Estonia - Estonian
+	case CTSVC_LANG_ESTONIAN: /* et, Estonia - Estonian */
 		return "et";
-	case CTSVC_LANG_BASQUE: // eu, Spain - Basque
+	case CTSVC_LANG_BASQUE: /* eu, Spain - Basque */
 		return "eu";
-	case CTSVC_LANG_FINNISH: // fi, Finland - Finnish
+	case CTSVC_LANG_FINNISH: /* fi, Finland - Finnish */
 		return "fi";
-	case CTSVC_LANG_FRENCH: // fr_CA, fr_FR
+	case CTSVC_LANG_FRENCH: /* fr_CA, fr_FR */
 		return "fr";
-	case CTSVC_LANG_IRISH: // ga, Ireland - Irish
+	case CTSVC_LANG_IRISH: /* ga, Ireland - Irish */
 		return "ga";
-	case CTSVC_LANG_GALICIAN: // gl, Spain - Galician
+	case CTSVC_LANG_GALICIAN: /* gl, Spain - Galician */
 		return "gl";
-	case CTSVC_LANG_HINDI: // hi, India - Hindi, Marathi, Nepali
+	case CTSVC_LANG_HINDI: /* hi, India - Hindi, Marathi, Nepali */
 		if (STRING_EQUAL == strncmp(langset, "hi", strlen("hi"))) {
 			return "hi";
 		}
@@ -189,64 +189,64 @@ const char *ctsvc_get_language_locale(int lang)
 			return "ne";
 		}
 		return "hi";
-	case CTSVC_LANG_CROATIAN: // hr, Bosnia and Herzegovina - Croatian
+	case CTSVC_LANG_CROATIAN: /* hr, Bosnia and Herzegovina - Croatian */
 		return "hr";
-	case CTSVC_LANG_HUNGARIAN: // hu, Hungary - Hungarian
+	case CTSVC_LANG_HUNGARIAN: /* hu, Hungary - Hungarian */
 		return "hu";
-	case CTSVC_LANG_ARMENIAN: // hy, Armenia - Armenian
+	case CTSVC_LANG_ARMENIAN: /* hy, Armenia - Armenian */
 		return "hy";
-	case CTSVC_LANG_ICELANDIC: // is, Iceland - Icelandic
+	case CTSVC_LANG_ICELANDIC: /* is, Iceland - Icelandic */
 		return "is";
-	case CTSVC_LANG_ITALIAN: // it_IT, Italy - Italian
+	case CTSVC_LANG_ITALIAN: /* it_IT, Italy - Italian */
 		return "it";
-	case CTSVC_LANG_JAPANESE: // ja_JP, japan
+	case CTSVC_LANG_JAPANESE: /* ja_JP, japan */
 		return "ja";
-	case CTSVC_LANG_GEORGIAN: // ka, Georgia - Georgian
+	case CTSVC_LANG_GEORGIAN: /* ka, Georgia - Georgian */
 		return "ka";
-	case CTSVC_LANG_KAZAKHSTAN: // kk, Kazakhstan
+	case CTSVC_LANG_KAZAKHSTAN: /* kk, Kazakhstan */
 		return "kk";
-	case CTSVC_LANG_KOREAN: // ko, ko_KR
+	case CTSVC_LANG_KOREAN: /* ko, ko_KR */
 		return "ko";
-	case CTSVC_LANG_LITHUANIAN: // lt, Lithuania - Lithuanian
+	case CTSVC_LANG_LITHUANIAN: /* lt, Lithuania - Lithuanian */
 		return "lt";
-	case CTSVC_LANG_LATVIAN: // lv, Latvia - Latvian
+	case CTSVC_LANG_LATVIAN: /* lv, Latvia - Latvian */
 		return "lv";
-	case CTSVC_LANG_MACEDONIA: // mk, Macedonia
+	case CTSVC_LANG_MACEDONIA: /* mk, Macedonia */
 		return "mk";
-	case CTSVC_LANG_NORWAY: // nb, Norway
+	case CTSVC_LANG_NORWAY: /* nb, Norway */
 		return "nb";
-	case CTSVC_LANG_DUTCH: // nl_Nl, Netherlands Dutch
+	case CTSVC_LANG_DUTCH: /* nl_Nl, Netherlands Dutch */
 		return "nl";
-	case CTSVC_LANG_POLISH: // pl, Polish
+	case CTSVC_LANG_POLISH: /* pl, Polish */
 		return "pl";
-	case CTSVC_LANG_PORTUGUESE: // pt_BR, pt_PT, Portugal
+	case CTSVC_LANG_PORTUGUESE: /* pt_BR, pt_PT, Portugal */
 		return "pt";
-	case CTSVC_LANG_ROMANIA: // ro, Romania
+	case CTSVC_LANG_ROMANIA: /* ro, Romania */
 		return "ro";
-	case CTSVC_LANG_RUSSIAN: // ru_RU, Russia
+	case CTSVC_LANG_RUSSIAN: /* ru_RU, Russia */
 		return "ru";
-	case CTSVC_LANG_SLOVAK: // sk, Slovakia - Slovak
+	case CTSVC_LANG_SLOVAK: /* sk, Slovakia - Slovak */
 		return "sk";
-	case CTSVC_LANG_SLOVENIAN: // sl, Slovenia - Slovenian
+	case CTSVC_LANG_SLOVENIAN: /* sl, Slovenia - Slovenian */
 		return "sl";
-	case CTSVC_LANG_SERBIAN: // sr, Serbia - Serbian
+	case CTSVC_LANG_SERBIAN: /* sr, Serbia - Serbian */
 		return "sr";
-	case CTSVC_LANG_SWEDISH: // sv, Finland - Swedish
+	case CTSVC_LANG_SWEDISH: /* sv, Finland - Swedish */
 		return "sv";
-	case CTSVC_LANG_TURKISH: // tr_TR, Turkey - Turkish
+	case CTSVC_LANG_TURKISH: /* tr_TR, Turkey - Turkish */
 		return "tr";
-	case CTSVC_LANG_UKRAINE: // uk, Ukraine
+	case CTSVC_LANG_UKRAINE: /* uk, Ukraine */
 		return "uk";
-	case CTSVC_LANG_CHINESE: // zh_CN, zh_HK, zh_SG, zh_TW
+	case CTSVC_LANG_CHINESE: /* zh_CN, zh_HK, zh_SG, zh_TW */
 		return "zh";
-	case CTSVC_LANG_THAI: // th_TH, Thai
+	case CTSVC_LANG_THAI: /* th_TH, Thai */
 		return "th";
-	case CTSVC_LANG_BENGALI: // as, bn
+	case CTSVC_LANG_BENGALI: /* as, bn */
 		if (STRING_EQUAL == strncmp(langset, "as", strlen("as"))) {
 			return "as";
 		}
 		return "bn";
-	case CTSVC_LANG_PUNJABI: // pa
+	case CTSVC_LANG_PUNJABI: /* pa, India */
 			return "pa";
 	case CTSVC_LANG_MALAYALAM:
 			return "ml";
@@ -266,13 +266,13 @@ const char *ctsvc_get_language_locale(int lang)
 			return "lo";
 	case CTSVC_LANG_HEBREW:
 			return "he";
-	case CTSVC_LANG_VIETNAMESE://latin
+	case CTSVC_LANG_VIETNAMESE:
 			return "vi";
 	case CTSVC_LANG_PERSIAN:
 			return "fa";
 	case CTSVC_LANG_UZBEK:
 			return "uz";
-	case CTSVC_LANG_URDU: //arabic
+	case CTSVC_LANG_URDU:
 			return "ur";
 	case CTSVC_LANG_ALBANIAN:
 			return "sq";
@@ -293,144 +293,144 @@ const char *ctsvc_get_language_locale(int lang)
 
 int ctsvc_get_language_type(const char *system_lang)
 {
-	// refer to the VCONFKEY_LANGSET
+	/* refer to the VCONFKEY_LANGSET */
 	int type;
 
 	RETV_IF(NULL == system_lang, CTSVC_LANG_OTHERS);
 
-	// az, Azerbaijan
+	/* az, Azerbaijan */
 	if (STRING_EQUAL == strncmp(system_lang, "az", strlen("az")))
 		type = CTSVC_LANG_AZERBAIJAN;
-	// ar, Bahrain - Arabic
+	/* ar, Bahrain - Arabic */
 	else if (STRING_EQUAL == strncmp(system_lang, "ar", strlen("ar")))
 		type = CTSVC_LANG_ARABIC;
-	// bg, Bulgaria - Bulgarian
+	/* bg, Bulgaria - Bulgarian */
 	else if (STRING_EQUAL == strncmp(system_lang, "bg", strlen("bg")))
 		type = CTSVC_LANG_BULGARIAN;
-	// ca, Spain - Catalan
+	/* ca, Spain - Catalan */
 	else if (STRING_EQUAL == strncmp(system_lang, "ca", strlen("ca")))
 		type = CTSVC_LANG_CATALAN;
-	// cs, Czech Republic - Czech
+	/* cs, Czech Republic - Czech */
 	else if (STRING_EQUAL == strncmp(system_lang, "cs", strlen("cs")))
 		type = CTSVC_LANG_CZECH;
-	// da, Denmark - Danish
+	/* da, Denmark - Danish */
 	else if (STRING_EQUAL == strncmp(system_lang, "da", strlen("da")))
 		type = CTSVC_LANG_DANISH;
-	// de, Germany - German
+	/* de, Germany - German */
 	else if (STRING_EQUAL == strncmp(system_lang, "de", strlen("de")))
 		type = CTSVC_LANG_GERMAN;
-	// el, Greece - Greek
+	/* el, Greece - Greek */
 	else if (STRING_EQUAL == strncmp(system_lang, "el", strlen("el")))
 		type = CTSVC_LANG_GREEK;
-	// en, en_PH, en_US
+	/* en, en_PH, en_US */
 	else if (STRING_EQUAL == strncmp(system_lang, "en", strlen("en")))
 		type = CTSVC_LANG_ENGLISH;
-	// es_ES, es_US, El Salvador - Spanish
+	/* es_ES, es_US, El Salvador - Spanish */
 	else if (STRING_EQUAL == strncmp(system_lang, "es", strlen("es")))
 		type = CTSVC_LANG_SPANISH;
-	// et, Estonia - Estonian
+	/* et, Estonia - Estonian */
 	else if (STRING_EQUAL == strncmp(system_lang, "et", strlen("et")))
 		type = CTSVC_LANG_ESTONIAN;
-	// eu, Spain - Basque
+	/* eu, Spain - Basque */
 	else if (STRING_EQUAL == strncmp(system_lang, "eu", strlen("eu")))
 		type = CTSVC_LANG_BASQUE;
-	// fi, Finland - Finnish
+	/* fi, Finland - Finnish */
 	else if (STRING_EQUAL == strncmp(system_lang, "fi", strlen("fi")))
 		type = CTSVC_LANG_FINNISH;
-	// fr_CA, fr_FR
+	/* fr_CA, fr_FR */
 	else if (STRING_EQUAL == strncmp(system_lang, "fr", strlen("fr")))
 		type = CTSVC_LANG_FRENCH;
-	// ga, Ireland - Irish
+	/* ga, Ireland - Irish */
 	else if (STRING_EQUAL == strncmp(system_lang, "ga", strlen("ga")))
 		type = CTSVC_LANG_IRISH;
-	// gl, Spain - Galician
+	/* gl, Spain - Galician */
 	else if (STRING_EQUAL == strncmp(system_lang, "gl", strlen("gl")))
 		type = CTSVC_LANG_GALICIAN;
-	// hi, India - Hindi
+	/* hi, India - Hindi */
 	else if (STRING_EQUAL == strncmp(system_lang, "hi", strlen("hi")))
 		type = CTSVC_LANG_HINDI;
-	// mr, India - marathi
+	/* mr, India - marathi */
 	else if (STRING_EQUAL == strncmp(system_lang, "mr", strlen("mr")))
 		type = CTSVC_LANG_HINDI;
-	// ne, India - nepal
+	/* ne, India - nepal */
 	else if (STRING_EQUAL == strncmp(system_lang, "ne", strlen("ne")))
 		type = CTSVC_LANG_HINDI;
-	// hr, Bosnia and Herzegovina - Croatian
+	/* hr, Bosnia and Herzegovina - Croatian */
 	else if (STRING_EQUAL == strncmp(system_lang, "hr", strlen("hr")))
 		type = CTSVC_LANG_CROATIAN;
-	// hu, Hungary - Hungarian
+	/* hu, Hungary - Hungarian */
 	else if (STRING_EQUAL == strncmp(system_lang, "hu", strlen("hu")))
 		type = CTSVC_LANG_HUNGARIAN;
-	// hy, Armenia - Armenian
+	/* hy, Armenia - Armenian */
 	else if (STRING_EQUAL == strncmp(system_lang, "hy", strlen("hy")))
 		type = CTSVC_LANG_ARMENIAN;
-	// is, Iceland - Icelandic
+	/* is, Iceland - Icelandic */
 	else if (STRING_EQUAL == strncmp(system_lang, "is", strlen("is")))
 		type = CTSVC_LANG_ICELANDIC;
-	// it_IT, Italy - Italian
+	/* it_IT, Italy - Italian */
 	else if (STRING_EQUAL == strncmp(system_lang, "it", strlen("it")))
 		type = CTSVC_LANG_ITALIAN;
-	// ja_JP, japan
+	/* ja_JP, japan */
 	else if (STRING_EQUAL == strncmp(system_lang, "ja", strlen("ja")))
 		type = CTSVC_LANG_JAPANESE;
-	// ka, Georgia - Georgian
+	/* ka, Georgia - Georgian */
 	else if (STRING_EQUAL == strncmp(system_lang, "ka", strlen("ka")))
 		type = CTSVC_LANG_GEORGIAN;
-	// kk, Kazakhstan
+	/* kk, Kazakhstan */
 	else if (STRING_EQUAL == strncmp(system_lang, "kk", strlen("kk")))
 		type = CTSVC_LANG_KAZAKHSTAN;
-	// ko, ko_KR
+	/* ko, ko_KR */
 	else if (STRING_EQUAL == strncmp(system_lang, "ko", strlen("ko")))
 		type = CTSVC_LANG_KOREAN;
-	// lt, Lithuania - Lithuanian
+	/* lt, Lithuania - Lithuanian */
 	else if (STRING_EQUAL == strncmp(system_lang, "lt", strlen("lt")))
 		type = CTSVC_LANG_LITHUANIAN;
-	// lv, Latvia - Latvian
+	/* lv, Latvia - Latvian */
 	else if (STRING_EQUAL == strncmp(system_lang, "lv", strlen("lv")))
 		type = CTSVC_LANG_LATVIAN;
-	// mk, Macedonia
+	/* mk, Macedonia */
 	else if (STRING_EQUAL == strncmp(system_lang, "mk", strlen("mk")))
 		type = CTSVC_LANG_MACEDONIA;
-	// nb, Norway
+	/* nb, Norway */
 	else if (STRING_EQUAL == strncmp(system_lang, "nb", strlen("nb")))
 		type = CTSVC_LANG_NORWAY;
-	// nl_Nl, Netherlands Dutch
+	/* nl_Nl, Netherlands Dutch */
 	else if (STRING_EQUAL == strncmp(system_lang, "nl", strlen("nl")))
 		type = CTSVC_LANG_DUTCH;
-	// pl, Polish
+	/* pl, Polish */
 	else if (STRING_EQUAL == strncmp(system_lang, "pl", strlen("pl")))
 		type = CTSVC_LANG_POLISH;
-	// pt_BR, pt_PT, Portugal
+	/* pt_BR, pt_PT, Portugal */
 	else if (STRING_EQUAL == strncmp(system_lang, "pt", strlen("pt")))
 		type = CTSVC_LANG_PORTUGUESE;
-	// ro, Romania
+	/* ro, Romania */
 	else if (STRING_EQUAL == strncmp(system_lang, "ro", strlen("ro")))
 		type = CTSVC_LANG_ROMANIA;
-	// ru_RU, Russia
+	/* ru_RU, Russia */
 	else if (STRING_EQUAL == strncmp(system_lang, "ru", strlen("ru")))
 		type = CTSVC_LANG_RUSSIAN;
-	// sk, Slovakia - Slovak
+	/* sk, Slovakia - Slovak */
 	else if (STRING_EQUAL == strncmp(system_lang, "sk", strlen("sk")))
 		type = CTSVC_LANG_SLOVAK;
-	// sl, Slovenia - Slovenian
+	/* sl, Slovenia - Slovenian */
 	else if (STRING_EQUAL == strncmp(system_lang, "sl", strlen("sl")))
 		type = CTSVC_LANG_SLOVENIAN;
-	// sr, Serbia - Serbian
+	/* sr, Serbia - Serbian */
 	else if (STRING_EQUAL == strncmp(system_lang, "sr", strlen("sr")))
 		type = CTSVC_LANG_SERBIAN;
-	// sv, Finland - Swedish
+	/* sv, Finland - Swedish */
 	else if (STRING_EQUAL == strncmp(system_lang, "sv", strlen("sv")))
 		type = CTSVC_LANG_SWEDISH;
-	// tr_TR, Turkey - Turkish
+	/* tr_TR, Turkey - Turkish */
 	else if (STRING_EQUAL == strncmp(system_lang, "tr", strlen("tr")))
 		type = CTSVC_LANG_TURKISH;
-	// uk, Ukraine
+	/* uk, Ukraine */
 	else if (STRING_EQUAL == strncmp(system_lang, "uk", strlen("uk")))
 		type = CTSVC_LANG_UKRAINE;
-	// zh_CN, zh_HK, zh_SG, zh_TW
+	/* zh_CN, zh_HK, zh_SG, zh_TW */
 	else if (STRING_EQUAL == strncmp(system_lang, "zh", strlen("zh")))
 		type = CTSVC_LANG_CHINESE;
-	// th_TH
+	/* th_TH */
 	else if (STRING_EQUAL == strncmp(system_lang, "th", strlen("th")))
 		type = CTSVC_LANG_THAI;
 	else if (STRING_EQUAL == strncmp(system_lang, "as", strlen("as")))

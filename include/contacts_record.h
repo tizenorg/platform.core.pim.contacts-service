@@ -472,4 +472,4 @@ int contacts_record_get_uri_p(contacts_record_h record, const char** view_uri);
 #endif
 
 
-#endif //__TIZEN_SOCIAL_CONTACTS_RECORD_H__
+#endif /* __TIZEN_SOCIAL_CONTACTS_RECORD_H__ */

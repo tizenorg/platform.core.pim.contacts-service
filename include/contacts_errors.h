@@ -64,7 +64,7 @@ typedef enum
     CONTACTS_ERROR_IPC                  = TIZEN_ERROR_CONTACTS | 0xBF,           /**< Unknown IPC error */
 
     /* ENVIRONMENT & OTHER MODULE */
-    // Socket, inotify, vconf, icu, tapi, security/smack, account and so on
+    /* Socket, inotify, vconf, icu, tapi, security/smack, account and so on */
     CONTACTS_ERROR_SYSTEM               = TIZEN_ERROR_CONTACTS | 0xEF,           /**< Internal system module error */
 
     /* UNHANDLED EXCEPTION */

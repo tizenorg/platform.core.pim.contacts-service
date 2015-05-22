@@ -72,7 +72,7 @@ static int __ctsvc_speeddial_create(contacts_record_h* out_record)
 static int __ctsvc_speeddial_destroy(contacts_record_h record, bool delete_child)
 {
 	ctsvc_speeddial_s* speeddial = (ctsvc_speeddial_s*)record;
-	speeddial->base.plugin_cbs = NULL;	// help to find double destroy bug (refer to the contacts_record_destroy)
+	speeddial->base.plugin_cbs = NULL; /* help to find double destroy bug (refer to the contacts_record_destroy) */
 	free(speeddial->base.properties_flags);
 
 	free(speeddial->display_name);

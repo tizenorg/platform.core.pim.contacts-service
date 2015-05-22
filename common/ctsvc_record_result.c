@@ -26,7 +26,7 @@
 #ifdef _CONTACTS_IPC_SERVER
 #ifdef ENABLE_SIM_FEATURE
 #include "ctsvc_server_sim.h"
-#endif // ENABLE_SIM_FEATURE
+#endif /* ENABLE_SIM_FEATURE */
 #endif
 
 static int __ctsvc_result_create(contacts_record_h* out_record);
@@ -89,7 +89,7 @@ static int __ctsvc_result_destroy(contacts_record_h record, bool delete_child)
 		free(data);
 	}
 	g_slist_free(result->values);
-	result->base.plugin_cbs = NULL;	// help to find double destroy bug (refer to the contacts_record_destroy)
+	result->base.plugin_cbs = NULL; /* help to find double destroy bug (refer to the contacts_record_destroy) */
 	free(result->base.properties_flags);
 
 	free(result);
@@ -181,7 +181,7 @@ static int __ctsvc_result_get_int(contacts_record_h record, unsigned int propert
 	ctsvc_result_s* result = (ctsvc_result_s *)record;
 
 	GSList *cursor;
-	//TODO: check the value type of property_id is int
+	/* TODO: check the value type of property_id is int */
 	for (cursor = result->values;cursor;cursor=cursor->next) {
 		ctsvc_result_value_s *data = cursor->data;
 		if (data->property_id == property_id) {
@@ -205,7 +205,7 @@ static int __ctsvc_result_set_int(contacts_record_h record, unsigned int propert
 	GSList *cursor;
 	ctsvc_result_value_s *data;
 
-	// TODO: check the value type of property_id is int
+	/* TODO: check the value type of property_id is int */
 	for (cursor = result->values;cursor;cursor=cursor->next) {
 		data = cursor->data;
 		if (data->property_id == property_id) {
@@ -216,7 +216,7 @@ static int __ctsvc_result_set_int(contacts_record_h record, unsigned int propert
 				if (property_id == CTSVC_PROPERTY_PHONELOG_SIM_SLOT_NO)
 					data->value.i = ctsvc_server_sim_get_sim_slot_no_by_info_id(value);
 				else
-#endif // ENABLE_SIM_FEATURE
+#endif /* ENABLE_SIM_FEATURE */
 #endif
 				data->value.i = value;
 				return CONTACTS_ERROR_NONE;
@@ -236,7 +236,7 @@ static int __ctsvc_result_set_int(contacts_record_h record, unsigned int propert
 	if (property_id == CTSVC_PROPERTY_PHONELOG_SIM_SLOT_NO)
 		data->value.i = ctsvc_server_sim_get_sim_slot_no_by_info_id(value);
 	else
-#endif // ENABLE_SIM_FEATURE
+#endif /* ENABLE_SIM_FEATURE */
 #endif
 	data->value.i = value;
 	result->values = g_slist_append(result->values, (void*)data);
@@ -249,7 +249,7 @@ static int __ctsvc_result_set_lli(contacts_record_h record, unsigned int propert
 	GSList *cursor;
 	ctsvc_result_value_s *data;
 
-	// TODO: check the value type of property_id is int
+	/* TODO: check the value type of property_id is int */
 	for (cursor = result->values;cursor;cursor=cursor->next) {
 		data = cursor->data;
 		if (data->property_id == property_id) {
@@ -306,7 +306,7 @@ static int __ctsvc_result_set_bool(contacts_record_h record, unsigned int proper
 	GSList *cursor;
 	ctsvc_result_value_s *data;
 
-	// TODO: check the value type of property_id is int
+	/* TODO: check the value type of property_id is int */
 	for (cursor = result->values;cursor;cursor=cursor->next) {
 		data = cursor->data;
 		if (data->property_id == property_id) {
@@ -337,7 +337,7 @@ static int __ctsvc_result_set_str(contacts_record_h record, unsigned int propert
 	char *full_path = NULL;
 	int str_len;
 
-	// TODO: check the value type of property_id is int
+	/* TODO: check the value type of property_id is int */
 	for (cursor = result->values;cursor;cursor=cursor->next) {
 		data = cursor->data;
 		if (data->property_id == property_id) {

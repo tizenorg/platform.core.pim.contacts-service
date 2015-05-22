@@ -76,8 +76,6 @@ int ctsvc_ipc_marshal_record_common(const ctsvc_record_s* common, pims_ipc_data_
  * marsharl : view_uri + other
  * unmarshal : view_uri를 먼저 get 하고 난 이후 나머지를 ..
  */
-//int ctsvc_ipc_unmarshal_filter(const pims_ipc_data_h ipc_data, contacts_filter_h *filter);
-//int ctsvc_ipc_marshal_filter(const contacts_filter_h filter, pims_ipc_data_h ipc_data);
 int ctsvc_ipc_unmarshal_query(const pims_ipc_data_h ipc_data, contacts_query_h *query);
 int ctsvc_ipc_marshal_query(const contacts_query_h query, pims_ipc_data_h ipc_data);
 int ctsvc_ipc_unmarshal_list(const pims_ipc_data_h ipc_data, contacts_list_h *list);

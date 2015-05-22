@@ -38,7 +38,7 @@
 
 #ifdef ENABLE_LOG_FEATURE
 #include "ctsvc_phonelog.h"
-#endif // ENABLE_LOG_FEATURE
+#endif /* ENABLE_LOG_FEATURE */
 #include "ctsvc_person.h"
 
 #define CTSVC_QUERY_RETRY_TIME	4
@@ -75,7 +75,7 @@ int ctsvc_db_open(void) {
 					ctsvc_db_phone_log_delete_callback, NULL, NULL);
 		RETVM_IF(SQLITE_OK != ret, CONTACTS_ERROR_DB,
 						"sqlite3_create_function() Fail(%d)", ret);
-#endif // ENABLE_LOG_FEATURE
+#endif /* ENABLE_LOG_FEATURE */
 		ret = sqlite3_create_function(ctsvc_db, "_PERSON_DELETE_", 1, SQLITE_UTF8, NULL,
 					ctsvc_db_person_delete_callback, NULL, NULL);
 		RETVM_IF(SQLITE_OK != ret, CONTACTS_ERROR_DB,

@@ -120,24 +120,24 @@ enum {
 
 enum{
 	CTSVC_VCARD_IMG_NONE,
-	CTSVC_VCARD_IMG_PNG,		// Portable Network Graphics
-	// vcard  2.1 spec
-	CTSVC_VCARD_IMG_JPEG,	// ISO JPEG format
-	CTSVC_VCARD_IMG_GIF,		//Graphics Interchange Format
-	CTSVC_VCARD_IMG_TIFF,		// Tagged Image File Format
-	CTSVC_VCARD_IMG_CGM,		//ISO Computer Graphics Metafile
-	CTSVC_VCARD_IMG_WMF,	// MS Windows Metafile
-	CTSVC_VCARD_IMG_BMP,		// MS Windows Bitmap
-	CTSVC_VCARD_IMG_MET,		// IBM PM Metafile
-	CTSVC_VCARD_IMG_PMB,		// IBM PM Bitmap
-	CTSVC_VCARD_IMG_DIB,		// MS Windows DIB
-	CTSVC_VCARD_IMG_PICT,		// Apple Picture format
-	CTSVC_VCARD_IMG_PDF,		// Adobe Page Description Format
-	CTSVC_VCARD_IMG_PS,		// Adobe PostScript format
-	CTSVC_VCARD_IMG_QTIME,	// Apple QuickTime format
-	CTSVC_VCARD_IMG_MPEG,	// ISO MPEG format
-	CTSVC_VCARD_IMG_MPEG2,	// ISO MPEG version 2 format
-	CTSVC_VCARD_IMG_AVI,		// Intel AVI format
+	CTSVC_VCARD_IMG_PNG,    /* Portable Network Graphics */
+	/* vcard  2.1 spec */
+	CTSVC_VCARD_IMG_JPEG,   /* ISO JPEG format */
+	CTSVC_VCARD_IMG_GIF,    /* Graphics Interchange Format */
+	CTSVC_VCARD_IMG_TIFF,   /* Tagged Image File Format */
+	CTSVC_VCARD_IMG_CGM,    /* ISO Computer Graphics Metafile */
+	CTSVC_VCARD_IMG_WMF,    /* MS Windows Metafile */
+	CTSVC_VCARD_IMG_BMP,    /* MS Windows Bitmap */
+	CTSVC_VCARD_IMG_MET,    /* IBM PM Metafile */
+	CTSVC_VCARD_IMG_PMB,    /* IBM PM Bitmap */
+	CTSVC_VCARD_IMG_DIB,    /* MS Windows DIB */
+	CTSVC_VCARD_IMG_PICT,   /* Apple Picture format */
+	CTSVC_VCARD_IMG_PDF,    /* Adobe Page Description Format */
+	CTSVC_VCARD_IMG_PS,     /* Adobe PostScript format */
+	CTSVC_VCARD_IMG_QTIME,  /* Apple QuickTime format */
+	CTSVC_VCARD_IMG_MPEG,   /* ISO MPEG format */
+	CTSVC_VCARD_IMG_MPEG2,  /* ISO MPEG version 2 format */
+	CTSVC_VCARD_IMG_AVI,    /* Intel AVI format */
 };
 
 static const char *content_name[CTSVC_VCARD_VALUE_MAX] = {0};
@@ -146,9 +146,9 @@ const char *CTSVC_CRLF = "\r\n";
 static void __ctsvc_vcard_initial(void)
 {
 	if (NULL == *content_name) {
-		//content_name[CTSVC_VCARD_VALUE_NAME] = "NAME"; /* not supported */
-		//content_name[CTSVC_VCARD_VALUE_PROFILE] = "PROFILE"; /* not supported */
-		//content_name[CTSVC_VCARD_VALUE_SOURCE] = "SOURCE"; /* not supported */
+		/* content_name[CTSVC_VCARD_VALUE_NAME] = "NAME"; // not supported */
+		/* content_name[CTSVC_VCARD_VALUE_PROFILE] = "PROFILE"; // not supported */
+		/* content_name[CTSVC_VCARD_VALUE_SOURCE] = "SOURCE"; // not supported */
 		content_name[CTSVC_VCARD_VALUE_FN] = "FN";
 		content_name[CTSVC_VCARD_VALUE_N] = "N";
 		content_name[CTSVC_VCARD_VALUE_PHONETIC_FIRST_NAME] = "X-PHONETIC-FIRST-NAME";
@@ -160,31 +160,31 @@ static void __ctsvc_vcard_initial(void)
 		content_name[CTSVC_VCARD_VALUE_X_ANNIVERSARY] = "ANNIVERSARY";
 		content_name[CTSVC_VCARD_VALUE_X_TIZEN_EVENT] = "X-TIZEN-EVENT";
 		content_name[CTSVC_VCARD_VALUE_ADR] = "ADR";
-		//content_name[CTSVC_VCARD_VALUE_LABEL] = "LABEL"; /* not supported */
+		/* content_name[CTSVC_VCARD_VALUE_LABEL] = "LABEL"; // not supported */
 		content_name[CTSVC_VCARD_VALUE_TEL] = "TEL";
 		content_name[CTSVC_VCARD_VALUE_EMAIL] = "EMAIL";
-		//content_name[CTSVC_VCARD_VALUE_MAILER] = "MAILER"; /* not supported */
-		//content_name[CTSVC_VCARD_VALUE_TZ] = "TZ"; /* not supported */
-		//content_name[CTSVC_VCARD_VALUE_GEO] = "GEO"; /* not supported */
+		/* content_name[CTSVC_VCARD_VALUE_MAILER] = "MAILER"; // not supported */
+		/* content_name[CTSVC_VCARD_VALUE_TZ] = "TZ"; // not supported */
+		/* content_name[CTSVC_VCARD_VALUE_GEO] = "GEO"; // not supported */
 		content_name[CTSVC_VCARD_VALUE_TITLE] = "TITLE";
 		content_name[CTSVC_VCARD_VALUE_ROLE] = "ROLE";
 		content_name[CTSVC_VCARD_VALUE_LOGO] = "LOGO";
-		//content_name[CTSVC_VCARD_VALUE_AGENT] = "AGENT"; /* not supported */
+		/* content_name[CTSVC_VCARD_VALUE_AGENT] = "AGENT"; // not supported */
 		content_name[CTSVC_VCARD_VALUE_ORG] = "ORG";
 		content_name[CTSVC_VCARD_VALUE_X_TIZEN_COMPANY_LOCATION] = "X-TIZEN-COMPANY-LOCATION";
 		content_name[CTSVC_VCARD_VALUE_X_TIZEN_COMPANY_DESCRIPTION] = "X-TIZEN-COMPANY-DESCRIPTION";
 		content_name[CTSVC_VCARD_VALUE_X_TIZEN_COMPANY_PHONETIC_NAME] = "X-TIZEN-COMPANY-PHONETIC-NAME";
 		content_name[CTSVC_VCARD_VALUE_X_TIZEN_COMPANY_ASSISTANT_NAME] = "X-TIZEN-COMPANY-ASSISTANT-NAME";
-		//content_name[CTSVC_VCARD_VALUE_CATEGORIES] = "CATEGORIES"; /* not supported */
+		/* content_name[CTSVC_VCARD_VALUE_CATEGORIES] = "CATEGORIES"; // not supported */
 		content_name[CTSVC_VCARD_VALUE_NOTE] = "NOTE";
-		//content_name[CTSVC_VCARD_VALUE_PRODID] = "PRODID"; /* not supported */
+		/* content_name[CTSVC_VCARD_VALUE_PRODID] = "PRODID"; // not supported */
 		content_name[CTSVC_VCARD_VALUE_REV] = "REV";
-		//content_name[CTSVC_VCARD_VALUE_SORT-STRING] = "SORT-STRING"; /* not supported */
+		/* content_name[CTSVC_VCARD_VALUE_SORT-STRING] = "SORT-STRING"; // not supported */
 		content_name[CTSVC_VCARD_VALUE_UID] = "UID";
 		content_name[CTSVC_VCARD_VALUE_URL] = "URL";
-		//content_name[CTSVC_VCARD_VALUE_VERSION] = "VERSION"; /* not supported */
-		//content_name[CTSVC_VCARD_VALUE_CLASS] = "CLASS";         /* not supported */
-		//content_name[CTSVC_VCARD_VALUE_KEY] = "KEY"; /* not supported */
+		/* content_name[CTSVC_VCARD_VALUE_VERSION] = "VERSION"; // not supported */
+		/* content_name[CTSVC_VCARD_VALUE_CLASS] = "CLASS"; // not supported */
+		/* content_name[CTSVC_VCARD_VALUE_KEY] = "KEY"; // not supported */
 		content_name[CTSVC_VCARD_VALUE_X_MSN] = "X-MSN";
 		content_name[CTSVC_VCARD_VALUE_X_YAHOO] = "X-YAHOO";
 		content_name[CTSVC_VCARD_VALUE_X_ICQ] = "X-ICQ";
@@ -196,7 +196,7 @@ static void __ctsvc_vcard_initial(void)
 		content_name[CTSVC_VCARD_VALUE_X_GOOGLE_TALK] = "X-GOOGLE-TALK";
 		content_name[CTSVC_VCARD_VALUE_X_TIZEN_MESSENGER] = "X-TIZEN-MESSENGER";
 		content_name[CTSVC_VCARD_VALUE_X_TIZEN_RELATIONSHIP] = "X-TIZEN-RELATIONSHIP";
-		//content_name[CTSVC_VCARD_VALUE_X_CHILDREN] = "X-CHILDREN";
+		/* content_name[CTSVC_VCARD_VALUE_X_CHILDREN] = "X-CHILDREN"; */
 		content_name[CTSVC_VCARD_VALUE_END] = "END";
 	}
 };
@@ -275,7 +275,7 @@ static int __ctsvc_vcard_append_str(char **buf, int *buf_size, int len, const ch
 				*r = *s;
 				break;
 			case 0xA1:
-				if (*(s+1) && 0xAC == *(s+1)) { // en/em backslash
+				if (*(s+1) && 0xAC == *(s+1)) { /* en/em backslash */
 					*r = '\\';
 					r++;
 					str_len++;
@@ -308,7 +308,7 @@ static int __ctsvc_vcard_append_str(char **buf, int *buf_size, int len, const ch
 				}
 				break;
 			case 0x81:
-				if (*(s+1) && 0x5F == *(s+1)) { // en/em backslash
+				if (*(s+1) && 0x5F == *(s+1)) { /* en/em backslash */
 					*r = '\\';
 					r++;
 					str_len++;
@@ -468,7 +468,7 @@ static inline int __ctsvc_vcard_append_name(ctsvc_list_s *names, char **buf, int
 			snprintf(display, sizeof(display), "%s %s", name->first, name->last);
 		}
 		else {
-			//CONTACTS_NAME_DISPLAY_ORDER_LASTFIRST
+			/* CONTACTS_NAME_DISPLAY_ORDER_LASTFIRST */
 			snprintf(display, sizeof(display), "%s, %s", name->last, name->first);
 		}
 	}
@@ -1033,32 +1033,32 @@ static void __ctsvc_vcard_get_clean_number_for_export(char *str, char *dest)
 		if (3 == char_len) {
 			if (*s == 0xef) {
 				if (*(s+1) == 0xbc) {
-					if (0x90 <= *(s+2) && *(s+2) <= 0x99) {				// ef bc 90 : '0' ~ ef bc 99 : '9'
+					if (0x90 <= *(s+2) && *(s+2) <= 0x99) {  /* ef bc 90 : '0' ~ ef bc 99 : '9' */
 						*r = '0' + (*(s+2) - 0x90);
 						r++;
 						s+=3;
 					}
-					else if (0x8b == *(s+2)) {								// ef bc 8b : '+'
+					else if (0x8b == *(s+2)) {   /* ef bc 8b : '+' */
 						*r = '+';
 						r++;
 						s+=3;
 					}
-					else if (0x8a == *(s+2)) {								// ef bc 8a : '*'
+					else if (0x8a == *(s+2)) {   /* ef bc 8a : '*' */
 						*r = '*';
 						r++;
 						s+=3;
 					}
-					else if (0x83 == *(s+2)) {								// ef bc 83 : '#'
+					else if (0x83 == *(s+2)) {   /* ef bc 83 : '#' */
 						*r = '#';
 						r++;
 						s+=3;
 					}
-					else if (0x8c == *(s+2)) {								// ef bc 8c : ','
+					else if (0x8c == *(s+2)) {   /* ef bc 8c : ',' */
 						*r = 'p';
 						r++;
 						s+=3;
 					}
-					else if (0x9b == *(s+2)) {								// ef bc 9b : ';'
+					else if (0x9b == *(s+2)) {   /* ef bc 9b : ';' */
 						*r = 'w';
 						r++;
 						s+=3;
@@ -1981,7 +1981,6 @@ API int contacts_vcard_make_from_person(contacts_record_h record, char **vcard_s
 	return ret;
 }
 
-////////////////////////////////////////////////////////////////////////////
 static inline char* __ctsvc_vcard_remove_empty_line(char *src)
 {
 	while (*src) {
@@ -2377,7 +2376,7 @@ static char* __ctsvc_vcard_remove_escape_char(char *str)
 				*r = *n;
 				s++;
 				break;
-			case 0xA1: // en/em backslash
+			case 0xA1:  /* en/em backslash */
 				if (*(n+1) && 0xAC == *(n+1)) {
 					*r = *n;
 					r++;
@@ -2385,7 +2384,7 @@ static char* __ctsvc_vcard_remove_escape_char(char *str)
 					s+=2;
 				}
 				break;
-			case 0x81:  // en/em backslash
+			case 0x81:  /* en/em backslash */
 				if (*(n+1) && 0x5F == *(n+1)) {
 					*r = *n;
 					r++;
@@ -2487,7 +2486,7 @@ static inline int __ctsvc_vcard_get_name(ctsvc_list_s *name_list, char *val)
 		contacts_list_get_current_record_p((contacts_list_h)name_list, &name);
 	}
 
-	contacts_record_set_str(name, _contacts_name.first, NULL); // remove FN
+	contacts_record_set_str(name, _contacts_name.first, NULL);  /* remove FN */
 
 	while (true) {
 		bool separator = false;
@@ -2613,9 +2612,9 @@ static inline int __ctsvc_vcard_get_photo(contacts_record_h contact, ctsvc_list_
 				CTS_ERR("write() Fail(%d)", errno);
 				close(fd);
 				if (ENOSPC == errno)
-					return CONTACTS_ERROR_FILE_NO_SPACE;		// No space
+					return CONTACTS_ERROR_FILE_NO_SPACE;   /* No space */
 				else
-					return CONTACTS_ERROR_SYSTEM;		// IO error
+					return CONTACTS_ERROR_SYSTEM;   /* IO error */
 			}
 		}
 		size -= ret;
@@ -2632,7 +2631,7 @@ static inline int __ctsvc_vcard_get_photo(contacts_record_h contact, ctsvc_list_
 
 	contacts_list_add((contacts_list_h)image_list, image);
 
-	// _contacts_contact.image_thumbnail_path is a read-only property
+	/* _contacts_contact.image_thumbnail_path is a read-only property */
 	((ctsvc_contact_s *)contact)->image_thumbnail_path = strdup(dest);
 
 	return CONTACTS_ERROR_NONE;
@@ -2860,9 +2859,9 @@ static inline int __ctsvc_vcard_get_company_logo(ctsvc_list_s *company_list, cha
 				CTS_ERR("write() Fail(%d)", errno);
 				close(fd);
 				if (ENOSPC == errno)
-					return CONTACTS_ERROR_FILE_NO_SPACE;		// No space
+					return CONTACTS_ERROR_FILE_NO_SPACE;   /* No space */
 				else
-					return CONTACTS_ERROR_SYSTEM;		// IO error
+					return CONTACTS_ERROR_SYSTEM;   /* IO error */
 			}
 		}
 		size -= ret;
@@ -3090,32 +3089,32 @@ static char* __ctsvc_vcard_get_clean_number_for_import(char *str)
 		if (3 == char_len) {
 			if (*s == 0xef) {
 				if (*(s+1) == 0xbc) {
-					if (0x90 <= *(s+2) && *(s+2) <= 0x99) {				// ef bc 90 : '0' ~ ef bc 99 : '9'
+					if (0x90 <= *(s+2) && *(s+2) <= 0x99) {   /* ef bc 90 : '0' ~ ef bc 99 : '9' */
 						*r = '0' + (*(s+2) - 0x90);
 						r++;
 						s+=3;
 					}
-					else if (0x8b == *(s+2)) {								// ef bc 8b : '+'
+					else if (0x8b == *(s+2)) {   /* ef bc 8b : '+' */
 						*r = '+';
 						r++;
 						s+=3;
 					}
-					else if (0x8a == *(s+2)) {								// ef bc 8a : '*'
+					else if (0x8a == *(s+2)) {   /* ef bc 8a : '*' */
 						*r = '*';
 						r++;
 						s+=3;
 					}
-					else if (0x83 == *(s+2)) {								// ef bc 83 : '#'
+					else if (0x83 == *(s+2)) {   /* ef bc 83 : '#' */
 						*r = '#';
 						r++;
 						s+=3;
 					}
-					else if (0xb0 == *(s+2) || 0x8c == *(s+2)) {		// ef bc b0 : 'P', ef bc 8c : ','
+					else if (0xb0 == *(s+2) || 0x8c == *(s+2)) {   /* ef bc b0 : 'P', ef bc 8c : ',' */
 						*r = ',';
 						r++;
 						s+=3;
 					}
-					else if (0xb7 == *(s+2) || 0x9b == *(s+2)) {		// ef bc b7 : 'W', ef bc 9b : ';'
+					else if (0xb7 == *(s+2) || 0x9b == *(s+2)) {   /* ef bc b7 : 'W', ef bc 9b : ';' */
 						*r = ';';
 						r++;
 						s+=3;
@@ -3731,14 +3730,14 @@ static inline void __ctsvc_vcard_make_contact_display_name(ctsvc_contact_s *cont
 		char *temp_display = NULL;
 		contacts_name_display_order_e name_display_order = CONTACTS_NAME_DISPLAY_ORDER_FIRSTLAST;
 
-		///////////////////////////////////////////////
-		// Make reverse display name (Last name first)
-		// Default         : Prefix Last, First Middle(addition), Suffix
-		// Korean, Chinese : Prefix LastFirstMiddleSuffix
-		// Japanese        : Prefix Last Middle First Suffix
-		// reverse sort name does not include prefix
-		//    But, if there is only prefix, reverse sort_name is prefix
-		//////////////////////////////////////////////
+		/*
+		 * Make reverse display name (Last name first)
+		 * Default         : Prefix Last, First Middle(addition), Suffix
+		 * Korean, Chinese : Prefix LastFirstMiddleSuffix
+		 * Japanese        : Prefix Last Middle First Suffix
+		 * reverse sort name does not include prefix
+		 *    But, if there is only prefix, reverse sort_name is prefix
+		 */
 		temp_display_len = SAFE_STRLEN(name->first)
 						+ SAFE_STRLEN(name->addition)
 						+ SAFE_STRLEN(name->last)
@@ -3776,7 +3775,7 @@ static inline void __ctsvc_vcard_make_contact_display_name(ctsvc_contact_s *cont
 			}
 
 			if (reverse_lang_type == CTSVC_LANG_JAPANESE) {
-				// make temp_display name Prefix - Last - Middle - First - Suffix
+				/* make temp_display name Prefix - Last - Middle - First - Suffix */
 				if (name->addition) {
 					if (*temp_display)
 						len += snprintf(temp_display + len, temp_display_len - len, " ");
@@ -3790,7 +3789,7 @@ static inline void __ctsvc_vcard_make_contact_display_name(ctsvc_contact_s *cont
 				}
 			}
 			else {
-				// make temp_display name Prefix - Last - First -Middle - Suffix
+				/* make temp_display name Prefix - Last - First -Middle - Suffix */
 				if (name->first) {
 					if (*temp_display) {
 						if (reverse_lang_type < 0) {
@@ -3847,14 +3846,14 @@ static inline void __ctsvc_vcard_make_contact_display_name(ctsvc_contact_s *cont
 			reverse_display = strdup(name->prefix);
 		}
 
-		///////////////////////////////////////////////
-		// Make display name (First name first)
-		// Default         : Prefix First Middle Last, Suffix
-		// Korean, Chinese : Prefix LastFirstMiddleSuffix (Same as reverse display name)
-		// Japanese        : Prefix First Middle Last Suffix
-		// sort name does not include prefix
-		//    But, if there is only prefix, sort_name is prefix
-		//////////////////////////////////////////////
+		/*
+		 * Make display name (First name first)
+		 * Default         : Prefix First Middle Last, Suffix
+		 * Korean, Chinese : Prefix LastFirstMiddleSuffix (Same as reverse display name)
+		 * Japanese        : Prefix First Middle Last Suffix
+		 * sort name does not include prefix
+		 *    But, if there is only prefix, sort_name is prefix
+		 */
 
 		if (reverse_lang_type == CTSVC_LANG_KOREAN ||
 			reverse_lang_type == CTSVC_LANG_CHINESE)
@@ -3868,7 +3867,7 @@ static inline void __ctsvc_vcard_make_contact_display_name(ctsvc_contact_s *cont
 								+ SAFE_STRLEN(name->suffix);
 			if (0 < temp_display_len) {
 				temp_display_len += 6;
-				// make reverse_temp_display_name
+				/* make reverse_temp_display_name */
 				temp_display = calloc(1, temp_display_len);
 				len = 0;
 
@@ -4143,7 +4142,7 @@ static const char* __contacts_vcard_parse_get_vcard_object(const char *cursor, G
 
 				return vcard_cursor;
 			}
-			else if (STRING_EQUAL == strncmp(vcard_cursor, begin, strlen(begin))) { // sub vcard
+			else if (STRING_EQUAL == strncmp(vcard_cursor, begin, strlen(begin))) { /* sub vcard */
 				sub_vcard_info_s *sub_vcard_info = calloc(1, sizeof(sub_vcard_info_s));
 				sub_vcard_info->pos_start = vcard_cursor;
 
@@ -4302,7 +4301,7 @@ API int contacts_vcard_parse_to_contact_foreach(const char *vcard_file_name,
 				}
 			}
 		}
-		else if (STRING_EQUAL == strncmp(line, "BEGIN:VCARD", 11)) { // sub vcard object
+		else if (STRING_EQUAL == strncmp(line, "BEGIN:VCARD", 11)) { /* sub vcard object */
 			vcard_depth++;
 		}
 	}

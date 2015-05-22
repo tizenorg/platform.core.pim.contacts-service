@@ -66,7 +66,7 @@ static int __ctsvc_updated_info_create(contacts_record_h* out_record)
 static int __ctsvc_updated_info_destroy(contacts_record_h record, bool delete_child)
 {
 	ctsvc_updated_info_s* updated_info = (ctsvc_updated_info_s*)record;
-	updated_info->base.plugin_cbs = NULL;	// help to find double destroy bug (refer to the contacts_record_destroy)
+	updated_info->base.plugin_cbs = NULL; /* help to find double destroy bug (refer to the contacts_record_destroy) */
 	free(updated_info->base.properties_flags);
 	free(updated_info);
 

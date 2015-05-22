@@ -66,7 +66,7 @@ int ctsvc_db_relationship_insert(contacts_record_h record, int contact_id, bool 
 	char query[CTS_SQL_MAX_LEN] = {0};
 	ctsvc_relationship_s *relationship = (ctsvc_relationship_s *)record;
 
-	// These check should be done in client side
+	/* These check should be done in client side */
 	RETV_IF(NULL == relationship->name, CONTACTS_ERROR_NONE);
 	RETVM_IF(contact_id <= 0, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : contact_id(%d) is mandatory field to insert relationship record", relationship->contact_id);
@@ -90,7 +90,7 @@ int ctsvc_db_relationship_insert(contacts_record_h record, int contact_id, bool 
 		return ret;
 	}
 
-	//relationship->id = ctsvc_db_get_last_insert_id();
+	/* relationship->id = ctsvc_db_get_last_insert_id(); */
 	if (id)
 		*id = ctsvc_db_get_last_insert_id();
 	ctsvc_stmt_finalize(stmt);

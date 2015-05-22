@@ -36,4 +36,4 @@ void ctsvc_mutex_lock(int type);
 void ctsvc_mutex_unlock(int type);
 
 
-#endif //__CTSVC_MUTEX_H__
+#endif /* __CTSVC_MUTEX_H__ */

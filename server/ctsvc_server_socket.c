@@ -104,7 +104,7 @@ int ctsvc_server_socket_return(GIOChannel *src, int value, int attach_num, int *
 	ctsvc_socket_msg_s msg = {0};
 	RETVM_IF(NULL == src, CONTACTS_ERROR_INVALID_PARAMETER, "src is NULL");
 
-	//	RETVM_IF(CONTACTS_ERROR_SYSTEM == value, value, "Socket has problems");
+	/* RETVM_IF(CONTACTS_ERROR_SYSTEM == value, value, "Socket has problems"); */
 	RETVM_IF(CTSVC_SOCKET_MSG_REQUEST_MAX_ATTACH < attach_num, CONTACTS_ERROR_INTERNAL,
 			"Invalid msg(attach_num = %d)", attach_num);
 
@@ -227,7 +227,7 @@ static void __ctsvc_server_socket_read_flush(GIOChannel *src, int size)
 		g_error_free(gerr);
 	}
 }
-#endif // ENABLIE_SIM_FEATURE
+#endif /* ENABLIE_SIM_FEATURE */
 
 
 #ifdef ENABLE_SIM_FEATURE
@@ -288,7 +288,7 @@ static gboolean __ctsvc_server_socket_request_handler(GIOChannel *src, GIOCondit
 #ifdef ENABLE_SIM_FEATURE
 	bool have_read_permission = false;
 	bool have_write_permission = false;
-#endif // ENABLE_SIM_FEATURE
+#endif /* ENABLE_SIM_FEATURE */
 
 	ctsvc_socket_msg_s msg = {0};
 	CTS_FN_CALL;
@@ -314,7 +314,7 @@ static gboolean __ctsvc_server_socket_request_handler(GIOChannel *src, GIOCondit
 	have_telephony_feature = ctsvc_server_have_telephony_feature();
 	if (false == have_telephony_feature) {
 		CTS_ERR("Telephony feature disabled");
-		__ctsvc_server_socket_read_flush(src, msg.attach_sizes[0]); 	// sim_id
+		__ctsvc_server_socket_read_flush(src, msg.attach_sizes[0]);  /* sim_id */
 		ctsvc_server_socket_return(src, CONTACTS_ERROR_NOT_SUPPORTED, 0, NULL);
 		return TRUE;
 	}
@@ -330,14 +330,14 @@ static gboolean __ctsvc_server_socket_request_handler(GIOChannel *src, GIOCondit
 	if (!have_write_permission)
 		INFO("fd(%d) : does not have contact write permission", fd);
 	ctsvc_mutex_unlock(CTS_MUTEX_SOCKET_CLIENT_INFO);
-#endif // ENABLE_SIM_FEATURE
+#endif /* ENABLE_SIM_FEATURE */
 
 	switch (msg.type) {
 #ifdef ENABLE_SIM_FEATURE
 	case CTSVC_SOCKET_MSG_TYPE_REQUEST_IMPORT_SIM:
 		if (false == have_write_permission) {
 			CTS_ERR("write permission denied");
-			__ctsvc_server_socket_read_flush(src, msg.attach_sizes[0]);		// sim_id
+			__ctsvc_server_socket_read_flush(src, msg.attach_sizes[0]);  /* sim_id */
 			ctsvc_server_socket_return(src, CONTACTS_ERROR_PERMISSION_DENIED, 0, NULL);
 			return TRUE;
 		}
@@ -346,13 +346,13 @@ static gboolean __ctsvc_server_socket_request_handler(GIOChannel *src, GIOCondit
 	case CTSVC_SOCKET_MSG_TYPE_REQUEST_SIM_INIT_COMPLETE:
 		if (false == have_read_permission) {
 			CTS_ERR("read permission denied");
-			__ctsvc_server_socket_read_flush(src, msg.attach_sizes[0]);		// sim_id
+			__ctsvc_server_socket_read_flush(src, msg.attach_sizes[0]);  /* sim_id */
 			ctsvc_server_socket_return(src, CONTACTS_ERROR_PERMISSION_DENIED, 0, NULL);
 			return TRUE;
 		}
 		__ctsvc_server_socket_get_sim_init_status(src, msg.attach_sizes[0]);
 		break;
-#endif // ENABLE_SIM_FEATURE
+#endif /* ENABLE_SIM_FEATURE */
 	default:
 		CTS_ERR("Unknown request type(%d)", msg.type);
 		break;

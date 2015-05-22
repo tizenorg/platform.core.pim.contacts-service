@@ -36,8 +36,8 @@
 #endif
 #define API __attribute__ ((visibility("default")))
 
-//#define CONTACTS_DEBUGGING
-//#define CONTACTS_TIMECHECK
+/*#define CONTACTS_DEBUGGING */
+/*#define CONTACTS_TIMECHECK */
 
 #define LOG_TAG "CONTACTS_SERVICE"
 #include <dlog.h>
@@ -114,7 +114,7 @@
 } while (0)
 
 
-// TO DISABLE THIS MACRO, DEFINE "G_DISABLE_ASSERT"
+/* TO DISABLE THIS MACRO, DEFINE "G_DISABLE_ASSERT" */
 #define ASSERT_NOT_REACHED(fmt, arg...) do { \
         CTS_ERR(fmt, ##arg); \
         assert(!"DO NOT REACH HERE!"); \
@@ -127,12 +127,12 @@
 		ptr = NULL; \
 	} while (0)
 
-// Thread-local storage
+/* Thread-local storage */
 #ifdef _CONTACTS_IPC_SERVER
 #define TLS __thread
 #elif _CONTACTS_IPC_CLIENT
 #define TLS __thread
-#else   //_CONTACTS_NATIVE
+#else /* _CONTACTS_NATIVE */
 #define TLS
 #endif
 

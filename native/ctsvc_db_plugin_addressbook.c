@@ -138,7 +138,7 @@ static int __ctsvc_db_addressbook_insert_record(contacts_record_h record, int *i
 	ret = ctsvc_begin_trans();
 	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "DB error : ctsvc_begin_trans() Fail(%d)", ret);
 
-	// Can not insert addressbook which has same account_id
+	/* Can not insert addressbook which has same account_id */
 	int addresbook_id;
 	account_h account = NULL;
 	snprintf(query, sizeof(query),
@@ -157,7 +157,7 @@ static int __ctsvc_db_addressbook_insert_record(contacts_record_h record, int *i
 		}
 	}
 
-	// check account_id validation
+	/* check account_id validation */
 	ret = account_create(&account);
 	if (ACCOUNT_ERROR_NONE != ret) {
 		CTS_ERR("account_create() Fail(%d)", ret);
@@ -202,7 +202,7 @@ static int __ctsvc_db_addressbook_insert_record(contacts_record_h record, int *i
 			break;
 		}
 
-		//int index = ctsvc_db_get_last_insert_id();
+		/* int index = ctsvc_db_get_last_insert_id(); */
 		if (id)
 			*id = ctsvc_db_get_last_insert_id();
 		ctsvc_stmt_finalize(stmt);
@@ -215,9 +215,9 @@ static int __ctsvc_db_addressbook_insert_record(contacts_record_h record, int *i
 			free(smack);
 			return ret;
 		}
-		//addressbook->id = index;
+		/* addressbook->id = index; */
 
-		// SUCCESS
+		/* SUCCESS */
 		return CONTACTS_ERROR_NONE;
 
 	} while (0);
@@ -343,7 +343,7 @@ static int __ctsvc_db_addressbook_delete_record(int addressbook_id)
 		if (0 < ret) {
 			ctsvc_set_my_profile_noti();
 			ctsvc_set_contact_noti();
-			// person noti will set in ctsvc_person_do_garbage_collection : ctsvc_set_person_noti();
+			/* person noti will set in ctsvc_person_do_garbage_collection : ctsvc_set_person_noti(); */
 			ctsvc_set_group_noti();
 			ctsvc_set_addressbook_noti();
 		}

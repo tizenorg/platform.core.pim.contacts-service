@@ -37,5 +37,5 @@
 #include <contacts_phone_log.h>
 #include <contacts_db_status.h>
 
-#endif //__TIZEN_SOCIAL_CONTACTS_H__
+#endif /*__TIZEN_SOCIAL_CONTACTS_H__ */
 

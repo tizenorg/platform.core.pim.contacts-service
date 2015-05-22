@@ -75,4 +75,4 @@ int contacts_phone_log_delete(contacts_phone_log_delete_e op, ...);
 #endif
 
 
-#endif //__TIZEN_SOCIAL_CONTACTS_PHONELOG_INTERNAL_H__
+#endif /* __TIZEN_SOCIAL_CONTACTS_PHONELOG_INTERNAL_H__ */

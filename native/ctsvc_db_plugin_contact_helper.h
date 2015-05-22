@@ -90,4 +90,4 @@ int ctsvc_contact_insert_data_relationship(contacts_list_h relationship_list, in
 int ctsvc_contact_insert_data_image(contacts_list_h image_list, int contact_id, bool is_my_profile);
 int ctsvc_contact_insert_data_extension(contacts_list_h extension_list, int contact_id, bool is_my_profile);
 
-#endif // __CTSVC_DB_PLUGIN_CONTACT_HELPER_H__
+#endif /* __CTSVC_DB_PLUGIN_CONTACT_HELPER_H__ */

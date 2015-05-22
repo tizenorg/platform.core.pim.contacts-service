@@ -234,4 +234,4 @@ int ctsvc_request_sim_get_initialization_status(int sim_slot_no, bool *completed
 	return msg.val;
 }
 
-#endif // ENABLE_SIM_FEATURE
+#endif /* ENABLE_SIM_FEATURE */

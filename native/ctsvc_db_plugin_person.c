@@ -153,7 +153,7 @@ static int __ctsvc_db_person_update_record(contacts_record_h record)
 	}
 
 	if (ctsvc_record_check_property_flag((ctsvc_record_s *)person, _contacts_person.display_contact_id, CTSVC_PROPERTY_FLAG_DIRTY)) {
-		// check name_contact_id validation
+		/* check name_contact_id validation */
 		char *temp;
 		char check_query[CTS_SQL_MIN_LEN] = {0};
 		snprintf(check_query, sizeof(check_query), "SELECT contact_id, %s FROM "CTS_TABLE_CONTACTS
@@ -188,7 +188,7 @@ static int __ctsvc_db_person_update_record(contacts_record_h record)
 		ctsvc_stmt_finalize(stmt);
 	}
 
-	// update favorite
+	/* update favorite */
 	index_favorite = CTSVC_PROPERTY_PERSON_IS_FAVORITE & 0x000000FF;
 	if (person->base.properties_flags &&
 			CTSVC_PROPERTY_FLAG_DIRTY == person->base.properties_flags[index_favorite]) {
@@ -314,7 +314,7 @@ static int __ctsvc_db_person_update_record(contacts_record_h record)
 		g_slist_free(bind_text);
 	}
 
-	// update person display_name
+	/* update person display_name */
 	if (display_name) {
 		char *temp = NULL;
 		person->display_name = SAFE_STRDUP(display_name);
@@ -323,7 +323,7 @@ static int __ctsvc_db_person_update_record(contacts_record_h record)
 			person->display_name_index = strdup(temp);
 
 		free(temp);
-		// TODO : update name primary_default??
+		/* TODO : update name primary_default?? */
 	}
 	ctsvc_set_person_noti();
 #ifdef _CONTACTS_IPC_SERVER
@@ -406,7 +406,7 @@ static int __ctsvc_db_person_delete_record(int id)
 	}
 	free(addressbook_ids);
 
-	// access control logic should be enabled
+	/* access control logic should be enabled */
 	snprintf(query, sizeof(query),
 			"UPDATE "CTS_TABLE_CONTACTS" SET person_id = 0, changed_ver = %d WHERE person_id = %d",
 			version, id);
@@ -417,7 +417,10 @@ static int __ctsvc_db_person_delete_record(int id)
 		return ret;
 	}
 
-	// images are deleted by db trigger callback function in ctsvc_db_image_delete_callback
+	/*
+	 * images are deleted by db trigger callback function
+	 * in ctsvc_db_image_delete_callback
+	 */
 	snprintf(query, sizeof(query), "DELETE FROM "CTS_TABLE_PERSONS" WHERE person_id = %d", id);
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {

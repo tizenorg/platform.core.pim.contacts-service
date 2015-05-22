@@ -195,4 +195,4 @@ int contacts_vcard_get_entity_count(const char *vcard_file_path, int *count);
 #endif
 
 
-#endif //__TIZEN_SOCIAL_CONTACTS_VCARD_H__
+#endif /* __TIZEN_SOCIAL_CONTACTS_VCARD_H__ */

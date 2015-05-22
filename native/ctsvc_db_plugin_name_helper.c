@@ -120,7 +120,7 @@ int ctsvc_db_name_insert(contacts_record_h record, int contact_id, bool is_my_pr
 	cts_stmt stmt = NULL;
 	ctsvc_name_s *name = (ctsvc_name_s*)record;
 	char query[CTS_SQL_MAX_LEN]={0};
-	char *normal_name[CTSVC_NN_MAX]={NULL};	//insert name search info
+	char *normal_name[CTSVC_NN_MAX]={NULL}; /* insert name search info */
 	char *temp_normal_first = NULL;
 	char *temp_normal_last = NULL;
 	int len_normal_first = 0;
@@ -135,8 +135,10 @@ int ctsvc_db_name_insert(contacts_record_h record, int contact_id, bool is_my_pr
 
 	if (name->first || name->last || name->addition || name->prefix || name->suffix
 		|| name->phonetic_first || name->phonetic_middle || name->phonetic_last) {
-		// If name record already exists, delete current name record
-		// If user update record with out-of-date record, name record can be two
+		/*
+		 * If name record already exists, delete current name record
+		 * If user update record with out-of-date record, name record can be two
+		 */
 		snprintf(query, sizeof(query),
 				"DELETE FROM "CTS_TABLE_DATA" "
 						"WHERE contact_id = %d AND datatype=%d "
@@ -215,7 +217,7 @@ int ctsvc_db_name_insert(contacts_record_h record, int contact_id, bool is_my_pr
 			return ret;
 		}
 
-		//name->id = ctsvc_db_get_last_insert_id();
+		/* name->id = ctsvc_db_get_last_insert_id(); */
 		if (id)
 			*id = ctsvc_db_get_last_insert_id();
 		name->contact_id = contact_id;
@@ -225,7 +227,7 @@ int ctsvc_db_name_insert(contacts_record_h record, int contact_id, bool is_my_pr
 			ctsvc_set_name_noti();
 	}
 
-	// update search index table
+	/* update search index table */
 	return CONTACTS_ERROR_NONE;
 }
 

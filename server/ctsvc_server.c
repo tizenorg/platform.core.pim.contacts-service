@@ -25,8 +25,8 @@
 #include <sys/stat.h>
 #include <pims-ipc.h>
 #include <pims-ipc-svc.h>
-#include <unistd.h>	//getuid
-#include <grp.h>		//setgroups
+#include <unistd.h>
+#include <grp.h>
 
 #include "ctsvc_internal.h"
 #include "ctsvc_db_init.h"
@@ -52,9 +52,11 @@ static int __server_main(void)
 	pims_ipc_svc_init(sock_file, CTS_SECURITY_FILE_GROUP, 0777);
 
 	do {
-		// register handle functions
-		// These functions will be called when requesting from client module depends on module name and function name (pims_ipc_call, ctsvc_ipc_call)
-		// pims_ipc_svc_register(MODULE_NAME, FUNCTION_NAME ...);
+		/*
+		 * register handle functions
+		 * These functions will be called when requesting from client module depends on module name and function name (pims_ipc_call, ctsvc_ipc_call)
+		 * pims_ipc_svc_register(MODULE_NAME, FUNCTION_NAME ...);
+		 */
 		if (pims_ipc_svc_register(CTSVC_IPC_MODULE, CTSVC_IPC_SERVER_CONNECT, ctsvc_ipc_server_connect, NULL) != 0) break;
 		if (pims_ipc_svc_register(CTSVC_IPC_MODULE, CTSVC_IPC_SERVER_DISCONNECT, ctsvc_ipc_server_disconnect, NULL) != 0) break;
 		if (pims_ipc_svc_register(CTSVC_IPC_MODULE, CTSVC_IPC_SERVER_CHECK_PERMISSION, ctsvc_ipc_server_check_permission, NULL) != 0) break;
@@ -96,7 +98,7 @@ static int __server_main(void)
 #ifdef ENABLE_LOG_FEATURE
 		if (pims_ipc_svc_register(CTSVC_IPC_PHONELOG_MODULE, CTSVC_IPC_SERVER_PHONELOG_RESET_STATISTICS, ctsvc_ipc_phone_log_reset_statistics, NULL) != 0) break;
 		if (pims_ipc_svc_register(CTSVC_IPC_PHONELOG_MODULE, CTSVC_IPC_SERVER_PHONELOG_DELETE, ctsvc_ipc_phone_log_delete, NULL) != 0) break;
-#endif // ENABLE_LOG_FEATURE
+#endif /* ENABLE_LOG_FEATURE */
 
 		if (pims_ipc_svc_register(CTSVC_IPC_SETTING_MODULE, CTSVC_IPC_SERVER_SETTING_GET_NAME_DISPLAY_ORDER, ctsvc_ipc_setting_get_name_display_order, NULL) != 0) break;
 		if (pims_ipc_svc_register(CTSVC_IPC_SETTING_MODULE, CTSVC_IPC_SERVER_SETTING_SET_NAME_DISPLAY_ORDER, ctsvc_ipc_setting_set_name_display_order, NULL) != 0) break;
@@ -179,9 +181,9 @@ int main(int argc, char *argv[])
 	INFO("Start contacts-service");
 	int ret;
 
-	if (getuid() == 0) {			// root
+	if (getuid() == 0) {   /* root */
 		gid_t glist[] = {CTS_SECURITY_FILE_GROUP};
-		ret = setgroups(1, glist);		// client and server should have same Groups
+		ret = setgroups(1, glist);   /* client and server should have same Groups */
 		WARN_IF(ret <0, "setgroups Fail(%d)", ret);
 	}
 

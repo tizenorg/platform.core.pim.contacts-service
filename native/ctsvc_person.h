@@ -26,4 +26,4 @@ int ctsvc_person_do_garbage_collection(void);
 int ctsvc_person_aggregate(int person_id);
 void ctsvc_db_person_delete_callback(sqlite3_context * context, int argc, sqlite3_value ** argv);
 
-#endif // __TIZEN_SOCIAL_CTSVC_PERSON_H__
+#endif /* __TIZEN_SOCIAL_CTSVC_PERSON_H__ */

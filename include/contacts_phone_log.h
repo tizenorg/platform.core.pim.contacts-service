@@ -93,4 +93,4 @@ int contacts_phone_log_reset_statistics(void);
 #endif
 
 
-#endif //__TIZEN_SOCIAL_CONTACTS_PHONELOG_H__
+#endif /* __TIZEN_SOCIAL_CONTACTS_PHONELOG_H__ */

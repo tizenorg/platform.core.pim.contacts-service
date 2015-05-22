@@ -74,4 +74,4 @@ int ctsvc_required_write_permission(const char *view_uri);
 
 bool ctsvc_should_ab_access_control(const char *view_uri);
 
-#endif // __TIZEN_SOCIAL_CTSVC_DB_INIT_H__
+#endif /* __TIZEN_SOCIAL_CTSVC_DB_INIT_H__ */

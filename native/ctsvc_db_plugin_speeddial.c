@@ -66,7 +66,7 @@ static int __ctsvc_db_speeddial_insert_record(contacts_record_h record, int *id)
 	ret = ctsvc_begin_trans();
 	RETVM_IF(ret, ret, "ctsvc_begin_trans() Fail(%d)", ret);
 
-	// check number_id validation
+	/* check number_id validation */
 	snprintf(query, sizeof(query),
 			"SELECT data.id FROM "CTS_TABLE_DATA", "CTS_TABLE_CONTACTS" "
 						"ON "CTS_TABLE_DATA".contact_id = "CTS_TABLE_CONTACTS".contact_id "
@@ -137,7 +137,7 @@ static int __ctsvc_db_speeddial_value_set(cts_stmt stmt, contacts_record_h *reco
 	temp = ctsvc_stmt_get_text(stmt, i++);
 	speeddial->number = SAFE_STRDUP(temp);
 	speeddial->dial_number = ctsvc_stmt_get_int(stmt, i++);
-	speeddial->id = speeddial->dial_number; // dial_number is an unique key
+	speeddial->id = speeddial->dial_number; /* dial_number is an unique key */
 
 	return CONTACTS_ERROR_NONE;
 }
@@ -198,7 +198,7 @@ static int __ctsvc_db_speeddial_update_record(contacts_record_h record)
 	ret = ctsvc_begin_trans();
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, CONTACTS_ERROR_DB, "DB error : ctsvc_begin_trans() Fail(%d)", ret);
 
-	// check number_id validation
+	/* check number_id validation */
 	snprintf(query, sizeof(query),
 			"SELECT data.id FROM "CTS_TABLE_DATA", "CTS_TABLE_CONTACTS" "
 						"ON "CTS_TABLE_DATA".contact_id = "CTS_TABLE_CONTACTS".contact_id "
@@ -402,7 +402,7 @@ static int __ctsvc_db_speeddial_get_records_with_query(contacts_query_h query,
 			switch(property_id) {
 			case CTSVC_PROPERTY_SPEEDDIAL_DIAL_NUMBER:
 				speeddial->dial_number = ctsvc_stmt_get_int(stmt, i);
-				speeddial->id = speeddial->dial_number; // dial_number is an unique key
+				speeddial->id = speeddial->dial_number; /* dial_number is an unique key */
 				break;
 			case CTSVC_PROPERTY_SPEEDDIAL_NUMBER_ID:
 				speeddial->number_id = ctsvc_stmt_get_int(stmt, i);

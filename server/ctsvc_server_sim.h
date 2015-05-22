@@ -44,5 +44,5 @@ int ctsvc_server_sim_get_info_id_by_sim_slot_no(int sim_slot_no);
 int ctsvc_server_sim_get_sim_slot_no_by_info_id(int sim_info_id);
 int ctsvc_server_socket_get_sim_init_status(void* data, int sim_slot_no);
 
-#endif // __CTSVC_SERVER_SIM_H__
+#endif /* __CTSVC_SERVER_SIM_H__ */
 

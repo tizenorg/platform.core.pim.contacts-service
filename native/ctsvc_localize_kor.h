@@ -28,4 +28,4 @@ bool ctsvc_is_chosung(const char *src);
 bool ctsvc_is_hangul(UChar src);
 void ctsvc_hangul_compatibility2jamo(UChar *src);
 
-#endif		//__TIZEN_SOCIAL_CTSVC_LOCALIZE_KOR_H__
+#endif /* __TIZEN_SOCIAL_CTSVC_LOCALIZE_KOR_H__ */

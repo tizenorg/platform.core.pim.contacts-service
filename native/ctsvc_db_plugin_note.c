@@ -191,7 +191,7 @@ static int __ctsvc_db_note_update_record(contacts_record_h record)
 		return ret;
 	}
 
-	// TODO ; contact display note update
+	/* TODO ; contact display note update */
 	ret = ctsvc_db_contact_update_changed_time(note->contact_id);
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("DB error : ctsvc_db_contact_update_changed_time() Fail(%d)", ret);
@@ -261,7 +261,7 @@ static int __ctsvc_db_note_delete_record(int id)
 		return ret;
 	}
 
-	// TODO ; contact name update
+	/* TODO ; contact name update */
 	ret = ctsvc_db_contact_update_changed_time(contact_id);
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("DB error : ctsvc_db_contact_update_changed_time() Fail(%d)", ret);

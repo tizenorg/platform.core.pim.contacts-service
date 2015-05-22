@@ -73,7 +73,7 @@ static int __ctsvc_addressbook_destroy(contacts_record_h record, bool delete_chi
 {
 	ctsvc_addressbook_s *addressbook = (ctsvc_addressbook_s*)record;
 
-	addressbook->base.plugin_cbs = NULL;	// help to find double destroy bug (refer to the contacts_record_destroy)
+	addressbook->base.plugin_cbs = NULL;   /* help to find double destroy bug (refer to the contacts_record_destroy) */
 	free(addressbook->base.properties_flags);
 	free(addressbook->name);
 	free(addressbook);

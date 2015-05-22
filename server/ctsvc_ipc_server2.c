@@ -22,7 +22,7 @@
 #include "contacts.h"
 #ifdef ENABLE_LOG_FEATURE
 #include "contacts_phone_log_internal.h"
-#endif //ENABLE_LOG_FEATURE
+#endif /* ENABLE_LOG_FEATURE */
 
 #include "ctsvc_service.h"
 #include "ctsvc_db_init.h"
@@ -830,7 +830,7 @@ DATA_FREE:
 
 	return;
 }
-#endif // ENABLE_LOG_FEATURE
+#endif /* ENABLE_LOG_FEATURE */
 
 void ctsvc_ipc_setting_get_name_display_order(pims_ipc_h ipc, pims_ipc_data_h indata,
 		pims_ipc_data_h *outdata, void *userdata)

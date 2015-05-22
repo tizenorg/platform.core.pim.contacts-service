@@ -61,7 +61,7 @@ static const char hangul_compatibility_choseong[] = {
 	0x81, 0x84, 0x85, 0x86, 0x00};
 
 static const unsigned char hangul_jamo_choseong[] = {
-	0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x1A, 0x06, 0x07,		// to choseong 0x1100~0x115F
+	0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x1A, 0x06, 0x07,   /* to choseong 0x1100~0x115F */
 	0x08, 0x21, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,
 	0x10, 0x11, 0x12, 0x14, 0x15, 0x1C, 0x1D, 0x1E, 0x20,
 	0x22, 0x23, 0x27, 0x29, 0x2B, 0x2C, 0x2D, 0x2E, 0x2F,
@@ -74,7 +74,7 @@ static const char hangul_compatibility_jungseong[] = {
 	0x89, 0x8A, 0x8B, 0x8C, 0x8D, 0x8E, 0x00};
 
 static const unsigned char hangul_jamo_jungseong[] = {
-	0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68, 0x69,	// to jungseong 0x1160~0x11A7
+	0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68, 0x69,   /* to jungseong 0x1160~0x11A7 */
 	0x6A, 0x6B, 0x6C, 0x6D, 0x6E, 0x6F, 0x70, 0x71, 0x72,
 	0x73, 0x74, 0x75, 0x60, 0x84, 0x85, 0x88, 0x91, 0x92,
 	0x94, 0x9E, 0xA1, 0x00};
@@ -85,7 +85,7 @@ static const char hangul_compatibility_jongseong[] = {
 	0x6F, 0x70, 0x82, 0x83, 0x00};
 
 static const unsigned char hangul_jamo_jongseong[] = {
-	0xAA, 0xAC, 0xAD, 0xB0, 0xB1, 0xB2, 0xB3, 0xB4, 0xB5,	// to jongseong 0x11A8~0x11FF
+	0xAA, 0xAC, 0xAD, 0xB0, 0xB1, 0xB2, 0xB3, 0xB4, 0xB5,   /* to jongseong 0x11A8~0x11FF */
 	0xC7, 0xC8, 0xCC, 0xCE, 0xD3, 0xD7, 0xD9, 0xDF, 0xF1, 0xF2, 0x00};
 
 static inline bool is_chosung(UChar src)
@@ -97,15 +97,15 @@ static inline bool is_chosung(UChar src)
 	unicode_value2 = (0xFF & (src));
 
 	if (unicode_value1 == 0x31
-			&& (0x30 <= unicode_value2 && unicode_value2 <= 0x4e)) //compatiblility jame
+			&& (0x30 <= unicode_value2 && unicode_value2 <= 0x4e))   /* compatiblility jame */
 		return true;
 
 	if (unicode_value1 == 0xA9
-			&& (0x60 <= unicode_value2  && unicode_value2 <= 0x7C))//jamo Extended-A
+			&& (0x60 <= unicode_value2  && unicode_value2 <= 0x7C)) /* jamo Extended-A */
 		return true;
 
 	if (unicode_value1 == 0x11
-			&& (0x00 <= unicode_value2  && unicode_value2 <= 0x5E))//jamo
+			&& (0x00 <= unicode_value2  && unicode_value2 <= 0x5E))  /* jamo */
 		return true;
 
 	return false;
@@ -278,7 +278,7 @@ bool ctsvc_is_chosung(const char *src)
 	int char_len = 0;
 
 	char_len = ctsvc_check_utf8(src[0]);
-	if (char_len < 0) return false;		// invalid value
+	if (char_len < 0) return false;   /* invalid value */
 
 	if (char_len == 3) {
 		unsigned short tmp;
@@ -311,12 +311,14 @@ static bool __ctsvc_is_hangul(const char *src)
 	int char_len = 0;
 
 	char_len = ctsvc_check_utf8(src[0]);
-	if (char_len <= 0) return false;		// invalid value
+	if (char_len <= 0) return false;   /* invalid value */
 
 	if (char_len == 3) {
 		switch(src[0]) {
-		// Hangul Jamo : 0x1100 ~ 0x11FF
-			// e1 84 80 ~ e1 87 bf
+		/*
+		 * Hangul Jamo : 0x1100 ~ 0x11FF
+		 *  e1 84 80 ~ e1 87 bf
+		 */
 		case 0xE1:
 			switch(src[1]) {
 			case 0x84 ... 0x87:
@@ -328,10 +330,12 @@ static bool __ctsvc_is_hangul(const char *src)
 			}
 			break;
 
-		// Hangul Compatibility Jamo : 0x3130 ~ 0x318F
-			// e3 84 b0 ~ e3 84 bf
-			// e3 85 80 ~ e3 85 bf
-			// e3 86 80 ~ e3 86 8f
+		/*
+		 * Hangul Compatibility Jamo : 0x3130 ~ 0x318F
+		 *  e3 84 b0 ~ e3 84 bf
+		 *  e3 85 80 ~ e3 85 bf
+		 *  e3 86 80 ~ e3 86 8f
+		 */
 		case 0xE3:
 			switch(src[1]) {
 			case 0x84:
@@ -351,10 +355,14 @@ static bool __ctsvc_is_hangul(const char *src)
 			}
 			break;
 
-		// Hangul Jamo Extended A : 0xA960 ~ 0xA97F
-			// ea a5 a0  ~ ea a5 bf
-		// Hangul syllables : 0xAC00 ~ 0xD7AF
-			// ea b0 80 ~ ea bf bf
+		/*
+		 * Hangul Jamo Extended A : 0xA960 ~ 0xA97F
+		 *  ea a5 a0  ~ ea a5 bf
+		 */
+		/*
+		 * Hangul syllables : 0xAC00 ~ 0xD7AF
+		 *  ea b0 80 ~ ea bf bf
+		 */
 		case 0xEA:
 			switch(src[1]) {
 			case 0xA5:
@@ -370,9 +378,11 @@ static bool __ctsvc_is_hangul(const char *src)
 			}
 			break;
 
-		// Hangul syllables : 0xAC00 ~ 0xD7AF
-			// eb 80 80 ~ eb bf bf
-			// ec 80 80 ~ ec bf bf
+		/*
+		 * Hangul syllables : 0xAC00 ~ 0xD7AF
+		 *  eb 80 80 ~ eb bf bf
+		 *  ec 80 80 ~ ec bf bf
+		 */
 		case 0xEB ... 0xEC:
 			switch(src[1]) {
 			case 0x80 ... 0xBF:
@@ -385,10 +395,14 @@ static bool __ctsvc_is_hangul(const char *src)
 			}
 			break;
 
-		// Hangul syllables : 0xAC00 ~ 0xD7AF
-			// ed 80 80 ~ ed 9e af
-		// Hangul Jamo Extended B : 0xD7B0 ~ 0xD7FF
-			// ed 9e b0 ~ ed 9f bf
+		/*
+		 * Hangul syllables : 0xAC00 ~ 0xD7AF
+		 *  ed 80 80 ~ ed 9e af
+		 */
+		/*
+		 * Hangul Jamo Extended B : 0xD7B0 ~ 0xD7FF
+		 *  ed 9e b0 ~ ed 9f bf
+		 */
 		case 0xED:
 			switch(src[1]) {
 			case 0x80 ... 0x9F:
@@ -400,8 +414,10 @@ static bool __ctsvc_is_hangul(const char *src)
 			}
 			break;
 
-		// Hangul halfwidth : 0xFFA0 ~ 0xFFDC
-			// ef be a0 ~ ef bf 9c
+		/*
+		 * Hangul halfwidth : 0xFFA0 ~ 0xFFDC
+		 *  ef be a0 ~ ef bf 9c
+		 */
 		case 0xEF:
 			switch(src[1]) {
 			case 0xBE:

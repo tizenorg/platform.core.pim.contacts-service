@@ -904,4 +904,4 @@ int contacts_db_get_last_change_version(int* last_change_version);
 #endif
 
 
-#endif //__TIZEN_SOCIAL_CONTACTS_DB_H__
+#endif /* __TIZEN_SOCIAL_CONTACTS_DB_H__ */

@@ -46,7 +46,7 @@
 
 #ifdef ENABLE_LOG_FEATURE
 #include "ctsvc_phonelog.h"
-#endif // ENABLE_LOG_FEATURE
+#endif /* ENABLE_LOG_FEATURE */
 
 static sqlite3 *server_db;
 
@@ -77,7 +77,7 @@ int ctsvc_server_db_open(sqlite3 **db)
 					ctsvc_db_phone_log_delete_callback, NULL, NULL);
 		RETVM_IF(SQLITE_OK != ret, CONTACTS_ERROR_DB,
 						"sqlite3_create_function() Fail(%d)", ret);
-#endif // ENABLE_LOG_FEATURE
+#endif /* ENABLE_LOG_FEATURE */
 		ret = sqlite3_create_function(server_db, "_PERSON_DELETE_", 1, SQLITE_UTF8, NULL,
 					ctsvc_db_person_delete_callback, NULL, NULL);
 		RETVM_IF(SQLITE_OK != ret, CONTACTS_ERROR_DB,
@@ -283,7 +283,7 @@ int ctsvc_server_update_sort(int prev_sort_primary, int prev_sort_secondary, int
 	}
 	ret = ctsvc_server_end_trans(true);
 
-	// person noti
+	/* person noti */
 #if 0
 	if (CONTACTS_ERROR_NONE == ret) {
 		int fd = open(CTSVC_NOTI_PERSON_CHANGED, O_TRUNC | O_RDWR);
@@ -615,7 +615,7 @@ int ctsvc_server_update_sort_name()
 		return CONTACTS_ERROR_DB;
 	}
 
-	// Update sort_name, sortkey, display_name_language of contact table
+	/* Update sort_name, sortkey, display_name_language of contact table */
 	snprintf(query, sizeof(query),
 			"UPDATE "CTS_TABLE_CONTACTS" "
 				"SET sort_name = ?, reverse_sort_name = ?, sortkey = ?, reverse_sortkey = ?, "
@@ -629,7 +629,7 @@ int ctsvc_server_update_sort_name()
 		goto DATA_FREE;
 	}
 
-	// Update name of search_index table
+	/* Update name of search_index table */
 	snprintf(query, sizeof(query),
 			"UPDATE %s SET name=? WHERE contact_id = ?",
 			CTS_TABLE_SEARCH_INDEX);
@@ -644,7 +644,7 @@ int ctsvc_server_update_sort_name()
 		int contact_id = sqlite3_column_int(stmt, 0);
 		char *search_name = NULL;
 
-		// get_contact_info
+		/* get_contact_info */
 		ctsvc_contact_s *contact = NULL;
 		contacts_record_create(_contacts_contact._uri, (contacts_record_h*)&contact);
 		ret = __ctsvc_server_db_get_contact_data(db, contact_id, contact);
@@ -655,7 +655,7 @@ int ctsvc_server_update_sort_name()
 			goto DATA_FREE;
 		}
 
-		// update sort_name, sortkey, display_name_language(sort group)
+		/* update sort_name, sortkey, display_name_language(sort group) */
 		ctsvc_contact_make_display_name(contact);
 		if (contact->sort_name)
 			sqlite3_bind_text(update_stmt, 1, contact->sort_name, strlen(contact->sort_name), SQLITE_STATIC);
@@ -679,7 +679,7 @@ int ctsvc_server_update_sort_name()
 		}
 		sqlite3_reset(update_stmt);
 
-		// update name valud of search_index table
+		/* update name valud of search_index table */
 		ctsvc_contact_make_search_name(contact, &search_name);
 		if (search_name) {
 			sqlite3_bind_text(search_name_stmt, 1, search_name, strlen(search_name), SQLITE_STATIC);
@@ -712,7 +712,7 @@ DATA_FREE:
 	if (search_name_stmt)
 		sqlite3_finalize(search_name_stmt);
 
-	// send notification
+	/* send notification */
 	if (CONTACTS_ERROR_DB != ret) {
 		ret = ctsvc_server_end_trans(true);
 		if (CONTACTS_ERROR_NONE == ret) {

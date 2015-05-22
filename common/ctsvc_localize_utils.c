@@ -53,122 +53,124 @@ int ctsvc_check_language(UChar *word)
 		type = CTSVC_LANG_NUMBER;
 	}
 	else if (u_isalpha(word[0])) {
-		// refer to the uchar.h
-		// #define U_GC_L_MASK  (U_GC_LU_MASK|U_GC_LL_MASK|U_GC_LT_MASK|U_GC_LM_MASK|U_GC_LO_MASK)
-		// U_GC_LU_MASK : U_UPPERCASE_LETTER
-		// U_GC_LL_MASK : U_LOWERCASE_LETTER
-		// U_GC_LT_MASK : U_TITLECASE_LETTER
-		// U_GC_LM_MASK : U_MODIFIER_LETTER
-		// U_GC_LO_MASK : U_OTHER_LETTER
+		/*
+		 * refer to the uchar.h
+		 * #define U_GC_L_MASK  (U_GC_LU_MASK|U_GC_LL_MASK|U_GC_LT_MASK|U_GC_LM_MASK|U_GC_LO_MASK)
+		 * U_GC_LU_MASK : U_UPPERCASE_LETTER
+		 * U_GC_LL_MASK : U_LOWERCASE_LETTER
+		 * U_GC_LT_MASK : U_TITLECASE_LETTER
+		 * U_GC_LM_MASK : U_MODIFIER_LETTER
+		 * U_GC_LO_MASK : U_OTHER_LETTER
+		 */
 
 		UBlockCode code = ublock_getCode(word[0]);
 		CTS_VERBOSE("Character unicode block is %d", code);
 
 		switch (code) {
-		//english
-		case UBLOCK_BASIC_LATIN:							// = 1, /*[0000]*/
-		case UBLOCK_LATIN_1_SUPPLEMENT:					// =2, /*[0080]*/
-		case UBLOCK_LATIN_EXTENDED_A:						// =3, /*[0100]*/
-		case UBLOCK_LATIN_EXTENDED_B:						// =4, /*[0180]*/
-		case UBLOCK_LATIN_EXTENDED_ADDITIONAL:			// =38, /*[1E00]*/
+		/* english */
+		case UBLOCK_BASIC_LATIN:          /* =1, [0000] */
+		case UBLOCK_LATIN_1_SUPPLEMENT:   /* =2, [0080] */
+		case UBLOCK_LATIN_EXTENDED_A:     /* =3, [0100] */
+		case UBLOCK_LATIN_EXTENDED_B:     /* =4, [0180] */
+		case UBLOCK_LATIN_EXTENDED_ADDITIONAL: /* =38, [1E00] */
 			type = CTSVC_LANG_ENGLISH;
-			// type = CTSVC_LANG_CATALAN;	// ca, Spain - Catalan
-			// type = CTSVC_LANG_GERMAN:	 // de, Germany - German
-			// type = CTSVC_LANG_BASQUE:	// eu, Spain - Basque
-			// type = CTSVC_LANG_DUTCH;		// nl_Nl, Netherlands Dutch
-			// type = CTSVC_LANG_FRENCH; 	// fr_CA, fr_FR
-			// type = CTSVC_LANG_ITALIAN: 	// it_IT, Italy - Italian
-			// type = CTSVC_LANG_PORTUGUESE:	 // pt_BR, pt_PT, Portugal
-			// type = CTSVC_LANG_SPANISH: // es_ES, es_US, El Salvador - Spanish
-			// type =  CTSVC_LANG_NORWAY: // nb, Norway
-			// type = CTSVC_LANG_DANISH: // da, Denmark - Danish
-			// type = CTSVC_LANG_AZERBAIJAN: // az, Azerbaijan
-			// type = CTSVC_LANG_ROMANIA: // ro, Romania
-			// type = CTSVC_LANG_CZECH: // cs, Czech Republic - Czech
-			// type = CTSVC_LANG_ESTONIAN: // et, Estonia - Estonian
-			// type = CTSVC_LANG_FINNISH: // fi, Finland - Finnish
-			// type = CTSVC_LANG_IRISH: // ga, Ireland - Irish
-			// type = CTSVC_LANG_GALICIAN: // gl, Spain - Galician
-			// type = CTSVC_LANG_HUNGARIAN: // hu, Hungary - Hungarian
-			// type = CTSVC_LANG_SWEDISH: // sv, Finland - Swedish
-			// type = CTSVC_LANG_SLOVENIAN: // sl, Slovenia - Slovenian
-			// type = CTSVC_LANG_SLOVAK: // sk, Slovakia - Slovak
-			// type = CTSVC_LANG_LITHUANIAN: // lt, Lithuania - Lithuanian
-			// type = CTSVC_LANG_POLISH: // pl, Polish
-			// type = CTSVC_LANG_LATVIAN: // lv, Latvia - Latvian
-			// type = CTSVC_LANG_CROATIAN: // hr, Bosnia and Herzegovina - Croatian
-			// type = CTSVC_LANG_ICELANDIC: // is, Iceland - Icelandic
+			/* type = CTSVC_LANG_CATALAN; */   /* ca, Spain - Catalan */
+			/* type = CTSVC_LANG_GERMAN; */    /* de, Germany - German */
+			/* type = CTSVC_LANG_BASQUE; */    /* eu, Spain - Basque */
+			/* type = CTSVC_LANG_DUTCH; */     /* nl_Nl, Netherlands Dutch */
+			/* type = CTSVC_LANG_FRENCH; */    /* fr_CA, fr_FR */
+			/* type = CTSVC_LANG_ITALIAN; */   /* it_IT, Italy - Italian */
+			/* type = CTSVC_LANG_PORTUGUESE; *//* pt_BR, pt_PT, Portugal */
+			/* type = CTSVC_LANG_SPANISH; */   /*/ es_ES, es_US, El Salvador - Spanish */
+			/* type = CTSVC_LANG_NORWAY; */    /* nb, Norway */
+			/* type = CTSVC_LANG_DANISH; */    /* da, Denmark - Danish */
+			/* type = CTSVC_LANG_AZERBAIJAN; *//* az, Azerbaijan */
+			/* type = CTSVC_LANG_ROMANIA; */   /* ro, Romania */
+			/* type = CTSVC_LANG_CZECH; */     /* cs, Czech Republic - Czech */
+			/* type = CTSVC_LANG_ESTONIAN; */  /* et, Estonia - Estonian */
+			/* type = CTSVC_LANG_FINNISH; */   /* fi, Finland - Finnish */
+			/* type = CTSVC_LANG_IRISH; */     /* ga, Ireland - Irish */
+			/* type = CTSVC_LANG_GALICIAN; */  /* gl, Spain - Galician */
+			/* type = CTSVC_LANG_HUNGARIAN; */ /* hu, Hungary - Hungarian */
+			/* type = CTSVC_LANG_SWEDISH; */   /* sv, Finland - Swedish */
+			/* type = CTSVC_LANG_SLOVENIAN; */ /* sl, Slovenia - Slovenian */
+			/* type = CTSVC_LANG_SLOVAK; */    /* sk, Slovakia - Slovak */
+			/* type = CTSVC_LANG_LITHUANIAN; *//* lt, Lithuania - Lithuanian */
+			/* type = CTSVC_LANG_POLISH; */    /* pl, Polish */
+			/* type = CTSVC_LANG_LATVIAN; */   /* lv, Latvia - Latvian */
+			/* type = CTSVC_LANG_CROATIAN; */  /* hr, Bosnia and Herzegovina - Croatian */
+			/* type = CTSVC_LANG_ICELANDIC; */ /* is, Iceland - Icelandic */
 			break;
 
-		//korean
-		case UBLOCK_HANGUL_JAMO:						// =30, /*[1100]*/
-		case UBLOCK_HANGUL_COMPATIBILITY_JAMO:		// =65, /*[3130]*/
-		case UBLOCK_HANGUL_SYLLABLES:				// =74, /*[AC00]*/
-		case UBLOCK_HANGUL_JAMO_EXTENDED_A:		// = 180, /*[A960]*/
-		case UBLOCK_HANGUL_JAMO_EXTENDED_B:		// = 185, /*[D7B0]*/
+		/* korean */
+		case UBLOCK_HANGUL_JAMO:                /* =30, [1100] */
+		case UBLOCK_HANGUL_COMPATIBILITY_JAMO:  /* =65, [3130] */
+		case UBLOCK_HANGUL_SYLLABLES:           /* =74, [AC00] */
+		case UBLOCK_HANGUL_JAMO_EXTENDED_A:     /* =180, [A960] */
+		case UBLOCK_HANGUL_JAMO_EXTENDED_B:     /* =185, [D7B0] */
 			type = CTSVC_LANG_KOREAN;
 			break;
 
-		// chainese
-		case UBLOCK_CJK_RADICALS_SUPPLEMENT:			 //=58, /*[2E80]*/
-		case UBLOCK_CJK_SYMBOLS_AND_PUNCTUATION:		 //=61, /*[3000]*/
-		case UBLOCK_ENCLOSED_CJK_LETTERS_AND_MONTHS:  //=68, /*[3200]*/
-		case UBLOCK_CJK_STROKES:							 // =130, /*[31C0]*/
-		case UBLOCK_CJK_COMPATIBILITY:						 // =69, /*[3300]*/
-		case UBLOCK_CJK_UNIFIED_IDEOGRAPHS_EXTENSION_A: //=70, /*[3400]*/
-		case UBLOCK_CJK_UNIFIED_IDEOGRAPHS:				 //=71, /*[4E00]*/
-		case UBLOCK_CJK_COMPATIBILITY_IDEOGRAPHS:		 //=79, /*[F900]*/
-		case UBLOCK_CJK_COMPATIBILITY_FORMS:				 //=83, /*[FE30]*/
-		case UBLOCK_CJK_UNIFIED_IDEOGRAPHS_EXTENSION_B :       // =94, /*[20000]*/
-		case UBLOCK_CJK_COMPATIBILITY_IDEOGRAPHS_SUPPLEMENT:         // =95, /*[2F800]*/
-		case UBLOCK_CJK_UNIFIED_IDEOGRAPHS_EXTENSION_C:         // =197, /*[2A700]*/
-		case UBLOCK_CJK_UNIFIED_IDEOGRAPHS_EXTENSION_D:         // =209, /*[2B740]*/
+		/* chainese */
+		case UBLOCK_CJK_RADICALS_SUPPLEMENT:                 /* =58, [2E80] */
+		case UBLOCK_CJK_SYMBOLS_AND_PUNCTUATION:             /* =61, [3000] */
+		case UBLOCK_ENCLOSED_CJK_LETTERS_AND_MONTHS:         /* =68, [3200] */
+		case UBLOCK_CJK_STROKES:                             /* =130, [31C0] */
+		case UBLOCK_CJK_COMPATIBILITY:                       /* =69, [3300] */
+		case UBLOCK_CJK_UNIFIED_IDEOGRAPHS_EXTENSION_A:      /* =70, [3400] */
+		case UBLOCK_CJK_UNIFIED_IDEOGRAPHS:                  /* =71, [4E00] */
+		case UBLOCK_CJK_COMPATIBILITY_IDEOGRAPHS:            /* =79, [F900] */
+		case UBLOCK_CJK_COMPATIBILITY_FORMS:                 /* =83, [FE30] */
+		case UBLOCK_CJK_UNIFIED_IDEOGRAPHS_EXTENSION_B :     /* =94, [20000] */
+		case UBLOCK_CJK_COMPATIBILITY_IDEOGRAPHS_SUPPLEMENT: /* =95, [2F800] */
+		case UBLOCK_CJK_UNIFIED_IDEOGRAPHS_EXTENSION_C:      /* =197, [2A700] */
+		case UBLOCK_CJK_UNIFIED_IDEOGRAPHS_EXTENSION_D:      /* =209, [2B740] */
 			type = CTSVC_LANG_CHINESE;
 			break;
 
-		// japanese
-		case UBLOCK_HIRAGANA:								// =62, /*[3040]*/
-		case UBLOCK_KATAKANA:								// =63, /*[30A0]*/
-		case UBLOCK_KATAKANA_PHONETIC_EXTENSIONS:		// =107, /*[31F0]*/
-		case UBLOCK_JAVANESE:								// =181, /*[A980]*/
+		/* japanese */
+		case UBLOCK_HIRAGANA:                      /* =62, [3040] */
+		case UBLOCK_KATAKANA:                      /* =63, [30A0] */
+		case UBLOCK_KATAKANA_PHONETIC_EXTENSIONS:  /* =107, [31F0] */
+		case UBLOCK_JAVANESE:                      /* =181, [A980] */
 			type = CTSVC_LANG_JAPANESE;
 			break;
 
-		case UBLOCK_GREEK:						// =8, /*[0370]*/
-		case UBLOCK_GREEK_EXTENDED:				// =39, /*[1F00]*/
+		case UBLOCK_GREEK:              /* =8, [0370] */
+		case UBLOCK_GREEK_EXTENDED:     /* =39, [1F00] */
 			type = CTSVC_LANG_GREEK;
 			break;
 
-		case UBLOCK_CYRILLIC:								// =9, /*[0400]*/
-		case UBLOCK_CYRILLIC_EXTENDED_A:					// = 158, /*[2DE0]*/
-		case UBLOCK_CYRILLIC_EXTENDED_B:					// = 160, /*[A640]*/
-		case UBLOCK_CYRILLIC_SUPPLEMENTARY:				// = 97, UBLOCK_CYRILLIC_SUPPLEMENT = UBLOCK_CYRILLIC_SUPPLEMENTARY, /*[0500]*/
+		case UBLOCK_CYRILLIC:                 /* =9, [0400] */
+		case UBLOCK_CYRILLIC_EXTENDED_A:      /* =158, [2DE0] */
+		case UBLOCK_CYRILLIC_EXTENDED_B:      /* =160, [A640] */
+		case UBLOCK_CYRILLIC_SUPPLEMENTARY:   /* =97, UBLOCK_CYRILLIC_SUPPLEMENT = UBLOCK_CYRILLIC_SUPPLEMENTARY, [0500] */
 			type = CTSVC_LANG_RUSSIAN;
-			// type = CTSVC_LANG_BULGARIAN: // bg, Bulgaria - Bulgarian
-			// type = CTSVC_LANG_MACEDONIA: // mk, Macedonia
-			// type = CTSVC_LANG_KAZAKHSTAN: // kk, Kazakhstan
-			// type = CTSVC_LANG_SERBIAN: // sr, Serbia - Serbian
-			// type = CTSVC_LANG_UKRAINE: // uk, Ukraine
+			/* type = CTSVC_LANG_BULGARIAN: */  /* bg, Bulgaria - Bulgarian */
+			/* type = CTSVC_LANG_MACEDONIA: */  /* mk, Macedonia */
+			/* type = CTSVC_LANG_KAZAKHSTAN: */ /* kk, Kazakhstan */
+			/* type = CTSVC_LANG_SERBIAN: */    /* sr, Serbia - Serbian */
+			/* type = CTSVC_LANG_UKRAINE: */    /* uk, Ukraine */
 			break;
 
-		case UBLOCK_ARMENIAN:						//=10, /*[0530]*/
+		case UBLOCK_ARMENIAN:             /* =10, [0530] */
 			type = CTSVC_LANG_ARMENIAN;
 			break;
-		case UBLOCK_ARABIC:						//=12, /*[0600]*/
+		case UBLOCK_ARABIC:               /* =12, [0600] */
 			type = CTSVC_LANG_ARABIC;
 			break;
-		case UBLOCK_DEVANAGARI:					// =15, /*[0900]*/
-		case UBLOCK_DEVANAGARI_EXTENDED:		// = 179, /*[A8E0]*/:
+		case UBLOCK_DEVANAGARI:           /* =15, [0900] */
+		case UBLOCK_DEVANAGARI_EXTENDED:  /* =179, [A8E0] */
 			type = CTSVC_LANG_HINDI;
 			break;
-		case UBLOCK_GEORGIAN:						//=29, /*[10A0]*/
-		case UBLOCK_GEORGIAN_SUPPLEMENT:		// = 135, /*[2D00]*/
+		case UBLOCK_GEORGIAN:             /* =29, [10A0] */
+		case UBLOCK_GEORGIAN_SUPPLEMENT:  /* =135, [2D00] */
 			type = CTSVC_LANG_GEORGIAN;
 			break;
-		case UBLOCK_OLD_TURKIC:					// = 191, /*[10C00]*/
+		case UBLOCK_OLD_TURKIC:           /* =191, [10C00] */
 			type = CTSVC_LANG_TURKISH;
 			break;
-		case UBLOCK_HALFWIDTH_AND_FULLWIDTH_FORMS:		// =87, /*[FF00]*/	// hangul : FFA0 ~ FFDC
+		case UBLOCK_HALFWIDTH_AND_FULLWIDTH_FORMS: /* =87, [FF00]  hangul : FFA0 ~ FFDC */
 		{
 			if (CTSVC_COMPARE_BETWEEN((UChar)0xFF21, word[0], (UChar)0xFF3A)
 				|| CTSVC_COMPARE_BETWEEN((UChar)0xFF41, word[0], (UChar)0xFF5A))
@@ -195,7 +197,7 @@ int ctsvc_check_language(UChar *word)
 	return type;
 }
 
-// check language type by first word(char*) using UBLOCK
+/* check language type by first word(char*) using UBLOCK */
 int ctsvc_check_language_type(const char *src)
 {
 	int length = 0;

@@ -137,4 +137,4 @@ int contacts_db_remove_status_changed_cb(contacts_db_status_changed_cb callback,
 #endif
 
 
-#endif //__TIZEN_SOCIAL_CONTACTS_DB_STATUS_H__
+#endif /* __TIZEN_SOCIAL_CONTACTS_DB_STATUS_H__ */

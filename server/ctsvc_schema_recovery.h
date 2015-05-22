@@ -21,6 +21,6 @@
 
 int ctsvc_server_check_schema();
 
-#endif // __CTSVC_SERVER_SCHEMA_RECOVERY_H__
+#endif /* __CTSVC_SERVER_SCHEMA_RECOVERY_H__ */
 
 

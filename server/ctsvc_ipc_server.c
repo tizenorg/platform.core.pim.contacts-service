@@ -960,8 +960,8 @@ void ctsvc_ipc_server_db_insert_records(pims_ipc_h ipc, pims_ipc_data_h indata,
 				ret = CONTACTS_ERROR_OUT_OF_MEMORY;
 				goto ERROR_RETURN;
 			}
-			// marshal : id_count+property_id+[ids]*id_count
-			// id_count
+			/* marshal : id_count+property_id+[ids]*id_count */
+			/* id_count */
 			if (pims_ipc_data_put(*outdata,(void*)&id_count,sizeof(int)) != 0) {
 				pims_ipc_data_destroy(*outdata);
 				*outdata = NULL;
@@ -971,7 +971,7 @@ void ctsvc_ipc_server_db_insert_records(pims_ipc_h ipc, pims_ipc_data_h indata,
 			}
 
 			for (i=0;i<id_count;i++) {
-				// marshal ids
+				/* marshal ids */
 				if (pims_ipc_data_put(*outdata,(void*)&ids[i],sizeof(int)) != 0) {
 					pims_ipc_data_destroy(*outdata);
 					*outdata = NULL;

@@ -50,31 +50,31 @@
 #ifdef _CONTACTS_IPC_SERVER
 #ifdef ENABLE_SIM_FEATURE
 #include "ctsvc_server_sim.h"
-#endif // ENABLE_SIM_FEATURE
+#endif /* ENABLE_SIM_FEATURE */
 #include "ctsvc_server_change_subject.h"
 #endif
 
-// It is used to sort search results
+/* It is used to sort search results */
 const char *hangul_syllable[19][3] = {
-	{"ㄱ", "가", "깋"},	// AC00, AE3B
-	{"ㄲ", "까", "낗"},	// AE3C, B097
-	{"ㄴ", "나", "닣"},	// B098, B2E3
-	{"ㄷ", "다", "딯"},	// B2E4, B52F
-	{"ㄸ", "따", "띻"},	// B530, B77B
-	{"ㄹ", "라", "맇"},	// B77C, B9C7
-	{"ㅁ", "마", "밓"},	// B9C8, BC13
-	{"ㅂ", "바", "빟"},	// BC14, BE5F
-	{"ㅃ", "빠", "삫"},	// BE60, C0AB
-	{"ㅅ", "사", "싷"},	// C0AC, C2F7
-	{"ㅆ", "싸", "앃"},	// C2F8, C543
-	{"ㅇ", "아", "잏"},	// C544, C78F
-	{"ㅈ", "자", "짛"},	// C790, C9DB
-	{"ㅉ", "짜", "찧"},	// C9DC, CC27
-	{"ㅊ", "차", "칳"},	// CC28, CE73
-	{"ㅋ", "카", "킿"},	// CE74, D0AF
-	{"ㅌ", "타", "팋"},	// D0C0, D30B
-	{"ㅍ", "파", "핗"},	// D30C, D557
-	{"ㅎ", "하", "힣"},	// D558, D7A3
+	{"ㄱ", "가", "깋"},   /* AC00, AE3B */
+	{"ㄲ", "까", "낗"},   /* AE3C, B097 */
+	{"ㄴ", "나", "닣"},   /* B098, B2E3 */
+	{"ㄷ", "다", "딯"},   /* B2E4, B52F */
+	{"ㄸ", "따", "띻"},   /* B530, B77B */
+	{"ㄹ", "라", "맇"},   /* B77C, B9C7 */
+	{"ㅁ", "마", "밓"},   /* B9C8, BC13 */
+	{"ㅂ", "바", "빟"},   /* BC14, BE5F */
+	{"ㅃ", "빠", "삫"},   /* BE60, C0AB */
+	{"ㅅ", "사", "싷"},   /* C0AC, C2F7 */
+	{"ㅆ", "싸", "앃"},   /* C2F8, C543 */
+	{"ㅇ", "아", "잏"},   /* C544, C78F */
+	{"ㅈ", "자", "짛"},   /* C790, C9DB */
+	{"ㅉ", "짜", "찧"},   /* C9DC, CC27 */
+	{"ㅊ", "차", "칳"},   /* CC28, CE73 */
+	{"ㅋ", "카", "킿"},   /* CE74, D0AF */
+	{"ㅌ", "타", "팋"},   /* D0C0, D30B */
+	{"ㅍ", "파", "핗"},   /* D30C, D557 */
+	{"ㅎ", "하", "힣"},   /* D558, D7A3 */
 };
 
 typedef enum {
@@ -123,8 +123,10 @@ static const char * __ctsvc_db_get_property_field_name(const property_info_s *pr
 	return NULL;
 }
 
-// return data type of the property
-// bool / int / long long int / char string / double / child record
+/*
+ * return data type of the property
+ * bool / int / long long int / char string / double / child record
+ */
 static inline int __ctsvc_db_get_property_type(const property_info_s *properties,
 		int count, unsigned int property_id)
 {
@@ -152,7 +154,7 @@ static inline int __ctsvc_db_create_int_condition(ctsvc_composite_filter_s *com_
 #ifdef _CONTACTS_IPC_SERVER
 #ifdef ENABLE_SIM_FEATURE
 	if (filter->property_id == CTSVC_PROPERTY_PHONELOG_SIM_SLOT_NO) {
-		// get real sim info id by SIM slot number 0/1
+		/* get real sim info id by SIM slot number 0/1 */
 		int sim_info_id = ctsvc_server_sim_get_info_id_by_sim_slot_no(filter->value.i);
 		if (0 < sim_info_id) {
 			snprintf(out_cond, sizeof(out_cond), "%s = %d", field_name, sim_info_id);
@@ -161,7 +163,7 @@ static inline int __ctsvc_db_create_int_condition(ctsvc_composite_filter_s *com_
 		}
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
-#endif // ENABLE_SIM_FEATURE
+#endif /* ENABLE_SIM_FEATURE */
 #endif
 
 	switch(filter->match) {
@@ -354,8 +356,10 @@ static inline int __ctsvc_db_create_str_condition(ctsvc_composite_filter_s *com_
 	RETVM_IF(NULL == field_name, CONTACTS_ERROR_INVALID_PARAMETER,
 			"Invalid parameter : property id(%d)", filter->property_id);
 
-	// number_filter condition is only used to find exactly matched number
-	// based on internal logic : _NUMBER_COMPARE_
+	/*
+	 * number_filter condition is only used to find exactly matched number
+	 * based on internal logic : _NUMBER_COMPARE_
+	 */
 	if (filter->property_id == CTSVC_PROPERTY_NUMBER_NUMBER_FILTER
 			|| filter->property_id == CTSVC_PROPERTY_PHONELOG_ADDRESS_FILTER
 			|| filter->property_id == CTSVC_PROPERTY_SPEEDDIAL_NUMBER_FILTER)
@@ -369,25 +373,28 @@ static inline int __ctsvc_db_create_str_condition(ctsvc_composite_filter_s *com_
 	temp = NULL;
 
 	if (filter->value.s) {
-		// number filter
+		/* number filter */
 		if (filter->property_id == CTSVC_PROPERTY_NUMBER_NUMBER_FILTER
 			|| filter->property_id == CTSVC_PROPERTY_PHONELOG_ADDRESS_FILTER
 			|| filter->property_id == CTSVC_PROPERTY_SPEEDDIAL_NUMBER_FILTER) {
-			// number filter is for matching number depends on internal rule _NUMBER_COMPARE_
-			char clean_num[strlen(filter->value.s)+1+5];	// for cc
-			char normal_num[strlen(filter->value.s)+1+5];	// for cc
+			/*
+			 * number filter is for matching number
+			 * depends on internal rule _NUMBER_COMPARE_
+			 */
+			char clean_num[strlen(filter->value.s)+1+5];   /* for cc */
+			char normal_num[strlen(filter->value.s)+1+5];  /* for cc */
 			bool add_condition = false;
 			ret = ctsvc_clean_number(filter->value.s, clean_num, sizeof(clean_num), false);
 			if (0 < ret) {
 				ret = ctsvc_normalize_number(clean_num, normal_num, sizeof(normal_num), false);
 				if (0 < ret) {
-					char min_match[strlen(filter->value.s)+1+5];	// for cc
+					char min_match[strlen(filter->value.s)+1+5];   /* for cc */
 					ret = ctsvc_get_minmatch_number(normal_num, min_match, sizeof(min_match), ctsvc_get_phonenumber_min_match_digit());
 					if (CONTACTS_ERROR_NONE == ret) {
-						// minmatch filter is to improve performance
+						/* minmatch filter is to improve performance */
 						*bind_text = g_slist_append(*bind_text, __ctsvc_db_get_str_with_escape(min_match, strlen(min_match), with_escape));
 
-						// _NUMBER_COMPARE_(noraml_num, normalized keyword)
+						/* _NUMBER_COMPARE_(noraml_num, normalized keyword) */
 						if (STRING_EQUAL != strcmp(normal_num, "+")) {
 							const char *number_field = NULL;
 							if (filter->property_id == CTSVC_PROPERTY_NUMBER_NUMBER_FILTER)
@@ -411,7 +418,7 @@ static inline int __ctsvc_db_create_str_condition(ctsvc_composite_filter_s *com_
 			}
 
 			if (add_condition == false) {
-				// If fail to get normalized number then compare with original number
+				/* If fail to get normalized number then compare with original number */
 				const char *number_field = NULL;
 				if (filter->property_id == CTSVC_PROPERTY_NUMBER_NUMBER_FILTER)
 					number_field = __ctsvc_db_get_property_field_name(com_filter->properties,
@@ -430,19 +437,19 @@ static inline int __ctsvc_db_create_str_condition(ctsvc_composite_filter_s *com_
 				}
 			}
 		}
-		// normalized number
+		/* normalized number */
 		else if (filter->property_id == CTSVC_PROPERTY_NUMBER_NORMALIZED_NUMBER
 				|| filter->property_id == CTSVC_PROPERTY_PHONELOG_NORMALIZED_ADDRESS
 				|| filter->property_id == CTSVC_PROPERTY_SPEEDDIAL_NORMALIZED_NUMBER) {
-			char clean_num[strlen(filter->value.s)+1+5]; // for cc
+			char clean_num[strlen(filter->value.s)+1+5];   /* for cc */
 			ret = ctsvc_clean_number(filter->value.s, clean_num, sizeof(clean_num), false);
 			if (0 < ret) {
 				bool add_condition = true;
 				const char *clean_field = NULL;
-				// has clean number or normalized number
+				/* has clean number or normalized number */
 				const char *cc = ctsvc_get_network_cc(false);
-				if (cc && cc[0] == '7' && clean_num[0] == '8') {		// Russia
-					char normal_num[strlen(clean_num)+1+5];	// for cc
+				if (cc && cc[0] == '7' && clean_num[0] == '8') {   /* Russia */
+					char normal_num[strlen(clean_num)+1+5];   /* for cc */
 					ret = ctsvc_normalize_number(clean_num, normal_num, sizeof(normal_num), false);
 					if (0 < ret)
 						*bind_text = g_slist_append(*bind_text, __ctsvc_db_get_str_with_escape(normal_num, strlen(normal_num), with_escape));
@@ -478,7 +485,7 @@ static inline int __ctsvc_db_create_str_condition(ctsvc_composite_filter_s *com_
 				}
 			}
 			else if (ret == 0) {
-				// If fail to get cleaned number then compare with original number
+				/* If fail to get cleaned number then compare with original number */
 				const char *number_field = NULL;
 				if (filter->property_id == CTSVC_PROPERTY_NUMBER_NORMALIZED_NUMBER)
 					number_field = __ctsvc_db_get_property_field_name(com_filter->properties,
@@ -503,17 +510,17 @@ static inline int __ctsvc_db_create_str_condition(ctsvc_composite_filter_s *com_
 			else
 				return CONTACTS_ERROR_INVALID_PARAMETER;
 		}
-		// cleaned number
+		/* cleaned number */
 		else if (filter->property_id == CTSVC_PROPERTY_NUMBER_CLEANED_NUMBER
 				|| filter->property_id == CTSVC_PROPERTY_PHONELOG_CLEANED_ADDRESS
 				|| filter->property_id == CTSVC_PROPERTY_SPEEDDIAL_CLEANED_NUMBER) {
-			char clean_num[strlen(filter->value.s)+1+5]; // for cc
+			char clean_num[strlen(filter->value.s)+1+5];   /* for cc */
 			ret = ctsvc_clean_number(filter->value.s, clean_num, sizeof(clean_num), false);
 			if (0 < ret) {
 				*bind_text = g_slist_append(*bind_text, __ctsvc_db_get_str_with_escape(clean_num, strlen(clean_num), with_escape));
 			}
 			else if (ret == 0) {
-				// If fail to get cleaned number then compare with original number
+				/* If fail to get cleaned number then compare with original number */
 				const char *number_field = NULL;
 				if (filter->property_id == CTSVC_PROPERTY_NUMBER_CLEANED_NUMBER)
 					number_field = __ctsvc_db_get_property_field_name(com_filter->properties,
@@ -631,9 +638,11 @@ static int __ctsvc_db_create_attribute_condition(ctsvc_composite_filter_s *com_f
 
 #define CTSVC_FILTER_LENGTH	100
 
-// If there are too many condition, sqlite return fail SQLITE_ERROR(1).
-// Expression tree is too large (maximum depth 1000).
-// It is related to SQLITE_LIMIT_EXPR_DEPTH.
+/*
+ * If there are too many condition, sqlite return fail SQLITE_ERROR(1).
+ * Expression tree is too large (maximum depth 1000).
+ * It is related to SQLITE_LIMIT_EXPR_DEPTH.
+ */
 static inline int __ctsvc_db_create_composite_condition(ctsvc_composite_filter_s *com_filter,
 		char **condition, GSList **bind_text)
 {
@@ -653,7 +662,7 @@ static inline int __ctsvc_db_create_composite_condition(ctsvc_composite_filter_s
 	GSList *ops = com_filter->filter_ops;
 
 	*condition = NULL;
-	// the case : did not set filter condition after calling contacts_filter_create()
+	/* the case : did not set filter condition after calling contacts_filter_create() */
 	RETV_IF(NULL == filters, CONTACTS_ERROR_NONE);
 
 	cond = NULL;
@@ -713,7 +722,7 @@ static inline int __ctsvc_db_create_composite_condition(ctsvc_composite_filter_s
 	return CONTACTS_ERROR_NONE;
 }
 
-// Make and execute 'UPDATE' sqlite statement to update record
+/* Make and execute 'UPDATE' sqlite statement to update record */
 int ctsvc_db_update_record_with_set_query(const char *set, GSList *bind_text, const char *table, int id)
 {
 	int ret = CONTACTS_ERROR_NONE;
@@ -744,7 +753,7 @@ int ctsvc_db_update_record_with_set_query(const char *set, GSList *bind_text, co
 	return ret;
 }
 
-// make 'SET' sqlite statement to update record
+/* make 'SET' sqlite statement to update record */
 int ctsvc_db_create_set_query(contacts_record_h record, char **set, GSList **bind_text)
 {
 	ctsvc_record_s *s_record;
@@ -857,7 +866,7 @@ static int __ctsvc_db_create_projection(const char *view_uri, const property_inf
 		}
 	}
 	else {
-		// add all properties
+		/* add all properties */
 		for (i=0;i<ids_count;i++) {
 			if (CTSVC_VIEW_DATA_TYPE_REC == (properties[i].property_id & CTSVC_VIEW_DATA_TYPE_MASK))
 				continue;
@@ -891,7 +900,7 @@ static inline bool __ctsvc_db_view_has_display_name(const char *view_uri,
 #ifdef ENABLE_LOG_FEATURE
 	if (STRING_EQUAL == strcmp(view_uri, _contacts_person_phone_log._uri))
 		return false;
-#endif // ENABLE_LOG_FEATURE
+#endif /* ENABLE_LOG_FEATURE */
 
 	for (i=0;i<count;i++) {
 		property_info_s *p = (property_info_s*)&(properties[i]);
@@ -971,7 +980,7 @@ int ctsvc_db_make_get_records_query_stmt(ctsvc_query_s *s_query, int offset, int
 		}
 	}
 
-	// If the view_uri has display_name, default sortkey is display_name
+	/* If the view_uri has display_name, default sortkey is display_name */
 	if (__ctsvc_db_view_has_display_name(s_query->view_uri, s_query->properties, s_query->property_count))
 		sortkey = ctsvc_get_sort_column();
 
@@ -1001,8 +1010,6 @@ int ctsvc_db_make_get_records_query_stmt(ctsvc_query_s *s_query, int offset, int
 				temp_len = SAFE_SNPRINTF(&query, &query_size, len, field_name);
 				if (0 <= temp_len) len+= temp_len;
 
-//				if (sortkey)
-//					len += snprintf(query+len, sizeof(query)-len, ", %s", sortkey);
 				if (false == s_query->sort_asc) {
 					temp_len = SAFE_SNPRINTF(&query, &query_size, len, " DESC ");
 					if (0 <= temp_len) len+= temp_len;
@@ -1315,7 +1322,7 @@ static int __ctsvc_db_append_search_query(const char *src, char **query, int *qu
 	}
 
 	if (strstr(src, "@")) {
-		// If the search key is email address format, DO NOT search it from NAME
+		/* If the search key is email address format, DO NOT search it from NAME */
 		range &= ~CONTACTS_SEARCH_RANGE_NAME;
 	}
 
@@ -1326,7 +1333,7 @@ static int __ctsvc_db_append_search_query(const char *src, char **query, int *qu
 	char* keyword = NULL;
 	int keyword_size = 0;
 	bool use_replaced_keyword = true;
-	// full width characters -> half width characters (apply to only FW ASCII & some symbols)
+	/* full width characters -> half width characters (apply to only FW ASCII & some symbols) */
 	if (ctsvc_get_halfwidth_string(src, &keyword, &keyword_size) != CONTACTS_ERROR_NONE) {
 		CTS_ERR("UChar converting error : ctsvc_get_halfwidth_string() Fail");
 		keyword = (char*)src;
@@ -1353,8 +1360,10 @@ static int __ctsvc_db_append_search_query(const char *src, char **query, int *qu
 		if (0 <= temp_len) len = temp_len;
 
 		if (range & CONTACTS_SEARCH_RANGE_NUMBER) {
-			// to find contact which has number including keyword
-			// FTS can only startwiths search
+			/*
+			 * to find contact which has number including keyword
+			 * FTS can only startwiths search
+			 */
 			char clean_number[SAFE_STRLEN(keyword)+1];
 			int err = ctsvc_clean_number(keyword, clean_number, sizeof(clean_number), false);
 			if (0 < err) {
@@ -1368,8 +1377,8 @@ static int __ctsvc_db_append_search_query(const char *src, char **query, int *qu
 				temp_len = SAFE_SNPRINTF(query, query_size, len, clean_number);
 				if (0 <= temp_len) len += temp_len;
 
-				if (cc && cc[0] == '7' && clean_number[0] == '8') {		// Russia
-					char normal_num[strlen(clean_number)+1+5];	// for cc
+				if (cc && cc[0] == '7' && clean_number[0] == '8') {   /* Russia */
+					char normal_num[strlen(clean_number)+1+5];   /* for cc */
 					int ret;
 					ret = ctsvc_normalize_number(clean_number, normal_num, sizeof(normal_num), false);
 					if (0 < ret) {
@@ -1453,7 +1462,7 @@ static int __ctsvc_db_append_search_query(const char *src, char **query, int *qu
 			}
 			else {
 				keyword_temp_len = strlen(search_keyword);
-				// replace '-' -> '_' because FTS does not support search '-'
+				/* replace '-' -> '_' because FTS does not support search '-' */
 				char temp_str[keyword_temp_len+1];
 				for (i=0;i<keyword_temp_len;i++) {
 					if (search_keyword[i] == '-') {
@@ -1481,16 +1490,18 @@ static int __ctsvc_db_append_search_query(const char *src, char **query, int *qu
 				if (0 <= temp_len) len += temp_len;
 			}
 
-			if (CTSVC_LANG_KOREAN == lang) {		// chosung search
+			if (CTSVC_LANG_KOREAN == lang) {   /* chosung search */
 				char *chosung = calloc(1, strlen(keyword) * 5);
 				char *korean_pattern = calloc(1, strlen(keyword) * 5);
 				char *search_chosung = NULL;
 				int count = 0;
 
-				// If try to find '홍길동' by 'ㄱ동'
-				// search by 'ㄱㄷ' in search_index table
-				// intersect
-				// search by '*ㄱ*동*' in name_lookup table
+				/*
+				 * If try to find '홍길동' by 'ㄱ동'
+				 * search by 'ㄱㄷ' in search_index table
+				 * intersect
+				 * search by '*ㄱ*동*' in name_lookup table
+				 */
 
 				count = ctsvc_get_chosung(keyword, chosung, strlen(keyword) * 5);
 				ctsvc_get_korean_search_pattern(keyword, korean_pattern, strlen(keyword) * 5);
@@ -1530,7 +1541,7 @@ static int __ctsvc_db_append_search_query(const char *src, char **query, int *qu
 				free(korean_pattern);
 				free(search_chosung);
 			}
-			else if (CTSVC_LANG_JAPANESE == lang) {	// hiragana search
+			else if (CTSVC_LANG_JAPANESE == lang) {   /* hiragana search */
 				temp_len = SAFE_SNPRINTF(query, query_size, len,  " (SELECT contact_id FROM ");
 				if (0 <= temp_len) len += temp_len;
 				temp_len = SAFE_SNPRINTF(query, query_size, len, CTS_TABLE_SEARCH_INDEX);
@@ -1546,7 +1557,7 @@ static int __ctsvc_db_append_search_query(const char *src, char **query, int *qu
 									CONTACTS_SEARCH_RANGE_NAME, search_hiragana, NULL, NULL);
 				if (0 <= temp_len) len = temp_len;
 			}
-			else if (CONTACTS_ERROR_NONE <= lang) {	// normalized string search
+			else if (CONTACTS_ERROR_NONE <= lang) {   /* normalized string search */
 				char *search_normal_name = NULL;
 				search_normal_name = __ctsvc_db_make_search_keyword(normalized_name);
 				temp_len = SAFE_SNPRINTF(query, query_size, len,  " (SELECT contact_id FROM ");
@@ -1565,7 +1576,7 @@ static int __ctsvc_db_append_search_query(const char *src, char **query, int *qu
 				if (0 <= temp_len) len = temp_len;
 				free(search_normal_name);
 			}
-			else {		// original keyword search
+			else {   /* original keyword search */
 				temp_len = SAFE_SNPRINTF(query, query_size, len,  " (SELECT contact_id FROM ");
 				if (0 <= temp_len) len += temp_len;
 				temp_len = SAFE_SNPRINTF(query, query_size, len, CTS_TABLE_SEARCH_INDEX);
@@ -1600,7 +1611,7 @@ static int __ctsvc_db_append_search_query(const char *src, char **query, int *qu
 			if (0 <= temp_len) len += temp_len;
 			temp_len = SAFE_SNPRINTF(query, query_size, len, temp_str);
 			if (0 <= temp_len) len += temp_len;
-			temp_len = SAFE_SNPRINTF(query, query_size, len, "%%' ESCAPE '\\') ");	//CTSVC_DB_ESCAPE_CHAR
+			temp_len = SAFE_SNPRINTF(query, query_size, len, "%%' ESCAPE '\\') ");   /* CTSVC_DB_ESCAPE_CHAR */
 			if (0 <= temp_len) len += temp_len;
 		}
 
@@ -1827,10 +1838,13 @@ static int __ctsvc_db_search_records_exec(const char *view_uri, const property_i
 		if (0 <= temp_len) len+= temp_len;
 
 		if (range & CONTACTS_SEARCH_RANGE_NUMBER) {
-			char clean_num[strlen(keyword)+1+5]; // for cc
-			// Original number can include '-' or special character. So search by cleaned_number
-			// If contact has 010 1234 5678 (normalized number is +cc 10 1234 5678),
-			//	then the contack should be searched by keyword +cc 10 1234 5678
+			char clean_num[strlen(keyword)+1+5];   /* for cc */
+
+			/*
+			 * Original number can include '-' or special character. So search by cleaned_number
+			 * If contact has 010 1234 5678 (normalized number is +cc 10 1234 5678),
+			 *	then the contact should be searched by keyword +cc 10 1234 5678
+			 */
 			ret = ctsvc_clean_number(keyword, clean_num, sizeof(clean_num), false);
 			if (0 < ret) {
 				const char *cc = ctsvc_get_network_cc(false);
@@ -1842,8 +1856,8 @@ static int __ctsvc_db_search_records_exec(const char *view_uri, const property_i
 				temp_len = SAFE_SNPRINTF(&query, &query_size, len, " WHERE normalized_number LIKE '%%");
 				if (0 <= temp_len) len+= temp_len;
 
-				if (cc && cc[0] == '7' && clean_num[0] == '8') {		// Russia
-					char normal_num[strlen(clean_num)+1+5];	// for cc
+				if (cc && cc[0] == '7' && clean_num[0] == '8') {   /* Russia */
+					char normal_num[strlen(clean_num)+1+5];   /* for cc */
 					ret = ctsvc_normalize_number(clean_num, normal_num, sizeof(normal_num), false);
 					if (0 < ret) {
 						temp_len = SAFE_SNPRINTF(&query, &query_size, len, normal_num);
@@ -1903,9 +1917,11 @@ static int __ctsvc_db_search_records_exec(const char *view_uri, const property_i
 			temp_len = SAFE_SNPRINTF(&query, &query_size, len, temp_query);
 			if (0 <= temp_len) len+= temp_len;
 
-			// search contact from search_index table by name and join the results
-			// FTS can support to serach with multiple words
-			// If contact display_name is 'abc def', then the contact should be searched by 'def'
+			/*
+			 * search contact from search_index table by name and join the results
+			 * FTS can support to serach with multiple words
+			 * If contact display_name is 'abc def', then the contact should be searched by 'def'
+			 */
 			temp_len = SAFE_SNPRINTF(&query, &query_size, len, " JOIN ");
 			if (0 <= temp_len) len+= temp_len;
 			temp_len = __ctsvc_db_append_search_query(keyword, &query, &query_size, len, CONTACTS_SEARCH_RANGE_NAME);
@@ -1935,7 +1951,7 @@ static int __ctsvc_db_search_records_exec(const char *view_uri, const property_i
 		temp_len = SAFE_SNPRINTF(&query, &query_size, len, " FROM (");
 		if (0 <= temp_len) len+= temp_len;
 		if (range & CONTACTS_SEARCH_RANGE_EMAIL) {
-			// search contact which has email address started with keyword
+			/* search contact which has email address started with keyword */
 			char *temp_keyword = __ctsvc_db_get_str_with_escape((char*)keyword, strlen((char*)keyword), true);
 			temp_len = SAFE_SNPRINTF(&query, &query_size, len, "SELECT * FROM ");
 			if (0 <= temp_len) len+= temp_len;
@@ -1988,7 +2004,7 @@ static int __ctsvc_db_search_records_exec(const char *view_uri, const property_i
 		temp_len = SAFE_SNPRINTF(&query, &query_size, len, ") ");
 		if (0 <= temp_len) len+= temp_len;
 	}
-	else {		// CTSVC_VIEW_URI_PERSON
+	else {   /* CTSVC_VIEW_URI_PERSON */
 		if (range & CONTACTS_SEARCH_RANGE_EMAIL) {
 			free(query);
 			return CONTACTS_ERROR_INVALID_PARAMETER;
@@ -2200,7 +2216,7 @@ static inline int __ctsvc_db_search_records_with_query_exec(ctsvc_query_s *s_que
 		free(query);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
-	else {		// CTSVC_VIEW_URI_PERSON
+	else {   /* CTSVC_VIEW_URI_PERSON */
 		temp_len = SAFE_SNPRINTF(&query, &query_size, len, table);
 		if (0 <= temp_len) len+= temp_len;
 		temp_len = SAFE_SNPRINTF(&query, &query_size, len, ", "
@@ -2257,8 +2273,6 @@ static inline int __ctsvc_db_search_records_with_query_exec(ctsvc_query_s *s_que
 				if (0 <= temp_len) len+= temp_len;
 				temp_len = SAFE_SNPRINTF(&query, &query_size, len, field_name);
 				if (0 <= temp_len) len+= temp_len;
-//				if (sortkey)
-//					len += snprintf(query+len, sizeof(query)-len, ", %s", sortkey);
 				if (false == s_query->sort_asc) {
 					temp_len = SAFE_SNPRINTF(&query, &query_size, len, " DESC ");
 					if (0 <= temp_len) len+= temp_len;

@@ -29,4 +29,4 @@ int ctsvc_db_activity_photo_delete(int id);
 int ctsvc_db_activity_photo_get_value_from_stmt(cts_stmt stmt, contacts_record_h *record);
 int ctsvc_db_activity_photo_get_records(int activity_id, contacts_record_h record_activity);
 
-#endif // __CTSVC_DB_PLUGIN_ACTIVITY_PHOTO_HELPER_H__
+#endif /* __CTSVC_DB_PLUGIN_ACTIVITY_PHOTO_HELPER_H__ */

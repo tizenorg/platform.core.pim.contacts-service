@@ -874,5 +874,5 @@
  *
  */
 
-#endif //__TIZEN_SOCIAL_CONTACTS_DOC_H__
+#endif /* __TIZEN_SOCIAL_CONTACTS_DOC_H__ */
 

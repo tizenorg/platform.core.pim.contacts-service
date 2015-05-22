@@ -460,8 +460,10 @@ void ctsvc_notification_send()
 	if (profile_change) __ctsvc_noti_publish_profile_change();
 }
 
-// Whenever deleting data table record, this function will be called
-// in order to set notification
+/*
+ * Whenever deleting data table record, this function will be called
+ * in order to set notification
+ */
 void ctsvc_db_data_delete_callback(sqlite3_context * context,
 		int argc, sqlite3_value ** argv)
 {

@@ -282,4 +282,4 @@ int contacts_filter_add_filter(contacts_filter_h parent_filter, contacts_filter_
 #endif
 
 
-#endif //__TIZEN_SOCIAL_CONTACTS_FILTER_H__
+#endif /* __TIZEN_SOCIAL_CONTACTS_FILTER_H__ */

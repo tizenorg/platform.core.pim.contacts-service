@@ -81,7 +81,7 @@ int ctsvc_db_nickname_insert(contacts_record_h record, int contact_id, bool is_m
 		return ret;
 	}
 
-	//nickname->id = ctsvc_db_get_last_insert_id();
+	/* nickname->id = ctsvc_db_get_last_insert_id(); */
 	if (id)
 		*id = ctsvc_db_get_last_insert_id();
 	ctsvc_stmt_finalize(stmt);

@@ -128,7 +128,7 @@ int ctsvc_db_extension_insert(contacts_record_h record, int contact_id, bool is_
 			return ret;
 		}
 
-//		extension->id = ctsvc_db_get_last_insert_id();
+		/* extension->id = ctsvc_db_get_last_insert_id(); */
 		if (id)
 			*id = ctsvc_db_get_last_insert_id();
 		ctsvc_stmt_finalize(stmt);

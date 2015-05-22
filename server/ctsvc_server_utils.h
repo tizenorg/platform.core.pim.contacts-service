@@ -29,5 +29,5 @@ int ctsvc_server_set_default_sort(int lang);
 
 void ctsvc_server_trim_memory(void);
 
-#endif // __CTSVC_SERVER_UTILS_H__
+#endif /* __CTSVC_SERVER_UTILS_H__ */
 

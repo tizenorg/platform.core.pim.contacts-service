@@ -33,7 +33,7 @@
 
 #ifdef ENABLE_LOG_FEATURE
 #include "ctsvc_phonelog.h"
-#endif // ENABLE_LOG_FEATURE
+#endif /* ENABLE_LOG_FEATURE */
 
 static int __ctsvc_db_number_reset_default(int number_id, int contact_id)
 {
@@ -109,7 +109,7 @@ int ctsvc_db_number_insert(contacts_record_h record, int contact_id, bool is_my_
 
 	if (false == is_my_profile) {
 #ifdef ENABLE_LOG_FEATURE
-		// updata phonelog
+		/* updata phonelog */
 		int person_id = -1;
 		snprintf(query, sizeof(query),
 				"SELECT person_id, data3 FROM "CTS_TABLE_CONTACTS", "CTS_TABLE_DATA" "
@@ -118,7 +118,7 @@ int ctsvc_db_number_insert(contacts_record_h record, int contact_id, bool is_my_
 		ret = ctsvc_query_get_first_int_result(query, &person_id);
 		if (0 < person_id)
 			ctsvc_db_phone_log_update_person_id(number->number, -1, person_id, false);
-#endif // ENABLE_LOG_FEATURE
+#endif /* ENABLE_LOG_FEATURE */
 		ctsvc_set_number_noti();
 	}
 	return CONTACTS_ERROR_NONE;
@@ -143,11 +143,11 @@ int ctsvc_db_number_get_value_from_stmt(cts_stmt stmt, contacts_record_h *record
 	temp = ctsvc_stmt_get_text(stmt, start_count++);
 	number->number = SAFE_STRDUP(temp);
 	temp = ctsvc_stmt_get_text(stmt, start_count++);
-	number->lookup = SAFE_STRDUP(temp);			// data4 : minmatch
+	number->lookup = SAFE_STRDUP(temp);         /* data4 : minmatch */
 	temp = ctsvc_stmt_get_text(stmt, start_count++);
-	number->normalized = SAFE_STRDUP(temp);	// data5 : normalized number
+	number->normalized = SAFE_STRDUP(temp);     /* data5 : normalized number */
 	temp = ctsvc_stmt_get_text(stmt, start_count++);
-	number->cleaned = SAFE_STRDUP(temp);		// data6 : cleaned number
+	number->cleaned = SAFE_STRDUP(temp);        /* data6 : cleaned number */
 
 	*record = (contacts_record_h)number;
 	return CONTACTS_ERROR_NONE;
@@ -164,11 +164,11 @@ int ctsvc_db_number_update(contacts_record_h record, bool is_my_profile)
 	char query[CTS_SQL_MAX_LEN] = {0};
 
 #ifdef ENABLE_LOG_FEATURE
-	// for updating phonelog
+	/* for updating phonelog */
 	char *pre_number = NULL;
 	int person_id = -1;
 	cts_stmt stmt = NULL;
-#endif // ENABLE_LOG_FEATURE
+#endif /* ENABLE_LOG_FEATURE */
 
 	RETVM_IF(0 == number->id, CONTACTS_ERROR_INVALID_PARAMETER, "number of contact has no ID.");
 	RETVM_IF(CTSVC_PROPERTY_FLAG_DIRTY != (number->base.property_flag & CTSVC_PROPERTY_FLAG_DIRTY),
@@ -191,7 +191,7 @@ int ctsvc_db_number_update(contacts_record_h record, bool is_my_profile)
 			char query_set[CTS_SQL_MAX_LEN] = {0};
 
 #ifdef ENABLE_LOG_FEATURE
-			// updata phonelog
+			/* updata phonelog */
 			snprintf(query, sizeof(query),
 					"SELECT person_id, data3 FROM "CTS_TABLE_CONTACTS", "CTS_TABLE_DATA" "
 											"ON "CTS_TABLE_CONTACTS".contact_id = "CTS_TABLE_DATA".contact_id "
@@ -208,7 +208,7 @@ int ctsvc_db_number_update(contacts_record_h record, bool is_my_profile)
 			}
 			else
 				WARN("ctsvc_query_prepare fail (%d)", ret);
-#endif // ENABLE_LOG_FEATURE
+#endif /* ENABLE_LOG_FEATURE */
 
 			char clean_num[SAFE_STRLEN(number->number) + 1];
 			ret = ctsvc_clean_number(number->number, clean_num, sizeof(clean_num), true);
@@ -235,7 +235,7 @@ int ctsvc_db_number_update(contacts_record_h record, bool is_my_profile)
 #ifdef ENABLE_LOG_FEATURE
 		if (ctsvc_record_check_property_flag((ctsvc_record_s *)record, CTSVC_PROPERTY_NUMBER_TYPE, CTSVC_PROPERTY_FLAG_DIRTY)) {
 			if (person_id <= 0) {
-				// updata phonelog
+				/* updata phonelog */
 				snprintf(query, sizeof(query),
 						"SELECT person_id, data3 FROM "CTS_TABLE_CONTACTS", "CTS_TABLE_DATA" "
 												"ON "CTS_TABLE_CONTACTS".contact_id = "CTS_TABLE_DATA".contact_id "
@@ -254,7 +254,7 @@ int ctsvc_db_number_update(contacts_record_h record, bool is_my_profile)
 					WARN("ctsvc_query_prepare fail (%d)", ret);
 			}
 		}
-#endif // ENABLE_LOG_FEATURE
+#endif /* ENABLE_LOG_FEATURE */
 
 		if (CONTACTS_ERROR_NONE != (ret = ctsvc_db_update_record_with_set_query(set, bind_text, CTS_TABLE_DATA, number->id))) break;
 
@@ -262,13 +262,13 @@ int ctsvc_db_number_update(contacts_record_h record, bool is_my_profile)
 			ctsvc_set_number_noti();
 
 #ifdef ENABLE_LOG_FEATURE
-		// update phone log
+		/* update phone log */
 		if (0 < person_id && pre_number)
 			ctsvc_db_phone_log_update_person_id(pre_number, person_id, -1, false);
 		if (0 < person_id)
 			ctsvc_db_phone_log_update_person_id(number->number, -1, person_id, false);
 		ctsvc_stmt_finalize(stmt);
-#endif // ENABLE_LOG_FEATURE
+#endif /* ENABLE_LOG_FEATURE */
 	} while (0);
 
 	CTSVC_RECORD_RESET_PROPERTY_FLAGS((ctsvc_record_s *)record);
@@ -288,7 +288,7 @@ int ctsvc_db_number_delete(int id, bool is_my_profile)
 	char query[CTS_SQL_MIN_LEN] = {0};
 
 #ifdef ENABLE_LOG_FEATURE
-	// for updating phonelog
+	/* for updating phonelog */
 	char *pre_number = NULL;
 	int person_id = -1;
 	cts_stmt stmt = NULL;
@@ -309,7 +309,7 @@ int ctsvc_db_number_delete(int id, bool is_my_profile)
 	}
 	else
 		WARN("ctsvc_query_prepare fail (%d)", ret);
-#endif // ENABLE_LOG_FEATURE
+#endif /* ENABLE_LOG_FEATURE */
 
 	snprintf(query, sizeof(query), "DELETE FROM "CTS_TABLE_DATA" WHERE id = %d AND datatype = %d",
 			id, CTSVC_DATA_NUMBER);
@@ -319,16 +319,16 @@ int ctsvc_db_number_delete(int id, bool is_my_profile)
 		CTS_ERR("ctsvc_query_exec() Fail(%d)", ret);
 #ifdef ENABLE_LOG_FEATURE
 		ctsvc_stmt_finalize(stmt);
-#endif // ENABLE_LOG_FEATURE
+#endif /* ENABLE_LOG_FEATURE */
 		return ret;
 	}
 
 #ifdef ENABLE_LOG_FEATURE
-	// update phone log
+	/* update phone log */
 	if (0 < person_id && pre_number)
 		ctsvc_db_phone_log_update_person_id(pre_number, person_id, -1, false);
 	ctsvc_stmt_finalize(stmt);
-#endif // ENABLE_LOG_FEATURE
+#endif /* ENABLE_LOG_FEATURE */
 
 	if (false == is_my_profile)
 		ctsvc_set_number_noti();

@@ -39,7 +39,7 @@
 #include "ctsvc_server_change_subject.h"
 #ifdef ENABLE_SIM_FEATURE
 #include "ctsvc_server_sim.h"
-#endif // ENABLE_SIM_FEATURE
+#endif /* ENABLE_SIM_FEATURE */
 #endif
 
 static int __ctsvc_db_phonelog_insert_record(contacts_record_h record, int *id);
@@ -93,7 +93,7 @@ static int __ctsvc_db_phonelog_value_set(cts_stmt stmt, contacts_record_h *recor
 #ifdef _CONTACTS_IPC_SERVER
 #ifdef ENABLE_SIM_FEATURE
 	phonelog->sim_slot_no = ctsvc_server_sim_get_sim_slot_no_by_info_id(ctsvc_stmt_get_int(stmt, i++));
-#endif // ENABLE_SIM_FEATURE
+#endif /* ENABLE_SIM_FEATURE */
 #endif
 	return CONTACTS_ERROR_NONE;
 }
@@ -351,7 +351,7 @@ static int __ctsvc_db_phonelog_get_records_with_query(contacts_query_h query, in
 			case CTSVC_PROPERTY_PHONELOG_SIM_SLOT_NO:
 				phonelog->sim_slot_no = ctsvc_server_sim_get_sim_slot_no_by_info_id(ctsvc_stmt_get_int(stmt, i));
 				break;
-#endif // ENABLE_SIM_FEATURE
+#endif /* ENABLE_SIM_FEATURE */
 			default:
 				break;
 			}
@@ -459,7 +459,7 @@ static int  __ctsvc_db_phonelog_insert(ctsvc_phonelog_s *phonelog, int *id)
 			ctsvc_stmt_bind_int(stmt, 7, sim_info_id);
 	}
 	else
-#endif // ENABLE_SIM_FEATURE
+#endif /* ENABLE_SIM_FEATURE */
 		ctsvc_stmt_bind_int(stmt, 7, -1);
 
 	ret = ctsvc_stmt_step(stmt);
@@ -472,7 +472,7 @@ static int  __ctsvc_db_phonelog_insert(ctsvc_phonelog_s *phonelog, int *id)
 		*id = ctsvc_db_get_last_insert_id();
 	ctsvc_stmt_finalize(stmt);
 
-	// update phonelog
+	/* update phonelog */
 	ctsvc_db_phone_log_update_person_id(phonelog->address, phonelog->person_id, -1, false);
 
 	ctsvc_set_phonelog_noti();
@@ -504,7 +504,7 @@ static int __ctsvc_db_phonelog_insert_record(contacts_record_h record, int *id)
 	}
 
 #ifdef _CONTACTS_IPC_SERVER
-	// add id for subscribe
+	/* add id for subscribe */
 	ctsvc_change_subject_add_changed_phone_log_id(CONTACTS_CHANGE_INSERTED, *id);
 #endif
 

@@ -42,4 +42,4 @@ bool ctsvc_have_ab_write_permission(int addressbook_id);
 int ctsvc_is_owner(int addressbook_id);
 
 
-#endif // __TIZEN_SOCIAL_CTSVC_DB_ACCESS_CONTROL_H__
+#endif /* __TIZEN_SOCIAL_CTSVC_DB_ACCESS_CONTROL_H__ */

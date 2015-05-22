@@ -34,7 +34,7 @@
 #include "ctsvc_server_change_subject.h"
 #ifdef ENABLE_SIM_FEATURE
 #include "ctsvc_server_sim.h"
-#endif // ENABLE_SIM_FEATURE
+#endif /* ENABLE_SIM_FEATURE */
 #endif
 
 API int contacts_phone_log_reset_statistics()
@@ -137,7 +137,7 @@ static int __ctsvc_db_phone_log_find_person_id(char *number, char *normal_num, c
 	}
 
 	if (*query) {
-		// several person can have same number
+		/* several person can have same number */
 		cts_stmt stmt = NULL;
 		int id;
 		int number_type = -1;
@@ -165,7 +165,7 @@ static int __ctsvc_db_phone_log_find_person_id(char *number, char *normal_num, c
 			id = ctsvc_stmt_get_int(stmt, 0);
 			number_type = ctsvc_stmt_get_int(stmt, 1);
 			if (find_person_id <= 0 && 0 < id) {
-				find_person_id = id;		// find first match person_id
+				find_person_id = id;   /* find first match person_id */
 				*find_number_type = number_type;
 				if (person_id <= 0)
 					break;
@@ -289,30 +289,30 @@ int ctsvc_db_phone_log_update_person_id(const char *number, int old_person_id, i
 		normal_address = ctsvc_stmt_get_text(get_log, 2);
 		minmatch_address = ctsvc_stmt_get_text(get_log, 3);
 
-		//CASE : number is inserted (contact insert/update) => update person_id of phone logs from NULL
+		/* CASE : number is inserted (contact insert/update) => update person_id of phone logs from NULL */
 		if (number && old_person_id <= 0 && 0 < candidate_person_id) {
 			__ctsvc_db_phone_log_find_person_id(address, normal_address, minmatch_address, candidate_person_id, &number_type);
 			new_person_id = candidate_person_id;
 		}
-		//CASE : phonelog insert without person_id
+		/* CASE : phonelog insert without person_id */
 		else if (number && old_person_id <= 0) {
-			// address == number
+			/* address == number */
 			new_person_id = __ctsvc_db_phone_log_find_person_id(address, normal_address, minmatch_address, -1, &number_type);
 			if (new_person_id <= 0) continue;
 		}
-		// CASE : number update/delete (contact update/delete) => find new_person_id by address
-		// CASE : phonelog insert with person_id
+		/* CASE : number update/delete (contact update/delete) => find new_person_id by address */
+		/* CASE : phonelog insert with person_id */
 		else if (number && 0 < old_person_id) {
-			// address == number
-			// although new_person_id and old_person_id are same, update phonelog for setting number_type
+			/* address == number */
+			/* although new_person_id and old_person_id are same, update phonelog for setting number_type */
 			new_person_id = __ctsvc_db_phone_log_find_person_id(address, normal_address, minmatch_address, old_person_id, &number_type);
 		}
-		// CASE : person link => deleted person_id -> new person_id (base_person_id)
+		/* CASE : person link => deleted person_id -> new person_id (base_person_id) */
 		else if (NULL == number && 0 < old_person_id && 0 < candidate_person_id && person_link) {
 			new_person_id = candidate_person_id;
 		}
-		// CASE : person unlink => check person_id of the address,
-		// if person_id is not old_person_id then change person_id to new_person_id
+		/* CASE : person unlink => check person_id of the address, */
+		/* if person_id is not old_person_id then change person_id to new_person_id */
 		else if (NULL == number && 0 < old_person_id && 0 < candidate_person_id) {
 			temp_id = __ctsvc_db_phone_log_find_person_id(address, normal_address, minmatch_address, candidate_person_id, &number_type);
 			if (0 < temp_id && temp_id == old_person_id)
@@ -320,13 +320,15 @@ int ctsvc_db_phone_log_update_person_id(const char *number, int old_person_id, i
 			else if (0 < temp_id && temp_id != old_person_id)
 				new_person_id = temp_id;
 		}
-		// CASE : person delete => find new_person_id by address
+		/* CASE : person delete => find new_person_id by address */
 		else if (NULL == number && 0 < old_person_id) {
 			new_person_id = __ctsvc_db_phone_log_find_person_id(address, normal_address, minmatch_address, candidate_person_id, &number_type);
 		}
-		// Already check this case as above : RETVM_IF(old_person_id <= 0 && NULL == number, ...
-//		else
-//			continue;
+		/* Already check this case as above : RETVM_IF(old_person_id <= 0 && NULL == number, ... */
+		/*
+		 * else
+		 *  continue;
+		 */
 
 		if (0 < new_person_id)
 			ctsvc_stmt_bind_int(update_log, 1, new_person_id);

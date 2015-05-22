@@ -246,4 +246,4 @@ int contacts_person_get_default_property(contacts_person_property_e property, in
 #endif
 
 
-#endif //__TIZEN_SOCIAL_CONTACTS_PERSON_H__
+#endif /* __TIZEN_SOCIAL_CONTACTS_PERSON_H__ */

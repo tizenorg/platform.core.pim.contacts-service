@@ -70,7 +70,7 @@ static int __ctsvc_person_create(contacts_record_h* out_record)
 static int __ctsvc_person_destroy(contacts_record_h record, bool delete_child)
 {
 	ctsvc_person_s *person = (ctsvc_person_s*)record;
-	person->base.plugin_cbs = NULL;	// help to find double-destroy bug (refer to the contacts_record_destroy)
+	person->base.plugin_cbs = NULL; /* help to find double-destroy bug (refer to the contacts_record_destroy) */
 	free(person->base.properties_flags);
 
 	free(person->display_name);

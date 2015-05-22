@@ -30,7 +30,7 @@
 #include "ctsvc_server_utils.h"
 #ifdef ENABLE_SIM_FEATURE
 #include "ctsvc_server_sim.h"
-#endif // ENABLE_SIM_FEATURE
+#endif /* ENABLE_SIM_FEATURE */
 #include "ctsvc_server_sqlite.h"
 #include "ctsvc_localize.h"
 #include "ctsvc_normalize.h"
@@ -121,7 +121,7 @@ void ctsvc_server_final_configuration(void)
 
 #ifdef ENABLE_SIM_FEATURE
 	ctsvc_server_sim_final();
-#endif // ENABLE_SIM_FEATURE
+#endif /* ENABLE_SIM_FEATURE */
 }
 
 int ctsvc_server_init_configuration(void)
@@ -152,7 +152,7 @@ int ctsvc_server_init_configuration(void)
 #ifdef ENABLE_SIM_FEATURE
 	ret = ctsvc_server_sim_init();
 	RETVM_IF(ret !=CONTACTS_ERROR_NONE, ret, "ctsvc_server_sim_init Fail(%d)", ret);
-#endif // ENABLE_SIM_FEATURE
+#endif /* ENABLE_SIM_FEATURE */
 
 	return CONTACTS_ERROR_NONE;
 }

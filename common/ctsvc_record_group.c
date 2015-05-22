@@ -75,7 +75,7 @@ static int __ctsvc_group_create(contacts_record_h *out_record)
 static int __ctsvc_group_destroy(contacts_record_h record, bool delete_child)
 {
 	ctsvc_group_s *group = (ctsvc_group_s*)record;
-	group->base.plugin_cbs = NULL;	// help to find double destroy bug (refer to the contacts_record_destroy)
+	group->base.plugin_cbs = NULL; /* help to find double destroy bug (refer to the contacts_record_destroy) */
 	free(group->base.properties_flags);
 
 	free(group->name);

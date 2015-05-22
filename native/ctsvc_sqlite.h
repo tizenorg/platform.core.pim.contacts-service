@@ -26,8 +26,8 @@
 
 #include <sqlite3.h>
 
-#define CTS_SQL_MAX_LEN   2048 //normal string length
-#define CTS_SQL_MIN_LEN  1024 //short sql string length
+#define CTS_SQL_MAX_LEN 2048 /* normal string length */
+#define CTS_SQL_MIN_LEN 1024 /* short sql string length */
 
 typedef sqlite3_stmt* cts_stmt;
 
@@ -75,4 +75,4 @@ static inline int ctsvc_stmt_bind_copy_text(cts_stmt stmt, int pos,
 int ctsvc_stmt_bind_copy_text(cts_stmt stmt, int pos, const char *str, int strlen);
 
 
-#endif //__TIZEN_SOCIAL_CTSVC_SQLITE_H__
+#endif /* __TIZEN_SOCIAL_CTSVC_SQLITE_H__ */

@@ -41,11 +41,11 @@ extern ctsvc_db_plugin_info_s ctsvc_db_plugin_group;
 extern ctsvc_db_plugin_info_s ctsvc_db_plugin_person;
 #ifdef ENABLE_LOG_FEATURE
 extern ctsvc_db_plugin_info_s ctsvc_db_plugin_phonelog;
-#endif // ENABLE_LOG_FEATURE
+#endif /* ENABLE_LOG_FEATURE */
 #ifdef ENABLE_SIM_FEATURE
 extern ctsvc_db_plugin_info_s ctsvc_db_plugin_speeddial;
 extern ctsvc_db_plugin_info_s ctsvc_db_plugin_sdn;
-#endif // ENABLE_SIM_FEATURE
+#endif /* ENABLE_SIM_FEATURE */
 extern ctsvc_db_plugin_info_s ctsvc_db_plugin_activity;
 extern ctsvc_db_plugin_info_s ctsvc_db_plugin_activity_photo;
 extern ctsvc_db_plugin_info_s ctsvc_db_plugin_address;
@@ -112,12 +112,14 @@ static const db_table_info_s __db_tables[] = {
 	{CTSVC_VIEW_URI_GROUP_RELATION, CTSVC_DB_VIEW_GROUP_RELATION, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_WRITE, true},
 	{CTSVC_VIEW_URI_EXTENSION,		CTSVC_DB_VIEW_EXTENSION, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_WRITE, true},
 
-// Do not support get_all_records, get_records_with_query, get_count, get_count_with_query
-//	{CTSVC_VIEW_URI_GROUPS_UPDATED_INFO, CTSVC_DB_VIEW_GROUPS_UPDATED_INFO, false},
-//	{CTSVC_VIEW_URI_GROUPS_MEMBER_UPDATED_INFO, CTSVC_DB_VIEW_GROUPS_MEMBER_UPDATED_INFO, false},
-//	{CTSVC_VIEW_URI_CONTACTS_UPDATED_INFO, CTSVC_DB_VIEW_CONTACTS_UPDATED_INFO, false},
-//	{CTSVC_VIEW_URI_MY_PROFILE_UPDATED_INFO, NULL, false},
-//	{CTSVC_VIEW_URI_GROUPRELS_UPDATED_INFO, NULL, false},
+/* Do not support get_all_records, get_records_with_query, get_count, get_count_with_query */
+/*
+ * {CTSVC_VIEW_URI_GROUPS_UPDATED_INFO, CTSVC_DB_VIEW_GROUPS_UPDATED_INFO, false},
+ * {CTSVC_VIEW_URI_GROUPS_MEMBER_UPDATED_INFO, CTSVC_DB_VIEW_GROUPS_MEMBER_UPDATED_INFO, false},
+ * {CTSVC_VIEW_URI_CONTACTS_UPDATED_INFO, CTSVC_DB_VIEW_CONTACTS_UPDATED_INFO, false},
+ * {CTSVC_VIEW_URI_MY_PROFILE_UPDATED_INFO, NULL, false},
+ * {CTSVC_VIEW_URI_GROUPRELS_UPDATED_INFO, NULL, false},
+ */
 
 	{CTSVC_VIEW_URI_READ_ONLY_PERSON_CONTACT, CTSVC_DB_VIEW_PERSON_CONTACT, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_NONE, true},
 	{CTSVC_VIEW_URI_READ_ONLY_PERSON_NUMBER, CTSVC_DB_VIEW_PERSON_NUMBER, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_NONE, true},
@@ -137,7 +139,7 @@ static const db_table_info_s __db_tables[] = {
 
 };
 
-// this function is called in mutex lock
+/* this function is called in mutex lock */
 int ctsvc_db_plugin_init()
 {
 	int i;
@@ -299,13 +301,13 @@ ctsvc_db_plugin_info_s* ctsvc_db_get_plugin_info(ctsvc_record_type_e type)
 #ifdef ENABLE_LOG_FEATURE
 	case CTSVC_RECORD_PHONELOG:
 		return &ctsvc_db_plugin_phonelog;
-#endif // ENABLE_LOG_FEATURE
+#endif /* ENABLE_LOG_FEATURE */
 #ifdef ENABLE_SIM_FEATURE
 	case CTSVC_RECORD_SPEEDDIAL:
 		return &ctsvc_db_plugin_speeddial;
 	case CTSVC_RECORD_SDN:
 		return &ctsvc_db_plugin_sdn;
-#endif // ENABLE_SIM_FEATURE
+#endif /* ENABLE_SIM_FEATURE */
 	case CTSVC_RECORD_UPDATED_INFO:
 	case CTSVC_RECORD_RESULT:
 	default:
@@ -322,21 +324,21 @@ static int __ctsvc_db_create_views()
 	if (__ctsvc_db_view_already_created)
 		return CONTACTS_ERROR_NONE;
 
-	// CTSVC_DB_VIEW_CONTACT
+	/* CTSVC_DB_VIEW_CONTACT */
 	snprintf(query, sizeof(query),
 		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_CONTACT" AS "
 			"SELECT * FROM "CTS_TABLE_CONTACTS" WHERE deleted = 0");
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_execs() Fail(%d)", ret);
 
-	// CTSVC_DB_VIEW_MY_PROFILE
+	/* CTSVC_DB_VIEW_MY_PROFILE */
 	snprintf(query, sizeof(query),
 		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_MY_PROFILE" AS "
 			"SELECT * FROM "CTS_TABLE_MY_PROFILES" WHERE deleted = 0");
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Fail(%d)", ret);
 
-	// CTSVC_DB_VIEW_PERSON
+	/* CTSVC_DB_VIEW_PERSON */
 	snprintf(query, sizeof(query),
 		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_PERSON" AS "
 			"SELECT persons.person_id, "
@@ -362,7 +364,7 @@ static int __ctsvc_db_create_views()
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Fail(%d)", ret);
 
-	// CTSVC_DB_VIEW_NAME
+	/* CTSVC_DB_VIEW_NAME */
 	snprintf(query, sizeof(query),
 		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_NAME" AS "
 			"SELECT id, "
@@ -383,7 +385,7 @@ static int __ctsvc_db_create_views()
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Fail(%d)", ret);
 
-	// CTSVC_DB_VIEW_NUMBER
+	/* CTSVC_DB_VIEW_NUMBER */
 	snprintf(query, sizeof(query),
 		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_NUMBER" AS "
 			"SELECT id, "
@@ -403,7 +405,7 @@ static int __ctsvc_db_create_views()
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Fail(%d)", ret);
 
-	// CTSVC_DB_VIEW_EMAIL
+	/* CTSVC_DB_VIEW_EMAIL */
 	snprintf(query, sizeof(query),
 		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_EMAIL" AS "
 			"SELECT id, "
@@ -420,7 +422,7 @@ static int __ctsvc_db_create_views()
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Fail(%d)", ret);
 
-	// CTSVC_DB_VIEW_ADDRESS
+	/* CTSVC_DB_VIEW_ADDRESS */
 	snprintf(query, sizeof(query),
 		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_ADDRESS" AS "
 			"SELECT id, "
@@ -443,7 +445,7 @@ static int __ctsvc_db_create_views()
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Fail(%d)", ret);
 
-	// CTSVC_DB_VIEW_URL
+	/* CTSVC_DB_VIEW_URL */
 	snprintf(query, sizeof(query),
 		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_URL" AS "
 			"SELECT id, "
@@ -459,7 +461,7 @@ static int __ctsvc_db_create_views()
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Fail(%d)", ret);
 
-	// CTSVC_DB_VIEW_EVENT
+	/* CTSVC_DB_VIEW_EVENT */
 	snprintf(query, sizeof(query),
 		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_EVENT" AS "
 			"SELECT id, "
@@ -477,7 +479,7 @@ static int __ctsvc_db_create_views()
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Fail(%d)", ret);
 
-	// CTSVC_DB_VIEW_GROUP_RELATION
+	/* CTSVC_DB_VIEW_GROUP_RELATION */
 	snprintf(query, sizeof(query),
 		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_GROUP_RELATION" AS "
 			"SELECT "CTS_TABLE_GROUP_RELATIONS".group_id, "
@@ -490,7 +492,7 @@ static int __ctsvc_db_create_views()
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Fail(%d)", ret);
 
-	// CTSVC_DB_VIEW_RELATIONSHIP
+	/* CTSVC_DB_VIEW_RELATIONSHIP */
 	snprintf(query, sizeof(query),
 		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_RELATIONSHIP" AS "
 			"SELECT id, "
@@ -506,7 +508,7 @@ static int __ctsvc_db_create_views()
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Fail(%d)", ret);
 
-	// CTSVC_DB_VIEW_IMAGE
+	/* CTSVC_DB_VIEW_IMAGE */
 	snprintf(query, sizeof(query),
 		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_IMAGE" AS "
 			"SELECT id, "
@@ -523,7 +525,7 @@ static int __ctsvc_db_create_views()
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Fail(%d)", ret);
 
-	// CTSVC_DB_VIEW_COMPANY
+	/* CTSVC_DB_VIEW_COMPANY */
 	snprintf(query, sizeof(query),
 		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_COMPANY" AS "
 			"SELECT id, "
@@ -547,7 +549,7 @@ static int __ctsvc_db_create_views()
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Fail(%d)", ret);
 
-	// CTSVC_DB_VIEW_NICKNAME
+	/* CTSVC_DB_VIEW_NICKNAME */
 	snprintf(query, sizeof(query),
 		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_NICKNAME" AS "
 			"SELECT id, "
@@ -561,7 +563,7 @@ static int __ctsvc_db_create_views()
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Fail(%d)", ret);
 
-	// CTSVC_DB_VIEW_MESSENGER
+	/* CTSVC_DB_VIEW_MESSENGER */
 	snprintf(query, sizeof(query),
 		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_MESSENGER" AS "
 			"SELECT id, "
@@ -577,7 +579,7 @@ static int __ctsvc_db_create_views()
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Fail(%d)", ret);
 
-	// CTSVC_DB_VIEW_NOTE
+	/* CTSVC_DB_VIEW_NOTE */
 	snprintf(query, sizeof(query),
 		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_NOTE" AS "
 			"SELECT id, "
@@ -591,7 +593,7 @@ static int __ctsvc_db_create_views()
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Fail(%d)", ret);
 
-	// CTSVC_DB_VIEW_PROFILE
+	/* CTSVC_DB_VIEW_PROFILE */
 	snprintf(query, sizeof(query),
 		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_PROFILE" AS "
 			"SELECT id, "
@@ -615,7 +617,7 @@ static int __ctsvc_db_create_views()
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Fail(%d)", ret);
 
-	// CTSVC_DB_VIEW_EXTENSION
+	/* CTSVC_DB_VIEW_EXTENSION */
 	snprintf(query, sizeof(query),
 		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_EXTENSION" AS "
 			"SELECT id, "
@@ -640,7 +642,7 @@ static int __ctsvc_db_create_views()
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Fail(%d)", ret);
 
-	// CTSVC_DB_VIEW_ACTIVITY
+	/* CTSVC_DB_VIEW_ACTIVITY */
 	snprintf(query, sizeof(query),
 		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_ACTIVITY" AS "
 			"SELECT id, "
@@ -657,7 +659,7 @@ static int __ctsvc_db_create_views()
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Fail(%d)", ret);
 
-	// CTSVC_DB_VIEW_ACTIVITY_PHOTOS
+	/* CTSVC_DB_VIEW_ACTIVITY_PHOTOS */
 	snprintf(query, sizeof(query),
 		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_ACTIVITY_PHOTOS" AS "
 			"SELECT "CTS_TABLE_ACTIVITY_PHOTOS".id, "
@@ -670,7 +672,7 @@ static int __ctsvc_db_create_views()
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Fail(%d)", ret);
 
 #ifdef ENABLE_SIM_FEATURE
-	// CTSVC_DB_VIEW_SPEEDIDAL
+	/* CTSVC_DB_VIEW_SPEEDIDAL */
 	snprintf(query, sizeof(query),
 		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_SPEEDIDAL" AS "
 			"SELECT persons.person_id, "
@@ -698,10 +700,10 @@ static int __ctsvc_db_create_views()
 			"ORDER BY speeddials.speed_number");
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Fail(%d)", ret);
-#endif // ENABLE_SIM_FEATURE
+#endif /* ENABLE_SIM_FEATURE */
 
 
-	// CTSVC_DB_VIEW_PERSON_CONTACT
+	/* CTSVC_DB_VIEW_PERSON_CONTACT */
 	snprintf(query, sizeof(query),
 		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_PERSON_CONTACT" AS "
 			"SELECT * FROM "CTSVC_DB_VIEW_PERSON" "
@@ -716,7 +718,7 @@ static int __ctsvc_db_create_views()
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Fail(%d)", ret);
 
-	// CTSVC_DB_VIEW_PERSON_NUMBER
+	/* CTSVC_DB_VIEW_PERSON_NUMBER */
 	snprintf(query, sizeof(query),
 		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_PERSON_NUMBER" AS "
 			"SELECT * FROM "CTSVC_DB_VIEW_PERSON_CONTACT" "
@@ -735,7 +737,7 @@ static int __ctsvc_db_create_views()
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Fail(%d)", ret);
 
-	// CTSVC_DB_VIEW_PERSON_EMAIL
+	/* CTSVC_DB_VIEW_PERSON_EMAIL */
 	snprintf(query, sizeof(query),
 		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_PERSON_EMAIL" AS "
 			"SELECT * FROM "CTSVC_DB_VIEW_PERSON_CONTACT" "
@@ -752,7 +754,7 @@ static int __ctsvc_db_create_views()
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Fail(%d)", ret);
 
 #ifdef ENABLE_LOG_FEATURE
-	// CTSVC_DB_VIEW_PERSON_PHONELOG
+	/* CTSVC_DB_VIEW_PERSON_PHONELOG */
 	snprintf(query, sizeof(query),
 		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_PERSON_PHONELOG" AS "
 			"SELECT L.id phonelog_id, "
@@ -782,9 +784,9 @@ static int __ctsvc_db_create_views()
 			"ORDER BY L.log_time DESC");
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Fail(%d)", ret);
-#endif // ENABLE_LOG_FEATURE
+#endif /* ENABLE_LOG_FEATURE */
 
-	// CTSVC_DB_VIEW_PERSON_USAGE
+	/* CTSVC_DB_VIEW_PERSON_USAGE */
 	snprintf(query, sizeof(query),
 		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_PERSON_USAGE" AS "
 			"SELECT * FROM "CTSVC_DB_VIEW_PERSON" "
@@ -797,7 +799,7 @@ static int __ctsvc_db_create_views()
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Fail(%d)", ret);
 
-	// CTSVC_DB_VIEW_PERSON_GROUP
+	/* CTSVC_DB_VIEW_PERSON_GROUP */
 	snprintf(query, sizeof(query),
 		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_PERSON_GROUP" AS "
 			"SELECT view_person_contact.*, groups.group_id, group_prio "
@@ -811,7 +813,7 @@ static int __ctsvc_db_create_views()
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Fail(%d)", ret);
 
-	// CTSVC_DB_VIEW_PERSON_GROUP_NOT_ASSIGNED
+	/* CTSVC_DB_VIEW_PERSON_GROUP_NOT_ASSIGNED */
 	snprintf(query, sizeof(query),
 		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_PERSON_GROUP_NOT_ASSIGNED" AS "
 			"SELECT * FROM "CTSVC_DB_VIEW_PERSON_CONTACT" "
@@ -819,7 +821,7 @@ static int __ctsvc_db_create_views()
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Fail(%d)", ret);
 
-	// CTSVC_DB_VIEW_PERSON_GROUP_ASSIGNED
+	/* CTSVC_DB_VIEW_PERSON_GROUP_ASSIGNED */
 	snprintf(query, sizeof(query),
 		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_PERSON_GROUP_ASSIGNED" AS "
 			"SELECT "CTSVC_DB_VIEW_PERSON_CONTACT".*, groups.group_id, group_prio "
@@ -833,7 +835,7 @@ static int __ctsvc_db_create_views()
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Fail(%d)", ret);
 
-	// CTSVC_DB_VIEW_CONTACT_NUMBER
+	/* CTSVC_DB_VIEW_CONTACT_NUMBER */
 	snprintf(query, sizeof(query),
 		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_CONTACT_NUMBER" AS "
 			"SELECT * FROM "CTSVC_DB_VIEW_CONTACT" "
@@ -852,7 +854,7 @@ static int __ctsvc_db_create_views()
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Fail(%d)", ret);
 
-	// CTSVC_DB_VIEW_CONTACT_EMAIL
+	/* CTSVC_DB_VIEW_CONTACT_EMAIL */
 	snprintf(query, sizeof(query),
 		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_CONTACT_EMAIL" AS "
 			"SELECT * FROM "CTSVC_DB_VIEW_CONTACT" "
@@ -868,7 +870,7 @@ static int __ctsvc_db_create_views()
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Fail(%d)", ret);
 
-	// CTSVC_DB_VIEW_CONTACT_GROUP
+	/* CTSVC_DB_VIEW_CONTACT_GROUP */
 	snprintf(query, sizeof(query),
 		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_CONTACT_GROUP" AS "
 			"SELECT C.*, groups.group_id, group_name "
@@ -881,7 +883,7 @@ static int __ctsvc_db_create_views()
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Fail(%d)", ret);
 
-	// CTSVC_DB_VIEW_CONTACT_ACTIVITY
+	/* CTSVC_DB_VIEW_CONTACT_ACTIVITY */
 	snprintf(query, sizeof(query),
 		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_CONTACT_ACTIVITY" AS "
 			"SELECT A.contact_id, "

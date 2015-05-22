@@ -55,11 +55,11 @@ extern ctsvc_record_plugin_cb_s result_plugin_cbs;
 #ifdef ENABLE_SIM_FEATURE
 extern ctsvc_record_plugin_cb_s sdn_plugin_cbs;
 extern ctsvc_record_plugin_cb_s speeddial_plugin_cbs;
-#endif // ENABLE_SIM_FEATURE
+#endif /* ENABLE_SIM_FEATURE */
 extern ctsvc_record_plugin_cb_s extension_plugin_cbs;
 #ifdef ENABLE_LOG_FEATURE
 extern ctsvc_record_plugin_cb_s phonelog_plugin_cbs;
-#endif // ENABLE_LOG_FEATURE
+#endif /* ENABLE_LOG_FEATURE */
 
 static const ctsvc_record_plugin_cb_s *__ctsvc_record_get_plugin_cb(int r_type)
 {
@@ -113,13 +113,13 @@ static const ctsvc_record_plugin_cb_s *__ctsvc_record_get_plugin_cb(int r_type)
 #ifdef ENABLE_LOG_FEATURE
 	case CTSVC_RECORD_PHONELOG:
 		return &phonelog_plugin_cbs;
-#endif // ENABLE_LOG_FEATURE
+#endif /* ENABLE_LOG_FEATURE */
 #ifdef ENABLE_SIM_FEATURE
 	case CTSVC_RECORD_SPEEDDIAL:
 		return &speeddial_plugin_cbs;
 	case CTSVC_RECORD_SDN:
 		return &sdn_plugin_cbs;
-#endif // ENABLE_SIM_FEATURE
+#endif /* ENABLE_SIM_FEATURE */
 	case CTSVC_RECORD_UPDATED_INFO:
 		return &updated_info_plugin_cbs;
 	case CTSVC_RECORD_RESULT:
@@ -133,8 +133,10 @@ static const ctsvc_record_plugin_cb_s *__ctsvc_record_get_plugin_cb(int r_type)
 		CTS_ERR("Invalid parameter: Operation restricted."); \
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 
-// This function is used for view_uri which is able to CRUD.
-// The view_uri's property should be sequencial value because it is used to find index at the below logic.
+/*
+ * This function is used for view_uri which is able to CRUD.
+ * The view_uri's property should be sequencial value because it is used to find index at the below logic.
+ */
 bool ctsvc_record_check_property_flag(const ctsvc_record_s* s_record, unsigned int property_id, contacts_property_flag_e flag)
 {
 	int index = property_id & 0x000000FF;
@@ -142,21 +144,25 @@ bool ctsvc_record_check_property_flag(const ctsvc_record_s* s_record, unsigned i
 	if (CTSVC_RECORD_RESULT == s_record->r_type)
 		return true;
 
-	// Check it when getting value of property
-	// property_flag and properties_flags is set when getting record with query
+	/*
+	 * Check it when getting value of property
+	 * property_flag and properties_flags is set when getting record with query
+	 */
 	if (CTSVC_PROPERTY_FLAG_PROJECTION == flag) {
-		// all property get.
+		/* all property get. */
 		if (NULL == s_record->properties_flags)
 			return true;
-		// Or before inserting record from DB, just get after setting.
-		// properties_flags is not NULL when just setting dirty
+		/*
+		 * Or before inserting record from DB, just get after setting.
+		 * properties_flags is not NULL when just setting dirty
+		 */
 		if (0 == (CTSVC_PROPERTY_FLAG_PROJECTION & s_record->property_flag))
 			return true;
 	}
 
-	// Check it when updating record
+	/* Check it when updating record */
 	if (CTSVC_PROPERTY_FLAG_DIRTY == flag) {
-		// all property is clean
+		/* all property is clean */
 		if (NULL == s_record->properties_flags)
 			return false;
 	}
@@ -197,7 +203,7 @@ int ctsvc_record_set_property_flag(ctsvc_record_s* _record, int property_id, con
 		return CONTACTS_ERROR_INVALID_PARAMETER; \
 	}
 
-// Record constuct/destruct
+/* Record constuct/destruct */
 API int contacts_record_create(const char* view_uri, contacts_record_h* out_record)
 {
 	int ret;
@@ -265,7 +271,7 @@ API int contacts_record_get_uri_p(contacts_record_h record, const char** out_str
     return ret;
 }
 
-// Record get/set int,str, etc..
+/* Record get/set int,str, etc.. */
 API int contacts_record_get_str(contacts_record_h record, unsigned int property_id, char** out_str)
 {
 	ctsvc_record_s *s_record;
@@ -518,7 +524,7 @@ int ctsvc_record_set_double(contacts_record_h record, unsigned int property_id, 
 	__INVALID_PARAMETER_ERROR_HANDLING();
 }
 
-// Record get/set child records
+/* Record get/set child records */
 API int contacts_record_add_child_record(contacts_record_h record,
 		unsigned int property_id, contacts_record_h child_record)
 {

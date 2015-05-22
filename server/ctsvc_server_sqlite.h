@@ -31,6 +31,6 @@ int ctsvc_server_update_sort_name();
 
 int ctsvc_server_get_sim_id(const char *unique_id, int *sim_id);
 
-#endif // __CTSVC_SERVER_SQLITE_H__
+#endif /* __CTSVC_SERVER_SQLITE_H__ */
 
 

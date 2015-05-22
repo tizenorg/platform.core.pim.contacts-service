@@ -87,7 +87,7 @@ int ctsvc_db_image_insert(contacts_record_h record, int contact_id, bool is_my_p
 	char image_path[CTSVC_IMG_FULL_PATH_SIZE_MAX] = {0};
 	ctsvc_image_s *image = (ctsvc_image_s *)record;
 
-	// These check should be done in client side
+	/* These check should be done in client side */
 	RETV_IF(NULL == image->path, CONTACTS_ERROR_NONE);
 	RETVM_IF(contact_id <= 0, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : contact_id(%d) is mandatory field to insert image record", image->contact_id);
@@ -123,7 +123,7 @@ int ctsvc_db_image_insert(contacts_record_h record, int contact_id, bool is_my_p
 		return ret;
 	}
 
-	//image->id = ctsvc_db_get_last_insert_id();
+	/* image->id = ctsvc_db_get_last_insert_id(); */
 	if (id)
 		*id = image_id;
 	ctsvc_stmt_finalize(stmt);
@@ -215,8 +215,10 @@ int ctsvc_db_image_delete(int id, bool is_my_profile)
 	return CONTACTS_ERROR_NONE;
 }
 
-// Whenever deleting image recode in data table, this funcion will be called
-// in order to delete the image file
+/*
+ * Whenever deleting image recode in data table, this funcion will be called
+ * in order to delete the image file
+ */
 void ctsvc_db_image_delete_callback(sqlite3_context *context, int argc, sqlite3_value ** argv)
 {
 	int ret;

@@ -19,7 +19,7 @@
 
 #include <glib.h>
 #include <stdlib.h>
-#include <unistd.h>	//sleep
+#include <unistd.h>
 
 #include <account.h>
 
@@ -37,14 +37,14 @@
 #define CTSVC_SERVER_BG_DELETE_STEP_TIME 1
 #define CTSVC_SERVER_BG_DELETE_THREAD "ctsvc_server_bg_delete"
 
-#define CTSVC_SERVER_BG_BASE_CPU_USAGE		10  // Delete contacts when cpu usage is under the value
+#define CTSVC_SERVER_BG_BASE_CPU_USAGE 10  /* Delete contacts when cpu usage is under the value */
 
 typedef enum
 {
-	STEP_1, // get contact_ids
-	STEP_2, // delete data
-	STEP_3,	// delete activity
-	STEP_4,	// delete search_index, contact(image by trigger)
+	STEP_1, /* get contact_ids */
+	STEP_2, /* delete data */
+	STEP_3, /* delete activity */
+	STEP_4, /* delete search_index, contact(image by trigger) */
 } __ctsvc_delete_step_e;
 
 typedef struct {
@@ -68,7 +68,7 @@ static int __ctsvc_server_bg_contact_delete_step1(__ctsvc_delete_data_s* data)
 	GSList *cursor;
 
 	if (data->contact_ids == NULL) {
-		// get event_list
+		/* get event_list */
 		snprintf(query, sizeof(query), "SELECT contact_id FROM "CTS_TABLE_CONTACTS" WHERE deleted = 1");
 		ret = ctsvc_query_prepare(query, &stmt);
 		RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
@@ -99,7 +99,7 @@ static int __ctsvc_server_bg_contact_delete_step1(__ctsvc_delete_data_s* data)
 	}
 }
 
-// remove data
+/* remove data */
 static int __ctsvc_server_bg_contact_delete_step2(__ctsvc_delete_data_s* data)
 {
     CTS_FN_CALL;
@@ -110,7 +110,7 @@ static int __ctsvc_server_bg_contact_delete_step2(__ctsvc_delete_data_s* data)
 	int count = 0;
 	GSList *cursor;
 
-	// get event_list
+	/* get event_list */
 	snprintf(query, sizeof(query),
 		"SELECT id FROM "CTS_TABLE_DATA" WHERE contact_id = %d LIMIT %d",
 		data->current_contact_id, CTSVC_SERVER_BG_DELETE_COUNT);
@@ -152,7 +152,7 @@ static int __ctsvc_server_bg_contact_delete_step2(__ctsvc_delete_data_s* data)
 	return ret;
 }
 
-// remove activities
+/* remove activities */
 static int __ctsvc_server_bg_contact_delete_step3(__ctsvc_delete_data_s* data)
 {
     CTS_FN_CALL;
@@ -164,7 +164,7 @@ static int __ctsvc_server_bg_contact_delete_step3(__ctsvc_delete_data_s* data)
 	int count = 0;
 	GSList *cursor;
 
-	// get event_list
+	/* get event_list */
 	snprintf(query, sizeof(query),
 		"SELECT id FROM "CTS_TABLE_ACTIVITIES" WHERE contact_id = %d LIMIT %d",
 		data->current_contact_id, CTSVC_SERVER_BG_DELETE_COUNT);
@@ -286,19 +286,19 @@ static bool  __ctsvc_server_db_delete_run(__ctsvc_delete_data_s* data)
 
 	switch (data->step) {
 		case STEP_1:
-			// get deleted contact id list
+			/* get deleted contact id list */
 			ret = __ctsvc_server_bg_contact_delete_step1(data);
 			break;
 		case STEP_2:
-			// delete data of current contact id (MAX CTSVC_SERVER_BG_DELETE_COUNT)
+			/* delete data of current contact id (MAX CTSVC_SERVER_BG_DELETE_COUNT) */
 			ret = __ctsvc_server_bg_contact_delete_step2(data);
 			break;
 		case STEP_3:
-			// delete activity of current contact id (MAX CTSVC_SERVER_BG_DELETE_COUNT each time)
+			/* delete activity of current contact id (MAX CTSVC_SERVER_BG_DELETE_COUNT each time) */
 			ret = __ctsvc_server_bg_contact_delete_step3(data);
 			break;
 		case STEP_4:
-			// delete search index of current contact id
+			/* delete search index of current contact id */
 			ret = __ctsvc_server_bg_contact_delete_step4(data);
 			break;
 		default:
@@ -401,10 +401,9 @@ static gpointer __ctsvc_server_bg_delete(gpointer user_data)
 		ctsvc_set_client_access_info(NULL, NULL);
 
 		while (1) {
-//			sleep(CTSVC_SERVER_BG_DELETE_STEP_TIME); // sleep 1 sec.
-			if (__ctsvc_cpu_is_busy()) {				// sleep 1 sec in function
+			if (__ctsvc_cpu_is_busy()) { /* sleep 1 sec in function */
 				CTS_ERR("Now CPU is busy.. waiting");
-				sleep(CTSVC_SERVER_BG_DELETE_STEP_TIME*59); // sleep 60 sec(1 min) totally
+				sleep(CTSVC_SERVER_BG_DELETE_STEP_TIME*59); /* sleep 60 sec(1 min) totally */
 				continue;
 			}
 			if (__ctsvc_server_db_delete_run(callback_data) == false) {
@@ -440,13 +439,13 @@ void ctsvc_server_bg_delete_start()
 				__ctsvc_server_bg_delete, NULL);
 	}
 
-	// don't use mutex.
+	/* don't use mutex. */
 	g_cond_signal(&__ctsvc_server_bg_delete_cond);
 }
 
 static void __ctsvc_server_addressbook_deleted_cb(const char *view_uri, void *data)
 {
-	// access control update
+	/* access control update */
 	ctsvc_reset_all_client_access_info();
 
 	ctsvc_server_bg_delete_start();
@@ -494,7 +493,7 @@ void ctsvc_server_bg_remove_cb()
 	CTS_ERR("call contacts_db_remove_changed_cb (_contacts_contact) : return (%d)", ret);
 
 	if (account) {
-		account_unsubscribe_notification(account);		// unsubscirbe & destroy
+		account_unsubscribe_notification(account);  /* unsubscirbe & destroy */
 		account = NULL;
 	}
 }

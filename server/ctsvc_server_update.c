@@ -29,10 +29,12 @@
 #include "ctsvc_localize_utils.h"
 #include "ctsvc_server_update.h"
 
-// It should be updated whenever DB schema including VIEW query is changed
-// You have to update user version schema.sql
-//			PRAGMA user_version = 100;
-#define CTSVC_SCHEMA_VERSION		101
+/*
+ * It should be updated whenever DB schema including VIEW query is changed
+ * You have to update user version schema.sql
+ *			PRAGMA user_version = 100;
+ */
+#define CTSVC_SCHEMA_VERSION 101
 
 #ifdef ENABLE_LOG_FEATURE
 static int __ctsvc_server_find_person_id_of_phonelog(sqlite3 *__db, char *normal_num,
@@ -83,7 +85,7 @@ static int __ctsvc_server_find_person_id_of_phonelog(sqlite3 *__db, char *normal
 		id = sqlite3_column_int(stmt, 0);
 		number_type = sqlite3_column_int(stmt, 1);
 		if (find_person_id <= 0 && id > 0) {
-			find_person_id = id;		// find first match person_id
+			find_person_id = id;	/* find first match person_id */
 			*find_number_type = number_type;
 			if (person_id <= 0)
 				break;
@@ -105,7 +107,7 @@ static int __ctsvc_server_find_person_id_of_phonelog(sqlite3 *__db, char *normal
 
 	return find_person_id;
 }
-#endif // ENABLE_LOG_FEATURE
+#endif /* ENABLE_LOG_FEATURE */
 
 static void __ctsvc_server_number_info_update(sqlite3 *__db)
 {
@@ -115,7 +117,7 @@ static void __ctsvc_server_number_info_update(sqlite3 *__db)
 	char query[CTS_SQL_MIN_LEN] = {0};
 
 #ifdef ENABLE_LOG_FEATURE
-	// update number of phonelog table
+	/* update number of phonelog table */
 	ret = snprintf(query, sizeof(query),
 			"SELECT id, number, person_id FROM "CTS_TABLE_PHONELOGS " "
 			"WHERE log_type < %d", CONTACTS_PLOG_TYPE_EMAIL_RECEIVED);
@@ -174,9 +176,9 @@ static void __ctsvc_server_number_info_update(sqlite3 *__db)
 	}
 	sqlite3_finalize(stmt);
 	sqlite3_finalize(update_stmt);
-#endif // ENABLE_LOG_FEATURE
+#endif /* ENABLE_LOG_FEATURE */
 
-	// update number of data table
+	/* update number of data table */
 	snprintf(query, sizeof(query),
 			"SELECT id, data3 FROM "CTS_TABLE_DATA" "
 			"WHERE datatype = %d", CTSVC_DATA_NUMBER);
@@ -264,10 +266,10 @@ int ctsvc_server_db_update(void)
 	RETVM_IF(ret != SQLITE_OK, CONTACTS_ERROR_DB,
 			"db_util_open() Fail(%d)", ret);
 
-	// check DB schema version
+	/* check DB schema version */
 	__ctsvc_server_get_db_version(__db, &old_version);
 
-	// Tizen 2.3a Releae 0.9.114.7 ('14/5)  -----------------------------------
+	/* Tizen 2.3a Releae 0.9.114.7 ('14/5)  ----------------------------------- */
 	if (old_version <= 100) {
 		ret = sqlite3_exec(__db, "CREATE INDEX name_lookup_idx1 ON name_lookup(contact_id);", NULL, 0, &errmsg);
 		if (SQLITE_OK != ret) {
@@ -281,30 +283,30 @@ int ctsvc_server_db_update(void)
 			sqlite3_free(errmsg);
 		}
 
-		// add view_activity_photos
+		/* add view_activity_photos */
 		ret = sqlite3_exec(__db, "DROP VIEW view_phonelog_number", NULL, 0, &errmsg);
 		if (SQLITE_OK != ret) {
 			CTS_ERR("drop view view_person_contact_group Fail(%d) : %s", ret, errmsg);
 			sqlite3_free(errmsg);
 		}
 
-		// add view_person_contact_group_assigned
-		// add view_person_contact_group_not_assigned
-		// change DB VIEW view_person_contact_group for performance
+		/* add view_person_contact_group_assigned */
+		/* add view_person_contact_group_not_assigned */
+		/* change DB VIEW view_person_contact_group for performance */
 		ret = sqlite3_exec(__db, "DROP VIEW "CTSVC_DB_VIEW_PERSON_GROUP, NULL, 0, &errmsg);
 		if (SQLITE_OK != ret) {
 			CTS_ERR("drop view view_person_contact_group Fail(%d) : %s", ret, errmsg);
 			sqlite3_free(errmsg);
 		}
 
-		// change DB VIEW view_contact_group for performance
+		/* change DB VIEW view_contact_group for performance */
 		ret = sqlite3_exec(__db, "DROP VIEW "CTSVC_DB_VIEW_CONTACT_GROUP, NULL, 0, &errmsg);
 		if (SQLITE_OK != ret) {
 			CTS_ERR("drop view view_contact_group Fail : %s", errmsg);
 			sqlite3_free(errmsg);
 		}
 
-		// for number compare
+		/* for number compare */
 		ret = sqlite3_exec(__db, "DROP VIEW "CTSVC_DB_VIEW_NUMBER, NULL, 0, &errmsg);
 		if (SQLITE_OK != ret) {
 			CTS_ERR("drop view %s Fail(%d) : %s", CTSVC_DB_VIEW_NUMBER, ret, errmsg);
@@ -353,7 +355,7 @@ int ctsvc_server_db_update(void)
 			sqlite3_free(errmsg);
 		}
 
-		// update phonelog, data number value
+		/* update phonelog, data number value */
 		__ctsvc_server_number_info_update(__db);
 
 		ret = sqlite3_exec(__db, "ALTER TABLE "CTS_TABLE_SDN" ADD COLUMN sim_slot_no TEXT", NULL, 0, &errmsg);

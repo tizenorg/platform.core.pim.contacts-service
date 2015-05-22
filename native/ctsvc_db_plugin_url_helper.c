@@ -84,7 +84,7 @@ int ctsvc_db_url_insert(contacts_record_h record, int contact_id, bool is_my_pro
 		return ret;
 	}
 
-	//url->id = ctsvc_db_get_last_insert_id();
+	/* url->id = ctsvc_db_get_last_insert_id(); */
 	if (id)
 		*id = ctsvc_db_get_last_insert_id();
 	ctsvc_stmt_finalize(stmt);

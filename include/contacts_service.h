@@ -182,4 +182,4 @@ int contacts_connect_with_flags(unsigned int flags);
 #endif
 
 
-#endif //__TIZEN_SOCIAL_CONTACTS_SERVICE_H__
+#endif /* __TIZEN_SOCIAL_CONTACTS_SERVICE_H__ */
