@@ -35,7 +35,7 @@ API int contacts_connect_with_flags(unsigned int flags)
 	unsigned int id = ctsvc_client_get_pid();
 
 	ret = ctsvc_client_handle_get_p_with_id(id, &contact);
-	if (CONTACTS_ERROR_NO_DATA == ret) {
+	if (NULL == contact) {
 		ret = ctsvc_client_handle_create(id, &contact);
 		RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_client_handle_create() Fail(%d)", ret);
 	}
@@ -57,7 +57,7 @@ API int contacts_connect(void)
 	unsigned int id = ctsvc_client_get_pid();
 
 	ret = ctsvc_client_handle_get_p_with_id(id, &contact);
-	if (CONTACTS_ERROR_NO_DATA == ret) {
+	if (NULL == contact) {
 		ret = ctsvc_client_handle_create(id, &contact);
 		RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_client_handle_create() Fail(%d)", ret);
 	}
@@ -100,7 +100,7 @@ API int contacts_connect_on_thread(void)
 	unsigned int id = ctsvc_client_get_tid();
 
 	ret = ctsvc_client_handle_get_p_with_id(id, &contact);
-	if (CONTACTS_ERROR_NO_DATA == ret) {
+	if (NULL == contact) {
 		ret = ctsvc_client_handle_create(id, &contact);
 		RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_client_handle_create() Fail(%d)", ret);
 	}
