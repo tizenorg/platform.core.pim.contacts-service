@@ -78,7 +78,7 @@ API int contacts_disconnect(void)
 	unsigned int id = ctsvc_client_get_pid();
 
 	ret = ctsvc_client_handle_get_p_with_id(id, &contact);
-	RETV_IF(CONTACTS_ERROR_NO_DATA == ret, CONTACTS_ERROR_NONE);
+	RETV_IF(NULL == contact, CONTACTS_ERROR_DB);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_client_handle_get_p_with_id() Fail(%d)", ret);
 
 	ret = ctsvc_client_disconnect(contact);
@@ -123,7 +123,7 @@ API int contacts_disconnect_on_thread(void)
 	unsigned int id = ctsvc_client_get_tid();
 
 	ret = ctsvc_client_handle_get_p_with_id(id, &contact);
-	RETV_IF(CONTACTS_ERROR_NO_DATA == ret, CONTACTS_ERROR_NONE);
+	RETV_IF(NULL == contact, CONTACTS_ERROR_DB);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_client_handle_get_p_with_id() Fail(%d)", ret);
 
 	ret = ctsvc_client_disconnect_on_thread(contact);
