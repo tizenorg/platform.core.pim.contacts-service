@@ -110,8 +110,10 @@ int ctsvc_ipc_create_for_change_subscription()
 int ctsvc_ipc_recover_for_change_subscription()
 {
 	ctsvc_mutex_lock(CTS_MUTEX_PIMS_IPC_PUBSUB);
-	if (__ipc_pubsub_ref <= 0)
+	if (__ipc_pubsub_ref <= 0) {
+		ctsvc_mutex_unlock(CTS_MUTEX_PIMS_IPC_PUBSUB);
 		return CONTACTS_ERROR_NONE;
+	}
 	__ipc = pims_ipc_create_for_subscribe(CTSVC_IPC_SOCKET_PATH_FOR_CHANGE_SUBSCRIPTION);
 	if (!__ipc) {
 		CTS_ERR("pims_ipc_create_for_subscribe error\n");
