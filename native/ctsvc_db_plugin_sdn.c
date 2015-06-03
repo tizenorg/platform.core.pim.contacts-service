@@ -364,10 +364,12 @@ static int __ctsvc_db_sdn_get_records_with_query(contacts_query_h query, int off
 				break;
 			case CTSVC_PROPERTY_SDN_NAME:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(sdn->name);
 				sdn->name = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_SDN_NUMBER:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(sdn->number);
 				sdn->number = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_SDN_SIM_SLOT_NO:

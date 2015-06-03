@@ -91,13 +91,14 @@ static int __ctsvc_group_destroy(contacts_record_h record, bool delete_child)
 
 static int __ctsvc_group_clone(contacts_record_h record, contacts_record_h *out_record)
 {
-    ctsvc_group_s *out_data = NULL;
-    ctsvc_group_s *src_data = NULL;
+	ctsvc_group_s *out_data = NULL;
+	ctsvc_group_s *src_data = NULL;
 
-    src_data = (ctsvc_group_s*)record;
-    out_data = calloc(1, sizeof(ctsvc_group_s));
-    RETVM_IF(NULL == out_data, CONTACTS_ERROR_OUT_OF_MEMORY,
-			 "Out of memeory : calloc(ctsvc_group_s) Fail(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
+	src_data = (ctsvc_group_s*)record;
+	out_data = calloc(1, sizeof(ctsvc_group_s));
+	RETVM_IF(NULL == out_data, CONTACTS_ERROR_OUT_OF_MEMORY,
+    		"Out of memeory : calloc(ctsvc_group_s) Fail(%d)",
+    		CONTACTS_ERROR_OUT_OF_MEMORY);
 
 	out_data->id = src_data->id;
 	out_data->addressbook_id = src_data->addressbook_id;
@@ -109,7 +110,12 @@ static int __ctsvc_group_clone(contacts_record_h record, contacts_record_h *out_
 	out_data->ringtone_path = SAFE_STRDUP(src_data->ringtone_path);
 	out_data->image_thumbnail_path = SAFE_STRDUP(src_data->image_thumbnail_path);
 
-	CTSVC_RECORD_COPY_BASE(&(out_data->base), &(src_data->base));
+	int ret = ctsvc_record_copy_base(&(out_data->base), &(src_data->base));
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("ctsvc_record_copy_base() Fail");
+		__ctsvc_group_destroy((contacts_record_h)out_data, true);
+		return ret;
+	}
 
 	*out_record = (contacts_record_h)out_data;
 	return CONTACTS_ERROR_NONE;

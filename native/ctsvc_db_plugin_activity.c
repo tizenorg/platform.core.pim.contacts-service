@@ -360,6 +360,10 @@ static int __ctsvc_db_activity_get_records_with_query(contacts_query_h query, in
 
 	if (false == had_activity_id) {
 		s_query->projection = realloc(s_query->projection, s_query->projection_count+1);
+		if (NULL == s_query->projection) {
+			CTS_ERR("realloc() Fail");
+			return CONTACTS_ERROR_OUT_OF_MEMORY;
+		}
 		s_query->projection[s_query->projection_count] = CTSVC_PROPERTY_ACTIVITY_ID;
 		s_query->projection_count++;
 	}
@@ -410,10 +414,12 @@ static int __ctsvc_db_activity_get_records_with_query(contacts_query_h query, in
 				break;
 			case CTSVC_PROPERTY_ACTIVITY_SOURCE_NAME:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(activity->source_name);
 				activity->source_name = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_ACTIVITY_STATUS:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(activity->status);
 				activity->status = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_ACTIVITY_TIMESTAMP:
@@ -421,10 +427,12 @@ static int __ctsvc_db_activity_get_records_with_query(contacts_query_h query, in
 				break;
 			case CTSVC_PROPERTY_ACTIVITY_SERVICE_OPERATION:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(activity->service_operation);
 				activity->service_operation = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_ACTIVITY_URI:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(activity->uri);
 				activity->uri = SAFE_STRDUP(temp);
 				break;
 			default:

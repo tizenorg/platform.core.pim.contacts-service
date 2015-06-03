@@ -339,6 +339,11 @@ static process_stat* __ctsvc_get_cpu_stat()
 	}
 
 	result = calloc(1, sizeof(process_stat));
+	if (NULL == result)
+	{
+		CTS_ERR("calloc() Fail");
+		return NULL;
+	}
 	for (i=0; i < 10;i++) {
 		if (i < 3)
 			result->cpu_work_time += cpu_time[i];

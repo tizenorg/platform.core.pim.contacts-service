@@ -388,46 +388,57 @@ static int __ctsvc_db_extension_get_records_with_query(contacts_query_h query, i
 				break;
 			case CTSVC_PROPERTY_EXTENSION_DATA2:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(extension->data2);
 				extension->data2 = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_EXTENSION_DATA3:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(extension->data3);
 				extension->data3 = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_EXTENSION_DATA4:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(extension->data4);
 				extension->data4 = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_EXTENSION_DATA5:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(extension->data5);
 				extension->data5 = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_EXTENSION_DATA6:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(extension->data6);
 				extension->data6 = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_EXTENSION_DATA7:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(extension->data7);
 				extension->data7 = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_EXTENSION_DATA8:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(extension->data8);
 				extension->data8 = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_EXTENSION_DATA9:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(extension->data9);
 				extension->data9 = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_EXTENSION_DATA10:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(extension->data10);
 				extension->data10 = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_EXTENSION_DATA11:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(extension->data11);
 				extension->data11 = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_EXTENSION_DATA12:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(extension->data12);
 				extension->data12 = SAFE_STRDUP(temp);
 				break;
 			default:

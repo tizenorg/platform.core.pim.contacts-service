@@ -55,6 +55,7 @@ static TLS bool company_change = false;
 static inline void __ctsvc_noti_publish_contact_change(void)
 {
 	int fd = open(CTSVC_NOTI_CONTACT_CHANGED, O_TRUNC | O_RDWR);
+
 	if (0 <= fd) {
 		close(fd);
 		contact_change = false;

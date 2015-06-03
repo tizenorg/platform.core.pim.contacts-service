@@ -614,29 +614,35 @@ static int __ctsvc_db_group_get_records_with_query(contacts_query_h query,
 				break;
 			case CTSVC_PROPERTY_GROUP_NAME:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(group->name);
 				group->name = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_GROUP_RINGTONE:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(group->ringtone_path);
 				group->ringtone_path = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_GROUP_IMAGE:
 				temp = ctsvc_stmt_get_text(stmt, i);
 				if (temp) {
 					snprintf(full_path, sizeof(full_path), "%s/%s", CTS_GROUP_IMAGE_LOCATION, temp);
+					free(group->image_thumbnail_path);
 					group->image_thumbnail_path = strdup(full_path);
 				}
 				break;
 			case CTSVC_PROPERTY_GROUP_VIBRATION:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(group->vibration);
 				group->vibration = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_GROUP_MESSAGE_ALERT:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(group->message_alert);
 				group->message_alert = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_GROUP_EXTRA_DATA:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(group->extra_data);
 				group->extra_data = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_GROUP_IS_READ_ONLY:

@@ -139,6 +139,10 @@ static int __ctsvc_attribute_filter_create(ctsvc_composite_filter_s *com_filter,
 	}
 
 	filter = (ctsvc_attribute_filter_s *)calloc(1, sizeof(ctsvc_attribute_filter_s));
+	if (NULL == filter) {
+		CTS_ERR("calloc() Fail");
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
+	}
 	filter->filter_type = filter_type;
 	filter->property_id = property_id;
 	filter->match = match;
@@ -289,6 +293,10 @@ static int __ctsvc_attribute_filter_clone(ctsvc_attribute_filter_s *src, ctsvc_a
 {
 	ctsvc_attribute_filter_s *out;
 	out = (ctsvc_attribute_filter_s *)calloc(1, sizeof(ctsvc_attribute_filter_s));
+	if (NULL == out) {
+		CTS_ERR("calloc() Fail");
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
+	}
 	out->filter_type = src->filter_type;
 	out->property_id = src->property_id;
 	out->match = src->match;

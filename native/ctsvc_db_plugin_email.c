@@ -575,10 +575,12 @@ static int __ctsvc_db_email_get_records_with_query(contacts_query_h query, int o
 				break;
 			case CTSVC_PROPERTY_EMAIL_LABEL:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(email->label);
 				email->label = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_EMAIL_EMAIL:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(email->email_addr);
 				email->email_addr = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_EMAIL_IS_DEFAULT:

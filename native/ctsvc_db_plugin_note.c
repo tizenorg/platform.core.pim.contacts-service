@@ -380,6 +380,7 @@ static int __ctsvc_db_note_get_records_with_query(contacts_query_h query, int of
 				break;
 			case CTSVC_PROPERTY_NOTE_NOTE:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(note->note);
 				note->note = SAFE_STRDUP(temp);
 				break;
 			default:

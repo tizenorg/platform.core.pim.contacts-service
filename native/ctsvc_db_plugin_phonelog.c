@@ -332,6 +332,7 @@ static int __ctsvc_db_phonelog_get_records_with_query(contacts_query_h query, in
 				break;
 			case CTSVC_PROPERTY_PHONELOG_ADDRESS:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(phonelog->address);
 				phonelog->address = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_PHONELOG_LOG_TIME:
@@ -345,6 +346,7 @@ static int __ctsvc_db_phonelog_get_records_with_query(contacts_query_h query, in
 				break;
 			case CTSVC_PROPERTY_PHONELOG_EXTRA_DATA2:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(phonelog->extra_data2);
 				phonelog->extra_data2 = SAFE_STRDUP(temp);
 				break;
 #ifdef ENABLE_SIM_FEATURE

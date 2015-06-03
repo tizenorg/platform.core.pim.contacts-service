@@ -93,6 +93,10 @@ static inline int __ctsvc_collation_str(const char *src, char **dest)
 	UCollator *collator;
 
 	char *region = strdup(ctsvc_get_langset());
+	if (NULL == region) {
+		CTS_ERR("strdup() Fail");
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
+	}
 
 	char *dot = strchr(region, '.');
 	if (dot)

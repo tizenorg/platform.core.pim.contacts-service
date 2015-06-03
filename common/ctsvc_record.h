@@ -25,33 +25,40 @@
 #define __TIZEN_SOCIAL_CTSVC_RECORD_H__
 
 #define CTSVC_RECORD_INIT_BASE(base, type, cb, uri) do {\
-    (base)->r_type = (type);\
-    (base)->plugin_cbs = (cb);\
-    (base)->view_uri = (uri);\
-    (base)->property_max_count = 0;\
+	(base)->r_type = (type);\
+	(base)->plugin_cbs = (cb);\
+	(base)->view_uri = (uri);\
+	(base)->property_max_count = 0;\
 } while (0)
 
-#define CTSVC_RECORD_COPY_BASE(dest, src) do {\
-    (dest)->r_type = (src)->r_type;\
-    (dest)->plugin_cbs = (src)->plugin_cbs;\
-    (dest)->view_uri = (src)->view_uri;\
-    (dest)->property_max_count = (src)->property_max_count;\
-    (dest)->property_flag = (src)->property_flag;\
-    if ((src)->properties_flags) \
-    {\
-        (dest)->properties_flags  = calloc((dest)->property_max_count, sizeof(char));\
-		memcpy((dest)->properties_flags,(src)->properties_flags,sizeof(char)*(dest)->property_max_count);\
-    }\
-} while (0)
+static inline int ctsvc_record_copy_base(ctsvc_record_s *dest, ctsvc_record_s *src)
+{
+	dest->r_type = src->r_type;
+	dest->plugin_cbs = src->plugin_cbs;
+	dest->view_uri = src->view_uri;
+	dest->property_max_count = src->property_max_count;
+	dest->property_flag = src->property_flag;
+	if (src->properties_flags) {
+		dest->properties_flags = calloc(dest->property_max_count, sizeof(char));
+		if (NULL == dest->properties_flags) {
+			CTS_ERR("calloc() Fail");
+			return CONTACTS_ERROR_OUT_OF_MEMORY;
+		}
+		if (dest->properties_flags) {
+			memcpy(dest->properties_flags,src->properties_flags,sizeof(char)*dest->property_max_count);
+		}
+	}
+	return CONTACTS_ERROR_NONE;
+}
 
 #define CTSVC_RECORD_RESET_PROPERTY_FLAGS(base)do {\
-    if ((base)->properties_flags) \
-    {\
-        free((base)->properties_flags); \
-        (base)->property_max_count = 0;\
-        (base)->properties_flags = NULL;\
-        (base)->property_flag = 0;\
-    }\
+	if ((base)->properties_flags) \
+	{\
+		free((base)->properties_flags); \
+		(base)->property_max_count = 0;\
+		(base)->properties_flags = NULL;\
+		(base)->property_flag = 0;\
+	}\
 } while (0)
 
 int ctsvc_record_set_property_flag(ctsvc_record_s* _record, int property_id, contacts_property_flag_e flag);

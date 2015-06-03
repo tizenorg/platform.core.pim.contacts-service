@@ -71,50 +71,98 @@ static int __ctsvc_my_profile_create(contacts_record_h *out_record)
 	RETVM_IF(NULL == my_profile, CONTACTS_ERROR_OUT_OF_MEMORY,
 			"Out of memory : calloc is Fail");
 
-	my_profile->name = calloc(1, sizeof(ctsvc_list_s));
-	my_profile->name->l_type = CTSVC_RECORD_NAME;
+	do {
+		my_profile->name = calloc(1, sizeof(ctsvc_list_s));
+		if (NULL == my_profile->name)
+			break;
+		my_profile->name->l_type = CTSVC_RECORD_NAME;
 
-	my_profile->company = calloc(1, sizeof(ctsvc_list_s));
-	my_profile->company->l_type = CTSVC_RECORD_COMPANY;
+		my_profile->company = calloc(1, sizeof(ctsvc_list_s));
+		if (NULL == my_profile->company)
+			break;
+		my_profile->company->l_type = CTSVC_RECORD_COMPANY;
 
-	my_profile->note = calloc(1, sizeof(ctsvc_list_s));
-	my_profile->note->l_type = CTSVC_RECORD_NOTE;
+		my_profile->note = calloc(1, sizeof(ctsvc_list_s));
+		if (NULL == my_profile->note)
+			break;
+		my_profile->note->l_type = CTSVC_RECORD_NOTE;
 
-	my_profile->numbers = calloc(1, sizeof(ctsvc_list_s));
-	my_profile->numbers->l_type = CTSVC_RECORD_NUMBER;
+		my_profile->numbers = calloc(1, sizeof(ctsvc_list_s));
+		if (NULL == my_profile->numbers)
+			break;
+		my_profile->numbers->l_type = CTSVC_RECORD_NUMBER;
 
-	my_profile->emails = calloc(1, sizeof(ctsvc_list_s));
-	my_profile->emails->l_type = CTSVC_RECORD_EMAIL;
+		my_profile->emails = calloc(1, sizeof(ctsvc_list_s));
+		if (NULL == my_profile->emails)
+			break;
+		my_profile->emails->l_type = CTSVC_RECORD_EMAIL;
 
-	my_profile->events = calloc(1, sizeof(ctsvc_list_s));
-	my_profile->events->l_type = CTSVC_RECORD_EVENT;
+		my_profile->events = calloc(1, sizeof(ctsvc_list_s));
+		if (NULL == my_profile->events)
+			break;
+		my_profile->events->l_type = CTSVC_RECORD_EVENT;
 
-	my_profile->messengers = calloc(1, sizeof(ctsvc_list_s));
-	my_profile->messengers->l_type = CTSVC_RECORD_MESSENGER;
+		my_profile->messengers = calloc(1, sizeof(ctsvc_list_s));
+		if (NULL == my_profile->messengers)
+			break;
+		my_profile->messengers->l_type = CTSVC_RECORD_MESSENGER;
 
-	my_profile->postal_addrs = calloc(1, sizeof(ctsvc_list_s));
-	my_profile->postal_addrs->l_type = CTSVC_RECORD_ADDRESS;
+		my_profile->postal_addrs = calloc(1, sizeof(ctsvc_list_s));
+		if (NULL == my_profile->postal_addrs)
+			break;
+		my_profile->postal_addrs->l_type = CTSVC_RECORD_ADDRESS;
 
-	my_profile->urls = calloc(1, sizeof(ctsvc_list_s));
-	my_profile->urls->l_type = CTSVC_RECORD_URL;
+		my_profile->urls = calloc(1, sizeof(ctsvc_list_s));
+		if (NULL == my_profile->urls)
+			break;
+		my_profile->urls->l_type = CTSVC_RECORD_URL;
 
-	my_profile->nicknames = calloc(1, sizeof(ctsvc_list_s));
-	my_profile->nicknames->l_type = CTSVC_RECORD_NICKNAME;
+		my_profile->nicknames = calloc(1, sizeof(ctsvc_list_s));
+		if (NULL == my_profile->nicknames)
+			break;
+		my_profile->nicknames->l_type = CTSVC_RECORD_NICKNAME;
 
-	my_profile->profiles = calloc(1, sizeof(ctsvc_list_s));
-	my_profile->profiles->l_type = CTSVC_RECORD_PROFILE;
+		my_profile->profiles = calloc(1, sizeof(ctsvc_list_s));
+		if (NULL == my_profile->profiles)
+			break;
+		my_profile->profiles->l_type = CTSVC_RECORD_PROFILE;
 
-	my_profile->relationships = calloc(1, sizeof(ctsvc_list_s));
-	my_profile->relationships->l_type = CTSVC_RECORD_RELATIONSHIP;
+		my_profile->relationships = calloc(1, sizeof(ctsvc_list_s));
+		if (NULL == my_profile->relationships)
+			break;
+		my_profile->relationships->l_type = CTSVC_RECORD_RELATIONSHIP;
 
-	my_profile->images = calloc(1, sizeof(ctsvc_list_s));
-	my_profile->images->l_type = CTSVC_RECORD_IMAGE;
+		my_profile->images = calloc(1, sizeof(ctsvc_list_s));
+		if (NULL == my_profile->images)
+			break;
+		my_profile->images->l_type = CTSVC_RECORD_IMAGE;
 
-	my_profile->extensions = calloc(1, sizeof(ctsvc_list_s));
-	my_profile->extensions->l_type = CTSVC_RECORD_EXTENSION;
+		my_profile->extensions = calloc(1, sizeof(ctsvc_list_s));
+		if (NULL == my_profile->extensions)
+			break;
+		my_profile->extensions->l_type = CTSVC_RECORD_EXTENSION;
 
-	*out_record = (contacts_record_h)my_profile;
-	return CONTACTS_ERROR_NONE;
+		*out_record = (contacts_record_h)my_profile;
+		return CONTACTS_ERROR_NONE;
+	} while (0);
+
+	CTS_ERR("calloc() Fail");
+	free(my_profile->extensions);
+	free(my_profile->images);
+	free(my_profile->relationships);
+	free(my_profile->profiles);
+	free(my_profile->nicknames);
+	free(my_profile->urls);
+	free(my_profile->postal_addrs);
+	free(my_profile->messengers);
+	free(my_profile->events);
+	free(my_profile->emails);
+	free(my_profile->numbers);
+	free(my_profile->note);
+	free(my_profile->company);
+	free(my_profile->name);
+	free(my_profile);
+	return CONTACTS_ERROR_OUT_OF_MEMORY;
 }
 
 static int __ctsvc_my_profile_destroy(contacts_record_h record, bool delete_child)
@@ -586,7 +634,12 @@ static int __ctsvc_my_profile_clone(contacts_record_h record, contacts_record_h 
 	ctsvc_list_clone((contacts_list_h)src_data->extensions, (contacts_list_h*)&out_data->extensions);
 	out_data->extensions->l_type = CTSVC_RECORD_EXTENSION;
 
-	CTSVC_RECORD_COPY_BASE(&(out_data->base), &(src_data->base));
+	int ret = ctsvc_record_copy_base(&(out_data->base), &(src_data->base));
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("ctsvc_record_copy_base() Fail");
+		__ctsvc_my_profile_destroy((contacts_record_h)out_data, true);
+		return ret;
+	}
 
 	*out_record = (contacts_record_h)out_data;
 

@@ -654,6 +654,11 @@ static int __ctsvc_activity_create(contacts_record_h *out_record)
 			"Out of memory : calloc is Fail");
 
 	activity->photos = calloc(1, sizeof(ctsvc_list_s));
+	if (NULL == activity->photos) {
+		CTS_ERR("calloc() Fail");
+		free(activity);
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
+	}
 	activity->photos->l_type = CTSVC_RECORD_ACTIVITY_PHOTO;
 
 	*out_record = (contacts_record_h)activity;
@@ -1183,53 +1188,104 @@ static int __ctsvc_contact_create(contacts_record_h *out_record)
 	RETVM_IF(NULL == contact, CONTACTS_ERROR_OUT_OF_MEMORY,
 			"Out of memory : calloc is Fail");
 
-	contact->name = calloc(1, sizeof(ctsvc_list_s));
-	contact->name->l_type = CTSVC_RECORD_NAME;
+	do {
+		contact->name = calloc(1, sizeof(ctsvc_list_s));
+		if (NULL == contact->name)
+			break;
+		contact->name->l_type = CTSVC_RECORD_NAME;
 
-	contact->company = calloc(1, sizeof(ctsvc_list_s));
-	contact->company->l_type = CTSVC_RECORD_COMPANY;
+		contact->company = calloc(1, sizeof(ctsvc_list_s));
+		if (NULL == contact->company)
+			break;
+		contact->company->l_type = CTSVC_RECORD_COMPANY;
 
-	contact->note = calloc(1, sizeof(ctsvc_list_s));
-	contact->note->l_type = CTSVC_RECORD_NOTE;
+		contact->note = calloc(1, sizeof(ctsvc_list_s));
+		if (NULL == contact->note)
+			break;
+		contact->note->l_type = CTSVC_RECORD_NOTE;
 
-	contact->numbers = calloc(1, sizeof(ctsvc_list_s));
-	contact->numbers->l_type = CTSVC_RECORD_NUMBER;
+		contact->numbers = calloc(1, sizeof(ctsvc_list_s));
+		if (NULL == contact->numbers)
+			break;
+		contact->numbers->l_type = CTSVC_RECORD_NUMBER;
 
-	contact->emails = calloc(1, sizeof(ctsvc_list_s));
-	contact->emails->l_type = CTSVC_RECORD_EMAIL;
+		contact->emails = calloc(1, sizeof(ctsvc_list_s));
+		if (NULL == contact->emails)
+			break;
+		contact->emails->l_type = CTSVC_RECORD_EMAIL;
 
-	contact->grouprelations = calloc(1, sizeof(ctsvc_list_s));
-	contact->grouprelations->l_type = CTSVC_RECORD_GROUP_RELATION;
+		contact->grouprelations = calloc(1, sizeof(ctsvc_list_s));
+		if (NULL == contact->grouprelations)
+			break;
+		contact->grouprelations->l_type = CTSVC_RECORD_GROUP_RELATION;
 
-	contact->events = calloc(1, sizeof(ctsvc_list_s));
-	contact->events->l_type = CTSVC_RECORD_EVENT;
+		contact->events = calloc(1, sizeof(ctsvc_list_s));
+		if (NULL == contact->events)
+			break;
+		contact->events->l_type = CTSVC_RECORD_EVENT;
 
-	contact->messengers = calloc(1, sizeof(ctsvc_list_s));
-	contact->messengers->l_type = CTSVC_RECORD_MESSENGER;
+		contact->messengers = calloc(1, sizeof(ctsvc_list_s));
+		if (NULL == contact->messengers)
+			break;
+		contact->messengers->l_type = CTSVC_RECORD_MESSENGER;
 
-	contact->postal_addrs = calloc(1, sizeof(ctsvc_list_s));
-	contact->postal_addrs->l_type = CTSVC_RECORD_ADDRESS;
+		contact->postal_addrs = calloc(1, sizeof(ctsvc_list_s));
+		if (NULL == contact->postal_addrs)
+			break;
+		contact->postal_addrs->l_type = CTSVC_RECORD_ADDRESS;
 
-	contact->urls = calloc(1, sizeof(ctsvc_list_s));
-	contact->urls->l_type = CTSVC_RECORD_URL;
+		contact->urls = calloc(1, sizeof(ctsvc_list_s));
+		if (NULL == contact->urls)
+			break;
+		contact->urls->l_type = CTSVC_RECORD_URL;
 
-	contact->nicknames = calloc(1, sizeof(ctsvc_list_s));
-	contact->nicknames->l_type = CTSVC_RECORD_NICKNAME;
+		contact->nicknames = calloc(1, sizeof(ctsvc_list_s));
+		if (NULL == contact->nicknames)
+			break;
+		contact->nicknames->l_type = CTSVC_RECORD_NICKNAME;
 
-	contact->profiles = calloc(1, sizeof(ctsvc_list_s));
-	contact->profiles->l_type = CTSVC_RECORD_PROFILE;
+		contact->profiles = calloc(1, sizeof(ctsvc_list_s));
+		if (NULL == contact->profiles)
+			break;
+		contact->profiles->l_type = CTSVC_RECORD_PROFILE;
 
-	contact->relationships = calloc(1, sizeof(ctsvc_list_s));
-	contact->relationships->l_type = CTSVC_RECORD_RELATIONSHIP;
+		contact->relationships = calloc(1, sizeof(ctsvc_list_s));
+		if (NULL == contact->relationships)
+			break;
+		contact->relationships->l_type = CTSVC_RECORD_RELATIONSHIP;
 
-	contact->images = calloc(1, sizeof(ctsvc_list_s));
-	contact->images->l_type = CTSVC_RECORD_IMAGE;
+		contact->images = calloc(1, sizeof(ctsvc_list_s));
+		if (NULL == contact->images)
+			break;
+		contact->images->l_type = CTSVC_RECORD_IMAGE;
 
-	contact->extensions = calloc(1, sizeof(ctsvc_list_s));
-	contact->extensions->l_type = CTSVC_RECORD_EXTENSION;
+		contact->extensions = calloc(1, sizeof(ctsvc_list_s));
+		if (NULL == contact->extensions)
+			break;
+		contact->extensions->l_type = CTSVC_RECORD_EXTENSION;
 
-	*out_record = (contacts_record_h)contact;
-	return CONTACTS_ERROR_NONE;
+		*out_record = (contacts_record_h)contact;
+		return CONTACTS_ERROR_NONE;
+	} while (0);
+
+	CTS_ERR("calloc() Fail");
+	free(contact->extensions);
+	free(contact->images);
+	free(contact->relationships);
+	free(contact->profiles);
+	free(contact->nicknames);
+	free(contact->urls);
+	free(contact->postal_addrs);
+	free(contact->messengers);
+	free(contact->events);
+	free(contact->grouprelations);
+	free(contact->emails);
+	free(contact->numbers);
+	free(contact->note);
+	free(contact->company);
+	free(contact->name);
+	free(contact);
+	return CONTACTS_ERROR_OUT_OF_MEMORY;
 }
 
 static int __ctsvc_contact_destroy(contacts_record_h record, bool delete_child)
@@ -1935,6 +1991,7 @@ static int __ctsvc_email_set_int(contacts_record_h record, unsigned int property
 	switch(property_id) {
 	case CTSVC_PROPERTY_EMAIL_ID:
 		email->id = value;
+		break;
 	case CTSVC_PROPERTY_EMAIL_CONTACT_ID:
 		RETVM_IF(0 < email->id, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (email)", property_id);
@@ -3946,7 +4003,12 @@ static int __ctsvc_contact_clone(contacts_record_h record, contacts_record_h *ou
 	ctsvc_list_clone((contacts_list_h)src_data->extensions, (contacts_list_h*)&out_data->extensions);
 	out_data->extensions->l_type = CTSVC_RECORD_EXTENSION;
 
-	CTSVC_RECORD_COPY_BASE(&(out_data->base), &(src_data->base));
+	int ret = ctsvc_record_copy_base(&(out_data->base), &(src_data->base));
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("ctsvc_record_copy_base() Fail");
+		__ctsvc_contact_destroy((contacts_record_h)out_data, true);
+		return ret;
+	}
 
 	*out_record = (contacts_record_h)out_data;
 
@@ -3975,7 +4037,12 @@ static int __ctsvc_activity_clone(contacts_record_h record, contacts_record_h *o
 	ctsvc_list_clone((contacts_list_h)src_data->photos, (contacts_list_h*)&out_data->photos);
 	out_data->photos->l_type = CTSVC_RECORD_ACTIVITY_PHOTO;
 
-	CTSVC_RECORD_COPY_BASE(&(out_data->base), &(src_data->base));
+	int ret = ctsvc_record_copy_base(&(out_data->base), &(src_data->base));
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("ctsvc_record_copy_base() Fail");
+		__ctsvc_activity_destroy((contacts_record_h)out_data, true);
+		return ret;
+	}
 
 	*out_record = (contacts_record_h)out_data;
 	return CONTACTS_ERROR_NONE;
@@ -3996,7 +4063,12 @@ static int __ctsvc_activity_photo_clone(contacts_record_h record, contacts_recor
 	out_data->photo_url = SAFE_STRDUP(src_data->photo_url);
 	out_data->sort_index = src_data->sort_index;
 
-	CTSVC_RECORD_COPY_BASE(&(out_data->base), &(src_data->base));
+	int ret = ctsvc_record_copy_base(&(out_data->base), &(src_data->base));
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("ctsvc_record_copy_base() Fail");
+		__ctsvc_activity_photo_destroy((contacts_record_h)out_data, true);
+		return ret;
+	}
 
 	*out_record = (contacts_record_h)out_data;
 	return CONTACTS_ERROR_NONE;
@@ -4025,7 +4097,12 @@ static int __ctsvc_address_clone(contacts_record_h record, contacts_record_h *ou
 	out_data->extended = SAFE_STRDUP(src_data->extended);
 	out_data->country = SAFE_STRDUP(src_data->country);
 
-	CTSVC_RECORD_COPY_BASE(&(out_data->base), &(src_data->base));
+	int ret = ctsvc_record_copy_base(&(out_data->base), &(src_data->base));
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("ctsvc_record_copy_base() Fail");
+		__ctsvc_address_destroy((contacts_record_h)out_data, true);
+		return ret;
+	}
 
 	*out_record = (contacts_record_h)out_data;
 	return CONTACTS_ERROR_NONE;
@@ -4059,7 +4136,12 @@ static int __ctsvc_company_clone(contacts_record_h record, contacts_record_h *ou
 	out_data->description = SAFE_STRDUP(src_data->description);
 	out_data->phonetic_name = SAFE_STRDUP(src_data->phonetic_name);
 
-	CTSVC_RECORD_COPY_BASE(&(out_data->base), &(src_data->base));
+	int ret = ctsvc_record_copy_base(&(out_data->base), &(src_data->base));
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("ctsvc_record_copy_base() Fail");
+		__ctsvc_company_destroy((contacts_record_h)out_data, true);
+		return ret;
+	}
 
 	*out_record = (contacts_record_h)out_data;
 	return CONTACTS_ERROR_NONE;
@@ -4082,7 +4164,12 @@ static int __ctsvc_email_clone(contacts_record_h record, contacts_record_h *out_
 	out_data->label = SAFE_STRDUP(src_data->label);
 	out_data->email_addr = SAFE_STRDUP(src_data->email_addr);
 
-	CTSVC_RECORD_COPY_BASE(&(out_data->base), &(src_data->base));
+	int ret = ctsvc_record_copy_base(&(out_data->base), &(src_data->base));
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("ctsvc_record_copy_base() Fail");
+		__ctsvc_email_destroy((contacts_record_h)out_data, true);
+		return ret;
+	}
 
 	*out_record = (contacts_record_h)out_data;
 	return CONTACTS_ERROR_NONE;
@@ -4106,7 +4193,12 @@ static int __ctsvc_event_clone(contacts_record_h record, contacts_record_h *out_
 	out_data->calendar_type = src_data->calendar_type;
 	out_data->is_leap_month = src_data->is_leap_month;
 
-	CTSVC_RECORD_COPY_BASE(&(out_data->base), &(src_data->base));
+	int ret = ctsvc_record_copy_base(&(out_data->base), &(src_data->base));
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("ctsvc_record_copy_base() Fail");
+		__ctsvc_event_destroy((contacts_record_h)out_data, true);
+		return ret;
+	}
 
 	*out_record = (contacts_record_h)out_data;
 	return CONTACTS_ERROR_NONE;
@@ -4138,7 +4230,12 @@ static int __ctsvc_extension_clone(contacts_record_h record, contacts_record_h *
 	out_data->data11 = SAFE_STRDUP(src_data->data11);
 	out_data->data12 = SAFE_STRDUP(src_data->data12);
 
-	CTSVC_RECORD_COPY_BASE(&(out_data->base), &(src_data->base));
+	int ret = ctsvc_record_copy_base(&(out_data->base), &(src_data->base));
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("ctsvc_record_copy_base() Fail");
+		__ctsvc_extension_destroy((contacts_record_h)out_data, true);
+		return ret;
+	}
 
 	*out_record = (contacts_record_h)out_data;
 	return CONTACTS_ERROR_NONE;
@@ -4159,7 +4256,12 @@ static int __ctsvc_group_relation_clone(contacts_record_h record, contacts_recor
 	out_data->contact_id = src_data->contact_id;
 	out_data->group_name = SAFE_STRDUP(src_data->group_name);
 
-	CTSVC_RECORD_COPY_BASE(&(out_data->base), &(src_data->base));
+	int ret = ctsvc_record_copy_base(&(out_data->base), &(src_data->base));
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("ctsvc_record_copy_base() Fail");
+		__ctsvc_group_relation_destroy((contacts_record_h)out_data, true);
+		return ret;
+	}
 
 	*out_record = (contacts_record_h)out_data;
 	return CONTACTS_ERROR_NONE;
@@ -4181,7 +4283,12 @@ static int __ctsvc_messenger_clone(contacts_record_h record, contacts_record_h *
 	out_data->label = SAFE_STRDUP(src_data->label);
 	out_data->im_id = SAFE_STRDUP(src_data->im_id);
 
-	CTSVC_RECORD_COPY_BASE(&(out_data->base), &(src_data->base));
+	int ret = ctsvc_record_copy_base(&(out_data->base), &(src_data->base));
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("ctsvc_record_copy_base() Fail");
+		__ctsvc_messenger_destroy((contacts_record_h)out_data, true);
+		return ret;
+	}
 
 	*out_record = (contacts_record_h)out_data;
 	return CONTACTS_ERROR_NONE;
@@ -4212,7 +4319,12 @@ static int __ctsvc_name_clone(contacts_record_h record, contacts_record_h *out_r
 	out_data->lookup = SAFE_STRDUP(src_data->lookup);
 	out_data->reverse_lookup = SAFE_STRDUP(src_data->reverse_lookup);
 
-	CTSVC_RECORD_COPY_BASE(&(out_data->base), &(src_data->base));
+	int ret = ctsvc_record_copy_base(&(out_data->base), &(src_data->base));
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("ctsvc_record_copy_base() Fail");
+		__ctsvc_name_destroy((contacts_record_h)out_data, true);
+		return ret;
+	}
 
 	*out_record = (contacts_record_h)out_data;
 	return CONTACTS_ERROR_NONE;
@@ -4234,7 +4346,12 @@ static int __ctsvc_nickname_clone(contacts_record_h record, contacts_record_h *o
 	out_data->label = SAFE_STRDUP(src_data->label);
 	out_data->nickname = SAFE_STRDUP(src_data->nickname);
 
-	CTSVC_RECORD_COPY_BASE(&(out_data->base), &(src_data->base));
+	int ret = ctsvc_record_copy_base(&(out_data->base), &(src_data->base));
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("ctsvc_record_copy_base() Fail");
+		__ctsvc_nickname_destroy((contacts_record_h)out_data, true);
+		return ret;
+	}
 
 	*out_record = (contacts_record_h)out_data;
 	return CONTACTS_ERROR_NONE;
@@ -4254,7 +4371,12 @@ static int __ctsvc_note_clone(contacts_record_h record, contacts_record_h *out_r
 	out_data->contact_id = src_data->contact_id;
 	out_data->note = SAFE_STRDUP(src_data->note);
 
-	CTSVC_RECORD_COPY_BASE(&(out_data->base), &(src_data->base));
+	int ret = ctsvc_record_copy_base(&(out_data->base), &(src_data->base));
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("ctsvc_record_copy_base() Fail");
+		__ctsvc_note_destroy((contacts_record_h)out_data, true);
+		return ret;
+	}
 
 	*out_record = (contacts_record_h)out_data;
 	return CONTACTS_ERROR_NONE;
@@ -4278,7 +4400,12 @@ static int __ctsvc_number_clone(contacts_record_h record, contacts_record_h *out
 	out_data->number = SAFE_STRDUP(src_data->number);
 	out_data->lookup = SAFE_STRDUP(src_data->lookup);
 
-	CTSVC_RECORD_COPY_BASE(&(out_data->base), &(src_data->base));
+	int ret = ctsvc_record_copy_base(&(out_data->base), &(src_data->base));
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("ctsvc_record_copy_base() Fail");
+		__ctsvc_number_destroy((contacts_record_h)out_data, true);
+		return ret;
+	}
 
 	*out_record = (contacts_record_h)out_data;
 	return CONTACTS_ERROR_NONE;
@@ -4306,7 +4433,12 @@ static int __ctsvc_profile_clone(contacts_record_h record, contacts_record_h *ou
 	out_data->category = SAFE_STRDUP(src_data->category);
 	out_data->extra_data = SAFE_STRDUP(src_data->extra_data);
 
-	CTSVC_RECORD_COPY_BASE(&(out_data->base), &(src_data->base));
+	int ret = ctsvc_record_copy_base(&(out_data->base), &(src_data->base));
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("ctsvc_record_copy_base() Fail");
+		__ctsvc_profile_destroy((contacts_record_h)out_data, true);
+		return ret;
+	}
 
 	*out_record = (contacts_record_h)out_data;
 
@@ -4329,7 +4461,12 @@ static int __ctsvc_relationship_clone(contacts_record_h record, contacts_record_
 	out_data->label = SAFE_STRDUP(src_data->label);
 	out_data->name = SAFE_STRDUP(src_data->name);
 
-	CTSVC_RECORD_COPY_BASE(&(out_data->base), &(src_data->base));
+	int ret = ctsvc_record_copy_base(&(out_data->base), &(src_data->base));
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("ctsvc_record_copy_base() Fail");
+		__ctsvc_relationship_destroy((contacts_record_h)out_data, true);
+		return ret;
+	}
 
 	*out_record = (contacts_record_h)out_data;
 	return CONTACTS_ERROR_NONE;
@@ -4355,7 +4492,12 @@ static int __ctsvc_image_clone(contacts_record_h record, contacts_record_h *out_
 		__ctsvc_temp_image_hash_table_insert(src_data->path);
 	out_data->path = SAFE_STRDUP(src_data->path);
 
-	CTSVC_RECORD_COPY_BASE(&(out_data->base), &(src_data->base));
+	int ret = ctsvc_record_copy_base(&(out_data->base), &(src_data->base));
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("ctsvc_record_copy_base() Fail");
+		__ctsvc_image_destroy((contacts_record_h)out_data, true);
+		return ret;
+	}
 
 	*out_record = (contacts_record_h)out_data;
 	return CONTACTS_ERROR_NONE;
@@ -4387,7 +4529,12 @@ static int __ctsvc_simple_contact_clone(contacts_record_h record, contacts_recor
 	out_data->message_alert = SAFE_STRDUP(src_data->message_alert);
 	out_data->image_thumbnail_path = SAFE_STRDUP(src_data->image_thumbnail_path);
 
-	CTSVC_RECORD_COPY_BASE(&(out_data->base), &(src_data->base));
+	int ret = ctsvc_record_copy_base(&(out_data->base), &(src_data->base));
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("ctsvc_record_copy_base() Fail");
+		__ctsvc_simple_contact_destroy((contacts_record_h)out_data, true);
+		return ret;
+	}
 
 	*out_record = (contacts_record_h)out_data;
 	return CONTACTS_ERROR_NONE;
@@ -4409,7 +4556,12 @@ static int __ctsvc_url_clone(contacts_record_h record, contacts_record_h *out_re
 	out_data->label = SAFE_STRDUP(src_data->label);
 	out_data->url = SAFE_STRDUP(src_data->url);
 
-	CTSVC_RECORD_COPY_BASE(&(out_data->base), &(src_data->base));
+	int ret = ctsvc_record_copy_base(&(out_data->base), &(src_data->base));
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("ctsvc_record_copy_base() Fail");
+		__ctsvc_url_destroy((contacts_record_h)out_data, true);
+		return ret;
+	}
 
 	*out_record = (contacts_record_h)out_data;
 	return CONTACTS_ERROR_NONE;

@@ -643,15 +643,16 @@ static int __ctsvc_db_image_get_records_with_query(contacts_query_h query, int o
 				break;
 			case CTSVC_PROPERTY_IMAGE_LABEL:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(image->label);
 				image->label = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_IMAGE_PATH:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(image->path);
 				image->path = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_IMAGE_IS_DEFAULT:
-				temp = ctsvc_stmt_get_text(stmt, i);
-				image->is_default = SAFE_STRDUP(temp);
+				image->is_default = ctsvc_stmt_get_int(stmt, i);
 				break;
 			default:
 				break;

@@ -378,10 +378,12 @@ static int __ctsvc_db_url_get_records_with_query(contacts_query_h query, int off
 				break;
 			case CTSVC_PROPERTY_URL_LABEL:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(url->label);
 				url->label = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_URL_URL:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(url->url);
 				url->url = SAFE_STRDUP(temp);
 				break;
 			default:

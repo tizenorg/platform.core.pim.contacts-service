@@ -395,42 +395,52 @@ static int __ctsvc_db_company_get_records_with_query(contacts_query_h query, int
 				break;
 			case CTSVC_PROPERTY_COMPANY_LABEL:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(company->label);
 				company->label = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_COMPANY_NAME:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(company->name);
 				company->name = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_COMPANY_DEPARTMENT:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(company->department);
 				company->department = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_COMPANY_JOB_TITLE:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(company->job_title);
 				company->job_title = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_COMPANY_ASSISTANT_NAME:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(company->assistant_name);
 				company->assistant_name = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_COMPANY_ROLE:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(company->role);
 				company->role = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_COMPANY_LOGO:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(company->logo);
 				company->logo = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_COMPANY_LOCATION:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(company->location);
 				company->location = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_COMPANY_DESCRIPTION:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(company->description);
 				company->description = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_COMPANY_PHONETIC_NAME:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(company->phonetic_name);
 				company->phonetic_name = SAFE_STRDUP(temp);
 				break;
 			default:

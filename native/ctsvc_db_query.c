@@ -676,6 +676,12 @@ static inline int __ctsvc_db_create_composite_condition(ctsvc_composite_filter_s
 
 	buf_size = CTSVC_FILTER_LENGTH;
 	out_cond = calloc(1, buf_size);
+	if (NULL == out_cond) {
+		CTS_ERR("calloc() Fail");
+		free(cond);
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
+	}
+
 	len = 0;
 	if (cond) {
 		temp_len = SAFE_SNPRINTF(&out_cond, &buf_size, len, "(");
@@ -945,6 +951,11 @@ int ctsvc_db_make_get_records_query_stmt(ctsvc_query_s *s_query, int offset, int
 
 	query_size = CTS_SQL_MAX_LEN;
 	query = calloc(1, query_size);
+	if (NULL == query) {
+		CTS_ERR("calloc() Fail");
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
+	}
+
 	len = 0;
 	if (s_query->distinct)
 		temp_len = SAFE_SNPRINTF(&query, &query_size, len, "SELECT DISTINCT ");
@@ -1342,6 +1353,10 @@ static int __ctsvc_db_append_search_query(const char *src, char **query, int *qu
 
 	char *search_keyword = NULL;
 	search_keyword = __ctsvc_db_make_search_keyword(keyword);
+	if (NULL == search_keyword) {
+		CTS_ERR("__ctsvc_db_make_search_keyword() Fail");
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
+	}
 
 	if (phonenumber) {
 		temp_len = SAFE_SNPRINTF(query, query_size, len, "(SELECT contact_id FROM ");
@@ -1738,6 +1753,11 @@ static int __ctsvc_db_search_records_append_sort(const char *view_uri,
 		}
 		else {
 			temp_keyword = __ctsvc_db_get_str_with_escape((char*)keyword, strlen((char*)keyword), true);
+			if (NULL == temp_keyword) {
+				CTS_ERR("__ctsvc_db_get_str_with_escape() Fail");
+				return CONTACTS_ERROR_OUT_OF_MEMORY;
+			}
+
 			char temp_str[CTS_SQL_MIN_LEN + (strlen(field) + strlen(temp_keyword)) * SORT_CHECK_LEN];
 			snprintf(temp_str, sizeof(temp_str),
 							" ORDER BY "
@@ -1795,6 +1815,11 @@ static int __ctsvc_db_search_records_exec(const char *view_uri, const property_i
 
 	query_size = CTS_SQL_MAX_LEN;
 	query = calloc(1, query_size);
+	if (NULL == query) {
+		CTS_ERR("calloc() Fail");
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
+	}
+
 	len = 0;
 
 	if (STRING_EQUAL == strcmp(keyword, "+")) {
@@ -1878,6 +1903,11 @@ static int __ctsvc_db_search_records_exec(const char *view_uri, const property_i
 			}
 			else {
 				char *temp_keyword = __ctsvc_db_get_str_with_escape((char*)keyword, strlen((char*)keyword), true);
+				if (NULL == temp_keyword) {
+					CTS_ERR("__ctsvc_db_get_str_with_escape() Fail");
+					free(query);
+					return CONTACTS_ERROR_OUT_OF_MEMORY;
+				}
 				temp_len = SAFE_SNPRINTF(&query, &query_size, len, " SELECT * FROM ");
 				if (0 <= temp_len) len+= temp_len;
 				temp_len = SAFE_SNPRINTF(&query, &query_size, len, table);
@@ -1953,6 +1983,11 @@ static int __ctsvc_db_search_records_exec(const char *view_uri, const property_i
 		if (range & CONTACTS_SEARCH_RANGE_EMAIL) {
 			/* search contact which has email address started with keyword */
 			char *temp_keyword = __ctsvc_db_get_str_with_escape((char*)keyword, strlen((char*)keyword), true);
+			if (NULL == temp_keyword) {
+				CTS_ERR("__ctsvc_db_get_str_with_escape() Fail");
+				free(query);
+				return CONTACTS_ERROR_OUT_OF_MEMORY;
+			}
 			temp_len = SAFE_SNPRINTF(&query, &query_size, len, "SELECT * FROM ");
 			if (0 <= temp_len) len+= temp_len;
 			temp_len = SAFE_SNPRINTF(&query, &query_size, len, table);
@@ -2186,6 +2221,11 @@ static inline int __ctsvc_db_search_records_with_query_exec(ctsvc_query_s *s_que
 
 	query_size = CTS_SQL_MAX_LEN;
 	query = calloc(1, query_size);
+	if (NULL == query) {
+		CTS_ERR("calloc() Fail");
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
+	}
+
 	len = 0;
 
 	if (s_query->distinct)
@@ -2639,6 +2679,11 @@ static int __ctsvc_db_get_count_with_query_exec(ctsvc_query_s *s_query, const ch
 
 	query_size = CTS_SQL_MAX_LEN;
 	query = calloc(1, query_size);
+	if (NULL == query) {
+		CTS_ERR("calloc() Fail");
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
+	}
+
 	len = 0;
 	if (s_query->distinct) {
 		temp_len = SAFE_SNPRINTF(&query, &query_size, len, "SELECT COUNT(*) FROM (SELECT DISTINCT ");

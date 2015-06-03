@@ -80,6 +80,10 @@ int ctsvc_contact_add_image_file(int parent_id, int img_id,
 
 	lower_ext = strdup(ext);
 	temp = lower_ext;
+	if (NULL == temp) {
+		CTS_ERR("strdup() Fail");
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
+	}
 	while (*temp) {
 		*temp = tolower(*temp);
 		temp++;
@@ -380,6 +384,11 @@ int ctsvc_contact_make_search_name(ctsvc_contact_s *contact, char **search_name)
 				if (normalized_display_name) {
 					buf_size = SAFE_STRLEN(normalized_display_name) + strlen(contact->sort_name) + 2;
 					name = calloc(1, buf_size);
+					if (NULL == name) {
+						CTS_ERR("calloc() Fail");
+						free(normalized_display_name);
+						return CONTACTS_ERROR_OUT_OF_MEMORY;
+					}
 					snprintf(name, buf_size, "%s %s", normalized_display_name, contact->sort_name);
 					free(normalized_display_name);
 				}
@@ -394,6 +403,11 @@ int ctsvc_contact_make_search_name(ctsvc_contact_s *contact, char **search_name)
 					if (CONTACTS_ERROR_NONE == ret) {
 						int name_len = (CHINESE_PINYIN_SPELL_MAX_LEN*strlen(contact->display_name)+1) * sizeof(char);
 						char *name_nospace = calloc(1, name_len);
+						if (NULL == name_nospace) {
+							CTS_ERR("calloc() Fail");
+							ctsvc_pinyin_free(pinyinname, size);
+							return CONTACTS_ERROR_OUT_OF_MEMORY;
+						}
 						char *temp_name = NULL;
 
 						ctsvc_normalize_str(contact->display_name, &name);
@@ -407,6 +421,13 @@ int ctsvc_contact_make_search_name(ctsvc_contact_s *contact, char **search_name)
 													+ SAFE_STRLEN(pinyinname[i].pinyin_initial)
 													+ 4;
 								temp_name = calloc(1, buf_size);
+								if (NULL == temp_name) {
+									CTS_ERR("calloc() Fail");
+									free(name_nospace);
+									ctsvc_pinyin_free(pinyinname, size);
+									free(name);
+									return CONTACTS_ERROR_OUT_OF_MEMORY;
+								}
 								snprintf(temp_name, buf_size, "%s %s %s %s",
 										name, pinyinname[i].pinyin_name, name_nospace, pinyinname[i].pinyin_initial);
 								free(name);
@@ -420,7 +441,13 @@ int ctsvc_contact_make_search_name(ctsvc_contact_s *contact, char **search_name)
 
 							buf_size = SAFE_STRLEN(name) + SAFE_STRLEN(&contact->display_name[i]) + 2;
 							temp_name = calloc(1, buf_size);
-
+							if (NULL == temp_name) {
+								CTS_ERR("calloc() Fail");
+								free(name_nospace);
+								ctsvc_pinyin_free(pinyinname, size);
+								free(name);
+								return CONTACTS_ERROR_OUT_OF_MEMORY;
+							}
 							snprintf(temp_name, buf_size, "%s %s", name, &contact->display_name[i]);
 
 							free(name);
@@ -439,6 +466,11 @@ int ctsvc_contact_make_search_name(ctsvc_contact_s *contact, char **search_name)
 							__ctsvc_contact_get_initial(contact->display_name, initial, sizeof(initial), false);
 							buf_size = SAFE_STRLEN(normalized_display_name) + strlen(initial) + 2;
 							name = calloc(1, buf_size);
+							if (NULL == name) {
+								CTS_ERR("calloc() Fail");
+								free(normalized_display_name);
+								return CONTACTS_ERROR_OUT_OF_MEMORY;
+							}
 							snprintf(name, buf_size, "%s %s", normalized_display_name, initial);
 
 							free(normalized_display_name);
@@ -454,6 +486,11 @@ int ctsvc_contact_make_search_name(ctsvc_contact_s *contact, char **search_name)
 						__ctsvc_contact_get_initial(contact->display_name, initial, sizeof(initial), false);
 						buf_size = SAFE_STRLEN(normalized_display_name) + strlen(initial) + 2;
 						name = calloc(1, buf_size);
+						if (NULL == name) {
+							CTS_ERR("calloc() Fail");
+							free(normalized_display_name);
+							return CONTACTS_ERROR_OUT_OF_MEMORY;
+						}
 						snprintf(name, buf_size, "%s %s", normalized_display_name, initial);
 
 						free(normalized_display_name);
@@ -466,6 +503,10 @@ int ctsvc_contact_make_search_name(ctsvc_contact_s *contact, char **search_name)
 			int count, i, j;
 			int full_len, chosung_len;
 			char *chosung = calloc(1, strlen(contact->display_name) * 5);
+			if (NULL == chosung) {
+				CTS_ERR("calloc() Fail");
+				return CONTACTS_ERROR_OUT_OF_MEMORY;
+			}
 			int total_len = strlen(contact->display_name);
 
 			count = ctsvc_get_chosung(contact->display_name, chosung, strlen(contact->display_name) * 5);
@@ -479,6 +520,12 @@ int ctsvc_contact_make_search_name(ctsvc_contact_s *contact, char **search_name)
 
 					buf_size = SAFE_STRLEN(name) + SAFE_STRLEN(&contact->display_name[i]) + SAFE_STRLEN(&chosung[j]) + 3;
 					temp_name = calloc(1, buf_size);
+					if (NULL == temp_name) {
+						CTS_ERR("calloc() Fail");
+						free(chosung);
+						free(name);
+						return CONTACTS_ERROR_OUT_OF_MEMORY;
+					}
 
 					snprintf(temp_name, buf_size, "%s %s %s", name, &contact->display_name[i], &chosung[j]);
 
@@ -501,6 +548,11 @@ int ctsvc_contact_make_search_name(ctsvc_contact_s *contact, char **search_name)
 				__ctsvc_contact_get_initial(contact->display_name, initial, sizeof(initial), false);
 				buf_size = SAFE_STRLEN(normalized_display_name) + strlen(initial) + 2;
 				name = calloc(1, buf_size);
+				if (NULL == name) {
+					CTS_ERR("calloc() Fail");
+					free(normalized_display_name);
+					return CONTACTS_ERROR_OUT_OF_MEMORY;
+				}
 				snprintf(name, buf_size, "%s %s", normalized_display_name, initial);
 
 				free(normalized_display_name);
@@ -522,6 +574,12 @@ int ctsvc_contact_make_search_name(ctsvc_contact_s *contact, char **search_name)
 			if (0 < buf_size) {
 				buf_size += 3; /* for space and null string */
 				phonetic = calloc(1, buf_size);
+				if (NULL == phonetic) {
+					CTS_ERR("calloc() Fail");
+					free(name);
+					return CONTACTS_ERROR_OUT_OF_MEMORY;
+				}
+
 				if (name_record->phonetic_first)
 					temp_len += snprintf(phonetic, buf_size, "%s", name_record->phonetic_first);
 				if (name_record->phonetic_middle) {
@@ -538,6 +596,12 @@ int ctsvc_contact_make_search_name(ctsvc_contact_s *contact, char **search_name)
 				if (name) {
 					buf_size = SAFE_STRLEN(name) + SAFE_STRLEN(phonetic) + 2;
 					temp_name = calloc(1, buf_size);
+					if (NULL == temp_name) {
+						CTS_ERR("calloc() Fail");
+						free(phonetic);
+						free(name);
+						return CONTACTS_ERROR_OUT_OF_MEMORY;
+					}
 					snprintf(temp_name, buf_size, "%s %s", name, phonetic);
 					free(name);
 					name = temp_name;
@@ -559,6 +623,10 @@ static int __ctsvc_make_phonetic_name(ctsvc_name_s* name, char** phonetic, conta
 	if (0 < len) {
 		len += 3; /* for space and null string */
 		*phonetic = calloc(1, len);
+		if (NULL == *phonetic) {
+			CTS_ERR("calloc() Fail");
+			return CONTACTS_ERROR_OUT_OF_MEMORY;
+		}
 
 		int temp_len = 0;
 		if (order == CONTACTS_NAME_DISPLAY_ORDER_FIRSTLAST) {
@@ -591,7 +659,7 @@ static int __ctsvc_make_phonetic_name(ctsvc_name_s* name, char** phonetic, conta
 		}
 	}
 
-	return len;
+	return CONTACTS_ERROR_NONE;
 }
 
 static inline int __ctsvc_get_sort_name_to_pinyin(const char *display_name, char **sort_name) {
@@ -898,6 +966,10 @@ char * __ctsvc_remove_first_space(char *src)
 	int name_len = (SAFE_STRLEN(src)+1)*sizeof(char);
 	char *name_nospace = NULL;
 	name_nospace = calloc(1, name_len);
+	if (NULL == name_nospace) {
+		CTS_ERR("calloc() Fail");
+		return NULL;
+	}
 
 	int len = strlen(src);
 	int i =0;
@@ -969,6 +1041,10 @@ void ctsvc_contact_make_display_name(ctsvc_contact_s *contact)
 		if (0 < temp_display_len) {
 			temp_display_len += 7;
 			temp_display = calloc(1, temp_display_len);
+			if (NULL == temp_display) {
+				CTS_ERR("calloc() Fail");
+				return;
+			}
 			len=0;
 
 			/* get language type */
@@ -1070,6 +1146,11 @@ void ctsvc_contact_make_display_name(ctsvc_contact_s *contact)
 		if (name->prefix && temp_display) {
 			display_len = SAFE_STRLEN(name->prefix) + temp_display_len + 2;
 			display = calloc(1, display_len);
+			if (NULL == display) {
+				CTS_ERR("calloc() Fail");
+				free(temp_display);
+				return;
+			}
 			char * temp = __ctsvc_remove_first_space(name->prefix);
 			snprintf(display, display_len, "%s %s", temp, temp_display);
 			free(temp);
@@ -1110,6 +1191,10 @@ void ctsvc_contact_make_display_name(ctsvc_contact_s *contact)
 				temp_display_len += 6;
 				/* make reverse_temp_display_name */
 				temp_display = calloc(1, temp_display_len);
+				if (NULL == temp_display) {
+					CTS_ERR("calloc() Fail");
+					return;
+				}
 				len = 0;
 
 				if (name->first) {
@@ -1151,6 +1236,11 @@ void ctsvc_contact_make_display_name(ctsvc_contact_s *contact)
 			if (name->prefix && temp_display) {
 				display_len = SAFE_STRLEN(name->prefix) + temp_display_len + 2;
 				display = calloc(1, display_len);
+				if (NULL == display) {
+					CTS_ERR("calloc() Fail");
+					free(temp_display);
+					return;
+				}
 				snprintf(display, display_len, "%s %s", name->prefix, temp_display);
 				contact->display_name = display;
 				contact->sort_name = temp_display;
@@ -1188,6 +1278,7 @@ void ctsvc_contact_make_display_name(ctsvc_contact_s *contact)
 				ctsvc_nickname_s *nickname = (ctsvc_nickname_s *)cur->data;
 				if (nickname && nickname->nickname) {
 					ctsvc_record_set_property_flag((ctsvc_record_s *)contact, _contacts_contact.display_name, CTSVC_PROPERTY_FLAG_DIRTY);
+					free(contact->display_name);
 					contact->display_name = SAFE_STRDUP(nickname->nickname);
 					contact->display_source_type = CONTACTS_DISPLAY_NAME_SOURCE_TYPE_NICKNAME;
 					break;
@@ -1201,6 +1292,7 @@ void ctsvc_contact_make_display_name(ctsvc_contact_s *contact)
 				ctsvc_number_s *number = (ctsvc_number_s *)cur->data;
 				if (number && number->number) {
 					ctsvc_record_set_property_flag((ctsvc_record_s *)contact, _contacts_contact.display_name, CTSVC_PROPERTY_FLAG_DIRTY);
+					free(contact->display_name);
 					contact->display_name = SAFE_STRDUP(number->number);
 					contact->display_source_type = CONTACTS_DISPLAY_NAME_SOURCE_TYPE_NUMBER;
 					break;
@@ -1214,6 +1306,7 @@ void ctsvc_contact_make_display_name(ctsvc_contact_s *contact)
 				ctsvc_email_s *email = (ctsvc_email_s *)cur->data;
 				if (email && email->email_addr) {
 					ctsvc_record_set_property_flag((ctsvc_record_s *)contact, _contacts_contact.display_name, CTSVC_PROPERTY_FLAG_DIRTY);
+					free(contact->display_name);
 					contact->display_name = SAFE_STRDUP(email->email_addr);
 					contact->display_source_type = CONTACTS_DISPLAY_NAME_SOURCE_TYPE_EMAIL;
 					break;

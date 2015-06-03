@@ -471,6 +471,7 @@ static int __ctsvc_db_addressbook_get_records_with_query(contacts_query_h query,
 				break;
 			case CTSVC_PROPERTY_ADDRESSBOOK_NAME:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(addressbook->name);
 				addressbook->name = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_ADDRESSBOOK_MODE:

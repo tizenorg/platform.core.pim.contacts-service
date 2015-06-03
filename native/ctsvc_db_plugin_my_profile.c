@@ -432,6 +432,10 @@ static void __ctsvc_make_my_profile_display_name(ctsvc_my_profile_s *my_profile)
 		if (0 < temp_display_len) {
 			temp_display_len += 7;
 			temp_display = calloc(1, temp_display_len);
+			if (NULL == temp_display) {
+				CTS_ERR("calloc() Fail");
+				return;
+			}
 			len=0;
 
 			if (name->last) {
@@ -522,6 +526,11 @@ static void __ctsvc_make_my_profile_display_name(ctsvc_my_profile_s *my_profile)
 		if (name->prefix && temp_display) {
 			display_len = SAFE_STRLEN(name->prefix) + temp_display_len + 2;
 			display = calloc(1, display_len);
+			if (NULL == display) {
+				CTS_ERR("calloc() Fail");
+				free(temp_display);
+				return;
+			}
 			snprintf(display, display_len, "%s %s", name->prefix, temp_display);
 			my_profile->reverse_display_name = display;
 			free(temp_display);
@@ -555,6 +564,10 @@ static void __ctsvc_make_my_profile_display_name(ctsvc_my_profile_s *my_profile)
 				temp_display_len += 6;
 				/* make reverse_temp_display_name */
 				temp_display = calloc(1, temp_display_len);
+				if (NULL == temp_display) {
+					CTS_ERR("calloc() Fail");
+					return;
+				}
 				len = 0;
 
 				if (name->first) {
@@ -590,6 +603,11 @@ static void __ctsvc_make_my_profile_display_name(ctsvc_my_profile_s *my_profile)
 			if (name->prefix && temp_display) {
 				display_len = SAFE_STRLEN(name->prefix) + temp_display_len + 2;
 				display = calloc(1, display_len);
+				if (NULL == display) {
+					CTS_ERR("calloc() Fail");
+					free(temp_display);
+					return;
+				}
 				snprintf(display, display_len, "%s %s", name->prefix, temp_display);
 				my_profile->display_name = display;
 				free(temp_display);
@@ -623,6 +641,7 @@ static void __ctsvc_make_my_profile_display_name(ctsvc_my_profile_s *my_profile)
 				ctsvc_nickname_s *nickname = (ctsvc_nickname_s *)cur->data;
 				if (nickname && nickname->nickname) {
 					ctsvc_record_set_property_flag((ctsvc_record_s *)my_profile, _contacts_my_profile.display_name, CTSVC_PROPERTY_FLAG_DIRTY);
+					free(my_profile->display_name);
 					my_profile->display_name = SAFE_STRDUP(nickname->nickname);
 					break;
 				}
@@ -635,6 +654,7 @@ static void __ctsvc_make_my_profile_display_name(ctsvc_my_profile_s *my_profile)
 				ctsvc_number_s *number = (ctsvc_number_s *)cur->data;
 				if (number && number->number) {
 					ctsvc_record_set_property_flag((ctsvc_record_s *)my_profile, _contacts_my_profile.display_name, CTSVC_PROPERTY_FLAG_DIRTY);
+					free(my_profile->display_name);
 					my_profile->display_name = SAFE_STRDUP(number->number);
 					break;
 				}
@@ -647,6 +667,7 @@ static void __ctsvc_make_my_profile_display_name(ctsvc_my_profile_s *my_profile)
 				ctsvc_email_s *email = (ctsvc_email_s *)cur->data;
 				if (email && email->email_addr) {
 					ctsvc_record_set_property_flag((ctsvc_record_s *)my_profile, _contacts_my_profile.display_name, CTSVC_PROPERTY_FLAG_DIRTY);
+					free(my_profile->display_name);
 					my_profile->display_name = SAFE_STRDUP(email->email_addr);
 					break;
 				}
@@ -886,6 +907,10 @@ static int __ctsvc_db_my_profile_get_records_with_query(contacts_query_h query, 
 
 	if (false == had_my_profile_id) {
 		s_query->projection = realloc(s_query->projection, s_query->projection_count+1);
+		if (NULL == s_query->projection) {
+			CTS_ERR("realloc() Fail");
+			return CONTACTS_ERROR_OUT_OF_MEMORY;
+		}
 		s_query->projection[s_query->projection_count] = CTSVC_PROPERTY_MY_PROFILE_ID;
 		s_query->projection_count++;
 	}
@@ -932,6 +957,7 @@ static int __ctsvc_db_my_profile_get_records_with_query(contacts_query_h query, 
 				break;
 			case CTSVC_PROPERTY_MY_PROFILE_DISPLAY_NAME:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(my_profile->display_name);
 				my_profile->display_name = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_MY_PROFILE_ADDRESSBOOK_ID:
@@ -941,6 +967,7 @@ static int __ctsvc_db_my_profile_get_records_with_query(contacts_query_h query, 
 				temp = ctsvc_stmt_get_text(stmt, i);
 				if (temp) {
 					snprintf(full_path, sizeof(full_path), "%s/%s", CTSVC_CONTACT_IMG_FULL_LOCATION, temp);
+					free(my_profile->image_thumbnail_path);
 					my_profile->image_thumbnail_path = strdup(full_path);
 				}
 				break;
@@ -949,6 +976,7 @@ static int __ctsvc_db_my_profile_get_records_with_query(contacts_query_h query, 
 				break;
 			case CTSVC_PROPERTY_MY_PROFILE_UID:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(my_profile->uid);
 				my_profile->uid = SAFE_STRDUP(temp);
 				break;
 			default:

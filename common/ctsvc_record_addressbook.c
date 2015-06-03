@@ -90,7 +90,12 @@ static int __ctsvc_addressbook_clone(contacts_record_h record, contacts_record_h
 	RETVM_IF(NULL == dest, CONTACTS_ERROR_OUT_OF_MEMORY,
 			"Out of memory : calloc is Fail");
 
-	CTSVC_RECORD_COPY_BASE(&(dest->base), &(src->base));
+	int ret = ctsvc_record_copy_base(&(dest->base), &(src->base));
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("ctsvc_record_copy_base() Fail");
+		free(dest);
+		return ret;
+	}
 
 	dest->id = src->id;
 	dest->account_id = src->account_id;

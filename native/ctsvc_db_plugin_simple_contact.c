@@ -238,6 +238,7 @@ static int __ctsvc_db_simple_contact_get_records_with_query(contacts_query_h que
 				break;
 			case CTSVC_PROPERTY_CONTACT_DISPLAY_NAME:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(contact->display_name);
 				contact->display_name = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_CONTACT_DISPLAY_SOURCE_DATA_ID:
@@ -248,12 +249,14 @@ static int __ctsvc_db_simple_contact_get_records_with_query(contacts_query_h que
 				break;
 			case CTSVC_PROPERTY_CONTACT_RINGTONE:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(contact->ringtone_path);
 				contact->ringtone_path = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_CONTACT_IMAGE_THUMBNAIL:
 				temp = ctsvc_stmt_get_text(stmt, i);
 				if (temp && *temp) {
 					snprintf(full_path, sizeof(full_path), "%s/%s", CTSVC_CONTACT_IMG_FULL_LOCATION, temp);
+					free(contact->image_thumbnail_path);
 					contact->image_thumbnail_path = strdup(full_path);
 				}
 				break;
@@ -271,14 +274,17 @@ static int __ctsvc_db_simple_contact_get_records_with_query(contacts_query_h que
 				break;
 			case CTSVC_PROPERTY_CONTACT_UID:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(contact->uid);
 				contact->uid = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_CONTACT_VIBRATION:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(contact->vibration);
 				contact->vibration = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_CONTACT_MESSAGE_ALERT:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(contact->message_alert);
 				contact->message_alert = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_CONTACT_CHANGED_TIME:

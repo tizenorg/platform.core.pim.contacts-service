@@ -189,6 +189,7 @@ static int __ctsvc_db_grouprelation_get_records_with_query(contacts_query_h quer
 				break;
 			case CTSVC_PROPERTY_GROUP_RELATION_GROUP_NAME:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(group_relation->group_name);
 				group_relation->group_name = SAFE_STRDUP(temp);
 				break;
 			default:

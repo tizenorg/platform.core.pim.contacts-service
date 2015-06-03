@@ -246,6 +246,11 @@ void ctsvc_set_client_access_info(pims_ipc_h ipc, const char *smack)
 	info = __ctsvc_find_access_info(thread_id);
 	if (NULL == info) {
 		info = calloc(1, sizeof(ctsvc_permission_info_s));
+		if (NULL == info) {
+			CTS_ERR("Thread(0x%x), calloc() Fail", thread_id);
+			ctsvc_mutex_unlock(CTS_MUTEX_ACCESS_CONTROL);
+			return;
+		}
 		__thread_list  = g_list_append(__thread_list, info);
 	}
 	info->thread_id = thread_id;
@@ -344,16 +349,24 @@ bool ctsvc_have_ab_write_permission(int addressbook_id)
 
 int ctsvc_get_write_permitted_addressbook_ids(int **addressbook_ids, int *count)
 {
+	unsigned int thread_id;
 	ctsvc_permission_info_s *find = NULL;
 	*count = 0;
 	*addressbook_ids = NULL;
 
 	ctsvc_mutex_lock(CTS_MUTEX_ACCESS_CONTROL);
-	find = __ctsvc_find_access_info(pthread_self());
+	thread_id = (unsigned int)pthread_self();
+	find = __ctsvc_find_access_info(thread_id);
 	if (find) {
 		if (find->write_list && 0 < find->write_list_count) {
 			int size = find->write_list_count * sizeof(int);
 			int *list = calloc(1, size);
+			if (NULL == list) {
+				CTS_ERR("Thread(0x%x), calloc() Fail", thread_id);
+				ctsvc_mutex_unlock(CTS_MUTEX_ACCESS_CONTROL);
+				return CONTACTS_ERROR_OUT_OF_MEMORY;
+			}
+
 			memcpy(list, find->write_list, size);
 			*count = find->write_list_count;
 			*addressbook_ids = list;

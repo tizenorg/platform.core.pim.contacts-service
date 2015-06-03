@@ -102,17 +102,18 @@ static gboolean __ctsvc_inotify_gio_cb(GIOChannel *src, GIOCondition cond, gpoin
 			if (__noti_list)
 				__ctsvc_inotify_handle_callback(__noti_list, ie.wd, ie.mask);
 
-			while (0 < ie.len) {
+			while (0 != ie.len) {
 				ret = read(fd, name, (ie.len<sizeof(name))?ie.len:sizeof(name));
 				if (-1 == ret) {
 					if (EINTR == errno)
 						continue;
 					else
-						break;
+						return TRUE;
 				}
-				if (ie.len <= ret)
-					break;
-				ie.len -= ret;
+				if (ie.len < ret)
+					ie.len = 0;
+				else
+					ie.len -= ret;
 			}
 		}
 		else {
@@ -123,7 +124,7 @@ static gboolean __ctsvc_inotify_gio_cb(GIOChannel *src, GIOCondition cond, gpoin
 					if (EINTR == errno)
 						continue;
 					else
-						break;
+						return TRUE;
 				}
 				ret += read_size;
 			}

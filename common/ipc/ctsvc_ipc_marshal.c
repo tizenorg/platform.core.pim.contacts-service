@@ -657,12 +657,27 @@ int ctsvc_ipc_unmarshal_record_common(const pims_ipc_data_h ipc_data, ctsvc_reco
 	}
 
 	str = (char*)pims_ipc_data_get(ipc_data,&size);
+	if (NULL == str) {
+		CTS_ERR("pims_ipc_data_get() Fail");
+		return CONTACTS_ERROR_NO_DATA;
+	}
 	common->view_uri = ctsvc_view_get_uri(str);
-	common->property_max_count = *(unsigned int*)pims_ipc_data_get(ipc_data,&size);
+
+	tmp = pims_ipc_data_get(ipc_data,&size);
+	if (NULL == tmp) {
+		CTS_ERR("pims_ipc_data_get() Fail");
+		return CONTACTS_ERROR_NO_DATA;
+	}
+	common->property_max_count = *(unsigned int*)tmp;
 
 	if (0 < common->property_max_count) {
 		unsigned char *tmp_properties_flags;
 		tmp_properties_flags = (unsigned char*)pims_ipc_data_get(ipc_data, &size);
+		if (NULL == tmp_properties_flags) {
+			CTS_ERR("pims_ipc_data_get() Fail");
+			return CONTACTS_ERROR_NO_DATA;
+		}
+
 		common->properties_flags  = calloc(common->property_max_count, sizeof(char));
 		if (common->properties_flags == NULL) {
 			CTS_ERR("calloc() Fail");
@@ -671,6 +686,10 @@ int ctsvc_ipc_unmarshal_record_common(const pims_ipc_data_h ipc_data, ctsvc_reco
 		memcpy(common->properties_flags, tmp_properties_flags, sizeof(char)*common->property_max_count);
 	}
 	tmp = pims_ipc_data_get(ipc_data,&size);
+	if (NULL == tmp) {
+		CTS_ERR("pims_ipc_data_get() Fail");
+		return CONTACTS_ERROR_NO_DATA;
+	}
 	common->property_flag = *(unsigned char*)tmp;
 
 	return CONTACTS_ERROR_NONE;
