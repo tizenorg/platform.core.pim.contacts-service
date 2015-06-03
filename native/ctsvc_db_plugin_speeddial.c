@@ -409,10 +409,12 @@ static int __ctsvc_db_speeddial_get_records_with_query(contacts_query_h query,
 				break;
 			case CTSVC_PROPERTY_SPEEDDIAL_NUMBER:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(speeddial->number);
 				speeddial->number = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_SPEEDDIAL_NUMBER_LABEL:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(speeddial->label);
 				speeddial->label = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_SPEEDDIAL_NUMBER_TYPE:
@@ -423,12 +425,14 @@ static int __ctsvc_db_speeddial_get_records_with_query(contacts_query_h query,
 				break;
 			case CTSVC_PROPERTY_SPEEDDIAL_DISPLAY_NAME:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(speeddial->display_name);
 				speeddial->display_name = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_SPEEDDIAL_IMAGE_THUMBNAIL:
 				temp = ctsvc_stmt_get_text(stmt, i);
 				if (temp) {
 					snprintf(full_path, sizeof(full_path), "%s/%s", CTSVC_CONTACT_IMG_FULL_LOCATION, temp);
+					free(speeddial->image_thumbnail_path);
 					speeddial->image_thumbnail_path = strdup(full_path);
 				}
 				break;

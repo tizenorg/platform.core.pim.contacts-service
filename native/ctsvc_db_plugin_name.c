@@ -396,34 +396,42 @@ static int __ctsvc_db_name_get_records_with_query(contacts_query_h query, int of
 				break;
 			case CTSVC_PROPERTY_NAME_FIRST:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(name->first);
 				name->first = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_NAME_LAST:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(name->last);
 				name->last = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_NAME_ADDITION:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(name->addition);
 				name->addition = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_NAME_SUFFIX:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(name->suffix);
 				name->suffix = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_NAME_PREFIX:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(name->prefix);
 				name->prefix = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_NAME_PHONETIC_FIRST:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(name->phonetic_first);
 				name->phonetic_first = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_NAME_PHONETIC_MIDDLE:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(name->phonetic_middle);
 				name->phonetic_middle = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_NAME_PHONETIC_LAST:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(name->phonetic_last);
 				name->phonetic_last = SAFE_STRDUP(temp);
 				break;
 			default:

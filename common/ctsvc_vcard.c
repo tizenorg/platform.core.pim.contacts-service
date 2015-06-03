@@ -362,17 +362,21 @@ static inline int __ctsvc_vcard_add_folding(char **buf, int *buf_size, int buf_l
 {
 	int char_len = 0;
 	char *buf_copy = NULL;
-	int len, result_len;
+	int len, result_len = 0;
 	char *r;
 	const char *s;
 	bool content_start = false;
 	bool encode_64 = false;
 
 	buf_copy = calloc(1, *buf_size);
+	if (NULL == buf_copy) {
+		CTS_ERR("calloc() Fail");
+		return 0;
+	}
 
 	s = *buf;
 	r = buf_copy;
-	len = result_len = 0;
+	len = result_len;
 
 	while (*s) {
 		if (*buf_size < result_len + 5) {
@@ -467,10 +471,12 @@ static inline int __ctsvc_vcard_append_name(ctsvc_list_s *names, char **buf, int
 		if (CONTACTS_NAME_DISPLAY_ORDER_FIRSTLAST == order) {
 			snprintf(display, sizeof(display), "%s %s", name->first, name->last);
 		}
+#ifdef _CONTACTS_IPC_CLIENT
 		else {
 			/* CONTACTS_NAME_DISPLAY_ORDER_LASTFIRST */
 			snprintf(display, sizeof(display), "%s, %s", name->last, name->first);
 		}
+#endif
 	}
 	else
 		snprintf(display, sizeof(display), "%s%s", SAFE_STR(name->first), SAFE_STR(name->last));
@@ -1679,6 +1685,10 @@ static int __ctsvc_vcard_make(ctsvc_contact_s *contact, char **vcard_stream)
 	__ctsvc_vcard_initial();
 
 	buf = calloc(1, buf_size);
+	if (NULL == buf) {
+		CTS_ERR("calloc() Fail");
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
+	}
 
 	len = __ctsvc_vcard_append_start_vcard_3_0(&buf, &buf_size, len);
 	if (len < 0) {
@@ -1717,6 +1727,11 @@ static int __ctsvc_vcard_make_from_my_profile(ctsvc_my_profile_s *my_profile, ch
 	__ctsvc_vcard_initial();
 
 	buf = calloc(1, buf_size);
+	if (NULL == buf) {
+		CTS_ERR("calloc() Fail");
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
+	}
+
 	len = __ctsvc_vcard_append_start_vcard_3_0(&buf, &buf_size, len);
 	if (len < 0) {
 		free(buf);
@@ -1921,6 +1936,11 @@ static int __ctsvc_vcard_make_from_person(ctsvc_person_s *person, ctsvc_list_s *
 	__ctsvc_vcard_initial();
 
 	buf = calloc(1, buf_size);
+	if (NULL == buf) {
+		CTS_ERR("calloc() Fail");
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
+	}
+
 	len = __ctsvc_vcard_append_start_vcard_3_0(&buf, &buf_size, len);
 	if (len < 0) {
 		free(buf);
@@ -2221,6 +2241,10 @@ static inline char* __ctsvc_vcard_translate_charset(char *src, int len)
 
 		temp_size = (src_len+1) * sizeof(UChar);
 		temp = malloc(temp_size);
+		if (NULL == temp) {
+			CTS_ERR("malloc() Fail");
+			return NULL;
+		}
 		conv = ucnv_open(enc, &err);
 		WARN_IF(U_FAILURE(err), "ucnv_open() Fail(%d), enc=%s", err, enc);
 		ucnv_toUChars(conv, temp, temp_size, val, src_len, &err);
@@ -2229,6 +2253,11 @@ static inline char* __ctsvc_vcard_translate_charset(char *src, int len)
 
 		dest_size = temp_size*2;
 		dest = malloc(dest_size);
+		if (NULL == dest) {
+			CTS_ERR("malloc() Fail");
+			free(temp);
+			return NULL;
+		}
 		conv = ucnv_open("UTF-8", &err);
 		WARN_IF(U_FAILURE(err), "ucnv_open() Fail(%d), enc=%s", err, enc);
 		ucnv_fromUChars(conv, dest, dest_size, temp, u_strlen(temp), &err);
@@ -2247,7 +2276,8 @@ static void __ctsvc_vcard_get_prefix(char **prefix, char *src)
 	if (temp) {
 		int len = (int)temp - (int)src;
 		*prefix = calloc(len+1, sizeof(char));
-		snprintf(*prefix, len+1, "%s", src);
+		if (*prefix)
+			snprintf(*prefix, len+1, "%s", src);
 	}
 	else {
 		*prefix = NULL;
@@ -2321,6 +2351,10 @@ static char* __ctsvc_vcard_get_val(int ver, char *src, char **prefix, char **des
 
 		*cursor = '\0';
 		*dest = strdup(src);
+		if (NULL == *dest) {
+			CTS_ERR("strdup() Fail");
+			return NULL;
+		}
 		if (CTSVC_VCARD_VER_2_1 != ver)
 			__ctsvc_vcard_remove_folding(*dest);
 
@@ -2591,7 +2625,7 @@ static inline int __ctsvc_vcard_get_photo(contacts_record_h contact, ctsvc_list_
 	type = __ctsvc_vcard_get_image_type(prefix);
 
 	buf = g_base64_decode(temp+1, &size);
-	if (0 == size) {
+	if ((0 == size) || (NULL == buf)) {
 		g_free(buf);
 		return CONTACTS_ERROR_NONE;
 	}
@@ -2647,6 +2681,10 @@ static inline void __ctsvc_vcard_get_event_type(contacts_record_h event, char *v
 	temp = strtok_r(val, ";", &last);
 	while (temp) {
 		lower = strdup(temp);
+		if (NULL == lower) {
+			CTS_ERR("strdup() Fail");
+			break;
+		}
 		lower_temp = lower;
 		while (*lower_temp) {
 			*lower_temp = tolower(*lower_temp);
@@ -2723,6 +2761,10 @@ static inline void __ctsvc_vcard_get_company_type(contacts_record_h company, cha
 	temp = strtok_r(val, ";", &last);
 	while (temp) {
 		lower = strdup(temp);
+		if (NULL == lower) {
+			CTS_ERR("strdup() Fail");
+			break;
+		}
 		lower_temp = lower;
 		while (*lower_temp) {
 			*lower_temp = tolower(*lower_temp);
@@ -2838,7 +2880,7 @@ static inline int __ctsvc_vcard_get_company_logo(ctsvc_list_s *company_list, cha
 	type = __ctsvc_vcard_get_image_type(prefix);
 
 	buf = g_base64_decode(temp+1, &size);
-	if (0 == size) {
+	if ((0 == size) || (NULL == buf)) {
 		g_free(buf);
 		return CONTACTS_ERROR_NONE;
 	}
@@ -2972,6 +3014,10 @@ static inline void __ctsvc_vcard_get_url_type(contacts_record_h url, char *val)
 	temp = strtok_r(val, ";", &last);
 	while (temp) {
 		lower = strdup(temp);
+		if (NULL == lower) {
+			CTS_ERR("strdup() Fail");
+			break;
+		}
 		lower_temp = lower;
 		while (*lower_temp) {
 			*lower_temp = tolower(*lower_temp);
@@ -3022,6 +3068,10 @@ static inline bool __ctsvc_vcard_get_number_type(contacts_record_h number, char 
 	temp = strtok_r(val, ";", &last);
 	while (temp) {
 		lower = strdup(temp);
+		if (NULL == lower) {
+			CTS_ERR("strdup() Fail");
+			break;
+		}
 		lower_temp = lower;
 		while (*lower_temp) {
 			*lower_temp = tolower(*lower_temp);
@@ -3218,6 +3268,10 @@ static inline bool __ctsvc_vcard_get_email_type(contacts_record_h email, char *v
 	temp = strtok_r(val, ";", &last);
 	while (temp) {
 		lower = strdup(temp);
+		if (NULL == lower) {
+			CTS_ERR("strdup() Fail");
+			break;
+		}
 		lower_temp = lower;
 		while (*lower_temp) {
 			*lower_temp = tolower(*lower_temp);
@@ -3275,6 +3329,10 @@ static inline bool __ctsvc_vcard_get_postal_type(contacts_record_h address, char
 	temp = strtok_r(val, ";", &last);
 	while (temp) {
 		lower = strdup(temp);
+		if (NULL == lower) {
+			CTS_ERR("strdup() Fail");
+			break;
+		}
 		lower_temp = lower;
 		while (*lower_temp) {
 			*lower_temp = tolower(*lower_temp);
@@ -3366,6 +3424,10 @@ static inline void __ctsvc_vcard_get_messenger_type(contacts_record_h messenger,
 	temp = strtok_r(val, ";", &last);
 	while (temp) {
 		lower = strdup(temp);
+		if (NULL == lower) {
+			CTS_ERR("strdup() Fail");
+			break;
+		}
 		lower_temp = lower;
 		while (*lower_temp) {
 			*lower_temp = tolower(*lower_temp);
@@ -3444,6 +3506,10 @@ static inline void __ctsvc_vcard_get_relationship_type(contacts_record_h relatio
 	temp = strtok_r(val, ";", &last);
 	while (temp) {
 		lower = strdup(temp);
+		if (NULL == lower) {
+			CTS_ERR("strdup() Fail");
+			break;
+		}
 		lower_temp = lower;
 		while (*lower_temp) {
 			*lower_temp = tolower(*lower_temp);
@@ -3524,6 +3590,11 @@ static char* __ctsvc_vcard_decode_base64_val(char *val)
 	decoded_str = g_base64_decode(src, &size);
 
 	dest = calloc((src-val)+size+1, sizeof(char));
+	if (NULL == dest) {
+		CTS_ERR("calloc() Fail");
+		return NULL;
+	}
+
 	snprintf(dest, (src-val)+1, "%s", val);
 	snprintf(dest+(src-val), size+1, "%s", decoded_str);
 	g_free(decoded_str);
@@ -3573,6 +3644,12 @@ static inline int __ctsvc_vcard_get_contact(int ver, char *vcard, contacts_recor
 
 		if (base64_encoded) {
 			char *temp = __ctsvc_vcard_decode_base64_val(val);
+			if (NULL == temp) {
+				CTS_ERR("__ctsvc_vcard_decode_base64_val() Fail");
+				free(prefix);
+				free(val);
+				return CONTACTS_ERROR_OUT_OF_MEMORY;
+			}
 			free(val);
 			val = temp;
 		}
@@ -3745,6 +3822,11 @@ static inline void __ctsvc_vcard_make_contact_display_name(ctsvc_contact_s *cont
 		if (0 < temp_display_len) {
 			temp_display_len += 7;
 			temp_display = calloc(1, temp_display_len);
+			if (NULL == temp_display) {
+				CTS_ERR("calloc() Fail");
+				return;
+			}
+
 			len=0;
 
 			if (name->last) {
@@ -3836,6 +3918,11 @@ static inline void __ctsvc_vcard_make_contact_display_name(ctsvc_contact_s *cont
 		if (name->prefix && temp_display) {
 			display_len = SAFE_STRLEN(name->prefix) + temp_display_len + 2;
 			reverse_display = calloc(1, display_len);
+			if (NULL == reverse_display) {
+				CTS_ERR("calloc() Fail");
+				free(temp_display);
+				return;
+			}
 			snprintf(reverse_display, display_len, "%s %s", name->prefix, temp_display);
 			free(temp_display);
 		}
@@ -3869,6 +3956,12 @@ static inline void __ctsvc_vcard_make_contact_display_name(ctsvc_contact_s *cont
 				temp_display_len += 6;
 				/* make reverse_temp_display_name */
 				temp_display = calloc(1, temp_display_len);
+				if (NULL == temp_display) {
+					CTS_ERR("calloc() Fail");
+					free(reverse_display);
+					return;
+				}
+
 				len = 0;
 
 				if (name->first) {
@@ -3904,6 +3997,12 @@ static inline void __ctsvc_vcard_make_contact_display_name(ctsvc_contact_s *cont
 			if (name->prefix && temp_display) {
 				display_len = SAFE_STRLEN(name->prefix) + temp_display_len + 2;
 				display = calloc(1, display_len);
+				if (NULL == display) {
+					CTS_ERR("calloc() Fail");
+					free(temp_display);
+					free(reverse_display);
+					return;
+				}
 				snprintf(display, display_len, "%s %s", name->prefix, temp_display);
 				free(temp_display);
 			}
@@ -3920,10 +4019,12 @@ static inline void __ctsvc_vcard_make_contact_display_name(ctsvc_contact_s *cont
 			contact->display_name = display;
 			free(reverse_display);
 		}
+#ifdef _CONTACTS_IPC_CLIENT
 		else {
 			contact->display_name = reverse_display;
 			free(display);
 		}
+#endif
 
 		contact->display_source_type = CONTACTS_DISPLAY_NAME_SOURCE_TYPE_NAME;
 	}
@@ -4126,6 +4227,11 @@ static const char* __contacts_vcard_parse_get_vcard_object(const char *cursor, G
 				}
 				vcard_len += (vcard_cursor - pos_start);
 				vcard_object = calloc(vcard_len + 1, sizeof(char));
+				if (NULL == vcard_object) {
+					CTS_ERR("calloc() Fail");
+					__contacts_vcard_free_sub_vcard_info_list(sub_vcard_list);
+					return NULL;
+				}
 
 				vcard_len = 0;
 				pos_start = vcard_start_cursor;
@@ -4144,6 +4250,11 @@ static const char* __contacts_vcard_parse_get_vcard_object(const char *cursor, G
 			}
 			else if (STRING_EQUAL == strncmp(vcard_cursor, begin, strlen(begin))) { /* sub vcard */
 				sub_vcard_info_s *sub_vcard_info = calloc(1, sizeof(sub_vcard_info_s));
+				if (NULL == sub_vcard_info) {
+					CTS_ERR("calloc() Fail");
+					__contacts_vcard_free_sub_vcard_info_list(sub_vcard_list);
+					return NULL;
+				}
 				sub_vcard_info->pos_start = vcard_cursor;
 
 				vcard_cursor = __contacts_vcard_parse_get_vcard_object(vcard_cursor, plist_vcard_object);

@@ -88,7 +88,12 @@ static int __ctsvc_updated_info_clone(contacts_record_h record, contacts_record_
 	out_data->changed_ver = src_data->changed_ver;
 	out_data->addressbook_id = src_data->addressbook_id;
 
-	CTSVC_RECORD_COPY_BASE(&(out_data->base), &(src_data->base));
+	int ret = ctsvc_record_copy_base(&(out_data->base), &(src_data->base));
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("ctsvc_record_copy_base() Fail");
+		__ctsvc_updated_info_destroy((contacts_record_h)out_data, true);
+		return ret;
+	}
 
 	*out_record = (contacts_record_h)out_data;
 	return CONTACTS_ERROR_NONE;

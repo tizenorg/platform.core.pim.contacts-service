@@ -529,6 +529,12 @@ static inline int __ctsvc_contact_make_search_data(int contact_id, ctsvc_contact
 			if (number_record && number_record->cleaned) {
 				buf_size = SAFE_STRLEN(number) + SAFE_STRLEN(number_record->cleaned) + SAFE_STRLEN(number_record->normalized) + 3;
 				temp_number = calloc(1, buf_size);
+				if (NULL == temp_number) {
+					CTS_ERR("calloc() Fail");
+					free(number);
+					return CONTACTS_ERROR_OUT_OF_MEMORY;
+				}
+
 				if (number)
 					snprintf(temp_number, buf_size, "%s %s %s", SAFE_STR(number), number_record->cleaned, number_record->normalized);
 				else
@@ -552,6 +558,13 @@ static inline int __ctsvc_contact_make_search_data(int contact_id, ctsvc_contact
 
 				buf_size = SAFE_STRLEN(data) + SAFE_STRLEN(email->email_addr) * (had?2:1) + 4;
 				temp_data = calloc(1, buf_size);
+				if (NULL == temp_data) {
+					CTS_ERR("calloc() Fail");
+					free(data);
+					free(number);
+					return CONTACTS_ERROR_OUT_OF_MEMORY;
+				}
+
 				if (data)
 					snprintf(temp_data, buf_size, "%s %s %s",data, email->email_addr, (had?temp:""));
 				else
@@ -575,6 +588,13 @@ static inline int __ctsvc_contact_make_search_data(int contact_id, ctsvc_contact
 
 				buf_size = SAFE_STRLEN(data) + SAFE_STRLEN(nickname->nickname) * (had?2:1) + 4;
 				temp_data = calloc(1, buf_size);
+				if (NULL == temp_data) {
+					CTS_ERR("calloc() Fail");
+					free(data);
+					free(number);
+					return CONTACTS_ERROR_OUT_OF_MEMORY;
+				}
+
 				if (data)
 					snprintf(temp_data, buf_size, "%s %s %s", data, nickname->nickname, (had?temp:""));
 				else
@@ -604,6 +624,12 @@ static inline int __ctsvc_contact_make_search_data(int contact_id, ctsvc_contact
 				buf_size = SAFE_STRLEN(data)
 							+ str_len * 2 + 16;
 				temp_data = calloc(1, buf_size);
+				if (NULL == temp_data) {
+					CTS_ERR("calloc() Fail");
+					free(data);
+					free(number);
+					return CONTACTS_ERROR_OUT_OF_MEMORY;
+				}
 
 				char temp[str_len+1];
 
@@ -657,6 +683,13 @@ static inline int __ctsvc_contact_make_search_data(int contact_id, ctsvc_contact
 
 				buf_size = SAFE_STRLEN(data) + SAFE_STRLEN(note->note) * (had?2:1) + 4;
 				temp_data = calloc(1, buf_size);
+				if (NULL == temp_data) {
+					CTS_ERR("calloc() Fail");
+					free(data);
+					free(number);
+					return CONTACTS_ERROR_OUT_OF_MEMORY;
+				}
+
 				if (data)
 					snprintf(temp_data, buf_size, "%s %s %s",data, note->note, (had?temp:""));
 				else
@@ -680,6 +713,13 @@ static inline int __ctsvc_contact_make_search_data(int contact_id, ctsvc_contact
 
 				buf_size = SAFE_STRLEN(data) + SAFE_STRLEN(messenger->im_id) * (had?2:1) + 4;
 				temp_data = calloc(1, buf_size);
+				if (NULL == temp_data) {
+					CTS_ERR("calloc() Fail");
+					free(data);
+					free(number);
+					return CONTACTS_ERROR_OUT_OF_MEMORY;
+				}
+
 				if (data)
 					snprintf(temp_data, buf_size, "%s %s %s",data, messenger->im_id, (had?temp:""));
 				else
@@ -703,6 +743,13 @@ static inline int __ctsvc_contact_make_search_data(int contact_id, ctsvc_contact
 
 				buf_size = SAFE_STRLEN(data) + SAFE_STRLEN(relationship->name) * (had?2:1) + 4;
 				temp_data = calloc(1, buf_size);
+				if (NULL == temp_data) {
+					CTS_ERR("calloc() Fail");
+					free(data);
+					free(number);
+					return CONTACTS_ERROR_OUT_OF_MEMORY;
+				}
+
 				if (data)
 					snprintf(temp_data, buf_size, "%s %s %s",data, relationship->name, (had?temp:""));
 				else
@@ -732,6 +779,12 @@ static inline int __ctsvc_contact_make_search_data(int contact_id, ctsvc_contact
 				len = 0;
 				buf_size = SAFE_STRLEN(data) + str_len * 2 + 18;
 				temp_data = calloc(1, buf_size);
+				if (NULL == temp_data) {
+					CTS_ERR("calloc() Fail");
+					free(data);
+					free(number);
+					return CONTACTS_ERROR_OUT_OF_MEMORY;
+				}
 
 				char temp[str_len+1];
 
@@ -834,6 +887,11 @@ static inline int __ctsvc_contact_refresh_lookup_data(int contact_id, ctsvc_cont
 									+ SAFE_STRLEN(name_record->last)+ SAFE_STRLEN(name_record->suffix) + 1;
 				int reverse_lang_type = ctsvc_contact_get_name_language(name_record);
 				temp_name = calloc(1, temp_len);
+				if (NULL == temp_name) {
+					CTS_ERR("calloc() Fail");
+					return CONTACTS_ERROR_OUT_OF_MEMORY;
+				}
+
 				if (reverse_lang_type == CTSVC_LANG_KOREAN ||
 					reverse_lang_type == CTSVC_LANG_CHINESE ||
 					reverse_lang_type == CTSVC_LANG_JAPANESE) {
@@ -1376,6 +1434,11 @@ static int __ctsvc_db_contact_get_records_with_query(contacts_query_h query, int
 
 	if (0 == had_contact_id) {
 		s_query->projection = realloc(s_query->projection, s_query->projection_count+1);
+		if (NULL == s_query->projection) {
+			CTS_ERR("realloc() Fail");
+			return CONTACTS_ERROR_OUT_OF_MEMORY;
+		}
+
 		s_query->projection[s_query->projection_count] = CTSVC_PROPERTY_CONTACT_ID;
 		s_query->projection_count++;
 	}
@@ -1422,6 +1485,7 @@ static int __ctsvc_db_contact_get_records_with_query(contacts_query_h query, int
 				break;
 			case CTSVC_PROPERTY_CONTACT_DISPLAY_NAME:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(contact->display_name);
 				contact->display_name = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_CONTACT_DISPLAY_SOURCE_DATA_ID:
@@ -1432,12 +1496,14 @@ static int __ctsvc_db_contact_get_records_with_query(contacts_query_h query, int
 				break;
 			case CTSVC_PROPERTY_CONTACT_RINGTONE:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(contact->ringtone_path);
 				contact->ringtone_path = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_CONTACT_IMAGE_THUMBNAIL:
 				temp = ctsvc_stmt_get_text(stmt, i);
 				if (temp && *temp) {
 					snprintf(full_path, sizeof(full_path), "%s/%s", CTSVC_CONTACT_IMG_FULL_LOCATION, temp);
+					free(contact->image_thumbnail_path);
 					contact->image_thumbnail_path = strdup(full_path);
 				}
 				break;
@@ -1455,14 +1521,17 @@ static int __ctsvc_db_contact_get_records_with_query(contacts_query_h query, int
 				break;
 			case CTSVC_PROPERTY_CONTACT_UID:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(contact->uid);
 				contact->uid = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_CONTACT_VIBRATION:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(contact->vibration);
 				contact->vibration = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_CONTACT_MESSAGE_ALERT:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(contact->message_alert);
 				contact->message_alert = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_CONTACT_CHANGED_TIME:

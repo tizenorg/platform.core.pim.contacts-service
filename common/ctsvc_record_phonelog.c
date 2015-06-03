@@ -103,7 +103,12 @@ static int __ctsvc_phonelog_clone(contacts_record_h record, contacts_record_h *o
 	out_data->extra_data2 = SAFE_STRDUP(src_data->extra_data2);
 	out_data->sim_slot_no = src_data->sim_slot_no;
 
-	CTSVC_RECORD_COPY_BASE(&(out_data->base), &(src_data->base));
+	int ret = ctsvc_record_copy_base(&(out_data->base), &(src_data->base));
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("ctsvc_record_copy_base() Fail");
+		__ctsvc_phonelog_destroy((contacts_record_h)out_data, true);
+		return ret;
+	}
 
 	*out_record = (contacts_record_h)out_data;
 	return CONTACTS_ERROR_NONE;

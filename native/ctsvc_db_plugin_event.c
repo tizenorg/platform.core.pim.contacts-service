@@ -379,6 +379,7 @@ static int __ctsvc_db_event_get_records_with_query(contacts_query_h query, int o
 				break;
 			case CTSVC_PROPERTY_EVENT_LABEL:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(event->label);
 				event->label = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_EVENT_DATE:

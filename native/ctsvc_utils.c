@@ -200,6 +200,10 @@ void ctsvc_utils_make_image_file_name(int parent_id, int id, char *src_img, char
 		ext = "";
 
 	lower_ext = strdup(ext);
+	if (NULL == lower_ext) {
+		CTS_ERR("strdup() Fail");
+		return;
+	}
 	temp = lower_ext;
 	while (*temp) {
 		*temp = tolower(*temp);
@@ -592,7 +596,7 @@ static bool _ctsvc_image_util_supported_jpeg_colorspace_cb(
 	int height = 0;
 	int dest_fd = 0;
 	int mimetype = 0;
-	unsigned int size = 0;
+	uint64_t size = 0;
 	void *buffer = NULL;
 	void *buffer_temp = NULL;
 	int ret;
@@ -606,7 +610,7 @@ static bool _ctsvc_image_util_supported_jpeg_colorspace_cb(
 	}
 
 	ret = image_util_decode_jpeg(info->src, colorspace, (unsigned char **)&buffer, &width,
-			&height, &size);
+			&height, (unsigned int *)&size);
 	if (IMAGE_UTIL_ERROR_NONE != ret) {
 		info->ret = CONTACTS_ERROR_SYSTEM;
 		return true;
@@ -625,7 +629,7 @@ static bool _ctsvc_image_util_supported_jpeg_colorspace_cb(
 			return false;
 		}
 
-		packet = _ctsvc_image_create_media_packet(fmt, buffer, size);
+		packet = _ctsvc_image_create_media_packet(fmt, buffer, (unsigned int)size);
 		if (NULL == packet) {
 			CTS_ERR("_ctsvc_image_create_media_packet() Fail");
 			media_format_unref(fmt);
@@ -634,7 +638,7 @@ static bool _ctsvc_image_util_supported_jpeg_colorspace_cb(
 			return false;
 		}
 
-		ret = _ctsvc_image_rotate(packet, rotation, &buffer_temp, (uint64_t *)&size);
+		ret = _ctsvc_image_rotate(packet, rotation, &buffer_temp, &size);
 
 		media_packet_destroy(packet);
 		media_format_unref(fmt);
@@ -684,7 +688,7 @@ static bool _ctsvc_image_util_supported_jpeg_colorspace_cb(
 			return false;
 		}
 
-		packet = _ctsvc_image_create_media_packet(fmt, buffer, size);
+		packet = _ctsvc_image_create_media_packet(fmt, buffer, (unsigned int)size);
 		if (NULL == packet) {
 			CTS_ERR("_ctsvc_image_create_media_packet() Fail");
 			media_format_unref(fmt);
@@ -694,7 +698,7 @@ static bool _ctsvc_image_util_supported_jpeg_colorspace_cb(
 		}
 
 		ret = _ctsvc_image_resize(packet, resized_width, resized_height, &buffer_temp,
-				(uint64_t *)&size);
+				&size);
 
 		media_packet_destroy(packet);
 		media_format_unref(fmt);

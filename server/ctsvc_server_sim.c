@@ -158,6 +158,11 @@ void ctsvc_server_sim_record_destroy(sim_contact_s *record)
 static sim_contact_s * __ctsvc_server_sim_record_clone(TelSimPbRecord_t *sim_record)
 {
 	sim_contact_s *record = calloc(1,sizeof(sim_contact_s));
+	if (NULL == record)
+	{
+		CTS_ERR("calloc() Fail");
+		return NULL;
+	}
 
 	record->sim_index = sim_record->index;
 	record->name = SAFE_STRDUP((char*)sim_record->name);
@@ -861,6 +866,12 @@ static int __ctsvc_server_sim_info_init()
 	while (cp_name[cp_index]) {
 		TapiHandle *handle;
 		ctsvc_sim_info_s *info = calloc(1, sizeof(ctsvc_sim_info_s));
+		if (NULL == info)
+		{
+			CTS_ERR("calloc() Fail");
+			g_strfreev(cp_name);
+			return CONTACTS_ERROR_OUT_OF_MEMORY;
+		}
 		info->cp_name = strdup(cp_name[cp_index]);
 		INFO("SIM cp_name[%d] : %s", cp_index, info->cp_name);
 		info->sim_slot_no = cp_index;

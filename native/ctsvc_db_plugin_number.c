@@ -572,14 +572,17 @@ static int __ctsvc_db_number_get_records_with_query(contacts_query_h query, int 
 				break;
 			case CTSVC_PROPERTY_NUMBER_LABEL:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(number->label);
 				number->label = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_NUMBER_NUMBER:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(number->number);
 				number->number = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_NUMBER_NUMBER_FILTER:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(number->lookup);
 				number->lookup = SAFE_STRDUP(temp);
 				break;
 			default:

@@ -89,6 +89,10 @@ API int contacts_query_set_projection(contacts_query_h query, unsigned int prope
 		free(query_s->projection);
 
 	query_s->projection = calloc(count, sizeof(unsigned int));
+	if (NULL == query_s->projection) {
+		CTS_ERR("calloc() Fail");
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
+	}
 	memcpy(query_s->projection, property_ids, sizeof(unsigned int) * count);
 	query_s->projection_count = count;
 

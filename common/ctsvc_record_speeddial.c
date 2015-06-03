@@ -104,7 +104,12 @@ static int __ctsvc_speeddial_clone(contacts_record_h record, contacts_record_h *
 	out_data->label = SAFE_STRDUP(src_data->label);
 	out_data->number = SAFE_STRDUP(src_data->number);
 
-	CTSVC_RECORD_COPY_BASE(&(out_data->base), &(src_data->base));
+	int ret = ctsvc_record_copy_base(&(out_data->base), &(src_data->base));
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("ctsvc_record_copy_base() Fail");
+		__ctsvc_speeddial_destroy((contacts_record_h)out_data, true);
+		return ret;
+	}
 
 	*out_record = (contacts_record_h)out_data;
 	return CONTACTS_ERROR_NONE;

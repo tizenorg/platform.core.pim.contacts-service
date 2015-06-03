@@ -379,34 +379,42 @@ static int __ctsvc_db_address_get_records_with_query(contacts_query_h query, int
 				break;
 			case CTSVC_PROPERTY_ADDRESS_LABEL:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(address->label);
 				address->label = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_ADDRESS_POSTBOX:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(address->pobox);
 				address->pobox = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_ADDRESS_POSTAL_CODE:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(address->postalcode);
 				address->postalcode = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_ADDRESS_REGION:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(address->region);
 				address->region = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_ADDRESS_LOCALITY:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(address->locality);
 				address->locality = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_ADDRESS_STREET:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(address->street);
 				address->street = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_ADDRESS_COUNTRY:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(address->country);
 				address->country = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_ADDRESS_EXTENDED:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(address->extended);
 				address->extended = SAFE_STRDUP(temp);
 				break;
 			default:

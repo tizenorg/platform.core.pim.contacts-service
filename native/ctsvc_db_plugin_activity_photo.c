@@ -326,6 +326,7 @@ static int __ctsvc_db_activity_photo_get_records_with_query(contacts_query_h que
 				break;
 			case CTSVC_PROPERTY_ACTIVITY_PHOTO_URL:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(activity_photo->photo_url);
 				activity_photo->photo_url = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_ACTIVITY_PHOTO_SORT_INDEX:

@@ -68,6 +68,11 @@ static void __ctsvc_server_change_language_cb(keynode_t *key, void *data)
 	char *langset = NULL;
 
 	new_langset = vconf_keynode_get_str(key);
+	if (NULL == new_langset)
+	{
+		CTS_ERR("vconf_keynode_get_str() Fail");
+		return;
+	}
 	langset = ctsvc_get_langset();
 	INFO("%s --> %s", langset, new_langset);
 	if (STRING_EQUAL != strcmp(langset, new_langset)) {

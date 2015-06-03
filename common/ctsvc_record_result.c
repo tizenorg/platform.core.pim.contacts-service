@@ -111,6 +111,12 @@ static int __ctsvc_result_clone(contacts_record_h record, contacts_record_h *out
 	for (cursor=src_data->values;cursor;cursor=cursor->next) {
 		ctsvc_result_value_s *src = cursor->data;
 		ctsvc_result_value_s *dest = calloc(1, sizeof(ctsvc_result_value_s));
+		if (NULL == dest) {
+			CTS_ERR("calloc() Fail");
+			__ctsvc_result_destroy((contacts_record_h)out_data, true);
+			return CONTACTS_ERROR_OUT_OF_MEMORY;
+		}
+
 		dest->property_id = src->property_id;
 		dest->type = src->type;
 		switch(src->type) {
@@ -135,7 +141,12 @@ static int __ctsvc_result_clone(contacts_record_h record, contacts_record_h *out
 		out_data->values = g_slist_append(out_data->values, (void*)dest);
 	}
 
-	CTSVC_RECORD_COPY_BASE(&(out_data->base), &(src_data->base));
+	int ret = ctsvc_record_copy_base(&(out_data->base), &(src_data->base));
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("ctsvc_record_copy_base() Fail");
+		__ctsvc_result_destroy((contacts_record_h)out_data, true);
+		return ret;
+	}
 
 	*out_record = (contacts_record_h)out_data;
 
@@ -229,6 +240,10 @@ static int __ctsvc_result_set_int(contacts_record_h record, unsigned int propert
 	}
 
 	data = calloc(1, sizeof(ctsvc_result_value_s));
+	if (NULL == data) {
+		CTS_ERR("calloc() Fail");
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
+	}
 	data->property_id = property_id;
 	data->type = CTSVC_VIEW_DATA_TYPE_INT;
 #ifdef _CONTACTS_IPC_SERVER
@@ -265,6 +280,10 @@ static int __ctsvc_result_set_lli(contacts_record_h record, unsigned int propert
 	}
 
 	data = calloc(1, sizeof(ctsvc_result_value_s));
+	if (NULL == data) {
+		CTS_ERR("calloc() Fail");
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
+	}
 	data->property_id = property_id;
 	data->type = CTSVC_VIEW_DATA_TYPE_LLI;
 	data->value.l = value;
@@ -293,6 +312,10 @@ static int __ctsvc_result_set_double(contacts_record_h record, unsigned int prop
 	}
 
 	data = calloc(1, sizeof(ctsvc_result_value_s));
+	if (NULL == data) {
+		CTS_ERR("calloc() Fail");
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
+	}
 	data->property_id = property_id;
 	data->type = CTSVC_VIEW_DATA_TYPE_DOUBLE;
 	data->value.d = value;
@@ -322,6 +345,10 @@ static int __ctsvc_result_set_bool(contacts_record_h record, unsigned int proper
 	}
 
 	data = calloc(1, sizeof(ctsvc_result_value_s));
+	if (NULL == data) {
+		CTS_ERR("calloc() Fail");
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
+	}
 	data->property_id = property_id;
 	data->type = CTSVC_VIEW_DATA_TYPE_BOOL;
 	data->value.i = value;
@@ -348,6 +375,10 @@ static int __ctsvc_result_set_str(contacts_record_h record, unsigned int propert
 					if (str) {
 						str_len = strlen(CTSVC_CONTACT_IMG_FULL_LOCATION) + strlen(str) + 2;
 						full_path = calloc(1, str_len);
+						if (NULL == full_path) {
+							CTS_ERR("calloc() Fail");
+							return CONTACTS_ERROR_OUT_OF_MEMORY;
+						}
 						snprintf(full_path, str_len, "%s/%s", CTSVC_CONTACT_IMG_FULL_LOCATION, str);
 					}
 					free(data->value.s);
@@ -366,6 +397,10 @@ static int __ctsvc_result_set_str(contacts_record_h record, unsigned int propert
 	}
 
 	data = calloc(1, sizeof(ctsvc_result_value_s));
+	if (NULL == data) {
+		CTS_ERR("calloc() Fail");
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
+	}
 	data->property_id = property_id;
 	data->type = CTSVC_VIEW_DATA_TYPE_STR;
 	switch (property_id) {
@@ -374,6 +409,11 @@ static int __ctsvc_result_set_str(contacts_record_h record, unsigned int propert
 		if (str) {
 			str_len = strlen(CTSVC_CONTACT_IMG_FULL_LOCATION) + strlen(str) + 2;
 			full_path = calloc(1, str_len);
+			if (NULL == full_path) {
+				CTS_ERR("calloc() Fail");
+				free(data);
+				return CONTACTS_ERROR_OUT_OF_MEMORY;
+			}
 			snprintf(full_path, str_len, "%s/%s", CTSVC_CONTACT_IMG_FULL_LOCATION, str);
 		}
 		free(data->value.s);

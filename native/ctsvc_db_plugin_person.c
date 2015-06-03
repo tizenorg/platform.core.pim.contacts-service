@@ -559,10 +559,12 @@ static int __ctsvc_db_person_get_records_with_query(contacts_query_h query, int 
 				break;
 			case CTSVC_PROPERTY_PERSON_DISPLAY_NAME:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(person->display_name);
 				person->display_name = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_PERSON_DISPLAY_NAME_INDEX:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(person->display_name_index);
 				person->display_name_index = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_PERSON_DISPLAY_CONTACT_ID:
@@ -570,12 +572,14 @@ static int __ctsvc_db_person_get_records_with_query(contacts_query_h query, int 
 				break;
 			case CTSVC_PROPERTY_PERSON_RINGTONE:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(person->ringtone_path);
 				person->ringtone_path = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_PERSON_IMAGE_THUMBNAIL:
 				temp = ctsvc_stmt_get_text(stmt, i);
 				if (temp && *temp) {
 					snprintf(full_path, sizeof(full_path), "%s/%s", CTSVC_CONTACT_IMG_FULL_LOCATION, temp);
+					free(person->image_thumbnail_path);
 					person->image_thumbnail_path = strdup(full_path);
 				}
 				break;
@@ -593,18 +597,22 @@ static int __ctsvc_db_person_get_records_with_query(contacts_query_h query, int 
 				break;
 			case CTSVC_PROPERTY_PERSON_ADDRESSBOOK_IDS:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(person->addressbook_ids);
 				person->addressbook_ids = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_PERSON_VIBRATION:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(person->vibration);
 				person->vibration = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_PERSON_STATUS:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(person->status);
 				person->status = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_PERSON_MESSAGE_ALERT:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(person->message_alert);
 				person->message_alert = SAFE_STRDUP(temp);
 				break;
 			default:

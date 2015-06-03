@@ -378,10 +378,12 @@ static int __ctsvc_db_messenger_get_records_with_query(contacts_query_h query, i
 				break;
 			case CTSVC_PROPERTY_MESSENGER_LABEL:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(messenger->label);
 				messenger->label = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_MESSENGER_IM_ID:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(messenger->im_id);
 				messenger->im_id = SAFE_STRDUP(temp);
 				break;
 			default:

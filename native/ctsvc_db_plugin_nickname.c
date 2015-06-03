@@ -382,6 +382,7 @@ static int __ctsvc_db_nickname_get_records_with_query(contacts_query_h query, in
 				break;
 			case CTSVC_PROPERTY_NICKNAME_NAME:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(nickname->nickname);
 				nickname->nickname = SAFE_STRDUP(temp);
 				break;
 			default:

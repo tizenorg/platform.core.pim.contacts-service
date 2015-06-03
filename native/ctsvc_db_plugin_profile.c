@@ -378,10 +378,12 @@ static int __ctsvc_db_profile_get_records_with_query(contacts_query_h query, int
 				break;
 			case CTSVC_PROPERTY_PROFILE_UID:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(profile->uid);
 				profile->uid = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_PROFILE_TEXT:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(profile->text);
 				profile->text = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_PROFILE_ORDER:
@@ -389,26 +391,32 @@ static int __ctsvc_db_profile_get_records_with_query(contacts_query_h query, int
 				break;
 			case CTSVC_PROPERTY_PROFILE_SERVICE_OPERATION:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(profile->service_operation);
 				profile->service_operation = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_PROFILE_MIME:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(profile->mime);
 				profile->mime = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_PROFILE_APP_ID:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(profile->app_id);
 				profile->app_id = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_PROFILE_URI:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(profile->uri);
 				profile->uri = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_PROFILE_CATEGORY:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(profile->category);
 				profile->category = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_PROFILE_EXTRA_DATA:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(profile->extra_data);
 				profile->extra_data = SAFE_STRDUP(temp);
 				break;
 			default:

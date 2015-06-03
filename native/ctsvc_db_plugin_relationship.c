@@ -380,10 +380,12 @@ static int __ctsvc_db_relationship_get_records_with_query(contacts_query_h query
 				break;
 			case CTSVC_PROPERTY_RELATIONSHIP_LABEL:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(relationship->label);
 				relationship->label = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_RELATIONSHIP_NAME:
 				temp = ctsvc_stmt_get_text(stmt, i);
+				free(relationship->name);
 				relationship->name = SAFE_STRDUP(temp);
 				break;
 			default:

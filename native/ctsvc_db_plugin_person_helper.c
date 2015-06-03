@@ -55,10 +55,12 @@ int ctsvc_db_person_create_record_from_stmt_with_projection(cts_stmt stmt, unsig
 			break;
 		case CTSVC_PROPERTY_PERSON_DISPLAY_NAME:
 			temp = ctsvc_stmt_get_text(stmt, i);
+			free(person->display_name);
 			person->display_name = SAFE_STRDUP(temp);
 			break;
 		case CTSVC_PROPERTY_PERSON_DISPLAY_NAME_INDEX:
 			temp = ctsvc_stmt_get_text(stmt, i);
+			free(person->display_name_index);
 			person->display_name_index = SAFE_STRDUP(temp);
 			break;
 		case CTSVC_PROPERTY_PERSON_DISPLAY_CONTACT_ID:
@@ -66,25 +68,30 @@ int ctsvc_db_person_create_record_from_stmt_with_projection(cts_stmt stmt, unsig
 			break;
 		case CTSVC_PROPERTY_PERSON_RINGTONE:
 			temp = ctsvc_stmt_get_text(stmt, i);
+			free(person->ringtone_path);
 			person->ringtone_path = SAFE_STRDUP(temp);
 			break;
 		case CTSVC_PROPERTY_PERSON_IMAGE_THUMBNAIL:
 			temp = ctsvc_stmt_get_text(stmt, i);
 			if (temp && *temp) {
 				snprintf(full_path, sizeof(full_path), "%s/%s", CTSVC_CONTACT_IMG_FULL_LOCATION, temp);
+				free(person->image_thumbnail_path);
 				person->image_thumbnail_path = strdup(full_path);
 			}
 			break;
 		case CTSVC_PROPERTY_PERSON_VIBRATION:
 			temp = ctsvc_stmt_get_text(stmt, i);
+			free(person->vibration);
 			person->vibration = SAFE_STRDUP(temp);
 			break;
 		case CTSVC_PROPERTY_PERSON_MESSAGE_ALERT:
 			temp = ctsvc_stmt_get_text(stmt, i);
+			free(person->message_alert);
 			person->message_alert = SAFE_STRDUP(temp);
 			break;
 		case CTSVC_PROPERTY_PERSON_STATUS:
 			temp = ctsvc_stmt_get_text(stmt, i);
+			free(person->status);
 			person->status = SAFE_STRDUP(temp);
 			break;
 		case CTSVC_PROPERTY_PERSON_IS_FAVORITE:
@@ -101,6 +108,7 @@ int ctsvc_db_person_create_record_from_stmt_with_projection(cts_stmt stmt, unsig
 			break;
 		case CTSVC_PROPERTY_PERSON_ADDRESSBOOK_IDS:
 			temp = ctsvc_stmt_get_text(stmt, i);
+			free(person->addressbook_ids);
 			person->addressbook_ids = SAFE_STRDUP(temp);
 			break;
 		case CTSVC_PROPERTY_PERSON_FAVORITE_PRIORITY:
@@ -125,8 +133,13 @@ int ctsvc_db_person_create_record_from_stmt_with_query(cts_stmt stmt, contacts_q
 	ctsvc_query_s *s_query = (ctsvc_query_s *)query;
 
 	if (0 == s_query->projection_count) {
-		unsigned int *projection = malloc(sizeof(unsigned int)*s_query->property_count);
 		int i;
+		unsigned int *projection = malloc(sizeof(unsigned int)*s_query->property_count);
+		if (NULL == projection) {
+			CTS_ERR("malloc() Fail");
+			return CONTACTS_ERROR_OUT_OF_MEMORY;
+		}
+
 		for (i=0;i<s_query->property_count;i++) {
 			projection[i] = s_query->properties[i].property_id;
 		}

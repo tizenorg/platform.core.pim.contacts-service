@@ -46,11 +46,19 @@ static inline void __ctsvc_make_name_lookup(int op_code, const char *name_first,
 	else {
 		if (CONTACTS_NAME_DISPLAY_ORDER_FIRSTLAST == op_code) {
 			*name_lookup = calloc(1, SAFE_STRLEN(name_first) + SAFE_STRLEN(name_last) + 3);
+			if (NULL == *name_lookup) {
+				CTS_ERR("calloc() Fail");
+				return;
+			}
 			snprintf(*name_lookup, SAFE_STRLEN(name_first) + SAFE_STRLEN(name_last) + 3, "%s %c%s",
 					SAFE_STR(name_first), 0x7E, SAFE_STR(name_last));
 		}
 		else {
 			*name_lookup = calloc(1, SAFE_STRLEN(name_first) + SAFE_STRLEN(name_last) + 5);
+			if (NULL == *name_lookup) {
+				CTS_ERR("calloc() Fail");
+				return;
+			}
 			snprintf(*name_lookup, SAFE_STRLEN(name_first) + SAFE_STRLEN(name_last) + 5, "%s,%c %c%s",
 					SAFE_STR(name_last), 0x7E, 0x7E, SAFE_STR(name_first));
 		}
