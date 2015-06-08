@@ -183,6 +183,7 @@ pkg_check_modules(ctsvc_server_pkgs REQUIRED
 	glib-2.0
 	pims-ipc
 	gobject-2.0
+	sqlite3
 	tapi
 	dlog
 	capi-media-image-util
