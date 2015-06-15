@@ -375,6 +375,8 @@ int ctsvc_contact_make_search_name(ctsvc_contact_s *contact, char **search_name)
 	char *temp_name = NULL;
 	int buf_size, ret;
 
+	RETV_IF(NULL == contact, CONTACTS_ERROR_NO_DATA);
+
 	if (contact->display_name) {
 		if (ctsvc_has_chinese(contact->display_name)) {
 			if (CTSVC_LANG_JAPANESE == ctsvc_check_language_type(contact->sort_name)) {
