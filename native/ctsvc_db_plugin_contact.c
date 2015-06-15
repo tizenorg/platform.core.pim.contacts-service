@@ -504,8 +504,8 @@ static bool __ctsvc_contact_check_token(char *src, char *dest, int len)
 }
 
 /* Make search data by number, email, nicknames, address, note, messenger, relationship, company */
-static inline int __ctsvc_contact_make_search_data(int contact_id, ctsvc_contact_s *contact,
-		char **search_name, char **search_number, char **search_data)
+static inline int __ctsvc_contact_make_search_data(ctsvc_contact_s *contact,
+		char **search_number, char **search_data)
 {
 	int len = 0;
 
@@ -515,10 +515,7 @@ static inline int __ctsvc_contact_make_search_data(int contact_id, ctsvc_contact
 	char *temp_data=NULL;
 	int buf_size=0;
 
-	if (contact == NULL)
-		return CONTACTS_ERROR_NO_DATA;
-
-	ctsvc_contact_make_search_name(contact, search_name);
+	RETV_IF(NULL == contact, CONTACTS_ERROR_NO_DATA);
 
 	if (contact->numbers) {
 		contacts_list_h number_list = (contacts_list_h)contact->numbers;
@@ -1063,11 +1060,20 @@ static inline int __ctsvc_contact_update_search_data(int contact_id)
 		return ret;
 	}
 
-	ret = __ctsvc_contact_make_search_data(contact_id, contact, &search_name, &search_number, &search_data);
+	ret = ctsvc_contact_make_search_name(contact, &search_name);
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("ctsvc_contact_make_search_name() Fail(%d)", ret);
+		contacts_record_destroy((contacts_record_h)contact, true);
+		ctsvc_end_trans(false);
+		return ret;
+	}
+
+	ret = __ctsvc_contact_make_search_data(contact, &search_number, &search_data);
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("__ctsvc_contact_make_search_data() Fail(%d)", ret);
 		contacts_record_destroy((contacts_record_h)contact, true);
 		ctsvc_end_trans(false);
+		free(search_name);
 		return ret;
 	}
 
@@ -1738,11 +1744,20 @@ static inline int __ctsvc_contact_insert_search_data(int contact_id)
 		return ret;
 	}
 
-	ret = __ctsvc_contact_make_search_data(contact_id, contact, &search_name, &search_number, &search_data);
+	ret = ctsvc_contact_make_search_name(contact, &search_name);
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("ctsvc_contact_make_search_name() Fail(%d)", ret);
+		contacts_record_destroy((contacts_record_h)contact, true);
+		ctsvc_end_trans(false);
+		return ret;
+	}
+
+	ret = __ctsvc_contact_make_search_data(contact, &search_number, &search_data);
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("__ctsvc_contact_make_search_data() Fail(%d)", ret);
 		contacts_record_destroy((contacts_record_h)contact, true);
 		ctsvc_end_trans(false);
+		free(search_name);
 		return ret;
 	}
 
