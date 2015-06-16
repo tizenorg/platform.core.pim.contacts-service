@@ -112,7 +112,7 @@ static int __ctsvc_server_bg_contact_delete_step2(__ctsvc_delete_data_s* data)
 
 	/* get event_list */
 	snprintf(query, sizeof(query),
-		"SELECT id FROM "CTS_TABLE_DATA" WHERE contact_id = %d LIMIT %d",
+		"SELECT id FROM "CTS_TABLE_DATA" WHERE contact_id = %d AND is_my_profile = 0 LIMIT %d",
 		data->current_contact_id, CTSVC_SERVER_BG_DELETE_COUNT);
 
 	ret = ctsvc_query_prepare(query, &stmt);
