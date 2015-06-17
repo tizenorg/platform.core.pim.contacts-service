@@ -937,8 +937,7 @@ static void __ctsvc_server_sim_ready_cb(keynode_t *key, void *data)
 static void __ctsvc_server_telephony_ready_cb(keynode_t *key, void *data)
 {
 	int bReady = 0;
-	/* TODO: it should be changed API */
-	vconf_get_bool(VCONFKEY_TELEPHONY_TAPI_STATE, &bReady);
+	vconf_get_int(VCONFKEY_TELEPHONY_TAPI_STATE, &bReady);
 
 	if (0 == bReady) {
 		CTS_ERR("telephony is not ready ");
@@ -965,8 +964,7 @@ static void __ctsvc_server_telephony_ready_cb(keynode_t *key, void *data)
 int ctsvc_server_sim_init()
 {
 	int bReady = 0;
-	/* TODO: it should be changed API */
-	vconf_get_bool(VCONFKEY_TELEPHONY_TAPI_STATE, &bReady);
+	vconf_get_int(VCONFKEY_TELEPHONY_TAPI_STATE, &bReady);
 
 	if (0 == bReady) {
 		CTS_ERR("telephony is not ready ");
