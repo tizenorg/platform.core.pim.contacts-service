@@ -37,10 +37,8 @@
 
 #ifdef _CONTACTS_IPC_SERVER
 #include "ctsvc_server_change_subject.h"
-#ifdef ENABLE_SIM_FEATURE
 #include "ctsvc_server_sim.h"
-#endif /* ENABLE_SIM_FEATURE */
-#endif
+#endif /* _CONTACTS_IPC_SERVER */
 
 static int __ctsvc_db_phonelog_insert_record(contacts_record_h record, int *id);
 static int __ctsvc_db_phonelog_get_record(int id, contacts_record_h* out_record);
@@ -91,10 +89,8 @@ static int __ctsvc_db_phonelog_value_set(cts_stmt stmt, contacts_record_h *recor
 	temp = ctsvc_stmt_get_text(stmt, i++);
 	phonelog->extra_data2 = SAFE_STRDUP(temp);
 #ifdef _CONTACTS_IPC_SERVER
-#ifdef ENABLE_SIM_FEATURE
 	phonelog->sim_slot_no = ctsvc_server_sim_get_sim_slot_no_by_info_id(ctsvc_stmt_get_int(stmt, i++));
-#endif /* ENABLE_SIM_FEATURE */
-#endif
+#endif /* _CONTACTS_IPC_SERVER */
 	return CONTACTS_ERROR_NONE;
 }
 
@@ -349,11 +345,9 @@ static int __ctsvc_db_phonelog_get_records_with_query(contacts_query_h query, in
 				free(phonelog->extra_data2);
 				phonelog->extra_data2 = SAFE_STRDUP(temp);
 				break;
-#ifdef ENABLE_SIM_FEATURE
 			case CTSVC_PROPERTY_PHONELOG_SIM_SLOT_NO:
 				phonelog->sim_slot_no = ctsvc_server_sim_get_sim_slot_no_by_info_id(ctsvc_stmt_get_int(stmt, i));
 				break;
-#endif /* ENABLE_SIM_FEATURE */
 			default:
 				break;
 			}
@@ -453,7 +447,6 @@ static int  __ctsvc_db_phonelog_insert(ctsvc_phonelog_s *phonelog, int *id)
 	if (phonelog->extra_data2)
 		ctsvc_stmt_bind_text(stmt, 6, phonelog->extra_data2);
 
-#ifdef ENABLE_SIM_FEATURE
 	if (0 <= phonelog->sim_slot_no) {
 		int sim_info_id;
 		sim_info_id = ctsvc_server_sim_get_info_id_by_sim_slot_no(phonelog->sim_slot_no);
@@ -461,7 +454,6 @@ static int  __ctsvc_db_phonelog_insert(ctsvc_phonelog_s *phonelog, int *id)
 			ctsvc_stmt_bind_int(stmt, 7, sim_info_id);
 	}
 	else
-#endif /* ENABLE_SIM_FEATURE */
 		ctsvc_stmt_bind_int(stmt, 7, -1);
 
 	ret = ctsvc_stmt_step(stmt);

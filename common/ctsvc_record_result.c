@@ -24,10 +24,8 @@
 #include "ctsvc_notify.h"
 
 #ifdef _CONTACTS_IPC_SERVER
-#ifdef ENABLE_SIM_FEATURE
 #include "ctsvc_server_sim.h"
-#endif /* ENABLE_SIM_FEATURE */
-#endif
+#endif /* _CONTACTS_IPC_SERVER */
 
 static int __ctsvc_result_create(contacts_record_h* out_record);
 static int __ctsvc_result_destroy(contacts_record_h record, bool delete_child);
@@ -222,13 +220,10 @@ static int __ctsvc_result_set_int(contacts_record_h record, unsigned int propert
 		if (data->property_id == property_id) {
 			if (data->type == CTSVC_VIEW_DATA_TYPE_INT) {
 #ifdef _CONTACTS_IPC_SERVER
-#ifdef ENABLE_SIM_FEATURE
-
 				if (property_id == CTSVC_PROPERTY_PHONELOG_SIM_SLOT_NO)
 					data->value.i = ctsvc_server_sim_get_sim_slot_no_by_info_id(value);
 				else
-#endif /* ENABLE_SIM_FEATURE */
-#endif
+#endif /* _CONTACTS_IPC_SERVER */
 				data->value.i = value;
 				return CONTACTS_ERROR_NONE;
 			}
@@ -247,12 +242,10 @@ static int __ctsvc_result_set_int(contacts_record_h record, unsigned int propert
 	data->property_id = property_id;
 	data->type = CTSVC_VIEW_DATA_TYPE_INT;
 #ifdef _CONTACTS_IPC_SERVER
-#ifdef ENABLE_SIM_FEATURE
 	if (property_id == CTSVC_PROPERTY_PHONELOG_SIM_SLOT_NO)
 		data->value.i = ctsvc_server_sim_get_sim_slot_no_by_info_id(value);
 	else
-#endif /* ENABLE_SIM_FEATURE */
-#endif
+#endif /* _CONTACTS_IPC_SERVER */
 	data->value.i = value;
 	result->values = g_slist_append(result->values, (void*)data);
 	return CONTACTS_ERROR_NONE;

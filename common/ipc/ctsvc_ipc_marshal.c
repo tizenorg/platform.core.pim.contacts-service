@@ -36,10 +36,8 @@ extern ctsvc_ipc_marshal_record_plugin_cb_s _ctsvc_ipc_record_person_plugin_cb;
 extern ctsvc_ipc_marshal_record_plugin_cb_s _ctsvc_ipc_record_phonelog_plugin_cb;
 #endif /* ENABLE_LOG_FEATURE */
 extern ctsvc_ipc_marshal_record_plugin_cb_s _ctsvc_ipc_record_result_plugin_cb;
-#ifdef ENABLE_SIM_FEATURE
 extern ctsvc_ipc_marshal_record_plugin_cb_s _ctsvc_ipc_record_sdn_plugin_cb;
 extern ctsvc_ipc_marshal_record_plugin_cb_s _ctsvc_ipc_record_speeddial_plugin_cb;
-#endif /* ENABLE_SIM_FEATURE */
 extern ctsvc_ipc_marshal_record_plugin_cb_s _ctsvc_ipc_record_updated_info_plugin_cb;
 
 extern ctsvc_ipc_marshal_record_plugin_cb_s _ctsvc_ipc_record_simple_contact_plugin_cb;
@@ -89,12 +87,10 @@ static ctsvc_ipc_marshal_record_plugin_cb_s* __ctsvc_ipc_marshal_get_plugin_cb(c
 	case CTSVC_RECORD_PHONELOG:
 		return (&_ctsvc_ipc_record_phonelog_plugin_cb);
 #endif /* ENABLE_LOG_FEATURE */
-#ifdef ENABLE_SIM_FEATURE
 	case CTSVC_RECORD_SPEEDDIAL:
 		return (&_ctsvc_ipc_record_speeddial_plugin_cb);
 	case CTSVC_RECORD_SDN:
 		return (&_ctsvc_ipc_record_sdn_plugin_cb);
-#endif /* ENABLE_SIM_FEATURE */
 	case CTSVC_RECORD_RESULT:
 		return (&_ctsvc_ipc_record_result_plugin_cb);
 	case CTSVC_RECORD_SIMPLE_CONTACT:

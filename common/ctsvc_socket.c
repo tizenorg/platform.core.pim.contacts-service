@@ -115,7 +115,6 @@ static inline int __ctsvc_safe_read(int fd, char *buf, int buf_size)
 	return read_size;
 }
 
-#ifdef ENABLE_SIM_FEATURE
 static int __ctsvc_socket_handle_return(int fd, ctsvc_socket_msg_s *msg)
 {
 	CTS_FN_CALL;
@@ -233,5 +232,3 @@ int ctsvc_request_sim_get_initialization_status(int sim_slot_no, bool *completed
 
 	return msg.val;
 }
-
-#endif /* ENABLE_SIM_FEATURE */
