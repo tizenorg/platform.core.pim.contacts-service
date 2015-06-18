@@ -83,8 +83,6 @@ cp LICENSE.APLv2 %{buildroot}/usr/share/license/contacts-service2-devel
 %post -n contacts-service2
 /sbin/ldconfig
 
-vconftool set -t int file/private/contacts-service/default_lang 0 -g 5000 -s contacts-service::vconf-private
-
 %postun -p /sbin/ldconfig
 
 %files -n contacts-service2
