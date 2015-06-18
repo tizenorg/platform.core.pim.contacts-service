@@ -42,10 +42,8 @@ extern ctsvc_db_plugin_info_s ctsvc_db_plugin_person;
 #ifdef ENABLE_LOG_FEATURE
 extern ctsvc_db_plugin_info_s ctsvc_db_plugin_phonelog;
 #endif /* ENABLE_LOG_FEATURE */
-#ifdef ENABLE_SIM_FEATURE
 extern ctsvc_db_plugin_info_s ctsvc_db_plugin_speeddial;
 extern ctsvc_db_plugin_info_s ctsvc_db_plugin_sdn;
-#endif /* ENABLE_SIM_FEATURE */
 extern ctsvc_db_plugin_info_s ctsvc_db_plugin_activity;
 extern ctsvc_db_plugin_info_s ctsvc_db_plugin_activity_photo;
 extern ctsvc_db_plugin_info_s ctsvc_db_plugin_address;
@@ -302,12 +300,10 @@ ctsvc_db_plugin_info_s* ctsvc_db_get_plugin_info(ctsvc_record_type_e type)
 	case CTSVC_RECORD_PHONELOG:
 		return &ctsvc_db_plugin_phonelog;
 #endif /* ENABLE_LOG_FEATURE */
-#ifdef ENABLE_SIM_FEATURE
 	case CTSVC_RECORD_SPEEDDIAL:
 		return &ctsvc_db_plugin_speeddial;
 	case CTSVC_RECORD_SDN:
 		return &ctsvc_db_plugin_sdn;
-#endif /* ENABLE_SIM_FEATURE */
 	case CTSVC_RECORD_UPDATED_INFO:
 	case CTSVC_RECORD_RESULT:
 	default:
@@ -671,7 +667,6 @@ static int __ctsvc_db_create_views()
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Fail(%d)", ret);
 
-#ifdef ENABLE_SIM_FEATURE
 	/* CTSVC_DB_VIEW_SPEEDIDAL */
 	snprintf(query, sizeof(query),
 		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_SPEEDIDAL" AS "
@@ -700,8 +695,6 @@ static int __ctsvc_db_create_views()
 			"ORDER BY speeddials.speed_number");
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Fail(%d)", ret);
-#endif /* ENABLE_SIM_FEATURE */
-
 
 	/* CTSVC_DB_VIEW_PERSON_CONTACT */
 	snprintf(query, sizeof(query),

@@ -62,17 +62,13 @@ SET(SRCS
 	${CMAKE_SOURCE_DIR}/common/ctsvc_socket.c
 	${CMAKE_SOURCE_DIR}/common/ctsvc_vcard.c
 	${CMAKE_SOURCE_DIR}/common/ctsvc_view.c
-)
 
-IF(ENABLE_SIM_FEATURE)
-SET(SRCS ${SRCS}
 	${CMAKE_SOURCE_DIR}/common/ipc/ctsvc_ipc_sdn.c
 	${CMAKE_SOURCE_DIR}/common/ctsvc_record_sdn.c
 	${CMAKE_SOURCE_DIR}/common/ctsvc_sim.c
 	${CMAKE_SOURCE_DIR}/common/ipc/ctsvc_ipc_speeddial.c
 	${CMAKE_SOURCE_DIR}/common/ctsvc_record_speeddial.c
 )
-ENDIF(ENABLE_SIM_FEATURE)
 
 IF(ENABLE_LOG_FEATURE)
 SET(SRCS ${SRCS}

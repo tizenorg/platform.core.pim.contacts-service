@@ -52,10 +52,8 @@ extern ctsvc_record_plugin_cb_s profile_plugin_cbs;
 extern ctsvc_record_plugin_cb_s nickname_plugin_cbs;
 extern ctsvc_record_plugin_cb_s email_plugin_cbs;
 extern ctsvc_record_plugin_cb_s result_plugin_cbs;
-#ifdef ENABLE_SIM_FEATURE
 extern ctsvc_record_plugin_cb_s sdn_plugin_cbs;
 extern ctsvc_record_plugin_cb_s speeddial_plugin_cbs;
-#endif /* ENABLE_SIM_FEATURE */
 extern ctsvc_record_plugin_cb_s extension_plugin_cbs;
 #ifdef ENABLE_LOG_FEATURE
 extern ctsvc_record_plugin_cb_s phonelog_plugin_cbs;
@@ -114,12 +112,10 @@ static const ctsvc_record_plugin_cb_s *__ctsvc_record_get_plugin_cb(int r_type)
 	case CTSVC_RECORD_PHONELOG:
 		return &phonelog_plugin_cbs;
 #endif /* ENABLE_LOG_FEATURE */
-#ifdef ENABLE_SIM_FEATURE
 	case CTSVC_RECORD_SPEEDDIAL:
 		return &speeddial_plugin_cbs;
 	case CTSVC_RECORD_SDN:
 		return &sdn_plugin_cbs;
-#endif /* ENABLE_SIM_FEATURE */
 	case CTSVC_RECORD_UPDATED_INFO:
 		return &updated_info_plugin_cbs;
 	case CTSVC_RECORD_RESULT:

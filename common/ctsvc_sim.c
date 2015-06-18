@@ -28,10 +28,6 @@
 
 API int contacts_sim_import_all_contacts()
 {
-#ifndef ENABLE_SIM_FEATURE
-	return CONTACTS_ERROR_NOT_SUPPORTED;
-#endif /* ENABLE_SIM_FEATURE */
-
 	int ret;
 
 	ctsvc_mutex_lock(CTS_MUTEX_SOCKET_FD);
@@ -43,10 +39,6 @@ API int contacts_sim_import_all_contacts()
 
 API int contacts_sim_get_initialization_status(bool *completed)
 {
-#ifndef ENABLE_SIM_FEATURE
-	return CONTACTS_ERROR_NOT_SUPPORTED;
-#endif /* ENABLE_SIM_FEATURE */
-
 	int ret;
 
 	RETVM_IF(completed == NULL, CONTACTS_ERROR_INVALID_PARAMETER,

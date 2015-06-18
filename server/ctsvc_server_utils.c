@@ -28,9 +28,7 @@
 #include "ctsvc_internal.h"
 #include "ctsvc_setting.h"
 #include "ctsvc_server_utils.h"
-#ifdef ENABLE_SIM_FEATURE
 #include "ctsvc_server_sim.h"
-#endif /* ENABLE_SIM_FEATURE */
 #include "ctsvc_server_sqlite.h"
 #include "ctsvc_localize.h"
 #include "ctsvc_normalize.h"
@@ -124,9 +122,7 @@ void ctsvc_server_final_configuration(void)
 	ret = vconf_ignore_key_changed(VCONFKEY_LANGSET, __ctsvc_server_change_language_cb);
 	RETM_IF(ret<0,"vconf_ignore_key_changed(%s) Fail(%d)", VCONFKEY_LANGSET, ret);
 
-#ifdef ENABLE_SIM_FEATURE
 	ctsvc_server_sim_final();
-#endif /* ENABLE_SIM_FEATURE */
 }
 
 int ctsvc_server_init_configuration(void)
@@ -154,10 +150,8 @@ int ctsvc_server_init_configuration(void)
 	RETVM_IF(ret<0, CONTACTS_ERROR_SYSTEM, "vconf_notify_key_changed(%s) Fail(%d)",
 			VCONFKEY_LANGSET, ret);
 
-#ifdef ENABLE_SIM_FEATURE
 	ret = ctsvc_server_sim_init();
 	RETVM_IF(ret !=CONTACTS_ERROR_NONE, ret, "ctsvc_server_sim_init Fail(%d)", ret);
-#endif /* ENABLE_SIM_FEATURE */
 
 	return CONTACTS_ERROR_NONE;
 }

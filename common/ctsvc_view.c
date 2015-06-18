@@ -297,7 +297,6 @@ API const _contacts_messenger_property_ids _contacts_messenger = {
 	.im_id		= CTSVC_PROPERTY_MESSENGER_IM_ID,
 };
 
-#ifdef ENABLE_SIM_FEATURE
 API const _contacts_sdn_property_ids _contacts_sdn = {
 	._uri	= CTSVC_VIEW_URI_SDN,
 	.id		= CTSVC_PROPERTY_SDN_ID,
@@ -320,7 +319,6 @@ API const _contacts_speeddial_property_ids _contacts_speeddial = {
 	.cleaned_number		= CTSVC_PROPERTY_SPEEDDIAL_CLEANED_NUMBER,
 	.number_filter		= CTSVC_PROPERTY_SPEEDDIAL_NUMBER_FILTER,
 };
-#endif /* ENABLE_SIM_FEATURE */
 
 API const _contacts_contact_updated_info_property_ids _contacts_contact_updated_info = {
 	._uri			= CTSVC_VIEW_URI_CONTACTS_UPDATED_INFO,
@@ -666,14 +664,12 @@ const property_info_s __property_addressbook[] = {
 	{CTSVC_PROPERTY_ADDRESSBOOK_MODE,		CTSVC_SEARCH_PROPERTY_ALL,	"mode"},
 };
 
-#ifdef ENABLE_SIM_FEATURE
 const property_info_s __property_sdn[] = {   /* _contacts_sdn */
 	{CTSVC_PROPERTY_SDN_ID,		CTSVC_SEARCH_PROPERTY_ALL,	"id"},
 	{CTSVC_PROPERTY_SDN_NAME,		CTSVC_SEARCH_PROPERTY_ALL,	"name"},
 	{CTSVC_PROPERTY_SDN_NUMBER,	CTSVC_SEARCH_PROPERTY_ALL,	"number"},
 	{CTSVC_PROPERTY_SDN_SIM_SLOT_NO,	CTSVC_SEARCH_PROPERTY_ALL,	"sim_slot_no"},
 };
-#endif /* ENABLE_SIM_FEATURE */
 
 const property_info_s __property_group[] = {
 	{CTSVC_PROPERTY_GROUP_ID,				CTSVC_SEARCH_PROPERTY_ALL,	"group_id"},
@@ -953,7 +949,6 @@ const property_info_s __property_my_profile[] = {
 	{CTSVC_PROPERTY_MY_PROFILE_EXTENSION,			CTSVC_SEARCH_PROPERTY_NONE,(void*)__property_extension},
 };
 
-#ifdef ENABLE_SIM_FEATURE
 const property_info_s __property_speeddial[] = {   /* _contacts_speeddial */
 	{CTSVC_PROPERTY_SPEEDDIAL_DIAL_NUMBER,		CTSVC_SEARCH_PROPERTY_ALL,	"speed_number"},
 	{CTSVC_PROPERTY_SPEEDDIAL_NUMBER_ID,			CTSVC_SEARCH_PROPERTY_ALL,	"number_id"},
@@ -967,7 +962,6 @@ const property_info_s __property_speeddial[] = {   /* _contacts_speeddial */
 	{CTSVC_PROPERTY_SPEEDDIAL_CLEANED_NUMBER,	CTSVC_SEARCH_PROPERTY_FILTER,	"cleaned_number"},
 	{CTSVC_PROPERTY_SPEEDDIAL_NUMBER_FILTER,	CTSVC_SEARCH_PROPERTY_FILTER,	"minmatch"},
 };
-#endif /* ENABLE_SIM_FEATURE */
 
 #ifdef ENABLE_LOG_FEATURE
 const property_info_s __property_phonelog[] = {   /* _contacts_phone_log */
@@ -984,25 +978,6 @@ const property_info_s __property_phonelog[] = {   /* _contacts_phone_log */
 	{CTSVC_PROPERTY_PHONELOG_SIM_SLOT_NO,			CTSVC_SEARCH_PROPERTY_ALL, "sim_id"},
 };
 #endif /* ENABLE_LOG_FEATURE */
-
-#if 0
-const property_info_s __property_updated_info[] = {
-	{CTSVC_PROPERTY_UPDATE_INFO_ID, 				CTSVC_SEARCH_PROPERTY_ALL,	"id"},
-	{CTSVC_PROPERTY_UPDATE_INFO_ADDRESSBOOK_ID, CTSVC_SEARCH_PROPERTY_ALL,	"addressbook_id"},
-	{CTSVC_PROPERTY_UPDATE_INFO_TYPE,			CTSVC_SEARCH_PROPERTY_ALL,	"type"},
-	{CTSVC_PROPERTY_UPDATE_INFO_VERSION,		CTSVC_SEARCH_PROPERTY_ALL,	"version"},
-	{CTSVC_PROPERTY_UPDATE_INFO_IMAGE_CHANGED,	CTSVC_SEARCH_PROPERTY_ALL,	"image_changed"},
-	{CTSVC_PROPERTY_UPDATE_INFO_LAST_CHANGED_TYPE, 	CTSVC_SEARCH_PROPERTY_ALL,	"is_deleted"},
-};
-
-const property_info_s __property_grouprel_updated_info[] = {
-	{CTSVC_PROPERTY_GROUP_ID,				CTSVC_SEARCH_PROPERTY_ALL,	"group_id"},
-	{CTSVC_PROPERTY_CONTACT_ID,			CTSVC_SEARCH_PROPERTY_ALL,	"id"},
-	{CTSVC_PROPERTY_ADDRESSBOOK_ID,		CTSVC_SEARCH_PROPERTY_ALL,	"addressbook_id"},
-	{CTSVC_PROPERTY_UPDATE_INFO_TYPE,	CTSVC_SEARCH_PROPERTY_ALL,	"type"},
-	{CTSVC_PROPERTY_UPDATE_INFO_VERSION,	CTSVC_SEARCH_PROPERTY_ALL,	"version"},
-};
-#endif
 
 /* search properties */
 const property_info_s __property_person_contact[] = {   /* _contacts_person_contact */
@@ -1272,10 +1247,8 @@ static const view_uri_info_s __tables[] = {
 #ifdef ENABLE_LOG_FEATURE
 	{CTSVC_VIEW_URI_PHONELOG,		CTSVC_RECORD_PHONELOG,			PTR_COUNT(__property_phonelog)},
 #endif /* ENABLE_LOG_FEATURE */
-#ifdef ENABLE_SIM_FEATURE
 	{CTSVC_VIEW_URI_SPEEDDIAL,		CTSVC_RECORD_SPEEDDIAL,			PTR_COUNT(__property_speeddial)},
 	{CTSVC_VIEW_URI_SDN,			CTSVC_RECORD_SDN,				PTR_COUNT(__property_sdn)},
-#endif /* ENABLE_SIM_FEATURE */
 
 	{CTSVC_VIEW_URI_NAME,			CTSVC_RECORD_NAME,				PTR_COUNT(__property_name)},
 	{CTSVC_VIEW_URI_COMPANY,		CTSVC_RECORD_COMPANY,			PTR_COUNT(__property_company)},

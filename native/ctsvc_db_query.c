@@ -48,11 +48,9 @@
 #include "ctsvc_db_plugin_company_helper.h"
 
 #ifdef _CONTACTS_IPC_SERVER
-#ifdef ENABLE_SIM_FEATURE
 #include "ctsvc_server_sim.h"
-#endif /* ENABLE_SIM_FEATURE */
 #include "ctsvc_server_change_subject.h"
-#endif
+#endif /* _CONTACTS_IPC_SERVER */
 
 /* It is used to sort search results */
 const char *hangul_syllable[19][3] = {
@@ -152,7 +150,6 @@ static inline int __ctsvc_db_create_int_condition(ctsvc_composite_filter_s *com_
 			"Invalid parameter : property id(%d)", filter->property_id);
 
 #ifdef _CONTACTS_IPC_SERVER
-#ifdef ENABLE_SIM_FEATURE
 	if (filter->property_id == CTSVC_PROPERTY_PHONELOG_SIM_SLOT_NO) {
 		/* get real sim info id by SIM slot number 0/1 */
 		int sim_info_id = ctsvc_server_sim_get_info_id_by_sim_slot_no(filter->value.i);
@@ -163,8 +160,7 @@ static inline int __ctsvc_db_create_int_condition(ctsvc_composite_filter_s *com_
 		}
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
-#endif /* ENABLE_SIM_FEATURE */
-#endif
+#endif /* _CONTACTS_IPC_SERVER */
 
 	switch(filter->match) {
 	case CONTACTS_MATCH_EQUAL:

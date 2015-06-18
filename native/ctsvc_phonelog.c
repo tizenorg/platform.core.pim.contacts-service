@@ -32,10 +32,8 @@
 
 #ifdef _CONTACTS_IPC_SERVER
 #include "ctsvc_server_change_subject.h"
-#ifdef ENABLE_SIM_FEATURE
 #include "ctsvc_server_sim.h"
-#endif /* ENABLE_SIM_FEATURE */
-#endif
+#endif /* _CONTACTS_IPC_SERVER */
 
 API int contacts_phone_log_reset_statistics()
 {
