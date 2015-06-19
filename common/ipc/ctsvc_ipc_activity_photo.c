@@ -23,12 +23,10 @@
 
 static int __ctsvc_ipc_unmarshal_activity_photo(pims_ipc_data_h ipc_data, const char* view_uri, contacts_record_h record);
 static int __ctsvc_ipc_marshal_activity_photo(const contacts_record_h record, pims_ipc_data_h ipc_data);
-static int __ctsvc_ipc_marshal_activity_photo_get_primary_id(const contacts_record_h record, unsigned int *property_id, int *id);
 
 ctsvc_ipc_marshal_record_plugin_cb_s _ctsvc_ipc_record_activity_photo_plugin_cb = {
 	.unmarshal_record = __ctsvc_ipc_unmarshal_activity_photo,
-	.marshal_record = __ctsvc_ipc_marshal_activity_photo,
-	.get_primary_id = __ctsvc_ipc_marshal_activity_photo_get_primary_id
+	.marshal_record = __ctsvc_ipc_marshal_activity_photo
 };
 
 
@@ -74,8 +72,3 @@ static int __ctsvc_ipc_marshal_activity_photo(const contacts_record_h record, pi
 
 }
 
-static int __ctsvc_ipc_marshal_activity_photo_get_primary_id(const contacts_record_h record, unsigned int *property_id, int *id)
-{
-	*property_id = CTSVC_PROPERTY_ACTIVITY_PHOTO_ID;
-	return contacts_record_get_int(record, *property_id, id);
-}

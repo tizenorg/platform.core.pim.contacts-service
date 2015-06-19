@@ -23,12 +23,10 @@
 
 static int __ctsvc_ipc_unmarshal_group_relation(pims_ipc_data_h ipc_data, const char* view_uri, contacts_record_h record);
 static int __ctsvc_ipc_marshal_group_relation(const contacts_record_h record, pims_ipc_data_h ipc_data);
-static int __ctsvc_ipc_marshal_group_relation_get_primary_id(const contacts_record_h record, unsigned int *property_id, int *id);
 
 ctsvc_ipc_marshal_record_plugin_cb_s _ctsvc_ipc_record_group_relation_plugin_cb = {
 	.unmarshal_record = __ctsvc_ipc_unmarshal_group_relation,
-	.marshal_record = __ctsvc_ipc_marshal_group_relation,
-	.get_primary_id = __ctsvc_ipc_marshal_group_relation_get_primary_id
+	.marshal_record = __ctsvc_ipc_marshal_group_relation
 };
 
 
@@ -73,8 +71,3 @@ static int __ctsvc_ipc_marshal_group_relation(const contacts_record_h record, pi
 	return CONTACTS_ERROR_INVALID_PARAMETER;
 }
 
-static int __ctsvc_ipc_marshal_group_relation_get_primary_id(const contacts_record_h record, unsigned int *property_id, int *id)
-{
-	*property_id = CTSVC_PROPERTY_GROUP_RELATION_ID;
-	return contacts_record_get_int(record, *property_id, id);
-}

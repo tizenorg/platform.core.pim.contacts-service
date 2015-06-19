@@ -26,8 +26,7 @@ static int __ctsvc_ipc_marshal_speeddial(const contacts_record_h record, pims_ip
 
 ctsvc_ipc_marshal_record_plugin_cb_s _ctsvc_ipc_record_speeddial_plugin_cb = {
 	.unmarshal_record = __ctsvc_ipc_unmarshal_speeddial,
-	.marshal_record = __ctsvc_ipc_marshal_speeddial,
-	.get_primary_id = NULL
+	.marshal_record = __ctsvc_ipc_marshal_speeddial
 };
 
 

@@ -33,17 +33,14 @@
  */
 typedef int (*ctsvc_ipc_unmarshal_record_cb)(const pims_ipc_data_h ipc_data, const char* view_uri, contacts_record_h precord);
 typedef int (*ctsvc_ipc_marshal_record_cb)(const contacts_record_h record, pims_ipc_data_h ipc_data);
-typedef int (*ctsvc_ipc_marshal_record_get_primary_id_cb)(const contacts_record_h record, unsigned int *property_id, int *id);
 
 typedef struct {
     ctsvc_ipc_unmarshal_record_cb unmarshal_record;
     ctsvc_ipc_marshal_record_cb marshal_record;
-    ctsvc_ipc_marshal_record_get_primary_id_cb get_primary_id;
 } ctsvc_ipc_marshal_record_plugin_cb_s;
 
 int ctsvc_ipc_unmarshal_record(const pims_ipc_data_h ipc_data, contacts_record_h* precord);
 int ctsvc_ipc_marshal_record(const contacts_record_h record, pims_ipc_data_h ipc_data);
-int ctsvc_ipc_marshal_record_get_primary_id(const contacts_record_h record, unsigned int *property_id, int *id);
 
 /*
  * string

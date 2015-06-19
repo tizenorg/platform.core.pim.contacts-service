@@ -26,8 +26,7 @@ static int __ctsvc_ipc_marshal_updated_info(const contacts_record_h record, pims
 
 ctsvc_ipc_marshal_record_plugin_cb_s _ctsvc_ipc_record_updated_info_plugin_cb = {
 	.unmarshal_record = __ctsvc_ipc_unmarshal_updated_info,
-	.marshal_record = __ctsvc_ipc_marshal_updated_info,
-	.get_primary_id = NULL
+	.marshal_record = __ctsvc_ipc_marshal_updated_info
 };
 
 

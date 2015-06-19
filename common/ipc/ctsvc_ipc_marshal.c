@@ -483,22 +483,6 @@ int ctsvc_ipc_marshal_record(const contacts_record_h record, pims_ipc_data_h ipc
 	return ret;
 }
 
-int ctsvc_ipc_marshal_record_get_primary_id(const contacts_record_h record,
-		unsigned int *property_id, int *id)
-{
-	RETVM_IF(NULL == record || NULL == property_id || NULL == id, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter");
-
-	ctsvc_record_s *temp = (ctsvc_record_s*)(record);
-
-	ctsvc_ipc_marshal_record_plugin_cb_s *plugin_cb = __ctsvc_ipc_marshal_get_plugin_cb(temp->r_type);
-
-	RETVM_IF(NULL == plugin_cb || NULL == plugin_cb->get_primary_id, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter");
-
-	int ret = plugin_cb->get_primary_id(record, property_id,id);
-
-	return ret;
-}
-
 int ctsvc_ipc_unmarshal_string(const pims_ipc_data_h ipc_data, char** ppbufchar)
 {
 	int ret = CONTACTS_ERROR_NONE;
