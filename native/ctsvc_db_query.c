@@ -949,6 +949,7 @@ int ctsvc_db_make_get_records_query_stmt(ctsvc_query_s *s_query, int offset, int
 	query = calloc(1, query_size);
 	if (NULL == query) {
 		CTS_ERR("calloc() Fail");
+		free(projection);
 		return CONTACTS_ERROR_OUT_OF_MEMORY;
 	}
 
