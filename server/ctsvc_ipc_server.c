@@ -120,6 +120,7 @@ ERROR_RETURN:
 DATA_FREE:
 	ctsvc_handle_destroy(contact);
 	ctsvc_server_trim_memory();
+	ctsvc_server_timeout();
 }
 
 void ctsvc_ipc_server_check_permission(pims_ipc_h ipc, pims_ipc_data_h indata,
@@ -165,6 +166,7 @@ ERROR_RETURN:
 			return;
 		}
 	}
+	ctsvc_server_timeout();
 }
 
 void ctsvc_ipc_server_db_insert_record(pims_ipc_h ipc, pims_ipc_data_h indata, pims_ipc_data_h *outdata, void *userdata)
@@ -257,6 +259,7 @@ DATA_FREE:
 	ctsvc_handle_destroy(contact);
 	contacts_record_destroy(record,true);
 	ctsvc_server_trim_memory();
+	ctsvc_server_timeout();
 	return;
 }
 
@@ -331,6 +334,7 @@ DATA_FREE:
 	ctsvc_handle_destroy(contact);
 	contacts_record_destroy(record,true);
 	CONTACTS_FREE(view_uri);
+	ctsvc_server_timeout();
 	return;
 }
 
@@ -413,6 +417,7 @@ DATA_FREE:
 	ctsvc_handle_destroy(contact);
 	contacts_record_destroy(record,true);
 	ctsvc_server_trim_memory();
+	ctsvc_server_timeout();
 	return;
 }
 
@@ -502,6 +507,7 @@ DATA_FREE:
 
 	ctsvc_handle_destroy(contact);
 	CONTACTS_FREE(view_uri);
+	ctsvc_server_timeout();
 	return;
 }
 
@@ -597,7 +603,7 @@ ERROR_RETURN:
 DATA_FREE:
 	ctsvc_handle_destroy(contact);
 	contacts_record_destroy(record, true);
-
+	ctsvc_server_timeout();
 	return;
 }
 
@@ -699,6 +705,7 @@ DATA_FREE:
 	ctsvc_handle_destroy(contact);
 	contacts_list_destroy(list,true);
 	CONTACTS_FREE(view_uri);
+	ctsvc_server_timeout();
 	return;
 }
 
@@ -797,6 +804,7 @@ DATA_FREE:
 	ctsvc_handle_destroy(contact);
 	contacts_list_destroy(list,true);
 	contacts_query_destroy(query);
+	ctsvc_server_timeout();
 	return;
 }
 
@@ -883,6 +891,7 @@ ERROR_RETURN:
 DATA_FREE:
 	ctsvc_handle_destroy(contact);
 	CONTACTS_FREE(view_uri);
+	ctsvc_server_timeout();
 	return;
 }
 
@@ -968,6 +977,7 @@ ERROR_RETURN:
 DATA_FREE:
 	ctsvc_handle_destroy(contact);
 	contacts_query_destroy(query);
+	ctsvc_server_timeout();
 	return;
 }
 
@@ -1089,6 +1099,7 @@ DATA_FREE:
 	ctsvc_handle_destroy(contact);
 	contacts_list_destroy(list,true);
 	CONTACTS_FREE(ids);
+	ctsvc_server_timeout();
 	return;
 }
 
@@ -1186,6 +1197,7 @@ ERROR_RETURN:
 DATA_FREE:
 	ctsvc_handle_destroy(contact);
 	contacts_list_destroy(list,true);
+	ctsvc_server_timeout();
 	return;
 }
 
@@ -1291,6 +1303,7 @@ DATA_FREE:
 	ctsvc_handle_destroy(contact);
 	CONTACTS_FREE(uri);
 	CONTACTS_FREE(ids);
+	ctsvc_server_timeout();
 	return;
 }
 
@@ -1411,6 +1424,7 @@ DATA_FREE:
 	ctsvc_handle_destroy(contact);
 	contacts_list_destroy(list,true);
 	CONTACTS_FREE(ids);
+	ctsvc_server_timeout();
 	return;
 }
 
@@ -1520,6 +1534,7 @@ DATA_FREE:
 	ctsvc_handle_destroy(contact);
 	contacts_list_destroy(record_list,true);
 	CONTACTS_FREE(view_uri);
+	ctsvc_server_timeout();
 	return;
 }
 
@@ -1576,6 +1591,7 @@ ERROR_RETURN:
 
 DATA_FREE:
 	ctsvc_handle_destroy(contact);
+	ctsvc_server_timeout();
 	return;
 }
 
@@ -1680,6 +1696,7 @@ DATA_FREE:
 	contacts_list_destroy(list,true);
 	CONTACTS_FREE(view_uri);
 	CONTACTS_FREE(keyword);
+	ctsvc_server_timeout();
 	return;
 }
 
@@ -1791,6 +1808,7 @@ DATA_FREE:
 	contacts_list_destroy(list,true);
 	free(view_uri);
 	free(keyword);
+	ctsvc_server_timeout();
 	return;
 }
 
@@ -1897,6 +1915,7 @@ DATA_FREE:
 	contacts_list_destroy(list,true);
 	contacts_query_destroy(query);
 	CONTACTS_FREE(keyword);
+	ctsvc_server_timeout();
 	return;
 }
 
@@ -1944,6 +1963,7 @@ ERROR_RETURN:
 	}
 DATA_FREE:
 	ctsvc_handle_destroy(contact);
+	ctsvc_server_timeout();
 	return;
 }
 

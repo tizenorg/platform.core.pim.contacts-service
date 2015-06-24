@@ -48,6 +48,7 @@ int ctsvc_ipc_client_check_permission(int permission, bool *result);
 int ctsvc_ipc_set_disconnected_cb(void (*cb)(void *), void *user_data);
 int ctsvc_ipc_unset_disconnected_cb();
 void ctsvc_ipc_set_disconnected(bool is_disconnected);
+int ctsvc_ipc_get_disconnected();
 void ctsvc_ipc_recovery();
 
 #endif /* __CTSVC_CLIENT_IPC_H__ */

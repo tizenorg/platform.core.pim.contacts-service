@@ -28,6 +28,7 @@ void ctsvc_server_final_configuration(void);
 int ctsvc_server_set_default_sort(int lang);
 
 void ctsvc_server_trim_memory(void);
+void ctsvc_server_timeout(void);
 
 #endif /* __CTSVC_SERVER_UTILS_H__ */
 

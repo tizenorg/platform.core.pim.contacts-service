@@ -1,9 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
- *
- * Contact: Youngjae Shin <yj99.shin@samsung.com>
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,24 +16,13 @@
  * limitations under the License.
  *
  */
-#ifndef __CTSVC_MUTEX_H__
-#define __CTSVC_MUTEX_H__
 
-enum {
-	CTS_MUTEX_CONNECTION,
-	CTS_MUTEX_UPDTATED_LIST_MEMPOOL,
-	CTS_MUTEX_SOCKET_FD,
-	CTS_MUTEX_PIMS_IPC_CALL,
-	CTS_MUTEX_PIMS_IPC_PUBSUB,
-	CTS_MUTEX_ACCESS_CONTROL,
-	CTS_MUTEX_HANDLE,
-	CTS_MUTEX_TIMEOUT,
-	CTS_MUTEX_CYNARA,
-	CTS_MUTEX_SOCKET_CLIENT_INFO,
-};
+#ifndef __CTSVC_SERVER_H__
+#define __CTSVC_SERVER_H__
 
-void ctsvc_mutex_lock(int type);
-void ctsvc_mutex_unlock(int type);
+void ctsvc_server_quit(void);
+int ctsvc_server_get_timeout_sec(void);
+
+#endif /* __CTSVC_SERVER_H__ */
 
 
-#endif /* __CTSVC_MUTEX_H__ */

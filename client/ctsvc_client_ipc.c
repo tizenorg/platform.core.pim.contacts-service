@@ -255,12 +255,18 @@ static void __ctsvc_ipc_unlock(void)
 
 int ctsvc_ipc_call(char *module, char *function, pims_ipc_h data_in, pims_ipc_data_h *data_out)
 {
-	pims_ipc_h ipc_handle = _ctsvc_get_ipc_handle();
+	pims_ipc_h ipc_handle;
+
+	if (true == ctsvc_ipc_get_disconnected()) {
+		ctsvc_ipc_recovery();
+		ctsvc_ipc_recover_for_change_subscription();
+		ctsvc_ipc_set_disconnected(false);
+	}
+
+	ipc_handle = _ctsvc_get_ipc_handle();
 
 	__ctsvc_ipc_lock();
-
 	int ret = pims_ipc_call(ipc_handle, module, function, data_in, data_out);
-
 	__ctsvc_ipc_unlock();
 
 	return ret;
@@ -351,6 +357,12 @@ void ctsvc_ipc_set_disconnected(bool is_disconnected)
 	_ctsvc_ipc_disconnected = is_disconnected;
 }
 
+int ctsvc_ipc_get_disconnected()
+{
+	CTS_DBG("_ctsvc_ipc_disconnected=%d", _ctsvc_ipc_disconnected);
+	return _ctsvc_ipc_disconnected;
+}
+
 static void _ctsvc_ipc_recovery_foreach_cb(gpointer key, gpointer value, gpointer user_data)
 {
 	GList *c;
@@ -368,11 +380,7 @@ static void _ctsvc_ipc_recovery_foreach_cb(gpointer key, gpointer value, gpointe
 
 void ctsvc_ipc_recovery()
 {
-	CTS_DBG("ctsvc_ipc_recovery (_ctsvc_ipc_disconnected=%d)", _ctsvc_ipc_disconnected);
-
-	if (false == _ctsvc_ipc_disconnected)
-		return;
-
+	CTS_FN_CALL;
 	g_hash_table_foreach(_ctsvc_ipc_table, _ctsvc_ipc_recovery_foreach_cb, NULL);
 }
 

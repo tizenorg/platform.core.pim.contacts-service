@@ -411,6 +411,7 @@ static gpointer __ctsvc_server_bg_delete(gpointer user_data)
 		while (1) {
 			if (__ctsvc_cpu_is_busy()) { /* sleep 1 sec in function */
 				CTS_ERR("Now CPU is busy.. waiting");
+				ctsvc_server_timeout();
 				sleep(CTSVC_SERVER_BG_DELETE_STEP_TIME*59); /* sleep 60 sec(1 min) totally */
 				continue;
 			}

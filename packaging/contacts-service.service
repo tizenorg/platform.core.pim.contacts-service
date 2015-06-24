@@ -3,7 +3,8 @@ Description=Start the Contacts service helper service
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/contacts-service-ipcd
+Environment="CMD=timeout" "TIME=0"
+ExecStart=/usr/bin/contacts-service-ipcd $CMD $TIME
 
 [Install]
 WantedBy=default.target

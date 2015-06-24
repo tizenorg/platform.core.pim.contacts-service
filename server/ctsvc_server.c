@@ -45,6 +45,12 @@
 #include "ctsvc_ipc_server2.h"
 #include "ctsvc_notify.h"
 
+#define CTSVC_TIMEOUT_FOR_DEFAULT 90
+
+static int ctsvc_list_count = 0;
+static int ctsvc_timeout_sec = CTSVC_TIMEOUT_FOR_DEFAULT;
+static GMainLoop *main_loop = NULL;
+
 static int __server_main(void)
 {
 	int ret;
@@ -124,7 +130,6 @@ static int __server_main(void)
 		ret = ctsvc_server_init_configuration();
 		CTS_DBG("%d", ret);
 
-		GMainLoop* main_loop;
 		main_loop = g_main_loop_new(NULL, FALSE);
 
 		pims_ipc_svc_run_main_loop(main_loop);
@@ -149,6 +154,18 @@ static int __server_main(void)
 
 	CTS_ERR("pims_ipc_svc_register error");
 	return -1;
+}
+
+void ctsvc_server_quit(void)
+{
+	g_main_loop_quit(main_loop);
+	main_loop = NULL;
+}
+
+int ctsvc_server_get_timeout_sec(void)
+{
+	CTS_DBG("ctsvc_timeout_sec:%d", ctsvc_timeout_sec);
+	return ctsvc_timeout_sec;
 }
 
 #define CTSVC_SECURITY_FILE_GROUP 6005
@@ -176,7 +193,6 @@ void ctsvc_create_rep_set_permission(const char* directory, mode_t mode)
 	}
 }
 
-
 int main(int argc, char *argv[])
 {
 	CTS_FN_CALL;
@@ -189,9 +205,10 @@ int main(int argc, char *argv[])
 		WARN_IF(ret <0, "setgroups Fail(%d)", ret);
 	}
 
+	if (2 <= argc && STRING_EQUAL == strcmp(argv[1], "timeout"))
+		ctsvc_timeout_sec = atoi(argv[2]);
+
 	ctsvc_server_check_schema();
-	if (2 <= argc && STRING_EQUAL ==strcmp(argv[1], "schema"))
-		return CONTACTS_ERROR_NONE;
 
 	ctsvc_create_rep_set_permission(DATA_REPERTORY, 0755);
 	ctsvc_create_rep_set_permission(CTSVC_NOTI_REPERTORY, 0775);

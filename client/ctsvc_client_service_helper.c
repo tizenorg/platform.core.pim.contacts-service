@@ -83,9 +83,12 @@ static void _ctsvc_ipc_disconnected_cb(void *user_data)
 
 static void _ctsvc_ipc_initialized_cb(void *user_data)
 {
-	ctsvc_ipc_recovery();
-	ctsvc_ipc_recover_for_change_subscription();
-	ctsvc_ipc_set_disconnected(false);
+	CTS_FN_CALL;
+	if (true == ctsvc_ipc_get_disconnected()) {
+		ctsvc_ipc_recovery();
+		ctsvc_ipc_recover_for_change_subscription();
+		ctsvc_ipc_set_disconnected(false);
+	}
 }
 
 int ctsvc_client_connect(contacts_h contact)

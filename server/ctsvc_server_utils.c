@@ -32,11 +32,14 @@
 #include "ctsvc_server_sqlite.h"
 #include "ctsvc_localize.h"
 #include "ctsvc_normalize.h"
+#include "ctsvc_mutex.h"
+#include "ctsvc_server.h"
 
 #define CTSVC_FEATURE_TELEPHONY "http://tizen.org/feature/network.telephony"
 
 static int system_language = -1;
 static bool _ctsvc_have_telephony_feature = false;
+static guint _ctsvc_timeout = 0;
 
 int ctsvc_server_load_feature_list(void)
 {
@@ -160,4 +163,25 @@ void ctsvc_server_trim_memory(void)
 {
 	malloc_trim(0);
 	sqlite3_release_memory(-1);
+}
+
+static gboolean _timeout_cb(gpointer user_data)
+{
+	CTS_FN_CALL;
+	ctsvc_server_quit();
+	return TRUE;
+}
+
+void ctsvc_server_timeout(void)
+{
+	CTS_FN_CALL;
+	int timeout = ctsvc_server_get_timeout_sec();
+	if (timeout < 1)
+		return;
+
+	ctsvc_mutex_lock(CTS_MUTEX_TIMEOUT);
+	if (_ctsvc_timeout > 0)
+		g_source_remove(_ctsvc_timeout);
+	_ctsvc_timeout = g_timeout_add_seconds(timeout, _timeout_cb, NULL);
+	ctsvc_mutex_unlock(CTS_MUTEX_TIMEOUT);
 }
