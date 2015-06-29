@@ -600,7 +600,7 @@ _CONTACTS_BEGIN_VIEW()
     _CONTACTS_PROPERTY_STR(label)             /* read, write */
     _CONTACTS_PROPERTY_INT(date)              /* read, write */
     _CONTACTS_PROPERTY_INT(calendar_type)     /* read, write */
-    _CONTACTS_PROPERTY_BOOL(is_leap_month)    /* read, write (Deprecated) */
+    _CONTACTS_PROPERTY_BOOL(is_leap_month)    /* read, write (Deprecated since 2.4) */
 _CONTACTS_END_VIEW(_contacts_event)
 
 /**
