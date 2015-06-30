@@ -193,6 +193,11 @@ API int contacts_db_add_changed_cb_with_info(const char* view_uri,
 	}
 
 	cb_info = calloc(1, sizeof(db_callback_info_s));
+	if (NULL == cb_info) {
+		CTS_ERR("calloc() Failed");
+		ctsvc_mutex_unlock(CTS_MUTEX_PIMS_IPC_PUBSUB);
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
+	}
 	cb_info->user_data = user_data;
 	cb_info->cb = cb;
 	info->callbacks = g_slist_append(info->callbacks, cb_info);

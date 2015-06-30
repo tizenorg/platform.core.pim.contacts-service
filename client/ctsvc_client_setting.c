@@ -218,6 +218,11 @@ API int contacts_setting_add_name_display_order_changed_cb(
 	}
 
 	cb_info = calloc(1, sizeof(ctsvc_name_display_order_changed_cb_info_s));
+	if (NULL == cb_info) {
+		CTS_ERR("calloc() Failed");
+		ctsvc_mutex_unlock(CTS_MUTEX_PIMS_IPC_PUBSUB);
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
+	}
 	cb_info->user_data = user_data;
 	cb_info->cb = cb;
 	__setting_name_display_order_subscribe_list = g_slist_append(__setting_name_display_order_subscribe_list, cb_info);
@@ -315,6 +320,11 @@ API int contacts_setting_add_name_sorting_order_changed_cb(
 	}
 
 	cb_info = calloc(1, sizeof(ctsvc_name_sorting_order_changed_cb_info_s));
+	if (NULL == cb_info) {
+		CTS_ERR("calloc() Failed");
+		ctsvc_mutex_unlock(CTS_MUTEX_PIMS_IPC_PUBSUB);
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
+	}
 	cb_info->user_data = user_data;
 	cb_info->cb = cb;
 	__setting_name_sorting_order_subscribe_list = g_slist_append(__setting_name_sorting_order_subscribe_list, cb_info);
