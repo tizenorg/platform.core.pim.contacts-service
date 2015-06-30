@@ -148,6 +148,7 @@ ERROR_RETURN:
 	*outdata = pims_ipc_data_create(0);
 	if (NULL == *outdata) {
 		CTS_ERR("pims_ipc_data_create() Fail");
+		ctsvc_server_timeout();
 		return;
 	}
 
@@ -155,6 +156,7 @@ ERROR_RETURN:
 		pims_ipc_data_destroy(*outdata);
 		*outdata = NULL;
 		CTS_ERR("ctsvc_ipc_marshal_int() Fail");
+		ctsvc_server_timeout();
 		return;
 	}
 
@@ -163,6 +165,7 @@ ERROR_RETURN:
 			pims_ipc_data_destroy(*outdata);
 			*outdata = NULL;
 			CTS_ERR("ctsvc_ipc_marshal_bool() Fail");
+			ctsvc_server_timeout();
 			return;
 		}
 	}
