@@ -71,9 +71,9 @@ MAJORVER=`echo %{version} | awk 'BEGIN {FS="."}{print $1}'`
 rm -rf %{buildroot}
 %make_install
 
-mkdir -p %{buildroot}%{_unitdir_user}/tizen-middleware.target.wants
+mkdir -p %{buildroot}%{_unitdir_user}/default.target.wants
 install -m 0644 %SOURCE1 %{buildroot}%{_unitdir_user}/contacts-service.service
-ln -s ../contacts-service.service %{buildroot}%{_unitdir_user}/tizen-middleware.target.wants/contacts-service.service
+ln -s ../contacts-service.service %{buildroot}%{_unitdir_user}/default.target.wants/contacts-service.service
 
 mkdir -p %{buildroot}%{_unitdir_user}/sockets.target.wants
 install -m 0644 %SOURCE2 %{buildroot}%{_unitdir_user}/contacts-service.socket
@@ -99,7 +99,7 @@ vconftool set -t int db/contacts-svc/phonenumber_min_match_digit 8 -g 5000 -s co
 %{_libdir}/libcontacts-service2.so.*
 %{_bindir}/contacts-service-ipcd*
 %{_unitdir_user}/contacts-service.service
-%{_unitdir_user}/tizen-middleware.target.wants/contacts-service.service
+%{_unitdir_user}/default.target.wants/contacts-service.service
 %{_unitdir_user}/sockets.target.wants/contacts-service.socket
 %{_unitdir_user}/contacts-service.socket
 /usr/share/license/%{name}2

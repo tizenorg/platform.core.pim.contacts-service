@@ -86,7 +86,9 @@ int ctsvc_ipc_create_for_change_subscription()
 	}
 
 	if (!__ipc) {
-		__ipc = pims_ipc_create_for_subscribe(CTSVC_IPC_SOCKET_PATH_FOR_CHANGE_SUBSCRIPTION);
+		char sock_file[CTSVC_PATH_MAX_LEN] = {0};
+		snprintf(sock_file, sizeof(sock_file), CTSVC_SOCK_PATH"/.%s_for_subscribe", getuid(), CTSVC_IPC_SERVICE);
+		__ipc = pims_ipc_create_for_subscribe(sock_file);
 		if (!__ipc) {
 			CTS_ERR("pims_ipc_create_for_subscribe error\n");
 			ctsvc_mutex_unlock(CTS_MUTEX_PIMS_IPC_PUBSUB);

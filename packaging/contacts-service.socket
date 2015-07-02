@@ -3,8 +3,6 @@ Description=Contacts Service socket
 
 [Socket]
 ListenStream=/tmp/.contacts_svc_ipc
-SmackLabelIPIn=contacts-service
-SmackLabelIPOut=contacts-service
 Service=contacts-service.service
 
 [Install]
