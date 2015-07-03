@@ -21,6 +21,7 @@
 #include "ctsvc_internal.h"
 #include "ctsvc_record.h"
 #include "ctsvc_view.h"
+#include "ctsvc_notify.h"
 
 #ifdef _CONTACTS_IPC_SERVER
 #ifdef ENABLE_SIM_FEATURE

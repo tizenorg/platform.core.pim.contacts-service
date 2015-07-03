@@ -27,6 +27,7 @@
 #include "ctsvc_db_query.h"
 #include "ctsvc_record.h"
 #include "ctsvc_notification.h"
+#include "ctsvc_notify.h"
 
 static int __ctsvc_db_speeddial_insert_record( contacts_record_h record, int *id );
 static int __ctsvc_db_speeddial_get_record( int id, contacts_record_h* out_record );

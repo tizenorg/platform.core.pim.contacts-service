@@ -196,6 +196,7 @@ int main(int argc, char *argv[])
 	ctsvc_create_rep_set_permission(CTS_MY_IMAGE_LOCATION, 0770);
 	ctsvc_create_rep_set_permission(CTS_GROUP_IMAGE_LOCATION, 0770);
 	ctsvc_create_rep_set_permission(CTS_LOGO_IMAGE_LOCATION, 0770);
+	ctsvc_create_rep_set_permission(CTSVC_CONTACT_IMG_FULL_LOCATION, 0770);
 
 	ctsvc_create_file_set_permission(CTSVC_NOTI_ADDRESSBOOK_CHANGED, 0660);
 	ctsvc_create_file_set_permission(CTSVC_NOTI_GROUP_CHANGED, 0660);

@@ -43,6 +43,7 @@
 #include "ctsvc_localize.h"
 #include "ctsvc_localize_utils.h"
 #include "ctsvc_setting.h"
+#include "ctsvc_notify.h"
 
 #ifdef _CONTACTS_IPC_SERVER
 #include "ctsvc_server_change_subject.h"
@@ -235,7 +236,7 @@ static inline bool ctsvc_check_available_image_space(void){
 	int ret;
 	struct statfs buf;
 	long long size;
-	ret = statfs(CTSVC_IMG_FULL_LOCATION, &buf);
+	ret = statfs(CTSVC_NOTI_IMG_REPERTORY, &buf);
 
 	RETVM_IF(ret!=0, false, "statfs Failed(%d)", ret);
 

@@ -30,6 +30,7 @@
 #include "ctsvc_record.h"
 #include "ctsvc_normalize.h"
 #include "ctsvc_notification.h"
+#include "ctsvc_notify.h"
 
 #ifdef _CONTACTS_IPC_SERVER
 #include "ctsvc_server_change_subject.h"

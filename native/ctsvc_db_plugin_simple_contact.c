@@ -32,6 +32,7 @@
 #include "ctsvc_db_query.h"
 #include "ctsvc_notification.h"
 #include "ctsvc_db_access_control.h"
+#include "ctsvc_notify.h"
 
 static int __ctsvc_db_simple_contact_get_record( int id, contacts_record_h* out_record );
 static int __ctsvc_db_simple_contact_get_all_records( int offset, int limit, contacts_list_h* out_list );

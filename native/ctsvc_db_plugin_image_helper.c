@@ -28,6 +28,7 @@
 #include "ctsvc_record.h"
 #include "ctsvc_notification.h"
 #include "ctsvc_db_access_control.h"
+#include "ctsvc_notify.h"
 
 int ctsvc_db_image_get_value_from_stmt(cts_stmt stmt, contacts_record_h *record, int start_count)
 {

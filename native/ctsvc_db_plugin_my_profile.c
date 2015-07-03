@@ -36,6 +36,7 @@
 #include "ctsvc_notification.h"
 #include "ctsvc_localize_utils.h"
 #include "ctsvc_db_access_control.h"
+#include "ctsvc_notify.h"
 
 #include "ctsvc_db_plugin_contact_helper.h"
 

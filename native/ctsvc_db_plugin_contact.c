@@ -39,6 +39,8 @@
 #include "ctsvc_localize.h"
 #include "ctsvc_localize_utils.h"
 #include "ctsvc_person.h"
+#include "ctsvc_notify.h"
+
 #ifdef ENABLE_LOG_FEATURE
 #include "ctsvc_phonelog.h"
 #endif // ENABLE_LOG_FEATURE
