@@ -615,14 +615,14 @@ _CONTACTS_END_VIEW(_contacts_event)
  *    <th>Description</th>
  * </tr>
  * <tr><td>string</td><td>_uri</td><td>read only</td><td> Identifier of this relationship view </td></tr>
- * <tr><td>integer</td><td> id </td><td>read only</td><td> DB record ID of the group (can not used as filter) </td></tr>
+ * <tr><td>integer</td><td> id </td><td>read only</td><td> DB record ID of the group (can not be used as filter) </td></tr>
  * <tr><td>integer</td><td> group_id </td><td>read, write once</td><td> DB record ID of the group </td></tr>
  * <tr><td>integer</td><td> contact_id </td><td>read, write once</td><td> DB record ID of the contact </td></tr>
  * <tr><td>string</td><td> name </td><td>read only</td><td> Group name </td></tr>
  * </table>
  */
 _CONTACTS_BEGIN_VIEW()
-    _CONTACTS_PROPERTY_INT(id)                /* read only, can not used as filter */
+    _CONTACTS_PROPERTY_INT(id)                /* read only, can not be used as filter */
     _CONTACTS_PROPERTY_INT(group_id)          /* read, write once */
     _CONTACTS_PROPERTY_INT(contact_id)        /* read, write once */
     _CONTACTS_PROPERTY_STR(name)              /* read only */
@@ -737,7 +737,7 @@ _CONTACTS_END_VIEW(_contacts_company)
  * <tr><td>string</td><td>_uri</td><td>read only</td><td> Identifier of this contacts nickname view </td></tr>
  * <tr><td>integer</td><td> id </td><td>read only</td><td> DB record ID of the nickname </td></tr>
  * <tr><td>integer</td><td> contact_id </td><td>read, write once</td><td> Contact ID that the nickname belongs to </td></tr>
- * <tr><td>string</td><td> nickname </td><td>read, write</td><td> Nickname </td></tr>
+ * <tr><td>string</td><td> name </td><td>read, write</td><td> Nickname </td></tr>
  * </table>
  */
 _CONTACTS_BEGIN_VIEW()
