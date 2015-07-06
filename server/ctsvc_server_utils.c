@@ -34,7 +34,25 @@
 #include "ctsvc_localize.h"
 #include "ctsvc_normalize.h"
 
+#define CTSVC_FEATURE_TELEPHONY "http://tizen.org/feature/network.telephony"
+
 static int system_language = -1;
+static bool _ctsvc_have_telephony_feature = false;
+
+int ctsvc_server_load_feature_list(void)
+{
+#if 0
+	system_info_get_platform_bool(CTSVC_FEATURE_TELEPHONY, &_ctsvc_have_telephony_feature);
+#else
+	_ctsvc_have_telephony_feature = false;
+#endif
+	return CONTACTS_ERROR_NONE;
+}
+
+bool ctsvc_server_have_telephony_feature(void)
+{
+	return _ctsvc_have_telephony_feature;
+}
 
 inline int ctsvc_server_set_default_sort(int sort)
 {

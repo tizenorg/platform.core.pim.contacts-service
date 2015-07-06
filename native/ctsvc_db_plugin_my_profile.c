@@ -78,7 +78,7 @@ static int __ctsvc_db_get_my_profile_base_info(int id, ctsvc_my_profile_s *my_pr
 
 	snprintf(query, sizeof(query),
 			"SELECT my_profile_id, addressbook_id, changed_time, %s, image_thumbnail_path, uid "
-				"FROM "CTS_TABLE_MY_PROFILES" WHERE my_profile_id = %d",
+				"FROM "CTS_TABLE_MY_PROFILES" WHERE my_profile_id = %d AND deleted = 0",
 				ctsvc_get_display_column(), id);
 
 	ret = ctsvc_query_prepare(query, &stmt);

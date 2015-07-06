@@ -477,7 +477,6 @@ ERROR_RETURN:
 
 int ctsvc_server_sim_import_contact(void* data, int sim_slot_no)
 {
-#if 0
 	CTS_FN_CALL;
 	int ret;
 	ctsvc_sim_info_s *info;
@@ -504,7 +503,7 @@ int ctsvc_server_sim_import_contact(void* data, int sim_slot_no)
 		__ctsvc_server_sim_set_return_data(NULL);
 		return CONTACTS_ERROR_SYSTEM;
 	}
-#endif
+
 	return CONTACTS_ERROR_NONE;
 }
 
@@ -520,7 +519,6 @@ int ctsvc_server_socket_get_sim_init_status(void* data, int sim_slot_no)
 
 static void __ctsvc_server_sim_sdn_read_cb(TapiHandle *handle, int result, void *data, void *user_data)
 {
-#if 0
 	CTS_FN_CALL;
 	int ret=0;
 	TelSimPbAccessResult_t sec_rt = result;
@@ -569,14 +567,10 @@ static void __ctsvc_server_sim_sdn_read_cb(TapiHandle *handle, int result, void 
 	return;
 ERROR_RETURN:
 	ctsvc_server_trim_memory();
-
-	return;
-#endif
 }
 
 static void __ctsvc_server_sim_sdn_meta_info_cb(TapiHandle *handle, int result, void *data, void *user_data)
 {
-#if 0
 	CTS_FN_CALL;
 	int ret = 0;
 	TelSimPbAccessResult_t sec_rt = result;
@@ -598,13 +592,10 @@ static void __ctsvc_server_sim_sdn_meta_info_cb(TapiHandle *handle, int result, 
 
 ERROR_RETURN:
 	ctsvc_server_trim_memory();
-	return;
-#endif
 }
 
 static int __ctsvc_server_sim_sdn_read(ctsvc_sim_info_s* info)
 {
-#if 0
 	CTS_FN_CALL;
 	int ret;
 	int card_changed = 0;
@@ -648,13 +639,10 @@ static int __ctsvc_server_sim_sdn_read(ctsvc_sim_info_s* info)
 ERROR_RETURN:
 	ctsvc_server_trim_memory();
 	return ret;
-#endif
-	return CONTACTS_ERROR_NONE;
 }
 
 static void __ctsvc_server_sim_get_meta_info_cb(TapiHandle *handle, int result, void *data, void *user_data)
 {
-#if 0
 	CTS_FN_CALL;
 	int ret=0;
 	int i=0;
@@ -714,14 +702,10 @@ static void __ctsvc_server_sim_get_meta_info_cb(TapiHandle *handle, int result, 
 		ret = __ctsvc_server_sim_sdn_read(info);
 		WARN_IF(CONTACTS_ERROR_NONE != ret, "__ctsvc_server_sim_sdn_read() Failed(%d)", ret);
 	}
-
-	return;
-#endif
 }
 
 static void __ctsvc_server_sim_get_iccid_cb(TapiHandle *handle, int result, void *data,void *user_data)
 {
-#if 0
 	TelSimAccessResult_t access_rt = result;
 	TelSimIccIdInfo_t *iccid = data;
 	ctsvc_sim_info_s *info = user_data;
@@ -737,12 +721,10 @@ static void __ctsvc_server_sim_get_iccid_cb(TapiHandle *handle, int result, void
 	ret = ctsvc_server_get_sim_id(info->sim_unique_id, &id);
 	if (CONTACTS_ERROR_NONE == ret)
 		info->sim_info_id = id;
-#endif
 }
 
 static int __ctsvc_server_sim_init_meta_info(ctsvc_sim_info_s *info)
 {
-#if 0
 	int ret = TAPI_API_SUCCESS;
 	int err = CONTACTS_ERROR_NONE;
 
@@ -763,13 +745,11 @@ static int __ctsvc_server_sim_init_meta_info(ctsvc_sim_info_s *info)
 	RETVM_IF(ret != TAPI_API_SUCCESS, CONTACTS_ERROR_SYSTEM,
 				"tel_get_sim_(usim)_meta_info(type:%d) fail (%d)", info->sim_type, ret);
 
-#endif
 	return CONTACTS_ERROR_NONE;
 }
 
 static int __ctsvc_server_sim_init_info(ctsvc_sim_info_s *info)
 {
-#if 0
 	CTS_FN_CALL;
 	int ret;
 	TelSimCardType_t cardtype = TAPI_SIM_PB_UNKNOWNN;
@@ -789,7 +769,7 @@ static int __ctsvc_server_sim_init_info(ctsvc_sim_info_s *info)
 	// set iccid : unique info of SIM
 	ret = tel_get_sim_iccid (info->handle, __ctsvc_server_sim_get_iccid_cb, info);
 	RETVM_IF(ret != TAPI_API_SUCCESS, CONTACTS_ERROR_SYSTEM, "tel_get_sim_iccid failed(%d)", ret);
-#endif
+
 	return CONTACTS_ERROR_NONE;
 }
 
@@ -809,7 +789,6 @@ static void __ctsvc_server_sim_data_remove(ctsvc_sim_info_s *info)
 
 static void __ctsvc_server_sim_noti_pb_status(TapiHandle *handle, const char *noti_id, void *data, void *user_data)
 {
-#if 0
 	CTS_FN_CALL;
 	int ret = 0;
 	ctsvc_sim_info_s *info = (ctsvc_sim_info_s*)user_data;
@@ -832,7 +811,6 @@ static void __ctsvc_server_sim_noti_pb_status(TapiHandle *handle, const char *no
 	else {
 		CTS_ERR("This noti did not control !!!");
 	}
-#endif
 }
 
 static void __ctsvc_server_sim_noti_sim_refreshed(TapiHandle *handle, const char *noti_id, void *data, void *user_data)
@@ -847,8 +825,6 @@ static void __ctsvc_server_sim_noti_sim_refreshed(TapiHandle *handle, const char
 
 static int __ctsvc_server_sim_info_init()
 {
-#if 0
-
 	int ret;
 	int sim_stat = -1;
 	TelSimPbList_t pb_list = {0,};
@@ -914,13 +890,11 @@ static int __ctsvc_server_sim_info_init()
 
 	g_strfreev(cp_name);
 
-#endif
 	return CONTACTS_ERROR_NONE;
 }
 
 static void __ctsvc_server_sim_ready_cb(keynode_t *key, void *data)
 {
-#if 0
 	int status = 0;
 	vconf_get_int(VCONFKEY_TELEPHONY_SIM_STATUS, &status);
 
@@ -933,12 +907,10 @@ static void __ctsvc_server_sim_ready_cb(keynode_t *key, void *data)
 	vconf_ignore_key_changed(VCONFKEY_TELEPHONY_SIM_STATUS, __ctsvc_server_sim_ready_cb);
 
 	__ctsvc_server_sim_info_init();
-#endif
 }
 
 static void __ctsvc_server_telephony_ready_cb(keynode_t *key, void *data)
 {
-#if 0
 	int bReady = 0;
 	// TODO: it should be changed API
 	vconf_get_bool(VCONFKEY_TELEPHONY_TAPI_STATE, &bReady);
@@ -962,13 +934,11 @@ static void __ctsvc_server_telephony_ready_cb(keynode_t *key, void *data)
 	}
 
 	__ctsvc_server_sim_info_init();
-#endif
 }
 
 
 int ctsvc_server_sim_init()
 {
-#if 0
 	int bReady = 0;
 	// TODO: it should be changed API
 	vconf_get_bool(VCONFKEY_TELEPHONY_TAPI_STATE, &bReady);
@@ -988,13 +958,12 @@ int ctsvc_server_sim_init()
 		__ctsvc_sim_cb = true;
 		return CONTACTS_ERROR_NONE;
 	}
-#endif
+
 	return __ctsvc_server_sim_info_init();
 }
 
 int ctsvc_server_sim_final(void)
 {
-#if 0
 	CTS_FN_CALL;
 	GSList *info_cursor = NULL;
 	sim_contact_s *record = NULL;
@@ -1025,7 +994,7 @@ int ctsvc_server_sim_final(void)
 
 		free(info);
 	}
-#endif
+
 	return CONTACTS_ERROR_NONE;
 }
 

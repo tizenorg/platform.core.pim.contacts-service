@@ -111,7 +111,7 @@ int ctsvc_db_activity_photo_update(contacts_record_h record)
 
 	do {
 		if (CONTACTS_ERROR_NONE != (ret = ctsvc_db_create_set_query(record, &set, &bind_text))) break;
-		if (CONTACTS_ERROR_NONE != (ret = ctsvc_db_update_record_with_set_query(set, bind_text, CTS_TABLE_DATA, activity_photo->id))) break;
+		if (CONTACTS_ERROR_NONE != (ret = ctsvc_db_update_record_with_set_query(set, bind_text, CTS_TABLE_ACTIVITY_PHOTOS, activity_photo->id))) break;
 		ctsvc_set_activity_noti();
 		ctsvc_set_activity_photo_noti();
 	} while (0);

@@ -19,6 +19,9 @@
 #ifndef __CTSVC_SERVER_UTILS_H__
 #define __CTSVC_SERVER_UTILS_H__
 
+int ctsvc_server_load_feature_list(void);
+bool ctsvc_server_have_telephony_feature(void);
+
 int ctsvc_server_init_configuration(void);
 void ctsvc_server_final_configuration(void);
 
