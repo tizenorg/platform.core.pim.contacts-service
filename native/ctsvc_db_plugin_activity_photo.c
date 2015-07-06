@@ -324,7 +324,7 @@ static int __ctsvc_db_activity_photo_get_records_with_query(contacts_query_h que
 			case CTSVC_PROPERTY_ACTIVITY_PHOTO_ACTIVITY_ID:
 				activity_photo->activity_id= ctsvc_stmt_get_int(stmt, i);
 				break;
-			case CTSVC_PROPERTY_MESSENGER_LABEL:
+			case CTSVC_PROPERTY_ACTIVITY_PHOTO_URL:
 				temp = ctsvc_stmt_get_text(stmt, i);
 				activity_photo->photo_url = SAFE_STRDUP(temp);
 				break;
