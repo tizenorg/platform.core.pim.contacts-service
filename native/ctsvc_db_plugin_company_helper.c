@@ -31,6 +31,7 @@
 #include "ctsvc_record.h"
 #include "ctsvc_notification.h"
 #include "ctsvc_db_access_control.h"
+#include "ctsvc_notify.h"
 
 static int __ctsvc_company_bind_stmt(cts_stmt stmt, ctsvc_company_s *company, int start_cnt)
 {

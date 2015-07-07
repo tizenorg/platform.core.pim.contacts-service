@@ -26,6 +26,7 @@
 #include "ctsvc_sqlite.h"
 #include "ctsvc_utils.h"
 #include "ctsvc_db_plugin_group_helper.h"
+#include "ctsvc_notify.h"
 
 // Whenever deleting group, this function will be called
 // in order to deleting group image file
