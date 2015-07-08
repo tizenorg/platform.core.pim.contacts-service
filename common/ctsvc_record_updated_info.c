@@ -87,6 +87,8 @@ static int __ctsvc_updated_info_clone(contacts_record_h record, contacts_record_
 	out_data->changed_type = src_data->changed_type;
 	out_data->changed_ver = src_data->changed_ver;
 	out_data->addressbook_id = src_data->addressbook_id;
+	out_data->image_changed = src_data->image_changed;
+	out_data->last_changed_type = src_data->last_changed_type;
 
 	int ret = ctsvc_record_copy_base(&(out_data->base), &(src_data->base));
 	if (CONTACTS_ERROR_NONE != ret) {
