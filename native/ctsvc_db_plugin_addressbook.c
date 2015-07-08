@@ -157,18 +157,11 @@ static int __ctsvc_db_addressbook_insert_record( contacts_record_h record, int *
 		}
 	}
 
-	ret = account_connect();
-	if (ACCOUNT_ERROR_NONE != ret) {
-		CTS_ERR("account_connect Failed(%d)", ret);
-		ctsvc_end_trans(false);
-		return CONTACTS_ERROR_SYSTEM;
-	}
 	// check account_id validation
 	ret = account_create(&account);
 	if (ACCOUNT_ERROR_NONE != ret) {
 		CTS_ERR("account_create() Failed(%d)", ret);
 		ctsvc_end_trans(false);
-		account_disconnect();
 		return CONTACTS_ERROR_SYSTEM;
 	}
 	ret = account_query_account_by_account_id(addressbook->account_id, &account);
@@ -177,14 +170,10 @@ static int __ctsvc_db_addressbook_insert_record( contacts_record_h record, int *
 		ret = account_destroy(account);
 		WARN_IF(ret != ACCOUNT_ERROR_NONE, "account_destroy Fail(%d)", ret);
 		ctsvc_end_trans(false);
-		account_disconnect();
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	ret = account_destroy(account);
 	WARN_IF(ret != ACCOUNT_ERROR_NONE, "account_destroy Fail(%d)", ret);
-
-	ret = account_disconnect();
-	WARN_IF(ret != ACCOUNT_ERROR_NONE, "account_disconnect Fail(%d)", ret);
 
 	snprintf(query, sizeof(query),
 			"INSERT INTO %s(addressbook_name, account_id, mode, smack_label) "
