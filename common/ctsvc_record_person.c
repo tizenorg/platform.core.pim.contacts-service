@@ -29,7 +29,6 @@ static int __ctsvc_person_get_int(contacts_record_h record, unsigned int propert
 static int __ctsvc_person_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_person_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_person_get_bool(contacts_record_h record, unsigned int property_id, bool *value);
-static int __ctsvc_person_set_int(contacts_record_h record, unsigned int property_id, int value);
 static int __ctsvc_person_set_str(contacts_record_h record, unsigned int property_id, const char* str);
 static int __ctsvc_person_set_bool(contacts_record_h record, unsigned int property_id, bool value);
 
@@ -45,7 +44,7 @@ ctsvc_record_plugin_cb_s person_plugin_cbs = {
 	.get_lli = NULL,
 	.get_double = NULL,
 	.set_str = __ctsvc_person_set_str,
-	.set_int = __ctsvc_person_set_int,
+	.set_int = NULL,
 	.set_bool = __ctsvc_person_set_bool,
 	.set_lli = NULL,
 	.set_double = NULL,
@@ -202,27 +201,6 @@ static int __ctsvc_person_get_bool(contacts_record_h record, unsigned int proper
 		break;
 	default:
 		CTS_ERR("This field(%d) is not supported in value(company)", property_id);
-		return CONTACTS_ERROR_INVALID_PARAMETER;
-	}
-	return CONTACTS_ERROR_NONE;
-}
-
-static int __ctsvc_person_set_int(contacts_record_h record, unsigned int property_id, int value)
-{
-	ctsvc_person_s *person = (ctsvc_person_s *)record;
-
-	switch(property_id) {
-	case CTSVC_PROPERTY_PERSON_DISPLAY_CONTACT_ID:
-		person->name_contact_id = value;
-		break;
-	case CTSVC_PROPERTY_PERSON_ID:
-		person->person_id = value;
-		break;
-	case CTSVC_PROPERTY_PERSON_LINK_COUNT:
-		person->link_count = value;
-		break;
-	default:
-		CTS_ERR("This field(0x%0x) is not supported in value(person)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;

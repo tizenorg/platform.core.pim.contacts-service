@@ -350,17 +350,7 @@ static int __ctsvc_ipc_unmarshal_attribute_filter(const pims_ipc_data_h ipc_data
 		}
 		break;
 	case CTSVC_FILTER_DOUBLE:
-		if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_double(ipc_data,&filter->value.d)) {
-			CTS_ERR("ctsvc_ipc_unmarshal_double() Fail");
-			return CONTACTS_ERROR_INVALID_PARAMETER;
-		}
-		break;
 	case CTSVC_FILTER_LLI:
-		if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_lli(ipc_data,&filter->value.l)) {
-			CTS_ERR("ctsvc_ipc_unmarshal_lli() Fail");
-			return CONTACTS_ERROR_INVALID_PARAMETER;
-		}
-		break;
 	default:
 		break;
 	}
@@ -401,17 +391,7 @@ static int __ctsvc_ipc_marshal_attribute_filter(const ctsvc_attribute_filter_s* 
 		}
 		break;
 	case CTSVC_FILTER_DOUBLE:
-		if (CONTACTS_ERROR_NONE != ctsvc_ipc_marshal_double((filter->value.d),ipc_data)) {
-			CTS_ERR("ctsvc_ipc_marshal_double() Fail");
-			return CONTACTS_ERROR_INVALID_PARAMETER;
-		}
-		break;
 	case CTSVC_FILTER_LLI:
-		if (CONTACTS_ERROR_NONE != ctsvc_ipc_marshal_lli((filter->value.l),ipc_data)) {
-			CTS_ERR("ctsvc_ipc_marshal_lli() Fail");
-			return CONTACTS_ERROR_INVALID_PARAMETER;
-		}
-		break;
 	default:
 		break;
 	}
@@ -569,57 +549,6 @@ int ctsvc_ipc_unmarshal_bool(const pims_ipc_data_h data, bool *pout)
 	return CONTACTS_ERROR_NONE;
 }
 
-int ctsvc_ipc_unmarshal_lli(const pims_ipc_data_h data, long long int *pout)
-{
-	RETV_IF(data==NULL,CONTACTS_ERROR_INVALID_PARAMETER);
-	RETV_IF(pout==NULL,CONTACTS_ERROR_INVALID_PARAMETER);
-
-	unsigned int size = 0;
-	void *tmp = pims_ipc_data_get(data,&size);
-	if (tmp == NULL) {
-		CTS_ERR("pims_ipc_data_get() Fail");
-		return CONTACTS_ERROR_NO_DATA;
-	}
-	else {
-		*pout = *(long long int*)tmp;
-	}
-	return CONTACTS_ERROR_NONE;
-}
-
-int ctsvc_ipc_unmarshal_long(const pims_ipc_data_h data, long *pout)
-{
-	RETV_IF(data==NULL,CONTACTS_ERROR_INVALID_PARAMETER);
-	RETV_IF(pout==NULL,CONTACTS_ERROR_INVALID_PARAMETER);
-
-	unsigned int size = 0;
-	void *tmp = pims_ipc_data_get(data, &size);
-	if (tmp == NULL) {
-		CTS_ERR("pims_ipc_data_get() Fail");
-		return CONTACTS_ERROR_NO_DATA;
-	}
-	else {
-		*pout = *(long*)tmp;
-	}
-	return CONTACTS_ERROR_NONE;
-}
-
-int ctsvc_ipc_unmarshal_double(const pims_ipc_data_h data, double *pout)
-{
-	RETV_IF(data==NULL,CONTACTS_ERROR_INVALID_PARAMETER);
-	RETV_IF(pout==NULL,CONTACTS_ERROR_INVALID_PARAMETER);
-
-	unsigned int size = 0;
-	void* tmp = pims_ipc_data_get(data,&size);
-	if (tmp == NULL) {
-		CTS_ERR("pims_ipc_data_get() Fail");
-		return CONTACTS_ERROR_NO_DATA;
-	}
-	else {
-		*pout = *(double*)tmp;
-	}
-	return CONTACTS_ERROR_NONE;
-}
-
 int ctsvc_ipc_unmarshal_record_common(const pims_ipc_data_h ipc_data, ctsvc_record_s* common)
 {
 	void *tmp = NULL;
@@ -727,36 +656,6 @@ int ctsvc_ipc_marshal_bool(const bool in, pims_ipc_data_h ipc_data)
 	RETV_IF(ipc_data==NULL,CONTACTS_ERROR_INVALID_PARAMETER);
 
 	if (pims_ipc_data_put(ipc_data,(void*)&in,sizeof(bool)) != 0) {
-		return CONTACTS_ERROR_OUT_OF_MEMORY;
-	}
-	return CONTACTS_ERROR_NONE;
-}
-
-int ctsvc_ipc_marshal_lli(const long long int in, pims_ipc_data_h ipc_data)
-{
-	RETV_IF(ipc_data==NULL,CONTACTS_ERROR_INVALID_PARAMETER);
-
-	if (pims_ipc_data_put(ipc_data,(void*)&in,sizeof(long long int)) != 0) {
-		return CONTACTS_ERROR_OUT_OF_MEMORY;
-	}
-	return CONTACTS_ERROR_NONE;
-}
-
-int ctsvc_ipc_marshal_long(const long in, pims_ipc_data_h ipc_data)
-{
-	RETV_IF(ipc_data==NULL,CONTACTS_ERROR_INVALID_PARAMETER);
-
-	if (pims_ipc_data_put(ipc_data,(void*)&in,sizeof(long)) != 0) {
-		return CONTACTS_ERROR_OUT_OF_MEMORY;
-	}
-	return CONTACTS_ERROR_NONE;
-}
-
-int ctsvc_ipc_marshal_double(const double in, pims_ipc_data_h ipc_data)
-{
-	RETV_IF(ipc_data==NULL,CONTACTS_ERROR_INVALID_PARAMETER);
-
-	if (pims_ipc_data_put(ipc_data,(void*)&in,sizeof(double)) != 0) {
 		return CONTACTS_ERROR_OUT_OF_MEMORY;
 	}
 	return CONTACTS_ERROR_NONE;

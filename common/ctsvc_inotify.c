@@ -49,21 +49,6 @@ static int __inoti_fd = -1;
 static guint __inoti_handler = 0;
 static GSList *__noti_list = NULL;
 
-void ctsvc_inotify_call_blocked_callback() {
-	noti_info *noti;
-	GSList *it = NULL;
-
-	for (it = __noti_list;it;it=it->next) {
-		noti = (noti_info *)it->data;
-
-		if (noti->cb && noti->blocked) {
-			CTS_DBG("%s", noti->view_uri);
-			noti->blocked = false;
-			noti->cb(noti->view_uri, noti->cb_data);
-		}
-	}
-}
-
 static inline void __ctsvc_inotify_handle_callback(GSList *noti_list, int wd, uint32_t mask)
 {
 	noti_info *noti;

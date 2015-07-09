@@ -50,9 +50,6 @@ int ctsvc_ipc_unmarshal_string(const pims_ipc_data_h ipc_data, char** ppbufchar)
 int ctsvc_ipc_unmarshal_bool(const pims_ipc_data_h data, bool *pout);
 int ctsvc_ipc_unmarshal_int(const pims_ipc_data_h data, int *pout);
 int ctsvc_ipc_unmarshal_unsigned_int(const pims_ipc_data_h data, unsigned int *pout);
-int ctsvc_ipc_unmarshal_lli(const pims_ipc_data_h data, long long int *pout);
-int ctsvc_ipc_unmarshal_long(const pims_ipc_data_h data, long *pout);
-int ctsvc_ipc_unmarshal_double(const pims_ipc_data_h data, double *pout);
 int ctsvc_ipc_unmarshal_record_common(const pims_ipc_data_h ipc_data, ctsvc_record_s* common);
 
 /*
@@ -62,9 +59,6 @@ int ctsvc_ipc_marshal_string(const char* bufchar, pims_ipc_data_h ipc_data);
 int ctsvc_ipc_marshal_bool(const bool in, pims_ipc_data_h ipc_data);
 int ctsvc_ipc_marshal_int(const int in, pims_ipc_data_h ipc_data);
 int ctsvc_ipc_marshal_unsigned_int(const unsigned int in, pims_ipc_data_h ipc_data);
-int ctsvc_ipc_marshal_lli(const long long int in, pims_ipc_data_h ipc_data);
-int ctsvc_ipc_marshal_long(const long in, pims_ipc_data_h ipc_data);
-int ctsvc_ipc_marshal_double(const double in, pims_ipc_data_h ipc_data);
 int ctsvc_ipc_marshal_record_common(const ctsvc_record_s* common, pims_ipc_data_h ipc_data);
 
 /*
