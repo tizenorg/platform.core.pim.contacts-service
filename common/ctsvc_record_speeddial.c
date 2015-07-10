@@ -33,6 +33,7 @@ static int __ctsvc_speeddial_get_int(contacts_record_h record, unsigned int prop
 static int __ctsvc_speeddial_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_speeddial_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_speeddial_set_int(contacts_record_h record, unsigned int property_id, int value);
+static int __ctsvc_speeddial_set_str(contacts_record_h record, unsigned int property_id, const char* str);
 
 
 ctsvc_record_plugin_cb_s speeddial_plugin_cbs = {
@@ -45,7 +46,7 @@ ctsvc_record_plugin_cb_s speeddial_plugin_cbs = {
 	.get_bool = NULL,
 	.get_lli = NULL,
 	.get_double = NULL,
-	.set_str = NULL,
+	.set_str = __ctsvc_speeddial_set_str,
 	.set_int = __ctsvc_speeddial_set_int,
 	.set_bool = NULL,
 	.set_lli = NULL,
@@ -198,3 +199,26 @@ static int __ctsvc_speeddial_set_int(contacts_record_h record, unsigned int prop
 	return CONTACTS_ERROR_NONE;
 }
 
+static int __ctsvc_speeddial_set_str(contacts_record_h record, unsigned int property_id, const char* str)
+{
+	ctsvc_speeddial_s *speeddial = (ctsvc_speeddial_s*)record;
+
+	switch(property_id) {
+	case CTSVC_PROPERTY_SPEEDDIAL_DISPLAY_NAME:
+		FREEandSTRDUP(speeddial->display_name, str);
+		break;
+	case CTSVC_PROPERTY_SPEEDDIAL_NUMBER:
+		FREEandSTRDUP(speeddial->number, str);
+		break;
+	case CTSVC_PROPERTY_SPEEDDIAL_IMAGE_THUMBNAIL:
+		FREEandSTRDUP(speeddial->image_thumbnail_path, str);
+		break;
+	case CTSVC_PROPERTY_SPEEDDIAL_NUMBER_LABEL:
+		FREEandSTRDUP(speeddial->label, str);
+		break;
+	default :
+		CTS_ERR("This field(%d) is not supported in value(speeddial)", property_id);
+		return CONTACTS_ERROR_INVALID_PARAMETER;
+	}
+	return CONTACTS_ERROR_NONE;
+}

@@ -108,8 +108,10 @@ static int __ctsvc_event_clone(contacts_record_h record, contacts_record_h *out_
 static int __ctsvc_event_get_int(contacts_record_h record, unsigned int property_id, int *out);
 static int __ctsvc_event_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_event_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
+static int __ctsvc_event_get_bool(contacts_record_h record, unsigned int property_id, bool *value);
 static int __ctsvc_event_set_int(contacts_record_h record, unsigned int property_id, int value);
 static int __ctsvc_event_set_str(contacts_record_h record, unsigned int property_id, const char* str);
+static int __ctsvc_event_set_bool(contacts_record_h record, unsigned int property_id, bool value);
 
 static int __ctsvc_extension_create(contacts_record_h *out_record);
 static int __ctsvc_extension_destroy(contacts_record_h record, bool delete_child);
@@ -127,6 +129,7 @@ static int __ctsvc_group_relation_get_int(contacts_record_h record, unsigned int
 static int __ctsvc_group_relation_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_group_relation_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_group_relation_set_int(contacts_record_h record, unsigned int property_id, int value);
+static int __ctsvc_group_relation_set_str(contacts_record_h record, unsigned int property_id, const char* str);
 
 static int __ctsvc_messenger_create(contacts_record_h *out_record);
 static int __ctsvc_messenger_destroy(contacts_record_h record, bool delete_child);
@@ -211,6 +214,8 @@ static int __ctsvc_simple_contact_get_bool(contacts_record_h record, unsigned in
 static int __ctsvc_simple_contact_get_int(contacts_record_h record, unsigned int property_id, int *out);
 static int __ctsvc_simple_contact_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_simple_contact_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
+static int __ctsvc_simple_contact_set_int(contacts_record_h record, unsigned int property_id, int value);
+static int __ctsvc_simple_contact_set_str(contacts_record_h record, unsigned int property_id, const char* str);
 
 static int __ctsvc_url_create(contacts_record_h *out_record);
 static int __ctsvc_url_destroy(contacts_record_h record, bool delete_child);
@@ -318,12 +323,12 @@ ctsvc_record_plugin_cb_s event_plugin_cbs = {
 	.get_str = __ctsvc_event_get_str,
 	.get_str_p = __ctsvc_event_get_str_p,
 	.get_int = __ctsvc_event_get_int,
-	.get_bool = NULL,
+	.get_bool = __ctsvc_event_get_bool,
 	.get_lli = NULL,
 	.get_double = NULL,
 	.set_str = __ctsvc_event_set_str,
 	.set_int = __ctsvc_event_set_int,
-	.set_bool = NULL,
+	.set_bool = __ctsvc_event_set_bool,
 	.set_lli = NULL,
 	.set_double = NULL,
 	.add_child_record = NULL,
@@ -453,7 +458,7 @@ ctsvc_record_plugin_cb_s group_relation_plugin_cbs = {
 	.get_bool = NULL,
 	.get_lli = NULL,
 	.get_double = NULL,
-	.set_str = NULL,
+	.set_str = __ctsvc_group_relation_set_str,
 	.set_int = __ctsvc_group_relation_set_int,
 	.set_bool = NULL,
 	.set_lli = NULL,
@@ -629,8 +634,8 @@ ctsvc_record_plugin_cb_s simple_contact_plugin_cbs = {
 	.get_bool = __ctsvc_simple_contact_get_bool,
 	.get_lli = NULL,
 	.get_double = NULL,
-	.set_str = NULL,
-	.set_int = NULL,
+	.set_str = __ctsvc_simple_contact_set_str,
+	.set_int = __ctsvc_simple_contact_set_int,
 	.set_bool = NULL,
 	.set_lli = NULL,
 	.set_double = NULL,
@@ -1858,6 +1863,32 @@ static int __ctsvc_contact_set_int(contacts_record_h record, unsigned int proper
 		break;
 	default:
 		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value (contact)", property_id);
+		return CONTACTS_ERROR_INVALID_PARAMETER;
+	}
+	return CONTACTS_ERROR_NONE;
+}
+
+static int __ctsvc_simple_contact_set_int(contacts_record_h record, unsigned int property_id, int value)
+{
+	ctsvc_simple_contact_s *contact = (ctsvc_simple_contact_s *)record;
+
+	switch(property_id) {
+	case CTSVC_PROPERTY_CONTACT_ID:
+		contact->contact_id = value;
+		break;
+	case CTSVC_PROPERTY_CONTACT_DISPLAY_SOURCE_DATA_ID:
+		contact->display_source_type = value;
+		break;
+	case CTSVC_PROPERTY_CONTACT_PERSON_ID:
+		contact->person_id = value;
+		break;
+	case CTSVC_PROPERTY_CONTACT_ADDRESSBOOK_ID:
+		RETVM_IF(0 < contact->contact_id, CONTACTS_ERROR_INVALID_PARAMETER,
+				"Invalide parameter : property_id(%d) is a read-only value (contact)", property_id);
+		contact->addressbook_id = value;
+		break;
+	default:
+		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(simple contact)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
@@ -3233,6 +3264,40 @@ static int __ctsvc_contact_set_str(contacts_record_h record, unsigned int proper
 }
 
 
+static int __ctsvc_simple_contact_set_str(contacts_record_h record, unsigned int property_id, const char* str)
+{
+	ctsvc_simple_contact_s *contact = (ctsvc_simple_contact_s *)record;
+
+	switch(property_id) {
+	case CTSVC_PROPERTY_CONTACT_DISPLAY_NAME:
+		FREEandSTRDUP(contact->display_name, str);
+		break;
+/*
+		CTS_ERR("Invalid parameter : property_id(%d) is a read-only value (contact)", property_id);
+		return CONTACTS_ERROR_INVALID_PARAMETER;
+*/
+	case CTSVC_PROPERTY_CONTACT_RINGTONE:
+		FREEandSTRDUP(contact->ringtone_path, str);
+		break;
+	case CTSVC_PROPERTY_CONTACT_IMAGE_THUMBNAIL:
+		FREEandSTRDUP(contact->image_thumbnail_path, str);
+		break;
+	case CTSVC_PROPERTY_CONTACT_UID:
+		FREEandSTRDUP(contact->uid, str);
+		break;
+	case CTSVC_PROPERTY_CONTACT_VIBRATION:
+		FREEandSTRDUP(contact->vibration, str);
+		break;
+	case CTSVC_PROPERTY_CONTACT_MESSAGE_ALERT:
+		FREEandSTRDUP(contact->message_alert, str);
+		break;
+	default :
+		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(simple_contact)", property_id);
+		return CONTACTS_ERROR_INVALID_PARAMETER;
+	}
+	return CONTACTS_ERROR_NONE;
+}
+
 static int __ctsvc_name_set_str(contacts_record_h record, unsigned int property_id, const char* str)
 {
 	ctsvc_name_s *name = (ctsvc_name_s *)record;
@@ -3468,6 +3533,25 @@ static int __ctsvc_messenger_set_str(contacts_record_h record, unsigned int prop
 	return CONTACTS_ERROR_NONE;
 }
 
+static int __ctsvc_group_relation_set_str(contacts_record_h record, unsigned int property_id, const char* str)
+{
+	ctsvc_group_relation_s *group_relation = (ctsvc_group_relation_s *)record;
+
+	switch(property_id) {
+	case CTSVC_PROPERTY_GROUP_RELATION_GROUP_NAME:
+		FREEandSTRDUP(group_relation->group_name, str);
+		break;
+/*
+		CTS_ERR("Invalid parameter : property_id(%d) is a read-only value (group_relation)", property_id);
+		return CONTACTS_ERROR_INVALID_PARAMETER;
+*/
+	default :
+		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(group_relation)", property_id);
+		return CONTACTS_ERROR_INVALID_PARAMETER;
+	}
+	return CONTACTS_ERROR_NONE;
+}
+
 static int __ctsvc_activity_set_str(contacts_record_h record, unsigned int property_id, const char* str)
 {
 	ctsvc_activity_s *activity = (ctsvc_activity_s *)record;
@@ -3697,6 +3781,20 @@ static int __ctsvc_email_get_bool(contacts_record_h record, unsigned int propert
 	return CONTACTS_ERROR_NONE;
 }
 
+static int __ctsvc_event_get_bool(contacts_record_h record, unsigned int property_id, bool *value)
+{
+	ctsvc_event_s *event = (ctsvc_event_s *)record;
+	switch (property_id) {
+	case CTSVC_PROPERTY_EVENT_IS_LEAP_MONTH: /* deprecated */
+		*value = event->is_leap_month;
+		break;
+	default:
+		CTS_ERR("Invalid parameter : property_id(0x%x) is not supported in value(event)", property_id);
+		return CONTACTS_ERROR_INVALID_PARAMETER;
+	}
+	return CONTACTS_ERROR_NONE;
+}
+
 static int __ctsvc_image_get_bool(contacts_record_h record, unsigned int property_id, bool *value)
 {
 	ctsvc_image_s *image = (ctsvc_image_s *)record;
@@ -3775,6 +3873,21 @@ static int __ctsvc_email_set_bool(contacts_record_h record, unsigned int propert
 		break;
 	default:
 		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(email)", property_id);
+		return CONTACTS_ERROR_INVALID_PARAMETER;
+	}
+	return CONTACTS_ERROR_NONE;
+}
+
+static int __ctsvc_event_set_bool(contacts_record_h record, unsigned int property_id, bool value)
+{
+	ctsvc_event_s *event = (ctsvc_event_s *)record;
+
+	switch(property_id) {
+	case CTSVC_PROPERTY_EVENT_IS_LEAP_MONTH: /* deprecated */
+		event->is_leap_month = value;
+		break;
+	default:
+		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(event)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;

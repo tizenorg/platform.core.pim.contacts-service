@@ -33,6 +33,10 @@ static int __ctsvc_result_clone(contacts_record_h record, contacts_record_h *out
 static int __ctsvc_result_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_result_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_result_get_int(contacts_record_h record, unsigned int property_id, int* out_value);
+static int __ctsvc_result_get_bool(contacts_record_h record, unsigned int property_id, bool* out_value);
+static int __ctsvc_result_set_int(contacts_record_h record, unsigned int property_id, int value);
+static int __ctsvc_result_set_bool(contacts_record_h record, unsigned int property_id, bool value);
+static int __ctsvc_result_set_str(contacts_record_h record, unsigned int property_id, const char *str);
 
 ctsvc_record_plugin_cb_s result_plugin_cbs = {
 	.create = __ctsvc_result_create,
@@ -41,12 +45,12 @@ ctsvc_record_plugin_cb_s result_plugin_cbs = {
 	.get_str = __ctsvc_result_get_str,
 	.get_str_p = __ctsvc_result_get_str_p,
 	.get_int = __ctsvc_result_get_int,
-	.get_bool = NULL,
+	.get_bool = __ctsvc_result_get_bool,
 	.get_lli = NULL,
 	.get_double = NULL,
-	.set_str = NULL,
-	.set_int = NULL,
-	.set_bool = NULL,
+	.set_str = __ctsvc_result_set_str,
+	.set_int = __ctsvc_result_set_int,
+	.set_bool = __ctsvc_result_set_bool,
 	.set_lli = NULL,
 	.set_double = NULL,
 	.add_child_record = NULL,
@@ -188,6 +192,175 @@ static int __ctsvc_result_get_int(contacts_record_h record, unsigned int propert
 		if (data->property_id == property_id) {
 			if (data->type == CTSVC_VIEW_DATA_TYPE_INT) {
 				*out_value = data->value.i;
+				return CONTACTS_ERROR_NONE;
+			}
+			else {
+				CTS_ERR("use another get_type API, (type : %d)", data->type);
+				return CONTACTS_ERROR_INVALID_PARAMETER;
+			}
+		}
+	}
+
+	return CONTACTS_ERROR_NO_DATA;
+}
+
+static int __ctsvc_result_set_int(contacts_record_h record, unsigned int property_id, int value)
+{
+	ctsvc_result_s* result = (ctsvc_result_s *)record;
+	GSList *cursor;
+	ctsvc_result_value_s *data;
+
+	/* TODO: check the value type of property_id is int */
+	for (cursor = result->values;cursor;cursor=cursor->next) {
+		data = cursor->data;
+		if (data->property_id == property_id) {
+			if (data->type == CTSVC_VIEW_DATA_TYPE_INT) {
+#ifdef _CONTACTS_IPC_SERVER
+				if (property_id == CTSVC_PROPERTY_PHONELOG_SIM_SLOT_NO)
+					data->value.i = ctsvc_server_sim_get_sim_slot_no_by_info_id(value);
+				else
+#endif /* _CONTACTS_IPC_SERVER */
+				data->value.i = value;
+				return CONTACTS_ERROR_NONE;
+			}
+			else {
+				CTS_ERR("use another get_type API, (type : %d)", data->type);
+				return CONTACTS_ERROR_INVALID_PARAMETER;
+			}
+		}
+	}
+
+	data = calloc(1, sizeof(ctsvc_result_value_s));
+	if (NULL == data) {
+		CTS_ERR("calloc() Fail");
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
+	}
+	data->property_id = property_id;
+	data->type = CTSVC_VIEW_DATA_TYPE_INT;
+#ifdef _CONTACTS_IPC_SERVER
+	if (property_id == CTSVC_PROPERTY_PHONELOG_SIM_SLOT_NO)
+		data->value.i = ctsvc_server_sim_get_sim_slot_no_by_info_id(value);
+	else
+#endif /* _CONTACTS_IPC_SERVER */
+	data->value.i = value;
+	result->values = g_slist_append(result->values, (void*)data);
+	return CONTACTS_ERROR_NONE;
+}
+
+static int __ctsvc_result_set_bool(contacts_record_h record, unsigned int property_id, bool value)
+{
+	ctsvc_result_s* result = (ctsvc_result_s *)record;
+	GSList *cursor;
+	ctsvc_result_value_s *data;
+
+	/* TODO: check the value type of property_id is int */
+	for (cursor = result->values;cursor;cursor=cursor->next) {
+		data = cursor->data;
+		if (data->property_id == property_id) {
+			if (data->type == CTSVC_VIEW_DATA_TYPE_BOOL) {
+				data->value.b = value;
+				return CONTACTS_ERROR_NONE;
+			}
+			else {
+				CTS_ERR("use another get_type API, (type : %d)", data->type);
+				return CONTACTS_ERROR_INVALID_PARAMETER;
+			}
+		}
+	}
+
+	data = calloc(1, sizeof(ctsvc_result_value_s));
+	if (NULL == data) {
+		CTS_ERR("calloc() Fail");
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
+	}
+	data->property_id = property_id;
+	data->type = CTSVC_VIEW_DATA_TYPE_BOOL;
+	data->value.i = value;
+	result->values = g_slist_append(result->values, (void*)data);
+	return CONTACTS_ERROR_NONE;
+}
+
+static int __ctsvc_result_set_str(contacts_record_h record, unsigned int property_id, const char *str)
+{
+	ctsvc_result_s* result = (ctsvc_result_s *)record;
+	GSList *cursor;
+	ctsvc_result_value_s *data;
+	char *full_path = NULL;
+	int str_len;
+
+	/* TODO: check the value type of property_id is int */
+	for (cursor = result->values;cursor;cursor=cursor->next) {
+		data = cursor->data;
+		if (data->property_id == property_id) {
+			if (data->type == CTSVC_VIEW_DATA_TYPE_STR) {
+				switch (property_id) {
+				case CTSVC_PROPERTY_PERSON_IMAGE_THUMBNAIL:
+				case CTSVC_PROPERTY_CONTACT_IMAGE_THUMBNAIL:
+					if (str) {
+						str_len = strlen(CTSVC_CONTACT_IMG_FULL_LOCATION) + strlen(str) + 2;
+						full_path = calloc(1, str_len);
+						if (NULL == full_path) {
+							CTS_ERR("calloc() Fail");
+							return CONTACTS_ERROR_OUT_OF_MEMORY;
+						}
+						snprintf(full_path, str_len, "%s/%s", CTSVC_CONTACT_IMG_FULL_LOCATION, str);
+					}
+					free(data->value.s);
+					data->value.s = full_path;
+					return CONTACTS_ERROR_NONE;
+				default:
+					FREEandSTRDUP(data->value.s, str);
+					return CONTACTS_ERROR_NONE;
+				}
+			}
+			else {
+				CTS_ERR("use another get_type API, (type : %d)", data->type);
+				return CONTACTS_ERROR_INVALID_PARAMETER;
+			}
+		}
+	}
+
+	data = calloc(1, sizeof(ctsvc_result_value_s));
+	if (NULL == data) {
+		CTS_ERR("calloc() Fail");
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
+	}
+	data->property_id = property_id;
+	data->type = CTSVC_VIEW_DATA_TYPE_STR;
+	switch (property_id) {
+	case CTSVC_PROPERTY_PERSON_IMAGE_THUMBNAIL:
+	case CTSVC_PROPERTY_CONTACT_IMAGE_THUMBNAIL:
+		if (str) {
+			str_len = strlen(CTSVC_CONTACT_IMG_FULL_LOCATION) + strlen(str) + 2;
+			full_path = calloc(1, str_len);
+			if (NULL == full_path) {
+				CTS_ERR("calloc() Fail");
+				free(data);
+				return CONTACTS_ERROR_OUT_OF_MEMORY;
+			}
+			snprintf(full_path, str_len, "%s/%s", CTSVC_CONTACT_IMG_FULL_LOCATION, str);
+		}
+		free(data->value.s);
+		data->value.s = full_path;
+		break;
+	default:
+		data->value.s = SAFE_STRDUP(str);
+		break;
+	}
+
+	result->values = g_slist_append(result->values, (void*)data);
+	return CONTACTS_ERROR_NONE;
+}
+
+static int __ctsvc_result_get_bool(contacts_record_h record, unsigned int property_id, bool* out_value)
+{
+	ctsvc_result_s* result = (ctsvc_result_s *)record;
+	GSList *cursor;
+	for (cursor = result->values;cursor;cursor=cursor->next) {
+		ctsvc_result_value_s *data = cursor->data;
+		if (data->property_id == property_id) {
+			if (data->type == CTSVC_VIEW_DATA_TYPE_BOOL) {
+				*out_value = data->value.b;
 				return CONTACTS_ERROR_NONE;
 			}
 			else {
