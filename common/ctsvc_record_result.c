@@ -154,17 +154,16 @@ static int __ctsvc_result_get_str_real(contacts_record_h record, unsigned int pr
 
 	GSList *cursor;
 
+	if (CTSVC_VIEW_DATA_TYPE_STR != (CTSVC_VIEW_DATA_TYPE_STR & property_id)) {
+		CTS_ERR("property_id is not str type.");
+		return CONTACTS_ERROR_INVALID_PARAMETER;
+	}
+
 	for (cursor = result->values;cursor;cursor=cursor->next) {
 		ctsvc_result_value_s *data = cursor->data;
 		if (data->property_id == property_id) {
-			if (data->type == CTSVC_VIEW_DATA_TYPE_STR) {
-				*out_str = GET_STR(copy, data->value.s);
-				return CONTACTS_ERROR_NONE;
-			}
-			else {
-				CTS_ERR("use another get_type API, (type : %d)", data->type);
-				return CONTACTS_ERROR_INVALID_PARAMETER;
-			}
+			*out_str = GET_STR(copy, data->value.s);
+			return CONTACTS_ERROR_NONE;
 		}
 	}
 
@@ -186,18 +185,17 @@ static int __ctsvc_result_get_int(contacts_record_h record, unsigned int propert
 	ctsvc_result_s* result = (ctsvc_result_s *)record;
 
 	GSList *cursor;
-	/* TODO: check the value type of property_id is int */
+
+	if (CTSVC_VIEW_DATA_TYPE_INT != (CTSVC_VIEW_DATA_TYPE_INT & property_id)) {
+		CTS_ERR("property_id is not int type.");
+		return CONTACTS_ERROR_INVALID_PARAMETER;
+	}
+
 	for (cursor = result->values;cursor;cursor=cursor->next) {
 		ctsvc_result_value_s *data = cursor->data;
 		if (data->property_id == property_id) {
-			if (data->type == CTSVC_VIEW_DATA_TYPE_INT) {
-				*out_value = data->value.i;
-				return CONTACTS_ERROR_NONE;
-			}
-			else {
-				CTS_ERR("use another get_type API, (type : %d)", data->type);
-				return CONTACTS_ERROR_INVALID_PARAMETER;
-			}
+			*out_value = data->value.i;
+			return CONTACTS_ERROR_NONE;
 		}
 	}
 
