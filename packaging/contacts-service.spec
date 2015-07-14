@@ -28,7 +28,6 @@ BuildRequires:  pkgconfig(cynara-creds-socket)
 BuildRequires:  pkgconfig(capi-system-info)
 BuildRequires:  pkgconfig(icu-uc)
 Requires(post): /usr/bin/sqlite3, /bin/chmod, /bin/chown
-Requires(post): /usr/bin/vconftool
 Requires(post): /sbin/ldconfig
 Requires(postun): /sbin/ldconfig
 
