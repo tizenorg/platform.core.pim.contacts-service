@@ -208,28 +208,26 @@ static int __ctsvc_result_set_int(contacts_record_h record, unsigned int propert
 	GSList *cursor;
 	ctsvc_result_value_s *data;
 
-	/* TODO: check the value type of property_id is int */
+	if (CTSVC_VIEW_DATA_TYPE_INT != (CTSVC_VIEW_DATA_TYPE_INT & property_id)) {
+		CTS_ERR("property_id is not int type.");
+		return CONTACTS_ERROR_INVALID_PARAMETER;
+	}
+
 	for (cursor = result->values;cursor;cursor=cursor->next) {
 		data = cursor->data;
 		if (data->property_id == property_id) {
-			if (data->type == CTSVC_VIEW_DATA_TYPE_INT) {
 #ifdef _CONTACTS_IPC_SERVER
-				if (property_id == CTSVC_PROPERTY_PHONELOG_SIM_SLOT_NO) {
-					CHECK_DIRTY_VAL(data->value.i, value, is_dirty);
-					data->value.i = ctsvc_server_sim_get_sim_slot_no_by_info_id(value);
-				}
-				else
+			if (property_id == CTSVC_PROPERTY_PHONELOG_SIM_SLOT_NO) {
+				CHECK_DIRTY_VAL(data->value.i, value, is_dirty);
+				data->value.i = ctsvc_server_sim_get_sim_slot_no_by_info_id(value);
+			}
+			else
 #endif /* _CONTACTS_IPC_SERVER */
-				{
-					CHECK_DIRTY_VAL(data->value.i, value, is_dirty);
-					data->value.i = value;
-					return CONTACTS_ERROR_NONE;
-				}
+			{
+				CHECK_DIRTY_VAL(data->value.i, value, is_dirty);
+				data->value.i = value;
 			}
-			else {
-				CTS_ERR("use another get_type API, (type : %d)", data->type);
-				return CONTACTS_ERROR_INVALID_PARAMETER;
-			}
+			return CONTACTS_ERROR_NONE;
 		}
 	}
 
@@ -298,36 +296,34 @@ static int __ctsvc_result_set_str(contacts_record_h record, unsigned int propert
 	char *full_path = NULL;
 	int str_len;
 
-	/* TODO: check the value type of property_id is int */
+	if (CTSVC_VIEW_DATA_TYPE_STR != (CTSVC_VIEW_DATA_TYPE_STR & property_id)) {
+		CTS_ERR("property_id is not str type.");
+		return CONTACTS_ERROR_INVALID_PARAMETER;
+	}
+
 	for (cursor = result->values;cursor;cursor=cursor->next) {
 		data = cursor->data;
 		if (data->property_id == property_id) {
-			if (data->type == CTSVC_VIEW_DATA_TYPE_STR) {
-				switch (property_id) {
-				case CTSVC_PROPERTY_PERSON_IMAGE_THUMBNAIL:
-				case CTSVC_PROPERTY_CONTACT_IMAGE_THUMBNAIL:
-					if (str) {
-						str_len = strlen(CTSVC_CONTACT_IMG_FULL_LOCATION) + strlen(str) + 2;
-						full_path = calloc(1, str_len);
-						if (NULL == full_path) {
-							CTS_ERR("calloc() Fail");
-							return CONTACTS_ERROR_OUT_OF_MEMORY;
-						}
-						snprintf(full_path, str_len, "%s/%s", CTSVC_CONTACT_IMG_FULL_LOCATION, str);
+			switch (property_id) {
+			case CTSVC_PROPERTY_PERSON_IMAGE_THUMBNAIL:
+			case CTSVC_PROPERTY_CONTACT_IMAGE_THUMBNAIL:
+				if (str) {
+					str_len = strlen(CTSVC_CONTACT_IMG_FULL_LOCATION) + strlen(str) + 2;
+					full_path = calloc(1, str_len);
+					if (NULL == full_path) {
+						CTS_ERR("calloc() Fail");
+						return CONTACTS_ERROR_OUT_OF_MEMORY;
 					}
-					CHECK_DIRTY_STR(data->value.s, full_path, is_dirty);
-					free(data->value.s);
-					data->value.s = full_path;
-					return CONTACTS_ERROR_NONE;
-				default:
-					CHECK_DIRTY_STR(data->value.s, str, is_dirty);
-					FREEandSTRDUP(data->value.s, str);
-					return CONTACTS_ERROR_NONE;
+					snprintf(full_path, str_len, "%s/%s", CTSVC_CONTACT_IMG_FULL_LOCATION, str);
 				}
-			}
-			else {
-				CTS_ERR("use another get_type API, (type : %d)", data->type);
-				return CONTACTS_ERROR_INVALID_PARAMETER;
+				CHECK_DIRTY_STR(data->value.s, full_path, is_dirty);
+				free(data->value.s);
+				data->value.s = full_path;
+				return CONTACTS_ERROR_NONE;
+			default:
+				CHECK_DIRTY_STR(data->value.s, str, is_dirty);
+				FREEandSTRDUP(data->value.s, str);
+				return CONTACTS_ERROR_NONE;
 			}
 		}
 	}
