@@ -23,7 +23,6 @@
 
 #include "contacts.h"
 #include "ctsvc_internal.h"
-#include "ctsvc_query.h"
 #include "ctsvc_filter.h"
 
 typedef enum {

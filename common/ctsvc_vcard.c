@@ -35,7 +35,6 @@
 #endif
 
 #include "contacts.h"
-#include "ctsvc_vcard.h"
 #include "ctsvc_internal.h"
 #include "ctsvc_record.h"
 #include "ctsvc_list.h"

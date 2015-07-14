@@ -26,7 +26,6 @@
 #include "ctsvc_internal.h"
 #include "ctsvc_list.h"
 #include "ctsvc_record.h"
-#include "ctsvc_query.h"
 #include "ctsvc_inotify.h"
 
 #include "ctsvc_ipc_define.h"
