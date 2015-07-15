@@ -45,8 +45,8 @@ int ctsvc_client_ipc_get_change_version(contacts_h contact);
 
 int ctsvc_ipc_client_check_permission(int permission, bool *result);
 
-int ctsvc_ipc_set_disconnected_cb(void (*cb)(void *), void *user_data);
-int ctsvc_ipc_unset_disconnected_cb();
+int ctsvc_ipc_set_disconnected_cb(pims_ipc_h ipc, void (*cb)(void *), void *user_data);
+int ctsvc_ipc_unset_disconnected_cb(pims_ipc_h ipc);
 void ctsvc_ipc_set_disconnected(bool is_disconnected);
 int ctsvc_ipc_get_disconnected();
 void ctsvc_ipc_recovery();
