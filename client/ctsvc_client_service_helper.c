@@ -76,18 +76,13 @@ int ctsvc_client_connect_with_flags(contacts_h contact, unsigned int flags)
 	return ret;
 }
 
-static void _ctsvc_ipc_disconnected_cb(void *user_data)
-{
-	ctsvc_ipc_set_disconnected(true);
-}
-
 static void _ctsvc_ipc_initialized_cb(void *user_data)
 {
 	CTS_FN_CALL;
 	if (true == ctsvc_ipc_get_disconnected()) {
+		ctsvc_ipc_set_disconnected(false);
 		ctsvc_ipc_recovery();
 		ctsvc_ipc_recover_for_change_subscription();
-		ctsvc_ipc_set_disconnected(false);
 	}
 }
 
@@ -125,7 +120,6 @@ int ctsvc_client_connect(contacts_h contact)
 		}
 		ctsvc_view_uri_init();
 		ctsvc_ipc_create_for_change_subscription();
-		ctsvc_ipc_set_disconnected_cb(_ctsvc_ipc_disconnected_cb, NULL);
 	}
 	else
 		CTS_DBG("System : Contacts service has been already connected(%d)", _ctsvc_connection + 1);
@@ -162,7 +156,7 @@ int ctsvc_client_disconnect(contacts_h contact)
 		ctsvc_view_uri_deinit();
 		ctsvc_inotify_close();
 		ctsvc_socket_final();
-		ctsvc_ipc_unset_disconnected_cb();
+
 	}
 	else if (1 < _ctsvc_connection)
 		CTS_DBG("System : connection count is %d", _ctsvc_connection);
@@ -212,7 +206,6 @@ int ctsvc_client_connect_on_thread(contacts_h contact)
 		}
 		ctsvc_view_uri_init();
 		ctsvc_ipc_create_for_change_subscription();
-		ctsvc_ipc_set_disconnected_cb(_ctsvc_ipc_disconnected_cb, NULL);
 	}
 	else if (0 < _ctsvc_connection_on_thread)
 		CTS_DBG("System : Contacts service has been already connected");
@@ -250,7 +243,6 @@ int ctsvc_client_disconnect_on_thread(contacts_h contact)
 		ctsvc_view_uri_deinit();
 		ctsvc_inotify_close();
 		ctsvc_socket_final();
-		ctsvc_ipc_unset_disconnected_cb();
 		CTS_DBG("System : connection_on_thread was destroyed successfully");
 	}
 	else if (1 < _ctsvc_connection_on_thread) {

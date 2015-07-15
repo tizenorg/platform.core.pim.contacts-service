@@ -47,7 +47,6 @@ struct ctsvc_ipc_s {
 
 static GHashTable *_ctsvc_ipc_table = NULL;
 static bool _ctsvc_ipc_disconnected = false;
-static int disconnected_cb_count = 0;
 
 static pims_ipc_h _ctsvc_get_ipc_handle()
 {
@@ -258,9 +257,9 @@ int ctsvc_ipc_call(char *module, char *function, pims_ipc_h data_in, pims_ipc_da
 	pims_ipc_h ipc_handle;
 
 	if (true == ctsvc_ipc_get_disconnected()) {
+		ctsvc_ipc_set_disconnected(false);
 		ctsvc_ipc_recovery();
 		ctsvc_ipc_recover_for_change_subscription();
-		ctsvc_ipc_set_disconnected(false);
 	}
 
 	ipc_handle = _ctsvc_get_ipc_handle();
@@ -336,20 +335,14 @@ int ctsvc_ipc_client_check_permission(int permission, bool *result)
 	return ret;
 }
 
-
-
-int ctsvc_ipc_set_disconnected_cb(void (*cb)(void *), void *user_data)
+int ctsvc_ipc_set_disconnected_cb(pims_ipc_h ipc, void (*cb)(void *), void *user_data)
 {
-	if (0 == disconnected_cb_count++)
-		return pims_ipc_set_server_disconnected_cb(cb, user_data);
-	return CONTACTS_ERROR_NONE;
+	return pims_ipc_add_server_disconnected_cb(ipc, cb, user_data);
 }
 
-int ctsvc_ipc_unset_disconnected_cb()
+int ctsvc_ipc_unset_disconnected_cb(pims_ipc_h ipc)
 {
-	if (1 == disconnected_cb_count--)
-		return pims_ipc_unset_server_disconnected_cb();
-	return CONTACTS_ERROR_NONE;
+	return pims_ipc_remove_server_disconnected_cb(ipc);
 }
 
 void ctsvc_ipc_set_disconnected(bool is_disconnected)

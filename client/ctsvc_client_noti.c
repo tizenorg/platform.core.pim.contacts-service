@@ -47,6 +47,11 @@ static int __ipc_pubsub_ref = 0;
 static pims_ipc_h __ipc = NULL;
 static GSList *__db_change_subscribe_list = NULL;
 
+static void _ctsvc_ipc_disconnected_cb(void *user_data)
+{
+	ctsvc_ipc_set_disconnected(true);
+}
+
 static void __ctsvc_db_subscriber_callback(pims_ipc_h ipc, pims_ipc_data_h data, void *user_data)
 {
 	int ret;
@@ -101,6 +106,7 @@ int ctsvc_ipc_create_for_change_subscription()
 			ctsvc_mutex_unlock(CTS_MUTEX_PIMS_IPC_PUBSUB);
 			return CONTACTS_ERROR_IPC;
 		}
+		ctsvc_ipc_set_disconnected_cb(__ipc, _ctsvc_ipc_disconnected_cb, NULL);
 	}
 	__ipc_pubsub_ref++;
 	ctsvc_mutex_unlock(CTS_MUTEX_PIMS_IPC_PUBSUB);
@@ -114,12 +120,15 @@ int ctsvc_ipc_recover_for_change_subscription()
 		ctsvc_mutex_unlock(CTS_MUTEX_PIMS_IPC_PUBSUB);
 		return CONTACTS_ERROR_NONE;
 	}
+	if (__ipc)
+		ctsvc_ipc_unset_disconnected_cb(__ipc);
 	__ipc = pims_ipc_create_for_subscribe(CTSVC_IPC_SOCKET_PATH_FOR_CHANGE_SUBSCRIPTION);
 	if (!__ipc) {
 		CTS_ERR("pims_ipc_create_for_subscribe error\n");
 		ctsvc_mutex_unlock(CTS_MUTEX_PIMS_IPC_PUBSUB);
 		return CONTACTS_ERROR_IPC;
 	}
+	ctsvc_ipc_set_disconnected_cb(__ipc, _ctsvc_ipc_disconnected_cb, NULL);
 	ctsvc_mutex_unlock(CTS_MUTEX_PIMS_IPC_PUBSUB);
 	return CONTACTS_ERROR_NONE;
 }
@@ -130,6 +139,7 @@ int ctsvc_ipc_destroy_for_change_subscription()
 
 	if (1 == __ipc_pubsub_ref) {
 		pims_ipc_destroy_for_subscribe(__ipc);
+		ctsvc_ipc_unset_disconnected_cb(__ipc);
 		__ipc = NULL;
 	}
 	else if (1 < __ipc_pubsub_ref) {
