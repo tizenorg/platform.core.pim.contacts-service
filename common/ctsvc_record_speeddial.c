@@ -32,8 +32,8 @@ static int __ctsvc_speeddial_clone(contacts_record_h record, contacts_record_h *
 static int __ctsvc_speeddial_get_int(contacts_record_h record, unsigned int property_id, int *out);
 static int __ctsvc_speeddial_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_speeddial_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
-static int __ctsvc_speeddial_set_int(contacts_record_h record, unsigned int property_id, int value);
-static int __ctsvc_speeddial_set_str(contacts_record_h record, unsigned int property_id, const char* str);
+static int __ctsvc_speeddial_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty);
+static int __ctsvc_speeddial_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty);
 
 
 ctsvc_record_plugin_cb_s speeddial_plugin_cbs = {
@@ -173,23 +173,27 @@ static int __ctsvc_speeddial_get_str(contacts_record_h record, unsigned int prop
 	return __ctsvc_speeddial_get_str_real(record, property_id, out_str, true);
 }
 
-static int __ctsvc_speeddial_set_int(contacts_record_h record, unsigned int property_id, int value)
+static int __ctsvc_speeddial_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty)
 {
 	ctsvc_speeddial_s *speeddial = (ctsvc_speeddial_s*)record;
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_SPEEDDIAL_NUMBER_TYPE:
+		CHECK_DIRTY_VAL(speeddial->number_type, value, is_dirty);
 		speeddial->number_type = value;
 		break;
 	case CTSVC_PROPERTY_SPEEDDIAL_PERSON_ID:
+		CHECK_DIRTY_VAL(speeddial->person_id, value, is_dirty);
 		speeddial->person_id = value;
 		break;
 	case CTSVC_PROPERTY_SPEEDDIAL_DIAL_NUMBER:
 		RETVM_IF(0 < speeddial->id, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (speeddial)", property_id);
+		CHECK_DIRTY_VAL(speeddial->dial_number, value, is_dirty);
 		speeddial->dial_number = value;
 		break;
 	case CTSVC_PROPERTY_SPEEDDIAL_NUMBER_ID:
+		CHECK_DIRTY_VAL(speeddial->number_id, value, is_dirty);
 		speeddial->number_id = value;
 		break;
 	default:
@@ -199,21 +203,25 @@ static int __ctsvc_speeddial_set_int(contacts_record_h record, unsigned int prop
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_speeddial_set_str(contacts_record_h record, unsigned int property_id, const char* str)
+static int __ctsvc_speeddial_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty)
 {
 	ctsvc_speeddial_s *speeddial = (ctsvc_speeddial_s*)record;
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_SPEEDDIAL_DISPLAY_NAME:
+		CHECK_DIRTY_STR(speeddial->display_name, str, is_dirty);
 		FREEandSTRDUP(speeddial->display_name, str);
 		break;
 	case CTSVC_PROPERTY_SPEEDDIAL_NUMBER:
+		CHECK_DIRTY_STR(speeddial->number, str, is_dirty);
 		FREEandSTRDUP(speeddial->number, str);
 		break;
 	case CTSVC_PROPERTY_SPEEDDIAL_IMAGE_THUMBNAIL:
+		CHECK_DIRTY_STR(speeddial->image_thumbnail_path, str, is_dirty);
 		FREEandSTRDUP(speeddial->image_thumbnail_path, str);
 		break;
 	case CTSVC_PROPERTY_SPEEDDIAL_NUMBER_LABEL:
+		CHECK_DIRTY_STR(speeddial->label, str, is_dirty);
 		FREEandSTRDUP(speeddial->label, str);
 		break;
 	default :

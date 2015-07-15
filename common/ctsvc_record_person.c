@@ -29,10 +29,9 @@ static int __ctsvc_person_get_int(contacts_record_h record, unsigned int propert
 static int __ctsvc_person_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_person_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_person_get_bool(contacts_record_h record, unsigned int property_id, bool *value);
-static int __ctsvc_person_set_int(contacts_record_h record, unsigned int property_id, int value);
-static int __ctsvc_person_set_str(contacts_record_h record, unsigned int property_id, const char* str);
-static int __ctsvc_person_set_bool(contacts_record_h record, unsigned int property_id, bool value);
-
+static int __ctsvc_person_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty);
+static int __ctsvc_person_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty);
+static int __ctsvc_person_set_bool(contacts_record_h record, unsigned int property_id, bool value, bool *is_dirty);
 
 ctsvc_record_plugin_cb_s person_plugin_cbs = {
 	.create = __ctsvc_person_create,
@@ -207,18 +206,21 @@ static int __ctsvc_person_get_bool(contacts_record_h record, unsigned int proper
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_person_set_int(contacts_record_h record, unsigned int property_id, int value)
+static int __ctsvc_person_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty)
 {
 	ctsvc_person_s *person = (ctsvc_person_s *)record;
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_PERSON_DISPLAY_CONTACT_ID:
+		CHECK_DIRTY_VAL(person->name_contact_id, value, is_dirty);
 		person->name_contact_id = value;
 		break;
 	case CTSVC_PROPERTY_PERSON_ID:
+		CHECK_DIRTY_VAL(person->person_id, value, is_dirty);
 		person->person_id = value;
 		break;
 	case CTSVC_PROPERTY_PERSON_LINK_COUNT:
+		CHECK_DIRTY_VAL(person->link_count, value, is_dirty);
 		person->link_count = value;
 		break;
 	default:
@@ -228,27 +230,33 @@ static int __ctsvc_person_set_int(contacts_record_h record, unsigned int propert
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_person_set_str(contacts_record_h record, unsigned int property_id, const char* str)
+static int __ctsvc_person_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty)
 {
 	ctsvc_person_s *person = (ctsvc_person_s *)record;
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_PERSON_DISPLAY_NAME:
-		FREEandSTRDUP(person->display_name, str);
+		CHECK_DIRTY_STR(person->display_name, str, is_dirty);
+		FREEandSTRDUP( person->display_name, str);
 		break;
 	case CTSVC_PROPERTY_PERSON_DISPLAY_NAME_INDEX:
-		FREEandSTRDUP(person->display_name_index, str);
+		CHECK_DIRTY_STR(person->display_name_index, str, is_dirty);
+		FREEandSTRDUP( person->display_name_index, str);
 		break;
 	case CTSVC_PROPERTY_PERSON_IMAGE_THUMBNAIL:
+		CHECK_DIRTY_STR(person->image_thumbnail_path, str, is_dirty);
 		FREEandSTRDUP(person->image_thumbnail_path, str);
 		break;
 	case CTSVC_PROPERTY_PERSON_RINGTONE:
+		CHECK_DIRTY_STR(person->ringtone_path, str, is_dirty);
 		FREEandSTRDUP(person->ringtone_path, str);
 		break;
 	case CTSVC_PROPERTY_PERSON_VIBRATION:
+		CHECK_DIRTY_STR(person->vibration, str, is_dirty);
 		FREEandSTRDUP(person->vibration, str);
 		break;
 	case CTSVC_PROPERTY_PERSON_MESSAGE_ALERT:
+		CHECK_DIRTY_STR(person->message_alert, str, is_dirty);
 		FREEandSTRDUP(person->message_alert, str);
 		break;
 	default :
@@ -258,12 +266,13 @@ static int __ctsvc_person_set_str(contacts_record_h record, unsigned int propert
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_person_set_bool(contacts_record_h record, unsigned int property_id, bool value)
+static int __ctsvc_person_set_bool(contacts_record_h record, unsigned int property_id, bool value, bool *is_dirty)
 {
 	ctsvc_person_s *person = (ctsvc_person_s *)record;
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_PERSON_IS_FAVORITE:
+		CHECK_DIRTY_VAL(person->is_favorite, value, is_dirty);
 		if (person->is_favorite != value) {
 			person->is_favorite = value;
 		}

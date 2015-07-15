@@ -382,8 +382,9 @@ int ctsvc_record_set_str(contacts_record_h record, unsigned int property_id, con
 		str = NULL;
 
 	if (s_record->plugin_cbs && s_record->plugin_cbs->set_str) {
-		ret = s_record->plugin_cbs->set_str(record, property_id, str);
-		if (CONTACTS_ERROR_NONE == ret)
+		bool is_dirty = false;
+		ret = s_record->plugin_cbs->set_str(record, property_id, str, &is_dirty);
+		if (CONTACTS_ERROR_NONE == ret && is_dirty)
 			ctsvc_record_set_property_flag(s_record, property_id, CTSVC_PROPERTY_FLAG_DIRTY);
 
 		return ret;
@@ -427,8 +428,9 @@ int ctsvc_record_set_bool(contacts_record_h record, unsigned int property_id, bo
 	__CHECK_PROJECTED_PROPERTY();
 
 	if (s_record->plugin_cbs && s_record->plugin_cbs->set_bool) {
-		ret = s_record->plugin_cbs->set_bool(record, property_id, value);
-		if (CONTACTS_ERROR_NONE == ret)
+		bool is_dirty = false;
+		ret = s_record->plugin_cbs->set_bool(record, property_id, value, &is_dirty);
+		if (CONTACTS_ERROR_NONE == ret && is_dirty)
 			ctsvc_record_set_property_flag(s_record, property_id, CTSVC_PROPERTY_FLAG_DIRTY);
 		return ret;
 	}
@@ -459,8 +461,9 @@ int ctsvc_record_set_int(contacts_record_h record, unsigned int property_id, int
 	__CHECK_PROJECTED_PROPERTY();
 
 	if (s_record->plugin_cbs && s_record->plugin_cbs->set_int) {
-		ret = s_record->plugin_cbs->set_int(record, property_id, value);
-		if (CONTACTS_ERROR_NONE == ret)
+		bool is_dirty = false;
+		ret = s_record->plugin_cbs->set_int(record, property_id, value, &is_dirty);
+		if (CONTACTS_ERROR_NONE == ret && is_dirty)
 			ctsvc_record_set_property_flag(s_record, property_id, CTSVC_PROPERTY_FLAG_DIRTY);
 		return ret;
 	}
@@ -484,8 +487,9 @@ int ctsvc_record_set_lli(contacts_record_h record, unsigned int property_id, lon
 	__CHECK_PROJECTED_PROPERTY();
 
 	if (s_record->plugin_cbs && s_record->plugin_cbs->set_lli) {
-		ret = s_record->plugin_cbs->set_lli(record, property_id, value);
-		if (CONTACTS_ERROR_NONE == ret)
+		bool is_dirty = false;
+		ret = s_record->plugin_cbs->set_lli(record, property_id, value, &is_dirty);
+		if (CONTACTS_ERROR_NONE == ret && is_dirty)
 			ctsvc_record_set_property_flag(s_record, property_id, CTSVC_PROPERTY_FLAG_DIRTY);
 		return ret;
 	}
@@ -511,8 +515,9 @@ int ctsvc_record_set_double(contacts_record_h record, unsigned int property_id, 
 	__CHECK_PROJECTED_PROPERTY();
 
 	if (s_record->plugin_cbs && s_record->plugin_cbs->set_double) {
-		ret = s_record->plugin_cbs->set_double(record, property_id, value);
-		if (CONTACTS_ERROR_NONE == ret)
+		bool is_dirty = false;
+		ret = s_record->plugin_cbs->set_double(record, property_id, value, &is_dirty);
+		if (CONTACTS_ERROR_NONE == ret && is_dirty)
 			ctsvc_record_set_property_flag(s_record, property_id, CTSVC_PROPERTY_FLAG_DIRTY);
 		return ret;
 	}

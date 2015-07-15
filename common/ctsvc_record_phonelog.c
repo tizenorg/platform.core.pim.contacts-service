@@ -33,8 +33,8 @@ static int __ctsvc_phonelog_clone(contacts_record_h record, contacts_record_h *o
 static int __ctsvc_phonelog_get_int(contacts_record_h record, unsigned int property_id, int *out);
 static int __ctsvc_phonelog_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_phonelog_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
-static int __ctsvc_phonelog_set_int(contacts_record_h record, unsigned int property_id, int value);
-static int __ctsvc_phonelog_set_str(contacts_record_h record, unsigned int property_id, const char* str);
+static int __ctsvc_phonelog_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty);
+static int __ctsvc_phonelog_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty);
 
 ctsvc_record_plugin_cb_s phonelog_plugin_cbs = {
 	.create = __ctsvc_phonelog_create,
@@ -172,22 +172,25 @@ static int __ctsvc_phonelog_get_str(contacts_record_h record, unsigned int prope
 	return __ctsvc_phonelog_get_str_real(record, property_id, out_str, true);
 }
 
-static int __ctsvc_phonelog_set_int(contacts_record_h record, unsigned int property_id, int value)
+static int __ctsvc_phonelog_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty)
 {
 	ctsvc_phonelog_s* phonelog = (ctsvc_phonelog_s*)record;
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_PHONELOG_ID:
+		CHECK_DIRTY_VAL(phonelog->id, value, is_dirty);
 		phonelog->id = value;
 		break;
 	case CTSVC_PROPERTY_PHONELOG_PERSON_ID:
 		RETVM_IF(0 < phonelog->id, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (phonelog)", property_id);
+		CHECK_DIRTY_VAL(phonelog->person_id, value, is_dirty);
 		phonelog->person_id = value;
 		break;
 	case CTSVC_PROPERTY_PHONELOG_LOG_TIME:
 		RETVM_IF(0 < phonelog->id, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (phonelog)", property_id);
+		CHECK_DIRTY_VAL(phonelog->log_time, value, is_dirty);
 		phonelog->log_time = value;
 		break;
 	case CTSVC_PROPERTY_PHONELOG_LOG_TYPE:
@@ -197,8 +200,10 @@ static int __ctsvc_phonelog_set_int(contacts_record_h record, unsigned int prope
 					&& value <= CONTACTS_PLOG_TYPE_MMS_BLOCKED)
 				|| (CONTACTS_PLOG_TYPE_EMAIL_RECEIVED <= value
 					&& value <= CONTACTS_PLOG_TYPE_EMAIL_SENT)
-			)
+			) {
+			CHECK_DIRTY_VAL(phonelog->log_type, value, is_dirty);
 			phonelog->log_type = value;
+		}
 		else {
 			CTS_ERR("Invalid parameter : log type is in invalid range (%d)", value);
 			return CONTACTS_ERROR_INVALID_PARAMETER;
@@ -207,11 +212,13 @@ static int __ctsvc_phonelog_set_int(contacts_record_h record, unsigned int prope
 	case CTSVC_PROPERTY_PHONELOG_EXTRA_DATA1:
 		RETVM_IF(0 < phonelog->id, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (phonelog)", property_id);
+		CHECK_DIRTY_VAL(phonelog->extra_data1, value, is_dirty);
 		phonelog->extra_data1 = value;
 		break;
 	case CTSVC_PROPERTY_PHONELOG_SIM_SLOT_NO:
 		RETVM_IF(0 < phonelog->id, CONTACTS_ERROR_INVALID_PARAMETER,
 			"Invalid parameter : property_id(%d) is a read-only value (phonelog)", property_id);
+		CHECK_DIRTY_VAL(phonelog->sim_slot_no, value, is_dirty);
 		phonelog->sim_slot_no = value;
 		break;
 	default:
@@ -221,7 +228,7 @@ static int __ctsvc_phonelog_set_int(contacts_record_h record, unsigned int prope
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_phonelog_set_str(contacts_record_h record, unsigned int property_id, const char* str)
+static int __ctsvc_phonelog_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty)
 {
 	ctsvc_phonelog_s* phonelog = (ctsvc_phonelog_s*)record;
 
@@ -229,9 +236,11 @@ static int __ctsvc_phonelog_set_str(contacts_record_h record, unsigned int prope
 	case CTSVC_PROPERTY_PHONELOG_ADDRESS:
 		RETVM_IF(0 < phonelog->id, CONTACTS_ERROR_INVALID_PARAMETER,
 			"Invalid parameter : property_id(%d) is a read-only value (phonelog)", property_id);
+		CHECK_DIRTY_STR(phonelog->address, str, is_dirty);
 		FREEandSTRDUP(phonelog->address, str);
 		break;
 	case CTSVC_PROPERTY_PHONELOG_EXTRA_DATA2:
+		CHECK_DIRTY_STR(phonelog->extra_data2, str, is_dirty);
 		FREEandSTRDUP(phonelog->extra_data2, str);
 		break;
 	default :

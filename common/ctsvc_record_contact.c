@@ -37,8 +37,8 @@ static int __ctsvc_activity_clone(contacts_record_h record, contacts_record_h *o
 static int __ctsvc_activity_get_int(contacts_record_h record, unsigned int property_id, int *out);
 static int __ctsvc_activity_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_activity_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
-static int __ctsvc_activity_set_int(contacts_record_h record, unsigned int property_id, int value);
-static int __ctsvc_activity_set_str(contacts_record_h record, unsigned int property_id, const char* str);
+static int __ctsvc_activity_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty);
+static int __ctsvc_activity_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty);
 static int __ctsvc_activity_add_child_record(contacts_record_h record, unsigned int property_id, contacts_record_h child_record);
 static int __ctsvc_activity_remove_child_record(contacts_record_h record, unsigned int property_id, contacts_record_h child_record);
 static int __ctsvc_activity_get_child_record_count(contacts_record_h record, unsigned int property_id, int *count);
@@ -51,8 +51,8 @@ static int __ctsvc_activity_photo_clone(contacts_record_h record, contacts_recor
 static int __ctsvc_activity_photo_get_int(contacts_record_h record, unsigned int property_id, int *out);
 static int __ctsvc_activity_photo_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_activity_photo_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
-static int __ctsvc_activity_photo_set_int(contacts_record_h record, unsigned int property_id, int value);
-static int __ctsvc_activity_photo_set_str(contacts_record_h record, unsigned int property_id, const char* str);
+static int __ctsvc_activity_photo_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty);
+static int __ctsvc_activity_photo_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty);
 
 
 static int __ctsvc_address_create(contacts_record_h *out_ecord);
@@ -62,9 +62,9 @@ static int __ctsvc_address_get_int(contacts_record_h record, unsigned int proper
 static int __ctsvc_address_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_address_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_address_get_bool(contacts_record_h record, unsigned int property_id, bool *value);
-static int __ctsvc_address_set_int(contacts_record_h record, unsigned int property_id, int value);
-static int __ctsvc_address_set_str(contacts_record_h record, unsigned int property_id, const char* str);
-static int __ctsvc_address_set_bool(contacts_record_h record, unsigned int property_id, bool value);
+static int __ctsvc_address_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty);
+static int __ctsvc_address_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty);
+static int __ctsvc_address_set_bool(contacts_record_h record, unsigned int property_id, bool value, bool *is_dirty);
 
 static int __ctsvc_company_create(contacts_record_h *out_record);
 static int __ctsvc_company_destroy(contacts_record_h record, bool delete_child);
@@ -72,8 +72,8 @@ static int __ctsvc_company_clone(contacts_record_h record, contacts_record_h *ou
 static int __ctsvc_company_get_int(contacts_record_h record, unsigned int property_id, int *out);
 static int __ctsvc_company_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_company_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
-static int __ctsvc_company_set_int(contacts_record_h record, unsigned int property_id, int value);
-static int __ctsvc_company_set_str(contacts_record_h record, unsigned int property_id, const char* str);
+static int __ctsvc_company_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty);
+static int __ctsvc_company_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty);
 
 static int __ctsvc_contact_create(contacts_record_h *out_record);
 static int __ctsvc_contact_destroy(contacts_record_h record, bool delete_child);
@@ -82,9 +82,9 @@ static int __ctsvc_contact_get_int(contacts_record_h record, unsigned int proper
 static int __ctsvc_contact_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_contact_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_contact_get_bool(contacts_record_h record, unsigned int property_id, bool *value);
-static int __ctsvc_contact_set_int(contacts_record_h record, unsigned int property_id, int value);
-static int __ctsvc_contact_set_str(contacts_record_h record, unsigned int property_id, const char* str);
-static int __ctsvc_contact_set_bool(contacts_record_h record, unsigned int property_id, bool value);
+static int __ctsvc_contact_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty);
+static int __ctsvc_contact_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty);
+static int __ctsvc_contact_set_bool(contacts_record_h record, unsigned int property_id, bool value, bool *is_dirty);
 static int __ctsvc_contact_clone_child_record_list(contacts_record_h record, unsigned int property_id, contacts_list_h* out_list);
 static int __ctsvc_contact_get_child_record_at_p(contacts_record_h record, unsigned int property_id, int index, contacts_record_h* out_record);
 static int __ctsvc_contact_get_child_record_count(contacts_record_h record, unsigned int property_id, int *count);
@@ -98,9 +98,9 @@ static int __ctsvc_email_get_int(contacts_record_h record, unsigned int property
 static int __ctsvc_email_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_email_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_email_get_bool(contacts_record_h record, unsigned int property_id, bool *value);
-static int __ctsvc_email_set_int(contacts_record_h record, unsigned int property_id, int value);
-static int __ctsvc_email_set_str(contacts_record_h record, unsigned int property_id, const char* str);
-static int __ctsvc_email_set_bool(contacts_record_h record, unsigned int property_id, bool value);
+static int __ctsvc_email_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty);
+static int __ctsvc_email_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty);
+static int __ctsvc_email_set_bool(contacts_record_h record, unsigned int property_id, bool value, bool *is_dirty);
 
 static int __ctsvc_event_create(contacts_record_h *out_record);
 static int __ctsvc_event_destroy(contacts_record_h record, bool delete_child);
@@ -109,9 +109,9 @@ static int __ctsvc_event_get_int(contacts_record_h record, unsigned int property
 static int __ctsvc_event_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_event_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_event_get_bool(contacts_record_h record, unsigned int property_id, bool *value);
-static int __ctsvc_event_set_int(contacts_record_h record, unsigned int property_id, int value);
-static int __ctsvc_event_set_str(contacts_record_h record, unsigned int property_id, const char* str);
-static int __ctsvc_event_set_bool(contacts_record_h record, unsigned int property_id, bool value);
+static int __ctsvc_event_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty);
+static int __ctsvc_event_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty);
+static int __ctsvc_event_set_bool(contacts_record_h record, unsigned int property_id, bool value, bool *is_dirty);
 
 static int __ctsvc_extension_create(contacts_record_h *out_record);
 static int __ctsvc_extension_destroy(contacts_record_h record, bool delete_child);
@@ -119,8 +119,8 @@ static int __ctsvc_extension_clone(contacts_record_h record, contacts_record_h *
 static int __ctsvc_extension_get_int(contacts_record_h record, unsigned int property_id, int *out);
 static int __ctsvc_extension_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_extension_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
-static int __ctsvc_extension_set_int(contacts_record_h record, unsigned int property_id, int value);
-static int __ctsvc_extension_set_str(contacts_record_h record, unsigned int property_id, const char* str);
+static int __ctsvc_extension_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty);
+static int __ctsvc_extension_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty);
 
 static int __ctsvc_group_relation_create(contacts_record_h *out_record);
 static int __ctsvc_group_relation_destroy(contacts_record_h record, bool delete_child);
@@ -128,8 +128,8 @@ static int __ctsvc_group_relation_clone(contacts_record_h record, contacts_recor
 static int __ctsvc_group_relation_get_int(contacts_record_h record, unsigned int property_id, int *out);
 static int __ctsvc_group_relation_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_group_relation_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
-static int __ctsvc_group_relation_set_int(contacts_record_h record, unsigned int property_id, int value);
-static int __ctsvc_group_relation_set_str(contacts_record_h record, unsigned int property_id, const char* str);
+static int __ctsvc_group_relation_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty);
+static int __ctsvc_group_relation_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty);
 
 static int __ctsvc_messenger_create(contacts_record_h *out_record);
 static int __ctsvc_messenger_destroy(contacts_record_h record, bool delete_child);
@@ -137,8 +137,8 @@ static int __ctsvc_messenger_clone(contacts_record_h record, contacts_record_h *
 static int __ctsvc_messenger_get_int(contacts_record_h record, unsigned int property_id, int *out);
 static int __ctsvc_messenger_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_messenger_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
-static int __ctsvc_messenger_set_int(contacts_record_h record, unsigned int property_id, int value);
-static int __ctsvc_messenger_set_str(contacts_record_h record, unsigned int property_id, const char* str);
+static int __ctsvc_messenger_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty);
+static int __ctsvc_messenger_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty);
 
 static int __ctsvc_name_create(contacts_record_h *out_record);
 static int __ctsvc_name_destroy(contacts_record_h record, bool delete_child);
@@ -146,8 +146,8 @@ static int __ctsvc_name_clone(contacts_record_h record, contacts_record_h *out_r
 static int __ctsvc_name_get_int(contacts_record_h record, unsigned int property_id, int *out);
 static int __ctsvc_name_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_name_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
-static int __ctsvc_name_set_int(contacts_record_h record, unsigned int property_id, int value);
-static int __ctsvc_name_set_str(contacts_record_h record, unsigned int property_id, const char* str);
+static int __ctsvc_name_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty);
+static int __ctsvc_name_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty);
 
 static int __ctsvc_nickname_create(contacts_record_h *out_record);
 static int __ctsvc_nickname_destroy(contacts_record_h record, bool delete_child);
@@ -155,8 +155,8 @@ static int __ctsvc_nickname_clone(contacts_record_h record, contacts_record_h *o
 static int __ctsvc_nickname_get_int(contacts_record_h record, unsigned int property_id, int *out);
 static int __ctsvc_nickname_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_nickname_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
-static int __ctsvc_nickname_set_int(contacts_record_h record, unsigned int property_id, int value);
-static int __ctsvc_nickname_set_str(contacts_record_h record, unsigned int property_id, const char* str);
+static int __ctsvc_nickname_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty);
+static int __ctsvc_nickname_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty);
 
 static int __ctsvc_note_create(contacts_record_h *out_record);
 static int __ctsvc_note_destroy(contacts_record_h record, bool delete_child);
@@ -164,8 +164,8 @@ static int __ctsvc_note_clone(contacts_record_h record, contacts_record_h *out_r
 static int __ctsvc_note_get_int(contacts_record_h record, unsigned int property_id, int *out);
 static int __ctsvc_note_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_note_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
-static int __ctsvc_note_set_int(contacts_record_h record, unsigned int property_id, int value);
-static int __ctsvc_note_set_str(contacts_record_h record, unsigned int property_id, const char* str);
+static int __ctsvc_note_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty);
+static int __ctsvc_note_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty);
 
 static int __ctsvc_number_create(contacts_record_h *out_record);
 static int __ctsvc_number_destroy(contacts_record_h record, bool delete_child);
@@ -174,9 +174,9 @@ static int __ctsvc_number_get_int(contacts_record_h record, unsigned int propert
 static int __ctsvc_number_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_number_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_number_get_bool(contacts_record_h record, unsigned int property_id, bool *value);
-static int __ctsvc_number_set_int(contacts_record_h record, unsigned int property_id, int value);
-static int __ctsvc_number_set_str(contacts_record_h record, unsigned int property_id, const char* str);
-static int __ctsvc_number_set_bool(contacts_record_h record, unsigned int property_id, bool value);
+static int __ctsvc_number_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty);
+static int __ctsvc_number_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty);
+static int __ctsvc_number_set_bool(contacts_record_h record, unsigned int property_id, bool value, bool *is_dirty);
 
 static int __ctsvc_profile_create(contacts_record_h *out_record);
 static int __ctsvc_profile_destroy(contacts_record_h record, bool delete_child);
@@ -184,8 +184,8 @@ static int __ctsvc_profile_clone(contacts_record_h record, contacts_record_h *ou
 static int __ctsvc_profile_get_int(contacts_record_h record, unsigned int property_id, int *out);
 static int __ctsvc_profile_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_profile_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
-static int __ctsvc_profile_set_int(contacts_record_h record, unsigned int property_id, int value);
-static int __ctsvc_profile_set_str(contacts_record_h record, unsigned int property_id, const char* str);
+static int __ctsvc_profile_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty);
+static int __ctsvc_profile_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty);
 
 static int __ctsvc_relationship_create(contacts_record_h *out_record);
 static int __ctsvc_relationship_destroy(contacts_record_h record, bool delete_child);
@@ -193,8 +193,8 @@ static int __ctsvc_relationship_clone(contacts_record_h record, contacts_record_
 static int __ctsvc_relationship_get_int(contacts_record_h record, unsigned int property_id, int *out);
 static int __ctsvc_relationship_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_relationship_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
-static int __ctsvc_relationship_set_int(contacts_record_h record, unsigned int property_id, int value);
-static int __ctsvc_relationship_set_str(contacts_record_h record, unsigned int property_id, const char* str);
+static int __ctsvc_relationship_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty);
+static int __ctsvc_relationship_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty);
 
 static int __ctsvc_image_create(contacts_record_h *out_record);
 static int __ctsvc_image_destroy(contacts_record_h record, bool delete_child);
@@ -203,9 +203,9 @@ static int __ctsvc_image_get_int(contacts_record_h record, unsigned int property
 static int __ctsvc_image_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_image_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_image_get_bool(contacts_record_h record, unsigned int property_id, bool *value);
-static int __ctsvc_image_set_int(contacts_record_h record, unsigned int property_id, int value);
-static int __ctsvc_image_set_str(contacts_record_h record, unsigned int property_id, const char* str);
-static int __ctsvc_image_set_bool(contacts_record_h record, unsigned int property_id, bool value);
+static int __ctsvc_image_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty);
+static int __ctsvc_image_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty);
+static int __ctsvc_image_set_bool(contacts_record_h record, unsigned int property_id, bool value, bool *is_dirty);
 
 static int __ctsvc_simple_contact_create(contacts_record_h *out_record);
 static int __ctsvc_simple_contact_destroy(contacts_record_h record, bool delete_child);
@@ -214,8 +214,8 @@ static int __ctsvc_simple_contact_get_bool(contacts_record_h record, unsigned in
 static int __ctsvc_simple_contact_get_int(contacts_record_h record, unsigned int property_id, int *out);
 static int __ctsvc_simple_contact_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_simple_contact_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
-static int __ctsvc_simple_contact_set_int(contacts_record_h record, unsigned int property_id, int value);
-static int __ctsvc_simple_contact_set_str(contacts_record_h record, unsigned int property_id, const char* str);
+static int __ctsvc_simple_contact_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty);
+static int __ctsvc_simple_contact_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty);
 
 static int __ctsvc_url_create(contacts_record_h *out_record);
 static int __ctsvc_url_destroy(contacts_record_h record, bool delete_child);
@@ -223,8 +223,8 @@ static int __ctsvc_url_clone(contacts_record_h record, contacts_record_h *out_re
 static int __ctsvc_url_get_int(contacts_record_h record, unsigned int property_id, int *out);
 static int __ctsvc_url_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_url_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
-static int __ctsvc_url_set_int(contacts_record_h record, unsigned int property_id, int value);
-static int __ctsvc_url_set_str(contacts_record_h record, unsigned int property_id, const char* str);
+static int __ctsvc_url_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty);
+static int __ctsvc_url_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty);
 
 static GHashTable *__ctsvc_temp_image_file_hash_table = NULL;
 
@@ -1829,28 +1829,33 @@ static int __ctsvc_extension_get_int(contacts_record_h record, unsigned int prop
 }
 
 
-static int __ctsvc_contact_set_int(contacts_record_h record, unsigned int property_id, int value)
+static int __ctsvc_contact_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty)
 {
 	ctsvc_contact_s *contact = (ctsvc_contact_s *)record;
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_CONTACT_ID:
+		CHECK_DIRTY_VAL(contact->id, value, is_dirty);
 		contact->id = value;
 		break;
 	case CTSVC_PROPERTY_CONTACT_DISPLAY_SOURCE_DATA_ID:
+		CHECK_DIRTY_VAL(contact->display_source_type, value, is_dirty);
 		contact->display_source_type = value;
 		break;
 	case CTSVC_PROPERTY_CONTACT_PERSON_ID:
 		RETVM_IF(0 < contact->id, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (contact)", property_id);
+		CHECK_DIRTY_VAL(contact->person_id, value, is_dirty);
 		contact->person_id = value;
 		break;
 	case CTSVC_PROPERTY_CONTACT_CHANGED_TIME:
+		CHECK_DIRTY_VAL(contact->changed_time, value, is_dirty);
 		contact->changed_time = value;
 		break;
 	case CTSVC_PROPERTY_CONTACT_ADDRESSBOOK_ID:
 		RETVM_IF(0 < contact->id, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (contact)", property_id);
+		CHECK_DIRTY_VAL(contact->addressbook_id, value, is_dirty);
 		contact->addressbook_id = value;
 		break;
 	case CTSVC_PROPERTY_CONTACT_LINK_MODE:
@@ -1859,6 +1864,7 @@ static int __ctsvc_contact_set_int(contacts_record_h record, unsigned int proper
 				CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : link mode is in invalid range (%d)", value);
 		RETVM_IF(0 < contact->id, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (contact)", property_id);
+		CHECK_DIRTY_VAL(contact->link_mode, value, is_dirty);
 		contact->link_mode = value;
 		break;
 	default:
@@ -1868,23 +1874,27 @@ static int __ctsvc_contact_set_int(contacts_record_h record, unsigned int proper
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_simple_contact_set_int(contacts_record_h record, unsigned int property_id, int value)
+static int __ctsvc_simple_contact_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty)
 {
 	ctsvc_simple_contact_s *contact = (ctsvc_simple_contact_s *)record;
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_CONTACT_ID:
+		CHECK_DIRTY_VAL(contact->contact_id, value, is_dirty);
 		contact->contact_id = value;
 		break;
 	case CTSVC_PROPERTY_CONTACT_DISPLAY_SOURCE_DATA_ID:
+		CHECK_DIRTY_VAL(contact->display_source_type, value, is_dirty);
 		contact->display_source_type = value;
 		break;
 	case CTSVC_PROPERTY_CONTACT_PERSON_ID:
+		CHECK_DIRTY_VAL(contact->person_id, value, is_dirty);
 		contact->person_id = value;
 		break;
 	case CTSVC_PROPERTY_CONTACT_ADDRESSBOOK_ID:
 		RETVM_IF(0 < contact->contact_id, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalide parameter : property_id(%d) is a read-only value (contact)", property_id);
+		CHECK_DIRTY_VAL(contact->addressbook_id, value, is_dirty);
 		contact->addressbook_id = value;
 		break;
 	default:
@@ -1894,17 +1904,19 @@ static int __ctsvc_simple_contact_set_int(contacts_record_h record, unsigned int
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_name_set_int(contacts_record_h record, unsigned int property_id, int value)
+static int __ctsvc_name_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty)
 {
 	ctsvc_name_s *name = (ctsvc_name_s *)record;
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_NAME_ID:
+		CHECK_DIRTY_VAL(name->id, value, is_dirty);
 		name->id = value;
 		break;
 	case CTSVC_PROPERTY_NAME_CONTACT_ID:
 		RETVM_IF(0 < name->id, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (name)", property_id);
+		CHECK_DIRTY_VAL(name->contact_id, value, is_dirty);
 		name->contact_id = value;
 		break;
 	default:
@@ -1914,17 +1926,19 @@ static int __ctsvc_name_set_int(contacts_record_h record, unsigned int property_
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_company_set_int(contacts_record_h record, unsigned int property_id, int value)
+static int __ctsvc_company_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty)
 {
 	ctsvc_company_s *company = (ctsvc_company_s *)record;
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_COMPANY_ID:
+		CHECK_DIRTY_VAL(company->id, value, is_dirty);
 		company->id = value;
 		break;
 	case CTSVC_PROPERTY_COMPANY_CONTACT_ID:
 		RETVM_IF(0 < company->id, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (company)", property_id);
+		CHECK_DIRTY_VAL(company->contact_id, value, is_dirty);
 		company->contact_id = value;
 		break;
 	case CTSVC_PROPERTY_COMPANY_TYPE:
@@ -1932,6 +1946,7 @@ static int __ctsvc_company_set_int(contacts_record_h record, unsigned int proper
 						|| CONTACTS_COMPANY_TYPE_WORK < value,
 				CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : company type is in invalid range (%d)", value);
 
+		CHECK_DIRTY_VAL(company->type, value, is_dirty);
 		company->type = value;
 		break;
 	default:
@@ -1941,17 +1956,19 @@ static int __ctsvc_company_set_int(contacts_record_h record, unsigned int proper
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_note_set_int(contacts_record_h record, unsigned int property_id, int value)
+static int __ctsvc_note_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty)
 {
 	ctsvc_note_s *note = (ctsvc_note_s *)record;
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_NOTE_ID:
+		CHECK_DIRTY_VAL(note->id, value, is_dirty);
 		note->id = value;
 		break;
 	case CTSVC_PROPERTY_NOTE_CONTACT_ID:
 		RETVM_IF(0 < note->id, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (note)", property_id);
+		CHECK_DIRTY_VAL(note->contact_id, value, is_dirty);
 		note->contact_id = value;
 		break;
 	default:
@@ -1961,20 +1978,23 @@ static int __ctsvc_note_set_int(contacts_record_h record, unsigned int property_
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_number_set_int(contacts_record_h record, unsigned int property_id, int value)
+static int __ctsvc_number_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty)
 {
 	ctsvc_number_s *number = (ctsvc_number_s*)record;
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_NUMBER_ID:
+		CHECK_DIRTY_VAL(number->id, value, is_dirty);
 		number->id = value;
 		break;
 	case CTSVC_PROPERTY_NUMBER_CONTACT_ID:
 		RETVM_IF(0 < number->id, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (number)", property_id);
+		CHECK_DIRTY_VAL(number->contact_id, value, is_dirty);
 		number->contact_id = value;
 		break;
 	case CTSVC_PROPERTY_NUMBER_TYPE:
+		CHECK_DIRTY_VAL(number->type, value, is_dirty);
 		number->type = value;
 		break;
 	default:
@@ -1984,17 +2004,19 @@ static int __ctsvc_number_set_int(contacts_record_h record, unsigned int propert
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_email_set_int(contacts_record_h record, unsigned int property_id, int value)
+static int __ctsvc_email_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty)
 {
 	ctsvc_email_s *email = (ctsvc_email_s *)record;
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_EMAIL_ID:
+		CHECK_DIRTY_VAL(email->id, value, is_dirty);
 		email->id = value;
 		break;
 	case CTSVC_PROPERTY_EMAIL_CONTACT_ID:
 		RETVM_IF(0 < email->id, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (email)", property_id);
+		CHECK_DIRTY_VAL(email->contact_id, value, is_dirty);
 		email->contact_id = value;
 		break;
 	case CTSVC_PROPERTY_EMAIL_TYPE:
@@ -2002,6 +2024,7 @@ static int __ctsvc_email_set_int(contacts_record_h record, unsigned int property
 						|| CONTACTS_EMAIL_TYPE_MOBILE < value,
 				CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : email type is in invalid range (%d)", value);
 
+		CHECK_DIRTY_VAL(email->type, value, is_dirty);
 		email->type = value;
 		break;
 	default:
@@ -2011,17 +2034,19 @@ static int __ctsvc_email_set_int(contacts_record_h record, unsigned int property
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_url_set_int(contacts_record_h record, unsigned int property_id, int value)
+static int __ctsvc_url_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty)
 {
 	ctsvc_url_s *url = (ctsvc_url_s *)record;
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_URL_ID:
+		CHECK_DIRTY_VAL(url->id, value, is_dirty);
 		url->id = value;
 		break;
 	case CTSVC_PROPERTY_URL_CONTACT_ID:
 		RETVM_IF(0 < url->id, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (url)", property_id);
+		CHECK_DIRTY_VAL(url->contact_id, value, is_dirty);
 		url->contact_id = value;
 		break;
 	case CTSVC_PROPERTY_URL_TYPE:
@@ -2029,6 +2054,7 @@ static int __ctsvc_url_set_int(contacts_record_h record, unsigned int property_i
 						|| CONTACTS_URL_TYPE_WORK < value,
 				CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : url type is in invalid range (%d)", value);
 
+		CHECK_DIRTY_VAL(url->type, value, is_dirty);
 		url->type = value;
 		break;
 	default:
@@ -2038,29 +2064,34 @@ static int __ctsvc_url_set_int(contacts_record_h record, unsigned int property_i
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_event_set_int(contacts_record_h record, unsigned int property_id, int value)
+static int __ctsvc_event_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty)
 {
 	ctsvc_event_s *event = (ctsvc_event_s *)record;
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_EVENT_ID:
+		CHECK_DIRTY_VAL(event->id, value, is_dirty);
 		event->id = value;
 		break;
 	case CTSVC_PROPERTY_EVENT_CONTACT_ID:
 		RETVM_IF(0 < event->id, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (event)", property_id);
+		CHECK_DIRTY_VAL(event->contact_id, value, is_dirty);
 		event->contact_id = value;
 		break;
 	case CTSVC_PROPERTY_EVENT_TYPE:
 		RETVM_IF(value < CONTACTS_EVENT_TYPE_OTHER
 						|| CONTACTS_EVENT_TYPE_ANNIVERSARY < value,
 				CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : event type is in invalid range (%d)", value);
+		CHECK_DIRTY_VAL(event->type, value, is_dirty);
 		event->type = value;
 		break;
 	case CTSVC_PROPERTY_EVENT_DATE:
+		CHECK_DIRTY_VAL(event->date, value, is_dirty);
 		event->date = value;
 		break;
 	case CTSVC_PROPERTY_EVENT_CALENDAR_TYPE:
+		CHECK_DIRTY_VAL(event->calendar_type, value, is_dirty);
 		event->calendar_type = value;
 		break;
 	default:
@@ -2070,17 +2101,19 @@ static int __ctsvc_event_set_int(contacts_record_h record, unsigned int property
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_nickname_set_int(contacts_record_h record, unsigned int property_id, int value)
+static int __ctsvc_nickname_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty)
 {
 	ctsvc_nickname_s *nickname = (ctsvc_nickname_s *)record;
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_NICKNAME_ID:
+		CHECK_DIRTY_VAL(nickname->id, value, is_dirty);
 		nickname->id = value;
 		break;
 	case CTSVC_PROPERTY_NICKNAME_CONTACT_ID:
 		RETVM_IF(0 < nickname->id, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (nickname)", property_id);
+		CHECK_DIRTY_VAL(nickname->contact_id, value, is_dirty);
 		nickname->contact_id = value;
 		break;
 	default:
@@ -2090,23 +2123,26 @@ static int __ctsvc_nickname_set_int(contacts_record_h record, unsigned int prope
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_address_set_int(contacts_record_h record, unsigned int property_id, int value)
+static int __ctsvc_address_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty)
 {
 	ctsvc_address_s *address = (ctsvc_address_s *)record;
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_ADDRESS_ID:
+		CHECK_DIRTY_VAL(address->id, value, is_dirty);
 		address->id = value;
 		break;
 	case CTSVC_PROPERTY_ADDRESS_CONTACT_ID:
 		RETVM_IF(0 < address->id, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (address)", property_id);
+		CHECK_DIRTY_VAL(address->contact_id, value, is_dirty);
 		address->contact_id = value;
 		break;
 	case CTSVC_PROPERTY_ADDRESS_TYPE:
 		RETVM_IF(value < CONTACTS_ADDRESS_TYPE_OTHER
 						|| CONTACTS_ADDRESS_TYPE_PARCEL < value,
 				CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : address type is %d", value);
+		CHECK_DIRTY_VAL(address->type, value, is_dirty);
 		address->type = value;
 		break;
 	default:
@@ -2116,17 +2152,19 @@ static int __ctsvc_address_set_int(contacts_record_h record, unsigned int proper
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_messenger_set_int(contacts_record_h record, unsigned int property_id, int value)
+static int __ctsvc_messenger_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty)
 {
 	ctsvc_messenger_s *messenger = (ctsvc_messenger_s *)record;
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_MESSENGER_ID:
+		CHECK_DIRTY_VAL(messenger->id, value, is_dirty);
 		messenger->id = value;
 		break;
 	case CTSVC_PROPERTY_MESSENGER_CONTACT_ID:
 		RETVM_IF(0 < messenger->id, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (messenger)", property_id);
+		CHECK_DIRTY_VAL(messenger->contact_id, value, is_dirty);
 		messenger->contact_id = value;
 		break;
 	case CTSVC_PROPERTY_MESSENGER_TYPE:
@@ -2134,6 +2172,7 @@ static int __ctsvc_messenger_set_int(contacts_record_h record, unsigned int prop
 							|| CONTACTS_MESSENGER_TYPE_IRC < value,
 					CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : messenger type is in invalid range (%d)", value);
 
+		CHECK_DIRTY_VAL(messenger->type, value, is_dirty);
 		messenger->type = value;
 		break;
 	default:
@@ -2143,22 +2182,25 @@ static int __ctsvc_messenger_set_int(contacts_record_h record, unsigned int prop
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_group_relation_set_int(contacts_record_h record, unsigned int property_id, int value)
+static int __ctsvc_group_relation_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty)
 {
 	ctsvc_group_relation_s *group = (ctsvc_group_relation_s *)record;
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_GROUP_RELATION_ID:
+		CHECK_DIRTY_VAL(group->id, value, is_dirty);
 		group->id = value;
 		break;
 	case CTSVC_PROPERTY_GROUP_RELATION_CONTACT_ID:
 		RETVM_IF(0 < group->id, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (group)", property_id);
+		CHECK_DIRTY_VAL(group->contact_id, value, is_dirty);
 		group->contact_id = value;
 		break;
 	case CTSVC_PROPERTY_GROUP_RELATION_GROUP_ID:
 		RETVM_IF(0 < group->id, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (group)", property_id);
+		CHECK_DIRTY_VAL(group->group_id, value, is_dirty);
 		group->group_id = value;
 		break;
 	default:
@@ -2168,20 +2210,23 @@ static int __ctsvc_group_relation_set_int(contacts_record_h record, unsigned int
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_activity_set_int(contacts_record_h record, unsigned int property_id, int value)
+static int __ctsvc_activity_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty)
 {
 	ctsvc_activity_s *activity = (ctsvc_activity_s *)record;
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_ACTIVITY_ID:
+		CHECK_DIRTY_VAL(activity->id, value, is_dirty);
 		activity->id = value;
 		break;
 	case CTSVC_PROPERTY_ACTIVITY_CONTACT_ID:
 		RETVM_IF(0 < activity->id, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (activity)", property_id);
+		CHECK_DIRTY_VAL(activity->contact_id, value, is_dirty);
 		activity->contact_id = value;
 		break;
 	case CTSVC_PROPERTY_ACTIVITY_TIMESTAMP:
+		CHECK_DIRTY_VAL(activity->timestamp, value, is_dirty);
 		activity->timestamp = value;
 		break;
 	default:
@@ -2191,18 +2236,21 @@ static int __ctsvc_activity_set_int(contacts_record_h record, unsigned int prope
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_activity_photo_set_int(contacts_record_h record, unsigned int property_id, int value)
+static int __ctsvc_activity_photo_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty)
 {
 	ctsvc_activity_photo_s *photo = (ctsvc_activity_photo_s *)record;
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_ACTIVITY_PHOTO_ID:
+		CHECK_DIRTY_VAL(photo->id, value, is_dirty);
 		photo->id = value;
 		break;
 	case CTSVC_PROPERTY_ACTIVITY_PHOTO_ACTIVITY_ID:
+		CHECK_DIRTY_VAL(photo->activity_id, value, is_dirty);
 		photo->activity_id = value;
 		break;
 	case CTSVC_PROPERTY_ACTIVITY_PHOTO_SORT_INDEX:
+		CHECK_DIRTY_VAL(photo->sort_index, value, is_dirty);
 		photo->sort_index = value;
 		break;
 	default:
@@ -2212,20 +2260,23 @@ static int __ctsvc_activity_photo_set_int(contacts_record_h record, unsigned int
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_profile_set_int(contacts_record_h record, unsigned int property_id, int value)
+static int __ctsvc_profile_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty)
 {
 	ctsvc_profile_s *profile = (ctsvc_profile_s *)record;
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_PROFILE_ID:
+		CHECK_DIRTY_VAL(profile->id, value, is_dirty);
 		profile->id = value;
 		break;
 	case CTSVC_PROPERTY_PROFILE_CONTACT_ID:
 		RETVM_IF(0 < profile->id, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (profile)", property_id);
+		CHECK_DIRTY_VAL(profile->contact_id, value, is_dirty);
 		profile->contact_id = value;
 		break;
 	case CTSVC_PROPERTY_PROFILE_ORDER:
+		CHECK_DIRTY_VAL(profile->order, value, is_dirty);
 		profile->order = value;
 		break;
 	default:
@@ -2235,24 +2286,26 @@ static int __ctsvc_profile_set_int(contacts_record_h record, unsigned int proper
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_relationship_set_int(contacts_record_h record, unsigned int property_id, int value)
+static int __ctsvc_relationship_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty)
 {
 	ctsvc_relationship_s *relationship = (ctsvc_relationship_s *)record;
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_RELATIONSHIP_ID:
+		CHECK_DIRTY_VAL(relationship->id, value, is_dirty);
 		relationship->id = value;
 		break;
 	case CTSVC_PROPERTY_RELATIONSHIP_CONTACT_ID:
 		RETVM_IF(0 < relationship->id, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (relationship)", property_id);
+		CHECK_DIRTY_VAL(relationship->contact_id, value, is_dirty);
 		relationship->contact_id = value;
 		break;
 	case CTSVC_PROPERTY_RELATIONSHIP_TYPE:
 		RETVM_IF(value < CONTACTS_RELATIONSHIP_TYPE_OTHER
 						|| CONTACTS_RELATIONSHIP_TYPE_CUSTOM < value,
 				CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : relationship type is in invalid range (%d)", value);
-
+		CHECK_DIRTY_VAL(relationship->type, value, is_dirty);
 		relationship->type = value;
 		break;
 	default:
@@ -2262,23 +2315,26 @@ static int __ctsvc_relationship_set_int(contacts_record_h record, unsigned int p
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_image_set_int(contacts_record_h record, unsigned int property_id, int value)
+static int __ctsvc_image_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty)
 {
 	ctsvc_image_s *image = (ctsvc_image_s *)record;
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_IMAGE_ID:
+		CHECK_DIRTY_VAL(image->id, value, is_dirty);
 		image->id = value;
 		break;
 	case CTSVC_PROPERTY_IMAGE_CONTACT_ID:
 		RETVM_IF(0 < image->id, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (image)", property_id);
+		CHECK_DIRTY_VAL(image->contact_id, value, is_dirty);
 		image->contact_id = value;
 		break;
 	case CTSVC_PROPERTY_IMAGE_TYPE:
 		RETVM_IF(value < CONTACTS_IMAGE_TYPE_OTHER || CONTACTS_IMAGE_TYPE_CUSTOM < value,
 				CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : image type is in invalid range (%d)", value);
+		CHECK_DIRTY_VAL(image->type, value, is_dirty);
 		image->type = value;
 		break;
 	default:
@@ -2288,20 +2344,23 @@ static int __ctsvc_image_set_int(contacts_record_h record, unsigned int property
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_extension_set_int(contacts_record_h record, unsigned int property_id, int value)
+static int __ctsvc_extension_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty)
 {
 	ctsvc_extension_s *extension = (ctsvc_extension_s *)record;
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_EXTENSION_ID:
+		CHECK_DIRTY_VAL(extension->id, value, is_dirty);
 		extension->id = value;
 		break;
 	case CTSVC_PROPERTY_EXTENSION_CONTACT_ID:
 		RETVM_IF(0 < extension->id, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (extension)", property_id);
+		CHECK_DIRTY_VAL(extension->contact_id, value, is_dirty);
 		extension->contact_id = value;
 		break;
 	case CTSVC_PROPERTY_EXTENSION_DATA1:
+		CHECK_DIRTY_VAL(extension->data1, value, is_dirty);
 		extension->data1 = value;
 		break;
 	default:
@@ -3229,12 +3288,13 @@ static int __ctsvc_extension_get_str(contacts_record_h record, unsigned int prop
 	return __ctsvc_extension_get_str_real(record, property_id, out_str, true);
 }
 
-static int __ctsvc_contact_set_str(contacts_record_h record, unsigned int property_id, const char* str)
+static int __ctsvc_contact_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty )
 {
 	ctsvc_contact_s *contact = (ctsvc_contact_s *)record;
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_CONTACT_DISPLAY_NAME:
+		CHECK_DIRTY_STR(contact->display_name, str, is_dirty);
 		FREEandSTRDUP(contact->display_name, str);
 		break;
 /*
@@ -3242,18 +3302,23 @@ static int __ctsvc_contact_set_str(contacts_record_h record, unsigned int proper
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 */
 	case CTSVC_PROPERTY_CONTACT_RINGTONE:
+		CHECK_DIRTY_STR(contact->ringtone_path, str, is_dirty);
 		FREEandSTRDUP(contact->ringtone_path, str);
 		break;
 	case CTSVC_PROPERTY_CONTACT_IMAGE_THUMBNAIL:
+		CHECK_DIRTY_STR(contact->image_thumbnail_path, str, is_dirty);
 		FREEandSTRDUP(contact->image_thumbnail_path, str);
 		break;
 	case CTSVC_PROPERTY_CONTACT_UID:
+		CHECK_DIRTY_STR(contact->uid, str, is_dirty);
 		FREEandSTRDUP(contact->uid, str);
 		break;
 	case CTSVC_PROPERTY_CONTACT_VIBRATION:
+		CHECK_DIRTY_STR(contact->vibration, str, is_dirty);
 		FREEandSTRDUP(contact->vibration, str);
 		break;
 	case CTSVC_PROPERTY_CONTACT_MESSAGE_ALERT:
+		CHECK_DIRTY_STR(contact->message_alert, str, is_dirty);
 		FREEandSTRDUP(contact->message_alert, str);
 		break;
 	default :
@@ -3264,12 +3329,13 @@ static int __ctsvc_contact_set_str(contacts_record_h record, unsigned int proper
 }
 
 
-static int __ctsvc_simple_contact_set_str(contacts_record_h record, unsigned int property_id, const char* str)
+static int __ctsvc_simple_contact_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty )
 {
 	ctsvc_simple_contact_s *contact = (ctsvc_simple_contact_s *)record;
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_CONTACT_DISPLAY_NAME:
+		CHECK_DIRTY_STR(contact->display_name, str, is_dirty);
 		FREEandSTRDUP(contact->display_name, str);
 		break;
 /*
@@ -3277,18 +3343,23 @@ static int __ctsvc_simple_contact_set_str(contacts_record_h record, unsigned int
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 */
 	case CTSVC_PROPERTY_CONTACT_RINGTONE:
+		CHECK_DIRTY_STR(contact->ringtone_path, str, is_dirty);
 		FREEandSTRDUP(contact->ringtone_path, str);
 		break;
 	case CTSVC_PROPERTY_CONTACT_IMAGE_THUMBNAIL:
+		CHECK_DIRTY_STR(contact->image_thumbnail_path, str, is_dirty);
 		FREEandSTRDUP(contact->image_thumbnail_path, str);
 		break;
 	case CTSVC_PROPERTY_CONTACT_UID:
+		CHECK_DIRTY_STR(contact->uid, str, is_dirty);
 		FREEandSTRDUP(contact->uid, str);
 		break;
 	case CTSVC_PROPERTY_CONTACT_VIBRATION:
+		CHECK_DIRTY_STR(contact->vibration, str, is_dirty);
 		FREEandSTRDUP(contact->vibration, str);
 		break;
 	case CTSVC_PROPERTY_CONTACT_MESSAGE_ALERT:
+		CHECK_DIRTY_STR(contact->message_alert, str, is_dirty);
 		FREEandSTRDUP(contact->message_alert, str);
 		break;
 	default :
@@ -3298,33 +3369,41 @@ static int __ctsvc_simple_contact_set_str(contacts_record_h record, unsigned int
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_name_set_str(contacts_record_h record, unsigned int property_id, const char* str)
+static int __ctsvc_name_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty )
 {
 	ctsvc_name_s *name = (ctsvc_name_s *)record;
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_NAME_FIRST:
+		CHECK_DIRTY_STR(name->first, str, is_dirty);
 		FREEandSTRDUP(name->first, str);
 		break;
 	case CTSVC_PROPERTY_NAME_LAST:
+		CHECK_DIRTY_STR(name->last, str, is_dirty);
 		FREEandSTRDUP(name->last, str);
 		break;
 	case CTSVC_PROPERTY_NAME_ADDITION:
+		CHECK_DIRTY_STR(name->addition, str, is_dirty);
 		FREEandSTRDUP(name->addition, str);
 		break;
 	case CTSVC_PROPERTY_NAME_SUFFIX:
+		CHECK_DIRTY_STR(name->suffix, str, is_dirty);
 		FREEandSTRDUP(name->suffix, str);
 		break;
 	case CTSVC_PROPERTY_NAME_PREFIX:
+		CHECK_DIRTY_STR(name->prefix, str, is_dirty);
 		FREEandSTRDUP(name->prefix, str);
 		break;
 	case CTSVC_PROPERTY_NAME_PHONETIC_FIRST:
+		CHECK_DIRTY_STR(name->phonetic_first, str, is_dirty);
 		FREEandSTRDUP(name->phonetic_first, str);
 		break;
 	case CTSVC_PROPERTY_NAME_PHONETIC_MIDDLE:
+		CHECK_DIRTY_STR(name->phonetic_middle, str, is_dirty);
 		FREEandSTRDUP(name->phonetic_middle, str);
 		break;
 	case CTSVC_PROPERTY_NAME_PHONETIC_LAST:
+		CHECK_DIRTY_STR(name->phonetic_last, str, is_dirty);
 		FREEandSTRDUP(name->phonetic_last, str);
 		break;
 	default :
@@ -3334,27 +3413,33 @@ static int __ctsvc_name_set_str(contacts_record_h record, unsigned int property_
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_company_set_str(contacts_record_h record, unsigned int property_id, const char* str)
+static int __ctsvc_company_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty )
 {
 	ctsvc_company_s *company = (ctsvc_company_s *)record;
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_COMPANY_LABEL:
+		CHECK_DIRTY_STR(company->label, str, is_dirty);
 		FREEandSTRDUP(company->label, str);
 		break;
 	case CTSVC_PROPERTY_COMPANY_NAME:
+		CHECK_DIRTY_STR(company->name, str, is_dirty);
 		FREEandSTRDUP(company->name, str);
 		break;
 	case CTSVC_PROPERTY_COMPANY_DEPARTMENT:
+		CHECK_DIRTY_STR(company->department, str, is_dirty);
 		FREEandSTRDUP(company->department, str);
 		break;
 	case CTSVC_PROPERTY_COMPANY_JOB_TITLE:
+		CHECK_DIRTY_STR(company->job_title, str, is_dirty);
 		FREEandSTRDUP(company->job_title, str);
 		break;
 	case CTSVC_PROPERTY_COMPANY_ASSISTANT_NAME:
+		CHECK_DIRTY_STR(company->assistant_name, str, is_dirty);
 		FREEandSTRDUP(company->assistant_name, str);
 		break;
 	case CTSVC_PROPERTY_COMPANY_ROLE:
+		CHECK_DIRTY_STR(company->role, str, is_dirty);
 		FREEandSTRDUP(company->role, str);
 		break;
 	case CTSVC_PROPERTY_COMPANY_LOGO:
@@ -3362,15 +3447,19 @@ static int __ctsvc_company_set_str(contacts_record_h record, unsigned int proper
 			company->is_vcard = false;
 			__ctsvc_temp_image_hash_table_remove(company->logo);
 		}
+		CHECK_DIRTY_STR(company->logo, str, is_dirty);
 		FREEandSTRDUP(company->logo, str);
 		break;
 	case CTSVC_PROPERTY_COMPANY_LOCATION:
+		CHECK_DIRTY_STR(company->location, str, is_dirty);
 		FREEandSTRDUP(company->location, str);
 		break;
 	case CTSVC_PROPERTY_COMPANY_DESCRIPTION:
+		CHECK_DIRTY_STR(company->description, str, is_dirty);
 		FREEandSTRDUP(company->description, str);
 		break;
 	case CTSVC_PROPERTY_COMPANY_PHONETIC_NAME:
+		CHECK_DIRTY_STR(company->phonetic_name, str, is_dirty);
 		FREEandSTRDUP(company->phonetic_name, str);
 		break;
 	default :
@@ -3380,12 +3469,13 @@ static int __ctsvc_company_set_str(contacts_record_h record, unsigned int proper
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_note_set_str(contacts_record_h record, unsigned int property_id, const char* str)
+static int __ctsvc_note_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty )
 {
 	ctsvc_note_s *note = (ctsvc_note_s *)record;
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_NOTE_NOTE:
+		CHECK_DIRTY_STR(note->note, str, is_dirty);
 		FREEandSTRDUP(note->note, str);
 		break;
 	default :
@@ -3395,15 +3485,17 @@ static int __ctsvc_note_set_str(contacts_record_h record, unsigned int property_
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_number_set_str(contacts_record_h record, unsigned int property_id, const char* str)
+static int __ctsvc_number_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty )
 {
 	ctsvc_number_s *number = (ctsvc_number_s*)record;
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_NUMBER_LABEL:
+		CHECK_DIRTY_STR(number->label, str, is_dirty);
 		FREEandSTRDUP(number->label, str);
 		break;
 	case CTSVC_PROPERTY_NUMBER_NUMBER:
+		CHECK_DIRTY_STR(number->number, str, is_dirty);
 		FREEandSTRDUP(number->number, str);
 		break;
 	default :
@@ -3413,15 +3505,17 @@ static int __ctsvc_number_set_str(contacts_record_h record, unsigned int propert
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_email_set_str(contacts_record_h record, unsigned int property_id, const char* str)
+static int __ctsvc_email_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty )
 {
 	ctsvc_email_s *email = (ctsvc_email_s *)record;
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_EMAIL_EMAIL:
+		CHECK_DIRTY_STR(email->email_addr, str, is_dirty);
 		FREEandSTRDUP(email->email_addr, str);
 		break;
 	case CTSVC_PROPERTY_EMAIL_LABEL:
+		CHECK_DIRTY_STR(email->label, str, is_dirty);
 		FREEandSTRDUP(email->label, str);
 		break;
 	default :
@@ -3431,15 +3525,17 @@ static int __ctsvc_email_set_str(contacts_record_h record, unsigned int property
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_url_set_str(contacts_record_h record, unsigned int property_id, const char* str)
+static int __ctsvc_url_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty )
 {
 	ctsvc_url_s *url = (ctsvc_url_s *)record;
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_URL_URL:
+		CHECK_DIRTY_STR(url->url, str, is_dirty);
 		FREEandSTRDUP(url->url, str);
 		break;
 	case CTSVC_PROPERTY_URL_LABEL:
+		CHECK_DIRTY_STR(url->label, str, is_dirty);
 		FREEandSTRDUP(url->label, str);
 		break;
 	default :
@@ -3449,12 +3545,13 @@ static int __ctsvc_url_set_str(contacts_record_h record, unsigned int property_i
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_event_set_str(contacts_record_h record, unsigned int property_id, const char* str)
+static int __ctsvc_event_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty )
 {
 	ctsvc_event_s *event = (ctsvc_event_s *)record;
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_EVENT_LABEL:
+		CHECK_DIRTY_STR(event->label, str, is_dirty);
 		FREEandSTRDUP(event->label, str);
 		break;
 	default :
@@ -3464,12 +3561,13 @@ static int __ctsvc_event_set_str(contacts_record_h record, unsigned int property
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_nickname_set_str(contacts_record_h record, unsigned int property_id, const char* str)
+static int __ctsvc_nickname_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty )
 {
 	ctsvc_nickname_s *nickname = (ctsvc_nickname_s *)record;
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_NICKNAME_NAME:
+		CHECK_DIRTY_STR(nickname->nickname, str, is_dirty);
 		FREEandSTRDUP(nickname->nickname, str);
 		break;
 	default :
@@ -3479,33 +3577,41 @@ static int __ctsvc_nickname_set_str(contacts_record_h record, unsigned int prope
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_address_set_str(contacts_record_h record, unsigned int property_id, const char* str)
+static int __ctsvc_address_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty )
 {
 	ctsvc_address_s *address = (ctsvc_address_s *)record;
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_ADDRESS_LABEL:
+		CHECK_DIRTY_STR(address->label, str, is_dirty);
 		FREEandSTRDUP(address->label, str);
 		break;
 	case CTSVC_PROPERTY_ADDRESS_POSTBOX:
+		CHECK_DIRTY_STR(address->pobox, str, is_dirty);
 		FREEandSTRDUP(address->pobox, str);
 		break;
 	case CTSVC_PROPERTY_ADDRESS_POSTAL_CODE:
+		CHECK_DIRTY_STR(address->postalcode, str, is_dirty);
 		FREEandSTRDUP(address->postalcode, str);
 		break;
 	case CTSVC_PROPERTY_ADDRESS_REGION:
+		CHECK_DIRTY_STR(address->region, str, is_dirty);
 		FREEandSTRDUP(address->region, str);
 		break;
 	case CTSVC_PROPERTY_ADDRESS_LOCALITY:
+		CHECK_DIRTY_STR(address->locality, str, is_dirty);
 		FREEandSTRDUP(address->locality, str);
 		break;
 	case CTSVC_PROPERTY_ADDRESS_STREET:
+		CHECK_DIRTY_STR(address->street, str, is_dirty);
 		FREEandSTRDUP(address->street, str);
 		break;
 	case CTSVC_PROPERTY_ADDRESS_COUNTRY:
+		CHECK_DIRTY_STR(address->country, str, is_dirty);
 		FREEandSTRDUP(address->country, str);
 		break;
 	case CTSVC_PROPERTY_ADDRESS_EXTENDED:
+		CHECK_DIRTY_STR(address->extended, str, is_dirty);
 		FREEandSTRDUP(address->extended, str);
 		break;
 	default :
@@ -3515,15 +3621,17 @@ static int __ctsvc_address_set_str(contacts_record_h record, unsigned int proper
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_messenger_set_str(contacts_record_h record, unsigned int property_id, const char* str)
+static int __ctsvc_messenger_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty )
 {
 	ctsvc_messenger_s *messenger = (ctsvc_messenger_s *)record;
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_MESSENGER_LABEL:
+		CHECK_DIRTY_STR(messenger->label, str, is_dirty);
 		FREEandSTRDUP(messenger->label, str);
 		break;
 	case CTSVC_PROPERTY_MESSENGER_IM_ID:
+		CHECK_DIRTY_STR(messenger->im_id, str, is_dirty);
 		FREEandSTRDUP(messenger->im_id, str);
 		break;
 	default :
@@ -3533,12 +3641,13 @@ static int __ctsvc_messenger_set_str(contacts_record_h record, unsigned int prop
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_group_relation_set_str(contacts_record_h record, unsigned int property_id, const char* str)
+static int __ctsvc_group_relation_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty )
 {
 	ctsvc_group_relation_s *group_relation = (ctsvc_group_relation_s *)record;
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_GROUP_RELATION_GROUP_NAME:
+		CHECK_DIRTY_STR(group_relation->group_name, str, is_dirty);
 		FREEandSTRDUP(group_relation->group_name, str);
 		break;
 /*
@@ -3552,21 +3661,25 @@ static int __ctsvc_group_relation_set_str(contacts_record_h record, unsigned int
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_activity_set_str(contacts_record_h record, unsigned int property_id, const char* str)
+static int __ctsvc_activity_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty )
 {
 	ctsvc_activity_s *activity = (ctsvc_activity_s *)record;
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_ACTIVITY_SOURCE_NAME:
+		CHECK_DIRTY_STR(activity->source_name, str, is_dirty);
 		FREEandSTRDUP(activity->source_name, str);
 		break;
 	case CTSVC_PROPERTY_ACTIVITY_STATUS:
+		CHECK_DIRTY_STR(activity->status, str, is_dirty);
 		FREEandSTRDUP(activity->status, str);
 		break;
 	case CTSVC_PROPERTY_ACTIVITY_SERVICE_OPERATION:
+		CHECK_DIRTY_STR(activity->service_operation, str, is_dirty);
 		FREEandSTRDUP(activity->service_operation, str);
 		break;
 	case CTSVC_PROPERTY_ACTIVITY_URI:
+		CHECK_DIRTY_STR(activity->uri, str, is_dirty);
 		FREEandSTRDUP(activity->uri, str);
 		break;
 	default :
@@ -3576,12 +3689,13 @@ static int __ctsvc_activity_set_str(contacts_record_h record, unsigned int prope
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_activity_photo_set_str(contacts_record_h record, unsigned int property_id, const char* str)
+static int __ctsvc_activity_photo_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty )
 {
 	ctsvc_activity_photo_s *photo = (ctsvc_activity_photo_s *)record;
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_ACTIVITY_PHOTO_URL:
+		CHECK_DIRTY_STR(photo->photo_url, str, is_dirty);
 		FREEandSTRDUP(photo->photo_url, str);
 		break;
 	default :
@@ -3591,33 +3705,41 @@ static int __ctsvc_activity_photo_set_str(contacts_record_h record, unsigned int
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_profile_set_str(contacts_record_h record, unsigned int property_id, const char* str)
+static int __ctsvc_profile_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty )
 {
 	ctsvc_profile_s *profile = (ctsvc_profile_s *)record;
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_PROFILE_UID:
+		CHECK_DIRTY_STR(profile->uid, str, is_dirty);
 		FREEandSTRDUP(profile->uid, str);
 		break;
 	case CTSVC_PROPERTY_PROFILE_TEXT:
+		CHECK_DIRTY_STR(profile->text, str, is_dirty);
 		FREEandSTRDUP(profile->text, str);
 		break;
 	case CTSVC_PROPERTY_PROFILE_SERVICE_OPERATION:
+		CHECK_DIRTY_STR(profile->service_operation, str, is_dirty);
 		FREEandSTRDUP(profile->service_operation, str);
 		break;
 	case CTSVC_PROPERTY_PROFILE_MIME:
+		CHECK_DIRTY_STR(profile->mime, str, is_dirty);
 		FREEandSTRDUP(profile->mime, str);
 		break;
 	case CTSVC_PROPERTY_PROFILE_APP_ID:
+		CHECK_DIRTY_STR(profile->app_id, str, is_dirty);
 		FREEandSTRDUP(profile->app_id, str);
 		break;
 	case CTSVC_PROPERTY_PROFILE_URI:
+		CHECK_DIRTY_STR(profile->uri, str, is_dirty);
 		FREEandSTRDUP(profile->uri, str);
 		break;
 	case CTSVC_PROPERTY_PROFILE_CATEGORY:
+		CHECK_DIRTY_STR(profile->category, str, is_dirty);
 		FREEandSTRDUP(profile->category, str);
 		break;
 	case CTSVC_PROPERTY_PROFILE_EXTRA_DATA:
+		CHECK_DIRTY_STR(profile->extra_data, str, is_dirty);
 		FREEandSTRDUP(profile->extra_data, str);
 		break;
 	default :
@@ -3627,15 +3749,17 @@ static int __ctsvc_profile_set_str(contacts_record_h record, unsigned int proper
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_relationship_set_str(contacts_record_h record, unsigned int property_id, const char* str)
+static int __ctsvc_relationship_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty )
 {
 	ctsvc_relationship_s *relationship = (ctsvc_relationship_s *)record;
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_RELATIONSHIP_LABEL:
+		CHECK_DIRTY_STR(relationship->label, str, is_dirty);
 		FREEandSTRDUP(relationship->label, str);
 		break;
 	case CTSVC_PROPERTY_RELATIONSHIP_NAME:
+		CHECK_DIRTY_STR(relationship->name, str, is_dirty);
 		FREEandSTRDUP(relationship->name, str);
 		break;
 	default :
@@ -3645,12 +3769,13 @@ static int __ctsvc_relationship_set_str(contacts_record_h record, unsigned int p
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_image_set_str(contacts_record_h record, unsigned int property_id, const char* str)
+static int __ctsvc_image_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty )
 {
 	ctsvc_image_s *image = (ctsvc_image_s *)record;
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_IMAGE_LABEL:
+		CHECK_DIRTY_STR(image->label, str, is_dirty);
 		FREEandSTRDUP(image->label, str);
 		break;
 	case CTSVC_PROPERTY_IMAGE_PATH:
@@ -3658,6 +3783,7 @@ static int __ctsvc_image_set_str(contacts_record_h record, unsigned int property
 			image->is_vcard = false;
 			__ctsvc_temp_image_hash_table_remove(image->path);
 		}
+		CHECK_DIRTY_STR(image->path, str, is_dirty);
 		FREEandSTRDUP(image->path, str);
 		break;
 	default :
@@ -3667,42 +3793,53 @@ static int __ctsvc_image_set_str(contacts_record_h record, unsigned int property
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_extension_set_str(contacts_record_h record, unsigned int property_id, const char* str)
+static int __ctsvc_extension_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty )
 {
 	ctsvc_extension_s *extension = (ctsvc_extension_s *)record;
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_EXTENSION_DATA2:
+		CHECK_DIRTY_STR(extension->data2, str, is_dirty);
 		FREEandSTRDUP(extension->data2, str);
 		break;
 	case CTSVC_PROPERTY_EXTENSION_DATA3:
+		CHECK_DIRTY_STR(extension->data3, str, is_dirty);
 		FREEandSTRDUP(extension->data3, str);
 		break;
 	case CTSVC_PROPERTY_EXTENSION_DATA4:
+		CHECK_DIRTY_STR(extension->data4, str, is_dirty);
 		FREEandSTRDUP(extension->data4, str);
 		break;
 	case CTSVC_PROPERTY_EXTENSION_DATA5:
+		CHECK_DIRTY_STR(extension->data5, str, is_dirty);
 		FREEandSTRDUP(extension->data5, str);
 		break;
 	case CTSVC_PROPERTY_EXTENSION_DATA6:
+		CHECK_DIRTY_STR(extension->data6, str, is_dirty);
 		FREEandSTRDUP(extension->data6, str);
 		break;
 	case CTSVC_PROPERTY_EXTENSION_DATA7:
+		CHECK_DIRTY_STR(extension->data7, str, is_dirty);
 		FREEandSTRDUP(extension->data7, str);
 		break;
 	case CTSVC_PROPERTY_EXTENSION_DATA8:
+		CHECK_DIRTY_STR(extension->data8, str, is_dirty);
 		FREEandSTRDUP(extension->data8, str);
 		break;
 	case CTSVC_PROPERTY_EXTENSION_DATA9:
+		CHECK_DIRTY_STR(extension->data9, str, is_dirty);
 		FREEandSTRDUP(extension->data9, str);
 		break;
 	case CTSVC_PROPERTY_EXTENSION_DATA10:
+		CHECK_DIRTY_STR(extension->data10, str, is_dirty);
 		FREEandSTRDUP(extension->data10, str);
 		break;
 	case CTSVC_PROPERTY_EXTENSION_DATA11:
+		CHECK_DIRTY_STR(extension->data11, str, is_dirty);
 		FREEandSTRDUP(extension->data11, str);
 		break;
 	case CTSVC_PROPERTY_EXTENSION_DATA12:
+		CHECK_DIRTY_STR(extension->data12, str, is_dirty);
 		FREEandSTRDUP(extension->data12, str);
 		break;
 	default :
@@ -3823,18 +3960,21 @@ static int __ctsvc_address_get_bool(contacts_record_h record, unsigned int prope
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_contact_set_bool(contacts_record_h record, unsigned int property_id, bool value)
+static int __ctsvc_contact_set_bool(contacts_record_h record, unsigned int property_id, bool value, bool *is_dirty)
 {
 	ctsvc_contact_s *contact = (ctsvc_contact_s *)record;
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_CONTACT_IS_FAVORITE:
+		CHECK_DIRTY_VAL(contact->is_favorite, value, is_dirty);
 		contact->is_favorite = value;
 		break;
 	case CTSVC_PROPERTY_CONTACT_HAS_PHONENUMBER:
+		CHECK_DIRTY_VAL(contact->has_phonenumber, value, is_dirty);
 		contact->has_phonenumber = value;
 		break;
 	case CTSVC_PROPERTY_CONTACT_HAS_EMAIL:
+		CHECK_DIRTY_VAL(contact->has_email, value, is_dirty);
 		contact->has_email = value;
 		break;
 /*
@@ -3848,12 +3988,13 @@ static int __ctsvc_contact_set_bool(contacts_record_h record, unsigned int prope
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_number_set_bool(contacts_record_h record, unsigned int property_id, bool value)
+static int __ctsvc_number_set_bool(contacts_record_h record, unsigned int property_id, bool value, bool *is_dirty)
 {
 	ctsvc_number_s *number = (ctsvc_number_s*)record;
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_NUMBER_IS_DEFAULT:
+		CHECK_DIRTY_VAL(number->is_default, value, is_dirty);
 		number->is_default = value;
 		break;
 	default:
@@ -3863,12 +4004,13 @@ static int __ctsvc_number_set_bool(contacts_record_h record, unsigned int proper
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_email_set_bool(contacts_record_h record, unsigned int property_id, bool value)
+static int __ctsvc_email_set_bool(contacts_record_h record, unsigned int property_id, bool value, bool *is_dirty)
 {
 	ctsvc_email_s *email = (ctsvc_email_s *)record;
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_EMAIL_IS_DEFAULT:
+		CHECK_DIRTY_VAL(email->is_default, value, is_dirty);
 		email->is_default = value;
 		break;
 	default:
@@ -3878,12 +4020,13 @@ static int __ctsvc_email_set_bool(contacts_record_h record, unsigned int propert
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_event_set_bool(contacts_record_h record, unsigned int property_id, bool value)
+static int __ctsvc_event_set_bool(contacts_record_h record, unsigned int property_id, bool value, bool *is_dirty)
 {
 	ctsvc_event_s *event = (ctsvc_event_s *)record;
 
 	switch(property_id) {
-	case CTSVC_PROPERTY_EVENT_IS_LEAP_MONTH: /* deprecated */
+	case CTSVC_PROPERTY_EVENT_IS_LEAP_MONTH:
+		CHECK_DIRTY_VAL(event->is_leap_month, value, is_dirty);
 		event->is_leap_month = value;
 		break;
 	default:
@@ -3893,12 +4036,13 @@ static int __ctsvc_event_set_bool(contacts_record_h record, unsigned int propert
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_image_set_bool(contacts_record_h record, unsigned int property_id, bool value)
+static int __ctsvc_image_set_bool(contacts_record_h record, unsigned int property_id, bool value, bool *is_dirty)
 {
 	ctsvc_image_s *image = (ctsvc_image_s *)record;
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_IMAGE_IS_DEFAULT:
+		CHECK_DIRTY_VAL(image->is_default, value, is_dirty);
 		image->is_default = value;
 		break;
 	default:
@@ -3908,12 +4052,13 @@ static int __ctsvc_image_set_bool(contacts_record_h record, unsigned int propert
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_address_set_bool(contacts_record_h record, unsigned int property_id, bool value)
+static int __ctsvc_address_set_bool(contacts_record_h record, unsigned int property_id, bool value, bool *is_dirty)
 {
 	ctsvc_address_s *address = (ctsvc_address_s *)record;
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_ADDRESS_IS_DEFAULT:
+		CHECK_DIRTY_VAL(address->is_default, value, is_dirty);
 		address->is_default = value;
 		break;
 	default:

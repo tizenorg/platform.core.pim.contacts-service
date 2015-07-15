@@ -33,8 +33,8 @@ static int __ctsvc_my_profile_clone(contacts_record_h record, contacts_record_h 
 static int __ctsvc_my_profile_get_int(contacts_record_h record, unsigned int property_id, int *out);
 static int __ctsvc_my_profile_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_my_profile_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
-static int __ctsvc_my_profile_set_int(contacts_record_h record, unsigned int property_id, int value);
-static int __ctsvc_my_profile_set_str(contacts_record_h record, unsigned int property_id, const char* str);
+static int __ctsvc_my_profile_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty);
+static int __ctsvc_my_profile_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty);
 static int __ctsvc_my_profile_clone_child_record_list(contacts_record_h record, unsigned int property_id, contacts_list_h* out_list);
 static int __ctsvc_my_profile_get_child_record_at_p(contacts_record_h record, unsigned int property_id, int index, contacts_record_h* out_record);
 static int __ctsvc_my_profile_get_child_record_count(contacts_record_h record, unsigned int property_id, int *count);
@@ -230,20 +230,23 @@ static int __ctsvc_my_profile_get_int(contacts_record_h record, unsigned int pro
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_my_profile_set_int(contacts_record_h record, unsigned int property_id, int value)
+static int __ctsvc_my_profile_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty)
 {
 	ctsvc_my_profile_s *my_profile = (ctsvc_my_profile_s *)record;
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_MY_PROFILE_ID:
+		CHECK_DIRTY_VAL(my_profile->id, value, is_dirty);
 		my_profile->id = value;
 		break;
 	case CTSVC_PROPERTY_MY_PROFILE_CHANGED_TIME:
+		CHECK_DIRTY_VAL(my_profile->changed_time, value, is_dirty);
 		my_profile->changed_time = value;
 		break;
 	case CTSVC_PROPERTY_MY_PROFILE_ADDRESSBOOK_ID:
 		RETVM_IF(0 < my_profile->id, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (my_profile)", property_id);
+		CHECK_DIRTY_VAL(my_profile->addressbook_id, value, is_dirty);
 		my_profile->addressbook_id = value;
 		break;
 	default:
@@ -552,18 +555,21 @@ static int __ctsvc_my_profile_remove_child_record(contacts_record_h record,
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_my_profile_set_str(contacts_record_h record, unsigned int property_id, const char* str)
+static int __ctsvc_my_profile_set_str(contacts_record_h record, unsigned int property_id, const char *str, bool *is_dirty )
 {
 	ctsvc_my_profile_s *my_profile = (ctsvc_my_profile_s *)record;
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_MY_PROFILE_DISPLAY_NAME:
+		CHECK_DIRTY_STR(my_profile->display_name, str, is_dirty);
 		FREEandSTRDUP(my_profile->display_name, str);
 		break;
 	case CTSVC_PROPERTY_MY_PROFILE_IMAGE_THUMBNAIL:
+		CHECK_DIRTY_STR(my_profile->image_thumbnail_path, str, is_dirty);
 		FREEandSTRDUP(my_profile->image_thumbnail_path, str);
 		break;
 	case CTSVC_PROPERTY_MY_PROFILE_UID:
+		CHECK_DIRTY_STR(my_profile->uid, str, is_dirty);
 		FREEandSTRDUP(my_profile->uid, str);
 		break;
 	default :

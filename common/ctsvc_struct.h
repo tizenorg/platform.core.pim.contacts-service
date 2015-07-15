@@ -48,6 +48,20 @@
 		else dest = NULL; \
 	} while (0)
 #define GET_STR(copy, str)	(copy)?(SAFE_STRDUP(str)):(str)
+#define CHECK_DIRTY_STR(src1, src2, is_dirty) \
+	do { \
+		if (src1 && NULL == src2) \
+			*is_dirty = true; \
+		else if (NULL == src1 && src2) \
+			*is_dirty = true; \
+		else if (src1 && src2 && 0 != strcmp(src1, src2)) \
+			*is_dirty = true; \
+	} while (0)
+#define CHECK_DIRTY_VAL(src1, src2, is_dirty) \
+	do { \
+		if (src1 != src2) \
+			*is_dirty = true; \
+	} while(0)
 
 enum {
 	CTSVC_DATA_NAME = 1,
@@ -132,11 +146,11 @@ typedef int (*__ctsvc_record_get_bool_cb)(contacts_record_h record, unsigned int
 typedef int (*__ctsvc_record_get_lli_cb)(contacts_record_h record, unsigned int property_id, long long int *value);
 typedef int (*__ctsvc_record_get_double_cb)(contacts_record_h record, unsigned int property_id, double *value);
 
-typedef int (*__ctsvc_record_set_str_cb)(contacts_record_h record, unsigned int property_id, const char* value);
-typedef int (*__ctsvc_record_set_int_cb)(contacts_record_h record, unsigned int property_id, int value);
-typedef int (*__ctsvc_record_set_bool_cb)(contacts_record_h record, unsigned int property_id, bool value);
-typedef int (*__ctsvc_record_set_lli_cb)(contacts_record_h record, unsigned int property_id, long long int value);
-typedef int (*__ctsvc_record_set_double_cb)(contacts_record_h record, unsigned int property_id, double value);
+typedef int (*__ctsvc_record_set_str_cb)(contacts_record_h record, unsigned int property_id, const char* value, bool *is_dirty);
+typedef int (*__ctsvc_record_set_int_cb)(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty);
+typedef int (*__ctsvc_record_set_bool_cb)(contacts_record_h record, unsigned int property_id, bool value, bool *is_dirty);
+typedef int (*__ctsvc_record_set_lli_cb)(contacts_record_h record, unsigned int property_id, long long int value, bool *is_dirty);
+typedef int (*__ctsvc_record_set_double_cb)(contacts_record_h record, unsigned int property_id, double value, bool *is_dirty);
 
 typedef int (*__ctsvc_record_add_child_record_cb)(contacts_record_h record, unsigned int property_id, contacts_record_h child_record);
 typedef int (*__ctsvc_record_remove_child_record_cb)(contacts_record_h record, unsigned int property_id, contacts_record_h child_record);

@@ -33,9 +33,9 @@ static int __ctsvc_group_get_int(contacts_record_h record, unsigned int property
 static int __ctsvc_group_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_group_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_group_get_bool(contacts_record_h record, unsigned int property_id, bool *value);
-static int __ctsvc_group_set_int(contacts_record_h record, unsigned int property_id, int value);
-static int __ctsvc_group_set_str(contacts_record_h record, unsigned int property_id, const char* str);
-static int __ctsvc_group_set_bool(contacts_record_h record, unsigned int property_id, bool value);
+static int __ctsvc_group_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty);
+static int __ctsvc_group_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty);
+static int __ctsvc_group_set_bool(contacts_record_h record, unsigned int property_id, bool value, bool *is_dirty);
 
 
 ctsvc_record_plugin_cb_s group_plugin_cbs = {
@@ -179,17 +179,19 @@ static int __ctsvc_group_get_str(contacts_record_h record, unsigned int property
 	return __ctsvc_group_get_str_real(record, property_id, out_str, true);
 }
 
-static int __ctsvc_group_set_int(contacts_record_h record, unsigned int property_id, int value)
+static int __ctsvc_group_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty)
 {
 	ctsvc_group_s *group = (ctsvc_group_s*)record;
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_GROUP_ID:
+		CHECK_DIRTY_VAL(group->id, value, is_dirty);
 		group->id = value;
 		break;
 	case CTSVC_PROPERTY_GROUP_ADDRESSBOOK_ID:
 		RETVM_IF(0 < group->id, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (group)", property_id);
+		CHECK_DIRTY_VAL(group->addressbook_id, value, is_dirty);
 		group->addressbook_id = value;
 		break;
 	default:
@@ -199,27 +201,33 @@ static int __ctsvc_group_set_int(contacts_record_h record, unsigned int property
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_group_set_str(contacts_record_h record, unsigned int property_id, const char* str)
+static int __ctsvc_group_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty)
 {
 	ctsvc_group_s *group = (ctsvc_group_s*)record;
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_GROUP_NAME:
+		CHECK_DIRTY_STR(group->name, str, is_dirty);
 		FREEandSTRDUP(group->name, str);
 		break;
 	case CTSVC_PROPERTY_GROUP_RINGTONE:
+		CHECK_DIRTY_STR(group->ringtone_path, str, is_dirty);
 		FREEandSTRDUP(group->ringtone_path, str);
 		break;
 	case CTSVC_PROPERTY_GROUP_IMAGE:
+		CHECK_DIRTY_STR(group->image_thumbnail_path, str, is_dirty);
 		FREEandSTRDUP(group->image_thumbnail_path, str);
 		break;
 	case CTSVC_PROPERTY_GROUP_VIBRATION:
+		CHECK_DIRTY_STR(group->vibration, str, is_dirty);
 		FREEandSTRDUP(group->vibration, str);
 		break;
 	case CTSVC_PROPERTY_GROUP_MESSAGE_ALERT:
+		CHECK_DIRTY_STR(group->message_alert, str, is_dirty);
 		FREEandSTRDUP(group->message_alert, str);
 		break;
 	case CTSVC_PROPERTY_GROUP_EXTRA_DATA:
+		CHECK_DIRTY_STR(group->extra_data, str, is_dirty);
 		FREEandSTRDUP(group->extra_data, str);
 		break;
 	default :
@@ -243,7 +251,7 @@ static int __ctsvc_group_get_bool(contacts_record_h record, unsigned int propert
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_group_set_bool(contacts_record_h record, unsigned int property_id, bool value)
+static int __ctsvc_group_set_bool(contacts_record_h record, unsigned int property_id, bool value, bool *is_dirty)
 {
 	ctsvc_group_s *group = (ctsvc_group_s*)record;
 
@@ -251,6 +259,7 @@ static int __ctsvc_group_set_bool(contacts_record_h record, unsigned int propert
 	case CTSVC_PROPERTY_GROUP_IS_READ_ONLY:
 		RETVM_IF(0 < group->id, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (group)", property_id);
+		CHECK_DIRTY_VAL(group->is_read_only, value, is_dirty);
 		group->is_read_only = value;
 		break;
 	default:
@@ -259,4 +268,3 @@ static int __ctsvc_group_set_bool(contacts_record_h record, unsigned int propert
 	}
 	return CONTACTS_ERROR_NONE;
 }
-

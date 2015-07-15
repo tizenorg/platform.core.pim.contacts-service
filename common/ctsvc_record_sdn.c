@@ -32,8 +32,8 @@ static int __ctsvc_sdn_clone(contacts_record_h record, contacts_record_h *out_re
 static int __ctsvc_sdn_get_int(contacts_record_h record, unsigned int property_id, int *out);
 static int __ctsvc_sdn_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_sdn_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
-static int __ctsvc_sdn_set_int(contacts_record_h record, unsigned int property_id, int value);
-static int __ctsvc_sdn_set_str(contacts_record_h record, unsigned int property_id, const char* str);
+static int __ctsvc_sdn_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty);
+static int __ctsvc_sdn_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty);
 
 ctsvc_record_plugin_cb_s sdn_plugin_cbs = {
 	.create = __ctsvc_sdn_create,
@@ -153,15 +153,17 @@ static int __ctsvc_sdn_get_str(contacts_record_h record, unsigned int property_i
 	return __ctsvc_sdn_get_str_real(record, property_id, out_str, true);
 }
 
-static int __ctsvc_sdn_set_int(contacts_record_h record, unsigned int property_id, int value)
+static int __ctsvc_sdn_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty)
 {
 	ctsvc_sdn_s* sdn = (ctsvc_sdn_s*)record;
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_SDN_ID:
+		CHECK_DIRTY_VAL(sdn->id, value, is_dirty);
 		sdn->id = value;
 		break;
 	case CTSVC_PROPERTY_SDN_SIM_SLOT_NO:
+		CHECK_DIRTY_VAL(sdn->sim_slot_no, value, is_dirty);
 		sdn->sim_slot_no = value;
 		break;
 	default:
@@ -171,15 +173,17 @@ static int __ctsvc_sdn_set_int(contacts_record_h record, unsigned int property_i
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_sdn_set_str(contacts_record_h record, unsigned int property_id, const char* str)
+static int __ctsvc_sdn_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty)
 {
 	ctsvc_sdn_s* sdn = (ctsvc_sdn_s*)record;
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_SDN_NAME:
+		CHECK_DIRTY_STR(sdn->name, str, is_dirty);
 		FREEandSTRDUP(sdn->name, str);
 		break;
 	case CTSVC_PROPERTY_SDN_NUMBER:
+		CHECK_DIRTY_STR(sdn->number, str, is_dirty);
 		FREEandSTRDUP(sdn->number, str);
 		break;
 	default :

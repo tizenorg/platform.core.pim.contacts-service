@@ -26,9 +26,9 @@ static int __ctsvc_updated_info_create(contacts_record_h* out_record);
 static int __ctsvc_updated_info_destroy(contacts_record_h record, bool delete_child);
 static int __ctsvc_updated_info_clone(contacts_record_h record, contacts_record_h *out_record);
 static int __ctsvc_updated_info_get_int(contacts_record_h record, unsigned int property_id, int *out);
-static int __ctsvc_updated_info_set_int(contacts_record_h record, unsigned int property_id, int value);
+static int __ctsvc_updated_info_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty);
 static int __ctsvc_updated_info_get_bool(contacts_record_h record, unsigned int property_id, bool *out);
-static int __ctsvc_updated_info_set_bool(contacts_record_h record, unsigned int property_id, bool value);
+static int __ctsvc_updated_info_set_bool(contacts_record_h record, unsigned int property_id, bool value, bool *is_dirty);
 
 ctsvc_record_plugin_cb_s updated_info_plugin_cbs = {
 	.create = __ctsvc_updated_info_create,
@@ -128,27 +128,32 @@ static int __ctsvc_updated_info_get_int(contacts_record_h record, unsigned int p
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_updated_info_set_int(contacts_record_h record, unsigned int property_id, int value)
+static int __ctsvc_updated_info_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty)
 {
 	ctsvc_updated_info_s* updated_info = (ctsvc_updated_info_s*)record;
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_UPDATE_INFO_ID :
+		CHECK_DIRTY_VAL(updated_info->id, value, is_dirty);
 		updated_info->id = value;
 		break;
 	case CTSVC_PROPERTY_UPDATE_INFO_ADDRESSBOOK_ID:
+		CHECK_DIRTY_VAL(updated_info->addressbook_id, value, is_dirty);
 		updated_info->addressbook_id = value;
 		break;
 	case CTSVC_PROPERTY_UPDATE_INFO_TYPE:
 		RETVM_IF(value < CONTACTS_CHANGE_INSERTED
 						|| CONTACTS_CHANGE_DELETED < value,
 				CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : update info type is in invalid range (%d)", value);
+		CHECK_DIRTY_VAL(updated_info->changed_type, value, is_dirty);
 		updated_info->changed_type = value;
 		break;
 	case CTSVC_PROPERTY_UPDATE_INFO_VERSION:
+		CHECK_DIRTY_VAL(updated_info->changed_ver, value, is_dirty);
 		updated_info->changed_ver = value;
 		break;
 	case CTSVC_PROPERTY_UPDATE_INFO_LAST_CHANGED_TYPE:
+		CHECK_DIRTY_VAL(updated_info->last_changed_type, value, is_dirty);
 		updated_info->last_changed_type = value;
 		break;
 	default:
@@ -173,12 +178,13 @@ static int __ctsvc_updated_info_get_bool(contacts_record_h record, unsigned int 
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_updated_info_set_bool(contacts_record_h record, unsigned int property_id, bool value)
+static int __ctsvc_updated_info_set_bool(contacts_record_h record, unsigned int property_id, bool value, bool *is_dirty)
 {
 	ctsvc_updated_info_s* updated_info = (ctsvc_updated_info_s*)record;
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_UPDATE_INFO_IMAGE_CHANGED :
+		CHECK_DIRTY_VAL(updated_info->image_changed, value, is_dirty);
 		updated_info->image_changed = value;
 		break;
 	default:

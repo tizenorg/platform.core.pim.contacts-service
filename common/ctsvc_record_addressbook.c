@@ -32,8 +32,8 @@ static int __ctsvc_addressbook_clone(contacts_record_h record, contacts_record_h
 static int __ctsvc_addressbook_get_int(contacts_record_h record, unsigned int property_id, int *out);
 static int __ctsvc_addressbook_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
 static int __ctsvc_addressbook_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
-static int __ctsvc_addressbook_set_int(contacts_record_h record, unsigned int property_id, int value);
-static int __ctsvc_addressbook_set_str(contacts_record_h record, unsigned int property_id, const char* str);
+static int __ctsvc_addressbook_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty);
+static int __ctsvc_addressbook_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty);
 
 ctsvc_record_plugin_cb_s addressbook_plugin_cbs = {
 	.create = __ctsvc_addressbook_create,
@@ -134,12 +134,13 @@ static int __ctsvc_addressbook_get_str(contacts_record_h record, unsigned int pr
 }
 
 static int __ctsvc_addressbook_set_str(contacts_record_h record,
-		unsigned int property_id, const char* str)
+		unsigned int property_id, const char* str, bool *is_dirty )
 {
 	ctsvc_addressbook_s *addressbook = (ctsvc_addressbook_s*)record;
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_ADDRESSBOOK_NAME:
+		CHECK_DIRTY_STR(addressbook->name, str, is_dirty);
 		FREEandSTRDUP(addressbook->name, str);
 		break;
 	default :
@@ -172,23 +173,26 @@ static int __ctsvc_addressbook_get_int(contacts_record_h record,
 }
 
 static int __ctsvc_addressbook_set_int(contacts_record_h record,
-		unsigned int property_id, int value)
+		unsigned int property_id, int value, bool *is_dirty)
 {
 	ctsvc_addressbook_s *addressbook = (ctsvc_addressbook_s*)record;
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_ADDRESSBOOK_ID:
+		CHECK_DIRTY_VAL(addressbook->id, value, is_dirty);
 		addressbook->id = value;
 		break;
 	case CTSVC_PROPERTY_ADDRESSBOOK_MODE:
 		RETVM_IF(value != CONTACTS_ADDRESS_BOOK_MODE_NONE
 						&& value != CONTACTS_ADDRESS_BOOK_MODE_READONLY,
 				CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : address_book mode is %d", value);
+		CHECK_DIRTY_VAL(addressbook->mode, value, is_dirty);
 		addressbook->mode = value;
 		break;
 	case CTSVC_PROPERTY_ADDRESSBOOK_ACCOUNT_ID:
 		RETVM_IF(0 < addressbook->id, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (addressbook)", property_id);
+		CHECK_DIRTY_VAL(addressbook->account_id, value, is_dirty);
 		addressbook->account_id = value;
 		break;
 	default:
