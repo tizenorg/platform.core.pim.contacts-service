@@ -45,7 +45,7 @@
 #include "ctsvc_ipc_server2.h"
 #include "ctsvc_notify.h"
 
-#define CTSVC_TIMEOUT_FOR_DEFAULT 90
+#define CTSVC_TIMEOUT_FOR_DEFAULT 0
 
 static int ctsvc_list_count = 0;
 static int ctsvc_timeout_sec = CTSVC_TIMEOUT_FOR_DEFAULT;
