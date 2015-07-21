@@ -160,7 +160,6 @@ int ctsvc_ipc_connect(contacts_h contact, unsigned int handle_id)
 	struct ctsvc_ipc_s *ipc_data = NULL;
 	char ipc_key[CTSVC_STR_SHORT_LEN] = {0};
 
-	RETV_IF(_ctsvc_ipc_disconnected, CONTACTS_ERROR_IPC_NOT_AVALIABLE);
 	snprintf(ipc_key, sizeof(ipc_key), "%u", handle_id);
 
 	if (NULL == _ctsvc_ipc_table)
@@ -197,7 +196,6 @@ int ctsvc_ipc_disconnect(contacts_h contact, unsigned int handle_id, int connect
 	pims_ipc_data_h indata = NULL;
 	char ipc_key[CTSVC_STR_SHORT_LEN] = {0};
 
-	RETV_IF(_ctsvc_ipc_disconnected, CONTACTS_ERROR_IPC_NOT_AVALIABLE);
 	RETVM_IF(NULL == _ctsvc_ipc_table, CONTACTS_ERROR_IPC, "contacts not connected");
 	snprintf(ipc_key, sizeof(ipc_key), "%u", handle_id);
 

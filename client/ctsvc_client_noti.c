@@ -138,8 +138,8 @@ int ctsvc_ipc_destroy_for_change_subscription()
 	ctsvc_mutex_lock(CTS_MUTEX_PIMS_IPC_PUBSUB);
 
 	if (1 == __ipc_pubsub_ref) {
-		pims_ipc_destroy_for_subscribe(__ipc);
 		ctsvc_ipc_unset_disconnected_cb(__ipc);
+		pims_ipc_destroy_for_subscribe(__ipc);
 		__ipc = NULL;
 	}
 	else if (1 < __ipc_pubsub_ref) {

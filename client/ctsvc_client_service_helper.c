@@ -91,6 +91,7 @@ int ctsvc_client_connect(contacts_h contact)
 	CTS_FN_CALL;
 	int ret;
 	ctsvc_base_s *base = (ctsvc_base_s *)contact;
+	RETV_IF(NULL == base, CONTACTS_ERROR_INVALID_PARAMETER);
 
  	ctsvc_mutex_lock(CTS_MUTEX_CONNECTION);
 	if (0 == base->connection_count) {
@@ -137,9 +138,11 @@ int ctsvc_client_disconnect(contacts_h contact)
 {
 	CTS_FN_CALL;
 	int ret;
+	ctsvc_base_s *base = (ctsvc_base_s *)contact;
+	RETV_IF(NULL == base, CONTACTS_ERROR_INVALID_PARAMETER);
+
 	ctsvc_mutex_lock(CTS_MUTEX_CONNECTION);
 
-	ctsvc_base_s *base = (ctsvc_base_s *)contact;
 	if (1 == base->connection_count) {
 		ret = ctsvc_ipc_disconnect(contact, ctsvc_client_get_pid(), _ctsvc_connection);
 		if (ret != CONTACTS_ERROR_NONE) {
@@ -176,6 +179,7 @@ int ctsvc_client_connect_on_thread(contacts_h contact)
 {
 	int ret;
 	ctsvc_base_s *base = (ctsvc_base_s *)contact;
+	RETV_IF(NULL == base, CONTACTS_ERROR_INVALID_PARAMETER);
 
 	ctsvc_mutex_lock(CTS_MUTEX_CONNECTION);
 
@@ -224,6 +228,7 @@ int ctsvc_client_disconnect_on_thread(contacts_h contact)
 {
 	int ret;
 	ctsvc_base_s *base = (ctsvc_base_s *)contact;
+	RETV_IF(NULL == base, CONTACTS_ERROR_INVALID_PARAMETER);
 
 	ctsvc_mutex_lock(CTS_MUTEX_CONNECTION);
 
