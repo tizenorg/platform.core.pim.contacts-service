@@ -63,7 +63,7 @@ static int __ctsvc_addressbook_create(contacts_record_h *out_record)
 
 	addressbook = (ctsvc_addressbook_s*)calloc(1, sizeof(ctsvc_addressbook_s));
 	RETVM_IF(NULL == addressbook, CONTACTS_ERROR_OUT_OF_MEMORY,
-			"Out of memory : calloc is failed");
+			"Out of memory : calloc is Fail");
 
 	*out_record = (contacts_record_h)addressbook;
 	return CONTACTS_ERROR_NONE;
@@ -88,7 +88,7 @@ static int __ctsvc_addressbook_clone(contacts_record_h record, contacts_record_h
 
 	dest = calloc(1, sizeof(ctsvc_addressbook_s));
 	RETVM_IF(NULL == dest, CONTACTS_ERROR_OUT_OF_MEMORY,
-			"Out of memory : calloc is failed");
+			"Out of memory : calloc is Fail");
 
 	CTSVC_RECORD_COPY_BASE(&(dest->base), &(src->base));
 
@@ -182,7 +182,7 @@ static int __ctsvc_addressbook_set_int(contacts_record_h record,
 		addressbook->mode = value;
 		break;
 	case CTSVC_PROPERTY_ADDRESSBOOK_ACCOUNT_ID:
-		RETVM_IF(addressbook->id > 0, CONTACTS_ERROR_INVALID_PARAMETER,
+		RETVM_IF(0 < addressbook->id, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (addressbook)", property_id);
 		addressbook->account_id = value;
 		break;

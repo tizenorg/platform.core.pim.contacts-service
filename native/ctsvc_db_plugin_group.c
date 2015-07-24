@@ -70,7 +70,7 @@ static double __ctsvc_db_group_get_next_group_prio(void)
 	snprintf(query, sizeof(query), "SELECT MAX(group_prio) FROM "CTS_TABLE_GROUPS" ");
 
 	ret = ctsvc_query_prepare(query, &stmt);
-	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
 
 	ret = ctsvc_stmt_step(stmt);
 	if (1 /*CTS_TRUE*/  == ret)
@@ -96,7 +96,7 @@ static int __ctsvc_db_group_insert_record(contacts_record_h record, int *id)
 			"Invalid parameter : The name of record is empty.");
 
 	ret = ctsvc_begin_trans();
-	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret,  "DB error : ctsvc_begin_trans() Failed(%d)", ret);
+	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret,  "DB error : ctsvc_begin_trans() Fail(%d)", ret);
 
 	if (false == ctsvc_have_ab_write_permission(group->addressbook_id)) {
 		CTS_ERR("ctsvc_have_ab_write_permission fail : does not have permission(addressbook_id : %d)",
@@ -118,7 +118,7 @@ static int __ctsvc_db_group_insert_record(contacts_record_h record, int *id)
 
 	ret = ctsvc_query_prepare(query, &stmt);
 	if (NULL == stmt) {
-		CTS_ERR("DB error : ctsvc_query_prepare() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_query_prepare() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
@@ -150,7 +150,7 @@ static int __ctsvc_db_group_insert_record(contacts_record_h record, int *id)
 		ctsvc_utils_make_image_file_name(0, group->id, group->image_thumbnail_path, image, sizeof(image));
 		ret = ctsvc_utils_copy_image(CTS_GROUP_IMAGE_LOCATION, group->image_thumbnail_path, image);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("ctsvc_utils_copy_image() Failed(%d)", ret);
+			CTS_ERR("ctsvc_utils_copy_image() Fail(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
 			ctsvc_end_trans(false);
 			return ret;
@@ -166,7 +166,7 @@ static int __ctsvc_db_group_insert_record(contacts_record_h record, int *id)
 
 	ret = ctsvc_stmt_step(stmt);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB error : ctsvc_stmt_step() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_stmt_step() Fail(%d)", ret);
 		ctsvc_stmt_finalize(stmt);
 		ctsvc_end_trans(false);
 		return ret;
@@ -178,7 +178,7 @@ static int __ctsvc_db_group_insert_record(contacts_record_h record, int *id)
 
 	ret = ctsvc_end_trans(true);
 	if (ret < CONTACTS_ERROR_NONE) {
-		CTS_ERR("DB error : ctsvc_end_trans() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_end_trans() Fail(%d)", ret);
 		return ret;
 	}
 
@@ -207,21 +207,21 @@ static int __ctsvc_db_group_update_record(contacts_record_h record)
 			"Invalid parameter : The name of group is empty.");
 
 	ret = ctsvc_begin_trans();
-	RETVM_IF(ret, ret, "ctsvc_begin_trans() Failed(%d)", ret);
+	RETVM_IF(ret, ret, "ctsvc_begin_trans() Fail(%d)", ret);
 
 	snprintf(query, sizeof(query),
 			"SELECT addressbook_id, is_read_only, image_thumbnail_path FROM %s WHERE group_id = %d",
 			CTS_TABLE_GROUPS, group->id);
 	ret = ctsvc_query_prepare(query, &stmt);
 	if (NULL == stmt) {
-		CTS_ERR("DB error : ctsvc_query_prepare() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_query_prepare() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
 
 	ret = ctsvc_stmt_step(stmt);
 	if (1 != ret) {
-		CTS_ERR("DB error : ctsvc_stmt_step() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_stmt_step() Fail(%d)", ret);
 		ctsvc_stmt_finalize(stmt);
 		ctsvc_end_trans(false);
 		if (CONTACTS_ERROR_NONE == ret) {
@@ -279,7 +279,7 @@ static int __ctsvc_db_group_update_record(contacts_record_h record)
 				}
 				ret = unlink(full_path);
 				if (ret < 0) {
-					CTS_WARN("unlink Failed(%d)", errno);
+					CTS_WARN("unlink Fail(%d)", errno);
 				}
 			}
 		}
@@ -299,7 +299,7 @@ static int __ctsvc_db_group_update_record(contacts_record_h record)
 			ctsvc_utils_make_image_file_name(0, group->id, group->image_thumbnail_path, dest, sizeof(dest));
 			ret = ctsvc_utils_copy_image(CTS_GROUP_IMAGE_LOCATION, group->image_thumbnail_path, dest);
 			if (CONTACTS_ERROR_NONE != ret) {
-				CTS_ERR("cts_copy_file() Failed(%d)", ret);
+				CTS_ERR("cts_copy_file() Fail(%d)", ret);
 				ctsvc_end_trans(false);
 				free(image);
 				return ret;
@@ -324,7 +324,7 @@ static int __ctsvc_db_group_update_record(contacts_record_h record)
 		snprintf(query, sizeof(query), "UPDATE %s SET %s WHERE group_id = %d", CTS_TABLE_GROUPS, query_set, group->id);
 		ret = ctsvc_query_prepare(query, &stmt);
 		if (NULL == stmt) {
-			CTS_ERR("DB error : ctsvc_query_prepare() Failed(%d)", ret);
+			CTS_ERR("DB error : ctsvc_query_prepare() Fail(%d)", ret);
 			break;
 		}
 		if (bind_text) {
@@ -337,7 +337,7 @@ static int __ctsvc_db_group_update_record(contacts_record_h record)
 		}
 		ret = ctsvc_stmt_step(stmt);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("ctsvc_stmt_step() Failed(%d)", ret);
+			CTS_ERR("ctsvc_stmt_step() Fail(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
 			break;
 		}
@@ -360,7 +360,7 @@ static int __ctsvc_db_group_update_record(contacts_record_h record)
 	}
 
 	ret = ctsvc_end_trans(true);
-	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "DB error : ctsvc_end_trans() Failed(%d)", ret);
+	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "DB error : ctsvc_end_trans() Fail(%d)", ret);
 
 	return CONTACTS_ERROR_NONE;
 }
@@ -373,7 +373,7 @@ static int __ctsvc_db_group_delete_record(int id)
 	char query[CTS_SQL_MAX_LEN] = {0};
 
 	ret = ctsvc_begin_trans();
-	RETVM_IF(CONTACTS_ERROR_NONE > ret, ret, "DB error : ctsvc_begin_trans() Failed(%d)", ret);
+	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "DB error : ctsvc_begin_trans() Fail(%d)", ret);
 
 	snprintf(query, sizeof(query),
 			"SELECT addressbook_id FROM %s WHERE group_id = %d",
@@ -407,7 +407,7 @@ static int __ctsvc_db_group_delete_record(int id)
 
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB error : ctsvc_query_exec() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_query_exec() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
@@ -421,7 +421,7 @@ static int __ctsvc_db_group_delete_record(int id)
 	ctsvc_get_next_ver();
 
 	ctsvc_set_group_noti();
-	if (count > 0) {
+	if (0 < count) {
 		ctsvc_set_group_rel_noti();
 		ctsvc_set_contact_noti();
 		ctsvc_set_person_noti();
@@ -429,7 +429,7 @@ static int __ctsvc_db_group_delete_record(int id)
 
 	ret = ctsvc_end_trans(true);
 	if (ret < CONTACTS_ERROR_NONE) {
-		CTS_ERR("DB error : ctsvc_end_trans() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_end_trans() Fail(%d)", ret);
 		return ret;
 	}
 
@@ -445,7 +445,7 @@ static int __ctsvc_db_group_value_set(cts_stmt stmt, contacts_record_h *record)
 	char full_path[CTSVC_IMG_FULL_PATH_SIZE_MAX] = {0};
 
 	ret = contacts_record_create(_contacts_group._uri, record);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "contacts_record_create is failed(%d)", ret);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "contacts_record_create Fail(%d)", ret);
 	group = (ctsvc_group_s*)*record;
 
 	i = 0;
@@ -487,11 +487,11 @@ static int __ctsvc_db_group_get_record(int id, contacts_record_h *out_record)
 				"FROM "CTS_TABLE_GROUPS" WHERE group_id = %d", id);
 
 	ret = ctsvc_query_prepare(query, &stmt);
-	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
 
 	ret = ctsvc_stmt_step(stmt);
 	if (1 /*CTS_TRUE*/ != ret) {
-		CTS_ERR("ctsvc_stmt_step() Failed(%d)", ret);
+		CTS_ERR("ctsvc_stmt_step() Fail(%d)", ret);
 		ctsvc_stmt_finalize(stmt);
 		if (CONTACTS_ERROR_NONE == ret)
 			return CONTACTS_ERROR_NO_DATA;
@@ -503,7 +503,7 @@ static int __ctsvc_db_group_get_record(int id, contacts_record_h *out_record)
 
 	ctsvc_stmt_finalize(stmt);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("__ctsvc_db_group_value_set(ALL) Failed(%d)", ret);
+		CTS_ERR("__ctsvc_db_group_value_set(ALL) Fail(%d)", ret);
 		return ret;
 	}
 	*out_record = record;
@@ -534,13 +534,13 @@ static int __ctsvc_db_group_get_all_records(int offset, int limit, contacts_list
 	}
 
 	ret = ctsvc_query_prepare(query, &stmt);
-	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
 
 	contacts_list_create(&list);
 	while ((ret = ctsvc_stmt_step(stmt))) {
 		contacts_record_h record;
 		if (1 != ret) {
-			CTS_ERR("DB error : ctsvc_stmt_step() Failed(%d)", ret);
+			CTS_ERR("DB error : ctsvc_stmt_step() Fail(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
 			contacts_list_destroy(list, true);
 			return ret;
@@ -579,7 +579,7 @@ static int __ctsvc_db_group_get_records_with_query(contacts_query_h query,
 	while ((ret = ctsvc_stmt_step(stmt))) {
 		contacts_record_h record;
 		if (1 != ret) {
-			CTS_ERR("DB error : ctsvc_stmt_step() Failed(%d)", ret);
+			CTS_ERR("DB error : ctsvc_stmt_step() Fail(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
 			contacts_list_destroy(list, true);
 			return ret;
@@ -593,7 +593,7 @@ static int __ctsvc_db_group_get_records_with_query(contacts_query_h query,
 			field_count = s_query->projection_count;
 
 			if (CONTACTS_ERROR_NONE != ctsvc_record_set_projection_flags(record, s_query->projection, s_query->projection_count, s_query->property_count)) {
-				ASSERT_NOT_REACHED("To set projection is failed.\n");
+				ASSERT_NOT_REACHED("To set projection is Fail.\n");
 			}
 		}
 

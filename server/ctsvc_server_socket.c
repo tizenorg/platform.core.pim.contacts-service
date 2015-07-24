@@ -121,7 +121,7 @@ int ctsvc_server_socket_return(GIOChannel *src, int value, int attach_num, int *
 
 	ret = __ctsvc_server_socket_safe_write(g_io_channel_unix_get_fd(src), (char *)&msg, sizeof(msg));
 	RETVM_IF(-1 == ret, CONTACTS_ERROR_SYSTEM,
-			"__ctsvc_server_socket_safe_write() Failed(errno = %d)", errno);
+			"__ctsvc_server_socket_safe_write() Fail(errno = %d)", errno);
 
 	return CONTACTS_ERROR_NONE;
 }
@@ -135,10 +135,10 @@ static void __ctsvc_server_socket_import_sim(GIOChannel *src, int size)
 	GError *gerr = NULL;
 	char receiver[CTS_SQL_MAX_LEN] = {0};
 
-	if (size > 0) {
+	if (0 < size) {
 		g_io_channel_read_chars(src, receiver, size, &len, &gerr);
 		if (gerr) {
-			CTS_ERR("g_io_channel_read_chars() Failed(%s)", gerr->message);
+			CTS_ERR("g_io_channel_read_chars() Fail(%s)", gerr->message);
 			g_error_free(gerr);
 			return;
 		}
@@ -155,7 +155,7 @@ static void __ctsvc_server_socket_import_sim(GIOChannel *src, int size)
 	}
 
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_server_sim_import_contact() Failed(%d)", ret);
+		CTS_ERR("ctsvc_server_sim_import_contact() Fail(%d)", ret);
 		ctsvc_server_socket_return(src, ret, 0, NULL);
 	}
 }
@@ -169,10 +169,10 @@ static void __ctsvc_server_socket_get_sim_init_status(GIOChannel *src, int size)
 	GError *gerr = NULL;
 	char receiver[CTS_SQL_MAX_LEN] = {0};
 
-	if (size > 0) {
+	if (0 < size) {
 		g_io_channel_read_chars(src, receiver, size, &len, &gerr);
 		if (gerr) {
-			CTS_ERR("g_io_channel_read_chars() Failed(%s)", gerr->message);
+			CTS_ERR("g_io_channel_read_chars() Fail(%s)", gerr->message);
 			g_error_free(gerr);
 			return;
 		}
@@ -189,7 +189,7 @@ static void __ctsvc_server_socket_get_sim_init_status(GIOChannel *src, int size)
 	}
 
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_server_socket_get_sim_init_status() Failed(%d)", ret);
+		CTS_ERR("ctsvc_server_socket_get_sim_init_status() Fail(%d)", ret);
 		ctsvc_server_socket_return(src, ret, 0, NULL);
 	}
 }
@@ -203,10 +203,10 @@ int ctsvc_server_socket_return_sim_int(GIOChannel *src, int value)
 
 	str_len = snprintf(count_str, sizeof(count_str), "%d", value);
 	ret = ctsvc_server_socket_return(src, CONTACTS_ERROR_NONE, 1, &str_len);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_server_socket_return() Failed(%d)", ret);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_server_socket_return() Fail(%d)", ret);
 	CTS_DBG("count_str : %s", count_str);
 	ret = __ctsvc_server_socket_safe_write(g_io_channel_unix_get_fd(src), count_str, str_len);
-	RETVM_IF(-1 == ret, CONTACTS_ERROR_SYSTEM, "__ctsvc_server_socket_safe_write() Failed(errno = %d)", errno);
+	RETVM_IF(-1 == ret, CONTACTS_ERROR_SYSTEM, "__ctsvc_server_socket_safe_write() Fail(errno = %d)", errno);
 
 	return CONTACTS_ERROR_NONE;
 }
@@ -222,7 +222,7 @@ static void __ctsvc_server_socket_read_flush(GIOChannel *src, int size)
 
 	g_io_channel_read_chars(src, receiver, size, &len, &gerr);
 	if (gerr) {
-		CTS_ERR("g_io_channel_read_chars() Failed(%s)", gerr->message);
+		CTS_ERR("g_io_channel_read_chars() Fail(%s)", gerr->message);
 		g_error_free(gerr);
 	}
 }
@@ -305,7 +305,7 @@ static gboolean __ctsvc_server_socket_request_handler(GIOChannel *src, GIOCondit
 	}
 
 	ret = __ctsvc_server_socket_safe_read(fd, (char *)&msg, sizeof(msg));
-	RETVM_IF(-1 == ret, TRUE, "__ctsvc_server_socket_safe_read() Failed(errno = %d)", errno);
+	RETVM_IF(-1 == ret, TRUE, "__ctsvc_server_socket_safe_read() Fail(errno = %d)", errno);
 
 	CTS_DBG("attach number = %d", msg.attach_num);
 
@@ -435,7 +435,7 @@ static gboolean __ctsvc_server_socket_handler(GIOChannel *src,
 	socklen_t client_len = sizeof(clientaddr);
 
 	client_sockfd = accept(sockfd, (struct sockaddr *)&clientaddr, &client_len);
-	RETVM_IF(-1 == client_sockfd, TRUE, "accept() Failed(errno = %d)", errno);
+	RETVM_IF(-1 == client_sockfd, TRUE, "accept() Fail(errno = %d)", errno);
 
 #ifdef ENABLE_SIM_FEATURE
 	if (NULL == _client_info_table)
@@ -476,23 +476,23 @@ int ctsvc_server_socket_init(void)
 	snprintf(addr.sun_path, sizeof(addr.sun_path), "%s", sock_file);
 
 	sockfd = socket(PF_UNIX, SOCK_STREAM, 0);
-	RETVM_IF(-1 == sockfd, CONTACTS_ERROR_SYSTEM, "socket() Failed(errno = %d)", errno);
+	RETVM_IF(-1 == sockfd, CONTACTS_ERROR_SYSTEM, "socket() Fail(errno = %d)", errno);
 
 	ret = bind(sockfd, (struct sockaddr *)&addr, sizeof(addr));
-	RETVM_IF(-1 == ret, CONTACTS_ERROR_SYSTEM, "bind() Failed(errno = %d)", errno);
+	RETVM_IF(-1 == ret, CONTACTS_ERROR_SYSTEM, "bind() Fail(errno = %d)", errno);
 
 	ret = chown(sock_file, getuid(), CTS_SECURITY_FILE_GROUP);
 	if (0 != ret)
-		CTS_ERR("chown(%s) Failed(%d)", sock_file, ret);
+		CTS_ERR("chown(%s) Fail(%d)", sock_file, ret);
 
 	ret = chmod(sock_file, CTS_SECURITY_DEFAULT_PERMISSION);
 	if (0 != ret)
-		CTS_ERR("chmod(%s) Failed(%d)", sock_file, ret);
+		CTS_ERR("chmod(%s) Fail(%d)", sock_file, ret);
 
 	ret = listen(sockfd, 30);
 	if (-1 == ret) {
 		close(sockfd);
-		CTS_ERR("listen() Failed(errno = %d)", errno);
+		CTS_ERR("listen() Fail(errno = %d)", errno);
 		return CONTACTS_ERROR_SYSTEM;
 	}
 

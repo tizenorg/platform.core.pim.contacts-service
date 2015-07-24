@@ -69,7 +69,7 @@ int ctsvc_begin_trans(void)
 			progress *= 2;
 		}
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("ctsvc_query_exec() Failed(%d)", ret);
+			CTS_ERR("ctsvc_query_exec() Fail(%d)", ret);
 			return ret;
 		}
 
@@ -112,7 +112,7 @@ int ctsvc_end_trans(bool is_success)
 		snprintf(query, sizeof(query), "UPDATE %s SET ver = %d",
 				CTS_TABLE_VERSION, transaction_ver);
 		ret = ctsvc_query_exec(query);
-		WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_query_exec(version up) Failed(%d)", ret);
+		WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_query_exec(version up) Fail(%d)", ret);
 	}
 
 	INFO("start commit");
@@ -127,13 +127,13 @@ int ctsvc_end_trans(bool is_success)
 
 	if (CONTACTS_ERROR_NONE != ret) {
 		int tmp_ret;
-		CTS_ERR("ctsvc_query_exec() Failed(%d)", ret);
+		CTS_ERR("ctsvc_query_exec() Fail(%d)", ret);
 		ctsvc_nofitication_cancel();
 #ifdef _CONTACTS_IPC_SERVER
 		ctsvc_change_subject_clear_changed_info();
 #endif
 		tmp_ret = ctsvc_query_exec("ROLLBACK TRANSACTION");
-		WARN_IF(CONTACTS_ERROR_NONE != tmp_ret, "ctsvc_query_exec(ROLLBACK) Failed(%d)", tmp_ret);
+		WARN_IF(CONTACTS_ERROR_NONE != tmp_ret, "ctsvc_query_exec(ROLLBACK) Fail(%d)", tmp_ret);
 		return ret;
 	}
 
@@ -197,7 +197,7 @@ void ctsvc_utils_make_image_file_name(int parent_id, int id, char *src_img, char
 		temp++;
 	}
 
-	if (parent_id > 0)
+	if (0 < parent_id)
 		snprintf(dest, dest_size, "%d_%d%s", parent_id, id, lower_ext);
 	else
 		snprintf(dest, dest_size, "%d%s", id, ext);
@@ -210,11 +210,11 @@ static inline bool ctsvc_check_available_image_space(void) {
 	long long size;
 	ret = statfs(CTSVC_NOTI_IMG_REPERTORY, &buf);
 
-	RETVM_IF(ret!=0, false, "statfs Failed(%d)", ret);
+	RETVM_IF(ret!=0, false, "statfs Fail(%d)", ret);
 
 	size = (long long)buf.f_bavail * (buf.f_bsize);
 
-	if (size > 1024*1024) // if available space to copy a image is larger than 1M
+	if (1024*1024 < size) // if available space to copy a image is larger than 1M
 		return true;
 	return false;
 }
@@ -236,7 +236,7 @@ static image_util_rotation_e __ctsvc_get_rotation_info(const char *path)
 	if (entry) {
 		ExifByteOrder mByteOrder = exif_data_get_byte_order(ed);
 		orientation = (int)exif_get_short(entry->data, mByteOrder);
-		if (orientation < 0 || orientation > 8)
+		if (orientation < 0 || 8 < orientation)
 			orientation = 0;
 	}
 
@@ -323,7 +323,7 @@ static bool __ctsvc_image_util_supported_jpeg_colorspace_cb(image_util_colorspac
 	}
 #endif
 
-	if (width > image_size || height > image_size) {
+	if (image_size < width || image_size < height) {
 		// image resize
 		if (image_size<=0 || width <=0 || height <= 0) {
 			free(img_source);
@@ -332,7 +332,7 @@ static bool __ctsvc_image_util_supported_jpeg_colorspace_cb(image_util_colorspac
 			return false;
 		}
 
-		if (width>height) {
+		if (height < width) {
 			resized_width = image_size;
 			resized_height = height*image_size/width;
 		}
@@ -356,7 +356,7 @@ static bool __ctsvc_image_util_supported_jpeg_colorspace_cb(image_util_colorspac
 		ret = image_util_resize(img_target, &resized_width, &resized_height,
 				img_source, width, height, colorspace);
 		if (ret!=IMAGE_UTIL_ERROR_NONE) {
-			CTS_ERR("image_util_resize failed(%d)", ret);
+			CTS_ERR("image_util_resize Fail(%d)", ret);
 			free(img_target);
 			free(img_source);
 			info->ret = CONTACTS_ERROR_SYSTEM;
@@ -379,7 +379,7 @@ static bool __ctsvc_image_util_supported_jpeg_colorspace_cb(image_util_colorspac
 					rotation, img_target, resized_width, resized_height, colorspace);
 		free(img_target);
 		if (IMAGE_UTIL_ERROR_NONE != ret) {
-			CTS_ERR("image_util_rotate failed(%d)", ret);
+			CTS_ERR("image_util_rotate Fail(%d)", ret);
 			info->ret = CONTACTS_ERROR_SYSTEM;
 			free(img_rotate);
 			return false;
@@ -393,21 +393,21 @@ static bool __ctsvc_image_util_supported_jpeg_colorspace_cb(image_util_colorspac
 	ret = image_util_encode_jpeg(img_target, resized_width, resized_height, colorspace, CTS_IMAGE_ENCODE_QUALITY, info->dest);
 	free(img_target);
 	if (ret != IMAGE_UTIL_ERROR_NONE) {
-		CTS_ERR("image_util_encode_jpeg failed(%d)", ret);
+		CTS_ERR("image_util_encode_jpeg Fail(%d)", ret);
 		info->ret = CONTACTS_ERROR_SYSTEM;
 		return false;
 	}
 
 	dest_fd = open(info->dest, O_RDONLY);
 	if (dest_fd < 0) {
-		CTS_ERR("System : Open Failed(%d)", errno);
+		CTS_ERR("System : Open Fail(%d)", errno);
 		info->ret = CONTACTS_ERROR_SYSTEM;
 		return false;
 	}
 
 	ret = fchown(dest_fd, getuid(), CTS_SECURITY_FILE_GROUP);
 	if (0 != ret) {
-		CTS_ERR("fchown Failed(%d)", errno);
+		CTS_ERR("fchown Fail(%d)", errno);
 		info->ret = CONTACTS_ERROR_SYSTEM;
 		close(dest_fd);
 		return false;
@@ -415,7 +415,7 @@ static bool __ctsvc_image_util_supported_jpeg_colorspace_cb(image_util_colorspac
 
 	ret = fchmod(dest_fd, CTS_SECURITY_IMAGE_PERMISSION);
 	if (0 != ret) {
-		CTS_ERR("fchmod Failed(%d)", errno);
+		CTS_ERR("fchmod Fail(%d)", errno);
 		info->ret = CONTACTS_ERROR_SYSTEM;
 		close(dest_fd);
 		return false;
@@ -461,24 +461,24 @@ int ctsvc_utils_copy_image(const char *dir, const char *src, const char *file)
 		return ret;
 	}
 	else
-		CTS_ERR("__ctsvc_resize_and_copy_image Failed(%d)", ret);
+		CTS_ERR("__ctsvc_resize_and_copy_image Fail(%d)", ret);
 
 	src_fd = open(src, O_RDONLY);
-	RETVM_IF(src_fd < 0, CONTACTS_ERROR_SYSTEM, "System : Open(src:%s) Failed(%d)", src, errno);
+	RETVM_IF(src_fd < 0, CONTACTS_ERROR_SYSTEM, "System : Open(src:%s) Fail(%d)", src, errno);
 	dest_fd = open(dest, O_WRONLY|O_CREAT|O_TRUNC, 0660);
 	if (dest_fd < 0) {
-		CTS_ERR("Open Failed(%d)", errno);
+		CTS_ERR("Open Fail(%d)", errno);
 		close(src_fd);
 		return CONTACTS_ERROR_SYSTEM;
 	}
 
-	while ((size = read(src_fd, buf, CTSVC_COPY_SIZE_MAX)) > 0) {
+	while (0 < (size = read(src_fd, buf, CTSVC_COPY_SIZE_MAX))) {
 		ret = write(dest_fd, buf, size);
 		if (ret <= 0) {
 			if (EINTR == errno)
 				continue;
 			else {
-				CTS_ERR("write() Failed(%d)", errno);
+				CTS_ERR("write() Fail(%d)", errno);
 				if (ENOSPC == errno)
 					ret = CONTACTS_ERROR_FILE_NO_SPACE;	// No space
 				else
@@ -493,11 +493,11 @@ int ctsvc_utils_copy_image(const char *dir, const char *src, const char *file)
 
 	ret = fchown(dest_fd, getuid(), CTS_SECURITY_FILE_GROUP);
 	if (0 != ret) {
-		CTS_ERR("fchown() Failed(%d)", ret);
+		CTS_ERR("fchown() Fail(%d)", ret);
 	}
 	ret = fchmod(dest_fd, CTS_SECURITY_IMAGE_PERMISSION);
 	if (0 != ret) {
-		CTS_ERR("fchmod() Failed(%d)", ret);
+		CTS_ERR("fchmod() Fail(%d)", ret);
 	}
 	close(src_fd);
 	close(dest_fd);
@@ -532,7 +532,7 @@ int ctsvc_get_current_version(int* out_current_version) {
 		int version = 0;
 		const char *query = "SELECT ver FROM "CTS_TABLE_VERSION;
 		ret = ctsvc_query_get_first_int_result(query, &version);
-		RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_query_get_first_int_result() Failed(%d)", ret);
+		RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_query_get_first_int_result() Fail(%d)", ret);
 		*out_current_version = version;
 	}
 	else
@@ -554,7 +554,7 @@ int SAFE_SNPRINTF(char **buf, int *buf_size, int len, const char *src)
 		return -1;
 
 	remain = *buf_size - len;
-	if (remain > strlen(src) + 1) {
+	if (strlen(src) + 1 < remain) {
 		temp_len = snprintf((*buf)+len, remain, "%s", src);
 		return temp_len;
 	}
@@ -567,7 +567,7 @@ int SAFE_SNPRINTF(char **buf, int *buf_size, int len, const char *src)
 			*buf = temp;
 			*buf_size = *buf_size * 2;
 			remain = *buf_size - len;
-			if (remain > strlen(src) + 1)
+			if (strlen(src) + 1 < remain)
 				break;
 		}
 		temp_len = snprintf((*buf)+len, remain, "%s", src);

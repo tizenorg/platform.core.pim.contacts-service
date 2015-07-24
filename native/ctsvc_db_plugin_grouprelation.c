@@ -99,12 +99,12 @@ static int __ctsvc_db_grouprelation_get_all_records(int offset, int limit, conta
 	}
 
 	ret = ctsvc_query_prepare(query, &stmt);
-	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
 
 	contacts_list_create(&list);
 	while ((ret = ctsvc_stmt_step(stmt))) {
 		if (1 != ret) {
-			CTS_ERR("DB error : ctsvc_stmt_step Failed(%d)", ret);
+			CTS_ERR("DB error : ctsvc_stmt_step Fail(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
 			contacts_list_destroy(list, true);
 			return ret;
@@ -150,7 +150,7 @@ static int __ctsvc_db_grouprelation_get_records_with_query(contacts_query_h quer
 	while ((ret = ctsvc_stmt_step(stmt))) {
 		contacts_record_h record;
 		if (1 != ret) {
-			CTS_ERR("DB error : ctsvc_stmt_step() Failed(%d)", ret);
+			CTS_ERR("DB error : ctsvc_stmt_step() Fail(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
 			contacts_list_destroy(list, true);
 			return ret;
@@ -164,7 +164,7 @@ static int __ctsvc_db_grouprelation_get_records_with_query(contacts_query_h quer
 			field_count = s_query->projection_count;
 
 			if (CONTACTS_ERROR_NONE != ctsvc_record_set_projection_flags(record, s_query->projection, s_query->projection_count, s_query->property_count)) {
-				ASSERT_NOT_REACHED("To set projection is failed.\n");
+				ASSERT_NOT_REACHED("To set projection is Fail.\n");
 			}
 		}
 

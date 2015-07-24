@@ -69,7 +69,7 @@ static int __ctsvc_my_profile_create(contacts_record_h *out_record)
 
 	my_profile = calloc(1, sizeof(ctsvc_my_profile_s));
 	RETVM_IF(NULL == my_profile, CONTACTS_ERROR_OUT_OF_MEMORY,
-			"Out of memory : calloc is failed");
+			"Out of memory : calloc is Fail");
 
 	my_profile->name = calloc(1, sizeof(ctsvc_list_s));
 	my_profile->name->l_type = CTSVC_RECORD_NAME;
@@ -194,7 +194,7 @@ static int __ctsvc_my_profile_set_int(contacts_record_h record, unsigned int pro
 		my_profile->changed_time = value;
 		break;
 	case CTSVC_PROPERTY_MY_PROFILE_ADDRESSBOOK_ID:
-		RETVM_IF(my_profile->id > 0, CONTACTS_ERROR_INVALID_PARAMETER,
+		RETVM_IF(0 < my_profile->id, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (my_profile)", property_id);
 		my_profile->addressbook_id = value;
 		break;
@@ -533,7 +533,7 @@ static int __ctsvc_my_profile_clone(contacts_record_h record, contacts_record_h 
 	src_data = (ctsvc_my_profile_s*)record;
 	out_data = calloc(1, sizeof(ctsvc_my_profile_s));
 	RETVM_IF(NULL == out_data, CONTACTS_ERROR_OUT_OF_MEMORY,
-			"Out of memeory : calloc(ctsvc_my_profile_s) Failed(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
+			"Out of memeory : calloc(ctsvc_my_profile_s) Fail(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
 
 	out_data->id = src_data->id;
 	out_data->addressbook_id = src_data->addressbook_id;

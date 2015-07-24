@@ -37,7 +37,7 @@ API int contacts_setting_get_name_display_order(contacts_name_display_order_e *n
 	*name_display_order = 0;
 
 	if (ctsvc_ipc_call(CTSVC_IPC_SETTING_MODULE, CTSVC_IPC_SERVER_SETTING_GET_NAME_DISPLAY_ORDER, NULL, &outdata) != 0) {
-		CTS_ERR("ctsvc_ipc_call failed");
+		CTS_ERR("ctsvc_ipc_call Fail");
 		return CONTACTS_ERROR_IPC;
 	}
 
@@ -62,7 +62,7 @@ API int contacts_setting_get_name_sorting_order(contacts_name_sorting_order_e *n
 	*name_sorting_order = 0;
 
 	if (ctsvc_ipc_call(CTSVC_IPC_SETTING_MODULE, CTSVC_IPC_SERVER_SETTING_GET_NAME_SORTING_ORDER, NULL, &outdata) != 0) {
-		CTS_ERR("ctsvc_ipc_call failed");
+		CTS_ERR("ctsvc_ipc_call Fail");
 		return CONTACTS_ERROR_IPC;
 	}
 
@@ -103,7 +103,7 @@ API int contacts_setting_set_name_display_order(contacts_name_display_order_e na
 	}
 
 	if (ctsvc_ipc_call(CTSVC_IPC_SETTING_MODULE, CTSVC_IPC_SERVER_SETTING_SET_NAME_DISPLAY_ORDER, indata, &outdata) != 0) {
-		CTS_ERR("ctsvc_ipc_call failed");
+		CTS_ERR("ctsvc_ipc_call Fail");
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
 	}
@@ -143,7 +143,7 @@ API int contacts_setting_set_name_sorting_order(contacts_name_sorting_order_e na
 	}
 
 	if (ctsvc_ipc_call(CTSVC_IPC_SETTING_MODULE, CTSVC_IPC_SERVER_SETTING_SET_NAME_SORTING_ORDER, indata, &outdata) != 0) {
-		CTS_ERR("ctsvc_ipc_call failed");
+		CTS_ERR("ctsvc_ipc_call Fail");
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
 	}

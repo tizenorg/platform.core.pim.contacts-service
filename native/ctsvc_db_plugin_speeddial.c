@@ -64,7 +64,7 @@ static int __ctsvc_db_speeddial_insert_record(contacts_record_h record, int *id)
 	ctsvc_speeddial_s *speeddial = (ctsvc_speeddial_s*)record;
 
 	ret = ctsvc_begin_trans();
-	RETVM_IF(ret, ret, "ctsvc_begin_trans() Failed(%d)", ret);
+	RETVM_IF(ret, ret, "ctsvc_begin_trans() Fail(%d)", ret);
 
 	// check number_id validation
 	snprintf(query, sizeof(query),
@@ -75,7 +75,7 @@ static int __ctsvc_db_speeddial_insert_record(contacts_record_h record, int *id)
 						CTSVC_DATA_NUMBER, speeddial->number_id);
 	ret = ctsvc_query_get_first_int_result(query, &number_id);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_query_get_first_int_result() Failed(%d) : number_id is invalid", ret);
+		CTS_ERR("ctsvc_query_get_first_int_result() Fail(%d) : number_id is invalid", ret);
 		ctsvc_end_trans(false);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
@@ -86,7 +86,7 @@ static int __ctsvc_db_speeddial_insert_record(contacts_record_h record, int *id)
 
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_query_exec() Failed(%d)", ret);
+		CTS_ERR("ctsvc_query_exec() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
@@ -116,7 +116,7 @@ static int __ctsvc_db_speeddial_value_set(cts_stmt stmt, contacts_record_h *reco
 	ctsvc_speeddial_s *speeddial;
 
 	ret = contacts_record_create(_contacts_speeddial._uri, record);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "contacts_record_create is failed(%d)", ret);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "contacts_record_create Fail(%d)", ret);
 	speeddial = (ctsvc_speeddial_s*)*record;
 
 	i = 0;
@@ -157,11 +157,11 @@ static int __ctsvc_db_speeddial_get_record(int id, contacts_record_h* out_record
 			ctsvc_get_display_column(), id);
 
 	ret = ctsvc_query_prepare(query, &stmt);
-	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
 
 	ret = ctsvc_stmt_step(stmt);
 	if (1 /*CTS_TRUE*/ != ret) {
-		CTS_ERR("DB error : ctsvc_stmt_step() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_stmt_step() Fail(%d)", ret);
 		ctsvc_stmt_finalize(stmt);
 		if (CONTACTS_ERROR_NONE == ret)
 			return CONTACTS_ERROR_NO_DATA;
@@ -173,7 +173,7 @@ static int __ctsvc_db_speeddial_get_record(int id, contacts_record_h* out_record
 
 	ctsvc_stmt_finalize(stmt);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("__ctsvc_db_speeddial_value_set(ALL) Failed(%d)", ret);
+		CTS_ERR("__ctsvc_db_speeddial_value_set(ALL) Fail(%d)", ret);
 		return ret;
 	}
 
@@ -207,7 +207,7 @@ static int __ctsvc_db_speeddial_update_record(contacts_record_h record)
 						CTSVC_DATA_NUMBER, speeddial->number_id);
 	ret = ctsvc_query_get_first_int_result(query, &number_id);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_query_get_first_int_result() Failed(%d) : number_id is invalid", ret);
+		CTS_ERR("ctsvc_query_get_first_int_result() Fail(%d) : number_id is invalid", ret);
 		ctsvc_end_trans(false);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
@@ -216,7 +216,7 @@ static int __ctsvc_db_speeddial_update_record(contacts_record_h record)
 		"SELECT speed_number FROM "CTS_TABLE_SPEEDDIALS" WHERE speed_number = %d", speeddial->dial_number);
 	ret = ctsvc_query_get_first_int_result(query, &speeddial_id);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB error : ctsvc_query_get_first_int_result() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_query_get_first_int_result() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
@@ -226,14 +226,14 @@ static int __ctsvc_db_speeddial_update_record(contacts_record_h record)
 			speeddial->number_id, speeddial->dial_number);
 	ret = ctsvc_query_prepare(query, &stmt);
 	if (NULL == stmt) {
-		CTS_ERR("DB error : ctsvc_query_prepare() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_query_prepare() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
 
 	ret = ctsvc_stmt_step(stmt);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_stmt_step() Failed(%d)", ret);
+		CTS_ERR("ctsvc_stmt_step() Fail(%d)", ret);
 		ctsvc_stmt_finalize(stmt);
 		ctsvc_end_trans(false);
 		return ret;
@@ -279,14 +279,14 @@ static int __ctsvc_db_speeddial_delete_record(int id)
 			CTS_TABLE_SPEEDDIALS, id);
 	ret = ctsvc_query_prepare(query, &stmt);
 	if (NULL == stmt) {
-		CTS_ERR("DB error : ctsvc_query_prepare() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_query_prepare() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
 
 	ret = ctsvc_stmt_step(stmt);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_stmt_step() Failed(%d)", ret);
+		CTS_ERR("ctsvc_stmt_step() Fail(%d)", ret);
 		ctsvc_stmt_finalize(stmt);
 		ctsvc_end_trans(false);
 		return ret;
@@ -329,13 +329,13 @@ static int __ctsvc_db_speeddial_get_all_records(int offset, int limit, contacts_
 	}
 
 	ret = ctsvc_query_prepare(query, &stmt);
-	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
 
 	contacts_list_create(&list);
 	while ((ret = ctsvc_stmt_step(stmt))) {
 		contacts_record_h record;
 		if (1 != ret) {
-			CTS_ERR("DB error : ctsvc_stmt_step() Failed(%d)", ret);
+			CTS_ERR("DB error : ctsvc_stmt_step() Fail(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
 			contacts_list_destroy(list, true);
 			return ret;
@@ -367,13 +367,13 @@ static int __ctsvc_db_speeddial_get_records_with_query(contacts_query_h query,
 	s_query = (ctsvc_query_s *)query;
 
 	ret = ctsvc_db_make_get_records_query_stmt(s_query, offset, limit, &stmt);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_db_make_get_records_query_stmt is failed(%d)", ret);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_db_make_get_records_query_stmt Fail(%d)", ret);
 
 	contacts_list_create(&list);
 	while ((ret = ctsvc_stmt_step(stmt))) {
 		contacts_record_h record;
 		if (1 != ret) {
-			CTS_ERR("DB error : ctsvc_stmt_step() Failed(%d)", ret);
+			CTS_ERR("DB error : ctsvc_stmt_step() Fail(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
 			contacts_list_destroy(list, true);
 			return ret;
@@ -387,7 +387,7 @@ static int __ctsvc_db_speeddial_get_records_with_query(contacts_query_h query,
 			field_count = s_query->projection_count;
 
 			if (CONTACTS_ERROR_NONE != ctsvc_record_set_projection_flags(record, s_query->projection, s_query->projection_count, s_query->property_count)) {
-				ASSERT_NOT_REACHED("To set projection is failed.\n");
+				ASSERT_NOT_REACHED("To set projection is Fail.\n");
 			}
 		}
 

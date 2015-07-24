@@ -50,11 +50,11 @@ int ctsvc_socket_init(void)
 
 	__ctsvc_sockfd = socket(PF_UNIX, SOCK_STREAM, 0);
 	RETVM_IF(-1 == __ctsvc_sockfd, CONTACTS_ERROR_IPC,
-			"socket() Failed(errno = %d)", errno);
+			"socket() Fail(errno = %d)", errno);
 
 	ret = connect(__ctsvc_sockfd, (struct sockaddr *)&caddr, sizeof(caddr));
 	if (-1 == ret) {
-		CTS_ERR("connect() Failed(errno = %d)", errno);
+		CTS_ERR("connect() Fail(errno = %d)", errno);
 		close(__ctsvc_sockfd);
 		__ctsvc_sockfd = -1;
 		return CONTACTS_ERROR_IPC;
@@ -122,7 +122,7 @@ static int __ctsvc_socket_handle_return(int fd, ctsvc_socket_msg_s *msg)
 	int ret;
 
 	ret = __ctsvc_safe_read(fd, (char *)msg, sizeof(ctsvc_socket_msg_s));
-	RETVM_IF(-1 == ret, CONTACTS_ERROR_IPC, "__ctsvc_safe_read() Failed(errno = %d)", errno);
+	RETVM_IF(-1 == ret, CONTACTS_ERROR_IPC, "__ctsvc_safe_read() Fail(errno = %d)", errno);
 
 	WARN_IF(CTSVC_SOCKET_MSG_TYPE_REQUEST_RETURN_VALUE != msg->type,
 			"Unknown Type(%d), ret=%d, attach_num= %d,"
@@ -181,13 +181,13 @@ int ctsvc_request_sim_import(int sim_slot_no)
 	msg.attach_sizes[0] = strlen(src);
 
 	ret = __ctsvc_safe_write(__ctsvc_sockfd, (char *)&msg, sizeof(msg));
-	RETVM_IF(-1 == ret, CONTACTS_ERROR_IPC, "__ctsvc_safe_write() Failed(errno = %d)", errno);
+	RETVM_IF(-1 == ret, CONTACTS_ERROR_IPC, "__ctsvc_safe_write() Fail(errno = %d)", errno);
 
 	ret = __ctsvc_safe_write(__ctsvc_sockfd, src, msg.attach_sizes[0]);
-	RETVM_IF(-1 == ret, CONTACTS_ERROR_IPC, "__ctsvc_safe_write() Failed(errno = %d)", errno);
+	RETVM_IF(-1 == ret, CONTACTS_ERROR_IPC, "__ctsvc_safe_write() Fail(errno = %d)", errno);
 
 	ret = __ctsvc_socket_handle_return(__ctsvc_sockfd, &msg);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "__ctsvc_socket_handle_return() Failed(%d)", ret);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "__ctsvc_socket_handle_return() Fail(%d)", ret);
 	CTS_DBG("attach_num = %d", msg.attach_num);
 
 	for (i=0;i<msg.attach_num;i++)
@@ -212,17 +212,17 @@ int ctsvc_request_sim_get_initialization_status(int sim_slot_no, bool *completed
 	msg.attach_sizes[0] = strlen(src);
 
 	ret = __ctsvc_safe_write(__ctsvc_sockfd, (char *)&msg, sizeof(msg));
-	RETVM_IF(-1 == ret, CONTACTS_ERROR_IPC, "__ctsvc_safe_write() Failed(errno = %d)", errno);
+	RETVM_IF(-1 == ret, CONTACTS_ERROR_IPC, "__ctsvc_safe_write() Fail(errno = %d)", errno);
 
 	ret = __ctsvc_safe_write(__ctsvc_sockfd, src, msg.attach_sizes[0]);
-	RETVM_IF(-1 == ret, CONTACTS_ERROR_IPC, "__ctsvc_safe_write() Failed(errno = %d)", errno);
+	RETVM_IF(-1 == ret, CONTACTS_ERROR_IPC, "__ctsvc_safe_write() Fail(errno = %d)", errno);
 
 	ret = __ctsvc_socket_handle_return(__ctsvc_sockfd, &msg);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "__ctsvc_socket_handle_return() Failed(%d)", ret);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "__ctsvc_socket_handle_return() Fail(%d)", ret);
 	CTS_DBG("attach_num = %d", msg.attach_num);
 
 	ret = __ctsvc_safe_read(__ctsvc_sockfd, dest, msg.attach_sizes[0]);
-	RETVM_IF(-1 == ret, CONTACTS_ERROR_IPC, "__ctsvc_safe_read() Failed(errno = %d)", errno);
+	RETVM_IF(-1 == ret, CONTACTS_ERROR_IPC, "__ctsvc_safe_read() Fail(errno = %d)", errno);
 
 	if (atoi(dest) ==0)
 		*completed = false;

@@ -68,7 +68,7 @@ static int __ctsvc_db_addressbook_value_set(cts_stmt stmt, contacts_record_h *re
 	ctsvc_addressbook_s *addressbook;
 
 	ret = contacts_record_create(_contacts_address_book._uri, record);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "contacts_record_create is failed(%d)", ret);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "contacts_record_create Fail(%d)", ret);
 	addressbook = (ctsvc_addressbook_s*)*record;
 
 	i = 0;
@@ -96,11 +96,11 @@ static int __ctsvc_db_addressbook_get_record(int id, contacts_record_h* out_reco
 				"FROM "CTS_TABLE_ADDRESSBOOKS" WHERE addressbook_id = %d", id);
 
 	ret = ctsvc_query_prepare(query, &stmt);
-	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
 
 	ret = ctsvc_stmt_step(stmt);
 	if (1 /*CTS_TRUE*/ != ret) {
-		CTS_ERR("ctsvc_stmt_step() Failed(%d)", ret);
+		CTS_ERR("ctsvc_stmt_step() Fail(%d)", ret);
 		ctsvc_stmt_finalize(stmt);
 		if (CONTACTS_ERROR_NONE == ret)
 			return CONTACTS_ERROR_NO_DATA;
@@ -112,7 +112,7 @@ static int __ctsvc_db_addressbook_get_record(int id, contacts_record_h* out_reco
 
 	ctsvc_stmt_finalize(stmt);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("__ctsvc_db_addressbook_value_set(ALL) Failed(%d)", ret);
+		CTS_ERR("__ctsvc_db_addressbook_value_set(ALL) Fail(%d)", ret);
 		return ret;
 	}
 
@@ -136,7 +136,7 @@ static int __ctsvc_db_addressbook_insert_record(contacts_record_h record, int *i
 			"Invalid parameter : record is invalid type(%d)", addressbook->base.r_type);
 
 	ret = ctsvc_begin_trans();
-	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "DB error : ctsvc_begin_trans() Failed(%d)", ret);
+	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "DB error : ctsvc_begin_trans() Fail(%d)", ret);
 
 	// Can not insert addressbook which has same account_id
 	int addresbook_id;
@@ -152,7 +152,7 @@ static int __ctsvc_db_addressbook_insert_record(contacts_record_h record, int *i
 			return CONTACTS_ERROR_INVALID_PARAMETER;
 		}
 		else {
-			CTS_ERR("DB error : ctsvc_query_get_first_int_result() Failed (%d)", ret);
+			CTS_ERR("DB error : ctsvc_query_get_first_int_result() Fail (%d)", ret);
 			return ret;
 		}
 	}
@@ -160,7 +160,7 @@ static int __ctsvc_db_addressbook_insert_record(contacts_record_h record, int *i
 	// check account_id validation
 	ret = account_create(&account);
 	if (ACCOUNT_ERROR_NONE != ret) {
-		CTS_ERR("account_create() Failed(%d)", ret);
+		CTS_ERR("account_create() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return CONTACTS_ERROR_SYSTEM;
 	}
@@ -182,7 +182,7 @@ static int __ctsvc_db_addressbook_insert_record(contacts_record_h record, int *i
 
 	ret = ctsvc_query_prepare(query, &stmt);
 	if (NULL == stmt) {
-		CTS_ERR("DB error : ctsvc_query_prepare() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_query_prepare() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
@@ -197,7 +197,7 @@ static int __ctsvc_db_addressbook_insert_record(contacts_record_h record, int *i
 	do {
 		ret = ctsvc_stmt_step(stmt);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("DB error : ctsvc_stmt_step() Failed(%d)", ret);
+			CTS_ERR("DB error : ctsvc_stmt_step() Fail(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
 			break;
 		}
@@ -211,7 +211,7 @@ static int __ctsvc_db_addressbook_insert_record(contacts_record_h record, int *i
 		ret = ctsvc_end_trans(true);
 		if (ret < CONTACTS_ERROR_NONE)
 		{
-			CTS_ERR("DB error : ctsvc_end_trans() Failed(%d)", ret);
+			CTS_ERR("DB error : ctsvc_end_trans() Fail(%d)", ret);
 			free(smack);
 			return ret;
 		}
@@ -243,7 +243,7 @@ static int __ctsvc_db_addressbook_update_record(contacts_record_h record)
 			"Invalid parameter : record is invalid type(%d)", addressbook->base.r_type);
 
 	ret = ctsvc_begin_trans();
-	RETVM_IF(ret, ret, "ctsvc_begin_trans() Failed(%d)", ret);
+	RETVM_IF(ret, ret, "ctsvc_begin_trans() Fail(%d)", ret);
 
 	ret = ctsvc_is_owner(addressbook->id);
 	if (CONTACTS_ERROR_NONE != ret) {
@@ -266,7 +266,7 @@ static int __ctsvc_db_addressbook_update_record(contacts_record_h record)
 		snprintf(query, sizeof(query), "UPDATE %s SET %s WHERE addressbook_id = %d", CTS_TABLE_ADDRESSBOOKS, set, addressbook->id);
 		ret = ctsvc_query_prepare(query, &stmt);
 		if (NULL == stmt) {
-			CTS_ERR("DB error : ctsvc_query_prepare() Failed(%d)", ret);
+			CTS_ERR("DB error : ctsvc_query_prepare() Fail(%d)", ret);
 			break;
 		}
 		if (bind_text) {
@@ -279,7 +279,7 @@ static int __ctsvc_db_addressbook_update_record(contacts_record_h record)
 		}
 		ret = ctsvc_stmt_step(stmt);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("ctsvc_stmt_step() Failed(%d)", ret);
+			CTS_ERR("ctsvc_stmt_step() Fail(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
 			break;
 		}
@@ -302,7 +302,7 @@ static int __ctsvc_db_addressbook_update_record(contacts_record_h record)
 	}
 
 	ret = ctsvc_end_trans(true);
-	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "DB error : ctsvc_end_trans() Failed(%d)", ret);
+	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "DB error : ctsvc_end_trans() Fail(%d)", ret);
 
 	return CONTACTS_ERROR_NONE;
 }
@@ -316,7 +316,7 @@ static int __ctsvc_db_addressbook_delete_record(int addressbook_id)
 
 	char query[CTS_SQL_MAX_LEN] = {0};
 	int ret = ctsvc_begin_trans();
-	RETVM_IF(CONTACTS_ERROR_NONE > ret, ret, "DB error : ctsvc_begin_trans() Failed(%d)", ret);
+	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "DB error : ctsvc_begin_trans() Fail(%d)", ret);
 
 	ret = ctsvc_is_owner(addressbook_id);
 	if (CONTACTS_ERROR_NONE != ret) {
@@ -335,7 +335,7 @@ static int __ctsvc_db_addressbook_delete_record(int addressbook_id)
 	do {
 		ret = ctsvc_query_exec(query);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("DB error : ctsvc_query_exec() Failed(%d)", ret);
+			CTS_ERR("DB error : ctsvc_query_exec() Fail(%d)", ret);
 			break;
 		}
 
@@ -354,13 +354,13 @@ static int __ctsvc_db_addressbook_delete_record(int addressbook_id)
 
 		ret = ctsvc_person_do_garbage_collection();
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("DB error : ctsvc_person_garbagecollection() Failed(%d)", ret);
+			CTS_ERR("DB error : ctsvc_person_garbagecollection() Fail(%d)", ret);
 			break;
 		}
 
 		ret = ctsvc_end_trans(true);
 		if (ret < CONTACTS_ERROR_NONE) {
-			CTS_ERR("DB error : ctsvc_end_trans() Failed(%d)", ret);
+			CTS_ERR("DB error : ctsvc_end_trans() Fail(%d)", ret);
 			return ret;
 		}
 
@@ -396,13 +396,13 @@ static int __ctsvc_db_addressbook_get_all_records(int offset, int limit,
 	}
 
 	ret = ctsvc_query_prepare(query, &stmt);
-	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
 
 	contacts_list_create(&list);
 	while ((ret = ctsvc_stmt_step(stmt))) {
 		contacts_record_h record;
 		if (1 != ret) {
-			CTS_ERR("DB error : ctsvc_stmt_step() Failed(%d)", ret);
+			CTS_ERR("DB error : ctsvc_stmt_step() Fail(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
 			contacts_list_destroy(list, true);
 			return ret;
@@ -438,7 +438,7 @@ static int __ctsvc_db_addressbook_get_records_with_query(contacts_query_h query,
 	while ((ret = ctsvc_stmt_step(stmt))) {
 		contacts_record_h record;
 		if (1 != ret) {
-			CTS_ERR("DB error : ctsvc_stmt_step() Failed(%d)", ret);
+			CTS_ERR("DB error : ctsvc_stmt_step() Fail(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
 			contacts_list_destroy(list, true);
 			return ret;
@@ -454,7 +454,7 @@ static int __ctsvc_db_addressbook_get_records_with_query(contacts_query_h query,
 					s_query->projection_count, s_query->property_count);
 
 			if (CONTACTS_ERROR_NONE != ret)
-				ASSERT_NOT_REACHED("To set projection is failed.\n");
+				ASSERT_NOT_REACHED("To set projection is Fail.\n");
 		}
 
 		for (i=0;i<field_count;i++) {

@@ -77,7 +77,7 @@ static int __ctsvc_db_phonelog_value_set(cts_stmt stmt, contacts_record_h *recor
 	ctsvc_phonelog_s *phonelog;
 
 	ret = contacts_record_create(_contacts_phone_log._uri, record);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "contacts_record_create is failed(%d)", ret);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "contacts_record_create Fail(%d)", ret);
 	phonelog = (ctsvc_phonelog_s*)*record;
 
 	i = 0;
@@ -113,11 +113,11 @@ static int __ctsvc_db_phonelog_get_record(int id, contacts_record_h* out_record)
 			"FROM "CTS_TABLE_PHONELOGS" WHERE id = %d", id);
 
 	ret = ctsvc_query_prepare(query, &stmt);
-	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
 
 	ret = ctsvc_stmt_step(stmt);
 	if (1 /*CTS_TRUE*/ != ret) {
-		CTS_ERR("ctsvc_stmt_step() Failed(%d)", ret);
+		CTS_ERR("ctsvc_stmt_step() Fail(%d)", ret);
 		ctsvc_stmt_finalize(stmt);
 		if (CONTACTS_ERROR_NONE == ret)
 			return CONTACTS_ERROR_NO_DATA;
@@ -129,7 +129,7 @@ static int __ctsvc_db_phonelog_get_record(int id, contacts_record_h* out_record)
 
 	ctsvc_stmt_finalize(stmt);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("__ctsvc_db_phonelog_value_set(ALL) Failed(%d)", ret);
+		CTS_ERR("__ctsvc_db_phonelog_value_set(ALL) Fail(%d)", ret);
 		return ret;
 	}
 
@@ -157,7 +157,7 @@ static int __ctsvc_db_phonelog_update_record(contacts_record_h record)
 	RETVM_IF(CTSVC_PROPERTY_FLAG_DIRTY != (phonelog->base.property_flag & CTSVC_PROPERTY_FLAG_DIRTY), CONTACTS_ERROR_NONE, "No update");
 
 	ret = ctsvc_begin_trans();
-	RETVM_IF(ret, ret, "ctsvc_begin_trans() Failed(%d)", ret);
+	RETVM_IF(ret, ret, "ctsvc_begin_trans() Fail(%d)", ret);
 
 	snprintf(query, sizeof(query),
 			"SELECT id FROM "CTS_TABLE_PHONELOGS" WHERE id = %d", phonelog->id);
@@ -190,7 +190,7 @@ static int __ctsvc_db_phonelog_update_record(contacts_record_h record)
 	}
 
 	ret = ctsvc_end_trans(true);
-	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "DB error : ctsvc_end_trans() Failed(%d)", ret);
+	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "DB error : ctsvc_end_trans() Fail(%d)", ret);
 
 	return CONTACTS_ERROR_NONE;
 }
@@ -202,7 +202,7 @@ static int __ctsvc_db_phonelog_delete_record(int id)
 	char query[CTS_SQL_MAX_LEN] = {0};
 
 	ret = ctsvc_begin_trans();
-	RETVM_IF(ret, ret, "ctsvc_begin_trans() Failed(%d)", ret);
+	RETVM_IF(ret, ret, "ctsvc_begin_trans() Fail(%d)", ret);
 
 	snprintf(query, sizeof(query),
 			"SELECT id FROM "CTS_TABLE_PHONELOGS" WHERE id = %d", id);
@@ -218,7 +218,7 @@ static int __ctsvc_db_phonelog_delete_record(int id)
 
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_query_exec() Failed(%d)", ret);
+		CTS_ERR("ctsvc_query_exec() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
@@ -227,7 +227,7 @@ static int __ctsvc_db_phonelog_delete_record(int id)
 
 	ret = ctsvc_end_trans(true);
 	if (ret < CONTACTS_ERROR_NONE) {
-		CTS_ERR("DB error : ctsvc_end_trans() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_end_trans() Fail(%d)", ret);
 		return ret;
 	}
 	else
@@ -254,13 +254,13 @@ static int __ctsvc_db_phonelog_get_all_records(int offset, int limit,
 	}
 
 	ret = ctsvc_query_prepare(query, &stmt);
-	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
 
 	contacts_list_create(&list);
 	while ((ret = ctsvc_stmt_step(stmt))) {
 		contacts_record_h record;
 		if (1 != ret) {
-			CTS_ERR("DB error : ctsvc_stmt_step() Failed(%d)", ret);
+			CTS_ERR("DB error : ctsvc_stmt_step() Fail(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
 			contacts_list_destroy(list, true);
 			return ret;
@@ -297,7 +297,7 @@ static int __ctsvc_db_phonelog_get_records_with_query(contacts_query_h query, in
 	while ((ret = ctsvc_stmt_step(stmt))) {
 		contacts_record_h record;
 		if (1 != ret) {
-			CTS_ERR("DB error : ctsvc_stmt_step() Failed(%d)", ret);
+			CTS_ERR("DB error : ctsvc_stmt_step() Fail(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
 			contacts_list_destroy(list, true);
 			return ret;
@@ -311,7 +311,7 @@ static int __ctsvc_db_phonelog_get_records_with_query(contacts_query_h query, in
 			field_count = s_query->projection_count;
 
 			if (CONTACTS_ERROR_NONE != ctsvc_record_set_projection_flags(record, s_query->projection, s_query->projection_count, s_query->property_count)) {
-				ASSERT_NOT_REACHED("To set projection is failed.\n");
+				ASSERT_NOT_REACHED("To set projection is Fail.\n");
 			}
 		}
 
@@ -403,7 +403,7 @@ static int __ctsvc_db_phonelog_increase_outgoing_count(ctsvc_phonelog_s *phonelo
 	}
 
 	ret = ctsvc_query_exec(query);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Failed(%d)", ret);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Fail(%d)", ret);
 
 	return CONTACTS_ERROR_NONE;
 }
@@ -424,7 +424,7 @@ static int  __ctsvc_db_phonelog_insert(ctsvc_phonelog_s *phonelog, int *id)
 			phonelog->log_type, phonelog->log_time, phonelog->extra_data1);
 
 	ret = ctsvc_query_prepare(query, &stmt);
-	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
 
 	if (phonelog->address) {
 		ctsvc_stmt_bind_text(stmt, 1, phonelog->address);
@@ -452,10 +452,10 @@ static int  __ctsvc_db_phonelog_insert(ctsvc_phonelog_s *phonelog, int *id)
 		ctsvc_stmt_bind_text(stmt, 6, phonelog->extra_data2);
 
 #ifdef ENABLE_SIM_FEATURE
-	if (phonelog->sim_slot_no >= 0) {
+	if (0 <= phonelog->sim_slot_no) {
 		int sim_info_id;
 		sim_info_id = ctsvc_server_sim_get_info_id_by_sim_slot_no(phonelog->sim_slot_no);
-		if (sim_info_id > 0)
+		if (0 < sim_info_id)
 			ctsvc_stmt_bind_int(stmt, 7, sim_info_id);
 	}
 	else
@@ -464,7 +464,7 @@ static int  __ctsvc_db_phonelog_insert(ctsvc_phonelog_s *phonelog, int *id)
 
 	ret = ctsvc_stmt_step(stmt);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_stmt_step() Failed(%d)", ret);
+		CTS_ERR("ctsvc_stmt_step() Fail(%d)", ret);
 		ctsvc_stmt_finalize(stmt);
 		return ret;
 	}
@@ -489,18 +489,18 @@ static int __ctsvc_db_phonelog_insert_record(contacts_record_h record, int *id)
 			"Invalid parameter : The phone_log has ID(%d)", phonelog->id);
 
 	ret = ctsvc_begin_trans();
-	RETVM_IF(ret, ret, "ctsvc_begin_trans() Failed(%d)", ret);
+	RETVM_IF(ret, ret, "ctsvc_begin_trans() Fail(%d)", ret);
 
 	ret = __ctsvc_db_phonelog_insert(phonelog, id);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("__ctsvc_db_phonelog_insert() Failed(%d)", ret);
+		CTS_ERR("__ctsvc_db_phonelog_insert() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
 
 	if (0 < phonelog->person_id) {
 		ret = __ctsvc_db_phonelog_increase_outgoing_count(phonelog);
-		WARN_IF(CONTACTS_ERROR_NONE != ret, "__ctsvc_db_phonelog_increase_outgoing_count() Failed(%d)", ret);
+		WARN_IF(CONTACTS_ERROR_NONE != ret, "__ctsvc_db_phonelog_increase_outgoing_count() Fail(%d)", ret);
 	}
 
 #ifdef _CONTACTS_IPC_SERVER
@@ -510,7 +510,7 @@ static int __ctsvc_db_phonelog_insert_record(contacts_record_h record, int *id)
 
 	ret = ctsvc_end_trans(true);
 	if (ret < CONTACTS_ERROR_NONE) {
-		CTS_ERR("DB error : ctsvc_end_trans() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_end_trans() Fail(%d)", ret);
 		return ret;
 	}
 	return CONTACTS_ERROR_NONE;

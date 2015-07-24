@@ -36,7 +36,7 @@ int ctsvc_db_activity_photo_get_value_from_stmt(cts_stmt stmt, contacts_record_h
 	int start_count = 0;
 
 	ret = contacts_record_create(_contacts_activity_photo._uri, (contacts_record_h *)&activity_photo);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "contacts_record_create is failed(%d)", ret);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "contacts_record_create Fail(%d)", ret);
 
 	activity_photo->id = ctsvc_stmt_get_int(stmt, start_count++);
 	activity_photo->activity_id = ctsvc_stmt_get_int(stmt, start_count++);
@@ -70,13 +70,13 @@ int ctsvc_db_activity_photo_insert(contacts_record_h record, int activity_id, in
 			activity_id, activity_photo->sort_index);
 
 	ret = ctsvc_query_prepare(query, &stmt);
-	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
 
 	sqlite3_bind_text(stmt, 1, activity_photo->photo_url, strlen(activity_photo->photo_url), SQLITE_STATIC);
 
 	ret = ctsvc_stmt_step(stmt);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_stmt_step() Failed(%d)", ret);
+		CTS_ERR("ctsvc_stmt_step() Fail(%d)", ret);
 		ctsvc_stmt_finalize(stmt);
 		return ret;
 	}
@@ -135,7 +135,7 @@ int ctsvc_db_activity_photo_delete(int id)
 	snprintf(query, sizeof(query), "DELETE FROM "CTS_TABLE_ACTIVITY_PHOTOS" WHERE id = %d", id);
 
 	ret = ctsvc_query_exec(query);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_query_exec() Failed(%d)", ret);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_query_exec() Fail(%d)", ret);
 
 	ctsvc_set_activity_noti();
 	ctsvc_set_activity_photo_noti();
@@ -156,12 +156,12 @@ int ctsvc_db_activity_photo_get_records(int activity_id, contacts_record_h recor
 						"ORDER BY sort_index ASC", activity_id);
 
 	ret = ctsvc_query_prepare(query, &stmt);
-	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
 
 	contacts_list_create(&list);
 	while ((ret = ctsvc_stmt_step(stmt))) {
 		if (1 != ret) {
-			CTS_ERR("DB error : ctsvc_stmt_step() Failed(%d)", ret);
+			CTS_ERR("DB error : ctsvc_stmt_step() Fail(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
 			contacts_list_destroy(list, true);
 			return ret;

@@ -34,7 +34,7 @@ int ctsvc_addressbook_reset_internal_addressbook(void)
 	int ret;
 
 	ret = ctsvc_begin_trans();
-	RETVM_IF(CONTACTS_ERROR_NONE > ret, ret, "DB error : ctsvc_begin_trans() Failed(%d)", ret);
+	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "DB error : ctsvc_begin_trans() Fail(%d)", ret);
 
 	ret = ctsvc_is_owner(0);
 	if (CONTACTS_ERROR_NONE != ret) {
@@ -54,7 +54,7 @@ int ctsvc_addressbook_reset_internal_addressbook(void)
 	do {
 		ret = ctsvc_query_exec(query);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("DB error : ctsvc_query_exec() Failed(%d)", ret);
+			CTS_ERR("DB error : ctsvc_query_exec() Fail(%d)", ret);
 			break;
 		}
 
@@ -63,7 +63,7 @@ int ctsvc_addressbook_reset_internal_addressbook(void)
 
 		ret = ctsvc_query_exec(query);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("DB error : ctsvc_query_exec() Failed(%d)", ret);
+			CTS_ERR("DB error : ctsvc_query_exec() Fail(%d)", ret);
 			break;
 		}
 
@@ -71,7 +71,7 @@ int ctsvc_addressbook_reset_internal_addressbook(void)
 				CTS_TABLE_GROUPS, 0 /*CTS_ADDRESSBOOK_INTERNAL*/);
 		ret = ctsvc_query_exec(query);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("DB error : ctsvc_query_exec() Failed(%d)", ret);
+			CTS_ERR("DB error : ctsvc_query_exec() Fail(%d)", ret);
 			break;
 		}
 
@@ -79,7 +79,7 @@ int ctsvc_addressbook_reset_internal_addressbook(void)
 				CTS_TABLE_GROUP_DELETEDS, 0 /*CTS_ADDRESSBOOK_INTERNAL*/);
 		ret = ctsvc_query_exec(query);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("DB error : ctsvc_query_exec() Failed(%d)", ret);
+			CTS_ERR("DB error : ctsvc_query_exec() Fail(%d)", ret);
 			break;
 		}
 
@@ -87,13 +87,13 @@ int ctsvc_addressbook_reset_internal_addressbook(void)
 				CTS_TABLE_DELETEDS, 0 /*CTS_ADDRESSBOOK_INTERNAL*/);
 		ret = ctsvc_query_exec(query);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("DB error : ctsvc_query_exec() Failed(%d)", ret);
+			CTS_ERR("DB error : ctsvc_query_exec() Fail(%d)", ret);
 			break;
 		}
 
 		ret = ctsvc_person_do_garbage_collection();
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("DB error : ctsvc_person_garbagecollection() Failed(%d)", ret);
+			CTS_ERR("DB error : ctsvc_person_garbagecollection() Fail(%d)", ret);
 			break;
 		}
 
@@ -103,7 +103,7 @@ int ctsvc_addressbook_reset_internal_addressbook(void)
 		ctsvc_set_group_noti();
 		ret = ctsvc_end_trans(true);
 		if (ret < CONTACTS_ERROR_NONE) {
-			CTS_ERR("DB error : ctsvc_end_trans() Failed(%d)", ret);
+			CTS_ERR("DB error : ctsvc_end_trans() Fail(%d)", ret);
 			return ret;
 		}
 
@@ -126,13 +126,13 @@ int ctsvc_addressbook_delete(int account_id)
 
 	// delete addressbook whish has account_id
 	ret = ctsvc_begin_trans();
-	RETVM_IF (CONTACTS_ERROR_NONE != ret, ret, "ctsvc_begin_trans() Failed(%d)", ret);
+	RETVM_IF (CONTACTS_ERROR_NONE != ret, ret, "ctsvc_begin_trans() Fail(%d)", ret);
 
 	snprintf(query, sizeof(query), "SELECT addressbook_id FROM %s WHERE account_id = %d",
 			CTS_TABLE_ADDRESSBOOKS, account_id);
 	ret = ctsvc_query_get_first_int_result(query, &addressbook_id);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB error : ctsvc_query_get_first_int_result() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_query_get_first_int_result() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
@@ -150,7 +150,7 @@ int ctsvc_addressbook_delete(int account_id)
 			CTS_TABLE_ADDRESSBOOKS, account_id);
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB error : ctsvc_query_exec() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_query_exec() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
@@ -171,7 +171,7 @@ int ctsvc_addressbook_delete(int account_id)
 
 	ret = ctsvc_person_do_garbage_collection();
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB error : ctsvc_person_garbagecollection() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_person_garbagecollection() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}

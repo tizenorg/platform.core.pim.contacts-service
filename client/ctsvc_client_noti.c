@@ -165,7 +165,7 @@ API int contacts_db_add_changed_cb_with_info(const char* view_uri,
 	if (!info) {
 		info = calloc(1, sizeof(subscribe_info_s));
 		if (NULL == info) {
-			CTS_ERR("calloc() Failed");
+			CTS_ERR("calloc() Fail");
 			ctsvc_mutex_unlock(CTS_MUTEX_PIMS_IPC_PUBSUB);
 			return CONTACTS_ERROR_OUT_OF_MEMORY;
 		}

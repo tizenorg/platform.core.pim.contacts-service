@@ -64,7 +64,7 @@ static int __ctsvc_phonelog_create(contacts_record_h *out_record)
 
 	phonelog = (ctsvc_phonelog_s*)calloc(1, sizeof(ctsvc_phonelog_s));
 	RETVM_IF(NULL == phonelog, CONTACTS_ERROR_OUT_OF_MEMORY,
-			"Out of memory : calloc is failed");
+			"Out of memory : calloc is Fail");
 
 	*out_record = (contacts_record_h)phonelog;
 
@@ -92,7 +92,7 @@ static int __ctsvc_phonelog_clone(contacts_record_h record, contacts_record_h *o
     src_data = (ctsvc_phonelog_s*)record;
     out_data = calloc(1, sizeof(ctsvc_phonelog_s));
     RETVM_IF(NULL == out_data, CONTACTS_ERROR_OUT_OF_MEMORY,
-			 "Out of memeory : calloc(ctsvc_phonelog_s) Failed(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
+			 "Out of memeory : calloc(ctsvc_phonelog_s) Fail(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
 
 	out_data->id = src_data->id;
 	out_data->address = SAFE_STRDUP(src_data->address);
@@ -176,12 +176,12 @@ static int __ctsvc_phonelog_set_int(contacts_record_h record, unsigned int prope
 		phonelog->id = value;
 		break;
 	case CTSVC_PROPERTY_PHONELOG_PERSON_ID:
-		RETVM_IF(phonelog->id > 0, CONTACTS_ERROR_INVALID_PARAMETER,
+		RETVM_IF(0 < phonelog->id, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (phonelog)", property_id);
 		phonelog->person_id = value;
 		break;
 	case CTSVC_PROPERTY_PHONELOG_LOG_TIME:
-		RETVM_IF(phonelog->id > 0, CONTACTS_ERROR_INVALID_PARAMETER,
+		RETVM_IF(0 < phonelog->id, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (phonelog)", property_id);
 		phonelog->log_time = value;
 		break;
@@ -200,12 +200,12 @@ static int __ctsvc_phonelog_set_int(contacts_record_h record, unsigned int prope
 		}
 		break;
 	case CTSVC_PROPERTY_PHONELOG_EXTRA_DATA1:
-		RETVM_IF(phonelog->id > 0, CONTACTS_ERROR_INVALID_PARAMETER,
+		RETVM_IF(0 < phonelog->id, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (phonelog)", property_id);
 		phonelog->extra_data1 = value;
 		break;
 	case CTSVC_PROPERTY_PHONELOG_SIM_SLOT_NO:
-		RETVM_IF(phonelog->id > 0, CONTACTS_ERROR_INVALID_PARAMETER,
+		RETVM_IF(0 < phonelog->id, CONTACTS_ERROR_INVALID_PARAMETER,
 			"Invalid parameter : property_id(%d) is a read-only value (phonelog)", property_id);
 		phonelog->sim_slot_no = value;
 		break;
@@ -222,7 +222,7 @@ static int __ctsvc_phonelog_set_str(contacts_record_h record, unsigned int prope
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_PHONELOG_ADDRESS:
-		RETVM_IF(phonelog->id > 0, CONTACTS_ERROR_INVALID_PARAMETER,
+		RETVM_IF(0 < phonelog->id, CONTACTS_ERROR_INVALID_PARAMETER,
 			"Invalid parameter : property_id(%d) is a read-only value (phonelog)", property_id);
 		FREEandSTRDUP(phonelog->address, str);
 		break;

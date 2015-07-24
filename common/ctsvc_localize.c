@@ -143,7 +143,7 @@ static inline bool is_chosung(UChar src)
 	unicode_value2 = (0xFF & (src));
 
 	if (unicode_value1 == 0x31
-			&& (unicode_value2 >= 0x30 && unicode_value2 <= 0x4e))
+			&& (0x30 <= unicode_value2 && unicode_value2 <= 0x4e))
 		return true;
 	return false;
 }
@@ -232,7 +232,7 @@ int ctsvc_convert_japanese_to_hiragana_unicode(UChar *src, UChar *dest, int dest
 
 		if (CTSVC_COMPARE_BETWEEN(CTSVC_JAPANESE_KATAKANA_START, src[i], CTSVC_JAPANESE_KATAKANA_END)) {
 			unicode_value1 = 0x30;
-			if ((unicode_value2 >= 0xa1 && unicode_value2 <= 0xef)
+			if ((0xa1 <= unicode_value2 && unicode_value2 <= 0xef)
 					|| (unicode_value2 == 0xF2 || unicode_value2 == 0xF3)) {
 				unicode_value2 -= 0x60;
 				dest[j] = unicode_value1 << 8 | unicode_value2;
@@ -244,18 +244,18 @@ int ctsvc_convert_japanese_to_hiragana_unicode(UChar *src, UChar *dest, int dest
 		else if (CTSVC_COMPARE_BETWEEN(CTSVC_JAPANESE_HALFWIDTH_AND_FULLWIDTH_FORMS_START, src[i], CTSVC_JAPANESE_HALFWIDTH_AND_FULLWIDTH_FORMS_END)) {
 			unicode_value1 = 0x30;
 			if (i+1 < len && (0xFF & (src[i+1])) == 0x9E
-					&& unicode_value2 >= 0x76 && unicode_value2 <= 0x89) {
+					&& 0x76 <= unicode_value2 && unicode_value2 <= 0x89) {
 				unicode_value2 = japanese_halfwidth_katakana_sonant_to_hiragana[unicode_value2 - 0x76];
 				dest[j] = unicode_value1 << 8 | unicode_value2;
 				i++;
 			}
 			else if (i+1 < len && (0xFF & (src[i])) == 0x9F
-					&& unicode_value2 >= 0x8a && unicode_value2 <= 0x8e) {
+					&& 0x8a <= unicode_value2 && unicode_value2 <= 0x8e) {
 				unicode_value2 = japanese_halfwidth_katakana_half_dullness_to_hiragana[unicode_value2 - 0x8a];
 				dest[j] = unicode_value1 << 8 | unicode_value2;
 				i++;
 			}
-			else if (unicode_value2 >= 0x66 && unicode_value2 <= 0x9d) {
+			else if (0x66 <= unicode_value2 && unicode_value2 <= 0x9d) {
 				unicode_value2 = japanese_halfwidth_katakana_to_hiragana[unicode_value2 - 0x66];
 				dest[j] = unicode_value1 << 8 | unicode_value2;
 			}
@@ -288,7 +288,7 @@ int ctsvc_convert_japanese_to_hiragana(const char *src, char **dest)
 
 	u_strFromUTF8(NULL, 0, &size, src, strlen(src), &status);
 	if (U_FAILURE(status) && status != U_BUFFER_OVERFLOW_ERROR) {
-		CTS_ERR("u_strFromUTF8 to get the dest length Failed(%s)", u_errorName(status));
+		CTS_ERR("u_strFromUTF8 to get the dest length Fail(%s)", u_errorName(status));
 		ret = CONTACTS_ERROR_SYSTEM;
 		goto DATA_FREE;
 	}
@@ -296,7 +296,7 @@ int ctsvc_convert_japanese_to_hiragana(const char *src, char **dest)
 	tmp_result = calloc(1, sizeof(UChar) * (size + 1));
 	u_strFromUTF8(tmp_result, size + 1, NULL, src, -1, &status);
 	if (U_FAILURE(status)) {
-		CTS_ERR("u_strFromUTF8 Failed(%s)", u_errorName(status));
+		CTS_ERR("u_strFromUTF8 Fail(%s)", u_errorName(status));
 		ret = CONTACTS_ERROR_SYSTEM;
 		goto DATA_FREE;
 	}
@@ -307,7 +307,7 @@ int ctsvc_convert_japanese_to_hiragana(const char *src, char **dest)
 
 	u_strToUTF8(NULL, 0, &size, result, -1, &status);
 	if (U_FAILURE(status) && status != U_BUFFER_OVERFLOW_ERROR) {
-		CTS_ERR("u_strToUTF8 to get the dest length Failed(%s)", u_errorName(status));
+		CTS_ERR("u_strToUTF8 to get the dest length Fail(%s)", u_errorName(status));
 		ret = CONTACTS_ERROR_SYSTEM;
 		goto DATA_FREE;
 	}
@@ -318,7 +318,7 @@ int ctsvc_convert_japanese_to_hiragana(const char *src, char **dest)
 	u_strToUTF8(*dest, size + 1, &size, result, -1, &status);
 
 	if (U_FAILURE(status)) {
-		CTS_ERR("u_strToUTF8 Failed(%s)", u_errorName(status));
+		CTS_ERR("u_strToUTF8 Fail(%s)", u_errorName(status));
 		ret =  CONTACTS_ERROR_SYSTEM;
 		goto DATA_FREE;
 	}
@@ -501,7 +501,7 @@ int ctsvc_check_language_type(const char *src)
 
 	if (src && src[0]) {
 		length = ctsvc_check_utf8(src[0]);
-		RETVM_IF(length <= 0, CONTACTS_ERROR_INTERNAL, "check_utf8 failed");
+		RETVM_IF(length <= 0, CONTACTS_ERROR_INTERNAL, "check_utf8 Fail");
 
 		strncpy(temp, src, length);
 
@@ -509,16 +509,16 @@ int ctsvc_check_language_type(const char *src)
 
 		u_strFromUTF8(tmp_result, array_sizeof(tmp_result), NULL, temp, -1, &status);
 			RETVM_IF(U_FAILURE(status), CONTACTS_ERROR_SYSTEM,
-					"u_strFromUTF8() Failed(%s)", u_errorName(status));
+					"u_strFromUTF8() Fail(%s)", u_errorName(status));
 
 		u_strToUpper(tmp_result, array_sizeof(tmp_result), tmp_result, -1, NULL, &status);
 		RETVM_IF(U_FAILURE(status), CONTACTS_ERROR_SYSTEM,
-				"u_strToLower() Failed(%s)", u_errorName(status));
+				"u_strToLower() Fail(%s)", u_errorName(status));
 
 		size = unorm_normalize(tmp_result, -1, UNORM_NFD, 0,
 				(UChar *)result, array_sizeof(result), &status);
 		RETVM_IF(U_FAILURE(status), CONTACTS_ERROR_SYSTEM,
-				"unorm_normalize(%s) Failed(%s)", src, u_errorName(status));
+				"unorm_normalize(%s) Fail(%s)", src, u_errorName(status));
 
 		CTS_VERBOSE("0x%x%x", (0xFF00 & (tmp_result[0])) >> 8,  (0xFF & (tmp_result[0])));
 
@@ -577,14 +577,14 @@ int ctsvc_get_name_sort_type(const char *src)
 	char char_src[10];
 
 	char_len = ctsvc_check_utf8(src[0]);
-	RETVM_IF(char_len <= 0, CONTACTS_ERROR_INVALID_PARAMETER, "check_utf8 failed");
+	RETVM_IF(char_len <= 0, CONTACTS_ERROR_INVALID_PARAMETER, "check_utf8 Fail");
 
 	memcpy(char_src, &src[0], char_len);
 	char_src[char_len] = '\0';
 
 	u_strFromUTF8(tmp_result, array_sizeof(tmp_result), NULL, char_src, -1, &status);
 	RETVM_IF(U_FAILURE(status), CONTACTS_ERROR_SYSTEM,
-			"u_strFromUTF8() Failed(%s)", u_errorName(status));
+			"u_strFromUTF8() Fail(%s)", u_errorName(status));
 
 	language_type = ctsvc_check_language(tmp_result);
 	ret = ctsvc_get_sort_type_from_language(language_type);
@@ -856,29 +856,29 @@ int ctsvc_get_chosung(const char *src, char *dest, int dest_size)
 	for (i=0;i<str_len;i+=char_len) {
 		char char_src[10];
 		char_len = ctsvc_check_utf8(src[i]);
-		RETVM_IF(char_len <= 0, CONTACTS_ERROR_INVALID_PARAMETER, "check_utf8 failed");
+		RETVM_IF(char_len <= 0, CONTACTS_ERROR_INVALID_PARAMETER, "check_utf8 Fail");
 
 		memcpy(char_src, &src[i], char_len);
 		char_src[char_len] = '\0';
 
 		u_strFromUTF8(tmp_result, array_sizeof(tmp_result), NULL, char_src, -1, &status);
 		RETVM_IF(U_FAILURE(status), CONTACTS_ERROR_SYSTEM,
-				"u_strFromUTF8() Failed(%s)", u_errorName(status));
+				"u_strFromUTF8() Fail(%s)", u_errorName(status));
 
 		u_strToUpper(tmp_result, array_sizeof(tmp_result), tmp_result, -1, NULL, &status);
 		RETVM_IF(U_FAILURE(status), CONTACTS_ERROR_SYSTEM,
-				"u_strToLower() Failed(%s)", u_errorName(status));
+				"u_strToLower() Fail(%s)", u_errorName(status));
 
 		size = unorm_normalize(tmp_result, -1, UNORM_NFD, 0,
 				(UChar *)result, array_sizeof(result), &status);
 		RETVM_IF(U_FAILURE(status), CONTACTS_ERROR_SYSTEM,
-				"unorm_normalize(%s) Failed(%s)", src, u_errorName(status));
+				"unorm_normalize(%s) Fail(%s)", src, u_errorName(status));
 		ctsvc_extra_normalize(result, size);
 		u_strToUTF8(temp, dest_size, &size, result, -1, &status);
 		RETVM_IF(U_FAILURE(status), CONTACTS_ERROR_SYSTEM,
-				"u_strToUTF8() Failed(%s)", u_errorName(status));
+				"u_strToUTF8() Fail(%s)", u_errorName(status));
 		chosung_len = ctsvc_check_utf8(temp[0]);
-		RETVM_IF(chosung_len <= 0, CONTACTS_ERROR_INVALID_PARAMETER, "check_utf8 failed");
+		RETVM_IF(chosung_len <= 0, CONTACTS_ERROR_INVALID_PARAMETER, "check_utf8 Fail");
 		memcpy(&dest[j], temp, chosung_len);
 		j += chosung_len;
 		count++;
@@ -903,14 +903,14 @@ int ctsvc_get_korean_search_pattern(const char *src, char *dest, int dest_size)
 	for (i=0;i<str_len;i+=char_len) {
 		char char_src[10];
 		char_len = ctsvc_check_utf8(src[i]);
-		RETVM_IF(char_len <= 0, CONTACTS_ERROR_INVALID_PARAMETER, "check_utf8 failed");
+		RETVM_IF(char_len <= 0, CONTACTS_ERROR_INVALID_PARAMETER, "check_utf8 Fail");
 
 		memcpy(char_src, &src[i], char_len);
 		char_src[char_len] = '\0';
 
 		u_strFromUTF8(tmp_result, array_sizeof(tmp_result), NULL, char_src, -1, &status);
 		RETVM_IF(U_FAILURE(status), CONTACTS_ERROR_SYSTEM,
-				"u_strFromUTF8() Failed(%s)", u_errorName(status));
+				"u_strFromUTF8() Fail(%s)", u_errorName(status));
 
 		if (is_chosung(tmp_result[0]))
 		{
@@ -918,7 +918,7 @@ int ctsvc_get_korean_search_pattern(const char *src, char *dest, int dest_size)
 
 			u_strToUTF8(&dest[j], dest_size - j, &size, tmp_result, -1, &status);
 			RETVM_IF(U_FAILURE(status), CONTACTS_ERROR_SYSTEM,
-					"u_strToUTF8() Failed(%s)", u_errorName(status));
+					"u_strToUTF8() Fail(%s)", u_errorName(status));
 			j += size;
 			dest[j] = '*';
 			j++;
@@ -926,15 +926,15 @@ int ctsvc_get_korean_search_pattern(const char *src, char *dest, int dest_size)
 		else {
 			u_strToUpper(tmp_result, array_sizeof(tmp_result), tmp_result, -1, NULL, &status);
 			RETVM_IF(U_FAILURE(status), CONTACTS_ERROR_SYSTEM,
-					"u_strToUpper() Failed(%s)", u_errorName(status));
+					"u_strToUpper() Fail(%s)", u_errorName(status));
 			size = unorm_normalize(tmp_result, -1, UNORM_NFD, 0,
 					(UChar *)result, array_sizeof(result), &status);
 			RETVM_IF(U_FAILURE(status), CONTACTS_ERROR_SYSTEM,
-					"unorm_normalize(%s) Failed(%s)", src, u_errorName(status));
+					"unorm_normalize(%s) Fail(%s)", src, u_errorName(status));
 			ctsvc_extra_normalize(result, size);
 			u_strToUTF8(&dest[j], dest_size - j, &size, result, -1, &status);
 			RETVM_IF(U_FAILURE(status), CONTACTS_ERROR_SYSTEM,
-					"u_strToUTF8() Failed(%s)", u_errorName(status));
+					"u_strToUTF8() Fail(%s)", u_errorName(status));
 			j += size;
 
 		}

@@ -37,7 +37,7 @@ int ctsvc_db_image_get_value_from_stmt(cts_stmt stmt, contacts_record_h *record,
 	ctsvc_image_s *image;
 
 	ret = contacts_record_create(_contacts_image._uri, (contacts_record_h *)&image);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "contacts_record_create is failed(%d)", ret);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "contacts_record_create Fail(%d)", ret);
 
 	image->id = ctsvc_stmt_get_int(stmt, start_count++);
 	image->contact_id = ctsvc_stmt_get_int(stmt, start_count++);
@@ -74,7 +74,7 @@ static int __ctsvc_db_image_reset_default(int image_id, int contact_id)
 			"UPDATE "CTS_TABLE_DATA" SET is_default=0, is_primary_default=0 WHERE id != %d AND contact_id = %d AND datatype=%d",
 			image_id, contact_id, CTSVC_DATA_IMAGE);
 	ret = ctsvc_query_exec(query);
-	WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_query_exec() Failed(%d)", ret);
+	WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_query_exec() Fail(%d)", ret);
 	return ret;
 }
 
@@ -100,7 +100,7 @@ int ctsvc_db_image_insert(contacts_record_h record, int contact_id, bool is_my_p
 	image_id = ctsvc_db_get_next_id(CTS_TABLE_DATA);
 	ret = ctsvc_contact_add_image_file(contact_id, image_id, image->path, image_path, sizeof(image_path));
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_contact_add_image_file() Failed(%d)", ret);
+		CTS_ERR("ctsvc_contact_add_image_file() Fail(%d)", ret);
 		return ret;
 	}
 	free(image->path);
@@ -112,13 +112,13 @@ int ctsvc_db_image_insert(contacts_record_h record, int contact_id, bool is_my_p
 			image_id, contact_id, is_my_profile, CTSVC_DATA_IMAGE, image->is_default, image->is_default, image->type);
 
 	ret = ctsvc_query_prepare(query, &stmt);
-	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
 
 	__ctsvc_image_bind_stmt(stmt, image, 1);
 
 	ret = ctsvc_stmt_step(stmt);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB error : ctsvc_stmt_step() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_stmt_step() Fail(%d)", ret);
 		ctsvc_stmt_finalize(stmt);
 		return ret;
 	}
@@ -168,7 +168,7 @@ int ctsvc_db_image_update(contacts_record_h record, int contact_id, bool is_my_p
 		}
 
 		ret = ctsvc_contact_update_image_file(contact_id, image->id, image->path, image_path, sizeof(image_path));
-		RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_contact_update_image_file() Failed(%d)", ret);
+		RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_contact_update_image_file() Fail(%d)", ret);
 
 		if (*image_path) {
 			free(image->path);
@@ -207,7 +207,7 @@ int ctsvc_db_image_delete(int id, bool is_my_profile)
 			id, CTSVC_DATA_IMAGE);
 
 	ret = ctsvc_query_exec(query);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_query_exec() Failed(%d)", ret);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_query_exec() Fail(%d)", ret);
 
 	if (!is_my_profile)
 		ctsvc_set_image_noti();
@@ -222,7 +222,7 @@ void ctsvc_db_image_delete_callback(sqlite3_context *context, int argc, sqlite3_
 	int ret;
 	const unsigned char* image_path;
 
-	if (argc > 1) {
+	if (1 < argc) {
 		sqlite3_result_null(context);
 		return;
 	}
@@ -230,7 +230,7 @@ void ctsvc_db_image_delete_callback(sqlite3_context *context, int argc, sqlite3_
 
 	ret = ctsvc_contact_delete_image_file_with_path(image_path);
 	WARN_IF (CONTACTS_ERROR_NONE != ret && CONTACTS_ERROR_NO_DATA != ret,
-			"ctsvc_contact_delete_image_file_with_path Failed(%d)", ret);
+			"ctsvc_contact_delete_image_file_with_path Fail(%d)", ret);
 
 	return;
 }

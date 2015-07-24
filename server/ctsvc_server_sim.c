@@ -113,7 +113,7 @@ static TapiHandle* __ctsvc_server_sim_get_tapi_handle(ctsvc_sim_info_s *info)
 		}
 		else {
 			info->handle = tel_init(info->cp_name);
-			RETVM_IF(NULL == info->handle, NULL, "tel_init() Failed");
+			RETVM_IF(NULL == info->handle, NULL, "tel_init() Fail");
 		}
 	}
 
@@ -175,11 +175,11 @@ static inline int __ctsvc_server_sim_record_add_num(contacts_record_h *record, c
 	RETVM_IF(number == NULL, CONTACTS_ERROR_INVALID_PARAMETER, "invalid number");
 
 	ret = contacts_record_create(_contacts_number._uri, record);
-	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create() Failed(%d)", ret);
+	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create() Fail(%d)", ret);
 	ret = contacts_record_set_str(*record, _contacts_number.number, number);
-	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_set_str() Failed(%d)", ret);
+	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_set_str() Fail(%d)", ret);
 	ret = contacts_record_set_int(*record, _contacts_number.type, CONTACTS_NUMBER_TYPE_OTHER);
-	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_set_int() Failed(%d)", ret);
+	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_set_int() Fail(%d)", ret);
 
 	return ret;
 }
@@ -191,11 +191,11 @@ static inline int __ctsvc_server_sim_record_add_email(contacts_record_h *record,
 	RETVM_IF(email == NULL, CONTACTS_ERROR_INVALID_PARAMETER, "invalid email");
 
 	ret = contacts_record_create(_contacts_email._uri, record);
-	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create() Failed(%d)", ret);
+	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create() Fail(%d)", ret);
 	ret = contacts_record_set_str(*record, _contacts_email.email, email);
-	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_set_str() Failed(%d)", ret);
+	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_set_str() Fail(%d)", ret);
 	ret = contacts_record_set_int(*record, _contacts_email.type,CONTACTS_EMAIL_TYPE_OTHER);
-	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_set_int() Failed(%d)", ret);
+	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_set_int() Fail(%d)", ret);
 
 	return ret;
 }
@@ -218,7 +218,7 @@ static int __ctsvc_server_sim_ctsvc_record_clone(sim_contact_s *record,
 	CTS_DBG("insert record->sim_index %d", record->sim_index);
 
 	ret = contacts_record_create(_contacts_contact._uri, contact);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "contacts_record_create failed(%d)", ret);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "contacts_record_create Fail(%d)", ret);
 	snprintf(sim_id, sizeof(sim_id), "%d", record->sim_index);
 	contacts_record_set_str(*contact, _contacts_contact.uid, sim_id);
 
@@ -361,7 +361,7 @@ static int __ctsvc_server_sim_insert_records_to_db(ctsvc_sim_info_s *info)
 		contacts_list_add(list, contact);
 		if (i == 50) {
 			ret = contacts_db_insert_records(list, NULL, NULL);
-			WARN_IF(ret < CONTACTS_ERROR_NONE, "contacts_db_insert_records() Failed(%d)", ret);
+			WARN_IF(ret < CONTACTS_ERROR_NONE, "contacts_db_insert_records() Fail(%d)", ret);
 			contacts_list_destroy(list, true);
 			list = NULL;
 			i = 0;
@@ -375,7 +375,7 @@ static int __ctsvc_server_sim_insert_records_to_db(ctsvc_sim_info_s *info)
 
 	if (list) {
 		ret = contacts_db_insert_records(list, NULL, NULL);
-		WARN_IF(ret < CONTACTS_ERROR_NONE, "contacts_db_insert_records() Failed(%d)", ret);
+		WARN_IF(ret < CONTACTS_ERROR_NONE, "contacts_db_insert_records() Fail(%d)", ret);
 		contacts_list_destroy(list, true);
 	}
 
@@ -410,7 +410,7 @@ static void __ctsvc_server_sim_import_contact_cb(TapiHandle *handle, int result,
 			start_index = (int)user_data;
 		CTS_DBG("TAPI_SIM_PB_INVALID_INDEX : start_index = %d",start_index);
 		start_index++;
-		if (start_index > info->file_record[TAPI_PB_3G_NAME].index_max) {
+		if (info->file_record[TAPI_PB_3G_NAME].index_max < start_index) {
 			CTS_ERR("start_index is invalid start_index = %d, total = %d", start_index,
 						info->file_record[TAPI_PB_3G_NAME].index_max);
 			ret = CONTACTS_ERROR_SYSTEM;
@@ -419,14 +419,14 @@ static void __ctsvc_server_sim_import_contact_cb(TapiHandle *handle, int result,
 		ret = tel_read_sim_pb_record(handle, info->sim_type, start_index,
 					__ctsvc_server_sim_import_contact_cb, (void*)start_index);
 		if (ret != TAPI_API_SUCCESS) {
-			CTS_ERR("SIM phonebook access Failed(%d) start_indext(%d)", access_rt,start_index);
+			CTS_ERR("SIM phonebook access Fail(%d) start_indext(%d)", access_rt,start_index);
 			ret = CONTACTS_ERROR_SYSTEM;
 			goto ERROR_RETURN;
 		}
 	}
 
 	if (TAPI_SIM_PB_SUCCESS != access_rt) {
-		CTS_ERR("SIM phonebook access Failed(%d)", access_rt);
+		CTS_ERR("SIM phonebook access Fail(%d)", access_rt);
 		ret = CONTACTS_ERROR_SYSTEM;
 		goto ERROR_RETURN;
 	}
@@ -450,7 +450,7 @@ static void __ctsvc_server_sim_import_contact_cb(TapiHandle *handle, int result,
 		ret = tel_read_sim_pb_record(__ctsvc_server_sim_get_tapi_handle(info), sim_info->phonebook_type,
 				sim_info->next_index, __ctsvc_server_sim_import_contact_cb, NULL);
 		if (TAPI_API_SUCCESS != ret) {
-			CTS_ERR("tel_read_sim_pb_record() Failed(%d)", ret);
+			CTS_ERR("tel_read_sim_pb_record() Fail(%d)", ret);
 			ret = CONTACTS_ERROR_SYSTEM;
 			goto ERROR_RETURN;
 		}
@@ -460,7 +460,7 @@ static void __ctsvc_server_sim_import_contact_cb(TapiHandle *handle, int result,
 		__ctsvc_server_sim_insert_records_to_db(info);
 		if (__ctsvc_server_sim_get_return_data()) {
 			ret = ctsvc_server_socket_return(__ctsvc_server_sim_get_return_data(), CONTACTS_ERROR_NONE, 0, NULL);
-			WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_server_socket_return() Failed(%d)", ret);
+			WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_server_socket_return() Fail(%d)", ret);
 			__ctsvc_server_sim_set_return_data(NULL);
 		}
 	}
@@ -469,7 +469,7 @@ static void __ctsvc_server_sim_import_contact_cb(TapiHandle *handle, int result,
 ERROR_RETURN:
 	if (__ctsvc_server_sim_get_return_data()) {
 		ret = ctsvc_server_socket_return(__ctsvc_server_sim_get_return_data(), ret, 0, NULL);
-		WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_server_socket_return() Failed(%d)", ret);
+		WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_server_socket_return() Fail(%d)", ret);
 		__ctsvc_server_sim_set_return_data(NULL);
 	}
 	return;
@@ -491,7 +491,7 @@ int ctsvc_server_sim_import_contact(void* data, int sim_slot_no)
 
 	if (info->file_record[TAPI_PB_3G_NAME].used_count == 0) {
 		ret = ctsvc_server_socket_return(__ctsvc_server_sim_get_return_data(), CONTACTS_ERROR_NO_DATA, 0, NULL);
-		WARN_IF(CONTACTS_ERROR_SYSTEM != ret, "helper_socket_return() Failed(%d)", ret);
+		WARN_IF(CONTACTS_ERROR_SYSTEM != ret, "helper_socket_return() Fail(%d)", ret);
 		__ctsvc_server_sim_set_return_data(NULL);
 		return ret;
 	}
@@ -533,16 +533,16 @@ static void __ctsvc_server_sim_sdn_read_cb(TapiHandle *handle, int result, void 
 			CTS_DBG("Index = %d", sim_info->index);
 			ret = tel_read_sim_pb_record(handle, sim_info->phonebook_type, sim_info->index+1,
 					__ctsvc_server_sim_sdn_read_cb, info);
-			RETM_IF(ret != TAPI_API_SUCCESS,  "tel_read_sim_pb_record() Failed(%d)", ret);
+			RETM_IF(ret != TAPI_API_SUCCESS,  "tel_read_sim_pb_record() Fail(%d)", ret);
 		}
-		CTS_ERR("SIM phonebook access Failed(%d)", sec_rt);
+		CTS_ERR("SIM phonebook access Fail(%d)", sec_rt);
 		goto ERROR_RETURN;
 	}
 
 	switch (sim_info->phonebook_type) {
 	case TAPI_SIM_PB_SDN:
 		ret = ctsvc_server_insert_sdn_contact((char *)sim_info->name, (char *)sim_info->number, info->sim_slot_no);
-		WARN_IF(ret != CONTACTS_ERROR_NONE, "ctsvc_server_insert_sdn_contact() Failed(%d)", ret);
+		WARN_IF(ret != CONTACTS_ERROR_NONE, "ctsvc_server_insert_sdn_contact() Fail(%d)", ret);
 		break;
 	case TAPI_SIM_PB_ADN:
 	case TAPI_SIM_PB_3GSIM:
@@ -557,7 +557,7 @@ static void __ctsvc_server_sim_sdn_read_cb(TapiHandle *handle, int result, void 
 		ret = tel_read_sim_pb_record(handle, sim_info->phonebook_type,sim_info->next_index,
 				__ctsvc_server_sim_sdn_read_cb, info);
 		if (TAPI_API_SUCCESS != ret) {
-			CTS_ERR("tel_read_sim_pb_record() Failed(%d)", ret);
+			CTS_ERR("tel_read_sim_pb_record() Fail(%d)", ret);
 			goto ERROR_RETURN;
 		}
 	}
@@ -580,10 +580,10 @@ static void __ctsvc_server_sim_sdn_meta_info_cb(TapiHandle *handle, int result, 
 	RETM_IF(TAPI_SIM_PB_SUCCESS != sec_rt, "TelSimPbAccessResult_t fail(%d)",sec_rt);
 	RETM_IF(pe == NULL, "pe is NULL result =%d",sec_rt);
 
-	if (pe->PbUsedCount > 0) {
+	if (0 < pe->PbUsedCount) {
 		ret = tel_read_sim_pb_record(info->handle, TAPI_SIM_PB_SDN, 1, __ctsvc_server_sim_sdn_read_cb, info);
 		if (TAPI_API_SUCCESS != ret) {
-			CTS_ERR("tel_read_sim_pb_record() Failed(%d)", ret);
+			CTS_ERR("tel_read_sim_pb_record() Fail(%d)", ret);
 			goto ERROR_RETURN;
 		}
 	}
@@ -606,7 +606,7 @@ static int __ctsvc_server_sim_sdn_read(ctsvc_sim_info_s* info)
 
 	ret = tel_get_sim_init_info(info->handle, &sim_status, &card_changed);
 	if (TAPI_API_SUCCESS != ret) {
-		CTS_ERR("tel_get_sim_init_info() Failed(%d)", ret);
+		CTS_ERR("tel_get_sim_init_info() Fail(%d)", ret);
 		CTS_DBG("sim_status = %d, card_changed = %d", sim_status, card_changed);
 		goto ERROR_RETURN;
 	}
@@ -615,25 +615,25 @@ static int __ctsvc_server_sim_sdn_read(ctsvc_sim_info_s* info)
 			TAPI_SIM_STATUS_CARD_REMOVED == sim_status) {
 		ret = ctsvc_server_delete_sdn_contact(info->sim_slot_no);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("ctsvc_server_delete_sdn_contact() Failed(%d)", ret);
+			CTS_ERR("ctsvc_server_delete_sdn_contact() Fail(%d)", ret);
 			goto ERROR_RETURN;
 		}
 	}
 	else if (TAPI_SIM_STATUS_SIM_INIT_COMPLETED == sim_status) {
 		ret = ctsvc_server_delete_sdn_contact(info->sim_slot_no);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("ctsvc_server_delete_sdn_contact() Failed(%d)", ret);
+			CTS_ERR("ctsvc_server_delete_sdn_contact() Fail(%d)", ret);
 			goto ERROR_RETURN;
 		}
 
 		ret = tel_get_sim_pb_meta_info(info->handle, TAPI_SIM_PB_SDN, __ctsvc_server_sim_sdn_meta_info_cb, info);
 		if (TAPI_API_SUCCESS != ret) {
-			CTS_ERR("tel_get_sim_pb_meta_info() Failed(%d)", ret);
+			CTS_ERR("tel_get_sim_pb_meta_info() Fail(%d)", ret);
 			goto ERROR_RETURN;
 		}
 	}
 	else
-		CTS_ERR("sim_status Failed(%d)", sim_status);
+		CTS_ERR("sim_status Fail(%d)", sim_status);
 	return CONTACTS_ERROR_NONE;
 
 ERROR_RETURN:
@@ -700,7 +700,7 @@ static void __ctsvc_server_sim_get_meta_info_cb(TapiHandle *handle, int result, 
 	if (!info->initialized) {
 		info->initialized = true;
 		ret = __ctsvc_server_sim_sdn_read(info);
-		WARN_IF(CONTACTS_ERROR_NONE != ret, "__ctsvc_server_sim_sdn_read() Failed(%d)", ret);
+		WARN_IF(CONTACTS_ERROR_NONE != ret, "__ctsvc_server_sim_sdn_read() Fail(%d)", ret);
 	}
 }
 
@@ -730,7 +730,7 @@ static int __ctsvc_server_sim_init_meta_info(ctsvc_sim_info_s *info)
 
 	if (info->sim_type == TAPI_SIM_PB_UNKNOWNN) {
 		err = __ctsvc_server_sim_init_info(info);
-		WARN_IF(CONTACTS_ERROR_NONE != err, "__ctsvc_server_sim_init_info() Failed(%d)", err);
+		WARN_IF(CONTACTS_ERROR_NONE != err, "__ctsvc_server_sim_init_info() Fail(%d)", err);
 	}
 
 	if (info->sim_type == TAPI_SIM_PB_3GSIM) {
@@ -758,7 +758,7 @@ static int __ctsvc_server_sim_init_info(ctsvc_sim_info_s *info)
 
 	// get sim_type
 	ret = tel_get_sim_type(info->handle, &cardtype);
-	RETVM_IF(ret != TAPI_API_SUCCESS, CONTACTS_ERROR_SYSTEM, "tel_get_sim_type failed(%d)slot no(%d)", ret, info->sim_slot_no);
+	RETVM_IF(ret != TAPI_API_SUCCESS, CONTACTS_ERROR_SYSTEM, "tel_get_sim_type Fail(%d)slot no(%d)", ret, info->sim_slot_no);
 	if (cardtype == TAPI_SIM_CARD_TYPE_USIM) {
 		info->sim_type = TAPI_SIM_PB_3GSIM;
 	}
@@ -772,7 +772,7 @@ static int __ctsvc_server_sim_init_info(ctsvc_sim_info_s *info)
 
 	// set iccid : unique info of SIM
 	ret = tel_get_sim_iccid (info->handle, __ctsvc_server_sim_get_iccid_cb, info);
-	RETVM_IF(ret != TAPI_API_SUCCESS, CONTACTS_ERROR_SYSTEM, "tel_get_sim_iccid failed(%d)", ret);
+	RETVM_IF(ret != TAPI_API_SUCCESS, CONTACTS_ERROR_SYSTEM, "tel_get_sim_iccid Fail(%d)", ret);
 
 	return CONTACTS_ERROR_NONE;
 }
@@ -804,7 +804,7 @@ static void __ctsvc_server_sim_noti_pb_status(TapiHandle *handle, const char *no
 		if (info->initialized)
 			return;
 		ret = __ctsvc_server_sim_init_meta_info(info);
-		WARN_IF(CONTACTS_ERROR_NONE != ret, "__ctsvc_server_sim_init_meta_info() Failed(%d)", ret);
+		WARN_IF(CONTACTS_ERROR_NONE != ret, "__ctsvc_server_sim_init_meta_info() Fail(%d)", ret);
 	}
 	// FDN on : can not import sim contacts
 	else if (pb_status->pb_list.b_fdn ==1 && pb_status->pb_list.b_adn == 0 && info->sim_type == TAPI_SIM_PB_ADN) {
@@ -843,7 +843,7 @@ static int __ctsvc_server_sim_info_init()
 	RETVM_IF(cp_name == NULL, CONTACTS_ERROR_SYSTEM, "tel_get_cp_name_list fail (cp_name is NULL)");
 
 	ret = ctsvc_server_delete_sdn_contact(-1);
-	WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_server_delete_sdn_contact() Failed(%d)", ret);
+	WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_server_delete_sdn_contact() Fail(%d)", ret);
 
 	while (cp_name[cp_index]) {
 		cp_index++;
@@ -873,18 +873,18 @@ static int __ctsvc_server_sim_info_init()
 		handle = __ctsvc_server_sim_get_tapi_handle(info);
 		if (handle) {
 			ret = __ctsvc_server_sim_init_info(info);
-			WARN_IF(CONTACTS_ERROR_NONE != ret, "__ctsvc_server_sim_init_info() Failed(%d)", ret);
+			WARN_IF(CONTACTS_ERROR_NONE != ret, "__ctsvc_server_sim_init_info() Fail(%d)", ret);
 			ret = tel_get_sim_pb_init_info(handle, &sim_stat, &pb_list);
 			if (TAPI_API_SUCCESS == ret && (pb_list.b_3g == 1 || pb_list.b_adn == 1)) {
 				ret = __ctsvc_server_sim_init_meta_info(info);
-				WARN_IF(CONTACTS_ERROR_NONE != ret, "__ctsvc_server_sim_init_meta_info() Failed(%d)", ret);
+				WARN_IF(CONTACTS_ERROR_NONE != ret, "__ctsvc_server_sim_init_meta_info() Fail(%d)", ret);
 			}
 
 			ret = tel_register_noti_event(handle, TAPI_NOTI_PB_STATUS, __ctsvc_server_sim_noti_pb_status, info);
-			WARN_IF(TAPI_API_SUCCESS != ret, "tel_register_noti_event() Failed(%d)", ret);
+			WARN_IF(TAPI_API_SUCCESS != ret, "tel_register_noti_event() Fail(%d)", ret);
 
 			ret = tel_register_noti_event(handle, TAPI_NOTI_SIM_REFRESHED, __ctsvc_server_sim_noti_sim_refreshed, info);
-			WARN_IF(TAPI_API_SUCCESS != ret, "tel_register_noti_event() Failed(%d)", ret);
+			WARN_IF(TAPI_API_SUCCESS != ret, "tel_register_noti_event() Fail(%d)", ret);
 		}
 		else {
 			CTS_ERR("tel_init fail");
@@ -988,7 +988,7 @@ int ctsvc_server_sim_final(void)
 
 		if (info->handle) {
 			ret = tel_deinit(info->handle);
-			WARN_IF(TAPI_API_SUCCESS != ret, "tel_deinit() Failed(%d)", ret);
+			WARN_IF(TAPI_API_SUCCESS != ret, "tel_deinit() Fail(%d)", ret);
 		}
 
 		for (cursor=info->import_contacts;cursor;cursor=cursor->next) {

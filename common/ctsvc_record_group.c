@@ -66,7 +66,7 @@ static int __ctsvc_group_create(contacts_record_h *out_record)
 
 	group = (ctsvc_group_s*)calloc(1, sizeof(ctsvc_group_s));
 	RETVM_IF(NULL == group, CONTACTS_ERROR_OUT_OF_MEMORY,
-			"calloc is failed");
+			"calloc is Fail");
 
 	*out_record = (contacts_record_h)group;
 	return CONTACTS_ERROR_NONE;
@@ -97,7 +97,7 @@ static int __ctsvc_group_clone(contacts_record_h record, contacts_record_h *out_
     src_data = (ctsvc_group_s*)record;
     out_data = calloc(1, sizeof(ctsvc_group_s));
     RETVM_IF(NULL == out_data, CONTACTS_ERROR_OUT_OF_MEMORY,
-			 "Out of memeory : calloc(ctsvc_group_s) Failed(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
+			 "Out of memeory : calloc(ctsvc_group_s) Fail(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
 
 	out_data->id = src_data->id;
 	out_data->addressbook_id = src_data->addressbook_id;
@@ -182,7 +182,7 @@ static int __ctsvc_group_set_int(contacts_record_h record, unsigned int property
 		group->id = value;
 		break;
 	case CTSVC_PROPERTY_GROUP_ADDRESSBOOK_ID:
-		RETVM_IF(group->id > 0, CONTACTS_ERROR_INVALID_PARAMETER,
+		RETVM_IF(0 < group->id, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (group)", property_id);
 		group->addressbook_id = value;
 		break;
@@ -243,7 +243,7 @@ static int __ctsvc_group_set_bool(contacts_record_h record, unsigned int propert
 
 	switch(property_id) {
 	case CTSVC_PROPERTY_GROUP_IS_READ_ONLY:
-		RETVM_IF(group->id > 0, CONTACTS_ERROR_INVALID_PARAMETER,
+		RETVM_IF(0 < group->id, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (group)", property_id);
 		group->is_read_only = value;
 		break;

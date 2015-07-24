@@ -35,7 +35,7 @@ void ctsvc_db_group_delete_callback(sqlite3_context *context, int argc, sqlite3_
 	int ret;
 	const unsigned char* path;
 
-	if (argc > 1) {
+	if (1 < argc) {
 		sqlite3_result_null(context);
 		return;
 	}

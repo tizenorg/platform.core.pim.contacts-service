@@ -58,7 +58,7 @@ API int contacts_setting_get_name_display_order(contacts_name_display_order_e *o
 
 	if (name_display_order < 0) {
 		ret = vconf_get_int(CTSVC_VCONF_DISPLAY_ORDER, &name_display_order);
-		RETVM_IF(ret<0, CONTACTS_ERROR_SYSTEM, "System : vconf_get_int() Failed(%d)", ret);
+		RETVM_IF(ret<0, CONTACTS_ERROR_SYSTEM, "System : vconf_get_int() Fail(%d)", ret);
 	}
 
 	*order = name_display_order;
@@ -76,7 +76,7 @@ API int contacts_setting_set_name_display_order(contacts_name_display_order_e or
 		return CONTACTS_ERROR_NONE;
 
 	ret = vconf_set_int(CTSVC_VCONF_DISPLAY_ORDER, order);
-	RETVM_IF(ret<0, CONTACTS_ERROR_SYSTEM, "System : vconf_set_int(display order) Failed(%d)", ret);
+	RETVM_IF(ret<0, CONTACTS_ERROR_SYSTEM, "System : vconf_set_int(display order) Fail(%d)", ret);
 
 	name_display_order = order;
 
@@ -89,7 +89,7 @@ API int contacts_setting_get_name_sorting_order(contacts_name_sorting_order_e *o
 	if (name_sorting_order < 0)
 	{
 		ret = vconf_get_int(CTSVC_VCONF_SORTING_ORDER, &name_sorting_order);
-		RETVM_IF(ret<0, CONTACTS_ERROR_SYSTEM, "System : vconf_get_int(sort order) Failed(%d)", ret);
+		RETVM_IF(ret<0, CONTACTS_ERROR_SYSTEM, "System : vconf_get_int(sort order) Fail(%d)", ret);
 	}
 
 	*order = name_sorting_order;
@@ -107,7 +107,7 @@ API int contacts_setting_set_name_sorting_order(contacts_name_sorting_order_e or
 		return CONTACTS_ERROR_NONE;
 
 	ret = vconf_set_int(CTSVC_VCONF_SORTING_ORDER, order);
-	RETVM_IF(ret<0, CONTACTS_ERROR_SYSTEM, "System : vconf_set_int(sort order) Failed(%d)", ret);
+	RETVM_IF(ret<0, CONTACTS_ERROR_SYSTEM, "System : vconf_set_int(sort order) Fail(%d)", ret);
 
 	name_sorting_order = order;
 
@@ -159,37 +159,37 @@ int ctsvc_register_vconf(void)
 	// display order
 	ret = vconf_get_int(CTSVC_VCONF_DISPLAY_ORDER, &name_display_order);
 	if (ret < 0) {
-		CTS_ERR("vconf_get_int() Failed(%d)", ret);
+		CTS_ERR("vconf_get_int() Fail(%d)", ret);
 		name_display_order = CONTACTS_NAME_DISPLAY_ORDER_FIRSTLAST;
 	}
 	ret = vconf_notify_key_changed(CTSVC_VCONF_DISPLAY_ORDER,
 			ctsvc_vconf_display_order_cb, NULL);
-	RETVM_IF(ret<0, CONTACTS_ERROR_SYSTEM, "vconf_notify_key_changed(display order) Failed(%d)", ret);
+	RETVM_IF(ret<0, CONTACTS_ERROR_SYSTEM, "vconf_notify_key_changed(display order) Fail(%d)", ret);
 
 	// sorting order
 	ret = vconf_get_int(CTSVC_VCONF_SORTING_ORDER, &name_sorting_order);
 	if (ret < 0) {
-		CTS_ERR("vconf_get_int() Failed(%d)", ret);
+		CTS_ERR("vconf_get_int() Fail(%d)", ret);
 		name_sorting_order = CONTACTS_NAME_SORTING_ORDER_FIRSTLAST;
 	}
 	ret = vconf_notify_key_changed(CTSVC_VCONF_SORTING_ORDER,
 			ctsvc_vconf_sorting_order_cb, NULL);
-	RETVM_IF(ret<0, CONTACTS_ERROR_SYSTEM, "vconf_notify_key_changed(sort order) Failed(%d)", ret);
+	RETVM_IF(ret<0, CONTACTS_ERROR_SYSTEM, "vconf_notify_key_changed(sort order) Fail(%d)", ret);
 
 	// phonenumber min match digit
 	ret = vconf_get_int(CTSVC_VCONF_PHONENUMBER_MIN_MATCH_DIGIT, &phonenumber_min_match_digit);
 	if (ret < 0) {
-		CTS_ERR("vconf_get_int() Failed(%d)", ret);
+		CTS_ERR("vconf_get_int() Fail(%d)", ret);
 		phonenumber_min_match_digit = 8;
 	}
 
 	ret = vconf_get_int(ctsvc_get_default_sort_vconfkey(), &primary_sort);
-	WARN_IF(ret < 0, "vconf_get_int() Failed(%d)", ret);
+	WARN_IF(ret < 0, "vconf_get_int() Fail(%d)", ret);
 	ctsvc_set_sort_memory(primary_sort);
 
 	ret = vconf_notify_key_changed(ctsvc_get_default_sort_vconfkey(),
 			ctsvc_vconf_sort_change_cb, NULL);
-	RETVM_IF(ret<0, CONTACTS_ERROR_SYSTEM, "vconf_notify_key_changed(deafult lang) Failed(%d)", ret);
+	RETVM_IF(ret<0, CONTACTS_ERROR_SYSTEM, "vconf_notify_key_changed(deafult lang) Fail(%d)", ret);
 
 	return CONTACTS_ERROR_NONE;
 }
@@ -205,12 +205,12 @@ void ctsvc_deregister_vconf(void)
 #endif
 
 	ret = vconf_ignore_key_changed(CTSVC_VCONF_DISPLAY_ORDER, ctsvc_vconf_display_order_cb);
-	RETM_IF(ret<0,"vconf_ignore_key_changed(display order) Failed(%d)", ret);
+	RETM_IF(ret<0,"vconf_ignore_key_changed(display order) Fail(%d)", ret);
 	ret = vconf_ignore_key_changed(CTSVC_VCONF_SORTING_ORDER, ctsvc_vconf_sorting_order_cb);
-	RETM_IF(ret<0,"vconf_ignore_key_changed(sort order) Failed(%d)", ret);
+	RETM_IF(ret<0,"vconf_ignore_key_changed(sort order) Fail(%d)", ret);
 
 	ret = vconf_ignore_key_changed(ctsvc_get_default_sort_vconfkey(), ctsvc_vconf_sort_change_cb);
-	RETM_IF(ret<0,"vconf_ignore_key_changed(default_lang) Failed(%d)", ret);
+	RETM_IF(ret<0,"vconf_ignore_key_changed(default_lang) Fail(%d)", ret);
 }
 
 int ctsvc_get_phonenumber_min_match_digit(void)
@@ -228,7 +228,7 @@ int ctsvc_get_primary_sort(void)
 	if (primary_sort < 0) {
 		int ret;
 		ret = vconf_get_int(ctsvc_get_default_sort_vconfkey(), &primary_sort);
-		WARN_IF(ret < 0, "vconf_get_int() Failed(%d)", ret);
+		WARN_IF(ret < 0, "vconf_get_int() Fail(%d)", ret);
 		ctsvc_set_sort_memory(primary_sort);
 	}
 	return primary_sort;

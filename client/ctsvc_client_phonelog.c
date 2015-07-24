@@ -50,7 +50,7 @@ API int contacts_phone_log_reset_statistics(void)
 	// ipc call
 	if (ctsvc_ipc_call(CTSVC_IPC_PHONELOG_MODULE, CTSVC_IPC_SERVER_PHONELOG_RESET_STATISTICS, indata, &outdata) != 0)
 	{
-		CTS_ERR("ctsvc_ipc_call failed");
+		CTS_ERR("ctsvc_ipc_call Fail");
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
 	}
@@ -142,7 +142,7 @@ API int contacts_phone_log_delete(contacts_phone_log_delete_e op, ...)
 
 	if (ctsvc_ipc_call(CTSVC_IPC_PHONELOG_MODULE,
 			CTSVC_IPC_SERVER_PHONELOG_DELETE, indata, &outdata) != 0) {
-		CTS_ERR("ctsvc_ipc_call failed");
+		CTS_ERR("ctsvc_ipc_call Fail");
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
 	}

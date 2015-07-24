@@ -65,7 +65,7 @@ static int __ctsvc_db_activity_photo_insert_record(contacts_record_h record, int
 
 	ret = ctsvc_begin_trans();
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB error : ctsvc_begin_trans() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_begin_trans() Fail(%d)", ret);
 		return ret;
 	}
 
@@ -93,13 +93,13 @@ static int __ctsvc_db_activity_photo_insert_record(contacts_record_h record, int
 
 	ret = ctsvc_db_activity_photo_insert(record, activity_photo->activity_id, id);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB error : ctsvc_db_activity_photo_insert() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_db_activity_photo_insert() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
 
 	ret = ctsvc_end_trans(true);
-	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "DB error : ctsvc_end_trans() Failed(%d)", ret);
+	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "DB error : ctsvc_end_trans() Fail(%d)", ret);
 
 	return CONTACTS_ERROR_NONE;
 }
@@ -120,11 +120,11 @@ static int __ctsvc_db_activity_photo_get_record(int id, contacts_record_h* out_r
 			id);
 
 	ret = ctsvc_query_prepare(query, &stmt);
-	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
 
 	ret = ctsvc_stmt_step(stmt);
 	if (1 /*CTS_TRUE*/ != ret) {
-		CTS_ERR("ctsvc_stmt_step() Failed(%d)", ret);
+		CTS_ERR("ctsvc_stmt_step() Fail(%d)", ret);
 		ctsvc_stmt_finalize(stmt);
 		if (CONTACTS_ERROR_NONE == ret)
 			return CONTACTS_ERROR_NO_DATA;
@@ -150,7 +150,7 @@ static int __ctsvc_db_activity_photo_update_record(contacts_record_h record)
 
 	ret = ctsvc_begin_trans();
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB error : ctsvc_begin_trans() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_begin_trans() Fail(%d)", ret);
 		return ret;
 	}
 
@@ -174,13 +174,13 @@ static int __ctsvc_db_activity_photo_update_record(contacts_record_h record)
 
 	ret = ctsvc_db_activity_photo_update(record);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("Update record Failed(%d)", ret);
+		CTS_ERR("Update record Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
 
 	ret = ctsvc_end_trans(true);
-	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "DB error : ctsvc_end_trans() Failed(%d)", ret);
+	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "DB error : ctsvc_end_trans() Fail(%d)", ret);
 
 	return CONTACTS_ERROR_NONE;
 }
@@ -193,7 +193,7 @@ static int __ctsvc_db_activity_photo_delete_record(int id)
 
 	ret = ctsvc_begin_trans();
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB error : ctsvc_begin_trans() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_begin_trans() Fail(%d)", ret);
 		return ret;
 	}
 
@@ -217,13 +217,13 @@ static int __ctsvc_db_activity_photo_delete_record(int id)
 
 	ret = ctsvc_db_activity_photo_delete(id);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB error : ctsvc_db_activity_photo_delete() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_db_activity_photo_delete() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
 
 	ret = ctsvc_end_trans(true);
-	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "DB error : ctsvc_end_trans() Failed(%d)", ret);
+	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "DB error : ctsvc_end_trans() Fail(%d)", ret);
 
 	return CONTACTS_ERROR_NONE;
 }
@@ -249,7 +249,7 @@ static int __ctsvc_db_activity_photo_get_all_records(int offset, int limit, cont
 	}
 
 	ret = ctsvc_query_prepare(query, &stmt);
-	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
 
 	contacts_list_create(&list);
 	while ((ret = ctsvc_stmt_step(stmt))) {
@@ -290,7 +290,7 @@ static int __ctsvc_db_activity_photo_get_records_with_query(contacts_query_h que
 	while ((ret = ctsvc_stmt_step(stmt))) {
 		contacts_record_h record;
 		if (1 /*CTS_TRUE */ != ret) {
-			CTS_ERR("DB error : ctsvc_stmt_step() Failed(%d)", ret);
+			CTS_ERR("DB error : ctsvc_stmt_step() Fail(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
 			contacts_list_destroy(list, true);
 			return ret;
@@ -306,7 +306,7 @@ static int __ctsvc_db_activity_photo_get_records_with_query(contacts_query_h que
 					s_query->projection_count, s_query->property_count);
 
 			if (CONTACTS_ERROR_NONE != ret)
-				ASSERT_NOT_REACHED("To set projection is failed.\n");
+				ASSERT_NOT_REACHED("To set projection is Fail.\n");
 		}
 
 		for (i=0;i<field_count;i++) {

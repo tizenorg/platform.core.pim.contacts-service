@@ -79,21 +79,21 @@ API int contacts_connect(void)
 	if (0 == ctsvc_connection) {
 		ret = ctsvc_ipc_connect();
 		if (ret != CONTACTS_ERROR_NONE) {
-			CTS_ERR("ctsvc_ipc_connect() Failed(%d)", ret);
+			CTS_ERR("ctsvc_ipc_connect() Fail(%d)", ret);
 			ctsvc_mutex_unlock(CTS_MUTEX_CONNECTION);
 			return ret;
 		}
 
 		ret = ctsvc_socket_init();
 		if (ret != CONTACTS_ERROR_NONE) {
-			CTS_ERR("ctsvc_socket_init() Failed(%d)", ret);
+			CTS_ERR("ctsvc_socket_init() Fail(%d)", ret);
 			ctsvc_mutex_unlock(CTS_MUTEX_CONNECTION);
 			return ret;
 		}
 
 		ret = ctsvc_inotify_init();
 		if (ret != CONTACTS_ERROR_NONE) {
-			CTS_ERR("ctsvc_inotify_init() Failed(%d)", ret);
+			CTS_ERR("ctsvc_inotify_init() Fail(%d)", ret);
 			ctsvc_socket_final();
 			ctsvc_mutex_unlock(CTS_MUTEX_CONNECTION);
 			return ret;
@@ -124,7 +124,7 @@ API int contacts_disconnect(void)
 		ret = ctsvc_ipc_disconnect();
 		if (ret != CONTACTS_ERROR_NONE) {
 			ctsvc_mutex_unlock(CTS_MUTEX_CONNECTION);
-			CTS_ERR("ctsvc_ipc_disconnect() Failed(%d)", ret);
+			CTS_ERR("ctsvc_ipc_disconnect() Fail(%d)", ret);
 			return ret;
 		}
 
@@ -155,21 +155,21 @@ API int contacts_connect_on_thread(void)
 	if (0 == ctsvc_connection_on_thread) {
 		ret = ctsvc_ipc_connect_on_thread();
 		if (ret != CONTACTS_ERROR_NONE) {
-			CTS_ERR("ctsvc_ipc_connect_on_thread() Failed(%d)", ret);
+			CTS_ERR("ctsvc_ipc_connect_on_thread() Fail(%d)", ret);
 			ctsvc_mutex_unlock(CTS_MUTEX_CONNECTION);
 			return ret;
 		}
 
 		ret = ctsvc_socket_init();
 		if (ret != CONTACTS_ERROR_NONE) {
-			CTS_ERR("ctsvc_socket_init() Failed(%d)", ret);
+			CTS_ERR("ctsvc_socket_init() Fail(%d)", ret);
 			ctsvc_mutex_unlock(CTS_MUTEX_CONNECTION);
 			return ret;
 		}
 
 		ret = ctsvc_inotify_init();
 		if (ret != CONTACTS_ERROR_NONE) {
-			CTS_ERR("ctsvc_inotify_init() Failed(%d)", ret);
+			CTS_ERR("ctsvc_inotify_init() Fail(%d)", ret);
 			ctsvc_socket_final();
 			ctsvc_mutex_unlock(CTS_MUTEX_CONNECTION);
 			return ret;
@@ -199,7 +199,7 @@ API int contacts_disconnect_on_thread(void)
 
 		ret = ctsvc_ipc_disconnect_on_thread();
 		if (ret != CONTACTS_ERROR_NONE) {
-			CTS_ERR("ctsvc_ipc_disconnect_on_thread() Failed(%d)", ret);
+			CTS_ERR("ctsvc_ipc_disconnect_on_thread() Fail(%d)", ret);
 			ctsvc_mutex_unlock(CTS_MUTEX_CONNECTION);
 			return ret;
 		}

@@ -93,7 +93,7 @@ API int contacts_filter_add_filter(contacts_filter_h filter1, contacts_filter_h 
 	RETVM_IF (0 != strcmp(s_filter1->view_uri, s_filter2->view_uri), CONTACTS_ERROR_INVALID_PARAMETER,
 				"The filter view_uri is different (filter1:%s, filter2:%s)", s_filter1->view_uri, s_filter2->view_uri);
 	ret = ctsvc_filter_clone(filter2, &new_filter);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_filter_clone is failed (%d)", ret);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_filter_clone is Fail (%d)", ret);
 	s_filter1->filters = g_slist_append(s_filter1->filters, new_filter);
 
 	return CONTACTS_ERROR_NONE;
@@ -176,7 +176,7 @@ API int contacts_filter_add_int(contacts_filter_h filter, unsigned int property_
 
 	RETV_IF(NULL == filter, CONTACTS_ERROR_INVALID_PARAMETER);
 	RETVM_IF(property_id == CTSVC_PROPERTY_PHONELOG_SIM_SLOT_NO &&
-			(match >= CONTACTS_MATCH_GREATER_THAN && match <= CONTACTS_MATCH_LESS_THAN_OR_EQUAL),
+			(CONTACTS_MATCH_GREATER_THAN <= match && match <= CONTACTS_MATCH_LESS_THAN_OR_EQUAL),
 			CONTACTS_ERROR_INVALID_PARAMETER, "Not support this condition");
 
 	com_filter = (ctsvc_composite_filter_s*)filter;

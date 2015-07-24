@@ -651,7 +651,7 @@ static int __ctsvc_activity_create(contacts_record_h *out_record)
 	ctsvc_activity_s *activity;
 	activity = (ctsvc_activity_s*)calloc(1, sizeof(ctsvc_activity_s));
 	RETVM_IF(NULL == activity, CONTACTS_ERROR_OUT_OF_MEMORY,
-			"Out of memory : calloc is failed");
+			"Out of memory : calloc is Fail");
 
 	activity->photos = calloc(1, sizeof(ctsvc_list_s));
 	activity->photos->l_type = CTSVC_RECORD_ACTIVITY_PHOTO;
@@ -665,7 +665,7 @@ static int __ctsvc_activity_photo_create(contacts_record_h *out_record)
 	ctsvc_activity_photo_s *photo;
 	photo = (ctsvc_activity_photo_s*)calloc(1, sizeof(ctsvc_activity_photo_s));
 	RETVM_IF(NULL == photo, CONTACTS_ERROR_OUT_OF_MEMORY,
-			"Out of memory : calloc is failed");
+			"Out of memory : calloc is Fail");
 
 	*out_record = (contacts_record_h)photo;
 	return CONTACTS_ERROR_NONE;
@@ -677,7 +677,7 @@ static int __ctsvc_address_create(contacts_record_h *out_record)
 
 	address = (ctsvc_address_s*)calloc(1, sizeof(ctsvc_address_s));
 	RETVM_IF(NULL == address, CONTACTS_ERROR_OUT_OF_MEMORY,
-			"Out of memory : calloc is failed");
+			"Out of memory : calloc is Fail");
 
 	*out_record = (contacts_record_h)address;
 	return CONTACTS_ERROR_NONE;
@@ -689,7 +689,7 @@ static int __ctsvc_company_create(contacts_record_h *out_record)
 
 	company = (ctsvc_company_s*)calloc(1, sizeof(ctsvc_company_s));
 	RETVM_IF(NULL == company, CONTACTS_ERROR_OUT_OF_MEMORY,
-			"Out of memory : calloc is failed");
+			"Out of memory : calloc is Fail");
 
 	*out_record = (contacts_record_h)company;
 	return CONTACTS_ERROR_NONE;
@@ -700,7 +700,7 @@ static int __ctsvc_email_create(contacts_record_h *out_record)
 	ctsvc_email_s *email;
 	email = (ctsvc_email_s*)calloc(1, sizeof(ctsvc_email_s));
 	RETVM_IF(NULL == email, CONTACTS_ERROR_OUT_OF_MEMORY,
-			"Out of memory : calloc is failed");
+			"Out of memory : calloc is Fail");
 
 	*out_record = (contacts_record_h)email;
 	return CONTACTS_ERROR_NONE;
@@ -711,7 +711,7 @@ static int __ctsvc_event_create(contacts_record_h *out_record)
 	ctsvc_event_s *event;
 	event = (ctsvc_event_s*)calloc(1, sizeof(ctsvc_event_s));
 	RETVM_IF(NULL == event, CONTACTS_ERROR_OUT_OF_MEMORY,
-			"Out of memory : calloc is failed");
+			"Out of memory : calloc is Fail");
 
 	*out_record = (contacts_record_h)event;
 	return CONTACTS_ERROR_NONE;
@@ -722,7 +722,7 @@ static int __ctsvc_extension_create(contacts_record_h *out_record)
 	ctsvc_extension_s *extension;
 	extension = (ctsvc_extension_s*)calloc(1, sizeof(ctsvc_extension_s));
 	RETVM_IF(NULL == extension, CONTACTS_ERROR_OUT_OF_MEMORY,
-			"Out of memory : calloc is failed");
+			"Out of memory : calloc is Fail");
 
 	*out_record = (contacts_record_h)extension;
 	return CONTACTS_ERROR_NONE;
@@ -733,7 +733,7 @@ static int __ctsvc_group_relation_create(contacts_record_h *out_record)
 	ctsvc_group_relation_s *group_relation;
 	group_relation = (ctsvc_group_relation_s*)calloc(1, sizeof(ctsvc_group_relation_s));
 	RETVM_IF(NULL == group_relation, CONTACTS_ERROR_OUT_OF_MEMORY,
-			"Out of memory : calloc is failed");
+			"Out of memory : calloc is Fail");
 
 	*out_record = (contacts_record_h)group_relation;
 	return CONTACTS_ERROR_NONE;
@@ -744,7 +744,7 @@ static int __ctsvc_messenger_create(contacts_record_h *out_record)
 	ctsvc_messenger_s *messenger;
 	messenger = (ctsvc_messenger_s*)calloc(1, sizeof(ctsvc_messenger_s));
 	RETVM_IF(NULL == messenger, CONTACTS_ERROR_OUT_OF_MEMORY,
-			"Out of memory : calloc is failed");
+			"Out of memory : calloc is Fail");
 
 	*out_record = (contacts_record_h)messenger;
 	return CONTACTS_ERROR_NONE;
@@ -756,7 +756,7 @@ static int __ctsvc_name_create(contacts_record_h *out_record)
 
 	name = (ctsvc_name_s*)calloc(1, sizeof(ctsvc_name_s));
 	RETVM_IF(NULL == name, CONTACTS_ERROR_OUT_OF_MEMORY,
-			"Out of memory : calloc is failed");
+			"Out of memory : calloc is Fail");
 
 	*out_record = (contacts_record_h)name;
 	return CONTACTS_ERROR_NONE;
@@ -768,7 +768,7 @@ static int __ctsvc_nickname_create(contacts_record_h *out_record)
 
 	nickname = (ctsvc_nickname_s*)calloc(1, sizeof(ctsvc_nickname_s));
 	RETVM_IF(NULL == nickname, CONTACTS_ERROR_OUT_OF_MEMORY,
-			"Out of memory : calloc is failed");
+			"Out of memory : calloc is Fail");
 
 	*out_record = (contacts_record_h)nickname;
 	return CONTACTS_ERROR_NONE;
@@ -780,7 +780,7 @@ static int __ctsvc_note_create(contacts_record_h *out_record)
 
 	note = (ctsvc_note_s*)calloc(1, sizeof(ctsvc_note_s));
 	RETVM_IF(NULL == note, CONTACTS_ERROR_OUT_OF_MEMORY,
-			"Out of memory : calloc is failed");
+			"Out of memory : calloc is Fail");
 
 	*out_record = (contacts_record_h)note;
 	return CONTACTS_ERROR_NONE;
@@ -792,7 +792,7 @@ static int __ctsvc_number_create(contacts_record_h *out_record)
 
 	number = (ctsvc_number_s*)calloc(1, sizeof(ctsvc_number_s));
 	RETVM_IF(NULL == number, CONTACTS_ERROR_OUT_OF_MEMORY,
-			"Out of memory : calloc is failed");
+			"Out of memory : calloc is Fail");
 
 	*out_record = (contacts_record_h)number;
 	return CONTACTS_ERROR_NONE;
@@ -804,7 +804,7 @@ static int __ctsvc_profile_create(contacts_record_h *out_record)
 
 	profile = (ctsvc_profile_s*)calloc(1, sizeof(ctsvc_profile_s));
 	RETVM_IF(NULL == profile, CONTACTS_ERROR_OUT_OF_MEMORY,
-			"Out of memory : calloc is failed");
+			"Out of memory : calloc is Fail");
 
 	*out_record = (contacts_record_h)profile;
 	return CONTACTS_ERROR_NONE;
@@ -816,7 +816,7 @@ static int __ctsvc_relationship_create(contacts_record_h *out_record)
 
 	relationship = (ctsvc_relationship_s*)calloc(1, sizeof(ctsvc_relationship_s));
 	RETVM_IF(NULL == relationship, CONTACTS_ERROR_OUT_OF_MEMORY,
-			"Out of memory : calloc is failed");
+			"Out of memory : calloc is Fail");
 
 	*out_record = (contacts_record_h)relationship;
 	return CONTACTS_ERROR_NONE;
@@ -828,7 +828,7 @@ static int __ctsvc_image_create(contacts_record_h *out_record)
 
 	image = (ctsvc_image_s*)calloc(1, sizeof(ctsvc_image_s));
 	RETVM_IF(NULL == image, CONTACTS_ERROR_OUT_OF_MEMORY,
-			"Out of memory : calloc is failed");
+			"Out of memory : calloc is Fail");
 
 	*out_record = (contacts_record_h)image;
 	return CONTACTS_ERROR_NONE;
@@ -840,7 +840,7 @@ static int __ctsvc_simple_contact_create(contacts_record_h *out_record)
 
 	simple_contact = (ctsvc_simple_contact_s*)calloc(1, sizeof(ctsvc_simple_contact_s));
 	RETVM_IF(NULL == simple_contact, CONTACTS_ERROR_OUT_OF_MEMORY,
-			"Out of memory : calloc is failed");
+			"Out of memory : calloc is Fail");
 
 	*out_record = (contacts_record_h)simple_contact;
 	return CONTACTS_ERROR_NONE;
@@ -852,7 +852,7 @@ static int __ctsvc_url_create(contacts_record_h *out_record)
 
 	url = (ctsvc_url_s*)calloc(1, sizeof(ctsvc_url_s));
 	RETVM_IF(NULL == url, CONTACTS_ERROR_OUT_OF_MEMORY,
-			"Out of memory : calloc is failed");
+			"Out of memory : calloc is Fail");
 
 	*out_record = (contacts_record_h)url;
 	return CONTACTS_ERROR_NONE;
@@ -895,7 +895,7 @@ static void __ctsvc_temp_image_hash_table_remove(char *filename)
 
 	if (NULL == __ctsvc_temp_image_file_hash_table) {
 		if (unlink(filename) < 0) {
-			CTS_WARN("unlink Failed(%d)", errno);
+			CTS_WARN("unlink Fail(%d)", errno);
 		}
 		return;
 	}
@@ -903,7 +903,7 @@ static void __ctsvc_temp_image_hash_table_remove(char *filename)
 	count = GPOINTER_TO_INT(g_hash_table_lookup(__ctsvc_temp_image_file_hash_table, filename));
 	if (count < 1) {
 		if (unlink(filename) < 0) {
-			CTS_WARN("unlink Failed(%d)", errno);
+			CTS_WARN("unlink Fail(%d)", errno);
 		}
 	}
 	else if (1 == count) {
@@ -1181,7 +1181,7 @@ static int __ctsvc_contact_create(contacts_record_h *out_record)
 
 	contact = calloc(1, sizeof(ctsvc_contact_s));
 	RETVM_IF(NULL == contact, CONTACTS_ERROR_OUT_OF_MEMORY,
-			"Out of memory : calloc is failed");
+			"Out of memory : calloc is Fail");
 
 	contact->name = calloc(1, sizeof(ctsvc_list_s));
 	contact->name->l_type = CTSVC_RECORD_NAME;
@@ -1785,7 +1785,7 @@ static int __ctsvc_contact_set_int(contacts_record_h record, unsigned int proper
 		contact->display_source_type = value;
 		break;
 	case CTSVC_PROPERTY_CONTACT_PERSON_ID:
-		RETVM_IF(contact->id > 0, CONTACTS_ERROR_INVALID_PARAMETER,
+		RETVM_IF(0 < contact->id, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (contact)", property_id);
 		contact->person_id = value;
 		break;
@@ -1793,7 +1793,7 @@ static int __ctsvc_contact_set_int(contacts_record_h record, unsigned int proper
 		contact->changed_time = value;
 		break;
 	case CTSVC_PROPERTY_CONTACT_ADDRESSBOOK_ID:
-		RETVM_IF(contact->id > 0, CONTACTS_ERROR_INVALID_PARAMETER,
+		RETVM_IF(0 < contact->id, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (contact)", property_id);
 		contact->addressbook_id = value;
 		break;
@@ -1801,7 +1801,7 @@ static int __ctsvc_contact_set_int(contacts_record_h record, unsigned int proper
 		RETVM_IF(value != CONTACTS_CONTACT_LINK_MODE_NONE
 						&& value != CONTACTS_CONTACT_LINK_MODE_IGNORE_ONCE,
 				CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : link mode is in invalid range (%d)", value);
-		RETVM_IF(contact->id > 0, CONTACTS_ERROR_INVALID_PARAMETER,
+		RETVM_IF(0 < contact->id, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (contact)", property_id);
 		contact->link_mode = value;
 		break;
@@ -1827,7 +1827,7 @@ static int __ctsvc_simple_contact_set_int(contacts_record_h record, unsigned int
 		contact->person_id = value;
 		break;
 	case CTSVC_PROPERTY_CONTACT_ADDRESSBOOK_ID:
-		RETVM_IF(contact->contact_id > 0, CONTACTS_ERROR_INVALID_PARAMETER,
+		RETVM_IF(0 < contact->contact_id, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalide parameter : property_id(%d) is a read-only value (contact)", property_id);
 		contact->addressbook_id = value;
 		break;
@@ -1847,7 +1847,7 @@ static int __ctsvc_name_set_int(contacts_record_h record, unsigned int property_
 		name->id = value;
 		break;
 	case CTSVC_PROPERTY_NAME_CONTACT_ID:
-		RETVM_IF(name->id > 0, CONTACTS_ERROR_INVALID_PARAMETER,
+		RETVM_IF(0 < name->id, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (name)", property_id);
 		name->contact_id = value;
 		break;
@@ -1867,13 +1867,13 @@ static int __ctsvc_company_set_int(contacts_record_h record, unsigned int proper
 		company->id = value;
 		break;
 	case CTSVC_PROPERTY_COMPANY_CONTACT_ID:
-		RETVM_IF(company->id > 0, CONTACTS_ERROR_INVALID_PARAMETER,
+		RETVM_IF(0 < company->id, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (company)", property_id);
 		company->contact_id = value;
 		break;
 	case CTSVC_PROPERTY_COMPANY_TYPE:
 		RETVM_IF(value < CONTACTS_COMPANY_TYPE_OTHER
-						|| value > CONTACTS_COMPANY_TYPE_WORK,
+						|| CONTACTS_COMPANY_TYPE_WORK < value,
 				CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : company type is in invalid range (%d)", value);
 
 		company->type = value;
@@ -1894,7 +1894,7 @@ static int __ctsvc_note_set_int(contacts_record_h record, unsigned int property_
 		note->id = value;
 		break;
 	case CTSVC_PROPERTY_NOTE_CONTACT_ID:
-		RETVM_IF(note->id > 0, CONTACTS_ERROR_INVALID_PARAMETER,
+		RETVM_IF(0 < note->id, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (note)", property_id);
 		note->contact_id = value;
 		break;
@@ -1914,7 +1914,7 @@ static int __ctsvc_number_set_int(contacts_record_h record, unsigned int propert
 		number->id = value;
 		break;
 	case CTSVC_PROPERTY_NUMBER_CONTACT_ID:
-		RETVM_IF(number->id > 0, CONTACTS_ERROR_INVALID_PARAMETER,
+		RETVM_IF(0 < number->id, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (number)", property_id);
 		number->contact_id = value;
 		break;
@@ -1936,13 +1936,13 @@ static int __ctsvc_email_set_int(contacts_record_h record, unsigned int property
 	case CTSVC_PROPERTY_EMAIL_ID:
 		email->id = value;
 	case CTSVC_PROPERTY_EMAIL_CONTACT_ID:
-		RETVM_IF(email->id > 0, CONTACTS_ERROR_INVALID_PARAMETER,
+		RETVM_IF(0 < email->id, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (email)", property_id);
 		email->contact_id = value;
 		break;
 	case CTSVC_PROPERTY_EMAIL_TYPE:
 		RETVM_IF(value < CONTACTS_EMAIL_TYPE_OTHER
-						|| value > CONTACTS_EMAIL_TYPE_MOBILE,
+						|| CONTACTS_EMAIL_TYPE_MOBILE < value,
 				CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : email type is in invalid range (%d)", value);
 
 		email->type = value;
@@ -1963,13 +1963,13 @@ static int __ctsvc_url_set_int(contacts_record_h record, unsigned int property_i
 		url->id = value;
 		break;
 	case CTSVC_PROPERTY_URL_CONTACT_ID:
-		RETVM_IF(url->id > 0, CONTACTS_ERROR_INVALID_PARAMETER,
+		RETVM_IF(0 < url->id, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (url)", property_id);
 		url->contact_id = value;
 		break;
 	case CTSVC_PROPERTY_URL_TYPE:
 		RETVM_IF(value < CONTACTS_URL_TYPE_OTHER
-						|| value > CONTACTS_URL_TYPE_WORK,
+						|| CONTACTS_URL_TYPE_WORK < value,
 				CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : url type is in invalid range (%d)", value);
 
 		url->type = value;
@@ -1990,13 +1990,13 @@ static int __ctsvc_event_set_int(contacts_record_h record, unsigned int property
 		event->id = value;
 		break;
 	case CTSVC_PROPERTY_EVENT_CONTACT_ID:
-		RETVM_IF(event->id > 0, CONTACTS_ERROR_INVALID_PARAMETER,
+		RETVM_IF(0 < event->id, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (event)", property_id);
 		event->contact_id = value;
 		break;
 	case CTSVC_PROPERTY_EVENT_TYPE:
 		RETVM_IF(value < CONTACTS_EVENT_TYPE_OTHER
-						|| value > CONTACTS_EVENT_TYPE_ANNIVERSARY,
+						|| CONTACTS_EVENT_TYPE_ANNIVERSARY < value,
 				CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : event type is in invalid range (%d)", value);
 		event->type = value;
 		break;
@@ -2022,7 +2022,7 @@ static int __ctsvc_nickname_set_int(contacts_record_h record, unsigned int prope
 		nickname->id = value;
 		break;
 	case CTSVC_PROPERTY_NICKNAME_CONTACT_ID:
-		RETVM_IF(nickname->id > 0, CONTACTS_ERROR_INVALID_PARAMETER,
+		RETVM_IF(0 < nickname->id, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (nickname)", property_id);
 		nickname->contact_id = value;
 		break;
@@ -2042,13 +2042,13 @@ static int __ctsvc_address_set_int(contacts_record_h record, unsigned int proper
 		address->id = value;
 		break;
 	case CTSVC_PROPERTY_ADDRESS_CONTACT_ID:
-		RETVM_IF(address->id > 0, CONTACTS_ERROR_INVALID_PARAMETER,
+		RETVM_IF(0 < address->id, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (address)", property_id);
 		address->contact_id = value;
 		break;
 	case CTSVC_PROPERTY_ADDRESS_TYPE:
 		RETVM_IF(value < CONTACTS_ADDRESS_TYPE_OTHER
-						|| value > CONTACTS_ADDRESS_TYPE_PARCEL,
+						|| CONTACTS_ADDRESS_TYPE_PARCEL < value,
 				CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : address type is %d", value);
 		address->type = value;
 		break;
@@ -2068,13 +2068,13 @@ static int __ctsvc_messenger_set_int(contacts_record_h record, unsigned int prop
 		messenger->id = value;
 		break;
 	case CTSVC_PROPERTY_MESSENGER_CONTACT_ID:
-		RETVM_IF(messenger->id > 0, CONTACTS_ERROR_INVALID_PARAMETER,
+		RETVM_IF(0 < messenger->id, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (messenger)", property_id);
 		messenger->contact_id = value;
 		break;
 	case CTSVC_PROPERTY_MESSENGER_TYPE:
 		RETVM_IF(value < CONTACTS_MESSENGER_TYPE_OTHER
-							|| value > CONTACTS_MESSENGER_TYPE_IRC,
+							|| CONTACTS_MESSENGER_TYPE_IRC < value,
 					CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : messenger type is in invalid range (%d)", value);
 
 		messenger->type = value;
@@ -2095,12 +2095,12 @@ static int __ctsvc_group_relation_set_int(contacts_record_h record, unsigned int
 		group->id = value;
 		break;
 	case CTSVC_PROPERTY_GROUP_RELATION_CONTACT_ID:
-		RETVM_IF(group->id > 0, CONTACTS_ERROR_INVALID_PARAMETER,
+		RETVM_IF(0 < group->id, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (group)", property_id);
 		group->contact_id = value;
 		break;
 	case CTSVC_PROPERTY_GROUP_RELATION_GROUP_ID:
-		RETVM_IF(group->id > 0, CONTACTS_ERROR_INVALID_PARAMETER,
+		RETVM_IF(0 < group->id, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (group)", property_id);
 		group->group_id = value;
 		break;
@@ -2120,7 +2120,7 @@ static int __ctsvc_activity_set_int(contacts_record_h record, unsigned int prope
 		activity->id = value;
 		break;
 	case CTSVC_PROPERTY_ACTIVITY_CONTACT_ID:
-		RETVM_IF(activity->id > 0, CONTACTS_ERROR_INVALID_PARAMETER,
+		RETVM_IF(0 < activity->id, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (activity)", property_id);
 		activity->contact_id = value;
 		break;
@@ -2164,7 +2164,7 @@ static int __ctsvc_profile_set_int(contacts_record_h record, unsigned int proper
 		profile->id = value;
 		break;
 	case CTSVC_PROPERTY_PROFILE_CONTACT_ID:
-		RETVM_IF(profile->id > 0, CONTACTS_ERROR_INVALID_PARAMETER,
+		RETVM_IF(0 < profile->id, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (profile)", property_id);
 		profile->contact_id = value;
 		break;
@@ -2187,13 +2187,13 @@ static int __ctsvc_relationship_set_int(contacts_record_h record, unsigned int p
 		relationship->id = value;
 		break;
 	case CTSVC_PROPERTY_RELATIONSHIP_CONTACT_ID:
-		RETVM_IF(relationship->id > 0, CONTACTS_ERROR_INVALID_PARAMETER,
+		RETVM_IF(0 < relationship->id, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (relationship)", property_id);
 		relationship->contact_id = value;
 		break;
 	case CTSVC_PROPERTY_RELATIONSHIP_TYPE:
 		RETVM_IF(value < CONTACTS_RELATIONSHIP_TYPE_OTHER
-						|| value > CONTACTS_RELATIONSHIP_TYPE_CUSTOM,
+						|| CONTACTS_RELATIONSHIP_TYPE_CUSTOM < value,
 				CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : relationship type is in invalid range (%d)", value);
 
 		relationship->type = value;
@@ -2214,7 +2214,7 @@ static int __ctsvc_image_set_int(contacts_record_h record, unsigned int property
 		image->id = value;
 		break;
 	case CTSVC_PROPERTY_IMAGE_CONTACT_ID:
-		RETVM_IF(image->id > 0, CONTACTS_ERROR_INVALID_PARAMETER,
+		RETVM_IF(0 < image->id, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (image)", property_id);
 		image->contact_id = value;
 		break;
@@ -2240,7 +2240,7 @@ static int __ctsvc_extension_set_int(contacts_record_h record, unsigned int prop
 		extension->id = value;
 		break;
 	case CTSVC_PROPERTY_EXTENSION_CONTACT_ID:
-		RETVM_IF(extension->id > 0, CONTACTS_ERROR_INVALID_PARAMETER,
+		RETVM_IF(0 < extension->id, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (extension)", property_id);
 		extension->contact_id = value;
 		break;
@@ -3874,7 +3874,7 @@ static int __ctsvc_contact_clone(contacts_record_h record, contacts_record_h *ou
 	src_data = (ctsvc_contact_s*)record;
 	out_data = calloc(1, sizeof(ctsvc_contact_s));
 	RETVM_IF(NULL == out_data, CONTACTS_ERROR_OUT_OF_MEMORY,
-			"Out of memeory : calloc(ctsvc_contact_s) Failed(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
+			"Out of memeory : calloc(ctsvc_contact_s) Fail(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
 
 	out_data->id = src_data->id;
 	out_data->person_id = src_data->person_id;
@@ -3962,7 +3962,7 @@ static int __ctsvc_activity_clone(contacts_record_h record, contacts_record_h *o
 	src_data = (ctsvc_activity_s*)record;
 	out_data = calloc(1, sizeof(ctsvc_activity_s));
 	RETVM_IF(NULL == out_data, CONTACTS_ERROR_OUT_OF_MEMORY,
-			"Out of memeory : calloc(ctsvc_activity_s) Failed(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
+			"Out of memeory : calloc(ctsvc_activity_s) Fail(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
 
 	out_data->id = src_data->id;
 	out_data->contact_id = src_data->contact_id;
@@ -3989,7 +3989,7 @@ static int __ctsvc_activity_photo_clone(contacts_record_h record, contacts_recor
 	src_data = (ctsvc_activity_photo_s*)record;
 	out_data = calloc(1, sizeof(ctsvc_activity_photo_s));
 	RETVM_IF(NULL == out_data, CONTACTS_ERROR_OUT_OF_MEMORY,
-			"Out of memeory : calloc(ctsvc_activity_s) Failed(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
+			"Out of memeory : calloc(ctsvc_activity_s) Fail(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
 
 	out_data->id = src_data->id;
 	out_data->activity_id = src_data->activity_id;
@@ -4010,7 +4010,7 @@ static int __ctsvc_address_clone(contacts_record_h record, contacts_record_h *ou
 	src_data = (ctsvc_address_s*)record;
 	out_data = calloc(1, sizeof(ctsvc_address_s));
 	RETVM_IF(NULL == out_data, CONTACTS_ERROR_OUT_OF_MEMORY,
-			"Out of memeory : calloc(ctsvc_address_s) Failed(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
+			"Out of memeory : calloc(ctsvc_address_s) Fail(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
 
 	out_data->id = src_data->id;
 	out_data->contact_id = src_data->contact_id;
@@ -4039,7 +4039,7 @@ static int __ctsvc_company_clone(contacts_record_h record, contacts_record_h *ou
 	src_data = (ctsvc_company_s*)record;
 	out_data = calloc(1, sizeof(ctsvc_company_s));
 	RETVM_IF(NULL == out_data, CONTACTS_ERROR_OUT_OF_MEMORY,
-			"Out of memeory : calloc(ctsvc_company_s) Failed(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
+			"Out of memeory : calloc(ctsvc_company_s) Fail(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
 
 	out_data->id = src_data->id;
 	out_data->contact_id = src_data->contact_id;
@@ -4073,7 +4073,7 @@ static int __ctsvc_email_clone(contacts_record_h record, contacts_record_h *out_
 	src_data = (ctsvc_email_s*)record;
 	out_data = calloc(1, sizeof(ctsvc_email_s));
 	RETVM_IF(NULL == out_data, CONTACTS_ERROR_OUT_OF_MEMORY,
-			"Out of memeory : calloc(ctsvc_email_s) Failed(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
+			"Out of memeory : calloc(ctsvc_email_s) Fail(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
 
 	out_data->id = src_data->id;
 	out_data->is_default = src_data->is_default;
@@ -4096,7 +4096,7 @@ static int __ctsvc_event_clone(contacts_record_h record, contacts_record_h *out_
 	src_data = (ctsvc_event_s*)record;
 	out_data = calloc(1, sizeof(ctsvc_event_s));
 	RETVM_IF(NULL == out_data, CONTACTS_ERROR_OUT_OF_MEMORY,
-			"Out of memeory : calloc(ctsvc_event_s) Failed(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
+			"Out of memeory : calloc(ctsvc_event_s) Fail(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
 
 	out_data->id = src_data->id;
 	out_data->contact_id = src_data->contact_id;
@@ -4120,7 +4120,7 @@ static int __ctsvc_extension_clone(contacts_record_h record, contacts_record_h *
 	src_data = (ctsvc_extension_s*)record;
 	out_data = calloc(1, sizeof(ctsvc_extension_s));
 	RETVM_IF(NULL == out_data, CONTACTS_ERROR_OUT_OF_MEMORY,
-			"Out of memeory : calloc(ctsvc_extension_s) Failed(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
+			"Out of memeory : calloc(ctsvc_extension_s) Fail(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
 
 	out_data->id = src_data->id;
 	out_data->contact_id = src_data->contact_id;
@@ -4152,7 +4152,7 @@ static int __ctsvc_group_relation_clone(contacts_record_h record, contacts_recor
 	src_data = (ctsvc_group_relation_s*)record;
 	out_data = calloc(1, sizeof(ctsvc_group_relation_s));
 	RETVM_IF(NULL == out_data, CONTACTS_ERROR_OUT_OF_MEMORY,
-			"Out of memeory : calloc(ctsvc_group_relation_s) Failed(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
+			"Out of memeory : calloc(ctsvc_group_relation_s) Fail(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
 
 	out_data->id = src_data->id;
 	out_data->group_id = src_data->group_id;
@@ -4173,7 +4173,7 @@ static int __ctsvc_messenger_clone(contacts_record_h record, contacts_record_h *
 	src_data = (ctsvc_messenger_s*)record;
 	out_data = calloc(1, sizeof(ctsvc_messenger_s));
 	RETVM_IF(NULL == out_data, CONTACTS_ERROR_OUT_OF_MEMORY,
-			"Out of memeory : calloc(ctsvc_messenger_s) Failed(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
+			"Out of memeory : calloc(ctsvc_messenger_s) Fail(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
 
 	out_data->id = src_data->id;
 	out_data->contact_id = src_data->contact_id;
@@ -4195,7 +4195,7 @@ static int __ctsvc_name_clone(contacts_record_h record, contacts_record_h *out_r
 	src_data = (ctsvc_name_s*)record;
 	out_data = calloc(1, sizeof(ctsvc_name_s));
 	RETVM_IF(NULL == out_data, CONTACTS_ERROR_OUT_OF_MEMORY,
-			"Out of memeory : calloc(ctsvc_name_s) Failed(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
+			"Out of memeory : calloc(ctsvc_name_s) Fail(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
 
 	out_data->is_default = src_data->is_default;
 	out_data->id = src_data->id;
@@ -4226,7 +4226,7 @@ static int __ctsvc_nickname_clone(contacts_record_h record, contacts_record_h *o
 	src_data = (ctsvc_nickname_s*)record;
 	out_data = calloc(1, sizeof(ctsvc_nickname_s));
 	RETVM_IF(NULL == out_data, CONTACTS_ERROR_OUT_OF_MEMORY,
-			"Out of memeory : calloc(ctsvc_nickname_s) Failed(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
+			"Out of memeory : calloc(ctsvc_nickname_s) Fail(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
 
 	out_data->id = src_data->id;
 	out_data->contact_id = src_data->contact_id;
@@ -4248,7 +4248,7 @@ static int __ctsvc_note_clone(contacts_record_h record, contacts_record_h *out_r
 	src_data = (ctsvc_note_s*)record;
 	out_data = calloc(1, sizeof(ctsvc_note_s));
 	RETVM_IF(NULL == out_data, CONTACTS_ERROR_OUT_OF_MEMORY,
-			"Out of memeory : calloc(ctsvc_note_s) Failed(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
+			"Out of memeory : calloc(ctsvc_note_s) Fail(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
 
 	out_data->id = src_data->id;
 	out_data->contact_id = src_data->contact_id;
@@ -4268,7 +4268,7 @@ static int __ctsvc_number_clone(contacts_record_h record, contacts_record_h *out
 	src_data = (ctsvc_number_s*)record;
 	out_data = calloc(1, sizeof(ctsvc_number_s));
 	RETVM_IF(NULL == out_data, CONTACTS_ERROR_OUT_OF_MEMORY,
-			"Out of memeory : calloc(ctsvc_number_s) Failed(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
+			"Out of memeory : calloc(ctsvc_number_s) Fail(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
 
 	out_data->is_default = src_data->is_default;
 	out_data->id = src_data->id;
@@ -4292,7 +4292,7 @@ static int __ctsvc_profile_clone(contacts_record_h record, contacts_record_h *ou
 	src_data = (ctsvc_profile_s*)record;
 	out_data = calloc(1, sizeof(ctsvc_profile_s));
 	RETVM_IF(NULL == out_data, CONTACTS_ERROR_OUT_OF_MEMORY,
-			"Out of memeory : calloc(ctsvc_profile_s) Failed(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
+			"Out of memeory : calloc(ctsvc_profile_s) Fail(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
 
 	out_data->id = src_data->id;
 	out_data->contact_id = src_data->contact_id;
@@ -4321,7 +4321,7 @@ static int __ctsvc_relationship_clone(contacts_record_h record, contacts_record_
 	src_data = (ctsvc_relationship_s*)record;
 	out_data = calloc(1, sizeof(ctsvc_relationship_s));
 	RETVM_IF(NULL == out_data, CONTACTS_ERROR_OUT_OF_MEMORY,
-			"Out of memeory : calloc(ctsvc_relationship_s) Failed(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
+			"Out of memeory : calloc(ctsvc_relationship_s) Fail(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
 
 	out_data->id = src_data->id;
 	out_data->contact_id = src_data->contact_id;
@@ -4343,7 +4343,7 @@ static int __ctsvc_image_clone(contacts_record_h record, contacts_record_h *out_
 	src_data = (ctsvc_image_s*)record;
 	out_data = calloc(1, sizeof(ctsvc_image_s));
 	RETVM_IF(NULL == out_data, CONTACTS_ERROR_OUT_OF_MEMORY,
-			"Out of memeory : calloc(ctsvc_image_s) Failed(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
+			"Out of memeory : calloc(ctsvc_image_s) Fail(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
 
 	out_data->is_default = src_data->is_default;
 	out_data->id = src_data->id;
@@ -4369,7 +4369,7 @@ static int __ctsvc_simple_contact_clone(contacts_record_h record, contacts_recor
 	src_data = (ctsvc_simple_contact_s*)record;
 	out_data = calloc(1, sizeof(ctsvc_simple_contact_s));
 	RETVM_IF(NULL == out_data, CONTACTS_ERROR_OUT_OF_MEMORY,
-			"Out of memeory : calloc(ctsvc_simple_contact_s) Failed(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
+			"Out of memeory : calloc(ctsvc_simple_contact_s) Fail(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
 
 	out_data->contact_id = src_data->contact_id;
 	out_data->person_id = src_data->person_id;
@@ -4401,7 +4401,7 @@ static int __ctsvc_url_clone(contacts_record_h record, contacts_record_h *out_re
 	src_data = (ctsvc_url_s*)record;
 	out_data = calloc(1, sizeof(ctsvc_url_s));
 	RETVM_IF(NULL == out_data, CONTACTS_ERROR_OUT_OF_MEMORY,
-			"Out of memeory : calloc(ctsvc_url_s) Failed(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
+			"Out of memeory : calloc(ctsvc_url_s) Fail(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
 
 	out_data->id = src_data->id;
 	out_data->contact_id = src_data->contact_id;

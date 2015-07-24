@@ -90,7 +90,7 @@ int ctsvc_db_company_insert(contacts_record_h record, int contact_id, bool is_my
 
 		ret = ctsvc_db_get_next_id(CTS_TABLE_DATA);
 		if (ret < CONTACTS_ERROR_NONE) {
-			CTS_ERR("ctsvc_db_get_next_id() Failed(%d)", ret);
+			CTS_ERR("ctsvc_db_get_next_id() Fail(%d)", ret);
 			ctsvc_end_trans(false);
 			return ret;
 		}
@@ -103,7 +103,7 @@ int ctsvc_db_company_insert(contacts_record_h record, int contact_id, bool is_my
 					company_id, contact_id, is_my_profile, CTSVC_DATA_COMPANY);
 
 		ret = ctsvc_query_prepare(query, &stmt);
-		RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
+		RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
 
 		__ctsvc_company_bind_stmt(stmt, company, 1);
 		if (company->logo) {
@@ -117,7 +117,7 @@ int ctsvc_db_company_insert(contacts_record_h record, int contact_id, bool is_my
 			ctsvc_utils_make_image_file_name(contact_id, company_id, company->logo, image, sizeof(image));
 			ret = ctsvc_utils_copy_image(CTS_LOGO_IMAGE_LOCATION, company->logo, image);
 			if (CONTACTS_ERROR_NONE != ret) {
-				CTS_ERR("ctsvc_utils_copy_image() Failed(%d)", ret);
+				CTS_ERR("ctsvc_utils_copy_image() Fail(%d)", ret);
 				ctsvc_stmt_finalize(stmt);
 				return ret;
 			}
@@ -126,7 +126,7 @@ int ctsvc_db_company_insert(contacts_record_h record, int contact_id, bool is_my
 
 		ret = ctsvc_stmt_step(stmt);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("ctsvc_stmt_step() Failed(%d)", ret);
+			CTS_ERR("ctsvc_stmt_step() Fail(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
 			return ret;
 		}
@@ -149,7 +149,7 @@ int ctsvc_db_company_get_value_from_stmt(cts_stmt stmt, contacts_record_h *recor
 	ctsvc_company_s *company;
 
 	ret = contacts_record_create(_contacts_company._uri, (contacts_record_h *)&company);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "contacts_record_create is failed(%d)", ret);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "contacts_record_create Fail(%d)", ret);
 
 	company->id = ctsvc_stmt_get_int(stmt, start_count++);
 	company->contact_id = ctsvc_stmt_get_int(stmt, start_count++);
@@ -207,7 +207,7 @@ int ctsvc_db_company_update(contacts_record_h record, int contact_id, bool is_my
 	snprintf(query, sizeof(query),
 			"SELECT id, data8 FROM "CTS_TABLE_DATA" WHERE id = %d", company->id);
 	ret = ctsvc_query_prepare(query, &stmt);
-	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
 
 	ret = ctsvc_stmt_step(stmt);
 	if (ret != 1) {
@@ -244,7 +244,7 @@ int ctsvc_db_company_update(contacts_record_h record, int contact_id, bool is_my
 				}
 				ret = unlink(full_path);
 				if (ret < 0) {
-					CTS_WARN("unlink Failed(%d)", errno);
+					CTS_WARN("unlink Fail(%d)", errno);
 				}
 			}
 		}
@@ -263,7 +263,7 @@ int ctsvc_db_company_update(contacts_record_h record, int contact_id, bool is_my
 			ctsvc_utils_make_image_file_name(contact_id, company->id, company->logo, dest, sizeof(dest));
 			ret = ctsvc_utils_copy_image(CTS_LOGO_IMAGE_LOCATION, company->logo, dest);
 			if (CONTACTS_ERROR_NONE != ret) {
-				CTS_ERR("cts_copy_file() Failed(%d)", ret);
+				CTS_ERR("cts_copy_file() Fail(%d)", ret);
 				ctsvc_stmt_finalize(stmt);
 				return ret;
 			}
@@ -300,7 +300,7 @@ int ctsvc_db_company_delete(int id, bool is_my_profile)
 			id, CTSVC_DATA_COMPANY);
 
 	ret = ctsvc_query_exec(query);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_query_exec() Failed(%d)", ret);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_query_exec() Fail(%d)", ret);
 	if (!is_my_profile)
 		ctsvc_set_company_noti();
 
@@ -314,7 +314,7 @@ void ctsvc_db_company_delete_callback(sqlite3_context *context, int argc, sqlite
 	int ret;
 	const unsigned char* logo_path;
 
-	if (argc > 1) {
+	if (1 < argc) {
 		sqlite3_result_null(context);
 		return;
 	}
@@ -325,7 +325,7 @@ void ctsvc_db_company_delete_callback(sqlite3_context *context, int argc, sqlite
 		snprintf(full_path, sizeof(full_path), "%s/%s", CTS_LOGO_IMAGE_LOCATION, logo_path);
 		ret = unlink(full_path);
 		if (ret < 0) {
-			CTS_WARN("unlink Failed(%d)", errno);
+			CTS_WARN("unlink Fail(%d)", errno);
 		}
 	}
 

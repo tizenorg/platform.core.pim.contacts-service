@@ -36,7 +36,7 @@ API int contacts_list_create(contacts_list_h* out_list)
 	*out_list = NULL;
 
 	list_s = (ctsvc_list_s*)calloc(1, sizeof(ctsvc_list_s));
-	RETVM_IF(NULL == list_s, CONTACTS_ERROR_OUT_OF_MEMORY, "Out of memory : calloc is failed");
+	RETVM_IF(NULL == list_s, CONTACTS_ERROR_OUT_OF_MEMORY, "Out of memory : calloc is Fail");
 
 	list_s->l_type = -1;
 	*out_list = (contacts_list_h)list_s;
@@ -168,7 +168,7 @@ int ctsvc_list_remove_child(contacts_list_h list, contacts_record_h record, bool
 			s_list->records = g_list_remove(s_list->records, s_record);
 			if (insert_delete_list) {
 				err = contacts_record_clone(record, &delete_record);
-				RETVM_IF(CONTACTS_ERROR_NONE != err, err,"contacts_record_clone() Failed(%d)", err);
+				RETVM_IF(CONTACTS_ERROR_NONE != err, err,"contacts_record_clone() Fail(%d)", err);
 				s_list->deleted_records = g_list_append(s_list->deleted_records, delete_record);
 			}
 			return CONTACTS_ERROR_NONE;
@@ -344,7 +344,7 @@ int ctsvc_list_clone(contacts_list_h list, contacts_list_h* out_list)
 	for (cursor = list_s->records;cursor;cursor=cursor->next) {
 		err = contacts_record_clone((contacts_record_h)cursor->data, &new_record);
 		if (CONTACTS_ERROR_NONE != err) {
-			CTS_ERR("contacts_record_clone() Failed(%d)", err);
+			CTS_ERR("contacts_record_clone() Fail(%d)", err);
 			contacts_list_destroy(new_list, true);
 			return err;
 		}
@@ -355,7 +355,7 @@ int ctsvc_list_clone(contacts_list_h list, contacts_list_h* out_list)
 	for (cursor = list_s->deleted_records;cursor;cursor=cursor->next) {
 		err = contacts_record_clone((contacts_record_h)cursor->data, &new_record);
 		if (CONTACTS_ERROR_NONE != err) {
-			CTS_ERR("contacts_record_clone() Failed(%d)", err);
+			CTS_ERR("contacts_record_clone() Fail(%d)", err);
 			contacts_list_destroy(new_list, true);
 			return err;
 		}

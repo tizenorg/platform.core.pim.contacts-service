@@ -73,10 +73,10 @@ int ctsvc_group_add_contact_in_transaction(int group_id, int contact_id)
 	snprintf(query, sizeof(query), "INSERT OR REPLACE INTO %s VALUES(%d, %d, %d, 0)",
 			CTS_TABLE_GROUP_RELATIONS, group_id, contact_id, version);
 	ret = ctsvc_query_prepare(query, &stmt);
-	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
 
 	ret = ctsvc_stmt_step(stmt);
-	WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_stmt_step() Failed(%d)", ret);
+	WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_stmt_step() Fail(%d)", ret);
 
 	rel_changed = ctsvc_db_change();
 	ctsvc_stmt_finalize(stmt);
@@ -86,7 +86,7 @@ int ctsvc_group_add_contact_in_transaction(int group_id, int contact_id)
 				"UPDATE "CTS_TABLE_GROUPS" SET member_changed_ver=%d WHERE group_id=%d",
 				version, group_id);
 		ret = ctsvc_query_exec(query);
-		RETVM_IF(ret != CONTACTS_ERROR_NONE, ret, "ctsvc_query_exec() Failed(%d)", ret);
+		RETVM_IF(ret != CONTACTS_ERROR_NONE, ret, "ctsvc_query_exec() Fail(%d)", ret);
 		ctsvc_set_group_rel_noti();
 		return rel_changed;
 	}
@@ -105,7 +105,7 @@ API int contacts_group_add_contact(int group_id, int contact_id)
 
 	/* BEGIN_TRANSACTION */
 	ret = ctsvc_begin_trans();
-	RETVM_IF(ret, ret, "contacts_svc_begin_trans() Failed(%d)", ret);
+	RETVM_IF(ret, ret, "contacts_svc_begin_trans() Fail(%d)", ret);
 
 	snprintf(query, sizeof(query),
 			"SELECT addressbook_id from "CTSVC_DB_VIEW_CONTACT"  WHERE contact_id = %d", contact_id);
@@ -126,14 +126,14 @@ API int contacts_group_add_contact(int group_id, int contact_id)
 	do {
 		int changed = ctsvc_group_add_contact_in_transaction(group_id, contact_id);
 		if (changed < CONTACTS_ERROR_NONE) {
-			CTS_ERR("DB error : ctsvc_group_add_contact_in_transaction() Failed(%d)", changed);
+			CTS_ERR("DB error : ctsvc_group_add_contact_in_transaction() Fail(%d)", changed);
 			ret = changed;
 			break;
 		}
 
 		ret = ctsvc_db_contact_update_changed_time(contact_id);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("DB error : ctsvc_db_contact_update_changed_time() Failed(%d)", ret);
+			CTS_ERR("DB error : ctsvc_db_contact_update_changed_time() Fail(%d)", ret);
 			ret = CONTACTS_ERROR_DB;
 			break;
 		}
@@ -141,7 +141,7 @@ API int contacts_group_add_contact(int group_id, int contact_id)
 
 		ret = ctsvc_end_trans(true);
 		if (ret < CONTACTS_ERROR_NONE) {
-			CTS_ERR("DB error : ctsvc_end_trans() Failed(%d)", ret);
+			CTS_ERR("DB error : ctsvc_end_trans() Fail(%d)", ret);
 			return ret;
 		}
 
@@ -168,10 +168,10 @@ int ctsvc_group_remove_contact_in_transaction(int group_id, int contact_id)
 			CTS_TABLE_GROUP_RELATIONS, version, group_id, contact_id);
 
 	ret = ctsvc_query_prepare(query, &stmt);
-	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
 
 	ret = ctsvc_stmt_step(stmt);
-	WARN_IF(CONTACTS_ERROR_NONE != ret, "DB Error: ctsvc_stmt_step() Failed(%d)", ret);
+	WARN_IF(CONTACTS_ERROR_NONE != ret, "DB Error: ctsvc_stmt_step() Fail(%d)", ret);
 
 	int rel_changed = ctsvc_db_change();
 	ctsvc_stmt_finalize(stmt);
@@ -181,7 +181,7 @@ int ctsvc_group_remove_contact_in_transaction(int group_id, int contact_id)
 				"UPDATE "CTS_TABLE_GROUPS" SET member_changed_ver=%d WHERE group_id=%d",
 				version, group_id);
 		ret = ctsvc_query_exec(query);
-		RETVM_IF(ret != CONTACTS_ERROR_NONE, ret, "ctsvc_query_exec() Failed(%d)", ret);
+		RETVM_IF(ret != CONTACTS_ERROR_NONE, ret, "ctsvc_query_exec() Fail(%d)", ret);
 		ctsvc_set_group_rel_noti();
 		return rel_changed;
 	}
@@ -200,7 +200,7 @@ API int contacts_group_remove_contact(int group_id, int contact_id)
 
 	/* BEGIN_TRANSACTION */
 	ret = ctsvc_begin_trans();
-	RETVM_IF(ret, ret, "contacts_svc_begin_trans() Failed(%d)", ret);
+	RETVM_IF(ret, ret, "contacts_svc_begin_trans() Fail(%d)", ret);
 
 	snprintf(query, sizeof(query),
 			"SELECT addressbook_id from "CTSVC_DB_VIEW_CONTACT"  WHERE contact_id = %d", contact_id);
@@ -221,14 +221,14 @@ API int contacts_group_remove_contact(int group_id, int contact_id)
 	do {
 		int changed = ctsvc_group_remove_contact_in_transaction(group_id, contact_id);
 		if (changed < CONTACTS_ERROR_NONE) {
-			CTS_ERR("DB error : ctsvc_group_remove_contact_in_transaction() Failed(%d)", changed);
+			CTS_ERR("DB error : ctsvc_group_remove_contact_in_transaction() Fail(%d)", changed);
 			ret = changed;
 			break;
 		}
 
 		ret = ctsvc_db_contact_update_changed_time(contact_id);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("DB error : ctsvc_db_contact_update_changed_time() Failed(%d)", ret);
+			CTS_ERR("DB error : ctsvc_db_contact_update_changed_time() Fail(%d)", ret);
 			ret = CONTACTS_ERROR_DB;
 			break;
 		}
@@ -236,7 +236,7 @@ API int contacts_group_remove_contact(int group_id, int contact_id)
 
 		ret = ctsvc_end_trans(true);
 		if (ret < CONTACTS_ERROR_NONE) {
-			CTS_ERR("DB error : ctsvc_end_trans() Failed(%d)", ret);
+			CTS_ERR("DB error : ctsvc_end_trans() Fail(%d)", ret);
 			return ret;
 		}
 
@@ -277,7 +277,7 @@ API int contacts_group_set_group_order(int group_id, int previous_group_id, int 
 	snprintf(query, sizeof(query), "SELECT group_prio, addressbook_id FROM "CTS_TABLE_GROUPS" WHERE group_id = ?");
 
 	ret = ctsvc_query_prepare(query, &stmt);
-	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
 
 	ctsvc_stmt_bind_int(stmt, 1, previous_group_id);
 	ret = ctsvc_stmt_step(stmt);
@@ -315,7 +315,7 @@ API int contacts_group_set_group_order(int group_id, int previous_group_id, int 
 		prio = (previous_prio + next_prio) / 2;
 
 	ret = ctsvc_begin_trans();
-	RETVM_IF(ret, ret, "ctsvc_begin_trans() Failed(%d)", ret);
+	RETVM_IF(ret, ret, "ctsvc_begin_trans() Fail(%d)", ret);
 
 	snprintf(query, sizeof(query),
 			"UPDATE %s SET group_prio = %f WHERE group_id = %d",
@@ -323,7 +323,7 @@ API int contacts_group_set_group_order(int group_id, int previous_group_id, int 
 
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_query_exec() Failed(%d)", ret);
+		CTS_ERR("ctsvc_query_exec() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
@@ -332,7 +332,7 @@ API int contacts_group_set_group_order(int group_id, int previous_group_id, int 
 
 	ret = ctsvc_end_trans(true);
 	if (ret < CONTACTS_ERROR_NONE) {
-		CTS_ERR("DB error : ctsvc_end_trans() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_end_trans() Fail(%d)", ret);
 		return ret;
 	}
 	else

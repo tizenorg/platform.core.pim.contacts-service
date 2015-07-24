@@ -54,7 +54,7 @@ API int contacts_activity_delete_by_contact_id(int contact_id)
 	// ipc call
 	if (ctsvc_ipc_call(CTSVC_IPC_ACTIVITY_MODULE, CTSVC_IPC_SERVER_ACTIVITY_DELETE_BY_CONTACT_ID, indata, &outdata) != 0)
 	{
-		CTS_ERR("ctsvc_ipc_call failed");
+		CTS_ERR("ctsvc_ipc_call Fail");
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
 	}
@@ -106,7 +106,7 @@ API int contacts_activity_delete_by_account_id(int account_id)
 	// ipc call
 	if (ctsvc_ipc_call(CTSVC_IPC_ACTIVITY_MODULE, CTSVC_IPC_SERVER_ACTIVITY_DELETE_BY_ACCOUNT_ID, indata, &outdata) != 0)
 	{
-		CTS_ERR("ctsvc_ipc_call failed");
+		CTS_ERR("ctsvc_ipc_call Fail");
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
 	}

@@ -35,7 +35,7 @@ int ctsvc_db_relationship_get_value_from_stmt(cts_stmt stmt, contacts_record_h *
 	ctsvc_relationship_s *relationship;
 
 	ret = contacts_record_create(_contacts_relationship._uri, (contacts_record_h *)&relationship);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "contacts_record_create is failed(%d)", ret);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "contacts_record_create Fail(%d)", ret);
 
 	relationship->id = ctsvc_stmt_get_int(stmt, start_count++);
 	relationship->contact_id = ctsvc_stmt_get_int(stmt, start_count++);
@@ -79,13 +79,13 @@ int ctsvc_db_relationship_insert(contacts_record_h record, int contact_id, bool 
 					contact_id, is_my_profile, CTSVC_DATA_RELATIONSHIP, relationship->type);
 
 	ret = ctsvc_query_prepare(query, &stmt);
-	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
 
 	__ctsvc_relationship_bind_stmt(stmt, relationship, 1);
 
 	ret = ctsvc_stmt_step(stmt);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB error : ctsvc_stmt_step() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_stmt_step() Fail(%d)", ret);
 		ctsvc_stmt_finalize(stmt);
 		return ret;
 	}
@@ -147,7 +147,7 @@ int ctsvc_db_relationship_delete(int id, bool is_my_profile)
 			id, CTSVC_DATA_RELATIONSHIP);
 
 	ret = ctsvc_query_exec(query);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_query_exec() Failed(%d)", ret);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_query_exec() Fail(%d)", ret);
 
 	if (!is_my_profile)
 		ctsvc_set_relationship_noti();

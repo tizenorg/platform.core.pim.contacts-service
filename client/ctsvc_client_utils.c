@@ -36,7 +36,7 @@ API int contacts_utils_get_index_characters(char **index_string)
 	RETVM_IF(ctsvc_get_ipc_handle() == NULL,CONTACTS_ERROR_IPC, "contacts not connected");
 
 	if (ctsvc_ipc_call(CTSVC_IPC_UTILS_MODULE, CTSVC_IPC_SERVER_UTILS_GET_INDEX_CHARACTERS, NULL, &outdata) != 0) {
-		CTS_ERR("ctsvc_ipc_call failed");
+		CTS_ERR("ctsvc_ipc_call Fail");
 		return CONTACTS_ERROR_IPC;
 	}
 

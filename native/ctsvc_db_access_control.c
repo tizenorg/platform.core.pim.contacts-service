@@ -147,7 +147,7 @@ static void __ctsvc_set_permission_info(ctsvc_permission_info_s *info)
 			"SELECT count(addressbook_id) FROM "CTS_TABLE_ADDRESSBOOKS);
 	ret = ctsvc_query_get_first_int_result(query, &count);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB error : ctsvc_query_get_first_int_result() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_query_get_first_int_result() Fail(%d)", ret);
 		return;
 	}
 	info->write_list = calloc(count, sizeof(int));
@@ -158,7 +158,7 @@ static void __ctsvc_set_permission_info(ctsvc_permission_info_s *info)
 			"SELECT addressbook_id, mode, smack_label FROM "CTS_TABLE_ADDRESSBOOKS);
 	ret = ctsvc_query_prepare(query, &stmt);
 	if (NULL == stmt) {
-		CTS_ERR("DB error : ctsvc_query_prepare() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_query_prepare() Fail(%d)", ret);
 		return;
 	}
 
@@ -169,7 +169,7 @@ static void __ctsvc_set_permission_info(ctsvc_permission_info_s *info)
 		char *temp = NULL;
 
 		if (1 != ret) {
-			CTS_ERR("DB error : ctsvc_stmt_step() Failed(%d)", ret);
+			CTS_ERR("DB error : ctsvc_stmt_step() Fail(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
 			return;
 		}
@@ -342,7 +342,7 @@ int ctsvc_get_write_permitted_addressbook_ids(int **addressbook_ids, int *count)
 	ctsvc_mutex_lock(CTS_MUTEX_ACCESS_CONTROL);
 	find = __ctsvc_find_access_info(pthread_self());
 	if (find) {
-		if (find->write_list && find->write_list_count > 0) {
+		if (find->write_list && 0 < find->write_list_count) {
 			int size = find->write_list_count * sizeof(int);
 			int *list = calloc(1, size);
 			memcpy(list, find->write_list, size);
@@ -387,13 +387,13 @@ int ctsvc_is_owner(int addressbook_id)
 				"WHERE addressbook_id = %d", addressbook_id);
 	ret = ctsvc_query_prepare(query, &stmt);
 	if (NULL == stmt) {
-		CTS_ERR("DB error : ctsvc_query_prepare() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_query_prepare() Fail(%d)", ret);
 		return ret;
 	}
 
 	ret = ctsvc_stmt_step(stmt);
 	if (1 != ret) {
-		CTS_ERR("ctsvc_stmt_step() Failed(%d)", ret);
+		CTS_ERR("ctsvc_stmt_step() Fail(%d)", ret);
 		ctsvc_stmt_finalize(stmt);
 		return ret;
 	}

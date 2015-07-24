@@ -97,15 +97,15 @@ static inline bool is_chosung(UChar src)
 	unicode_value2 = (0xFF & (src));
 
 	if (unicode_value1 == 0x31
-			&& (unicode_value2 >= 0x30 && unicode_value2 <= 0x4e)) //compatiblility jame
+			&& (0x30 <= unicode_value2 && unicode_value2 <= 0x4e)) //compatiblility jame
 		return true;
 
 	if (unicode_value1 == 0xA9
-			&& (unicode_value2 >= 0x60 && unicode_value2 <= 0x7C))//jamo Extended-A
+			&& (0x60 <= unicode_value2  && unicode_value2 <= 0x7C))//jamo Extended-A
 		return true;
 
 	if (unicode_value1 == 0x11
-			&& (unicode_value2 >= 0x00 && unicode_value2 <= 0x5E))//jamo
+			&& (0x00 <= unicode_value2  && unicode_value2 <= 0x5E))//jamo
 		return true;
 
 	return false;
@@ -185,29 +185,29 @@ int ctsvc_get_chosung(const char *src, char *dest, int dest_size)
 	for (i=0;i<str_len;i+=char_len) {
 		char char_src[10];
 		char_len = ctsvc_check_utf8(src[i]);
-		RETVM_IF(char_len <= 0, CONTACTS_ERROR_INVALID_PARAMETER, "check_utf8 failed");
+		RETVM_IF(char_len <= 0, CONTACTS_ERROR_INVALID_PARAMETER, "check_utf8 Fail");
 
 		memcpy(char_src, &src[i], char_len);
 		char_src[char_len] = '\0';
 
 		u_strFromUTF8(tmp_result, array_sizeof(tmp_result), NULL, char_src, -1, &status);
 		RETVM_IF(U_FAILURE(status), CONTACTS_ERROR_SYSTEM,
-				"u_strFromUTF8() Failed(%s)", u_errorName(status));
+				"u_strFromUTF8() Fail(%s)", u_errorName(status));
 
 		u_strToUpper(tmp_result, array_sizeof(tmp_result), tmp_result, -1, NULL, &status);
 		RETVM_IF(U_FAILURE(status), CONTACTS_ERROR_SYSTEM,
-				"u_strToLower() Failed(%s)", u_errorName(status));
+				"u_strToLower() Fail(%s)", u_errorName(status));
 
 		size = unorm_normalize(tmp_result, -1, UNORM_NFD, 0,
 				(UChar *)result, array_sizeof(result), &status);
 		RETVM_IF(U_FAILURE(status), CONTACTS_ERROR_SYSTEM,
-				"unorm_normalize(%s) Failed(%s)", src, u_errorName(status));
+				"unorm_normalize(%s) Fail(%s)", src, u_errorName(status));
 		ctsvc_extra_normalize(result, size);
 		u_strToUTF8(temp, dest_size, &size, result, -1, &status);
 		RETVM_IF(U_FAILURE(status), CONTACTS_ERROR_SYSTEM,
-				"u_strToUTF8() Failed(%s)", u_errorName(status));
+				"u_strToUTF8() Fail(%s)", u_errorName(status));
 		chosung_len = ctsvc_check_utf8(temp[0]);
-		RETVM_IF(chosung_len <= 0, CONTACTS_ERROR_INVALID_PARAMETER, "check_utf8 failed");
+		RETVM_IF(chosung_len <= 0, CONTACTS_ERROR_INVALID_PARAMETER, "check_utf8 Fail");
 		memcpy(&dest[j], temp, chosung_len);
 		j += chosung_len;
 		count++;
@@ -231,7 +231,7 @@ int ctsvc_get_korean_search_pattern(const char *src, char *dest, int dest_size)
 	for (i=0;i<str_len;i+=char_len) {
 		char char_src[10];
 		char_len = ctsvc_check_utf8(src[i]);
-		RETVM_IF(char_len <= 0, CONTACTS_ERROR_INVALID_PARAMETER, "check_utf8 failed");
+		RETVM_IF(char_len <= 0, CONTACTS_ERROR_INVALID_PARAMETER, "check_utf8 Fail");
 		if (char_len == 1 && src[i] == ' ')
 			continue;
 
@@ -240,14 +240,14 @@ int ctsvc_get_korean_search_pattern(const char *src, char *dest, int dest_size)
 
 		u_strFromUTF8(tmp_result, array_sizeof(tmp_result), NULL, char_src, -1, &status);
 		RETVM_IF(U_FAILURE(status), CONTACTS_ERROR_SYSTEM,
-				"u_strFromUTF8() Failed(%s)", u_errorName(status));
+				"u_strFromUTF8() Fail(%s)", u_errorName(status));
 
 		if (is_chosung(tmp_result[0])) {
 			ctsvc_hangul_compatibility2jamo(tmp_result);
 
 			u_strToUTF8(&dest[j], dest_size - j, &size, tmp_result, -1, &status);
 			RETVM_IF(U_FAILURE(status), CONTACTS_ERROR_SYSTEM,
-					"u_strToUTF8() Failed(%s)", u_errorName(status));
+					"u_strToUTF8() Fail(%s)", u_errorName(status));
 			j += size;
 			dest[j] = '*';
 			j++;
@@ -255,15 +255,15 @@ int ctsvc_get_korean_search_pattern(const char *src, char *dest, int dest_size)
 		else {
 			u_strToUpper(tmp_result, array_sizeof(tmp_result), tmp_result, -1, NULL, &status);
 			RETVM_IF(U_FAILURE(status), CONTACTS_ERROR_SYSTEM,
-					"u_strToUpper() Failed(%s)", u_errorName(status));
+					"u_strToUpper() Fail(%s)", u_errorName(status));
 			size = unorm_normalize(tmp_result, -1, UNORM_NFD, 0,
 					(UChar *)result, array_sizeof(result), &status);
 			RETVM_IF(U_FAILURE(status), CONTACTS_ERROR_SYSTEM,
-					"unorm_normalize(%s) Failed(%s)", src, u_errorName(status));
+					"unorm_normalize(%s) Fail(%s)", src, u_errorName(status));
 			ctsvc_extra_normalize(result, size);
 			u_strToUTF8(&dest[j], dest_size - j, &size, result, -1, &status);
 			RETVM_IF(U_FAILURE(status), CONTACTS_ERROR_SYSTEM,
-					"u_strToUTF8() Failed(%s)", u_errorName(status));
+					"u_strToUTF8() Fail(%s)", u_errorName(status));
 			j += size;
 		}
 		count++;
