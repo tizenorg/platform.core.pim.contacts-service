@@ -47,7 +47,7 @@ API int contacts_connect()
 	if (0 == ctsvc_connection) {
 		ret = ctsvc_inotify_init();
 		if (ret != CONTACTS_ERROR_NONE) {
-			CTS_ERR("ctsvc_inotify_init() Failed(%d)", ret);
+			CTS_ERR("ctsvc_inotify_init() Fail(%d)", ret);
 			ctsvc_mutex_unlock(CTS_MUTEX_CONNECTION);
 			return ret;
 		}
@@ -63,7 +63,7 @@ API int contacts_connect()
 	if (0 == thread_connection) {
 		ret = ctsvc_db_init();
 		if (ret != CONTACTS_ERROR_NONE) {
-			CTS_ERR("ctsvc_db_init() Failed(%d)", ret);
+			CTS_ERR("ctsvc_db_init() Fail(%d)", ret);
 			ctsvc_mutex_unlock(CTS_MUTEX_CONNECTION);
 			return ret;
 		}

@@ -64,7 +64,7 @@ static int __ctsvc_db_simple_contact_value_set(cts_stmt stmt, contacts_record_h 
 	char full_path[CTSVC_IMG_FULL_PATH_SIZE_MAX] = {0};
 
 	ret = contacts_record_create(_contacts_simple_contact._uri, record);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "contacts_record_create is failed(%d)", ret);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "contacts_record_create Fail(%d)", ret);
 	contact = (ctsvc_simple_contact_s*)*record;
 
 	i = 0;
@@ -115,11 +115,11 @@ static int __ctsvc_db_simple_contact_get_record(int id, contacts_record_h* out_r
 					ctsvc_get_display_column(), id);
 
 	ret = ctsvc_query_prepare(query, &stmt);
-	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
 
 	ret = ctsvc_stmt_step(stmt);
 	if (1 /*CTS_TRUE*/ != ret) {
-		CTS_ERR("ctsvc_stmt_step() Failed(%d)", ret);
+		CTS_ERR("ctsvc_stmt_step() Fail(%d)", ret);
 		ctsvc_stmt_finalize(stmt);
 		if (CONTACTS_ERROR_NONE == ret)
 			return CONTACTS_ERROR_NO_DATA;
@@ -131,7 +131,7 @@ static int __ctsvc_db_simple_contact_get_record(int id, contacts_record_h* out_r
 
 	ctsvc_stmt_finalize(stmt);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("__ctsvc_db_simple_contact_value_set(ALL) Failed(%d)", ret);
+		CTS_ERR("__ctsvc_db_simple_contact_value_set(ALL) Fail(%d)", ret);
 		return ret;
 	}
 
@@ -162,13 +162,13 @@ static int __ctsvc_db_simple_contact_get_all_records(int offset, int limit,
 	}
 
 	ret = ctsvc_query_prepare(query, &stmt);
-	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
 
 	contacts_list_create(&list);
 	while ((ret = ctsvc_stmt_step(stmt))) {
 		contacts_record_h record;
 		if (1 != ret) {
-			CTS_ERR("DB error : ctsvc_stmt_step() Failed(%d)", ret);
+			CTS_ERR("DB error : ctsvc_stmt_step() Fail(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
 			contacts_list_destroy(list, true);
 			return ret;
@@ -206,7 +206,7 @@ static int __ctsvc_db_simple_contact_get_records_with_query(contacts_query_h que
 	while ((ret = ctsvc_stmt_step(stmt))) {
 		contacts_record_h record;
 		if (1 != ret) {
-			CTS_ERR("DB error : ctsvc_stmt_step() Failed(%d)", ret);
+			CTS_ERR("DB error : ctsvc_stmt_step() Fail(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
 			contacts_list_destroy(list, true);
 			return ret;
@@ -220,7 +220,7 @@ static int __ctsvc_db_simple_contact_get_records_with_query(contacts_query_h que
 			field_count = s_query->projection_count;
 
 			if (CONTACTS_ERROR_NONE != ctsvc_record_set_projection_flags(record, s_query->projection, s_query->projection_count, s_query->property_count)) {
-				ASSERT_NOT_REACHED("To set projection is failed.\n");
+				ASSERT_NOT_REACHED("To set projection is Fail.\n");
 			}
 		}
 

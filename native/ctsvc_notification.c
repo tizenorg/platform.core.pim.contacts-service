@@ -468,7 +468,7 @@ void ctsvc_db_data_delete_callback(sqlite3_context * context,
 	CTS_FN_CALL;
 	int datatype;
 
-	if (argc > 2) {
+	if (2 < argc) {
 		sqlite3_result_null(context);
 		return;
 	}

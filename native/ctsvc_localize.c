@@ -108,14 +108,14 @@ int ctsvc_get_name_sort_type(const char *src)
 	char char_src[10];
 
 	char_len = ctsvc_check_utf8(src[0]);
-	RETVM_IF(char_len <= 0, CONTACTS_ERROR_INVALID_PARAMETER, "check_utf8 failed");
+	RETVM_IF(char_len <= 0, CONTACTS_ERROR_INVALID_PARAMETER, "check_utf8 Fail");
 
 	memcpy(char_src, &src[0], char_len);
 	char_src[char_len] = '\0';
 
 	u_strFromUTF8(tmp_result, array_sizeof(tmp_result), NULL, char_src, -1, &status);
 	RETVM_IF(U_FAILURE(status), CONTACTS_ERROR_SYSTEM,
-			"u_strFromUTF8() Failed(%s)", u_errorName(status));
+			"u_strFromUTF8() Fail(%s)", u_errorName(status));
 
 	language_type = ctsvc_check_language(tmp_result);
 	ret = ctsvc_get_sort_type_from_language(language_type);

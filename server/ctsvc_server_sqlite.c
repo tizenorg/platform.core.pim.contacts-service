@@ -58,38 +58,38 @@ int ctsvc_server_db_open(sqlite3 **db)
 	if (!server_db) {
 		ret = db_util_open(CTSVC_DB_PATH, &server_db, 0);
 		RETVM_IF(ret != SQLITE_OK, CONTACTS_ERROR_DB,
-				"db_util_open() Failed(%d)", ret);
+				"db_util_open() Fail(%d)", ret);
 
 		ret = sqlite3_create_function(server_db, "_DATA_DELETE_", 2, SQLITE_UTF8, NULL,
 					ctsvc_db_data_delete_callback, NULL, NULL);
 		RETVM_IF(SQLITE_OK != ret, CONTACTS_ERROR_DB,
-						"sqlite3_create_function() Failed(%d)", ret);
+						"sqlite3_create_function() Fail(%d)", ret);
 		ret = sqlite3_create_function(server_db, "_DATA_IMAGE_DELETE_", 1, SQLITE_UTF8, NULL,
 					ctsvc_db_image_delete_callback, NULL, NULL);
 		RETVM_IF(SQLITE_OK != ret, CONTACTS_ERROR_DB,
-						"sqlite3_create_function() Failed(%d)", ret);
+						"sqlite3_create_function() Fail(%d)", ret);
 		ret = sqlite3_create_function(server_db, "_DATA_COMPANY_DELETE_", 1, SQLITE_UTF8, NULL,
 					ctsvc_db_company_delete_callback, NULL, NULL);
 		RETVM_IF(SQLITE_OK != ret, CONTACTS_ERROR_DB,
-						"sqlite3_create_function() Failed(%d)", ret);
+						"sqlite3_create_function() Fail(%d)", ret);
 #ifdef ENABLE_LOG_FEATURE
 		ret = sqlite3_create_function(server_db, "_PHONE_LOG_DELETE_", 1, SQLITE_UTF8, NULL,
 					ctsvc_db_phone_log_delete_callback, NULL, NULL);
 		RETVM_IF(SQLITE_OK != ret, CONTACTS_ERROR_DB,
-						"sqlite3_create_function() Failed(%d)", ret);
+						"sqlite3_create_function() Fail(%d)", ret);
 #endif // ENABLE_LOG_FEATURE
 		ret = sqlite3_create_function(server_db, "_PERSON_DELETE_", 1, SQLITE_UTF8, NULL,
 					ctsvc_db_person_delete_callback, NULL, NULL);
 		RETVM_IF(SQLITE_OK != ret, CONTACTS_ERROR_DB,
-						"sqlite3_create_function() Failed(%d)", ret);
+						"sqlite3_create_function() Fail(%d)", ret);
 		ret = sqlite3_create_function(server_db, "_GROUP_DELETE_", 1, SQLITE_UTF8, NULL,
 					ctsvc_db_group_delete_callback, NULL, NULL);
 		RETVM_IF(SQLITE_OK != ret, CONTACTS_ERROR_DB,
-						"sqlite3_create_function() Failed(%d)", ret);
+						"sqlite3_create_function() Fail(%d)", ret);
 		ret = sqlite3_create_function(server_db, "_NUMBER_COMPARE_", 4, SQLITE_UTF8, NULL,
 					ctsvc_db_phone_number_equal_callback, NULL, NULL);
 		RETVM_IF(SQLITE_OK != ret, CONTACTS_ERROR_DB,
-						"sqlite3_create_function() Failed(%d)", ret);
+						"sqlite3_create_function() Fail(%d)", ret);
 	}
 	if (db)
 		*db = server_db;
@@ -120,7 +120,7 @@ int ctsvc_server_begin_trans(void)
 	}
 
 	if (SQLITE_OK != ret) {
-		CTS_ERR("sqlite3_exec() Failed(%d)", ret);
+		CTS_ERR("sqlite3_exec() Fail(%d)", ret);
 		return CONTACTS_ERROR_DB;
 	}
 	return CONTACTS_ERROR_NONE;
@@ -137,7 +137,7 @@ int ctsvc_server_end_trans(bool success)
 			ret = sqlite3_exec(server_db, "COMMIT TRANSACTION",
 					NULL, NULL, &errmsg);
 			if (SQLITE_OK != ret) {
-				CTS_ERR("sqlite3_exec(COMMIT) Failed(%d, %s)", ret, errmsg);
+				CTS_ERR("sqlite3_exec(COMMIT) Fail(%d, %s)", ret, errmsg);
 				sqlite3_free(errmsg);
 				i++;
 				sleep(1);
@@ -156,7 +156,7 @@ int ctsvc_server_end_trans(bool success)
 		ret = sqlite3_exec(server_db, "ROLLBACK TRANSACTION",
 				NULL, NULL, &errmsg);
 		if (SQLITE_OK != ret) {
-			CTS_ERR("sqlite3_exec(ROLLBACK) Failed(%d, %s)", ret, errmsg);
+			CTS_ERR("sqlite3_exec(ROLLBACK) Fail(%d, %s)", ret, errmsg);
 			sqlite3_free(errmsg);
 			i++;
 			sleep(1);
@@ -164,7 +164,7 @@ int ctsvc_server_end_trans(bool success)
 	} while ((SQLITE_BUSY == ret || SQLITE_LOCKED == ret) && i < CTS_COMMIT_TRY_MAX);
 
 	if (SQLITE_OK != ret) {
-		CTS_ERR("sqlite3_exec(ROLLBACK) Failed(%d) : DB lock", ret);
+		CTS_ERR("sqlite3_exec(ROLLBACK) Fail(%d) : DB lock", ret);
 		return CONTACTS_ERROR_DB;
 	}
 	else {
@@ -182,16 +182,16 @@ int ctsvc_server_update_sort(int prev_sort_primary, int prev_sort_secondary, int
 	char query[CTS_SQL_MIN_LEN] = {0};
 
 	ret = ctsvc_server_db_open(&db);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_server_db_open() Failed(%d)", ret);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_server_db_open() Fail(%d)", ret);
 
 	ret = ctsvc_server_begin_trans();
-	RETVM_IF(ret, ret, "ctsvc_server_begin_trans() Failed(%d)", ret);
+	RETVM_IF(ret, ret, "ctsvc_server_begin_trans() Fail(%d)", ret);
 
 	snprintf(query, sizeof(query), "UPDATE %s SET display_name_language=%d WHERE display_name_language =%d",
 			CTS_TABLE_CONTACTS, prev_sort_primary, CTSVC_SORT_PRIMARY);
 	ret = sqlite3_exec(db, query, NULL, NULL, &errmsg);
 	if (SQLITE_OK != ret) {
-		CTS_ERR("sqlite3_exec(%s) Failed(%d, %s)", query, ret, errmsg);
+		CTS_ERR("sqlite3_exec(%s) Fail(%d, %s)", query, ret, errmsg);
 		sqlite3_free(errmsg);
 		ctsvc_server_end_trans(false);
 		ctsvc_server_db_close();
@@ -202,7 +202,7 @@ int ctsvc_server_update_sort(int prev_sort_primary, int prev_sort_secondary, int
 			CTS_TABLE_CONTACTS, prev_sort_secondary, CTSVC_SORT_SECONDARY);
 	ret = sqlite3_exec(db, query, NULL, NULL, &errmsg);
 	if (SQLITE_OK != ret) {
-		CTS_ERR("sqlite3_exec(%s) Failed(%d, %s)", query, ret, errmsg);
+		CTS_ERR("sqlite3_exec(%s) Fail(%d, %s)", query, ret, errmsg);
 		sqlite3_free(errmsg);
 		ctsvc_server_end_trans(false);
 		ctsvc_server_db_close();
@@ -213,7 +213,7 @@ int ctsvc_server_update_sort(int prev_sort_primary, int prev_sort_secondary, int
 				CTS_TABLE_CONTACTS, CTSVC_SORT_PRIMARY, new_sort_primary);
 	ret = sqlite3_exec(db, query, NULL, NULL, &errmsg);
 	if (SQLITE_OK != ret) {
-		CTS_ERR("sqlite3_exec(%s) Failed(%d, %s)", query, ret, errmsg);
+		CTS_ERR("sqlite3_exec(%s) Fail(%d, %s)", query, ret, errmsg);
 		sqlite3_free(errmsg);
 		ctsvc_server_end_trans(false);
 		ctsvc_server_db_close();
@@ -224,7 +224,7 @@ int ctsvc_server_update_sort(int prev_sort_primary, int prev_sort_secondary, int
 			CTS_TABLE_CONTACTS, CTSVC_SORT_SECONDARY, new_sort_secondary);
 	ret = sqlite3_exec(db, query, NULL, NULL, &errmsg);
 	if (SQLITE_OK != ret) {
-		CTS_ERR("sqlite3_exec(%s) Failed(%d, %s)", query, ret, errmsg);
+		CTS_ERR("sqlite3_exec(%s) Fail(%d, %s)", query, ret, errmsg);
 		sqlite3_free(errmsg);
 		ctsvc_server_end_trans(false);
 		ctsvc_server_db_close();
@@ -235,7 +235,7 @@ int ctsvc_server_update_sort(int prev_sort_primary, int prev_sort_secondary, int
 				CTS_TABLE_CONTACTS, prev_sort_primary, CTSVC_SORT_PRIMARY);
 	ret = sqlite3_exec(db, query, NULL, NULL, &errmsg);
 	if (SQLITE_OK != ret) {
-		CTS_ERR("sqlite3_exec(%s) Failed(%d, %s)", query, ret, errmsg);
+		CTS_ERR("sqlite3_exec(%s) Fail(%d, %s)", query, ret, errmsg);
 		sqlite3_free(errmsg);
 		ctsvc_server_end_trans(false);
 		ctsvc_server_db_close();
@@ -246,7 +246,7 @@ int ctsvc_server_update_sort(int prev_sort_primary, int prev_sort_secondary, int
 			CTS_TABLE_CONTACTS, prev_sort_secondary, CTSVC_SORT_SECONDARY);
 	ret = sqlite3_exec(db, query, NULL, NULL, &errmsg);
 	if (SQLITE_OK != ret) {
-		CTS_ERR("sqlite3_exec(%s) Failed(%d, %s)", query, ret, errmsg);
+		CTS_ERR("sqlite3_exec(%s) Fail(%d, %s)", query, ret, errmsg);
 		sqlite3_free(errmsg);
 		ctsvc_server_end_trans(false);
 		ctsvc_server_db_close();
@@ -257,7 +257,7 @@ int ctsvc_server_update_sort(int prev_sort_primary, int prev_sort_secondary, int
 				CTS_TABLE_CONTACTS, CTSVC_SORT_PRIMARY, new_sort_primary);
 	ret = sqlite3_exec(db, query, NULL, NULL, &errmsg);
 	if (SQLITE_OK != ret) {
-		CTS_ERR("sqlite3_exec(%s) Failed(%d, %s)", query, ret, errmsg);
+		CTS_ERR("sqlite3_exec(%s) Fail(%d, %s)", query, ret, errmsg);
 		sqlite3_free(errmsg);
 		ctsvc_server_end_trans(false);
 		ctsvc_server_db_close();
@@ -268,7 +268,7 @@ int ctsvc_server_update_sort(int prev_sort_primary, int prev_sort_secondary, int
 			CTS_TABLE_CONTACTS, CTSVC_SORT_SECONDARY, new_sort_secondary);
 	ret = sqlite3_exec(db, query, NULL, NULL, &errmsg);
 	if (SQLITE_OK != ret) {
-		CTS_ERR("sqlite3_exec(%s) Failed(%d, %s)", query, ret, errmsg);
+		CTS_ERR("sqlite3_exec(%s) Fail(%d, %s)", query, ret, errmsg);
 		sqlite3_free(errmsg);
 		ctsvc_server_end_trans(false);
 		ctsvc_server_db_close();
@@ -305,14 +305,14 @@ int ctsvc_server_insert_sdn_contact(const char *name, const char *number,
 	char query[CTS_SQL_MIN_LEN] = {0};
 
 	ret = ctsvc_server_db_open(&db);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_server_db_open() Failed(%d)", ret);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_server_db_open() Fail(%d)", ret);
 
 	snprintf(query, sizeof(query), "INSERT INTO %s(name, number, sim_slot_no) VALUES(?, ?, ?)",
 			CTS_TABLE_SDN);
 
 	ret = sqlite3_prepare_v2(db, query, strlen(query), &stmt, NULL);
 	if (SQLITE_OK != ret) {
-		CTS_ERR("sqlite3_prepare_v2(%s) Failed(%s)", query, sqlite3_errmsg(db));
+		CTS_ERR("sqlite3_prepare_v2(%s) Fail(%s)", query, sqlite3_errmsg(db));
 		ctsvc_server_db_close();
 		return CONTACTS_ERROR_DB;
 	}
@@ -323,7 +323,7 @@ int ctsvc_server_insert_sdn_contact(const char *name, const char *number,
 
 	ret = sqlite3_step(stmt);
 	if (SQLITE_DONE != ret) {
-		CTS_ERR("sqlite3_step() Failed(%d)", ret);
+		CTS_ERR("sqlite3_step() Fail(%d)", ret);
 		sqlite3_finalize(stmt);
 		ctsvc_server_db_close();
 		return CONTACTS_ERROR_DB;
@@ -342,7 +342,7 @@ int ctsvc_server_delete_sdn_contact(int sim_slot_no)
 	char query[CTS_SQL_MAX_LEN] = {0};
 
 	ret = ctsvc_server_db_open(&db);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "helper_db_open() Failed(%d)", ret);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "helper_db_open() Fail(%d)", ret);
 
 	if (sim_slot_no < 0)
 		snprintf(query, sizeof(query), "DELETE FROM %s", CTS_TABLE_SDN);
@@ -351,13 +351,13 @@ int ctsvc_server_delete_sdn_contact(int sim_slot_no)
 
 	ret = sqlite3_prepare_v2(db, query, strlen(query), &stmt, NULL);
 	if (SQLITE_OK != ret) {
-		CTS_ERR("sqlite3_prepare_v2(%s) Failed(%s)", query, sqlite3_errmsg(db));
+		CTS_ERR("sqlite3_prepare_v2(%s) Fail(%s)", query, sqlite3_errmsg(db));
 		ctsvc_server_db_close();
 		return CONTACTS_ERROR_DB;
 	}
 	ret = sqlite3_step(stmt);
 	if (SQLITE_DONE != ret) {
-		CTS_ERR("sqlite3_step() Failed(%d)", ret);
+		CTS_ERR("sqlite3_step() Fail(%d)", ret);
 		sqlite3_finalize(stmt);
 		ctsvc_server_db_close();
 		return CONTACTS_ERROR_DB;
@@ -380,14 +380,14 @@ int ctsvc_server_update_collation()
 
 	ret = ctsvc_server_db_open(&db);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_server_db_open() Failed(%d)", ret);
+		CTS_ERR("ctsvc_server_db_open() Fail(%d)", ret);
 		ctsvc_db_set_status(CONTACTS_DB_STATUS_NORMAL);
 		return ret;
 	}
 
 	ret = ctsvc_server_begin_trans();
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_server_begin_trans() Failed(%d)", ret);
+		CTS_ERR("ctsvc_server_begin_trans() Fail(%d)", ret);
 		ctsvc_server_db_close();
 		ctsvc_db_set_status(CONTACTS_DB_STATUS_NORMAL);
 		return ret;
@@ -398,7 +398,7 @@ int ctsvc_server_update_collation()
 				"FROM "CTS_TABLE_CONTACTS" WHERE deleted = 0");
 	ret = sqlite3_prepare_v2(db, query, strlen(query), &stmt, NULL);
 	if (SQLITE_OK != ret) {
-		CTS_ERR("sqlite3_prepare_v2(%s) Failed(%s)", query, sqlite3_errmsg(db));
+		CTS_ERR("sqlite3_prepare_v2(%s) Fail(%s)", query, sqlite3_errmsg(db));
 		ctsvc_server_end_trans(false);
 		ctsvc_server_db_close();
 		ctsvc_db_set_status(CONTACTS_DB_STATUS_NORMAL);
@@ -410,7 +410,7 @@ int ctsvc_server_update_collation()
 				"WHERE contact_id = ?");
 	ret = sqlite3_prepare_v2(db, query, strlen(query), &update_stmt, NULL);
 	if (SQLITE_OK != ret) {
-		CTS_ERR("sqlite3_prepare_v2(%s) Failed(%s)", query, sqlite3_errmsg(db));
+		CTS_ERR("sqlite3_prepare_v2(%s) Fail(%s)", query, sqlite3_errmsg(db));
 		sqlite3_finalize(stmt);
 		ctsvc_server_end_trans(false);
 		ctsvc_server_db_close();
@@ -445,7 +445,7 @@ int ctsvc_server_update_collation()
 		free(reverse_sortkey);
 
 		if (SQLITE_DONE != ret) {
-			CTS_ERR("sqlite3_step(%s) Failed(%d, %s)", query, ret, sqlite3_errmsg(db));
+			CTS_ERR("sqlite3_step(%s) Fail(%d, %s)", query, ret, sqlite3_errmsg(db));
 			sqlite3_finalize(stmt);
 			sqlite3_finalize(update_stmt);
 			ctsvc_server_end_trans(false);
@@ -459,7 +459,7 @@ int ctsvc_server_update_collation()
 	}
 
 	if (SQLITE_ROW != ret && SQLITE_DONE != ret) {
-		CTS_ERR("sqlite3_step() Failed(%d)", ret);
+		CTS_ERR("sqlite3_step() Fail(%d)", ret);
 		sqlite3_finalize(update_stmt);
 		sqlite3_finalize(stmt);
 		ctsvc_server_end_trans(false);
@@ -502,7 +502,7 @@ int ctsvc_server_get_sim_id(const char *unique_id, int *sim_id)
 								"WHERE unique_id = '%s'", unique_id);
 	ret = ctsvc_query_get_first_int_result(query, &id);
 	if (CONTACTS_ERROR_NONE != ret && CONTACTS_ERROR_NO_DATA != ret) {
-		CTS_ERR("ctsvc_query_get_first_int_result() Failed(%d)", ret);
+		CTS_ERR("ctsvc_query_get_first_int_result() Fail(%d)", ret);
 		return ret;
 	}
 
@@ -538,11 +538,11 @@ static int __ctsvc_server_db_get_contact_data(sqlite3* db, int id, ctsvc_contact
 					"WHERE data.contact_id = %d  AND is_my_profile = 0 "
 					"ORDER BY is_default DESC", id);
 	ret = sqlite3_prepare_v2(db, query, strlen(query), &stmt, NULL);
-	RETVM_IF(SQLITE_OK != ret, ret, "DB error : sqlite3_prepare_v2() Failed(%d)", ret);
+	RETVM_IF(SQLITE_OK != ret, ret, "DB error : sqlite3_prepare_v2() Fail(%d)", ret);
 
 	ret = sqlite3_step(stmt);
 	if (SQLITE_ROW != ret) {
-		CTS_ERR("sqlite3_step() Failed(%d)", ret);
+		CTS_ERR("sqlite3_step() Fail(%d)", ret);
 		sqlite3_finalize(stmt);
 		return ret;
 	}
@@ -590,14 +590,14 @@ int ctsvc_server_update_sort_name()
 
 	ret = ctsvc_server_db_open(&db);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_server_db_open() Failed(%d)", ret);
+		CTS_ERR("ctsvc_server_db_open() Fail(%d)", ret);
 		ctsvc_db_set_status(CONTACTS_DB_STATUS_NORMAL);
 		return ret;
 	}
 
 	ret = ctsvc_server_begin_trans();
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_server_begin_trans() Failed(%d)", ret);
+		CTS_ERR("ctsvc_server_begin_trans() Fail(%d)", ret);
 		ctsvc_server_db_close();
 		ctsvc_db_set_status(CONTACTS_DB_STATUS_NORMAL);
 		return ret;
@@ -608,7 +608,7 @@ int ctsvc_server_update_sort_name()
 				"FROM "CTS_TABLE_CONTACTS" WHERE deleted = 0");
 	ret = sqlite3_prepare_v2(db, query, strlen(query), &stmt, NULL);
 	if (SQLITE_OK != ret) {
-		CTS_ERR("sqlite3_prepare_v2(%s) Failed(%s)", query, sqlite3_errmsg(db));
+		CTS_ERR("sqlite3_prepare_v2(%s) Fail(%s)", query, sqlite3_errmsg(db));
 		ctsvc_server_end_trans(false);
 		ctsvc_server_db_close();
 		ctsvc_db_set_status(CONTACTS_DB_STATUS_NORMAL);
@@ -624,7 +624,7 @@ int ctsvc_server_update_sort_name()
 				"WHERE contact_id = ?");
 	ret = sqlite3_prepare_v2(db, query, strlen(query), &update_stmt, NULL);
 	if (SQLITE_OK != ret) {
-		CTS_ERR("sqlite3_propare_v2(%s) Failed(%s)", query, sqlite3_errmsg(db));
+		CTS_ERR("sqlite3_propare_v2(%s) Fail(%s)", query, sqlite3_errmsg(db));
 		ret = CONTACTS_ERROR_DB;
 		goto DATA_FREE;
 	}
@@ -635,7 +635,7 @@ int ctsvc_server_update_sort_name()
 			CTS_TABLE_SEARCH_INDEX);
 	ret = sqlite3_prepare_v2(db, query, strlen(query), &search_name_stmt, NULL);
 	if (SQLITE_OK != ret) {
-		CTS_ERR("sqlite3_propare_v2(%s) Failed(%s)", query, sqlite3_errmsg(db));
+		CTS_ERR("sqlite3_propare_v2(%s) Fail(%s)", query, sqlite3_errmsg(db));
 		ret = CONTACTS_ERROR_DB;
 		goto DATA_FREE;
 	}
@@ -649,7 +649,7 @@ int ctsvc_server_update_sort_name()
 		contacts_record_create(_contacts_contact._uri, (contacts_record_h*)&contact);
 		ret = __ctsvc_server_db_get_contact_data(db, contact_id, contact);
 		if (SQLITE_DONE != ret) {
-			CTS_ERR("sqlite3_step(%s) Failed(%d, %s)", query, ret, sqlite3_errmsg(db));
+			CTS_ERR("sqlite3_step(%s) Fail(%d, %s)", query, ret, sqlite3_errmsg(db));
 			contacts_record_destroy((contacts_record_h)contact, true);
 			ret = CONTACTS_ERROR_DB;
 			goto DATA_FREE;
@@ -672,7 +672,7 @@ int ctsvc_server_update_sort_name()
 
 		ret = sqlite3_step(update_stmt);
 		if (SQLITE_DONE != ret) {
-			CTS_ERR("sqlite3_step(%s) Failed(%d, %s)", query, ret, sqlite3_errmsg(db));
+			CTS_ERR("sqlite3_step(%s) Fail(%d, %s)", query, ret, sqlite3_errmsg(db));
 			contacts_record_destroy((contacts_record_h)contact, true);
 			ret = CONTACTS_ERROR_DB;
 			goto DATA_FREE;
@@ -687,7 +687,7 @@ int ctsvc_server_update_sort_name()
 			ret = sqlite3_step(search_name_stmt);
 			free(search_name);
 			if (SQLITE_DONE != ret) {
-				CTS_ERR("sqlite3_step(%s) Failed(%d, %s)", query, ret, sqlite3_errmsg(db));
+				CTS_ERR("sqlite3_step(%s) Fail(%d, %s)", query, ret, sqlite3_errmsg(db));
 				contacts_record_destroy((contacts_record_h)contact, true);
 				ret = CONTACTS_ERROR_DB;
 				goto DATA_FREE;
@@ -699,7 +699,7 @@ int ctsvc_server_update_sort_name()
 	}
 
 	if (SQLITE_ROW != ret && SQLITE_DONE != ret) {
-		CTS_ERR("sqlite3_step() Failed(%d)", ret);
+		CTS_ERR("sqlite3_step() Fail(%d)", ret);
 		ret = CONTACTS_ERROR_DB;
 		goto DATA_FREE;
 	}

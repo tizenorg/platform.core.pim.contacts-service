@@ -71,7 +71,7 @@ static int __ctsvc_result_create(contacts_record_h* out_record)
 	ctsvc_result_s *result;
 	result = (ctsvc_result_s*)calloc(1, sizeof(ctsvc_result_s));
 	RETVM_IF(NULL == result, CONTACTS_ERROR_OUT_OF_MEMORY,
-			"Out of memory : calloc is failed");
+			"Out of memory : calloc is Fail");
 
 	*out_record = (contacts_record_h)result;
 	return CONTACTS_ERROR_NONE;
@@ -106,7 +106,7 @@ static int __ctsvc_result_clone(contacts_record_h record, contacts_record_h *out
     src_data = (ctsvc_result_s*)record;
     out_data = calloc(1, sizeof(ctsvc_result_s));
     RETVM_IF(NULL == out_data, CONTACTS_ERROR_OUT_OF_MEMORY,
-			 "Out of memeory : calloc(ctsvc_result_s) Failed(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
+			 "Out of memeory : calloc(ctsvc_result_s) Fail(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
 
 	for (cursor=src_data->values;cursor;cursor=cursor->next) {
 		ctsvc_result_value_s *src = cursor->data;

@@ -65,7 +65,7 @@ static int __ctsvc_db_sdn_value_set(cts_stmt stmt, contacts_record_h *record)
 	ctsvc_sdn_s *sdn;
 
 	ret = contacts_record_create(_contacts_sdn._uri, record);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "contacts_record_create is failed(%d)", ret);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "contacts_record_create Fail(%d)", ret);
 	sdn = (ctsvc_sdn_s*)*record;
 
 	i = 0;
@@ -95,11 +95,11 @@ static int __ctsvc_db_sdn_get_record(int id, contacts_record_h* out_record)
 				"SELECT id, name, number, sim_slot_no FROM "CTS_TABLE_SDN" WHERE id = %d", id);
 
 	ret = ctsvc_query_prepare(query, &stmt);
-	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
 
 	ret = ctsvc_stmt_step(stmt);
 	if (1 /*CTS_TRUE*/ != ret) {
-		CTS_ERR("ctsvc_stmt_step() Failed(%d)", ret);
+		CTS_ERR("ctsvc_stmt_step() Fail(%d)", ret);
 		ctsvc_stmt_finalize(stmt);
 		if (CONTACTS_ERROR_NONE == ret)
 			return CONTACTS_ERROR_NO_DATA;
@@ -111,7 +111,7 @@ static int __ctsvc_db_sdn_get_record(int id, contacts_record_h* out_record)
 
 	ctsvc_stmt_finalize(stmt);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("__ctsvc_db_sdn_value_set(ALL) Failed(%d)", ret);
+		CTS_ERR("__ctsvc_db_sdn_value_set(ALL) Fail(%d)", ret);
 		return ret;
 	}
 
@@ -138,7 +138,7 @@ static int __ctsvc_db_sdn_insert_record(contacts_record_h record, int *id)
 			"INSERT INTO "CTS_TABLE_SDN"(name, number, sim_slot_no) VALUES(?, ?, ?)");
 
 	ret = ctsvc_query_prepare(query, &stmt);
-	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
 
 	ctsvc_stmt_bind_text(stmt, 1, sdn->name);
 	ctsvc_stmt_bind_text(stmt, 2, sdn->number);
@@ -146,14 +146,14 @@ static int __ctsvc_db_sdn_insert_record(contacts_record_h record, int *id)
 
 	ret = ctsvc_begin_trans();
 	if (ret < CONTACTS_ERROR_NONE) {
-		CTS_ERR("DB error : ctsvc_begin_trans() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_begin_trans() Fail(%d)", ret);
 		ctsvc_stmt_finalize(stmt);
 		return ret;
 	}
 
 	ret = ctsvc_stmt_step(stmt);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB error : ctsvc_stmt_step() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_stmt_step() Fail(%d)", ret);
 		ctsvc_stmt_finalize(stmt);
 		ctsvc_end_trans(false);
 		return ret;
@@ -167,7 +167,7 @@ static int __ctsvc_db_sdn_insert_record(contacts_record_h record, int *id)
 	ctsvc_set_sdn_noti();
 	ret = ctsvc_end_trans(true);
 	if (ret < CONTACTS_ERROR_NONE) {
-		CTS_ERR("DB error : ctsvc_end_trans() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_end_trans() Fail(%d)", ret);
 		return ret;
 	}
 
@@ -192,7 +192,7 @@ static int __ctsvc_db_sdn_update_record(contacts_record_h record)
 	RETVM_IF(CTSVC_PROPERTY_FLAG_DIRTY != (sdn->base.property_flag & CTSVC_PROPERTY_FLAG_DIRTY), CONTACTS_ERROR_NONE, "No update");
 
 	ret = ctsvc_begin_trans();
-	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "DB error : ctsvc_begin_trans() Failed(%d)", ret);
+	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "DB error : ctsvc_begin_trans() Fail(%d)", ret);
 
 	snprintf(query, sizeof(query),
 			"SELECT id FROM "CTS_TABLE_SDN" WHERE id = %d", sdn->id);
@@ -218,7 +218,7 @@ static int __ctsvc_db_sdn_update_record(contacts_record_h record)
 	}
 
 	ret = ctsvc_end_trans(true);
-	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "DB error : ctsvc_end_trans() Failed(%d)", ret);
+	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "DB error : ctsvc_end_trans() Fail(%d)", ret);
 
 	return CONTACTS_ERROR_NONE;
 }
@@ -230,7 +230,7 @@ static int __ctsvc_db_sdn_delete_record(int sdn_id)
 	char query[CTS_SQL_MAX_LEN] = {0};
 
 	ret = ctsvc_begin_trans();
-	RETVM_IF(CONTACTS_ERROR_NONE > ret, ret, "DB error : ctsvc_begin_trans() Failed(%d)", ret);
+	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "DB error : ctsvc_begin_trans() Fail(%d)", ret);
 
 	snprintf(query, sizeof(query),
 			"SELECT id FROM "CTS_TABLE_SDN" WHERE id = %d", sdn_id);
@@ -244,7 +244,7 @@ static int __ctsvc_db_sdn_delete_record(int sdn_id)
 	snprintf(query, sizeof(query), "DELETE FROM "CTS_TABLE_SDN" WHERE id = %d", sdn_id);
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB error : ctsvc_query_exec() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_query_exec() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
@@ -259,7 +259,7 @@ static int __ctsvc_db_sdn_delete_record(int sdn_id)
 	ctsvc_set_sdn_noti();
 	ret = ctsvc_end_trans(true);
 	if (ret != CONTACTS_ERROR_NONE) {
-		CTS_ERR("DB error : ctsvc_end_trans() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_end_trans() Fail(%d)", ret);
 		return ret;
 	}
 
@@ -288,13 +288,13 @@ static int __ctsvc_db_sdn_get_all_records(int offset, int limit,
 	}
 
 	ret = ctsvc_query_prepare(query, &stmt);
-	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
 
 	contacts_list_create(&list);
 	while ((ret = ctsvc_stmt_step(stmt))) {
 		contacts_record_h record;
 		if (1 != ret) {
-			CTS_ERR("DB error : ctsvc_stmt_step() Failed(%d)", ret);
+			CTS_ERR("DB error : ctsvc_stmt_step() Fail(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
 			contacts_list_destroy(list, true);
 			return ret;
@@ -332,7 +332,7 @@ static int __ctsvc_db_sdn_get_records_with_query(contacts_query_h query, int off
 	while ((ret = ctsvc_stmt_step(stmt))) {
 		contacts_record_h record;
 		if (1 != ret) {
-			CTS_ERR("DB error : ctsvc_stmt_step() Failed(%d)", ret);
+			CTS_ERR("DB error : ctsvc_stmt_step() Fail(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
 			contacts_list_destroy(list, true);
 			return ret;
@@ -346,7 +346,7 @@ static int __ctsvc_db_sdn_get_records_with_query(contacts_query_h query, int off
 			field_count = s_query->projection_count;
 
 			if (CONTACTS_ERROR_NONE != ctsvc_record_set_projection_flags(record, s_query->projection, s_query->projection_count, s_query->property_count)) {
-				ASSERT_NOT_REACHED("To set projection is failed.\n");
+				ASSERT_NOT_REACHED("To set projection is Fail.\n");
 			}
 		}
 

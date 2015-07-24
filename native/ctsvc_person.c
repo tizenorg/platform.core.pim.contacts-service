@@ -58,7 +58,7 @@ static inline int __ctsvc_get_person_default_number_value(int id, contacts_recor
 				CTS_TABLE_CONTACTS, CTS_TABLE_DATA, CTSVC_DATA_NUMBER, id);
 
 	ret = ctsvc_query_prepare(query, &stmt);
-	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
 
 	ret = ctsvc_stmt_step(stmt);
 	if (1 /*CTS_TRUE*/ != ret) {
@@ -87,7 +87,7 @@ static inline int __ctsvc_get_person_default_number_value(int id, contacts_recor
 		ret = CONTACTS_ERROR_NONE;
 	}
 	else
-		CTS_ERR("contacts_record_create() Failed");
+		CTS_ERR("contacts_record_create() Fail");
 
 	ctsvc_stmt_finalize(stmt);
 	return ret;
@@ -108,7 +108,7 @@ static inline int __ctsvc_get_person_default_email_value(int id, contacts_record
 					CTS_TABLE_CONTACTS, CTS_TABLE_DATA, CTSVC_DATA_EMAIL, id);
 
 	ret = ctsvc_query_prepare(query, &stmt);
-	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
 
 	ret = ctsvc_stmt_step(stmt);
 	if (1 /*CTS_TRUE*/ != ret) {
@@ -135,7 +135,7 @@ static inline int __ctsvc_get_person_default_email_value(int id, contacts_record
 		ret = CONTACTS_ERROR_NONE;
 	}
 	else
-		CTS_ERR("contacts_record_create() Failed");
+		CTS_ERR("contacts_record_create() Fail");
 
 	ctsvc_stmt_finalize(stmt);
 	return ret;
@@ -157,7 +157,7 @@ static inline int __ctsvc_get_person_default_image_value(int id, contacts_record
 					CTSVC_DATA_IMAGE, id);
 
 	ret = ctsvc_query_prepare(query, &stmt);
-	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
 
 	ret = ctsvc_stmt_step(stmt);
 	if (1 /*CTS_TRUE*/ != ret) {
@@ -184,7 +184,7 @@ static inline int __ctsvc_get_person_default_image_value(int id, contacts_record
 		ret = CONTACTS_ERROR_NONE;
 	}
 	else
-		CTS_ERR("contacts_record_create() Failed");
+		CTS_ERR("contacts_record_create() Fail");
 
 	ctsvc_stmt_finalize(stmt);
 	return ret;
@@ -200,15 +200,15 @@ static int __ctsvc_get_person_value(int op_code,
 	switch (op_code) {
 	case CTSVC_GET_PERSON_DEFAULT_NUMBER_VALUE:
 		ret = __ctsvc_get_person_default_number_value(person_id, record);
-		RETVM_IF(ret != CONTACTS_ERROR_NONE, ret, "__ctsvc_get_person_default_number_value() Failed(%d)", ret);
+		RETVM_IF(ret != CONTACTS_ERROR_NONE, ret, "__ctsvc_get_person_default_number_value() Fail(%d)", ret);
 		break;
 	case CTSVC_GET_PERSON_DEFAULT_EMAIL_VALUE:
 		ret = __ctsvc_get_person_default_email_value(person_id, record);
-		RETVM_IF(ret != CONTACTS_ERROR_NONE, ret, "__ctsvc_get_person_default_email_value() Failed(%d)", ret);
+		RETVM_IF(ret != CONTACTS_ERROR_NONE, ret, "__ctsvc_get_person_default_email_value() Fail(%d)", ret);
 		break;
 	case CTSVC_GET_PERSON_DEFAULT_IMAGE_VALUE:
 		ret = __ctsvc_get_person_default_image_value(person_id, record);
-		RETVM_IF(ret != CONTACTS_ERROR_NONE, ret, "__ctsvc_get_person_default_image_value() Failed(%d)", ret);
+		RETVM_IF(ret != CONTACTS_ERROR_NONE, ret, "__ctsvc_get_person_default_image_value() Fail(%d)", ret);
 		break;
 	default:
 		CTS_ERR("Invalid parameter : The op_code(%d) is not supported", op_code);
@@ -232,25 +232,25 @@ static inline int __ctsvc_put_person_default_name(int person_id, int contact_id)
 					CTS_TABLE_CONTACTS, contact_id);
 
 	ret = ctsvc_query_get_first_int_result(query, &id);
-	RETVM_IF(ret != CONTACTS_ERROR_NONE, ret, "ctsvc_query_get_first_int_result() Failed(%d)", ret);
+	RETVM_IF(ret != CONTACTS_ERROR_NONE, ret, "ctsvc_query_get_first_int_result() Fail(%d)", ret);
 
 	if (id == person_id) {
 		ret = ctsvc_begin_trans();
-		RETVM_IF(CONTACTS_ERROR_NONE > ret, ret, "DB error : ctsvc_begin_trans() Failed(%d)", ret);
+		RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "DB error : ctsvc_begin_trans() Fail(%d)", ret);
 		snprintf(query, sizeof(query),
 						"UPDATE %s SET name_contact_id=%d WHERE person_id=%d",
 						CTS_TABLE_PERSONS, contact_id, person_id);
 
 		ret = ctsvc_query_exec(query);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("ctsvc_query_exec() Failed(%d)", ret);
+			CTS_ERR("ctsvc_query_exec() Fail(%d)", ret);
 			ctsvc_end_trans(false);
 			return ret;
 		}
 		else {
 			ret = ctsvc_end_trans(true);
 			if (ret < CONTACTS_ERROR_NONE) {
-				CTS_ERR("DB error : ctsvc_end_trans() Failed(%d)", ret);
+				CTS_ERR("DB error : ctsvc_end_trans() Fail(%d)", ret);
 				return ret;
 			}
 			else
@@ -275,7 +275,7 @@ static inline int __ctsvc_put_person_default_image(int person_id, int id)
 	char query[CTS_SQL_MAX_LEN] = {0};
 
 	ret = ctsvc_begin_trans();
-	RETVM_IF(CONTACTS_ERROR_NONE > ret, ret, "DB error : ctsvc_begin_trans() Failed(%d)", ret);
+	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "DB error : ctsvc_begin_trans() Fail(%d)", ret);
 
 	snprintf(query, sizeof(query),
 			"SELECT D.is_default, D.contact_id, D.data3 "
@@ -285,7 +285,7 @@ static inline int __ctsvc_put_person_default_image(int person_id, int id)
 				CTSVC_DATA_IMAGE, person_id, id);
 	ret = ctsvc_query_prepare(query, &stmt);
 	if (NULL == stmt) {
-		CTS_ERR("ctsvc_query_prepare failed(%d)", ret);
+		CTS_ERR("ctsvc_query_prepare Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
@@ -310,7 +310,7 @@ static inline int __ctsvc_put_person_default_image(int person_id, int id)
 				CTSVC_DATA_IMAGE, person_id);
 	ret = ctsvc_query_exec(query);
 	if (ret < CONTACTS_ERROR_NONE) {
-		CTS_ERR("DB error : ctsvc_query_exec() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_query_exec() Fail(%d)", ret);
 		free(image_path);
 		ctsvc_end_trans(false);
 		return ret;
@@ -325,7 +325,7 @@ static inline int __ctsvc_put_person_default_image(int person_id, int id)
 
 		ret = ctsvc_query_exec(query);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("DB error : ctsvc_query_exec() Failed(%d)", ret);
+			CTS_ERR("DB error : ctsvc_query_exec() Fail(%d)", ret);
 			free(image_path);
 			ctsvc_end_trans(false);
 			return ret;
@@ -337,7 +337,7 @@ static inline int __ctsvc_put_person_default_image(int person_id, int id)
 				"UPDATE "CTS_TABLE_DATA" SET is_primary_default=1, is_default=1 WHERE id=%d ", id);
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_query_exec() Failed(%d)", ret);
+		CTS_ERR("ctsvc_query_exec() Fail(%d)", ret);
 		free(image_path);
 		ctsvc_end_trans(false);
 		return ret;
@@ -348,7 +348,7 @@ static inline int __ctsvc_put_person_default_image(int person_id, int id)
 			"UPDATE "CTS_TABLE_PERSONS" SET image_thumbnail_path=? WHERE person_id=%d ", person_id);
 	ret = ctsvc_query_prepare(query, &stmt);
 	if (NULL == stmt) {
-		CTS_ERR("ctsvc_query_prepare() Failed(%d)", ret);
+		CTS_ERR("ctsvc_query_prepare() Fail(%d)", ret);
 		free(image_path);
 		ctsvc_end_trans(false);
 		return ret;
@@ -357,7 +357,7 @@ static inline int __ctsvc_put_person_default_image(int person_id, int id)
 	ctsvc_stmt_bind_text(stmt, 1, image_path);
 	ret = ctsvc_stmt_step(stmt);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_stmt_step() Failed(%d)", ret);
+		CTS_ERR("ctsvc_stmt_step() Fail(%d)", ret);
 		ctsvc_stmt_finalize(stmt);
 		free(image_path);
 		ctsvc_end_trans(false);
@@ -370,7 +370,7 @@ static inline int __ctsvc_put_person_default_image(int person_id, int id)
 			"UPDATE "CTS_TABLE_CONTACTS" SET image_thumbnail_path=? WHERE contact_id=%d ", contact_id);
 	ret = ctsvc_query_prepare(query, &stmt);
 	if (NULL == stmt) {
-		CTS_ERR("ctsvc_query_prepare() Failed(%d)", ret);
+		CTS_ERR("ctsvc_query_prepare() Fail(%d)", ret);
 		free(image_path);
 		ctsvc_end_trans(false);
 		return ret;
@@ -379,7 +379,7 @@ static inline int __ctsvc_put_person_default_image(int person_id, int id)
 	ctsvc_stmt_bind_text(stmt, 1, image_path);
 	ret = ctsvc_stmt_step(stmt);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_stmt_step() Failed(%d)", ret);
+		CTS_ERR("ctsvc_stmt_step() Fail(%d)", ret);
 		ctsvc_stmt_finalize(stmt);
 		free(image_path);
 		ctsvc_end_trans(false);
@@ -410,7 +410,7 @@ static inline int __ctsvc_put_person_default_data(int person_id, int id, int dat
 				CTS_TABLE_DATA, CTS_TABLE_CONTACTS, datatype, person_id, id);
 
 	ret = ctsvc_query_prepare(query, &stmt);
-	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
 
 	ret = ctsvc_stmt_step(stmt);
 	if (1 != ret) {
@@ -425,7 +425,7 @@ static inline int __ctsvc_put_person_default_data(int person_id, int id, int dat
 	ctsvc_stmt_finalize(stmt);
 
 	ret = ctsvc_begin_trans();
-	RETVM_IF(CONTACTS_ERROR_NONE > ret, ret, "DB error : ctsvc_begin_trans() Failed(%d)", ret);
+	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "DB error : ctsvc_begin_trans() Fail(%d)", ret);
 
 	// unset is_primary_default of all data of the person
 	snprintf(query, sizeof(query),
@@ -436,7 +436,7 @@ static inline int __ctsvc_put_person_default_data(int person_id, int id, int dat
 
 	ret = ctsvc_query_exec(query);
 	if (ret < CONTACTS_ERROR_NONE) {
-		CTS_ERR("DB error : ctsvc_query_exec() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_query_exec() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
@@ -450,7 +450,7 @@ static inline int __ctsvc_put_person_default_data(int person_id, int id, int dat
 
 		ret = ctsvc_query_exec(query);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("DB error : ctsvc_query_exec() Failed(%d)", ret);
+			CTS_ERR("DB error : ctsvc_query_exec() Fail(%d)", ret);
 			ctsvc_end_trans(false);
 			return ret;
 		}
@@ -462,7 +462,7 @@ static inline int __ctsvc_put_person_default_data(int person_id, int id, int dat
 
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_query_exec() Failed(%d)", ret);
+		CTS_ERR("ctsvc_query_exec() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
@@ -479,7 +479,7 @@ static inline int __ctsvc_put_person_default_data(int person_id, int id, int dat
 			"SELECT name_contact_id FROM "CTS_TABLE_PERSONS" WHERE person_id = %d", person_id);
 	ret = ctsvc_query_get_first_int_result(query, &name_contact_id);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_query_get_first_int_result() Failed(%d)", ret);
+		CTS_ERR("ctsvc_query_get_first_int_result() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
@@ -490,7 +490,7 @@ static inline int __ctsvc_put_person_default_data(int person_id, int id, int dat
 			"SELECT display_name_source FROM "CTS_TABLE_CONTACTS" WHERE contact_id = %d", name_contact_id);
 		ret = ctsvc_query_get_first_int_result(query, &org_source_type);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("ctsvc_query_get_first_int_result() Failed(%d)", ret);
+			CTS_ERR("ctsvc_query_get_first_int_result() Fail(%d)", ret);
 			ctsvc_end_trans(false);
 			return ret;
 		}
@@ -501,7 +501,7 @@ static inline int __ctsvc_put_person_default_data(int person_id, int id, int dat
 						CTS_TABLE_PERSONS, contact_id, person_id);
 			ret = ctsvc_query_exec(query);
 			if (CONTACTS_ERROR_NONE != ret) {
-				CTS_ERR("ctsvc_query_exec() Failed(%d)", ret);
+				CTS_ERR("ctsvc_query_exec() Fail(%d)", ret);
 				ctsvc_end_trans(false);
 				return ret;
 			}
@@ -510,7 +510,7 @@ static inline int __ctsvc_put_person_default_data(int person_id, int id, int dat
 
 	ret = ctsvc_end_trans(true);
 	if (ret < CONTACTS_ERROR_NONE) {
-		CTS_ERR("DB error : ctsvc_end_trans() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_end_trans() Fail(%d)", ret);
 		return ret;
 	}
 	else
@@ -590,15 +590,15 @@ int ctsvc_person_aggregate(int person_id)
 				"FROM "CTS_TABLE_PERSONS" "
 				"WHERE persons.person_id = %d", person_id);
 	ret = ctsvc_query_prepare(query, &stmt);
-	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
 
 	if (1 != ctsvc_stmt_step(stmt)) {
-	   CTS_ERR("ctsvc_stmt_step() Failed\n");
+	   CTS_ERR("ctsvc_stmt_step() Fail\n");
 	   return CONTACTS_ERROR_DB;
 	}
 	ret = contacts_record_create(_contacts_person._uri, (contacts_record_h*)&person);
 	if (CONTACTS_ERROR_NONE != ret) {
-	   CTS_ERR("contacts_record_create() Failed\n");
+	   CTS_ERR("contacts_record_create() Fail\n");
 	   return CONTACTS_ERROR_INTERNAL;
 	}
 	person->person_id = ctsvc_stmt_get_int(stmt, 0);
@@ -655,7 +655,7 @@ int ctsvc_person_aggregate(int person_id)
 		CTS_TABLE_CONTACTS, CTS_TABLE_ACTIVITIES, person->person_id);
 	ret = ctsvc_query_prepare(query, &stmt);
 	if (NULL == stmt) {
-		CTS_ERR("DB error : ctsvc_query_prepare() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_query_prepare() Fail(%d)", ret);
 		free(image_thumbnail_path);
 		contacts_record_destroy((contacts_record_h)person, true);
 		return ret;
@@ -725,7 +725,7 @@ int ctsvc_person_aggregate(int person_id)
 			CTS_TABLE_CONTACTS, person_id);
 	ret = ctsvc_query_prepare(query, &stmt);
 	if (NULL == stmt) {
-		CTS_ERR("DB error : ctsvc_query_prepare() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_query_prepare() Fail(%d)", ret);
 		free(image_thumbnail_path);
 		free(ringtone_path);
 		free(vibration);
@@ -766,7 +766,7 @@ int ctsvc_person_aggregate(int person_id)
 
 		link_count++;
 
-		if (contact_display_name_source_type > display_name_source_type) {
+		if (display_name_source_type < contact_display_name_source_type) {
 			display_name_source_type = contact_display_name_source_type;
 			name_contact_id = contact_id;
 		}
@@ -828,7 +828,7 @@ int ctsvc_person_aggregate(int person_id)
 
 	ret = ctsvc_query_prepare(query, &stmt);
 	if (NULL == stmt) {
-		CTS_ERR("DB error : ctsvc_query_prepare() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_query_prepare() Fail(%d)", ret);
 		free(addressbook_ids);
 		free(image_thumbnail_path);
 		free(ringtone_path);
@@ -853,7 +853,7 @@ int ctsvc_person_aggregate(int person_id)
 
 	ret = ctsvc_stmt_step(stmt);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_stmt_step() Failed(%d)", ret);
+		CTS_ERR("ctsvc_stmt_step() Fail(%d)", ret);
 		ctsvc_stmt_finalize(stmt);
 		free(addressbook_ids);
 		free(image_thumbnail_path);
@@ -878,7 +878,7 @@ int ctsvc_person_aggregate(int person_id)
 				"DELETE FROM "CTS_TABLE_FAVORITES" WHERE person_id = %d", person_id);
 		ret = ctsvc_query_exec(query);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("ctsvc_query_exec() Failed(%d)", ret);
+			CTS_ERR("ctsvc_query_exec() Fail(%d)", ret);
 			return ret;
 		}
 	}
@@ -899,7 +899,7 @@ static bool __ctsvc_get_person_favorite_info(int person_id, double *priority)
 	snprintf(query, sizeof(query),
 			"SELECT favorite_prio FROM "CTS_TABLE_FAVORITES" WHERE person_id = %d", person_id);
 	ret = ctsvc_query_prepare(query, &stmt);
-	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
 
 	ret = ctsvc_stmt_step(stmt);
 	if (1 == ret) {
@@ -927,7 +927,7 @@ API int contacts_person_link_person(int base_person_id, int person_id)
 		"Invalid parameter : base_person_id(%d), person_id(%d)", base_person_id, person_id);
 
 	ret = ctsvc_begin_trans();
-	RETVM_IF(CONTACTS_ERROR_NONE > ret, ret, "DB error : ctsvc_begin_trans() Failed(%d)", ret);
+	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "DB error : ctsvc_begin_trans() Fail(%d)", ret);
 
 	ret = __ctsvc_get_person_value(CTSVC_GET_PERSON_DEFAULT_NUMBER_VALUE, base_person_id, &record);
 	if (CONTACTS_ERROR_NONE != ret) {
@@ -977,7 +977,7 @@ API int contacts_person_link_person(int base_person_id, int person_id)
 			CTS_TABLE_CONTACTS, base_person_id, person_id);
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_query_exec() Failed(%d)", ret);
+		CTS_ERR("ctsvc_query_exec() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
@@ -1005,7 +1005,7 @@ API int contacts_person_link_person(int base_person_id, int person_id)
 			CTS_TABLE_PERSONS, person_id);
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_query_exec() Failed(%d)", ret);
+		CTS_ERR("ctsvc_query_exec() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
@@ -1019,7 +1019,7 @@ API int contacts_person_link_person(int base_person_id, int person_id)
 				"INSERT INTO "CTS_TABLE_FAVORITES" values(%d, %f)", base_person_id, favorite_prio);
 		ret = ctsvc_query_exec(query);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("ctsvc_query_exec() Failed(%d)", ret);
+			CTS_ERR("ctsvc_query_exec() Fail(%d)", ret);
 			ctsvc_end_trans(false);
 			return ret;
 		}
@@ -1028,7 +1028,7 @@ API int contacts_person_link_person(int base_person_id, int person_id)
 	ctsvc_set_person_noti();
 	ret = ctsvc_end_trans(true);
 	if (ret < CONTACTS_ERROR_NONE) {
-		CTS_ERR("DB error : ctsvc_end_trans() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_end_trans() Fail(%d)", ret);
 		return ret;
 	}
 	else
@@ -1051,7 +1051,7 @@ static int __ctsvc_update_primary_default_data(int person_id)
 				"ORDER BY contact_id",
 				CTS_TABLE_CONTACTS, person_id);
 		ret = ctsvc_query_prepare(query, &stmt);
-		RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
+		RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
 
 		while (1 == ctsvc_stmt_step(stmt)) {
 			int contact_id = ctsvc_stmt_get_int(stmt, 0);
@@ -1064,7 +1064,7 @@ static int __ctsvc_update_primary_default_data(int person_id)
 
 			ret = ctsvc_query_prepare(query, &stmt_number);
 			if (NULL == stmt_number) {
-				CTS_ERR("DB error : ctsvc_query_prepare() Failed(%d)", ret);
+				CTS_ERR("DB error : ctsvc_query_prepare() Fail(%d)", ret);
 				ctsvc_stmt_finalize(stmt);
 				return ret;
 			}
@@ -1092,7 +1092,7 @@ static int __ctsvc_update_primary_default_data(int person_id)
 				"ORDER BY contact_id",
 				CTS_TABLE_CONTACTS, person_id);
 		ret = ctsvc_query_prepare(query, &stmt);
-		RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
+		RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
 
 		while (1 == ctsvc_stmt_step(stmt)) {
 			int contact_id = ctsvc_stmt_get_int(stmt, 0);
@@ -1105,7 +1105,7 @@ static int __ctsvc_update_primary_default_data(int person_id)
 
 			ret = ctsvc_query_prepare(query, &stmt_email);
 			if (NULL == stmt_email) {
-				CTS_ERR("DB error : ctsvc_query_prepare() Failed(%d)", ret);
+				CTS_ERR("DB error : ctsvc_query_prepare() Fail(%d)", ret);
 				ctsvc_stmt_finalize(stmt);
 				return ret;
 			}
@@ -1133,7 +1133,7 @@ static int __ctsvc_update_primary_default_data(int person_id)
 				"ORDER BY contact_id",
 				CTS_TABLE_CONTACTS, person_id);
 		ret = ctsvc_query_prepare(query, &stmt);
-		RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
+		RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
 
 		while (1 == ctsvc_stmt_step(stmt)) {
 			int contact_id = ctsvc_stmt_get_int(stmt, 0);
@@ -1146,7 +1146,7 @@ static int __ctsvc_update_primary_default_data(int person_id)
 
 			ret = ctsvc_query_prepare(query, &stmt_image);
 			if (NULL == stmt_image) {
-				CTS_ERR("DB error : ctsvc_query_prepare() Failed(%d)", ret);
+				CTS_ERR("DB error : ctsvc_query_prepare() Fail(%d)", ret);
 				ctsvc_stmt_finalize(stmt);
 				return ret;
 			}
@@ -1185,7 +1185,7 @@ API int contacts_person_unlink_contact(int person_id, int contact_id, int* out_p
 		*out_person_id = 0;
 
 	ret = ctsvc_begin_trans();
-	RETVM_IF(ret, ret, "ctsvc_begin_trans() Failed(%d)", ret);
+	RETVM_IF(ret, ret, "ctsvc_begin_trans() Fail(%d)", ret);
 
 	snprintf(query, sizeof(query),
 			"SELECT link_count FROM "CTS_TABLE_PERSONS" WHERE person_id=%d", person_id);
@@ -1203,15 +1203,15 @@ API int contacts_person_unlink_contact(int person_id, int contact_id, int* out_p
 
 	ret = ctsvc_db_contact_get(contact_id, (contacts_record_h*)&record);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_db_contact_get() Failed(%d)", ret);
+		CTS_ERR("ctsvc_db_contact_get() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
 
 	// create new person
 	id = ctsvc_db_insert_person(record);
-	if (CONTACTS_ERROR_NONE > id) {
-		CTS_ERR("ctsvc_db_insert_person() Failed(%d)", id);
+	if (id < CONTACTS_ERROR_NONE) {
+		CTS_ERR("ctsvc_db_insert_person() Fail(%d)", id);
 		ctsvc_end_trans(false);
 		contacts_record_destroy(record, true);
 		return id;
@@ -1224,7 +1224,7 @@ API int contacts_person_unlink_contact(int person_id, int contact_id, int* out_p
 			CTS_TABLE_CONTACT_STAT, id, CTS_TABLE_CONTACT_STAT, person_id);
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_query_exec() Failed(%d)", ret);
+		CTS_ERR("ctsvc_query_exec() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		contacts_record_destroy(record, true);
 		return ret;
@@ -1238,7 +1238,7 @@ API int contacts_person_unlink_contact(int person_id, int contact_id, int* out_p
 			CTS_TABLE_CONTACTS, id, contact_id);
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_query_exec() Failed(%d)", ret);
+		CTS_ERR("ctsvc_query_exec() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		contacts_record_destroy(record, true);
 		return ret;
@@ -1247,7 +1247,7 @@ API int contacts_person_unlink_contact(int person_id, int contact_id, int* out_p
 	// update bsae person info
 	ret = ctsvc_person_aggregate(person_id);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_person_aggregate(%d) Failed(%d)", person_id, ret);
+		CTS_ERR("ctsvc_person_aggregate(%d) Fail(%d)", person_id, ret);
 		ctsvc_end_trans(false);
 		contacts_record_destroy(record, true);
 		return ret;
@@ -1258,7 +1258,7 @@ API int contacts_person_unlink_contact(int person_id, int contact_id, int* out_p
 				"INSERT OR REPLACE INTO "CTS_TABLE_FAVORITES" values(%d, %f)", id, priority);
 		ret = ctsvc_query_exec(query);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("ctsvc_query_exec() Failed(%d)", ret);
+			CTS_ERR("ctsvc_query_exec() Fail(%d)", ret);
 			ctsvc_end_trans(false);
 			contacts_record_destroy(record, true);
 			return ret;
@@ -1278,7 +1278,7 @@ API int contacts_person_unlink_contact(int person_id, int contact_id, int* out_p
 	ctsvc_set_person_noti();
 	ret = ctsvc_end_trans(true);
 	if (ret < CONTACTS_ERROR_NONE) {
-		CTS_ERR("DB error : ctsvc_end_trans() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_end_trans() Fail(%d)", ret);
 		return ret;
 	}
 	else
@@ -1294,7 +1294,7 @@ int ctsvc_person_do_garbage_collection(void)
 	snprintf(query, sizeof(query), "SELECT person_id FROM "CTS_TABLE_PERSONS" WHERE dirty=1");
 
 	ret = ctsvc_query_prepare(query, &stmt);
-	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
 
 	while (1 /*CTS_TRUE*/ == ctsvc_stmt_step(stmt)) {
 		int person_id;
@@ -1322,18 +1322,18 @@ API int contacts_person_reset_usage(int person_id, contacts_usage_type_e type)
 		CTS_TABLE_CONTACT_STAT, person_id, type);
 
 	ret = ctsvc_begin_trans();
-	RETVM_IF(ret, ret, "DB error : ctsvc_begin_trans() Failed(%d)", ret);
+	RETVM_IF(ret, ret, "DB error : ctsvc_begin_trans() Fail(%d)", ret);
 
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB error : ctsvc_query_exec() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_query_exec() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
 
 	ret = ctsvc_end_trans(true);
 	if (ret < CONTACTS_ERROR_NONE) {
-		CTS_ERR("DB error : ctsvc_end_trans() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_end_trans() Fail(%d)", ret);
 		return ret;
 	}
 	else
@@ -1352,7 +1352,7 @@ API int contacts_person_set_favorite_order(int person_id, int front_person_id, i
 	snprintf(query, sizeof(query), "SELECT favorite_prio FROM "CTS_TABLE_FAVORITES" WHERE person_id = ?");
 
 	ret = ctsvc_query_prepare(query, &stmt);
-	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
 
 	ctsvc_stmt_bind_int(stmt, 1, front_person_id);
 	ret = ctsvc_stmt_step(stmt);
@@ -1374,7 +1374,7 @@ API int contacts_person_set_favorite_order(int person_id, int front_person_id, i
 		prio = (front_prio + back_prio) / 2;
 
 	ret = ctsvc_begin_trans();
-	RETVM_IF(ret, ret, "ctsvc_begin_trans() Failed(%d)", ret);
+	RETVM_IF(ret, ret, "ctsvc_begin_trans() Fail(%d)", ret);
 
 	snprintf(query, sizeof(query),
 			"UPDATE %s SET favorite_prio = %f WHERE person_id = %d",
@@ -1382,7 +1382,7 @@ API int contacts_person_set_favorite_order(int person_id, int front_person_id, i
 
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret)	{
-		CTS_ERR("ctsvc_query_exec() Failed(%d)", ret);
+		CTS_ERR("ctsvc_query_exec() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
@@ -1391,7 +1391,7 @@ API int contacts_person_set_favorite_order(int person_id, int front_person_id, i
 
 	ret = ctsvc_end_trans(true);
 	if (ret < CONTACTS_ERROR_NONE) {
-		CTS_ERR("DB error : ctsvc_end_trans() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_end_trans() Fail(%d)", ret);
 		return ret;
 	}
 	else
@@ -1404,7 +1404,7 @@ API int contacts_person_set_default_property(contacts_person_property_e property
 	int ret;
 
 	ret = ctsvc_begin_trans();
-	RETVM_IF(ret < CONTACTS_ERROR_NONE, CONTACTS_ERROR_DB, "ctsvc_begin_trans() Failed(%d)", ret);
+	RETVM_IF(ret < CONTACTS_ERROR_NONE, CONTACTS_ERROR_DB, "ctsvc_begin_trans() Fail(%d)", ret);
 
 	switch(property) {
 	case CONTACTS_PERSON_PROPERTY_NAME_CONTACT:
@@ -1424,7 +1424,7 @@ API int contacts_person_set_default_property(contacts_person_property_e property
 		break;
 	}
 	if (ret < CONTACTS_ERROR_NONE) {
-		CTS_ERR("contacts_person_set_default_property() Failed(%d) : person property (%d)", ret, property);
+		CTS_ERR("contacts_person_set_default_property() Fail(%d) : person property (%d)", ret, property);
 		ctsvc_end_trans(false);
 		return ret;
 	}
@@ -1482,7 +1482,7 @@ API int contacts_person_get_default_property(contacts_person_property_e property
 	if (*query) {
 		int result = 0;
 		ret = ctsvc_query_get_first_int_result(query, &result);
-		RETVM_IF(ret != CONTACTS_ERROR_NONE, ret, "ctsvc_query_get_first_int_result failed(%d)", ret);
+		RETVM_IF(ret != CONTACTS_ERROR_NONE, ret, "ctsvc_query_get_first_int_result Fail(%d)", ret);
 		*id = result;
 	}
 

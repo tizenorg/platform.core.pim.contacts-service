@@ -71,7 +71,7 @@ static int __ctsvc_server_bg_contact_delete_step1(__ctsvc_delete_data_s* data)
 		// get event_list
 		snprintf(query, sizeof(query), "SELECT contact_id FROM "CTS_TABLE_CONTACTS" WHERE deleted = 1");
 		ret = ctsvc_query_prepare(query, &stmt);
-		RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
+		RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
 
 		while (1 == (ret = ctsvc_stmt_step(stmt))) {
 			int id = 0;
@@ -116,7 +116,7 @@ static int __ctsvc_server_bg_contact_delete_step2(__ctsvc_delete_data_s* data)
 		data->current_contact_id, CTSVC_SERVER_BG_DELETE_COUNT);
 
 	ret = ctsvc_query_prepare(query, &stmt);
-	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
 
 	while (1 == (ret = ctsvc_stmt_step(stmt))) {
 		int id = 0;
@@ -130,7 +130,7 @@ static int __ctsvc_server_bg_contact_delete_step2(__ctsvc_delete_data_s* data)
 		return CONTACTS_ERROR_NO_DATA;
 
 	ret = ctsvc_begin_trans();
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, CONTACTS_ERROR_DB, "DB failed");
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, CONTACTS_ERROR_DB, "DB Fail");
 
 	cursor = g_slist_nth(list, 0);
 	while (cursor) {
@@ -139,7 +139,7 @@ static int __ctsvc_server_bg_contact_delete_step2(__ctsvc_delete_data_s* data)
 
 		ret = ctsvc_query_exec(query);
 		if (ret != CONTACTS_ERROR_NONE) {
-			CTS_ERR("DB failed");
+			CTS_ERR("DB Fail");
 			ctsvc_end_trans(false);
 			g_slist_free(list);
 			return ret;
@@ -170,7 +170,7 @@ static int __ctsvc_server_bg_contact_delete_step3(__ctsvc_delete_data_s* data)
 		data->current_contact_id, CTSVC_SERVER_BG_DELETE_COUNT);
 
 	ret = ctsvc_query_prepare(query, &stmt);
-	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
 
 	while (1 == (ret = ctsvc_stmt_step(stmt))) {
 		int id = 0;
@@ -184,7 +184,7 @@ static int __ctsvc_server_bg_contact_delete_step3(__ctsvc_delete_data_s* data)
 		return CONTACTS_ERROR_NO_DATA;
 
 	ret = ctsvc_begin_trans();
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, CONTACTS_ERROR_DB, "DB failed");
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, CONTACTS_ERROR_DB, "DB Fail");
 
 	cursor = g_slist_nth(list, 0);
 	while (cursor) {
@@ -193,7 +193,7 @@ static int __ctsvc_server_bg_contact_delete_step3(__ctsvc_delete_data_s* data)
 
 		ret = ctsvc_query_exec(query);
 		if (ret != CONTACTS_ERROR_NONE) {
-			CTS_ERR("DB failed");
+			CTS_ERR("DB Fail");
 			ctsvc_end_trans(false);
 			g_slist_free(list);
 			return ret;
@@ -212,13 +212,13 @@ static int __ctsvc_server_bg_contact_delete_step4(__ctsvc_delete_data_s* data)
 	char query[CTS_SQL_MIN_LEN] = {0};
 
 	ret = ctsvc_begin_trans();
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, CONTACTS_ERROR_DB, "DB failed");
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, CONTACTS_ERROR_DB, "DB Fail");
 
 	snprintf(query, sizeof(query), "DELETE FROM "CTS_TABLE_SEARCH_INDEX" WHERE contact_id = %d",
 					data->current_contact_id);
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB failed");
+		CTS_ERR("DB Fail");
 		ctsvc_end_trans(false);
 		return ret;
 	}
@@ -227,7 +227,7 @@ static int __ctsvc_server_bg_contact_delete_step4(__ctsvc_delete_data_s* data)
 					data->current_contact_id);
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB failed");
+		CTS_ERR("DB Fail");
 		ctsvc_end_trans(false);
 		return ret;
 	}
@@ -373,7 +373,7 @@ static bool __ctsvc_cpu_is_busy()
 
 	cpu_usage = ((double)work_time_diff/(double)total_time_diff) * 100;
 	CTS_INFO("cpu usage : %.2lf (%ld/%ld)", cpu_usage, work_time_diff, total_time_diff);
-	if (cpu_usage > CTSVC_SERVER_BG_BASE_CPU_USAGE)
+	if (CTSVC_SERVER_BG_BASE_CPU_USAGE < cpu_usage)
 		return true;
 	return false;
 }
@@ -478,11 +478,11 @@ void ctsvc_server_bg_add_cb()
 	if (ACCOUNT_ERROR_NONE == ret) {
 		ret = account_subscribe_notification(account, __ctsvc_server_account_delete_cb, NULL);
 		if (ACCOUNT_ERROR_NONE != ret) {
-			CTS_ERR("account_subscribe_notification Failed (%d)", ret);
+			CTS_ERR("account_subscribe_notification Fail (%d)", ret);
 		}
 	}
 	else
-		CTS_ERR("account_subscribe_create Failed (%d)", ret);
+		CTS_ERR("account_subscribe_create Fail (%d)", ret);
 }
 
 void ctsvc_server_bg_remove_cb()

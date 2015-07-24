@@ -57,7 +57,7 @@ static int __ctsvc_updated_info_create(contacts_record_h* out_record)
 	ctsvc_updated_info_s *updated_info;
 	updated_info = (ctsvc_updated_info_s*)calloc(1, sizeof(ctsvc_updated_info_s));
 	RETVM_IF(NULL == updated_info, CONTACTS_ERROR_OUT_OF_MEMORY,
-			"Out of memory calloc is failed");
+			"Out of memory calloc is Fail");
 
 	*out_record = (contacts_record_h)updated_info;
 	return CONTACTS_ERROR_NONE;
@@ -81,7 +81,7 @@ static int __ctsvc_updated_info_clone(contacts_record_h record, contacts_record_
     src_data = (ctsvc_updated_info_s*)record;
     out_data = calloc(1, sizeof(ctsvc_updated_info_s));
     RETVM_IF(NULL == out_data, CONTACTS_ERROR_OUT_OF_MEMORY,
-			 "Out of memeory : calloc(ctsvc_updated_info_s) Failed(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
+			 "Out of memeory : calloc(ctsvc_updated_info_s) Fail(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
 
 	out_data->id = src_data->id;
 	out_data->changed_type = src_data->changed_type;
@@ -134,7 +134,7 @@ static int __ctsvc_updated_info_set_int(contacts_record_h record, unsigned int p
 		break;
 	case CTSVC_PROPERTY_UPDATE_INFO_TYPE:
 		RETVM_IF(value < CONTACTS_CHANGE_INSERTED
-						|| value > CONTACTS_CHANGE_DELETED,
+						|| CONTACTS_CHANGE_DELETED < value,
 				CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : update info type is in invalid range (%d)", value);
 		updated_info->changed_type = value;
 		break;

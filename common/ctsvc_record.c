@@ -173,11 +173,11 @@ int ctsvc_record_set_property_flag(ctsvc_record_s* _record, int property_id, con
 	if (NULL == _record->properties_flags) {
 		unsigned int count = 0;
 		ctsvc_view_get_all_property_infos(_record->view_uri, &count);
-		RETVM_IF(count <= 0, CONTACTS_ERROR_INVALID_PARAMETER, "ctsvc_view_get_all_property_infos() Failed");
+		RETVM_IF(count <= 0, CONTACTS_ERROR_INVALID_PARAMETER, "ctsvc_view_get_all_property_infos() Fail");
 
 		_record->properties_flags = calloc(count, sizeof(char));
 		_record->property_max_count = count;
-		RETVM_IF(NULL == _record->properties_flags, CONTACTS_ERROR_OUT_OF_MEMORY, "calloc Failed");
+		RETVM_IF(NULL == _record->properties_flags, CONTACTS_ERROR_OUT_OF_MEMORY, "calloc Fail");
 	}
 	_record->property_flag |= flag;
 	_record->properties_flags[index] |= flag;

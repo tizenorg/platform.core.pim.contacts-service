@@ -34,7 +34,7 @@ int ctsvc_db_nickname_get_value_from_stmt(cts_stmt stmt, contacts_record_h *reco
 	ctsvc_nickname_s *nickname;
 
 	ret = contacts_record_create(_contacts_nickname._uri, (contacts_record_h *)&nickname);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "contacts_record_create is failed(%d)", ret);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "contacts_record_create Fail(%d)", ret);
 
 	nickname->id = ctsvc_stmt_get_int(stmt, start_count++);
 	nickname->contact_id = ctsvc_stmt_get_int(stmt, start_count++);
@@ -67,7 +67,7 @@ int ctsvc_db_nickname_insert(contacts_record_h record, int contact_id, bool is_m
 			contact_id, is_my_profile, CTSVC_DATA_NICKNAME, nickname->type);
 
 	ret = ctsvc_query_prepare(query, &stmt);
-	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
 
 	if (nickname->label)
 		ctsvc_stmt_bind_text(stmt, 1, nickname->label);
@@ -76,7 +76,7 @@ int ctsvc_db_nickname_insert(contacts_record_h record, int contact_id, bool is_m
 
 	ret = ctsvc_stmt_step(stmt);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB error : ctsvc_stmt_step() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_stmt_step() Fail(%d)", ret);
 		ctsvc_stmt_finalize(stmt);
 		return ret;
 	}
@@ -135,7 +135,7 @@ int ctsvc_db_nickname_delete(int id, bool is_my_profile)
 			id, CTSVC_DATA_NICKNAME);
 
 	ret = ctsvc_query_exec(query);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_query_exec() Failed(%d)", ret);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_query_exec() Fail(%d)", ret);
 
 	if (!is_my_profile)
 		ctsvc_set_nickname_noti();

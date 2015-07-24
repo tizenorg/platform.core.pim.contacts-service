@@ -83,11 +83,11 @@ API int contacts_phone_log_delete(contacts_phone_log_delete_e op, ...)
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	ret = ctsvc_begin_trans();
-	RETVM_IF(ret, ret, "ctsvc_begin_trans() Failed(%d)", ret);
+	RETVM_IF(ret, ret, "ctsvc_begin_trans() Fail(%d)", ret);
 
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_query_exec() Failed(%d)", ret);
+		CTS_ERR("ctsvc_query_exec() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
@@ -164,7 +164,7 @@ static int __ctsvc_db_phone_log_find_person_id(char *number, char *normal_num, c
 		while ((ret = ctsvc_stmt_step(stmt))) {
 			id = ctsvc_stmt_get_int(stmt, 0);
 			number_type = ctsvc_stmt_get_int(stmt, 1);
-			if (find_person_id <= 0 && id > 0) {
+			if (find_person_id <= 0 && 0 < id) {
 				find_person_id = id;		// find first match person_id
 				*find_number_type = number_type;
 				if (person_id <= 0)
@@ -237,7 +237,7 @@ int ctsvc_db_phone_log_update_person_id(const char *number, int old_person_id, i
 			len += snprintf(query+len, sizeof(query)-len, ") ");
 	}
 
-	if (old_person_id > 0)
+	if (0 < old_person_id)
 		len += snprintf(query+len, sizeof(query)-len, "AND person_id = %d ", old_person_id);
 	else
 		len += snprintf(query+len, sizeof(query)-len, "AND person_id IS NULL ");
@@ -290,7 +290,7 @@ int ctsvc_db_phone_log_update_person_id(const char *number, int old_person_id, i
 		minmatch_address = ctsvc_stmt_get_text(get_log, 3);
 
 		//CASE : number is inserted (contact insert/update) => update person_id of phone logs from NULL
-		if (number && old_person_id <= 0 && candidate_person_id > 0) {
+		if (number && old_person_id <= 0 && 0 < candidate_person_id) {
 			__ctsvc_db_phone_log_find_person_id(address, normal_address, minmatch_address, candidate_person_id, &number_type);
 			new_person_id = candidate_person_id;
 		}
@@ -302,35 +302,35 @@ int ctsvc_db_phone_log_update_person_id(const char *number, int old_person_id, i
 		}
 		// CASE : number update/delete (contact update/delete) => find new_person_id by address
 		// CASE : phonelog insert with person_id
-		else if (number && old_person_id > 0) {
+		else if (number && 0 < old_person_id) {
 			// address == number
 			// although new_person_id and old_person_id are same, update phonelog for setting number_type
 			new_person_id = __ctsvc_db_phone_log_find_person_id(address, normal_address, minmatch_address, old_person_id, &number_type);
 		}
 		// CASE : person link => deleted person_id -> new person_id (base_person_id)
-		else if (NULL == number && old_person_id  > 0 && candidate_person_id > 0 && person_link) {
+		else if (NULL == number && 0 < old_person_id && 0 < candidate_person_id && person_link) {
 			new_person_id = candidate_person_id;
 		}
 		// CASE : person unlink => check person_id of the address,
 		// if person_id is not old_person_id then change person_id to new_person_id
-		else if (NULL == number && old_person_id  > 0 && candidate_person_id > 0) {
+		else if (NULL == number && 0 < old_person_id && 0 < candidate_person_id) {
 			temp_id = __ctsvc_db_phone_log_find_person_id(address, normal_address, minmatch_address, candidate_person_id, &number_type);
-			if (temp_id > 0 && temp_id == old_person_id)
+			if (0 < temp_id && temp_id == old_person_id)
 				continue;
-			else if (temp_id > 0 && temp_id != old_person_id)
+			else if (0 < temp_id && temp_id != old_person_id)
 				new_person_id = temp_id;
 		}
 		// CASE : person delete => find new_person_id by address
-		else if (NULL == number && old_person_id  > 0) {
+		else if (NULL == number && 0 < old_person_id) {
 			new_person_id = __ctsvc_db_phone_log_find_person_id(address, normal_address, minmatch_address, candidate_person_id, &number_type);
 		}
 		// Already check this case as above : RETVM_IF(old_person_id <= 0 && NULL == number, ...
 //		else
 //			continue;
 
-		if (new_person_id > 0)
+		if (0 < new_person_id)
 			ctsvc_stmt_bind_int(update_log, 1, new_person_id);
-		if (number_type >= 0)
+		if (0 <= number_type)
 			ctsvc_stmt_bind_int(update_log, 2, number_type);
 		ctsvc_stmt_bind_int(update_log, 3, phonelog_id);
 		ctsvc_stmt_step(update_log);

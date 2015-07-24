@@ -63,7 +63,7 @@ static int __ctsvc_speeddial_create(contacts_record_h* out_record)
 	ctsvc_speeddial_s *speeddial;
 	speeddial = (ctsvc_speeddial_s*)calloc(1, sizeof(ctsvc_speeddial_s));
 	RETVM_IF(NULL == speeddial, CONTACTS_ERROR_OUT_OF_MEMORY,
-			"Out of memory : calloc is failed");
+			"Out of memory : calloc is Fail");
 
 	*out_record = (contacts_record_h)speeddial;
 	return CONTACTS_ERROR_NONE;
@@ -92,7 +92,7 @@ static int __ctsvc_speeddial_clone(contacts_record_h record, contacts_record_h *
     src_data = (ctsvc_speeddial_s*)record;
     out_data = calloc(1, sizeof(ctsvc_speeddial_s));
     RETVM_IF(NULL == out_data, CONTACTS_ERROR_OUT_OF_MEMORY,
-			 "Out of memeory : calloc(ctsvc_speeddial_s) Failed(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
+			 "Out of memeory : calloc(ctsvc_speeddial_s) Fail(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
 
 	out_data->id = src_data->id;
 	out_data->dial_number = src_data->dial_number;
@@ -180,7 +180,7 @@ static int __ctsvc_speeddial_set_int(contacts_record_h record, unsigned int prop
 		speeddial->person_id = value;
 		break;
 	case CTSVC_PROPERTY_SPEEDDIAL_DIAL_NUMBER:
-		RETVM_IF(speeddial->id > 0, CONTACTS_ERROR_INVALID_PARAMETER,
+		RETVM_IF(0 < speeddial->id, CONTACTS_ERROR_INVALID_PARAMETER,
 				"Invalid parameter : property_id(%d) is a read-only value (speeddial)", property_id);
 		speeddial->dial_number = value;
 		break;

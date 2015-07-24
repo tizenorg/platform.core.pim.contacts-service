@@ -206,7 +206,7 @@ int ctsvc_check_language_type(const char *src)
 
 	if (src && src[0]) {
 		length = ctsvc_check_utf8(src[0]);
-		RETVM_IF(length <= 0, CONTACTS_ERROR_INTERNAL, "check_utf8 failed");
+		RETVM_IF(length <= 0, CONTACTS_ERROR_INTERNAL, "check_utf8 Fail");
 
 		strncpy(temp, src, length);
 
@@ -214,16 +214,16 @@ int ctsvc_check_language_type(const char *src)
 
 		u_strFromUTF8(tmp_result, array_sizeof(tmp_result), NULL, temp, -1, &status);
 			RETVM_IF(U_FAILURE(status), CONTACTS_ERROR_SYSTEM,
-					"u_strFromUTF8() Failed(%s)", u_errorName(status));
+					"u_strFromUTF8() Fail(%s)", u_errorName(status));
 
 		u_strToUpper(tmp_result, array_sizeof(tmp_result), tmp_result, -1, NULL, &status);
 		RETVM_IF(U_FAILURE(status), CONTACTS_ERROR_SYSTEM,
-				"u_strToLower() Failed(%s)", u_errorName(status));
+				"u_strToLower() Fail(%s)", u_errorName(status));
 
 		unorm_normalize(tmp_result, -1, UNORM_NFD, 0,
 				(UChar *)result, array_sizeof(result), &status);
 		RETVM_IF(U_FAILURE(status), CONTACTS_ERROR_SYSTEM,
-				"unorm_normalize(%s) Failed(%s)", src, u_errorName(status));
+				"unorm_normalize(%s) Fail(%s)", src, u_errorName(status));
 
 		CTS_VERBOSE("0x%x%x", (0xFF00 & (tmp_result[0])) >> 8,  (0xFF & (tmp_result[0])));
 

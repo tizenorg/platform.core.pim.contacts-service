@@ -35,11 +35,11 @@ API int contacts_activity_delete_by_contact_id(int contact_id)
 	snprintf(query, sizeof(query), "DELETE FROM "CTS_TABLE_ACTIVITIES" WHERE contact_id = %d", contact_id);
 
 	int ret = ctsvc_begin_trans();
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_begin_trans() Failed(%d)", ret);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_begin_trans() Fail(%d)", ret);
 
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_query_exec() Failed(%d)", ret);
+		CTS_ERR("ctsvc_query_exec() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
@@ -63,11 +63,11 @@ API int contacts_activity_delete_by_account_id(int account_id)
 			CTS_TABLE_ACTIVITIES, CTS_TABLE_CONTACTS, CTS_TABLE_ADDRESSBOOKS, account_id);
 
 	int ret = ctsvc_begin_trans();
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_begin_trans() Failed(%d)", ret);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_begin_trans() Fail(%d)", ret);
 
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_query_exec() Failed(%d)", ret);
+		CTS_ERR("ctsvc_query_exec() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}

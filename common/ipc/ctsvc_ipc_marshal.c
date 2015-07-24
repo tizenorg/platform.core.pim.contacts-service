@@ -667,7 +667,7 @@ int ctsvc_ipc_unmarshal_record_common(const pims_ipc_data_h ipc_data, ctsvc_reco
 	common->view_uri = ctsvc_view_get_uri(str);
 	common->property_max_count = *(unsigned int*)pims_ipc_data_get(ipc_data,&size);
 
-	if (common->property_max_count > 0) {
+	if (0 < common->property_max_count) {
 		unsigned char *tmp_properties_flags;
 		tmp_properties_flags = (unsigned char*)pims_ipc_data_get(ipc_data, &size);
 		common->properties_flags  = calloc(common->property_max_count, sizeof(char));
@@ -866,7 +866,7 @@ int ctsvc_ipc_unmarshal_query(const pims_ipc_data_h ipc_data, contacts_query_h *
 		goto ERROR_RETURN;
 	}
 
-	if (que->projection_count > 0) {
+	if (0 < que->projection_count) {
 		que->projection = (unsigned int*)malloc(sizeof(unsigned int)*que->projection_count);
 		if (que->projection == NULL) {
 			CTS_ERR("malloc fail");

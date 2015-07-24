@@ -91,7 +91,7 @@ int ctsvc_contact_add_image_file(int parent_id, int img_id,
 
 	ret = ctsvc_utils_copy_image(CTSVC_CONTACT_IMG_FULL_LOCATION, src_img, dest);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_utils_copy_image() Failed(%d)", ret);
+		CTS_ERR("ctsvc_utils_copy_image() Fail(%d)", ret);
 		dest[0] = '\0';
 		return ret;
 	}
@@ -108,11 +108,11 @@ static int __ctsvc_contact_get_current_image_file(int image_id, char *dest, int 
 
 	snprintf(query, sizeof(query), "SELECT data3 FROM %s WHERE id = %d", CTS_TABLE_DATA, image_id);
 	ret = ctsvc_query_prepare(query, &stmt);
-	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
 
 	ret = ctsvc_stmt_step(stmt);
 	if (1 /*CTS_TRUE*/ != ret) {
-		CTS_ERR("DB error: ctsvc_stmt_step() Failed(%d)", ret);
+		CTS_ERR("DB error: ctsvc_stmt_step() Fail(%d)", ret);
 		ctsvc_stmt_finalize(stmt);
 		if (CONTACTS_ERROR_NONE == ret)
 			return CONTACTS_ERROR_NO_DATA;
@@ -161,7 +161,7 @@ int ctsvc_contact_update_image_file(int parent_id, int img_id,
 	ret = __ctsvc_contact_get_current_image_file(img_id, dest, sizeof(dest));
 
 	WARN_IF(CONTACTS_ERROR_NONE != ret && CONTACTS_ERROR_NO_DATA != ret,
-			"__ctsvc_contact_get_current_image_file() Failed(%d)", ret);
+			"__ctsvc_contact_get_current_image_file() Fail(%d)", ret);
 	if (*dest) {
 		if (src_img && strcmp(dest, src_img) == 0) {
 			snprintf(dest_name, dest_size, "%s", src_img + strlen(CTSVC_CONTACT_IMG_FULL_LOCATION) + 1);
@@ -170,13 +170,13 @@ int ctsvc_contact_update_image_file(int parent_id, int img_id,
 
 		ret = unlink(dest);
 		if (ret < 0) {
-			CTS_WARN("unlink Failed(%d)", errno);
+			CTS_WARN("unlink Fail(%d)", errno);
 		}
 	}
 
 	if (src_img) {
 		ret = ctsvc_contact_add_image_file(parent_id, img_id, src_img, dest_name, dest_size);
-		RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_contact_add_image_file() Failed(%d)", ret);
+		RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_contact_add_image_file() Fail(%d)", ret);
 	}
 
 	return ret;
@@ -192,7 +192,7 @@ int ctsvc_db_contact_update_changed_time(int contact_id)
 			CTS_TABLE_CONTACTS, ctsvc_get_next_ver(), (int)time(NULL), contact_id);
 
 	ret = ctsvc_query_exec(query);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_query_exec() Failed(%d)", ret);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_query_exec() Fail(%d)", ret);
 
 	ctsvc_set_contact_noti();
 
@@ -208,7 +208,7 @@ int ctsvc_contact_delete_image_file_with_path(const unsigned char* image_path)
 		snprintf(full_path, sizeof(full_path), "%s/%s", CTSVC_CONTACT_IMG_FULL_LOCATION, image_path);
 		ret = unlink(full_path);
 		if (ret < 0) {
-			CTS_WARN("unlink Failed(%d)", errno);
+			CTS_WARN("unlink Fail(%d)", errno);
 		}
 	}
 
@@ -227,7 +227,7 @@ int ctsvc_db_contact_delete(int contact_id)
 	int version;
 
 	ret = ctsvc_begin_trans();
-	RETVM_IF(ret, ret, "DB error : ctsvc_begin_trans() Failed(%d)", ret);
+	RETVM_IF(ret, ret, "DB error : ctsvc_begin_trans() Fail(%d)", ret);
 
 	snprintf(query, sizeof(query),
 		"SELECT addressbook_id, person_id "
@@ -235,14 +235,14 @@ int ctsvc_db_contact_delete(int contact_id)
 
 	ret = ctsvc_query_prepare(query, &stmt);
 	if (NULL == stmt) {
-		CTS_ERR("DB error : ctsvc_query_prepare() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_query_prepare() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
 
 	ret = ctsvc_stmt_step(stmt);
 	if (1 != ret) {
-		CTS_ERR("DB error : ctsvc_stmt_step() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_stmt_step() Fail(%d)", ret);
 		ctsvc_stmt_finalize(stmt);
 		ctsvc_end_trans(false);
 		if (CONTACTS_ERROR_NONE == ret)
@@ -270,7 +270,7 @@ int ctsvc_db_contact_delete(int contact_id)
 				CTS_TABLE_GROUPS, version, CTS_TABLE_GROUP_RELATIONS, contact_id);
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_query_exec() Failed(%d)", ret);
+		CTS_ERR("ctsvc_query_exec() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
@@ -281,14 +281,14 @@ int ctsvc_db_contact_delete(int contact_id)
 			CTS_TABLE_CONTACTS, version, contact_id);
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_query_exec() Failed(%d)", ret);
+		CTS_ERR("ctsvc_query_exec() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
 
 	snprintf(query, sizeof(query), "SELECT link_count FROM "CTS_TABLE_PERSONS" WHERE person_id = %d", person_id);
 	ret = ctsvc_query_get_first_int_result(query, &link_count);
-	WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_query_get_first_int_result() Failed(%d)", ret);
+	WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_query_get_first_int_result() Fail(%d)", ret);
 	// set dirty bit to person by trigger : person will be aggregated in ctsvc_person_aggregate
 
 	if (1 < link_count) {
@@ -303,12 +303,12 @@ int ctsvc_db_contact_delete(int contact_id)
 		ctsvc_set_person_noti();
 
 	ctsvc_set_contact_noti();
-	if (rel_changed > 0)
+	if (0 < rel_changed)
 		ctsvc_set_group_rel_noti();
 
 	ret = ctsvc_end_trans(true);
 	if (ret < CONTACTS_ERROR_NONE) {
-		CTS_ERR("DB error : ctsvc_end_trans() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_end_trans() Fail(%d)", ret);
 		return ret;
 	}
 	else
@@ -466,7 +466,7 @@ int ctsvc_contact_make_search_name(ctsvc_contact_s *contact, char **search_name)
 
 			ctsvc_normalize_str(contact->display_name, &name);
 
-			if (count > 0) {
+			if (0 < count) {
 				for (i=0, j=0; i < total_len; i+=full_len, j+=chosung_len) {
 					full_len = ctsvc_check_utf8(contact->display_name[i]);
 					chosung_len = ctsvc_check_utf8(chosung[j]);
@@ -513,7 +513,7 @@ int ctsvc_contact_make_search_name(ctsvc_contact_s *contact, char **search_name)
 		contacts_list_get_current_record_p(name_list, (contacts_record_h*)&name_record);
 		if (NULL != name_record) {
 			buf_size = SAFE_STRLEN(name_record->phonetic_first) + SAFE_STRLEN(name_record->phonetic_last) + SAFE_STRLEN(name_record->phonetic_middle);
-			if (buf_size > 0) {
+			if (0 < buf_size) {
 				buf_size += 3; // for space and null string
 				phonetic = calloc(1, buf_size);
 				if (name_record->phonetic_first)
@@ -550,7 +550,7 @@ int ctsvc_contact_make_search_name(ctsvc_contact_s *contact, char **search_name)
 static int __ctsvc_make_phonetic_name(ctsvc_name_s* name, char** phonetic, contacts_name_display_order_e order)
 {
 	int len = SAFE_STRLEN(name->phonetic_first) + SAFE_STRLEN(name->phonetic_last) + SAFE_STRLEN(name->phonetic_middle);
-	if (len > 0) {
+	if (0 < len) {
 		len += 3; // for space and null string
 		*phonetic = calloc(1, len);
 
@@ -614,7 +614,7 @@ static inline int __ctsvc_get_sort_name_to_pinyin(const char *display_name, char
 					temp[temp_index] = ' ';
 					temp_index++;
 					name_len = ctsvc_check_utf8(display_name[name_index]);
-					if (name_len > 0) {
+					if (0 < name_len) {
 						memcpy(&(temp[temp_index]), &(display_name[name_index]), name_len);
 						temp_index += name_len;
 						name_index += name_len;
@@ -661,7 +661,7 @@ void ctsvc_contact_make_sortkey(ctsvc_contact_s *contact)
 	int sort_type = -1;
 
 	if (contact->display_source_type == CONTACTS_DISPLAY_NAME_SOURCE_TYPE_NAME) {
-		if (contact->name->count > 0 && contact->name->records != NULL
+		if ( 0 < contact->name->count && contact->name->records != NULL
 				&& contact->name->records->data != NULL) {
 			ctsvc_name_s *name = (ctsvc_name_s *)contact->name->records->data;
 			__ctsvc_make_phonetic_name(name, &phonetic, CONTACTS_NAME_DISPLAY_ORDER_FIRSTLAST);
@@ -675,7 +675,7 @@ void ctsvc_contact_make_sortkey(ctsvc_contact_s *contact)
 	else
 		sort_type = CTSVC_SORT_OTHERS;
 
-	WARN_IF(sort_type < 0, "ctsvc_get_name_sort_type Failed(%d)", sort_type);
+	WARN_IF(sort_type < 0, "ctsvc_get_name_sort_type Fail(%d)", sort_type);
 	char *langset =	ctsvc_get_langset();
 
 	switch (sort_type) {
@@ -733,7 +733,7 @@ void ctsvc_contact_make_sortkey(ctsvc_contact_s *contact)
 	// check reverse sort_name, reverser_display_name_language
 	// make reverse phonetic name
 	if (contact->display_source_type == CONTACTS_DISPLAY_NAME_SOURCE_TYPE_NAME) {
-		if (contact->name->count > 0 && contact->name->records != NULL
+		if ( 0 < contact->name->count && contact->name->records != NULL
 				&& contact->name->records->data != NULL) {
 			ctsvc_name_s *name = (ctsvc_name_s *)contact->name->records->data;
 			__ctsvc_make_phonetic_name(name, &phonetic, CONTACTS_NAME_DISPLAY_ORDER_LASTFIRST);
@@ -747,7 +747,7 @@ void ctsvc_contact_make_sortkey(ctsvc_contact_s *contact)
 	else
 		sort_type = CTSVC_SORT_OTHERS;
 
-	WARN_IF(sort_type < 0, "ctsvc_get_name_sort_type Failed(%d)", sort_type);
+	WARN_IF(sort_type < 0, "ctsvc_get_name_sort_type Fail(%d)", sort_type);
 
 	switch (sort_type) {
 	case CTSVC_SORT_CJK:
@@ -932,7 +932,7 @@ void ctsvc_contact_make_display_name(ctsvc_contact_s *contact)
 
 	contact->display_source_type = CONTACTS_DISPLAY_NAME_SOURCE_TYPE_INVALID;
 
-	if (contact->name->count > 0 && contact->name->records != NULL && contact->name->records->data != NULL) {
+	if ( 0 < contact->name->count && contact->name->records != NULL && contact->name->records->data != NULL) {
 		name = (ctsvc_name_s *)contact->name->records->data;
 	}
 
@@ -1235,7 +1235,7 @@ int ctsvc_get_data_info_name(cts_stmt stmt, contacts_list_h name_list)
 	contacts_record_h record;
 
 	ret = contacts_list_get_count(name_list, &count);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "contacts_list_get_count is failed(%d)", ret);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "contacts_list_get_count Fail(%d)", ret);
 	RETVM_IF (1 < count, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : already had name");
 
 	ctsvc_db_name_get_value_from_stmt(stmt, &record, 1);
@@ -1463,7 +1463,7 @@ bool ctsvc_contact_check_default_image(contacts_list_h image_list)
 
 	ret = contacts_list_get_count(image_list, &count);
 	if (CONTACTS_ERROR_NONE !=ret || 0 == count) {
-		CTS_DBG("list get count failed (%d)", count);
+		CTS_DBG("list get count Fail (%d)", count);
 		return false;
 	}
 
@@ -1504,7 +1504,7 @@ bool ctsvc_contact_check_default_address(contacts_list_h address_list)
 
 	ret = contacts_list_get_count(address_list, &count);
 	if (CONTACTS_ERROR_NONE !=ret || 0 == count) {
-		CTS_DBG("list get count failed (%d)", count);
+		CTS_DBG("list get count Fail (%d)", count);
 		return false;
 	}
 
@@ -1685,7 +1685,7 @@ int ctsvc_contact_update_data_event(contacts_list_h event_list, int contact_id, 
 		contacts_list_get_current_record_p(event_list, &record);
 		event = (ctsvc_event_s*)record;
 		if (0 < event->id) {
-			if (event->date > 0)
+			if (0 < event->date)
 				ret = ctsvc_db_event_update(record, is_my_profile);
 			else
 				ret = ctsvc_db_event_delete(event->id, is_my_profile);
@@ -2513,7 +2513,7 @@ int ctsvc_contact_update_display_name(int contact_id, contacts_display_name_sour
 
 		ret = ctsvc_query_prepare(query, &stmt);
 		if (NULL == stmt) {
-			CTS_ERR("DB error : ctsvc_query_prepare() Failed(%d)", ret);
+			CTS_ERR("DB error : ctsvc_query_prepare() Fail(%d)", ret);
 			contacts_record_destroy(record, true);
 			return ret;
 		}
@@ -2532,7 +2532,7 @@ int ctsvc_contact_update_display_name(int contact_id, contacts_display_name_sour
 			ctsvc_stmt_bind_text(stmt, 6, contact->reverse_sortkey);
 
 		ret = ctsvc_stmt_step(stmt);
-		WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_stmt_step() Failed(%d)", ret);
+		WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_stmt_step() Fail(%d)", ret);
 
 		ctsvc_stmt_finalize(stmt);
 	}

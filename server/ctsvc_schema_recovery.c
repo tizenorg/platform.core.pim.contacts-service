@@ -52,36 +52,36 @@ static inline int __ctsvc_server_remake_db_file()
 	sqlite3 *db;
 
 	ret = ctsvc_server_db_open(&db);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_server_db_open() Failed(%d)", ret);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_server_db_open() Fail(%d)", ret);
 
 	ret = sqlite3_exec(db, schema_query, NULL, 0, &errmsg);
 	if (SQLITE_OK != ret) {
-		CTS_ERR("remake contacts DB file is Failed : %s", errmsg);
+		CTS_ERR("remake contacts DB file is Fail : %s", errmsg);
 		sqlite3_free(errmsg);
 	}
 
 	ctsvc_server_db_close();
 
 	fd = open(CTSVC_DB_PATH, O_CREAT | O_RDWR, 0660);
-	RETVM_IF(-1 == fd, CONTACTS_ERROR_SYSTEM, "open Failed");
+	RETVM_IF(-1 == fd, CONTACTS_ERROR_SYSTEM, "open Fail");
 
 	ret = fchown(fd, getuid(), CTS_SECURITY_FILE_GROUP);
 	if (0 != ret)
-		CTS_ERR("fchown(%s) Failed(%d)", CTSVC_DB_PATH, ret);
+		CTS_ERR("fchown(%s) Fail(%d)", CTSVC_DB_PATH, ret);
 	ret = fchmod(fd, CTS_SECURITY_DEFAULT_PERMISSION);
 	if (0 != ret)
-		CTS_ERR("fchown(%s) Failed(%d)", CTSVC_DB_PATH, ret);
+		CTS_ERR("fchown(%s) Fail(%d)", CTSVC_DB_PATH, ret);
 	close(fd);
 
 	fd = open(CTSVC_DB_JOURNAL_PATH, O_CREAT | O_RDWR, 0660);
-	RETVM_IF(-1 == fd, CONTACTS_ERROR_SYSTEM, "open Failed");
+	RETVM_IF(-1 == fd, CONTACTS_ERROR_SYSTEM, "open Fail");
 
 	ret = fchown(fd, getuid(), CTS_SECURITY_FILE_GROUP);
 	if (0 != ret)
-		CTS_ERR("fchown(%s) Failed(%d)", CTSVC_DB_JOURNAL_PATH, ret);
+		CTS_ERR("fchown(%s) Fail(%d)", CTSVC_DB_JOURNAL_PATH, ret);
 	ret = fchmod(fd, CTS_SECURITY_DEFAULT_PERMISSION);
 	if (0 != ret)
-		CTS_ERR("fchown(%s) Failed(%d)", CTSVC_DB_JOURNAL_PATH, ret);
+		CTS_ERR("fchown(%s) Fail(%d)", CTSVC_DB_JOURNAL_PATH, ret);
 	close(fd);
 
 	return CONTACTS_ERROR_NONE;
@@ -95,14 +95,14 @@ static int __ctsvc_server_check_table()
 	cts_stmt stmt = NULL;
 
 	ret = ctsvc_server_db_open(&db);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_server_db_open() Failed(%d)", ret);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_server_db_open() Fail(%d)", ret);
 
 	snprintf(query, sizeof(query),
 			"SELECT name FROM sqlite_master WHERE type='table' AND name='%s'",
 			CTS_TABLE_CONTACTS);
 	ret = sqlite3_prepare_v2(db, query, strlen(query), &stmt, NULL);
 	if (SQLITE_OK != ret) {
-		CTS_ERR("DB error : sqlite3_prepare_v2(%s) Failed(%s)", query, sqlite3_errmsg(db));
+		CTS_ERR("DB error : sqlite3_prepare_v2(%s) Fail(%s)", query, sqlite3_errmsg(db));
 		ctsvc_server_db_close();
 		return CONTACTS_ERROR_DB;
 	}

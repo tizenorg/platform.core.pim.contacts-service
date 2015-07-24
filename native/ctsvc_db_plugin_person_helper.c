@@ -153,7 +153,7 @@ int ctsvc_db_person_create_record_from_stmt(cts_stmt stmt, contacts_record_h *re
 
 	i = 0;
 	ret = contacts_record_create(_contacts_person._uri, record);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "contacts_record_create is failed(%d)", ret);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "contacts_record_create Fail(%d)", ret);
 	person = (ctsvc_person_s *)*record;
 	person->person_id = ctsvc_stmt_get_int(stmt, i++);
 
@@ -216,14 +216,14 @@ int ctsvc_db_person_set_favorite(int person_id, bool set, bool propagate)
 			"SELECT MAX(favorite_prio) FROM "CTS_TABLE_FAVORITES);
 
 		ret = ctsvc_query_prepare(query, &stmt);
-		RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
+		RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
 
 		ret = ctsvc_stmt_step(stmt);
 		if (1 /*CTS_TRUE*/ == ret) {
 			prio = ctsvc_stmt_get_dbl(stmt, 0);
 		}
 		else if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("ctsvc_stmt_step() Failed(%d)", ret);
+			CTS_ERR("ctsvc_stmt_step() Fail(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
 			return ret;
 		}
@@ -240,7 +240,7 @@ int ctsvc_db_person_set_favorite(int person_id, bool set, bool propagate)
 
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_query_exec() Failed(%d)", ret);
+		CTS_ERR("ctsvc_query_exec() Fail(%d)", ret);
 		return ret;
 	}
 
@@ -253,7 +253,7 @@ int ctsvc_db_person_set_favorite(int person_id, bool set, bool propagate)
 			 person_id);
 		ret = ctsvc_query_exec(query);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("ctsvc_query_exec() Failed(%d)", ret);
+			CTS_ERR("ctsvc_query_exec() Fail(%d)", ret);
 			return ret;
 		}
 	}
@@ -276,7 +276,7 @@ int ctsvc_db_insert_person(contacts_record_h record)
 		"ORDER BY timestamp DESC LIMIT 1",
 		CTS_TABLE_ACTIVITIES, contact->id);
 	ret = ctsvc_query_prepare(query, &stmt);
-	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
 
 	if (1 == ctsvc_stmt_step(stmt))
 		status = SAFE_STRDUP(ctsvc_stmt_get_text(stmt, 0));
@@ -293,7 +293,7 @@ int ctsvc_db_insert_person(contacts_record_h record)
 
 	ret = ctsvc_query_prepare(query, &stmt);
 	if (NULL == stmt) {
-		CTS_ERR("DB error : ctsvc_query_prepare() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_query_prepare() Fail(%d)", ret);
 		free(status);
 		return ret;
 	}
@@ -310,7 +310,7 @@ int ctsvc_db_insert_person(contacts_record_h record)
 
 	ret = ctsvc_stmt_step(stmt);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_stmt_step() Failed(%d)", ret);
+		CTS_ERR("ctsvc_stmt_step() Fail(%d)", ret);
 		ctsvc_stmt_finalize(stmt);
 		free(status);
 		return ret;
@@ -325,7 +325,7 @@ int ctsvc_db_insert_person(contacts_record_h record)
 
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_query_exec Failed(%d)", ret);
+		CTS_ERR("ctsvc_query_exec Fail(%d)", ret);
 		free(status);
 		return ret;
 	}
@@ -334,7 +334,7 @@ int ctsvc_db_insert_person(contacts_record_h record)
 	if (contact->is_favorite) {
 		ret = ctsvc_db_person_set_favorite(index, contact->is_favorite, false);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("ctsvc_db_person_set_favorite() Failed(%d)", ret);
+			CTS_ERR("ctsvc_db_person_set_favorite() Fail(%d)", ret);
 			return ret;
 		}
 	}
@@ -371,7 +371,7 @@ static inline int __ctsvc_db_update_person_default(int person_id, int datatype)
 			person_id, datatype);
 
 		ret = ctsvc_query_prepare(query, &stmt);
-		RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
+		RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
 
 		ret = ctsvc_stmt_step(stmt);
 		if (1 == ret) {
@@ -383,7 +383,7 @@ static inline int __ctsvc_db_update_person_default(int person_id, int datatype)
 
 			ret = ctsvc_query_exec(query);
 			if (CONTACTS_ERROR_NONE != ret) {
-				CTS_ERR("ctsvc_query_exec Failed(%d)", ret);
+				CTS_ERR("ctsvc_query_exec Fail(%d)", ret);
 				ctsvc_stmt_finalize(stmt);
 				return ret;
 			}
@@ -397,13 +397,13 @@ static inline int __ctsvc_db_update_person_default(int person_id, int datatype)
 				snprintf(query, sizeof(query),
 						"UPDATE "CTS_TABLE_PERSONS" SET image_thumbnail_path=? WHERE person_id=%d", person_id);
 				ret = ctsvc_query_prepare(query, &stmt);
-				RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
+				RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
 				ctsvc_stmt_bind_text(stmt, 1, image_thumbnail_path);
 				ret = ctsvc_stmt_step(stmt);
 				ctsvc_stmt_finalize(stmt);
 				free(image_thumbnail_path);
 				if (CONTACTS_ERROR_NONE != ret) {
-					CTS_ERR("ctsvc_stmt_step Failed(%d)", ret);
+					CTS_ERR("ctsvc_stmt_step Fail(%d)", ret);
 					return ret;
 				}
 			}
@@ -463,7 +463,7 @@ int ctsvc_db_update_person(contacts_record_h record)
 	int is_favorite = 0;
 
 	ret = ctsvc_begin_trans();
-	RETVM_IF(ret, ret, "ctsvc_begin_trans() Failed(%d)", ret);
+	RETVM_IF(ret, ret, "ctsvc_begin_trans() Fail(%d)", ret);
 
 	__ctsvc_db_update_person_default(contact->person_id, CTSVC_DATA_NUMBER);
 	__ctsvc_db_update_person_default(contact->person_id, CTSVC_DATA_EMAIL);
@@ -492,7 +492,7 @@ int ctsvc_db_update_person(contacts_record_h record)
 
 	ret = ctsvc_query_prepare(query, &stmt);
 	if (NULL == stmt) {
-		CTS_ERR("ctsvc_query_prepare() Failed(%d)", ret);
+		CTS_ERR("ctsvc_query_prepare() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
@@ -521,7 +521,7 @@ int ctsvc_db_update_person(contacts_record_h record)
 
 	ret = ctsvc_stmt_step(stmt);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_stmt_step() Failed(%d)", ret);
+		CTS_ERR("ctsvc_stmt_step() Fail(%d)", ret);
 		ctsvc_stmt_finalize(stmt);
 		ctsvc_end_trans(false);
 		return ret;
@@ -533,7 +533,7 @@ int ctsvc_db_update_person(contacts_record_h record)
 			"SELECT is_favorite FROM "CTS_TABLE_CONTACTS" WHERE contact_id =%d ", contact->id);
 	ret = ctsvc_query_get_first_int_result(query, &is_favorite);
 	if (ret < CONTACTS_ERROR_NONE) {
-		CTS_ERR("ctsvc_query_get_first_int_result() Failed(%d)", ret);
+		CTS_ERR("ctsvc_query_get_first_int_result() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
@@ -544,7 +544,7 @@ int ctsvc_db_update_person(contacts_record_h record)
 	if (CONTACTS_ERROR_NO_DATA == ret && is_favorite) {
 		ret = ctsvc_db_person_set_favorite(contact->person_id, true, false);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("ctsvc_db_person_set_favorite() Failed(%d)", ret);
+			CTS_ERR("ctsvc_db_person_set_favorite() Fail(%d)", ret);
 			ctsvc_end_trans(false);
 			return ret;
 		}
@@ -556,19 +556,19 @@ int ctsvc_db_update_person(contacts_record_h record)
 		if (CONTACTS_ERROR_NO_DATA == ret) {
 			ret = ctsvc_db_person_set_favorite(contact->person_id, false, false);
 			if (CONTACTS_ERROR_NONE != ret) {
-				CTS_ERR("ctsvc_db_person_set_favorite() Failed(%d)", ret);
+				CTS_ERR("ctsvc_db_person_set_favorite() Fail(%d)", ret);
 				ctsvc_end_trans(false);
 				return ret;
 			}
 		}
 		else if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("ctsvc_query_get_first_int_result() Failed(%d)", ret);
+			CTS_ERR("ctsvc_query_get_first_int_result() Fail(%d)", ret);
 			ctsvc_end_trans(false);
 			return ret;
 		}
 	}
 	else if (ret < CONTACTS_ERROR_NONE && CONTACTS_ERROR_NO_DATA != ret) {
-		CTS_ERR("ctsvc_query_get_first_int_result() Failed(%d)", ret);
+		CTS_ERR("ctsvc_query_get_first_int_result() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
@@ -581,7 +581,7 @@ int ctsvc_db_update_person(contacts_record_h record)
 
 	ret = ctsvc_end_trans(true);
 	if (ret < CONTACTS_ERROR_NONE) {
-		CTS_ERR("DB error : ctsvc_end_trans() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_end_trans() Fail(%d)", ret);
 		return ret;
 	}
 	else
@@ -612,7 +612,7 @@ void ctsvc_db_normalize_str_callback(sqlite3_context * context,
 			char *dest = NULL;
 			ret = ctsvc_normalize_index(display_name, &dest);
 			if (ret < CONTACTS_ERROR_NONE) {
-				CTS_ERR("ctsvc_normalize_index() Failed(%d)", ret);
+				CTS_ERR("ctsvc_normalize_index() Fail(%d)", ret);
 				sqlite3_result_null(context);
 				return;
 			}

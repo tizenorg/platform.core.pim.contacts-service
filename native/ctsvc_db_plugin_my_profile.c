@@ -82,11 +82,11 @@ static int __ctsvc_db_get_my_profile_base_info(int id, ctsvc_my_profile_s *my_pr
 				ctsvc_get_display_column(), id);
 
 	ret = ctsvc_query_prepare(query, &stmt);
-	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
 
 	ret = ctsvc_stmt_step(stmt);
 	if (1 /*CTS_TRUE*/ != ret) {
-		CTS_ERR("ctsvc_stmt_step() Failed(%d)", ret);
+		CTS_ERR("ctsvc_stmt_step() Fail(%d)", ret);
 		ctsvc_stmt_finalize(stmt);
 		if (CONTACTS_ERROR_NONE == ret)
 			return CONTACTS_ERROR_NO_DATA;
@@ -125,11 +125,11 @@ static int __ctsvc_db_my_profile_get_data(int id, ctsvc_my_profile_s *my_profile
 					"FROM "CTS_TABLE_DATA" WHERE contact_id = %d AND is_my_profile = 1", id);
 
 	ret = ctsvc_query_prepare(query, &stmt);
-	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
 
 	ret = ctsvc_stmt_step(stmt);
 	if (1 /*CTS_TRUE */!= ret) {
-		CTS_ERR("ctsvc_stmt_step() Failed(%d)", ret);
+		CTS_ERR("ctsvc_stmt_step() Fail(%d)", ret);
 		ctsvc_stmt_finalize(stmt);
 		return ret;
 	}
@@ -205,14 +205,14 @@ static int __ctsvc_db_my_profile_get_record(int id, contacts_record_h* out_recor
 	my_profile = (ctsvc_my_profile_s *)record;
 	ret = __ctsvc_db_get_my_profile_base_info(id, my_profile);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("cts_get_main_contacts_info(ALL) Failed(%d)", ret);
+		CTS_ERR("cts_get_main_contacts_info(ALL) Fail(%d)", ret);
 		contacts_record_destroy(record, true);
 		return ret;
 	}
 
 	ret = __ctsvc_db_my_profile_get_data(id, my_profile);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("__ctsvc_db_my_profile_get_data Failed(%d)", ret);
+		CTS_ERR("__ctsvc_db_my_profile_get_data Fail(%d)", ret);
 		contacts_record_destroy(record, true);
 		return ret;
 	}
@@ -230,13 +230,13 @@ static int __ctsvc_db_my_profile_delete_record(int id)
 	char query[CTS_SQL_MAX_LEN] = {0};
 
 	ret = ctsvc_begin_trans();
-	RETVM_IF(ret, ret, "DB error : ctsvc_begin_trans() Failed(%d)", ret);
+	RETVM_IF(ret, ret, "DB error : ctsvc_begin_trans() Fail(%d)", ret);
 
 	snprintf(query, sizeof(query),
 		"SELECT addressbook_id FROM "CTSVC_DB_VIEW_MY_PROFILE" WHERE my_profile_id = %d", id);
 	ret  = ctsvc_query_get_first_int_result(query, &addressbook_id);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_query_get_first_int_result Failed(%d)", ret);
+		CTS_ERR("ctsvc_query_get_first_int_result Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
@@ -251,7 +251,7 @@ static int __ctsvc_db_my_profile_delete_record(int id)
 					"SET deleted = 1, changed_ver = %d WHERE my_profile_id = %d", ctsvc_get_next_ver(), id);
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_query_exec() Failed(%d)", ret);
+		CTS_ERR("ctsvc_query_exec() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
@@ -260,7 +260,7 @@ static int __ctsvc_db_my_profile_delete_record(int id)
 
 	ret = ctsvc_end_trans(true);
 	if (ret < CONTACTS_ERROR_NONE) {
-		CTS_ERR("DB error : ctsvc_end_trans() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_end_trans() Fail(%d)", ret);
 		return ret;
 	}
 	else
@@ -274,7 +274,7 @@ static inline int __ctsvc_my_profile_update_data(ctsvc_my_profile_s *my_profile)
 	if (my_profile->name) {
 		ret = ctsvc_contact_update_data_name((contacts_list_h)my_profile->name, my_profile->id, true);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("ctsvc_contact_update_data_name() Failed(%d)", ret);
+			CTS_ERR("ctsvc_contact_update_data_name() Fail(%d)", ret);
 			return ret;
 		}
 	}
@@ -282,7 +282,7 @@ static inline int __ctsvc_my_profile_update_data(ctsvc_my_profile_s *my_profile)
 	if (my_profile->company) {
 		ret = ctsvc_contact_update_data_company((contacts_list_h)my_profile->company, my_profile->id, true);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("ctsvc_contact_update_data_company() Failed(%d)", ret);
+			CTS_ERR("ctsvc_contact_update_data_company() Fail(%d)", ret);
 			return ret;
 		}
 	}
@@ -290,7 +290,7 @@ static inline int __ctsvc_my_profile_update_data(ctsvc_my_profile_s *my_profile)
 	if (my_profile->note) {
 		ret = ctsvc_contact_update_data_note((contacts_list_h)my_profile->note, my_profile->id, true);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("ctsvc_contact_update_data_note() Failed(%d)", ret);
+			CTS_ERR("ctsvc_contact_update_data_note() Fail(%d)", ret);
 			return ret;
 		}
 	}
@@ -298,7 +298,7 @@ static inline int __ctsvc_my_profile_update_data(ctsvc_my_profile_s *my_profile)
 	if (my_profile->events) {
 		ret = ctsvc_contact_update_data_event((contacts_list_h)my_profile->events, my_profile->id, true);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("ctsvc_contact_update_data_events() Failed(%d)", ret);
+			CTS_ERR("ctsvc_contact_update_data_events() Fail(%d)", ret);
 			return ret;
 		}
 	}
@@ -306,7 +306,7 @@ static inline int __ctsvc_my_profile_update_data(ctsvc_my_profile_s *my_profile)
 	if (my_profile->messengers) {
 		ret = ctsvc_contact_update_data_messenger((contacts_list_h)my_profile->messengers, my_profile->id, true);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("ctsvc_contact_update_data_messengers() Failed(%d)", ret);
+			CTS_ERR("ctsvc_contact_update_data_messengers() Fail(%d)", ret);
 			return ret;
 		}
 	}
@@ -314,7 +314,7 @@ static inline int __ctsvc_my_profile_update_data(ctsvc_my_profile_s *my_profile)
 	if (my_profile->postal_addrs) {
 		ret = ctsvc_contact_update_data_address((contacts_list_h)my_profile->postal_addrs, my_profile->id, true);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("ctsvc_contact_update_data_address() Failed(%d)", ret);
+			CTS_ERR("ctsvc_contact_update_data_address() Fail(%d)", ret);
 			return ret;
 		}
 	}
@@ -322,7 +322,7 @@ static inline int __ctsvc_my_profile_update_data(ctsvc_my_profile_s *my_profile)
 	if (my_profile->urls) {
 		ret = ctsvc_contact_update_data_url((contacts_list_h)my_profile->urls, my_profile->id, true);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("ctsvc_contact_update_data_url() Failed(%d)", ret);
+			CTS_ERR("ctsvc_contact_update_data_url() Fail(%d)", ret);
 			return ret;
 		}
 	}
@@ -330,7 +330,7 @@ static inline int __ctsvc_my_profile_update_data(ctsvc_my_profile_s *my_profile)
 	if (my_profile->nicknames) {
 		ret = ctsvc_contact_update_data_nickname((contacts_list_h)my_profile->nicknames, my_profile->id, true);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("ctsvc_contact_update_data_nickname() Failed(%d)", ret);
+			CTS_ERR("ctsvc_contact_update_data_nickname() Fail(%d)", ret);
 			return ret;
 		}
 	}
@@ -339,7 +339,7 @@ static inline int __ctsvc_my_profile_update_data(ctsvc_my_profile_s *my_profile)
 		bool had_phonenumber;
 		ret = ctsvc_contact_update_data_number((contacts_list_h)my_profile->numbers, my_profile->id, true, &had_phonenumber);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("ctsvc_contact_update_data_number() Failed(%d)", ret);
+			CTS_ERR("ctsvc_contact_update_data_number() Fail(%d)", ret);
 			return ret;
 		}
 	}
@@ -348,7 +348,7 @@ static inline int __ctsvc_my_profile_update_data(ctsvc_my_profile_s *my_profile)
 		bool had_email;
 		ret = ctsvc_contact_update_data_email((contacts_list_h)my_profile->emails, my_profile->id, true, &had_email);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("ctsvc_contact_update_data_email() Failed(%d)", ret);
+			CTS_ERR("ctsvc_contact_update_data_email() Fail(%d)", ret);
 			return ret;
 		}
 	}
@@ -356,7 +356,7 @@ static inline int __ctsvc_my_profile_update_data(ctsvc_my_profile_s *my_profile)
 	if (my_profile->profiles) {
 		ret = ctsvc_contact_update_data_profile((contacts_list_h)my_profile->profiles, my_profile->id, true);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("ctsvc_contact_update_data_profile() Failed(%d)", ret);
+			CTS_ERR("ctsvc_contact_update_data_profile() Fail(%d)", ret);
 			return ret;
 		}
 	}
@@ -364,7 +364,7 @@ static inline int __ctsvc_my_profile_update_data(ctsvc_my_profile_s *my_profile)
 	if (my_profile->relationships) {
 		ret = ctsvc_contact_update_data_relationship((contacts_list_h)my_profile->relationships, my_profile->id, true);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("ctsvc_contact_update_data_relationship() Failed(%d)", ret);
+			CTS_ERR("ctsvc_contact_update_data_relationship() Fail(%d)", ret);
 			return ret;
 		}
 	}
@@ -372,7 +372,7 @@ static inline int __ctsvc_my_profile_update_data(ctsvc_my_profile_s *my_profile)
 	if (my_profile->images) {
 		ret = ctsvc_contact_update_data_image((contacts_list_h)my_profile->images, my_profile->id, true);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("ctsvc_contact_update_data_image() Failed(%d)", ret);
+			CTS_ERR("ctsvc_contact_update_data_image() Fail(%d)", ret);
 			return ret;
 		}
 	}
@@ -380,7 +380,7 @@ static inline int __ctsvc_my_profile_update_data(ctsvc_my_profile_s *my_profile)
 	if (my_profile->extensions) {
 		ret = ctsvc_contact_update_data_extension((contacts_list_h)my_profile->extensions, my_profile->id, true);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("ctsvc_contact_update_data_extension() Failed(%d)", ret);
+			CTS_ERR("ctsvc_contact_update_data_extension() Fail(%d)", ret);
 			return ret;
 		}
 	}
@@ -406,7 +406,7 @@ static void __ctsvc_make_my_profile_display_name(ctsvc_my_profile_s *my_profile)
 	free(my_profile->reverse_display_name);
 	my_profile->reverse_display_name = NULL;
 
-	if (my_profile->name->count > 0 && my_profile->name->records != NULL && my_profile->name->records->data != NULL) {
+	if (0 < my_profile->name->count && my_profile->name->records != NULL && my_profile->name->records->data != NULL) {
 		name = (ctsvc_name_s *)my_profile->name->records->data;
 	}
 
@@ -676,7 +676,7 @@ static int __ctsvc_db_my_profile_update_record(contacts_record_h record)
 	GSList *cursor = NULL;
 
 	ret = ctsvc_begin_trans();
-	RETVM_IF(ret, ret, "ctsvc_begin_trans() Failed(%d)", ret);
+	RETVM_IF(ret, ret, "ctsvc_begin_trans() Fail(%d)", ret);
 
 	snprintf(query, sizeof(query),
 		"SELECT my_profile_id FROM "CTSVC_DB_VIEW_MY_PROFILE" WHERE my_profile_id = %d", my_profile->id);
@@ -700,7 +700,7 @@ static int __ctsvc_db_my_profile_update_record(contacts_record_h record)
 	//update data
 	ret = __ctsvc_my_profile_update_data(my_profile);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("__ctsvc_my_profile_update_data() Failed(%d)", ret);
+		CTS_ERR("__ctsvc_my_profile_update_data() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
@@ -719,7 +719,7 @@ static int __ctsvc_db_my_profile_update_record(contacts_record_h record)
 			ret = contacts_list_get_current_record_p((contacts_list_h)my_profile->images, &record_image);
 
 			if (CONTACTS_ERROR_NONE != ret) {
-				CTS_ERR("contacts_list_get_current_record_p() Failed(%d)", ret);
+				CTS_ERR("contacts_list_get_current_record_p() Fail(%d)", ret);
 				ctsvc_end_trans(false);
 				return CONTACTS_ERROR_DB;
 			}
@@ -755,7 +755,7 @@ static int __ctsvc_db_my_profile_update_record(contacts_record_h record)
 		version = ctsvc_get_next_ver();
 
 		ret = ctsvc_db_create_set_query(record, &set, &bind_text);
-		WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_db_create_set_query() Failed(%d)", ret);
+		WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_db_create_set_query() Fail(%d)", ret);
 
 		if (set && *set)
 			len = snprintf(query_set, sizeof(query_set), "%s, ", set);
@@ -772,7 +772,7 @@ static int __ctsvc_db_my_profile_update_record(contacts_record_h record)
 
 		ret = ctsvc_query_prepare(query, &stmt);
 		if (NULL == stmt) {
-			CTS_ERR("DB error : ctsvc_query_prepare() Failed(%d)", ret);
+			CTS_ERR("DB error : ctsvc_query_prepare() Fail(%d)", ret);
 			break;
 		}
 
@@ -787,7 +787,7 @@ static int __ctsvc_db_my_profile_update_record(contacts_record_h record)
 
 		ret = ctsvc_stmt_step(stmt);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("ctsvc_stmt_step() Failed(%d)", ret);
+			CTS_ERR("ctsvc_stmt_step() Fail(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
 			break;
 		}
@@ -805,7 +805,7 @@ static int __ctsvc_db_my_profile_update_record(contacts_record_h record)
 	ctsvc_set_my_profile_noti();
 
 	ret = ctsvc_end_trans(true);
-	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "DB error : ctsvc_end_trans() Failed(%d)", ret);
+	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "DB error : ctsvc_end_trans() Fail(%d)", ret);
 
 	return CONTACTS_ERROR_NONE;
 }
@@ -829,13 +829,13 @@ static int __ctsvc_db_my_profile_get_all_records(int offset, int limit, contacts
 	}
 
 	ret = ctsvc_query_prepare(query, &stmt);
-	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
 
 	contacts_list_create(&list);
 	while ((ret = ctsvc_stmt_step(stmt))) {
 		contacts_record_h record;
 		if (1 != ret) {
-			CTS_ERR("DB error : ctsvc_stmt_step() Failed(%d)", ret);
+			CTS_ERR("DB error : ctsvc_stmt_step() Fail(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
 			contacts_list_destroy(list, true);
 			return ret;
@@ -843,7 +843,7 @@ static int __ctsvc_db_my_profile_get_all_records(int offset, int limit, contacts
 		my_profile_id = ctsvc_stmt_get_int(stmt, 0);
 		ret = contacts_db_get_record(_contacts_my_profile._uri, my_profile_id, &record);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("DB error : contacts_db_get_record() Failed(%d)", ret);
+			CTS_ERR("DB error : contacts_db_get_record() Fail(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
 			contacts_list_destroy(list, true);
 			return ret;
@@ -897,7 +897,7 @@ static int __ctsvc_db_my_profile_get_records_with_query(contacts_query_h query, 
 	while ((ret = ctsvc_stmt_step(stmt))) {
 		contacts_record_h record;
 		if (1 != ret) {
-			CTS_ERR("DB error : ctsvc_stmt_step() Failed(%d)", ret);
+			CTS_ERR("DB error : ctsvc_stmt_step() Fail(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
 			contacts_list_destroy(list, true);
 			return ret;
@@ -913,7 +913,7 @@ static int __ctsvc_db_my_profile_get_records_with_query(contacts_query_h query, 
 					s_query->projection_count, s_query->property_count);
 
 			if (CONTACTS_ERROR_NONE != ret)
-				ASSERT_NOT_REACHED("To set projection is failed.\n");
+				ASSERT_NOT_REACHED("To set projection is Fail.\n");
 		}
 
 		for (i=0;i<field_count;i++) {
@@ -957,7 +957,7 @@ static int __ctsvc_db_my_profile_get_records_with_query(contacts_query_h query, 
 		}
 		ret = __ctsvc_db_my_profile_get_data(my_profile_id, my_profile);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("__ctsvc_db_my_profile_get_data Failed(%d)", ret);
+			CTS_ERR("__ctsvc_db_my_profile_get_data Fail(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
 			contacts_list_destroy(list, true);
 			return ret;
@@ -985,7 +985,7 @@ static int __ctsvc_my_profile_insert_data(ctsvc_my_profile_s *contact)
 	if (contact->name) {
 		ret = ctsvc_contact_insert_data_name((contacts_list_h)contact->name, contact->id, true);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("ctsvc_contact_insert_data_name() Failed(%d)", ret);
+			CTS_ERR("ctsvc_contact_insert_data_name() Fail(%d)", ret);
 			return ret;
 		}
 	}
@@ -994,7 +994,7 @@ static int __ctsvc_my_profile_insert_data(ctsvc_my_profile_s *contact)
 	if (contact->company) {
 		ret = ctsvc_contact_insert_data_company((contacts_list_h)contact->company, contact->id, true);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("ctsvc_insert_my_profile_data_company() Failed(%d)", ret);
+			CTS_ERR("ctsvc_insert_my_profile_data_company() Fail(%d)", ret);
 			return ret;
 		}
 	}
@@ -1003,7 +1003,7 @@ static int __ctsvc_my_profile_insert_data(ctsvc_my_profile_s *contact)
 	if (contact->events) {
 		ret = ctsvc_contact_insert_data_event((contacts_list_h)contact->events, contact->id, true);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("ctsvc_insert_my_profile_data_event() Failed(%d)", ret);
+			CTS_ERR("ctsvc_insert_my_profile_data_event() Fail(%d)", ret);
 			return ret;
 		}
 	}
@@ -1012,7 +1012,7 @@ static int __ctsvc_my_profile_insert_data(ctsvc_my_profile_s *contact)
 	if (contact->messengers) {
 		ret = ctsvc_contact_insert_data_messenger((contacts_list_h)contact->messengers, contact->id, true);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("ctsvc_insert_my_profile_data_messenger() Failed(%d)", ret);
+			CTS_ERR("ctsvc_insert_my_profile_data_messenger() Fail(%d)", ret);
 			return ret;
 		}
 	}
@@ -1021,7 +1021,7 @@ static int __ctsvc_my_profile_insert_data(ctsvc_my_profile_s *contact)
 	if (contact->postal_addrs) {
 		ret = ctsvc_contact_insert_data_address((contacts_list_h)contact->postal_addrs, contact->id, true);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("ctsvc_insert_my_profile_data_postal() Failed(%d)", ret);
+			CTS_ERR("ctsvc_insert_my_profile_data_postal() Fail(%d)", ret);
 			return ret;
 		}
 	}
@@ -1030,7 +1030,7 @@ static int __ctsvc_my_profile_insert_data(ctsvc_my_profile_s *contact)
 	if (contact->urls) {
 		ret = ctsvc_contact_insert_data_url((contacts_list_h)contact->urls, contact->id, true);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("ctsvc_insert_my_profile_data_web() Failed(%d)", ret);
+			CTS_ERR("ctsvc_insert_my_profile_data_web() Fail(%d)", ret);
 			return ret;
 		}
 	}
@@ -1039,7 +1039,7 @@ static int __ctsvc_my_profile_insert_data(ctsvc_my_profile_s *contact)
 	if (contact->nicknames) {
 		ret = ctsvc_contact_insert_data_nickname((contacts_list_h)contact->nicknames, contact->id, true);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("ctsvc_insert_my_profile_data_nickname() Failed(%d)", ret);
+			CTS_ERR("ctsvc_insert_my_profile_data_nickname() Fail(%d)", ret);
 			return ret;
 		}
 	}
@@ -1048,7 +1048,7 @@ static int __ctsvc_my_profile_insert_data(ctsvc_my_profile_s *contact)
 	if (contact->numbers) {
 		ret = ctsvc_contact_insert_data_number((contacts_list_h)contact->numbers, contact->id, true);
 		if (ret < CONTACTS_ERROR_NONE) {
-			CTS_ERR("ctsvc_contact_insert_data_number() Failed(%d)", ret);
+			CTS_ERR("ctsvc_contact_insert_data_number() Fail(%d)", ret);
 			return ret;
 		}
 	}
@@ -1057,7 +1057,7 @@ static int __ctsvc_my_profile_insert_data(ctsvc_my_profile_s *contact)
 	if (contact->emails) {
 		ret = ctsvc_contact_insert_data_email((contacts_list_h)contact->emails, contact->id, true);
 		if (ret < CONTACTS_ERROR_NONE) {
-			CTS_ERR("ctsvc_insert_my_profile_data_email() Failed(%d)", ret);
+			CTS_ERR("ctsvc_insert_my_profile_data_email() Fail(%d)", ret);
 			return ret;
 		}
 	}
@@ -1066,7 +1066,7 @@ static int __ctsvc_my_profile_insert_data(ctsvc_my_profile_s *contact)
 	if (contact->profiles) {
 		ret = ctsvc_contact_insert_data_profile((contacts_list_h)contact->profiles, contact->id, true);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("ctsvc_insert_my_profile_data_profile() Failed(%d)", ret);
+			CTS_ERR("ctsvc_insert_my_profile_data_profile() Fail(%d)", ret);
 			return ret;
 		}
 	}
@@ -1075,7 +1075,7 @@ static int __ctsvc_my_profile_insert_data(ctsvc_my_profile_s *contact)
 	if (contact->relationships) {
 		ret = ctsvc_contact_insert_data_relationship((contacts_list_h)contact->relationships, contact->id, true);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("ctsvc_contact_insert_data_relationship() Failed(%d)", ret);
+			CTS_ERR("ctsvc_contact_insert_data_relationship() Fail(%d)", ret);
 			return ret;
 		}
 	}
@@ -1084,7 +1084,7 @@ static int __ctsvc_my_profile_insert_data(ctsvc_my_profile_s *contact)
 	if (contact->images) {
 		ret = ctsvc_contact_insert_data_image((contacts_list_h)contact->images, contact->id, true);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("ctsvc_contact_insert_data_image() Failed(%d)", ret);
+			CTS_ERR("ctsvc_contact_insert_data_image() Fail(%d)", ret);
 			return ret;
 		}
 	}
@@ -1093,7 +1093,7 @@ static int __ctsvc_my_profile_insert_data(ctsvc_my_profile_s *contact)
 	if (contact->note) {
 		ret = ctsvc_contact_insert_data_note((contacts_list_h)contact->note, contact->id, true);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("ctsvc_contact_insert_data_note() Failed(%d)", ret);
+			CTS_ERR("ctsvc_contact_insert_data_note() Fail(%d)", ret);
 			return ret;
 		}
 	}
@@ -1102,7 +1102,7 @@ static int __ctsvc_my_profile_insert_data(ctsvc_my_profile_s *contact)
 	if (contact->extensions) {
 		ret = ctsvc_contact_insert_data_extension((contacts_list_h)contact->extensions, contact->id, true);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("ctsvc_contact_insert_data_extension() Failed(%d)", ret);
+			CTS_ERR("ctsvc_contact_insert_data_extension() Fail(%d)", ret);
 			return ret;
 		}
 	}
@@ -1129,7 +1129,7 @@ static int __ctsvc_db_my_profile_insert_record(contacts_record_h record, int *id
 				"Invalid parameter : id(%d), This record is already inserted", my_profile->id);
 
 	ret = ctsvc_begin_trans();
-	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "ctsvc_begin_trans() Failed(%d)", ret);
+	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "ctsvc_begin_trans() Fail(%d)", ret);
 
 	if (false == ctsvc_have_ab_write_permission(my_profile->addressbook_id)) {
 		CTS_ERR("ctsvc_have_ab_write_permission fail : does not have permission(addressbook_id : %d)",
@@ -1140,11 +1140,11 @@ static int __ctsvc_db_my_profile_insert_record(contacts_record_h record, int *id
 
 	snprintf(query, sizeof(query), "DELETE FROM "CTS_TABLE_MY_PROFILES" WHERE addressbook_id = %d AND deleted = 1", my_profile->addressbook_id);
 	ret = ctsvc_query_exec(query);
-	WARN_IF(CONTACTS_ERROR_NONE != ret, "Delete deleted my_profile of addressbook(%d) failed", my_profile->addressbook_id);
+	WARN_IF(CONTACTS_ERROR_NONE != ret, "Delete deleted my_profile of addressbook(%d) Fail", my_profile->addressbook_id);
 
 	ret = ctsvc_db_get_next_id(CTS_TABLE_MY_PROFILES);
 	if (ret < CONTACTS_ERROR_NONE) {
-		CTS_ERR("ctsvc_db_get_next_id() Failed(%d)", ret);
+		CTS_ERR("ctsvc_db_get_next_id() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
@@ -1158,7 +1158,7 @@ static int __ctsvc_db_my_profile_insert_record(contacts_record_h record, int *id
 	//Insert Data
 	ret = __ctsvc_my_profile_insert_data(my_profile);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("cts_insert_my_profile_data() Failed(%d)", ret);
+		CTS_ERR("cts_insert_my_profile_data() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
@@ -1178,7 +1178,7 @@ static int __ctsvc_db_my_profile_insert_record(contacts_record_h record, int *id
 			contacts_list_first((contacts_list_h)my_profile->images);
 			ret = contacts_list_get_current_record_p((contacts_list_h)my_profile->images, (contacts_record_h*)&image);
 			if (CONTACTS_ERROR_NONE != ret) {
-				CTS_ERR("contacts_list_get_current_record_p() Failed(%d)", ret);
+				CTS_ERR("contacts_list_get_current_record_p() Fail(%d)", ret);
 				ctsvc_end_trans(false);
 				return CONTACTS_ERROR_DB;
 			}
@@ -1204,7 +1204,7 @@ static int __ctsvc_db_my_profile_insert_record(contacts_record_h record, int *id
 
 	ret = ctsvc_query_prepare(query, &stmt);
 	if (NULL == stmt) {
-		CTS_ERR("ctsvc_query_prepare() Failed(%d)", ret);
+		CTS_ERR("ctsvc_query_prepare() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
@@ -1220,7 +1220,7 @@ static int __ctsvc_db_my_profile_insert_record(contacts_record_h record, int *id
 
 	ret = ctsvc_stmt_step(stmt);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_stmt_step() Failed(%d)", ret);
+		CTS_ERR("ctsvc_stmt_step() Fail(%d)", ret);
 		ctsvc_stmt_finalize(stmt);
 		ctsvc_end_trans(false);
 		return ret;
@@ -1230,7 +1230,7 @@ static int __ctsvc_db_my_profile_insert_record(contacts_record_h record, int *id
 	ctsvc_set_my_profile_noti();
 
 	ret = ctsvc_end_trans(true);
-	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_svc_end_trans() Failed(%d)", ret);
+	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_svc_end_trans() Fail(%d)", ret);
 
 	return CONTACTS_ERROR_NONE;
 }

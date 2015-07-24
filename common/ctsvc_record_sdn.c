@@ -62,7 +62,7 @@ static int __ctsvc_sdn_create(contacts_record_h* out_record)
 	ctsvc_sdn_s *sdn;
 	sdn = (ctsvc_sdn_s*)calloc(1, sizeof(ctsvc_sdn_s));
 	RETVM_IF(NULL == sdn, CONTACTS_ERROR_OUT_OF_MEMORY,
-			"Out of memory calloc is failed");
+			"Out of memory calloc is Fail");
 
 	*out_record = (contacts_record_h)sdn;
 	return CONTACTS_ERROR_NONE;
@@ -89,7 +89,7 @@ static int __ctsvc_sdn_clone(contacts_record_h record, contacts_record_h *out_re
     src_data = (ctsvc_sdn_s*)record;
     out_data = calloc(1, sizeof(ctsvc_sdn_s));
     RETVM_IF(NULL == out_data, CONTACTS_ERROR_OUT_OF_MEMORY,
-			 "Out of memeory : calloc(ctsvc_sdn_s) Failed(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
+			 "Out of memeory : calloc(ctsvc_sdn_s) Fail(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
 
 	out_data->id = src_data->id;
 	out_data->name = SAFE_STRDUP(src_data->name);

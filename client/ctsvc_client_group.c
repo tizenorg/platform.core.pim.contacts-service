@@ -62,7 +62,7 @@ API int contacts_group_add_contact(int group_id, int contact_id)
 	// ipc call
 	if (ctsvc_ipc_call(CTSVC_IPC_GROUP_MODULE, CTSVC_IPC_SERVER_GROUP_ADD_CONTACT, indata, &outdata) != 0)
 	{
-		CTS_ERR("ctsvc_ipc_call failed");
+		CTS_ERR("ctsvc_ipc_call Fail");
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
 	}
@@ -123,7 +123,7 @@ API int contacts_group_remove_contact(int group_id, int contact_id)
 	// ipc call
 	if (ctsvc_ipc_call(CTSVC_IPC_GROUP_MODULE, CTSVC_IPC_SERVER_GROUP_REMOVE_CONTACT, indata, &outdata) != 0)
 	{
-		CTS_ERR("ctsvc_ipc_call failed");
+		CTS_ERR("ctsvc_ipc_call Fail");
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
 	}
@@ -191,7 +191,7 @@ API int contacts_group_set_group_order(int group_id, int previous_group_id, int 
 	// ipc call
 	if (ctsvc_ipc_call(CTSVC_IPC_GROUP_MODULE, CTSVC_IPC_SERVER_GROUP_SET_GROUP_ORDER, indata, &outdata) != 0)
 	{
-		CTS_ERR("ctsvc_ipc_call failed");
+		CTS_ERR("ctsvc_ipc_call Fail");
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
 	}

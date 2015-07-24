@@ -49,14 +49,14 @@
 
 #define CTSVC_VCARD_APPEND_STR(buf, buf_size, len, str) do { \
 	if ((len = __ctsvc_vcard_append_str(buf, buf_size, len, str, false)) < 0) { \
-		CTS_ERR("__ctsvc_vcard_append_str() Failed"); \
+		CTS_ERR("__ctsvc_vcard_append_str() Fail"); \
 		return CONTACTS_ERROR_OUT_OF_MEMORY; \
 	} \
 } while (0)
 
 #define CTSVC_VCARD_APPEND_CONTENT_STR(buf, buf_size, len, content) do { \
 	if ((len = __ctsvc_vcard_append_str(buf, buf_size, len, content, true)) < 0) { \
-		ERR("__ctsvc_vcard_append_str() Failed"); \
+		ERR("__ctsvc_vcard_append_str() Fail"); \
 		return CONTACTS_ERROR_OUT_OF_MEMORY; \
 	} \
 } while (0)
@@ -660,7 +660,7 @@ static inline int __ctsvc_vcard_put_company_logo(const char *path, char **buf, i
 	type = __ctsvc_vcard_get_image_type(suffix);
 
 	fd = open(path, O_RDONLY);
-	RETVM_IF(fd < 0, CONTACTS_ERROR_SYSTEM, "System : Open Failed(%d)", errno);
+	RETVM_IF(fd < 0, CONTACTS_ERROR_SYSTEM, "System : Open Fail(%d)", errno);
 
 	read_len = 0;
 	while ((ret = read(fd, image+read_len, sizeof(image)-read_len))) {
@@ -673,7 +673,7 @@ static inline int __ctsvc_vcard_put_company_logo(const char *path, char **buf, i
 		read_len += ret;
 	}
 	close(fd);
-	RETVM_IF(ret < 0, CONTACTS_ERROR_SYSTEM, "System : read() Failed(%d)", errno);
+	RETVM_IF(ret < 0, CONTACTS_ERROR_SYSTEM, "System : read() Fail(%d)", errno);
 
 	buf_image = g_base64_encode(image, read_len);
 	if (buf_image) {
@@ -1473,7 +1473,7 @@ static inline int __ctsvc_vcard_put_photo(ctsvc_list_s *image_list, char **buf, 
 		type = __ctsvc_vcard_get_image_type(suffix);
 
 		fd = open(data->path, O_RDONLY);
-		RETVM_IF(fd < 0, CONTACTS_ERROR_SYSTEM, "System : Open Failed(%d)", errno);
+		RETVM_IF(fd < 0, CONTACTS_ERROR_SYSTEM, "System : Open Fail(%d)", errno);
 
 		read_len = 0;
 		while ((ret = read(fd, image+read_len, sizeof(image)-read_len))) {
@@ -1486,7 +1486,7 @@ static inline int __ctsvc_vcard_put_photo(ctsvc_list_s *image_list, char **buf, 
 			read_len += ret;
 		}
 		close(fd);
-		RETVM_IF(ret < 0, CONTACTS_ERROR_SYSTEM, "System : read() Failed(%d)", errno);
+		RETVM_IF(ret < 0, CONTACTS_ERROR_SYSTEM, "System : read() Fail(%d)", errno);
 
 		buf_image = g_base64_encode(image, read_len);
 
@@ -1974,7 +1974,7 @@ API int contacts_vcard_make_from_person(contacts_record_h record, char **vcard_s
 		if (CONTACTS_ERROR_NONE != (ret = contacts_db_get_records_with_query(query, 0, 0, &list))) break;
 		if (CONTACTS_ERROR_NONE != (ret = __ctsvc_vcard_make_from_person(person, (ctsvc_list_s *)list, vcard_stream))) break;
 	} while (0);
-	WARN_IF(CONTACTS_ERROR_NONE != ret, "__ctsvc_vcard_make_from_person() Failed(%d)", ret);
+	WARN_IF(CONTACTS_ERROR_NONE != ret, "__ctsvc_vcard_make_from_person() Fail(%d)", ret);
 	contacts_query_destroy(query);
 	contacts_filter_destroy(filter);
 	contacts_list_destroy(list, true);
@@ -2223,17 +2223,17 @@ static inline char* __ctsvc_vcard_translate_charset(char *src, int len)
 		temp_size = (src_len+1) * sizeof(UChar);
 		temp = malloc(temp_size);
 		conv = ucnv_open(enc, &err);
-		WARN_IF(U_FAILURE(err), "ucnv_open() Failed(%d), enc=%s", err, enc);
+		WARN_IF(U_FAILURE(err), "ucnv_open() Fail(%d), enc=%s", err, enc);
 		ucnv_toUChars(conv, temp, temp_size, val, src_len, &err);
-		WARN_IF(U_FAILURE(err), "ucnv_toUChars() Failed(%d), enc=%s", err, enc);
+		WARN_IF(U_FAILURE(err), "ucnv_toUChars() Fail(%d), enc=%s", err, enc);
 		ucnv_close(conv);
 
 		dest_size = temp_size*2;
 		dest = malloc(dest_size);
 		conv = ucnv_open("UTF-8", &err);
-		WARN_IF(U_FAILURE(err), "ucnv_open() Failed(%d), enc=%s", err, enc);
+		WARN_IF(U_FAILURE(err), "ucnv_open() Fail(%d), enc=%s", err, enc);
 		ucnv_fromUChars(conv, dest, dest_size, temp, u_strlen(temp), &err);
-		WARN_IF(U_FAILURE(err), "ucnv_fromUChars() Failed(%d), enc=%s", err, enc);
+		WARN_IF(U_FAILURE(err), "ucnv_fromUChars() Fail(%d), enc=%s", err, enc);
 		ucnv_close(conv);
 		free(temp);
 
@@ -2425,7 +2425,7 @@ static inline int __ctsvc_vcard_get_display_name(ctsvc_list_s *name_list, char *
 	contacts_list_get_count((contacts_list_h)name_list, &count);
 	if (count <= 0) {
 		ret = contacts_record_create(_contacts_name._uri, &name);
-		RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create is failed(%d)", ret);
+		RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create is Fail(%d)", ret);
 		contacts_list_add((contacts_list_h)name_list, name);
 	}
 	else {
@@ -2433,9 +2433,9 @@ static inline int __ctsvc_vcard_get_display_name(ctsvc_list_s *name_list, char *
 	}
 
 	ret = contacts_record_get_str_p(name, _contacts_name.first, &first_name);
-	WARN_IF(ret != CONTACTS_ERROR_NONE, "contacts_record_get_str_p is failed(%d)", ret);
+	WARN_IF(ret != CONTACTS_ERROR_NONE, "contacts_record_get_str_p is Fail(%d)", ret);
 	ret = contacts_record_get_str_p(name, _contacts_name.last, &last_name);
-	WARN_IF(ret != CONTACTS_ERROR_NONE, "contacts_record_get_str_p is failed(%d)", ret);
+	WARN_IF(ret != CONTACTS_ERROR_NONE, "contacts_record_get_str_p is Fail(%d)", ret);
 
 	if ((NULL == first_name || '\0' == *first_name) && (NULL == last_name || '\0' == *last_name))
 		contacts_record_set_str(name, _contacts_name.first, __ctsvc_vcard_remove_escape_char(temp));
@@ -2480,7 +2480,7 @@ static inline int __ctsvc_vcard_get_name(ctsvc_list_s *name_list, char *val)
 	contacts_list_get_count((contacts_list_h)name_list, &count);
 	if (count <= 0) {
 		ret = contacts_record_create(_contacts_name._uri, &name);
-		RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create is failed(%d)", ret);
+		RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create is Fail(%d)", ret);
 		contacts_list_add((contacts_list_h)name_list, name);
 	}
 	else {
@@ -2520,7 +2520,7 @@ static inline int __ctsvc_vcard_get_phonetic_name(ctsvc_list_s *name_list, int t
 	contacts_list_get_count((contacts_list_h)name_list, &count);
 	if (count <= 0) {
 		ret = contacts_record_create(_contacts_name._uri, &name);
-		RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create is failed(%d)", ret);
+		RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create is Fail(%d)", ret);
 		contacts_list_add((contacts_list_h)name_list, name);
 	}
 	else {
@@ -2556,7 +2556,7 @@ static inline int __ctsvc_vcard_get_nickname(ctsvc_list_s *nickname_list, char *
 		ret = contacts_record_create(_contacts_nickname._uri, &nickname);
 		if (ret < CONTACTS_ERROR_NONE) {
 			GList *cursor = NULL;
-			CTS_ERR("contacts_record_create is failed(%d)", ret);
+			CTS_ERR("contacts_record_create is Fail(%d)", ret);
 			for (cursor = nickname_list->records;cursor;cursor=cursor->next)
 				contacts_record_destroy((contacts_record_h)(cursor->data), true);
 			g_list_free(nickname_list->records);
@@ -2602,7 +2602,7 @@ static inline int __ctsvc_vcard_get_photo(contacts_record_h contact, ctsvc_list_
 			CTSVC_VCARD_IMAGE_LOCATION, tv.tv_sec, tv.tv_usec, __ctsvc_get_img_suffix(type));
 
 	fd = open(dest, O_WRONLY|O_CREAT|O_TRUNC, 0660);
-	RETVM_IF(fd < 0, CONTACTS_ERROR_SYSTEM, "System : open Failed(%d)", errno);
+	RETVM_IF(fd < 0, CONTACTS_ERROR_SYSTEM, "System : open Fail(%d)", errno);
 
 	while (0 < size) {
 		ret = write(fd, buf, size);
@@ -2610,7 +2610,7 @@ static inline int __ctsvc_vcard_get_photo(contacts_record_h contact, ctsvc_list_
 			if (EINTR == errno)
 				continue;
 			else {
-				CTS_ERR("write() Failed(%d)", errno);
+				CTS_ERR("write() Fail(%d)", errno);
 				close(fd);
 				if (ENOSPC == errno)
 					return CONTACTS_ERROR_FILE_NO_SPACE;		// No space
@@ -2625,7 +2625,7 @@ static inline int __ctsvc_vcard_get_photo(contacts_record_h contact, ctsvc_list_
 	g_free(buf);
 
 	ret = contacts_record_create(_contacts_image._uri, &image);
-	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create is failed(%d)", ret);
+	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create is Fail(%d)", ret);
 
 	contacts_record_set_str(image, _contacts_image.path, dest);
 	((ctsvc_image_s *)image)->is_vcard = true;
@@ -2697,7 +2697,7 @@ static inline int __ctsvc_vcard_get_event(ctsvc_list_s *event_list, int type, ch
 
 	ret = contacts_record_create(_contacts_event._uri, &event);
 	if (ret < CONTACTS_ERROR_NONE) {
-		CTS_ERR("contacts_record_create is failed(%d)", ret);
+		CTS_ERR("contacts_record_create is Fail(%d)", ret);
 		return ret;
 	}
 
@@ -2774,7 +2774,7 @@ static inline int __ctsvc_vcard_get_company_value(ctsvc_list_s *company_list, in
 	company = __ctsvc_vcard_get_company_empty_record(company_list, property_id);
 	if (NULL == company) {
 		int ret = contacts_record_create(_contacts_company._uri, &company);
-		RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create is failed(%d)", ret);
+		RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create is Fail(%d)", ret);
 		contacts_list_add((contacts_list_h)company_list, company);
 	}
 
@@ -2795,7 +2795,7 @@ static inline int __ctsvc_vcard_get_company(ctsvc_list_s *company_list, char *pr
 	company = __ctsvc_vcard_get_company_empty_record(company_list, _contacts_company.name);
 	if (NULL == company) {
 		int ret = contacts_record_create(_contacts_company._uri, &company);
-		RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create is failed(%d)", ret);
+		RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create is Fail(%d)", ret);
 		contacts_list_add((contacts_list_h)company_list, company);
 	}
 
@@ -2828,7 +2828,7 @@ static inline int __ctsvc_vcard_get_company_logo(ctsvc_list_s *company_list, cha
 	company = __ctsvc_vcard_get_company_empty_record(company_list, _contacts_company.logo);
 	if (NULL == company) {
 		ret = contacts_record_create(_contacts_company._uri, &company);
-		RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create is failed(%d)", ret);
+		RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create is Fail(%d)", ret);
 		contacts_list_add((contacts_list_h)company_list, company);
 	}
 
@@ -2849,7 +2849,7 @@ static inline int __ctsvc_vcard_get_company_logo(ctsvc_list_s *company_list, cha
 			getpid(), tv.tv_sec, tv.tv_usec, __ctsvc_get_img_suffix(type));
 
 	fd = open(dest, O_WRONLY|O_CREAT|O_TRUNC, 0660);
-	RETVM_IF(fd < 0, CONTACTS_ERROR_SYSTEM, "System : open Failed(%d)", errno);
+	RETVM_IF(fd < 0, CONTACTS_ERROR_SYSTEM, "System : open Fail(%d)", errno);
 
 	while (0 < size) {
 		ret = write(fd, buf, size);
@@ -2857,7 +2857,7 @@ static inline int __ctsvc_vcard_get_company_logo(ctsvc_list_s *company_list, cha
 			if (EINTR == errno)
 				continue;
 			else {
-				CTS_ERR("write() Failed(%d)", errno);
+				CTS_ERR("write() Fail(%d)", errno);
 				close(fd);
 				if (ENOSPC == errno)
 					return CONTACTS_ERROR_FILE_NO_SPACE;		// No space
@@ -2884,7 +2884,7 @@ static inline int __ctsvc_vcard_get_note(ctsvc_list_s *note_list, char *val)
 	contacts_record_h note;
 
 	ret = contacts_record_create(_contacts_note._uri, &note);
-	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create is failed(%d)", ret);
+	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create is Fail(%d)", ret);
 	contacts_list_add((contacts_list_h)note_list, note);
 
 	temp = __ctsvc_get_content_value(val);
@@ -3004,7 +3004,7 @@ static inline int __ctsvc_vcard_get_url(ctsvc_list_s* url_list, char *prefix, ch
 	RETVM_IF(NULL == temp, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : vcard");
 
 	ret = contacts_record_create(_contacts_url._uri, &url);
-	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create is failed(%d)", ret);
+	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create is Fail(%d)", ret);
 
 	contacts_record_set_str(url, _contacts_url.url, __ctsvc_vcard_remove_escape_char(temp));
 	__ctsvc_vcard_get_url_type(url, prefix);
@@ -3197,7 +3197,7 @@ static inline int __ctsvc_vcard_get_number(ctsvc_list_s *numbers, char *prefix, 
 	RETVM_IF(NULL == temp, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : vcard");
 
 	ret = contacts_record_create(_contacts_number._uri, &number);
-	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create is failed(%d)", ret);
+	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create is Fail(%d)", ret);
 
 	temp = __ctsvc_vcard_remove_escape_char(temp);
 	contacts_record_set_str(number, _contacts_number.number, __ctsvc_vcard_get_clean_number_for_import(temp));
@@ -3256,7 +3256,7 @@ static inline int __ctsvc_vcard_get_email(ctsvc_list_s* emails, char *prefix, ch
 	RETVM_IF(NULL == temp, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : vcard");
 
 	ret = contacts_record_create(_contacts_email._uri, &email);
-	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create is failed(%d)", ret);
+	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create is Fail(%d)", ret);
 
 	contacts_record_set_str(email, _contacts_email.email, __ctsvc_vcard_remove_escape_char(temp));
 	is_default = __ctsvc_vcard_get_email_type(email, prefix);
@@ -3397,7 +3397,7 @@ static inline int __ctsvc_vcard_get_messenger(ctsvc_list_s* messenger_list, int 
 	RETVM_IF(NULL == temp, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : vcard");
 
 	ret = contacts_record_create(_contacts_messenger._uri, &messenger);
-	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create is failed(%d)", ret);
+	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create is Fail(%d)", ret);
 
 	contacts_record_set_str(messenger, _contacts_messenger.im_id, __ctsvc_vcard_remove_escape_char(temp));
 
@@ -3499,7 +3499,7 @@ static inline int __ctsvc_vcard_get_relationship(ctsvc_list_s* relationship_list
 	RETVM_IF(NULL == temp, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : vcard");
 
 	ret = contacts_record_create(_contacts_relationship._uri, &relationship);
-	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create is failed(%d)", ret);
+	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create is Fail(%d)", ret);
 
 	contacts_record_set_str(relationship, _contacts_relationship.name, __ctsvc_vcard_remove_escape_char(temp));
 	__ctsvc_vcard_get_relationship_type(relationship, prefix);
@@ -3668,7 +3668,7 @@ static inline int __ctsvc_vcard_get_contact(int ver, char *vcard, contacts_recor
 			free(prefix);
 			return CONTACTS_ERROR_NONE;
 		default:
-			CTS_ERR("Invalid parameter : __ctsvc_vcard_check_content_type() Failed(%d)", type);
+			CTS_ERR("Invalid parameter : __ctsvc_vcard_check_content_type() Fail(%d)", type);
 			free(val);
 			free(prefix);
 			return CONTACTS_ERROR_INVALID_PARAMETER;
@@ -3718,7 +3718,7 @@ static inline void __ctsvc_vcard_make_contact_display_name(ctsvc_contact_s *cont
 	free(contact->reverse_display_name);
 	contact->reverse_display_name = NULL;
 
-	if (contact->name->count > 0 && contact->name->records != NULL && contact->name->records->data != NULL) {
+	if (0 < contact->name->count && contact->name->records != NULL && contact->name->records->data != NULL) {
 		name = (ctsvc_name_s *)contact->name->records->data;
 	}
 
@@ -4019,16 +4019,16 @@ static int __ctsvc_vcard_parse(const void *vcard_stream, contacts_record_h *reco
 	}
 
 	contacts_record_create(_contacts_contact._uri, (contacts_record_h *)&contact);
-	RETVM_IF(NULL == contact, CONTACTS_ERROR_OUT_OF_MEMORY, "Out of memory : contacts_record_create() Failed");
+	RETVM_IF(NULL == contact, CONTACTS_ERROR_OUT_OF_MEMORY, "Out of memory : contacts_record_create() Fail");
 
 	ret = __ctsvc_vcard_get_contact(ver, vcard, (contacts_record_h *)&contact);
 	if (CONTACTS_ERROR_NONE!= ret) {
 		contacts_record_destroy((contacts_record_h)contact, true);
 		if (CONTACTS_ERROR_INVALID_PARAMETER == ret) {
-			CTS_ERR("cts_vcard_get_contact() Failed(%d)", ret);
+			CTS_ERR("cts_vcard_get_contact() Fail(%d)", ret);
 		}
 		else
-			CTS_ERR("cts_vcard_get_contact() Failed(%d)", ret);
+			CTS_ERR("cts_vcard_get_contact() Fail(%d)", ret);
 
 		return ret;
 	}
@@ -4226,13 +4226,13 @@ API int contacts_vcard_parse_to_contact_foreach(const char *vcard_file_name,
 	RETV_IF(NULL == cb, CONTACTS_ERROR_INVALID_PARAMETER);
 
 	file = fopen(vcard_file_name, "r");
-	RETVM_IF(NULL == file, CONTACTS_ERROR_SYSTEM, "System : fopen() Failed(%d)", errno);
+	RETVM_IF(NULL == file, CONTACTS_ERROR_SYSTEM, "System : fopen() Fail(%d)", errno);
 
 	len = 0;
 	buf_size = CTSVC_VCARD_MAX_SIZE;
 	stream = malloc(CTSVC_VCARD_MAX_SIZE);
 	if (NULL == stream) {
-		CTS_ERR("Out of memory : malloc() Failed");
+		CTS_ERR("Out of memory : malloc() Fail");
 		fclose(file);
 		return CONTACTS_ERROR_OUT_OF_MEMORY;
 	}
@@ -4323,7 +4323,7 @@ API int contacts_vcard_get_entity_count(const char *vcard_file_name, int *count)
 	RETV_IF(NULL == vcard_file_name, CONTACTS_ERROR_INVALID_PARAMETER);
 
 	file = fopen(vcard_file_name, "r");
-	RETVM_IF(NULL == file, CONTACTS_ERROR_SYSTEM, "System : fopen() Failed(%d)", errno);
+	RETVM_IF(NULL == file, CONTACTS_ERROR_SYSTEM, "System : fopen() Fail(%d)", errno);
 
 	cnt = 0;
 	while (fgets(line, sizeof(line), file)) {

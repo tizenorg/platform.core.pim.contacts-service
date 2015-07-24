@@ -69,7 +69,7 @@ static int __ctsvc_db_name_insert_record(contacts_record_h record, int *id)
 
 	ret = ctsvc_begin_trans();
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB error : ctsvc_begin_trans() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_begin_trans() Fail(%d)", ret);
 		return ret;
 	}
 
@@ -105,7 +105,7 @@ static int __ctsvc_db_name_insert_record(contacts_record_h record, int *id)
 
 	ret = ctsvc_db_name_insert(record, name->contact_id, false, id);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB error : ctsvc_begin_trans() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_begin_trans() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
@@ -114,7 +114,7 @@ static int __ctsvc_db_name_insert_record(contacts_record_h record, int *id)
 
 	ret = ctsvc_db_contact_update_changed_time(name->contact_id);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB error : ctsvc_db_contact_update_changed_time() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_db_contact_update_changed_time() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
@@ -122,7 +122,7 @@ static int __ctsvc_db_name_insert_record(contacts_record_h record, int *id)
 
 	ret = ctsvc_end_trans(true);
 	if (ret < CONTACTS_ERROR_NONE) {
-		CTS_ERR("DB error : ctsvc_end_trans() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_end_trans() Fail(%d)", ret);
 		return ret;
 	}
 	else
@@ -147,11 +147,11 @@ static int __ctsvc_db_name_get_record(int id, contacts_record_h* out_record)
 				id, CTSVC_DATA_NAME);
 
 	ret = ctsvc_query_prepare(query, &stmt);
-	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
+	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
 
 	ret = ctsvc_stmt_step(stmt);
 	if (1 /*CTS_TRUE*/ != ret) {
-		CTS_ERR("ctsvc_stmt_step() Failed(%d)", ret);
+		CTS_ERR("ctsvc_stmt_step() Fail(%d)", ret);
 		ctsvc_stmt_finalize(stmt);
 		if (CONTACTS_ERROR_NONE == ret)
 			return CONTACTS_ERROR_NO_DATA;
@@ -178,7 +178,7 @@ static int __ctsvc_db_name_update_record(contacts_record_h record)
 
 	ret = ctsvc_begin_trans();
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB error : ctsvc_begin_trans() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_begin_trans() Fail(%d)", ret);
 		return ret;
 	}
 
@@ -199,7 +199,7 @@ static int __ctsvc_db_name_update_record(contacts_record_h record)
 
 	ret = ctsvc_db_name_update(record, false);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB error : ctsvc_begin_trans() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_begin_trans() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
@@ -208,7 +208,7 @@ static int __ctsvc_db_name_update_record(contacts_record_h record)
 
 	ret = ctsvc_db_contact_update_changed_time(name->contact_id);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB error : ctsvc_db_contact_update_changed_time() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_db_contact_update_changed_time() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
@@ -216,7 +216,7 @@ static int __ctsvc_db_name_update_record(contacts_record_h record)
 
 	ret = ctsvc_end_trans(true);
 	if (ret < CONTACTS_ERROR_NONE) {
-		CTS_ERR("DB error : ctsvc_end_trans() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_end_trans() Fail(%d)", ret);
 		return ret;
 	}
 	else
@@ -234,7 +234,7 @@ static int __ctsvc_db_name_delete_record(int id)
 
 	ret = ctsvc_begin_trans();
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB error : ctsvc_begin_trans() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_begin_trans() Fail(%d)", ret);
 		return ret;
 	}
 
@@ -243,7 +243,7 @@ static int __ctsvc_db_name_delete_record(int id)
 			"WHERE contact_id = (SELECT contact_id FROM "CTS_TABLE_DATA" WHERE id = %d)", id);
 	ret = ctsvc_query_prepare(query, &stmt);
 	if (NULL == stmt) {
-		CTS_ERR("DB error : ctsvc_query_prepare Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_query_prepare Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
@@ -270,7 +270,7 @@ static int __ctsvc_db_name_delete_record(int id)
 
 	ret = ctsvc_db_name_delete(id, false);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB error : ctsvc_begin_trans() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_begin_trans() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
@@ -279,7 +279,7 @@ static int __ctsvc_db_name_delete_record(int id)
 
 	ret = ctsvc_db_contact_update_changed_time(contact_id);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB error : ctsvc_db_contact_update_changed_time() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_db_contact_update_changed_time() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
@@ -287,7 +287,7 @@ static int __ctsvc_db_name_delete_record(int id)
 
 	ret = ctsvc_end_trans(true);
 	if (ret < CONTACTS_ERROR_NONE) {
-		CTS_ERR("DB error : ctsvc_end_trans() Failed(%d)", ret);
+		CTS_ERR("DB error : ctsvc_end_trans() Fail(%d)", ret);
 		return ret;
 	}
 	else
@@ -318,12 +318,12 @@ static int __ctsvc_db_name_get_all_records(int offset, int limit, contacts_list_
 	}
 
 	ret = ctsvc_query_prepare(query, &stmt);
-	RETVM_IF(NULL == stmt, ret, "DB error : 	ctsvc_query_prepare() Failed(%d)", ret);
+	RETVM_IF(NULL == stmt, ret, "DB error : 	ctsvc_query_prepare() Fail(%d)", ret);
 
 	contacts_list_create(&list);
 	while ((ret = ctsvc_stmt_step(stmt))) {
 		if (1 != ret) {
-			CTS_ERR("DB error : ctsvc_stmt_step Failed(%d)", ret);
+			CTS_ERR("DB error : ctsvc_stmt_step Fail(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
 			contacts_list_destroy(list, true);
 			return ret;
@@ -360,7 +360,7 @@ static int __ctsvc_db_name_get_records_with_query(contacts_query_h query, int of
 	while ((ret = ctsvc_stmt_step(stmt))) {
 		contacts_record_h record;
 		if (1 != ret) {
-			CTS_ERR("DB error : ctsvc_stmt_step Failed(%d)", ret);
+			CTS_ERR("DB error : ctsvc_stmt_step Fail(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
 			contacts_list_destroy(list, true);
 			return ret;
@@ -376,7 +376,7 @@ static int __ctsvc_db_name_get_records_with_query(contacts_query_h query, int of
 					s_query->projection_count, s_query->property_count);
 
 			if (CONTACTS_ERROR_NONE !=  ret)
-				ASSERT_NOT_REACHED("To set projection is failed.\n");
+				ASSERT_NOT_REACHED("To set projection is Fail.\n");
 		}
 
 		for (i=0;i<field_count;i++) {

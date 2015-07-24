@@ -141,7 +141,7 @@ static inline int __ctsvc_inotify_attach_handler(int fd)
 	RETVM_IF(fd < 0, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter: fd is invalid");
 
 	channel = g_io_channel_unix_new(fd);
-	RETVM_IF(NULL == channel, CONTACTS_ERROR_SYSTEM, "System: g_io_channel_unix_new() Failed");
+	RETVM_IF(NULL == channel, CONTACTS_ERROR_SYSTEM, "System: g_io_channel_unix_new() Fail");
 
 	g_io_channel_set_flags(channel, G_IO_FLAG_NONBLOCK, NULL);
 
@@ -161,16 +161,16 @@ int ctsvc_inotify_init(void)
 	}
 	__inoti_fd = inotify_init();
 	RETVM_IF(-1 == __inoti_fd, CONTACTS_ERROR_SYSTEM,
-			"System: inotify_init() Failed(%d)", errno);
+			"System: inotify_init() Fail(%d)", errno);
 
 	ret = fcntl(__inoti_fd, F_SETFD, FD_CLOEXEC);
-	WARN_IF(ret < 0, "fcntl failed(%d)", ret);
+	WARN_IF(ret < 0, "fcntl Fail(%d)", ret);
 	ret = fcntl(__inoti_fd, F_SETFL, O_NONBLOCK);
-	WARN_IF(ret < 0, "fcntl failed(%d)", ret);
+	WARN_IF(ret < 0, "fcntl Fail(%d)", ret);
 
 	__inoti_handler = __ctsvc_inotify_attach_handler(__inoti_fd);
 	if (__inoti_handler <= 0) {
-		CTS_ERR("__ctsvc_inotify_attach_handler() Failed");
+		CTS_ERR("__ctsvc_inotify_attach_handler() Fail");
 		close(__inoti_fd);
 		__inoti_fd = -1;
 		__inoti_handler = 0;
@@ -192,7 +192,7 @@ static inline int __ctsvc_inotify_watch(int fd, const char *notipath)
 
 	ret = inotify_add_watch(fd, notipath, IN_CLOSE_WRITE);
 	RETVM_IF(-1 == ret, CONTACTS_ERROR_SYSTEM,
-			"System: inotify_add_watch() Failed(%d)", errno);
+			"System: inotify_add_watch() Fail(%d)", errno);
 
 	return CONTACTS_ERROR_NONE;
 }
@@ -274,11 +274,11 @@ int ctsvc_inotify_subscribe(const char *view_uri,
 
 	path = __ctsvc_noti_get_file_path(view_uri);
 	RETVM_IF(NULL == path, CONTACTS_ERROR_INVALID_PARAMETER,
-			"__ctsvc_noti_get_file_path(%s) Failed", view_uri);
+			"__ctsvc_noti_get_file_path(%s) Fail", view_uri);
 
 	wd = __ctsvc_inotify_get_wd(__inoti_fd, path);
 	if (-1 == wd) {
-		CTS_ERR("__ctsvc_inotify_get_wd() Failed(errno : %d)", errno);
+		CTS_ERR("__ctsvc_inotify_get_wd() Fail(errno : %d)", errno);
 		if (errno == EACCES)
 			return CONTACTS_ERROR_PERMISSION_DENIED;
 		return CONTACTS_ERROR_SYSTEM;
@@ -302,10 +302,10 @@ int ctsvc_inotify_subscribe(const char *view_uri,
 	}
 
 	ret = __ctsvc_inotify_watch(__inoti_fd, path);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "__ctsvc_inotify_watch() Failed");
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "__ctsvc_inotify_watch() Fail");
 
 	noti = calloc(1, sizeof(noti_info));
-	RETVM_IF(NULL == noti, CONTACTS_ERROR_OUT_OF_MEMORY, "calloc() Failed");
+	RETVM_IF(NULL == noti, CONTACTS_ERROR_OUT_OF_MEMORY, "calloc() Fail");
 
 	noti->wd = wd;
 	noti->view_uri = strdup(view_uri);
@@ -364,18 +364,18 @@ int ctsvc_inotify_unsubscribe(const char *view_uri, contacts_db_changed_cb cb, v
 
 	path = __ctsvc_noti_get_file_path(view_uri);
 	RETVM_IF(NULL == path, CONTACTS_ERROR_INVALID_PARAMETER,
-			"__ctsvc_noti_get_file_path(%s) Failed", view_uri);
+			"__ctsvc_noti_get_file_path(%s) Fail", view_uri);
 
 	wd = __ctsvc_inotify_get_wd(__inoti_fd, path);
 	if (-1 == wd) {
-		CTS_ERR("__ctsvc_inotify_get_wd() Failed(errno : %d)", errno);
+		CTS_ERR("__ctsvc_inotify_get_wd() Fail(errno : %d)", errno);
 		if (errno == EACCES)
 			return CONTACTS_ERROR_PERMISSION_DENIED;
 		return CONTACTS_ERROR_SYSTEM;
 	}
 
 	ret = __ctsvc_del_noti(&__noti_list, wd, view_uri, cb, user_data);
-	WARN_IF(ret < CONTACTS_ERROR_NONE, "__ctsvc_del_noti() Failed(%d)", ret);
+	WARN_IF(ret < CONTACTS_ERROR_NONE, "__ctsvc_del_noti() Fail(%d)", ret);
 
 	if (0 == ret)
 		return inotify_rm_watch(__inoti_fd, wd);

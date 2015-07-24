@@ -61,7 +61,7 @@ static int __ctsvc_person_create(contacts_record_h* out_record)
 	ctsvc_person_s *person;
 	person = (ctsvc_person_s*)calloc(1, sizeof(ctsvc_person_s));
 	RETVM_IF(NULL == person, CONTACTS_ERROR_OUT_OF_MEMORY,
-			"Out of memory : calloc is failed");
+			"Out of memory : calloc is Fail");
 
 	*out_record = (contacts_record_h)person;
 	return CONTACTS_ERROR_NONE;
@@ -94,7 +94,7 @@ static int __ctsvc_person_clone(contacts_record_h record, contacts_record_h *out
     src_data = (ctsvc_person_s*)record;
     out_data = calloc(1, sizeof(ctsvc_person_s));
     RETVM_IF(NULL == out_data, CONTACTS_ERROR_OUT_OF_MEMORY,
-			 "Out of memeory : calloc(ctsvc_person_s) Failed(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
+			 "Out of memeory : calloc(ctsvc_person_s) Fail(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
 
 	out_data->is_favorite = src_data->is_favorite;
 	out_data->has_phonenumber = src_data->has_phonenumber;

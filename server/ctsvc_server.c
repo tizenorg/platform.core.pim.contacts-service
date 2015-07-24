@@ -156,7 +156,7 @@ void ctsvc_create_file_set_permission(const char* file, mode_t mode)
 		ret = fchown(fd, -1, CTSVC_SECURITY_FILE_GROUP);
 		if (-1 == ret)
 		{
-			printf("Failed to fchown\n");
+			printf("Fail to fchown\n");
 			return;
 		}
 		close(fd);

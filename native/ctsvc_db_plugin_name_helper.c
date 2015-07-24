@@ -101,13 +101,13 @@ static int __ctsvc_normalize_name(ctsvc_name_s *src, char *dest[])
 
 	if (src->first) {
 		ret = ctsvc_normalize_str(src->first, &dest[CTSVC_NN_FIRST]);
-		RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "ctsvc_normalize_str() Failed(%d)", ret);
+		RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "ctsvc_normalize_str() Fail(%d)", ret);
 		language_type = ret;
 	}
 
 	if (src->last) {
 		ret = ctsvc_normalize_str(src->last, &dest[CTSVC_NN_LAST]);
-		RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "ctsvc_normalize_str() Failed(%d)", ret);
+		RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "ctsvc_normalize_str() Fail(%d)", ret);
 		if (language_type < ret)
 			language_type = ret;
 	}
@@ -155,10 +155,10 @@ int ctsvc_db_name_insert(contacts_record_h record, int contact_id, bool is_my_pr
 				contact_id, is_my_profile, CTSVC_DATA_NAME);
 
 		ret = ctsvc_query_prepare(query, &stmt);
-		RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Failed(%d)", ret);
+		RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
 
 		ret = __ctsvc_normalize_name(name, normal_name);
-		WARN_IF(ret < CONTACTS_ERROR_NONE, "__ctsvc_normalize_name() Failed(%d)", ret);
+		WARN_IF(ret < CONTACTS_ERROR_NONE, "__ctsvc_normalize_name() Fail(%d)", ret);
 
 		switch (ret) {
 		case CTSVC_LANG_KOREAN:
@@ -210,7 +210,7 @@ int ctsvc_db_name_insert(contacts_record_h record, int contact_id, bool is_my_pr
 
 		ret = ctsvc_stmt_step(stmt);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("DB error : ctsvc_stmt_step() Failed(%d)", ret);
+			CTS_ERR("DB error : ctsvc_stmt_step() Fail(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
 			return ret;
 		}
@@ -237,7 +237,7 @@ int ctsvc_db_name_get_value_from_stmt(cts_stmt stmt, contacts_record_h *record, 
 	ctsvc_name_s *name;
 
 	ret = contacts_record_create(_contacts_name._uri, (contacts_record_h *)&name);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "contacts_record_create is failed(%d)", ret);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "contacts_record_create Fail(%d)", ret);
 
 	name->id = ctsvc_stmt_get_int(stmt, start_count++);
 	name->contact_id = ctsvc_stmt_get_int(stmt, start_count++);
@@ -296,7 +296,7 @@ int ctsvc_db_name_update(contacts_record_h record, bool is_my_profile)
 
 	ret = __ctsvc_normalize_name(name, normal_name);
 	if (ret < CONTACTS_ERROR_NONE) {
-		CTS_ERR("cts_normalize_name() Failed(%d)", ret);
+		CTS_ERR("cts_normalize_name() Fail(%d)", ret);
 		return ret;
 	}
 
@@ -378,7 +378,7 @@ int ctsvc_db_name_delete(int id, bool is_my_profile)
 	snprintf(query, sizeof(query), "DELETE FROM "CTS_TABLE_DATA" WHERE id = %d", id);
 
 	ret = ctsvc_query_exec(query);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_query_exec() Failed(%d)", ret);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_query_exec() Fail(%d)", ret);
 
 	if (!is_my_profile)
 		ctsvc_set_name_noti();

@@ -33,7 +33,7 @@ API int contacts_db_add_changed_cb(const char* view_uri, contacts_db_changed_cb 
 
 	ret = ctsvc_inotify_subscribe(view_uri, cb, user_data);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret,
-			"ctsvc_inotify_subscribe(%s) Failed(%d)", view_uri, ret);
+			"ctsvc_inotify_subscribe(%s) Fail(%d)", view_uri, ret);
 
 	return CONTACTS_ERROR_NONE;
 }
@@ -50,7 +50,7 @@ API int contacts_db_remove_changed_cb(const char* view_uri, contacts_db_changed_
 
 	ret = ctsvc_inotify_unsubscribe(view_uri, cb, user_data);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret,
-			"ctsvc_inotify_unsubscribe(%s) Failed(%d)", view_uri, ret);
+			"ctsvc_inotify_unsubscribe(%s) Fail(%d)", view_uri, ret);
 
 	return CONTACTS_ERROR_NONE;
 }

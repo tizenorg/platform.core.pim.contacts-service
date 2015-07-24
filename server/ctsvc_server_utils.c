@@ -54,7 +54,7 @@ bool ctsvc_server_have_telephony_feature(void)
 inline int ctsvc_server_set_default_sort(int sort)
 {
 	int ret = vconf_set_int(ctsvc_get_default_sort_vconfkey(), sort);
-	RETVM_IF(ret<0, CONTACTS_ERROR_SYSTEM, "vconf_set_int() Failed(%d)", ret);
+	RETVM_IF(ret<0, CONTACTS_ERROR_SYSTEM, "vconf_set_int() Fail(%d)", ret);
 	ctsvc_set_sort_memory(sort);
 	return CONTACTS_ERROR_NONE;
 }
@@ -117,7 +117,7 @@ void ctsvc_server_final_configuration(void)
 	int ret = -1;
 
 	ret = vconf_ignore_key_changed(VCONFKEY_LANGSET, __ctsvc_server_change_language_cb);
-	RETM_IF(ret<0,"vconf_ignore_key_changed(%s) Failed(%d)", VCONFKEY_LANGSET, ret);
+	RETM_IF(ret<0,"vconf_ignore_key_changed(%s) Fail(%d)", VCONFKEY_LANGSET, ret);
 
 #ifdef ENABLE_SIM_FEATURE
 	ctsvc_server_sim_final();
@@ -137,7 +137,7 @@ int ctsvc_server_init_configuration(void)
 
 	ret = vconf_get_int(ctsvc_get_default_sort_vconfkey(), &sort_type);
 	if (ret < 0 || sort_type == CTSVC_SORT_OTHERS) {
-		CTS_ERR("vconf_get_int(%s) Failed(%d)", ctsvc_get_default_sort_vconfkey(),ret);
+		CTS_ERR("vconf_get_int(%s) Fail(%d)", ctsvc_get_default_sort_vconfkey(),ret);
 		sort_type = ctsvc_get_sort_type_from_language(system_language);
 		if (sort_type == CTSVC_SORT_OTHERS)
 			sort_type = CTSVC_SORT_WESTERN;
@@ -146,12 +146,12 @@ int ctsvc_server_init_configuration(void)
 
 	ret = vconf_notify_key_changed(VCONFKEY_LANGSET,
 			__ctsvc_server_change_language_cb, NULL);
-	RETVM_IF(ret<0, CONTACTS_ERROR_SYSTEM, "vconf_notify_key_changed(%s) Failed(%d)",
+	RETVM_IF(ret<0, CONTACTS_ERROR_SYSTEM, "vconf_notify_key_changed(%s) Fail(%d)",
 			VCONFKEY_LANGSET, ret);
 
 #ifdef ENABLE_SIM_FEATURE
 	ret = ctsvc_server_sim_init();
-	RETVM_IF(ret !=CONTACTS_ERROR_NONE, ret, "ctsvc_server_sim_init Failed(%d)", ret);
+	RETVM_IF(ret !=CONTACTS_ERROR_NONE, ret, "ctsvc_server_sim_init Fail(%d)", ret);
 #endif // ENABLE_SIM_FEATURE
 
 	return CONTACTS_ERROR_NONE;

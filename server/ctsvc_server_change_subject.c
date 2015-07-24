@@ -104,7 +104,7 @@ void ctsvc_change_subject_add_changed_phone_log_id(contacts_changed_e type, int 
 	info_len = strlen(__phone_log_chanaged_info);
 	CTS_DBG("%s(len : %d), %s (crrent_len : %d), max_len : %d",
 		changed_info, len, __phone_log_chanaged_info, info_len, __phone_log_buf_size);
-	if (info_len + len > __phone_log_buf_size) {
+	if (__phone_log_buf_size < info_len + len) {
 		__phone_log_chanaged_info = realloc(__phone_log_chanaged_info, __phone_log_buf_size * 2);
 		__phone_log_buf_size *= 2;
 	}
@@ -128,7 +128,7 @@ void ctsvc_change_subject_add_changed_person_id(contacts_changed_e type, int id)
 
 	len = snprintf(changed_info, sizeof(changed_info), "%d:%d,", type, id);
 	info_len = strlen(__person_changed_info);
-	if (info_len + len > __person_buf_size) {
+	if (__person_buf_size < info_len + len) {
 		__person_changed_info = realloc(__person_changed_info, __person_buf_size * 2);
 		__person_buf_size *= 2;
 	}

@@ -73,7 +73,7 @@ API int contacts_db_insert_record(contacts_record_h record, int *id)
 	// ipc call
 	if (ctsvc_ipc_call(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_INSERT_RECORD, indata, &outdata) != 0)
 	{
-		CTS_ERR("ctsvc_ipc_call failed");
+		CTS_ERR("ctsvc_ipc_call Fail");
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
 	}
@@ -138,7 +138,7 @@ API int contacts_db_get_record(const char* view_uri, int id, contacts_record_h* 
 	// ipc call
 	if (ctsvc_ipc_call(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_GET_RECORD, indata, &outdata) != 0)
 	{
-		CTS_ERR("ctsvc_ipc_call failed");
+		CTS_ERR("ctsvc_ipc_call Fail");
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
 	}
@@ -189,7 +189,7 @@ API int contacts_db_update_record(contacts_record_h record)
 	// ipc call
 	if (ctsvc_ipc_call(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_UPDATE_RECORD, indata, &outdata) != 0)
 	{
-		CTS_ERR("ctsvc_ipc_call failed");
+		CTS_ERR("ctsvc_ipc_call Fail");
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
 	}
@@ -249,7 +249,7 @@ API int contacts_db_delete_record(const char* view_uri, int id)
 	// ipc call
 	if (ctsvc_ipc_call(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_DELETE_RECORD, indata, &outdata) != 0)
 	{
-		CTS_ERR("ctsvc_ipc_call failed");
+		CTS_ERR("ctsvc_ipc_call Fail");
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
 	}
@@ -305,7 +305,7 @@ API int contacts_db_replace_record(contacts_record_h record, int id)
 	// ipc call
 	if (ctsvc_ipc_call(CTSVC_IPC_DB_MODULE,
 				CTSVC_IPC_SERVER_DB_REPLACE_RECORD, indata, &outdata) != 0) {
-		CTS_ERR("ctsvc_ipc_call failed");
+		CTS_ERR("ctsvc_ipc_call Fail");
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
 	}
@@ -371,7 +371,7 @@ API int contacts_db_get_all_records(const char* view_uri, int offset, int limit,
 	// ipc call
 	if (ctsvc_ipc_call(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_GET_ALL_RECORDS, indata, &outdata) != 0)
 	{
-		CTS_ERR("ctsvc_ipc_call failed");
+		CTS_ERR("ctsvc_ipc_call Fail");
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
 	}
@@ -436,7 +436,7 @@ API int contacts_db_get_records_with_query(contacts_query_h query, int offset, i
 	// ipc call
 	if (ctsvc_ipc_call(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_GET_RECORDS_WITH_QUERY, indata, &outdata) != 0)
 	{
-		CTS_ERR("ctsvc_ipc_call failed");
+		CTS_ERR("ctsvc_ipc_call Fail");
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
 	}
@@ -489,7 +489,7 @@ API int contacts_db_get_count(const char* view_uri, int *out_count)
 	// ipc call
 	if (ctsvc_ipc_call(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_GET_COUNT, indata, &outdata) != 0)
 	{
-		CTS_ERR("ctsvc_ipc_call failed");
+		CTS_ERR("ctsvc_ipc_call Fail");
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
 	}
@@ -541,7 +541,7 @@ API int contacts_db_get_count_with_query(contacts_query_h query, int *out_count)
 	// ipc call
 	if (ctsvc_ipc_call(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_GET_COUNT_WITH_QUERY, indata, &outdata) != 0)
 	{
-		CTS_ERR("ctsvc_ipc_call failed");
+		CTS_ERR("ctsvc_ipc_call Fail");
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
 	}
@@ -594,7 +594,7 @@ API int contacts_db_insert_records(contacts_list_h list, int **ids, int *count)
 
 	if (ctsvc_ipc_call(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_INSERT_RECORDS,
 				indata, &outdata) != 0) {
-		CTS_ERR("ctsvc_ipc_call failed");
+		CTS_ERR("ctsvc_ipc_call Fail");
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
 	}
@@ -652,7 +652,7 @@ API int contacts_db_update_records(contacts_list_h list)
 
 	if (ctsvc_ipc_call(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_UPDATE_RECORDS,
 				indata, &outdata) != 0) {
-		CTS_ERR("ctsvc_ipc_call failed");
+		CTS_ERR("ctsvc_ipc_call Fail");
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
 	}
@@ -715,7 +715,7 @@ API int contacts_db_delete_records(const char* view_uri, int ids[], int count)
 
 	if (ctsvc_ipc_call(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_DELETE_RECORDS,
 				indata, &outdata) != 0) {
-		CTS_ERR("ctsvc_ipc_call failed");
+		CTS_ERR("ctsvc_ipc_call Fail");
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
 	}
@@ -782,7 +782,7 @@ API int contacts_db_replace_records(contacts_list_h list, int ids[], int count)
 
 	if (ctsvc_ipc_call(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_REPLACE_RECORDS,
 				indata, &outdata) != 0) {
-		CTS_ERR("ctsvc_ipc_call failed");
+		CTS_ERR("ctsvc_ipc_call Fail");
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
 	}
@@ -848,7 +848,7 @@ API int contacts_db_get_changes_by_version(const char* view_uri, int addressbook
 	// ipc call
 	if (ctsvc_ipc_call(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_CHANGES_BY_VERSION, indata, &outdata) != 0)
 	{
-		CTS_ERR("ctsvc_ipc_call failed");
+		CTS_ERR("ctsvc_ipc_call Fail");
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
 	}
@@ -888,7 +888,7 @@ API int contacts_db_get_current_version(int* contacts_db_version)
 	// ipc call
 	if (ctsvc_ipc_call(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_GET_CURRENT_VERSION, NULL, &outdata) != 0)
 	{
-		CTS_ERR("ctsvc_ipc_call failed");
+		CTS_ERR("ctsvc_ipc_call Fail");
 		return CONTACTS_ERROR_IPC;
 	}
 
@@ -957,7 +957,7 @@ API int contacts_db_search_records(const char* view_uri, const char *keyword,
 	// ipc call
 	if (ctsvc_ipc_call(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_SEARCH_RECORDS, indata, &outdata) != 0)
 	{
-		CTS_ERR("ctsvc_ipc_call failed");
+		CTS_ERR("ctsvc_ipc_call Fail");
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
 	}
@@ -1025,7 +1025,7 @@ API int contacts_db_search_records_with_range(const char* view_uri, const char *
 	}
 
 	if (ctsvc_ipc_call(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_SEARCH_RECORDS_WITH_RANGE, indata, &outdata) != 0) {
-		CTS_ERR("ctsvc_ipc_call failed");
+		CTS_ERR("ctsvc_ipc_call Fail");
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
 	}
@@ -1098,7 +1098,7 @@ API int contacts_db_search_records_with_query(contacts_query_h query, const char
 	// ipc call
 	if (ctsvc_ipc_call(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_SEARCH_RECORDS_WITH_QUERY, indata, &outdata) != 0)
 	{
-		CTS_ERR("ctsvc_ipc_call failed");
+		CTS_ERR("ctsvc_ipc_call Fail");
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
 	}
@@ -1175,7 +1175,7 @@ API int contacts_db_get_status(contacts_db_status_e *status)
 	*status = 0;
 
 	if (ctsvc_ipc_call(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_GET_STATUS, NULL, &outdata) != 0) {
-		CTS_ERR("ctsvc_ipc_call failed");
+		CTS_ERR("ctsvc_ipc_call Fail");
 		return CONTACTS_ERROR_IPC;
 	}
 
