@@ -109,11 +109,10 @@ static int __ctsvc_server_sim_init_info(ctsvc_sim_info_s *info);
 static TapiHandle* __ctsvc_server_sim_get_tapi_handle(ctsvc_sim_info_s *info)
 {
 	if (NULL == info->handle) {
-		int bReady = 0;
-		/* TODO: it should be changed API */
+		bool bReady = false;
 		vconf_get_bool(VCONFKEY_TELEPHONY_READY, &bReady);
 
-		if (0 == bReady) {
+		if (false == bReady) {
 			CTS_ERR("telephony is not ready ");
 			return NULL;
 		}
@@ -961,16 +960,16 @@ static void __ctsvc_server_sim_ready_cb(keynode_t *key, void *data)
 
 static void __ctsvc_server_telephony_ready_cb(keynode_t *key, void *data)
 {
-	int bReady = 0;
-	vconf_get_int(VCONFKEY_TELEPHONY_TAPI_STATE, &bReady);
+	bool bReady = false;
+	vconf_get_bool(VCONFKEY_TELEPHONY_READY, &bReady);
 
-	if (0 == bReady) {
+	if (false == bReady) {
 		CTS_ERR("telephony is not ready ");
 		return;
 	}
 	INFO("telephony is Ready");
 
-	vconf_ignore_key_changed(VCONFKEY_TELEPHONY_TAPI_STATE, __ctsvc_server_telephony_ready_cb);
+	vconf_ignore_key_changed(VCONFKEY_TELEPHONY_READY, __ctsvc_server_telephony_ready_cb);
 	__ctsvc_tapi_cb = false;
 
 	int status = 0;
@@ -988,12 +987,12 @@ static void __ctsvc_server_telephony_ready_cb(keynode_t *key, void *data)
 
 int ctsvc_server_sim_init()
 {
-	int bReady = 0;
-	vconf_get_int(VCONFKEY_TELEPHONY_TAPI_STATE, &bReady);
+	bool bReady = false;
+	vconf_get_bool(VCONFKEY_TELEPHONY_READY, &bReady);
 
-	if (0 == bReady) {
+	if (false == bReady) {
 		CTS_ERR("telephony is not ready ");
-		vconf_notify_key_changed(VCONFKEY_TELEPHONY_TAPI_STATE, __ctsvc_server_telephony_ready_cb, NULL);
+		vconf_notify_key_changed(VCONFKEY_TELEPHONY_READY, __ctsvc_server_telephony_ready_cb, NULL);
 		__ctsvc_tapi_cb = true;
 		return CONTACTS_ERROR_NONE;
 	}
@@ -1018,7 +1017,7 @@ int ctsvc_server_sim_final(void)
 	int ret = 0;
 
 	if (__ctsvc_tapi_cb)
-		vconf_ignore_key_changed(VCONFKEY_TELEPHONY_TAPI_STATE, __ctsvc_server_telephony_ready_cb);
+		vconf_ignore_key_changed(VCONFKEY_TELEPHONY_READY, __ctsvc_server_telephony_ready_cb);
 	if (__ctsvc_sim_cb)
 		vconf_ignore_key_changed(VCONFKEY_TELEPHONY_SIM_STATUS, __ctsvc_server_sim_ready_cb);
 
