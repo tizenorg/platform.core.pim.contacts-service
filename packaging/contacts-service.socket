@@ -2,7 +2,7 @@
 Description=Contacts Service socket
 
 [Socket]
-ListenStream=/run/user/5001/.contacts_svc_ipc
+ListenStream=/run/user/%U/.contacts_svc_ipc
 Service=contacts-service.service
 
 [Install]
