@@ -2251,7 +2251,6 @@ static inline int __ctsvc_db_search_records_with_query_exec(ctsvc_query_s *s_que
 	if (0 <= temp_len) len = temp_len;
 
 	if (condition && *condition) {
-		len += snprintf(query+len, sizeof(query)-len, " AND (%s)", condition);
 		temp_len = SAFE_SNPRINTF(&query, &query_size, len, " AND (");
 		if (0 <= temp_len) len+= temp_len;
 		temp_len = SAFE_SNPRINTF(&query, &query_size, len, condition);
