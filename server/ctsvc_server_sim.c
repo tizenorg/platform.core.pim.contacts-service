@@ -109,10 +109,10 @@ static int __ctsvc_server_sim_init_info(ctsvc_sim_info_s *info);
 static TapiHandle* __ctsvc_server_sim_get_tapi_handle(ctsvc_sim_info_s *info)
 {
 	if (NULL == info->handle) {
-		bool bReady = false;
+		int bReady = 0;
 		vconf_get_bool(VCONFKEY_TELEPHONY_READY, &bReady);
 
-		if (false == bReady) {
+		if (0 == bReady) {
 			CTS_ERR("telephony is not ready ");
 			return NULL;
 		}
@@ -360,7 +360,6 @@ static void __ctsvc_server_sim_destroy_records(gpointer data)
 
 static void __ctsvc_server_sim_destroy_import_contacts(ctsvc_sim_info_s *info)
 {
-	GSList *cursor;
 	RET_IF(NULL == info);
 	RET_IF(NULL == info->import_contacts);
 
@@ -960,10 +959,10 @@ static void __ctsvc_server_sim_ready_cb(keynode_t *key, void *data)
 
 static void __ctsvc_server_telephony_ready_cb(keynode_t *key, void *data)
 {
-	bool bReady = false;
+	int bReady = 0;
 	vconf_get_bool(VCONFKEY_TELEPHONY_READY, &bReady);
 
-	if (false == bReady) {
+	if (0 == bReady) {
 		CTS_ERR("telephony is not ready ");
 		return;
 	}
@@ -987,10 +986,10 @@ static void __ctsvc_server_telephony_ready_cb(keynode_t *key, void *data)
 
 int ctsvc_server_sim_init()
 {
-	bool bReady = false;
+	int bReady = 0;
 	vconf_get_bool(VCONFKEY_TELEPHONY_READY, &bReady);
 
-	if (false == bReady) {
+	if (0 == bReady) {
 		CTS_ERR("telephony is not ready ");
 		vconf_notify_key_changed(VCONFKEY_TELEPHONY_READY, __ctsvc_server_telephony_ready_cb, NULL);
 		__ctsvc_tapi_cb = true;
@@ -1013,7 +1012,6 @@ int ctsvc_server_sim_final(void)
 {
 	CTS_FN_CALL;
 	GSList *info_cursor = NULL;
-	sim_contact_s *record = NULL;
 	int ret = 0;
 
 	if (__ctsvc_tapi_cb)
@@ -1023,7 +1021,6 @@ int ctsvc_server_sim_final(void)
 
 	for (info_cursor=__ctsvc_sim_info;info_cursor;info_cursor=info_cursor->next) {
 		ctsvc_sim_info_s *info = info_cursor->data;
-		GSList *cursor;
 		free(info->cp_name);
 		free(info->sim_unique_id);
 
