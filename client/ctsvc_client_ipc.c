@@ -154,6 +154,11 @@ static int _ctsvc_ipc_connect(contacts_h contact, pims_ipc_h ipc)
 	return ret;
 }
 
+static void _ctsvc_ipc_disconnected_cb(void *user_data)
+{
+	ctsvc_ipc_set_disconnected(true);
+}
+
 int ctsvc_ipc_connect(contacts_h contact, unsigned int handle_id)
 {
 	int ret = CONTACTS_ERROR_NONE;
@@ -180,6 +185,7 @@ int ctsvc_ipc_connect(contacts_h contact, unsigned int handle_id)
 			return ret;
 		}
 		g_hash_table_insert(_ctsvc_ipc_table, strdup(ipc_key), ipc_data);
+		ctsvc_ipc_set_disconnected_cb(ipc_data->ipc, _ctsvc_ipc_disconnected_cb, NULL);
 	}
 	_ctsvc_ipc_connect(contact, ipc_data->ipc);
 	ipc_data->list_handle = g_list_append(ipc_data->list_handle, contact);
@@ -361,6 +367,7 @@ static void _ctsvc_ipc_recovery_foreach_cb(gpointer key, gpointer value, gpointe
 
 	int ret = _ctsvc_ipc_create(&(ipc_data->ipc));
 	RETM_IF(CONTACTS_ERROR_NONE != ret, "_ctsvc_ipc_create() Fail(%d)", ret);
+	ctsvc_ipc_set_disconnected_cb(ipc_data->ipc, _ctsvc_ipc_disconnected_cb, NULL);
 
 	for (c=ipc_data->list_handle;c;c=c->next) {
 		contacts_h contact = c->data;
