@@ -1051,8 +1051,10 @@ static inline int __ctsvc_contact_update_search_data(int contact_id, bool need_r
 		r = ctsvc_query_exec(query);
 		if (CONTACTS_ERROR_NONE != r) {
 			CTS_ERR("ctsvc_query_exec() Fail(%d)", r);
+			ctsvc_end_trans(false);
 			return r;
 		}
+		ctsvc_end_trans(false);
 		return ret;
 	}
 	else if (CONTACTS_ERROR_NONE != ret) {
