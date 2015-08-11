@@ -24,7 +24,7 @@
 #include "contacts_phone_log_internal.h"
 #endif /* ENABLE_LOG_FEATURE */
 
-#include "ctsvc_service.h"
+#include "ctsvc_server_service.h"
 #include "ctsvc_db_init.h"
 #include "ctsvc_db_access_control.h"
 
@@ -32,7 +32,7 @@
 #include "ctsvc_ipc_marshal.h"
 #include "ctsvc_internal.h"
 #include "ctsvc_ipc_server.h"
-#include "ctsvc_utils.h"
+#include "ctsvc_db_utils.h"
 
 void ctsvc_ipc_activity_delete_by_contact_id(pims_ipc_h ipc, pims_ipc_data_h indata, pims_ipc_data_h *outdata, void *userdata)
 {

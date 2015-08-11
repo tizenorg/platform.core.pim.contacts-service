@@ -21,8 +21,8 @@
  *
  */
 
-#ifndef __TIZEN_SOCIAL_CTSVC_SOCKET_H__
-#define __TIZEN_SOCIAL_CTSVC_SOCKET_H__
+#ifndef __CTSVC_SOCKET_H__
+#define __CTSVC_SOCKET_H__
 
 #include "contacts.h"
 
@@ -51,5 +51,5 @@ int ctsvc_request_sim_get_initialization_status(int sim_slot_no, bool* completed
 int ctsvc_socket_init(void);
 void ctsvc_socket_final(void);
 
-#endif /* __TIZEN_SOCIAL_CTSVC_SOCKET_H__ */
+#endif /* __CTSVC_SOCKET_H__ */
 

@@ -1,6 +1,6 @@
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include)
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/server)
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/native)
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/server/db)
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/common)
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/common/ipc)
 LINK_DIRECTORIES(${CMAKE_BINARY_DIR})
@@ -37,6 +37,8 @@ SET(SRCS
 	${CMAKE_SOURCE_DIR}/common/ipc/ctsvc_ipc_extension.c
 	${CMAKE_SOURCE_DIR}/common/ipc/ctsvc_ipc_profile.c
 	${CMAKE_SOURCE_DIR}/common/ipc/ctsvc_ipc_image.c
+	${CMAKE_SOURCE_DIR}/common/ipc/ctsvc_ipc_sdn.c
+	${CMAKE_SOURCE_DIR}/common/ipc/ctsvc_ipc_speeddial.c
 
 	${CMAKE_SOURCE_DIR}/common/ctsvc_filter.c
 	${CMAKE_SOURCE_DIR}/common/ctsvc_db_notification.c
@@ -56,93 +58,72 @@ SET(SRCS
 	${CMAKE_SOURCE_DIR}/common/ctsvc_socket.c
 	${CMAKE_SOURCE_DIR}/common/ctsvc_vcard.c
 	${CMAKE_SOURCE_DIR}/common/ctsvc_view.c
+	${CMAKE_SOURCE_DIR}/common/ctsvc_record_speeddial.c
+	${CMAKE_SOURCE_DIR}/common/ctsvc_record_sdn.c
 
-	${CMAKE_SOURCE_DIR}/native/ctsvc_activity.c
+	db/ctsvc_db_access_control.c
+	db/ctsvc_db_init.c
+	db/ctsvc_db_plugin_activity.c
+	db/ctsvc_db_plugin_activity_photo_helper.c
+	db/ctsvc_db_plugin_activity_photo.c
+	db/ctsvc_db_plugin_address_helper.c
+	db/ctsvc_db_plugin_address.c
+	db/ctsvc_db_plugin_addressbook_helper.c
+	db/ctsvc_db_plugin_addressbook.c
+	db/ctsvc_db_plugin_company_helper.c
+	db/ctsvc_db_plugin_company.c
+	db/ctsvc_db_plugin_contact_helper.c
+	db/ctsvc_db_plugin_contact.c
+	db/ctsvc_db_plugin_my_profile.c
+	db/ctsvc_db_plugin_email_helper.c
+	db/ctsvc_db_plugin_email.c
+	db/ctsvc_db_plugin_event_helper.c
+	db/ctsvc_db_plugin_event.c
+	db/ctsvc_db_plugin_extension_helper.c
+	db/ctsvc_db_plugin_extension.c
+	db/ctsvc_db_plugin_group_helper.c
+	db/ctsvc_db_plugin_group.c
+	db/ctsvc_db_plugin_grouprelation.c
+	db/ctsvc_db_plugin_image_helper.c
+	db/ctsvc_db_plugin_image.c
+	db/ctsvc_db_plugin_messenger_helper.c
+	db/ctsvc_db_plugin_messenger.c
+	db/ctsvc_db_plugin_name_helper.c
+	db/ctsvc_db_plugin_name.c
+	db/ctsvc_db_plugin_nickname_helper.c
+	db/ctsvc_db_plugin_nickname.c
+	db/ctsvc_db_plugin_note_helper.c
+	db/ctsvc_db_plugin_note.c
+	db/ctsvc_db_plugin_number_helper.c
+	db/ctsvc_db_plugin_number.c
+	db/ctsvc_db_plugin_person_helper.c
+	db/ctsvc_db_plugin_person.c
+	db/ctsvc_db_plugin_profile_helper.c
+	db/ctsvc_db_plugin_profile.c
+	db/ctsvc_db_plugin_relationship_helper.c
+	db/ctsvc_db_plugin_relationship.c
+	db/ctsvc_db_plugin_simple_contact.c
+	db/ctsvc_db_plugin_url_helper.c
+	db/ctsvc_db_plugin_url.c
+	db/ctsvc_db_plugin_sdn.c
+	db/ctsvc_db_plugin_speeddial.c
+	db/ctsvc_db_query.c
+	db/ctsvc_db_sqlite.c
+	db/ctsvc_db_utils.c
 
-	${CMAKE_SOURCE_DIR}/native/ctsvc_db_access_control.c
-	${CMAKE_SOURCE_DIR}/native/ctsvc_db_init.c
-	${CMAKE_SOURCE_DIR}/native/ctsvc_db_plugin_activity.c
+	ctsvc_localize_jp.c
+	ctsvc_localize_kor.c
+	ctsvc_localize_ch.c
+	ctsvc_localize.c
+	ctsvc_normalize.c
+	ctsvc_number_utils.c
 
-	${CMAKE_SOURCE_DIR}/native/ctsvc_db_plugin_activity_photo.c
-	${CMAKE_SOURCE_DIR}/native/ctsvc_db_plugin_activity_photo_helper.c
-
-	${CMAKE_SOURCE_DIR}/native/ctsvc_db_plugin_address_helper.c
-	${CMAKE_SOURCE_DIR}/native/ctsvc_db_plugin_address.c
-
-	${CMAKE_SOURCE_DIR}/native/ctsvc_db_plugin_addressbook.c
-	${CMAKE_SOURCE_DIR}/native/ctsvc_db_plugin_addressbook_helper.c
-
-	${CMAKE_SOURCE_DIR}/native/ctsvc_db_plugin_company_helper.c
-	${CMAKE_SOURCE_DIR}/native/ctsvc_db_plugin_company.c
-
-	${CMAKE_SOURCE_DIR}/native/ctsvc_db_plugin_contact_helper.c
-	${CMAKE_SOURCE_DIR}/native/ctsvc_db_plugin_contact.c
-	${CMAKE_SOURCE_DIR}/native/ctsvc_db_plugin_my_profile.c
-
-	${CMAKE_SOURCE_DIR}/native/ctsvc_db_plugin_email_helper.c
-	${CMAKE_SOURCE_DIR}/native/ctsvc_db_plugin_email.c
-
-	${CMAKE_SOURCE_DIR}/native/ctsvc_db_plugin_event_helper.c
-	${CMAKE_SOURCE_DIR}/native/ctsvc_db_plugin_event.c
-
-	${CMAKE_SOURCE_DIR}/native/ctsvc_db_plugin_extension_helper.c
-	${CMAKE_SOURCE_DIR}/native/ctsvc_db_plugin_extension.c
-
-	${CMAKE_SOURCE_DIR}/native/ctsvc_db_plugin_group.c
-	${CMAKE_SOURCE_DIR}/native/ctsvc_db_plugin_group_helper.c
-	${CMAKE_SOURCE_DIR}/native/ctsvc_db_plugin_grouprelation.c
-
-	${CMAKE_SOURCE_DIR}/native/ctsvc_db_plugin_image_helper.c
-	${CMAKE_SOURCE_DIR}/native/ctsvc_db_plugin_image.c
-
-	${CMAKE_SOURCE_DIR}/native/ctsvc_db_plugin_messenger_helper.c
-	${CMAKE_SOURCE_DIR}/native/ctsvc_db_plugin_messenger.c
-
-	${CMAKE_SOURCE_DIR}/native/ctsvc_db_plugin_name_helper.c
-	${CMAKE_SOURCE_DIR}/native/ctsvc_db_plugin_name.c
-
-	${CMAKE_SOURCE_DIR}/native/ctsvc_db_plugin_nickname_helper.c
-	${CMAKE_SOURCE_DIR}/native/ctsvc_db_plugin_nickname.c
-
-	${CMAKE_SOURCE_DIR}/native/ctsvc_db_plugin_note_helper.c
-	${CMAKE_SOURCE_DIR}/native/ctsvc_db_plugin_note.c
-
-	${CMAKE_SOURCE_DIR}/native/ctsvc_db_plugin_number_helper.c
-	${CMAKE_SOURCE_DIR}/native/ctsvc_db_plugin_number.c
-
-	${CMAKE_SOURCE_DIR}/native/ctsvc_db_plugin_person_helper.c
-	${CMAKE_SOURCE_DIR}/native/ctsvc_db_plugin_person.c
-
-
-	${CMAKE_SOURCE_DIR}/native/ctsvc_db_plugin_profile_helper.c
-	${CMAKE_SOURCE_DIR}/native/ctsvc_db_plugin_profile.c
-
-	${CMAKE_SOURCE_DIR}/native/ctsvc_db_plugin_relationship_helper.c
-	${CMAKE_SOURCE_DIR}/native/ctsvc_db_plugin_relationship.c
-
-
-	${CMAKE_SOURCE_DIR}/native/ctsvc_db_plugin_simple_contact.c
-
-	${CMAKE_SOURCE_DIR}/native/ctsvc_db_plugin_url_helper.c
-	${CMAKE_SOURCE_DIR}/native/ctsvc_db_plugin_url.c
-
-	${CMAKE_SOURCE_DIR}/native/ctsvc_db_query.c
-
-	${CMAKE_SOURCE_DIR}/native/ctsvc_group.c
-
-	${CMAKE_SOURCE_DIR}/native/ctsvc_person.c
-	${CMAKE_SOURCE_DIR}/native/ctsvc_service.c
-	${CMAKE_SOURCE_DIR}/native/ctsvc_sqlite.c
-	${CMAKE_SOURCE_DIR}/native/ctsvc_utils.c
-	${CMAKE_SOURCE_DIR}/native/ctsvc_number_utils.c
-	${CMAKE_SOURCE_DIR}/native/ctsvc_notification.c
-	${CMAKE_SOURCE_DIR}/native/ctsvc_setting.c
-
-	${CMAKE_SOURCE_DIR}/native/ctsvc_localize_jp.c
-	${CMAKE_SOURCE_DIR}/native/ctsvc_localize_kor.c
-	${CMAKE_SOURCE_DIR}/native/ctsvc_localize_ch.c
-	${CMAKE_SOURCE_DIR}/native/ctsvc_localize.c
-	${CMAKE_SOURCE_DIR}/native/ctsvc_normalize.c
+	ctsvc_notification.c
+	ctsvc_server_activity.c
+	ctsvc_server_group.c
+	ctsvc_server_person.c
+	ctsvc_server_service.c
+	ctsvc_server_setting.c
 
 	ctsvc_ipc_server.c
 	ctsvc_ipc_server2.c
@@ -154,13 +135,6 @@ SET(SRCS
 	ctsvc_server_update.c
 	ctsvc_server_bg.c
 	ctsvc_server.c
-
-	${CMAKE_SOURCE_DIR}/common/ipc/ctsvc_ipc_sdn.c
-	${CMAKE_SOURCE_DIR}/common/ctsvc_record_sdn.c
-	${CMAKE_SOURCE_DIR}/native/ctsvc_db_plugin_sdn.c
-	${CMAKE_SOURCE_DIR}/common/ipc/ctsvc_ipc_speeddial.c
-	${CMAKE_SOURCE_DIR}/common/ctsvc_record_speeddial.c
-	${CMAKE_SOURCE_DIR}/native/ctsvc_db_plugin_speeddial.c
 	ctsvc_server_sim.c
 )
 
@@ -168,8 +142,9 @@ IF(ENABLE_LOG_FEATURE)
 SET(SRCS ${SRCS}
 	${CMAKE_SOURCE_DIR}/common/ipc/ctsvc_ipc_phonelog.c
 	${CMAKE_SOURCE_DIR}/common/ctsvc_record_phonelog.c
-	${CMAKE_SOURCE_DIR}/native/ctsvc_db_plugin_phonelog.c
-	${CMAKE_SOURCE_DIR}/native/ctsvc_phonelog.c
+
+	db/ctsvc_db_plugin_phonelog.c
+	ctsvc_server_phonelog.c
 )
 ENDIF(ENABLE_LOG_FEATURE)
 

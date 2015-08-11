@@ -23,10 +23,10 @@
 
 #include "ctsvc_internal.h"
 #include "contacts.h"
-#include "ctsvc_schema.h"
-#include "ctsvc_sqlite.h"
+#include "ctsvc_db_schema.h"
+#include "ctsvc_db_sqlite.h"
 #include "ctsvc_notify.h"
-#include "ctsvc_setting.h"
+#include "ctsvc_server_setting.h"
 #include "ctsvc_normalize.h"
 #include "ctsvc_localize.h"
 #include "ctsvc_localize_utils.h"
@@ -42,10 +42,10 @@
 #include "ctsvc_db_plugin_group_helper.h"
 #include "ctsvc_db_plugin_contact_helper.h"
 
-#include "ctsvc_person.h"
+#include "ctsvc_server_person.h"
 
 #ifdef ENABLE_LOG_FEATURE
-#include "ctsvc_phonelog.h"
+#include "ctsvc_server_phonelog.h"
 #endif /* ENABLE_LOG_FEATURE */
 
 static sqlite3 *server_db;

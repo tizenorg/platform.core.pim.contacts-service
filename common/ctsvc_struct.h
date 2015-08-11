@@ -21,8 +21,8 @@
  *
  */
 
-#ifndef __TIZEN_SOCIAL_CTSVC_STRUCT_H__
-#define __TIZEN_SOCIAL_CTSVC_STRUCT_H__
+#ifndef __CTSVC_STRUCT_H__
+#define __CTSVC_STRUCT_H__
 
 #include <stdbool.h>
 #include <stdlib.h>
@@ -623,4 +623,4 @@ typedef struct {
 }ctsvc_result_s;
 
 
-#endif /* __TIZEN_SOCIAL_CTSVC_STRUCT_H__ */
+#endif /* __CTSVC_STRUCT_H__ */

@@ -16,8 +16,8 @@
  * limitations under the License.
  *
  */
-#ifndef __TIZEN_SOCIAL_CTSVC_LOCALIZE_CH_H__
-#define __TIZEN_SOCIAL_CTSVC_LOCALIZE_CH_H__
+#ifndef __CTSVC_LOCALIZE_CH_H__
+#define __CTSVC_LOCALIZE_CH_H__
 
 #define CHINESE_PINYIN_SPELL_MAX_LEN	15
 #define	CHINESE_PINYIN_MAX_LEN			3
@@ -31,4 +31,4 @@ int ctsvc_convert_chinese_to_pinyin(const char *src, pinyin_name_s **name, int *
 
 bool ctsvc_has_chinese(const char *src);
 
-#endif // __TIZEN_SOCIAL_CTSVC_LOCALIZE_CH_H__
+#endif /* __CTSVC_LOCALIZE_CH_H__ */

@@ -19,7 +19,7 @@
 
 #include <stdlib.h>
 
-#include "ctsvc_service.h"
+#include "ctsvc_server_service.h"
 #include "ctsvc_db_init.h"
 
 #include "ctsvc_ipc_marshal.h"

@@ -21,7 +21,7 @@
 #include <pims-ipc-svc.h>
 #include "contacts.h"
 
-#include "ctsvc_service.h"
+#include "ctsvc_server_service.h"
 #include "ctsvc_db_init.h"
 #include "ctsvc_db_query.h"
 #include "ctsvc_db_access_control.h"
@@ -29,7 +29,7 @@
 #include "ctsvc_ipc_marshal.h"
 #include "ctsvc_internal.h"
 #include "ctsvc_ipc_server.h"
-#include "ctsvc_utils.h"
+#include "ctsvc_db_utils.h"
 #include "ctsvc_server_utils.h"
 
 void ctsvc_ipc_server_connect(pims_ipc_h ipc, pims_ipc_data_h indata, pims_ipc_data_h *outdata, void *userdata)

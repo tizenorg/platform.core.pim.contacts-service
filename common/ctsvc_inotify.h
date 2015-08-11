@@ -18,8 +18,8 @@
  * limitations under the License.
  *
  */
-#ifndef __TIZEN_SOCIAL_CTSVC_INOTIFY_H__
-#define __TIZEN_SOCIAL_CTSVC_INOTIFY_H__
+#ifndef __CTSVC_INOTIFY_H__
+#define __CTSVC_INOTIFY_H__
 
 #include "contacts_db.h"
 
@@ -28,4 +28,4 @@ void ctsvc_inotify_close(void);
 int ctsvc_inotify_subscribe(const char *view_uri, contacts_db_changed_cb cb, void *data);
 int ctsvc_inotify_unsubscribe(const char *view_uri, contacts_db_changed_cb cb, void *user_data);
 
-#endif /* __TIZEN_SOCIAL_CTSVC_INOTIFY_H__ */
+#endif /* __CTSVC_INOTIFY_H__ */

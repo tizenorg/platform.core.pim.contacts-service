@@ -18,8 +18,8 @@
  */
 #include <tzplatform_config.h>
 
-#ifndef __TIZEN_SOCIAL_CTSVC_NOTIFY_H__
-#define __TIZEN_SOCIAL_CTSVC_NOTIFY_H__
+#ifndef __CTSVC_NOTIFY_H__
+#define __CTSVC_NOTIFY_H__
 
 #define DATA_REPERTORY tzplatform_getenv(TZ_USER_DATA)
 #define CTSVC_NOTI_REPERTORY tzplatform_mkpath(TZ_USER_DATA,"contacts-svc")
@@ -58,4 +58,4 @@
 #define CTSVC_SETTING_DISPLAY_ORDER_CHANGED "contacts.setting.display_order"
 #define CTSVC_SETTING_SORTING_ORDER_CHANGED "contacts.setting.sorting_order"
 
-#endif /* __TIZEN_SOCIAL_CTSVC_NOTIFY_H__ */
+#endif /* __CTSVC_NOTIFY_H__ */
