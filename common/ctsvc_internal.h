@@ -21,8 +21,8 @@
  *
  */
 
-#ifndef __TIZEN_SOCIAL_CTSVC_INTERNAL_H__
-#define __TIZEN_SOCIAL_CTSVC_INTERNAL_H__
+#ifndef __CTSVC_INTERNAL_H__
+#define __CTSVC_INTERNAL_H__
 
 #include <stdio.h>
 #include <assert.h>
@@ -136,5 +136,5 @@
 #define TLS
 #endif
 
-#endif /* __TIZEN_SOCIAL_CTSVC_INTERNAL_H__ */
+#endif /* __CTSVC_INTERNAL_H__ */
 

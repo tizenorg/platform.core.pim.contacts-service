@@ -30,7 +30,7 @@
 
 #include "ctsvc_internal.h"
 #include "ctsvc_db_init.h"
-#include "ctsvc_schema.h"
+#include "ctsvc_db_schema.h"
 #include "ctsvc_schema_recovery.h"
 #include "ctsvc_server_socket.h"
 #include "ctsvc_server_utils.h"

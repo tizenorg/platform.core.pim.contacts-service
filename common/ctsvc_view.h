@@ -21,8 +21,8 @@
  *
  */
 
-#ifndef __TIZEN_SOCIAL_CTSVC_VIEW_H__
-#define __TIZEN_SOCIAL_CTSVC_VIEW_H__
+#ifndef __CTSVC_VIEW_H__
+#define __CTSVC_VIEW_H__
 
 #include "ctsvc_struct.h"
 
@@ -469,4 +469,4 @@ const char* ctsvc_view_get_uri(const char* view_uri);
 ctsvc_record_type_e ctsvc_view_get_record_type(const char* view_uri);
 const property_info_s* ctsvc_view_get_all_property_infos(const char *view_uri, unsigned int *count);
 
-#endif /* __TIZEN_SOCIAL_CTSVC_VIEW_H__ */
+#endif /* __CTSVC_VIEW_H__ */

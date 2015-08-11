@@ -21,8 +21,8 @@
  *
  */
 
-#ifndef __TIZEN_SOCIAL_CTSVC_RECORD_H__
-#define __TIZEN_SOCIAL_CTSVC_RECORD_H__
+#ifndef __CTSVC_RECORD_H__
+#define __CTSVC_RECORD_H__
 
 #define CTSVC_RECORD_INIT_BASE(base, type, cb, uri) do {\
 	(base)->r_type = (type);\
@@ -70,4 +70,4 @@ int ctsvc_record_set_lli(contacts_record_h record, unsigned int property_id, lon
 int ctsvc_record_set_double(contacts_record_h record, unsigned int property_id, double value);
 bool ctsvc_record_check_property_flag(const ctsvc_record_s* s_record, unsigned int property_id, contacts_property_flag_e flag);
 
-#endif /* __TIZEN_SOCIAL_CTSVC_RECORD_H__ */
+#endif /* __CTSVC_RECORD_H__ */

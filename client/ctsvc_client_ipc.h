@@ -17,8 +17,8 @@
  *
  */
 
-#ifndef __TIZEN_SOCIAL_CTSVC_CLIENT_IPC_H__
-#define __TIZEN_SOCIAL_CTSVC_CLIENT_IPC_H__
+#ifndef __CTSVC_CLIENT_IPC_H__
+#define __CTSVC_CLIENT_IPC_H__
 
 #include <pims-ipc.h>
 
@@ -44,5 +44,5 @@ int ctsvc_client_ipc_get_change_version(void);
 
 int ctsvc_ipc_client_check_permission(int permission, bool *result);
 
-#endif /*  __TIZEN_SOCIAL_CTSVC_CLIENT_IPC_H__ */
+#endif /* __CTSVC_CLIENT_IPC_H__ */
 

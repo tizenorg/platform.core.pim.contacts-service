@@ -22,9 +22,9 @@
 #include "contacts.h"
 
 #include "ctsvc_internal.h"
-#include "ctsvc_schema.h"
-#include "ctsvc_sqlite.h"
-#include "ctsvc_setting.h"
+#include "ctsvc_db_schema.h"
+#include "ctsvc_db_sqlite.h"
+#include "ctsvc_server_setting.h"
 #include "ctsvc_number_utils.h"
 #include "ctsvc_localize_utils.h"
 #include "ctsvc_server_update.h"

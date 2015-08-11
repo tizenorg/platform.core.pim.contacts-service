@@ -21,8 +21,8 @@
  *
  */
 
-#ifndef __TIZEN_SOCIAL_CTSVC_LIST_H__
-#define __TIZEN_SOCIAL_CTSVC_LIST_H__
+#ifndef __CTSVC_LIST_H__
+#define __CTSVC_LIST_H__
 
 #include "contacts_views.h"
 
@@ -37,4 +37,4 @@ int ctsvc_list_get_deleted_count(contacts_list_h list, unsigned int *count);
 int ctsvc_list_get_deleted_nth_record_p(contacts_list_h list, int index, contacts_record_h* record);
 int ctsvc_list_append_deleted_record(contacts_list_h list, contacts_record_h record);
 
-#endif /*  __TIZEN_SOCIAL_CTSVC_LIST_H__ */
+#endif /* __CTSVC_LIST_H__ */
