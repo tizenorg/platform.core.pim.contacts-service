@@ -25,11 +25,11 @@
 
 #include "contacts.h"
 #include "ctsvc_internal.h"
-#include "ctsvc_schema.h"
-#include "ctsvc_sqlite.h"
+#include "ctsvc_db_schema.h"
+#include "ctsvc_db_sqlite.h"
 #include "ctsvc_server_bg.h"
 #include "ctsvc_server_utils.h"
-#include "ctsvc_utils.h"
+#include "ctsvc_db_utils.h"
 #include "ctsvc_db_plugin_addressbook_helper.h"
 #include "ctsvc_db_access_control.h"
 

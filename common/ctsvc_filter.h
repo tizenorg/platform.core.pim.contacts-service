@@ -21,10 +21,10 @@
  *
  */
 
-#ifndef __TIZEN_SOCIAL_CTSVC_FILTER_H__
-#define __TIZEN_SOCIAL_CTSVC_FILTER_H__
+#ifndef __CTSVC_FILTER_H__
+#define __CTSVC_FILTER_H__
 
 int ctsvc_filter_clone(contacts_filter_h filter, contacts_filter_h *out_filter);
 
-#endif /*  __TIZEN_SOCIAL_CTSVC_FILTER_H__ */
+#endif /* __CTSVC_FILTER_H__ */
 

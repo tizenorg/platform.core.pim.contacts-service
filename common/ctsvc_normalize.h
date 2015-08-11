@@ -16,8 +16,8 @@
  * limitations under the License.
  *
  */
-#ifndef __TIZEN_SOCIAL_CTSVC_NORMALIZE_H__
-#define __TIZEN_SOCIAL_CTSVC_NORMALIZE_H__
+#ifndef __CTSVC_NORMALIZE_H__
+#define __CTSVC_NORMALIZE_H__
 
 enum LANGTYPE{
 	CTSVC_LANG_NUMBER = 0,
@@ -75,4 +75,4 @@ int ctsvc_collation_str(char *src, char **dest);
 int ctsvc_normalize_index(const char *src, char **dest);
 int ctsvc_get_halfwidth_string(const char *src, char** dest, int* dest_size);
 
-#endif /*  __TIZEN_SOCIAL_CTSVC_NORMALIZE_H__ */
+#endif /*  __CTSVC_NORMALIZE_H__ */

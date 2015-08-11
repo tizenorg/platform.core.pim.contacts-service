@@ -30,13 +30,13 @@
 
 #include "ctsvc_internal.h"
 #include "ctsvc_struct.h"
-#include "ctsvc_schema.h"
-#include "ctsvc_sqlite.h"
+#include "ctsvc_db_schema.h"
+#include "ctsvc_db_sqlite.h"
 #include "ctsvc_server_socket.h"
 #include "ctsvc_server_sqlite.h"
 #include "ctsvc_server_utils.h"
 #include "ctsvc_server_sim.h"
-#include "ctsvc_utils.h"
+#include "ctsvc_db_utils.h"
 #include "ctsvc_list.h"
 #include "ctsvc_db_access_control.h"
 

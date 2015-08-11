@@ -26,9 +26,9 @@
 #include "ctsvc_internal.h"
 #include "ctsvc_server_sqlite.h"
 #include "schema.h"
-#include "ctsvc_sqlite.h"
+#include "ctsvc_db_sqlite.h"
 #include "ctsvc_schema_recovery.h"
-#include "ctsvc_schema.h"
+#include "ctsvc_db_schema.h"
 
 /* Additional Error */
 enum {
