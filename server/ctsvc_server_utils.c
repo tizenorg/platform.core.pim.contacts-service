@@ -76,6 +76,9 @@ static void __ctsvc_server_change_language_cb(keynode_t *key, void *data)
 	}
 	langset = ctsvc_get_langset();
 	INFO("%s --> %s", langset, new_langset);
+
+	ctsvc_server_stop_timeout();
+
 	if (STRING_EQUAL != strcmp(langset, new_langset)) {
 		bool sort_name_update = false;
 		old_primary_sort = ctsvc_get_primary_sort();
@@ -116,6 +119,8 @@ static void __ctsvc_server_change_language_cb(keynode_t *key, void *data)
 			ctsvc_server_update_collation();
 		}
 	}
+
+	ctsvc_server_start_timeout();
 }
 
 void ctsvc_server_final_configuration(void)
@@ -172,16 +177,28 @@ static gboolean _timeout_cb(gpointer user_data)
 	return TRUE;
 }
 
-void ctsvc_server_timeout(void)
+void ctsvc_server_start_timeout(void)
 {
-	CTS_FN_CALL;
 	int timeout = ctsvc_server_get_timeout_sec();
 	if (timeout < 1)
 		return;
 
 	ctsvc_mutex_lock(CTS_MUTEX_TIMEOUT);
-	if (_ctsvc_timeout > 0)
+	if (_ctsvc_timeout)
 		g_source_remove(_ctsvc_timeout);
 	_ctsvc_timeout = g_timeout_add_seconds(timeout, _timeout_cb, NULL);
+	ctsvc_mutex_unlock(CTS_MUTEX_TIMEOUT);
+}
+
+void ctsvc_server_stop_timeout(void)
+{
+	int timeout = ctsvc_server_get_timeout_sec();
+	if (timeout < 1)
+		return;
+
+	ctsvc_mutex_lock(CTS_MUTEX_TIMEOUT);
+	if (_ctsvc_timeout)
+		g_source_remove(_ctsvc_timeout);
+	_ctsvc_timeout = 0;
 	ctsvc_mutex_unlock(CTS_MUTEX_TIMEOUT);
 }

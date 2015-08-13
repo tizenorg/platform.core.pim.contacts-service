@@ -24,6 +24,7 @@
 #include "contacts.h"
 #include "ctsvc_internal.h"
 #include "ctsvc_ipc_define.h"
+#include "ctsvc_ipc_marshal.h"
 #include "ctsvc_server_change_subject.h"
 
 #define CTSVC_SUBSCRIBE_MAX_LEN	1024

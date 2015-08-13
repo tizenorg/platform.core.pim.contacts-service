@@ -408,10 +408,10 @@ static gpointer __ctsvc_server_bg_delete(gpointer user_data)
 		}
 		ctsvc_set_client_access_info(NULL, NULL);
 
+		ctsvc_server_stop_timeout();
 		while (1) {
 			if (__ctsvc_cpu_is_busy()) { /* sleep 1 sec in function */
 				CTS_ERR("Now CPU is busy.. waiting");
-				ctsvc_server_timeout();
 				sleep(CTSVC_SERVER_BG_DELETE_STEP_TIME*59); /* sleep 60 sec(1 min) totally */
 				continue;
 			}
@@ -425,8 +425,10 @@ static gpointer __ctsvc_server_bg_delete(gpointer user_data)
 		ctsvc_unset_client_access_info();
 
 		ret = ctsvc_disconnect();
+
 		if (CONTACTS_ERROR_NONE != ret)
 			CTS_ERR("contacts_disconnect Fail(%d)", ret);
+		ctsvc_server_start_timeout();
 
 		g_mutex_lock(&__ctsvc_server_bg_delete_mutex);
 		CTS_DBG("wait");
@@ -434,6 +436,7 @@ static gpointer __ctsvc_server_bg_delete(gpointer user_data)
 		g_mutex_unlock(&__ctsvc_server_bg_delete_mutex);
 	}
 
+	ctsvc_server_start_timeout();
 	return NULL;
 }
 
@@ -469,8 +472,12 @@ static bool __ctsvc_server_account_delete_cb(const char* event_type, int account
 {
 	CTS_FN_CALL;
 	CTS_INFO("event_type : %s, account_id : %d", event_type, account_id);
-	if (STRING_EQUAL == strcmp(event_type, ACCOUNT_NOTI_NAME_DELETE))
+
+	if (STRING_EQUAL == strcmp(event_type, ACCOUNT_NOTI_NAME_DELETE)) {
+		ctsvc_server_stop_timeout();
 		ctsvc_addressbook_delete(account_id);
+	}
+	ctsvc_server_start_timeout();
 	return true;
 }
 

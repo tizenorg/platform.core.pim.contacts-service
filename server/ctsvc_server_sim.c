@@ -955,7 +955,9 @@ static void __ctsvc_server_sim_ready_cb(keynode_t *key, void *data)
 	__ctsvc_sim_cb = false;
 	vconf_ignore_key_changed(VCONFKEY_TELEPHONY_SIM_STATUS, __ctsvc_server_sim_ready_cb);
 
+	ctsvc_server_stop_timeout();
 	__ctsvc_server_sim_info_init();
+	ctsvc_server_start_timeout();
 }
 
 static void __ctsvc_server_telephony_ready_cb(keynode_t *key, void *data)
@@ -981,7 +983,9 @@ static void __ctsvc_server_telephony_ready_cb(keynode_t *key, void *data)
 		return;
 	}
 
+	ctsvc_server_stop_timeout();
 	__ctsvc_server_sim_info_init();
+	ctsvc_server_start_timeout();
 }
 
 
