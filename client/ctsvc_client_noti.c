@@ -114,8 +114,6 @@ int ctsvc_ipc_recover_for_change_subscription()
 		ctsvc_mutex_unlock(CTS_MUTEX_PIMS_IPC_PUBSUB);
 		return CONTACTS_ERROR_NONE;
 	}
-	if (__ipc)
-		ctsvc_ipc_unset_disconnected_cb(__ipc);
 	__ipc = pims_ipc_create_for_subscribe(CTSVC_IPC_SOCKET_PATH_FOR_CHANGE_SUBSCRIPTION);
 	if (!__ipc) {
 		CTS_ERR("pims_ipc_create_for_subscribe error\n");
@@ -131,7 +129,6 @@ int ctsvc_ipc_destroy_for_change_subscription()
 	ctsvc_mutex_lock(CTS_MUTEX_PIMS_IPC_PUBSUB);
 
 	if (1 == __ipc_pubsub_ref) {
-		ctsvc_ipc_unset_disconnected_cb(__ipc);
 		pims_ipc_destroy_for_subscribe(__ipc);
 		__ipc = NULL;
 	}

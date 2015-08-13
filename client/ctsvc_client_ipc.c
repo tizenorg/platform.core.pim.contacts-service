@@ -24,6 +24,7 @@
 #include <unistd.h>
 #include <glib.h>
 #include <pims-ipc-data.h>
+#include <pthread.h>
 
 #include "ctsvc_client_ipc.h"
 #include "ctsvc_client_utils.h"
@@ -45,6 +46,7 @@ struct ctsvc_ipc_s {
 	GList *list_handle;
 };
 
+static pthread_mutex_t _ctsvc_mutex_disconnected = PTHREAD_MUTEX_INITIALIZER;
 static GHashTable *_ctsvc_ipc_table = NULL;
 static bool _ctsvc_ipc_disconnected = false;
 
@@ -110,8 +112,10 @@ static void _ctsvc_ipc_data_free(gpointer p)
 	if (NULL == ipc_data)
 		return;
 
-	if (ipc_data->ipc)
+	if (ipc_data->ipc) {
+		ctsvc_ipc_unset_disconnected_cb(ipc_data->ipc);
 		pims_ipc_destroy(ipc_data->ipc);
+	}
 
 	g_list_free(ipc_data->list_handle);
 
@@ -351,12 +355,16 @@ int ctsvc_ipc_unset_disconnected_cb(pims_ipc_h ipc)
 
 void ctsvc_ipc_set_disconnected(bool is_disconnected)
 {
+	pthread_mutex_lock(&_ctsvc_mutex_disconnected);
 	_ctsvc_ipc_disconnected = is_disconnected;
+	pthread_mutex_unlock(&_ctsvc_mutex_disconnected);
 }
 
 int ctsvc_ipc_get_disconnected()
 {
+	pthread_mutex_lock(&_ctsvc_mutex_disconnected);
 	CTS_DBG("_ctsvc_ipc_disconnected=%d", _ctsvc_ipc_disconnected);
+	pthread_mutex_unlock(&_ctsvc_mutex_disconnected);
 	return _ctsvc_ipc_disconnected;
 }
 
@@ -365,6 +373,7 @@ static void _ctsvc_ipc_recovery_foreach_cb(gpointer key, gpointer value, gpointe
 	GList *c;
 	struct ctsvc_ipc_s *ipc_data = value;
 
+	ctsvc_ipc_unset_disconnected_cb(ipc_data->ipc);
 	int ret = _ctsvc_ipc_create(&(ipc_data->ipc));
 	RETM_IF(CONTACTS_ERROR_NONE != ret, "_ctsvc_ipc_create() Fail(%d)", ret);
 	ctsvc_ipc_set_disconnected_cb(ipc_data->ipc, _ctsvc_ipc_disconnected_cb, NULL);
