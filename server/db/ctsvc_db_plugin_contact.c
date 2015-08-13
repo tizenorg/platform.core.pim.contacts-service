@@ -2376,8 +2376,8 @@ static int __ctsvc_db_contact_replace_record(contacts_record_h record, int conta
 					"sort_name=?, reverse_sort_name=?, "
 					"sortkey=?, reverse_sortkey=?, uid=?, ringtone_path=?, vibration=?, "
 					"message_alert =?, image_thumbnail_path=?",
-					version, (int)time(NULL),
-					contact->has_phonenumber, contact->has_email, contact->is_favorite,
+					version, (int)time(NULL), contact->is_favorite,
+					contact->has_phonenumber, contact->has_email,
 					contact->display_source_type,
 					contact->display_name_language, contact->reverse_display_name_language);
 
