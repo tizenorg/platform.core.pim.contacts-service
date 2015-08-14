@@ -38,6 +38,7 @@ int ctsvc_handle_destroy(contacts_h contact)
 	RETV_IF(NULL == contact, CONTACTS_ERROR_INVALID_PARAMETER);
 	ctsvc_base_s *base = (ctsvc_base_s *)contact;
 	free(base);
+	base = NULL;
 	return CONTACTS_ERROR_NONE;
 }
 

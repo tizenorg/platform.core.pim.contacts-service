@@ -137,8 +137,8 @@ int ctsvc_client_handle_remove(unsigned int id, contacts_h contact)
 		g_hash_table_destroy(_ctsvc_handle_table);
 		_ctsvc_handle_table = NULL;
 	}
-	ctsvc_mutex_unlock(CTS_MUTEX_HANDLE);
 	ctsvc_handle_destroy(contact);
+	ctsvc_mutex_unlock(CTS_MUTEX_HANDLE);
 
 	return CONTACTS_ERROR_NONE;
 }
