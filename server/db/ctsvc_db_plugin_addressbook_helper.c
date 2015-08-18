@@ -32,6 +32,7 @@ int ctsvc_addressbook_reset_internal_addressbook(void)
 	CTS_FN_CALL;
 	char query[CTS_SQL_MIN_LEN] = {0};
 	int ret;
+	int version;
 
 	ret = ctsvc_begin_trans();
 	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "DB error : ctsvc_begin_trans() Fail(%d)", ret);
@@ -46,9 +47,10 @@ int ctsvc_addressbook_reset_internal_addressbook(void)
 		return ret;
 	}
 
-	snprintf(query, sizeof(query), "UPDATE %s SET deleted=1, person_id=0, "
-			"changed_ver = ((SELECT ver FROM cts_version) + 1) WHERE addressbook_id = %d",
-			CTS_TABLE_CONTACTS, 0 /*CTS_ADDRESSBOOK_INTERNAL*/);
+	version = ctsvc_get_next_ver();
+	snprintf(query, sizeof(query),
+			"UPDATE %s SET deleted = 1, person_id = 0, changed_ver=%d WHERE addressbook_id = %d",
+			CTS_TABLE_CONTACTS, version, 0 /*CTS_ADDRESSBOOK_INTERNAL*/);
 
 	/* DOING JOB */
 	do {
