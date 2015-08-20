@@ -21,10 +21,11 @@
 #ifndef __CTSVC_NOTIFY_H__
 #define __CTSVC_NOTIFY_H__
 
+#define CTSVC_VCARD_IMAGE_LOCATION tzplatform_mkpath(TZ_USER_SHARE,"vcard")
+
 #define DATA_REPERTORY tzplatform_getenv(TZ_USER_DATA)
 #define CTSVC_NOTI_REPERTORY tzplatform_mkpath(TZ_USER_DATA,"contacts-svc")
 #define CTSVC_NOTI_IMG_REPERTORY tzplatform_mkpath(TZ_USER_DATA,"contacts-svc/img/")
-#define CTSVC_VCARD_IMAGE_LOCATION tzplatform_mkpath(TZ_USER_DATA,"contacts-svc/img/vcard")
 #define CTS_MY_IMAGE_LOCATION tzplatform_mkpath(TZ_USER_DATA,"contacts-svc/img/my")
 #define CTS_GROUP_IMAGE_LOCATION tzplatform_mkpath(TZ_USER_DATA,"contacts-svc/img/group")
 #define CTS_LOGO_IMAGE_LOCATION tzplatform_mkpath(TZ_USER_DATA,"contacts-svc/img/logo")
