@@ -366,21 +366,39 @@ static int __ctsvc_db_phonelog_get_records_with_query(contacts_query_h query, in
 //static int __ctsvc_db_phonelog_update_records(const contacts_list_h in_list) { return CONTACTS_ERROR_NONE; }
 //static int __ctsvc_db_phonelog_delete_records(int ids[], int count) { return CONTACTS_ERROR_NONE; }
 
-static int __ctsvc_db_phonelog_increase_outgoing_count(ctsvc_phonelog_s *phonelog)
+static int __ctsvc_db_phonelog_increase_used_count(ctsvc_phonelog_s *phonelog)
 {
 	int ret;
 	int id;
 	int type = CONTACTS_USAGE_STAT_TYPE_NONE;
 	char query[CTS_SQL_MIN_LEN] = {0};
 
-	if (phonelog->log_type == CONTACTS_PLOG_TYPE_VOICE_OUTGOING ||
-		phonelog->log_type == CONTACTS_PLOG_TYPE_VIDEO_OUTGOING)
+	switch(phonelog->log_type) {
+	case CONTACTS_PLOG_TYPE_VOICE_OUTGOING:
+	case CONTACTS_PLOG_TYPE_VIDEO_OUTGOING:
 		type = CONTACTS_USAGE_STAT_TYPE_OUTGOING_CALL;
-	else if (phonelog->log_type == CONTACTS_PLOG_TYPE_MMS_OUTGOING ||
-		phonelog->log_type == CONTACTS_PLOG_TYPE_SMS_OUTGOING)
+		break;
+	case CONTACTS_PLOG_TYPE_MMS_OUTGOING:
+	case CONTACTS_PLOG_TYPE_SMS_OUTGOING:
 		type = CONTACTS_USAGE_STAT_TYPE_OUTGOING_MSG;
-	else
+		break;
+	case CONTACTS_PLOG_TYPE_EMAIL_SENT:
+		type = CONTACTS_USAGE_STAT_TYPE_OUTGOING_EMAIL;
+		break;
+	case CONTACTS_PLOG_TYPE_VOICE_INCOMMING:
+	case CONTACTS_PLOG_TYPE_VIDEO_INCOMMING:
+		type = CONTACTS_USAGE_STAT_TYPE_INCOMMING_CALL;
+		break;
+	case CONTACTS_PLOG_TYPE_MMS_INCOMMING:
+	case CONTACTS_PLOG_TYPE_SMS_INCOMMING:
+		type = CONTACTS_USAGE_STAT_TYPE_INCOMMING_MSG;
+		break;
+	case CONTACTS_PLOG_TYPE_EMAIL_RECEIVED:
+		type = CONTACTS_USAGE_STAT_TYPE_INCOMMING_EMAIL;
+		break;
+	default:
 		return CONTACTS_ERROR_NONE;
+	}
 
 	snprintf(query, sizeof(query),
 			"SELECT person_id FROM %s WHERE person_id = %d and usage_type = %d ",
@@ -493,8 +511,8 @@ static int __ctsvc_db_phonelog_insert_record(contacts_record_h record, int *id)
 	}
 
 	if (0 < phonelog->person_id) {
-		ret = __ctsvc_db_phonelog_increase_outgoing_count(phonelog);
-		WARN_IF(CONTACTS_ERROR_NONE != ret, "__ctsvc_db_phonelog_increase_outgoing_count() Fail(%d)", ret);
+		ret = __ctsvc_db_phonelog_increase_used_count(phonelog);
+		WARN_IF(CONTACTS_ERROR_NONE != ret, "__ctsvc_db_phonelog_increase_used_count() Fail(%d)", ret);
 	}
 
 #ifdef _CONTACTS_IPC_SERVER

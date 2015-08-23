@@ -264,7 +264,11 @@ typedef enum {
 typedef enum {
     CONTACTS_USAGE_STAT_TYPE_NONE,          /**< None */
     CONTACTS_USAGE_STAT_TYPE_OUTGOING_CALL, /**< Outgoing call */
-    CONTACTS_USAGE_STAT_TYPE_OUTGOING_MSG   /**< Outgoing message */
+    CONTACTS_USAGE_STAT_TYPE_OUTGOING_MSG,   /**< Outgoing message */
+    CONTACTS_USAGE_STAT_TYPE_OUTGOING_EMAIL, /**< Outgoing email */
+    CONTACTS_USAGE_STAT_TYPE_INCOMMING_CALL, /**< Incomming call */
+    CONTACTS_USAGE_STAT_TYPE_INCOMMING_MSG,  /**< Incomming message */
+    CONTACTS_USAGE_STAT_TYPE_INCOMMING_EMAIL /**< Incomming email */
 }contacts_usage_type_e;
 
 /**
