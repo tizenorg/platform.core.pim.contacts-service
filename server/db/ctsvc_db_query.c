@@ -1411,7 +1411,6 @@ static int __ctsvc_db_append_search_query(const char *src, char **query, int *qu
 	else {
 		char *normalized_name = NULL;
 		int lang = CTSVC_LANG_OTHERS;
-		bool add_brace = false;
 		char *hiragana = NULL;
 		char *search_hiragana = NULL;
 		bool need_union = false;
@@ -1454,7 +1453,6 @@ static int __ctsvc_db_append_search_query(const char *src, char **query, int *qu
 			if (need_union) {
 				temp_len = SAFE_SNPRINTF(query, query_size, len, " UNION SELECT contact_id FROM (");
 				if (0 <= temp_len) len += temp_len;
-				add_brace = true;
 			}
 			temp_len = SAFE_SNPRINTF(query, query_size, len, " SELECT contact_id FROM ");
 			if (0 <= temp_len) len += temp_len;
@@ -1488,10 +1486,9 @@ static int __ctsvc_db_append_search_query(const char *src, char **query, int *qu
 									CONTACTS_SEARCH_RANGE_DATA, NULL, NULL, temp_str);
 				if (0 <= temp_len) len = temp_len;
 			}
-			if (add_brace) {
+			if (need_union) {
 				temp_len = SAFE_SNPRINTF(query, query_size, len, ") ");
 				if (0 <= temp_len) len += temp_len;
-				add_brace = false;
 			}
 			need_union = true;
 		}
@@ -1500,7 +1497,6 @@ static int __ctsvc_db_append_search_query(const char *src, char **query, int *qu
 			if (need_union) {
 				temp_len = SAFE_SNPRINTF(query, query_size, len, " UNION SELECT contact_id FROM (");
 				if (0 <= temp_len) len += temp_len;
-				add_brace = true;
 			}
 
 			if (CTSVC_LANG_KOREAN == lang) {   /* chosung search */
@@ -1627,10 +1623,9 @@ static int __ctsvc_db_append_search_query(const char *src, char **query, int *qu
 			temp_len = SAFE_SNPRINTF(query, query_size, len, "%%' ESCAPE '\\' ");   /* CTSVC_DB_ESCAPE_CHAR */
 			if (0 <= temp_len) len += temp_len;
 
-			if (add_brace) {
+			if (need_union) {
 				temp_len = SAFE_SNPRINTF(query, query_size, len, ") ");
 				if (0 <= temp_len) len += temp_len;
-				add_brace = false;
 			}
 		}
 
