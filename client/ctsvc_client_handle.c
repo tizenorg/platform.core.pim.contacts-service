@@ -57,8 +57,7 @@ int ctsvc_client_handle_get_p_with_id(unsigned int id, contacts_h *p_contact)
 	contact = g_hash_table_lookup(_ctsvc_handle_table, key);
 	ctsvc_mutex_unlock(CTS_MUTEX_HANDLE);
 
-	if (NULL == contact)
-	{
+	if (NULL == contact) {
 		CTS_ERR("g_hash_table_lookup() return NULL");
 		return CONTACTS_ERROR_NO_DATA;
 	}
@@ -132,7 +131,9 @@ int ctsvc_client_handle_remove(unsigned int id, contacts_h contact)
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "_ctsvc_client_handle_get_key() Fail(%d)", ret);
 
 	ctsvc_mutex_lock(CTS_MUTEX_HANDLE);
-	g_hash_table_remove(_ctsvc_handle_table, key);
+	if (false == g_hash_table_remove(_ctsvc_handle_table, key))
+		CTS_ERR("g_hash_table_remove() Fail. key:%s", key);
+
 	if (0 == g_hash_table_size(_ctsvc_handle_table)) {
 		g_hash_table_destroy(_ctsvc_handle_table);
 		_ctsvc_handle_table = NULL;

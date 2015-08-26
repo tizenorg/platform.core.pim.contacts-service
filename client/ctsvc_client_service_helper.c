@@ -172,6 +172,7 @@ int ctsvc_client_disconnect(contacts_h contact)
 	_ctsvc_connection--;
 
 	if (0 == base->connection_count) {
+		CTS_INFO("connection_count is 0. remove handle");
 		ret = ctsvc_client_handle_remove(ctsvc_client_get_pid(), contact);
 		WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_client_handle_remove() Fail(%d)", ret);
 	}
@@ -266,6 +267,11 @@ int ctsvc_client_disconnect_on_thread(contacts_h contact)
 
 	_ctsvc_connection_on_thread--;
 
+	if (0 == base->connection_count) {
+		CTS_INFO("connection_count is 0. remove handle");
+		ret = ctsvc_client_handle_remove(ctsvc_client_get_tid(), contact);
+		WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_client_handle_remove() Fail(%d)", ret);
+	}
 	ctsvc_mutex_unlock(CTS_MUTEX_CONNECTION);
 
 	return CONTACTS_ERROR_NONE;

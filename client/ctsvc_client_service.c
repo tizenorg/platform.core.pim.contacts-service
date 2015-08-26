@@ -155,11 +155,6 @@ API int contacts_disconnect_on_thread(void)
 	if (CONTACTS_ERROR_INVALID_PARAMETER == ret)
 		ret = CONTACTS_ERROR_IPC;
 
-	if (0 == ((ctsvc_base_s *)contact)->connection_count) {
-		ret = ctsvc_client_handle_remove(id, contact);
-		WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_client_handle_remove() Fail(%d)", ret);
-	}
-
 	return ret;
 }
 
