@@ -463,6 +463,7 @@ static void __clear_nslot_list(gpointer data, gpointer user_data)
 {
 	noti_info *noti = (noti_info *)data;
 
+	ctsvc_handle_destroy(noti->contact);
 	free(noti->view_uri);
 	free(noti);
 }
