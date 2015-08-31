@@ -1875,7 +1875,7 @@ static int __ctsvc_db_search_records_exec(const char *view_uri, const property_i
 		temp_len = SAFE_SNPRINTF(&query, &query_size, len, " WHERE ");
 		if (0 <= temp_len) len+= temp_len;
 
-		if (range & CONTACTS_SEARCH_RANGE_NUMBER) {
+		if ((range & CONTACTS_SEARCH_RANGE_NUMBER) && ctsvc_is_phonenumber(keyword)) {
 			char clean_num[strlen(keyword)+1+5];   /* for cc */
 
 			/*
