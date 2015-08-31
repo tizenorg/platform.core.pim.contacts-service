@@ -352,8 +352,10 @@ static int __ctsvc_db_activity_get_records_with_query(contacts_query_h query, in
 			}
 		}
 	}
-	else
+	else {
+		s_query->projection_count = 0;
 		had_activity_id = true;
+	}
 
 	if (false == had_activity_id) {
 		s_query->projection = realloc(s_query->projection, s_query->projection_count+1);

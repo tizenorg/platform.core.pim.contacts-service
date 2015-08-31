@@ -1471,10 +1471,12 @@ static int __ctsvc_db_contact_get_records_with_query(contacts_query_h query, int
 			}
 		}
 	}
-	else
+	else {
+		s_query->projection_count = 0;
 		had_contact_id = true;
+	}
 
-	if (0 == had_contact_id) {
+	if (false == had_contact_id) {
 		s_query->projection = realloc(s_query->projection, s_query->projection_count+1);
 		if (NULL == s_query->projection) {
 			CTS_ERR("realloc() Fail");

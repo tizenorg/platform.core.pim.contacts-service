@@ -902,8 +902,10 @@ static int __ctsvc_db_my_profile_get_records_with_query(contacts_query_h query, 
 			}
 		}
 	}
-	else
+	else {
+		s_query->projection_count = 0;
 		had_my_profile_id = true;
+	}
 
 	if (false == had_my_profile_id) {
 		s_query->projection = realloc(s_query->projection, s_query->projection_count+1);
