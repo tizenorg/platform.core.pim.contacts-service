@@ -29,6 +29,7 @@
 #include "ctsvc_ipc_marshal.h"
 #include "ctsvc_mutex.h"
 #include "ctsvc_client_ipc.h"
+#include "ctsvc_client_setting.h"
 #include "contacts_extension.h"
 
 typedef struct
@@ -76,6 +77,28 @@ DATA_FREE:
 	free(str);
 }
 
+int __ctsvc_db_recover_for_change_subscription()
+{
+	GSList *it = NULL;
+	subscribe_info_s *info = NULL;
+
+	for (it=__db_change_subscribe_list;it;it=it->next) {
+		if (NULL == it->data) continue;
+
+		info = it->data;
+		if (info->view_uri) {
+			if (pims_ipc_subscribe(__ipc, CTSVC_IPC_SUBSCRIBE_MODULE, info->view_uri,
+						__ctsvc_db_subscriber_callback, (void*)info) != 0) {
+				CTS_ERR("pims_ipc_subscribe() Fail");
+				return CONTACTS_ERROR_IPC;
+			}
+		}
+	}
+
+	return CONTACTS_ERROR_NONE;
+}
+
+
 /* This API should be called in CTS_MUTEX_PIMS_IPC_PUBSUB mutex */
 pims_ipc_h ctsvc_ipc_get_handle_for_change_subsciption()
 {
@@ -97,7 +120,7 @@ int ctsvc_ipc_create_for_change_subscription()
 		snprintf(sock_file, sizeof(sock_file), CTSVC_SOCK_PATH"/.%s_for_subscribe", getuid(), CTSVC_IPC_SERVICE);
 		__ipc = pims_ipc_create_for_subscribe(sock_file);
 		if (NULL == __ipc) {
-			CTS_ERR("pims_ipc_create_for_subscribe error\n");
+			CTS_ERR("pims_ipc_create_for_subscribe() Fail");
 			ctsvc_mutex_unlock(CTS_MUTEX_PIMS_IPC_PUBSUB);
 			return CONTACTS_ERROR_IPC;
 		}
@@ -109,17 +132,33 @@ int ctsvc_ipc_create_for_change_subscription()
 
 int ctsvc_ipc_recover_for_change_subscription()
 {
+	int ret;
 	ctsvc_mutex_lock(CTS_MUTEX_PIMS_IPC_PUBSUB);
 	if (__ipc_pubsub_ref <= 0) {
 		ctsvc_mutex_unlock(CTS_MUTEX_PIMS_IPC_PUBSUB);
 		return CONTACTS_ERROR_NONE;
 	}
+
+	pims_ipc_destroy_for_subscribe(__ipc);
 	__ipc = pims_ipc_create_for_subscribe(CTSVC_IPC_SOCKET_PATH_FOR_CHANGE_SUBSCRIPTION);
-	if (!__ipc) {
-		CTS_ERR("pims_ipc_create_for_subscribe error\n");
+	if (NULL == __ipc) {
+		CTS_ERR("pims_ipc_create_for_subscribe() Fail");
 		ctsvc_mutex_unlock(CTS_MUTEX_PIMS_IPC_PUBSUB);
 		return CONTACTS_ERROR_IPC;
 	}
+	ret = ctsvc_setting_recover_for_change_subscription();
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("ctsvc_setting_recover_for_change_subscription() Fail(%d)", ret);
+		ctsvc_mutex_unlock(CTS_MUTEX_PIMS_IPC_PUBSUB);
+		return ret;
+	}
+	ret = __ctsvc_db_recover_for_change_subscription();
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("__ctsvc_db_recover_changed_cb_with_info() Fail(%d)", ret);
+		ctsvc_mutex_unlock(CTS_MUTEX_PIMS_IPC_PUBSUB);
+		return ret;
+	}
+
 	ctsvc_mutex_unlock(CTS_MUTEX_PIMS_IPC_PUBSUB);
 	return CONTACTS_ERROR_NONE;
 }
@@ -161,12 +200,12 @@ API int contacts_db_add_changed_cb_with_info(const char* view_uri,
 
 	if (STRING_EQUAL == strncmp(view_uri, CTSVC_VIEW_URI_PHONELOG, strlen(CTSVC_VIEW_URI_PHONELOG))) {
 		ret = ctsvc_ipc_client_check_permission(CTSVC_PERMISSION_PHONELOG_READ, &result);
-		RETVM_IF(ret != CONTACTS_ERROR_NONE, ret, "ctsvc_ipc_client_check_permission fail (%d)", ret);
+		RETVM_IF(ret != CONTACTS_ERROR_NONE, ret, "ctsvc_ipc_client_check_permission() Fail(%d)", ret);
 		RETVM_IF(result == false, CONTACTS_ERROR_PERMISSION_DENIED, "Permission denied (phonelog read)");
 	}
 	else if (STRING_EQUAL == strncmp(view_uri, CTSVC_VIEW_URI_PERSON, strlen(CTSVC_VIEW_URI_PERSON))) {
 		ret = ctsvc_ipc_client_check_permission(CTSVC_PERMISSION_CONTACT_READ, &result);
-		RETVM_IF(ret != CONTACTS_ERROR_NONE, ret, "ctsvc_ipc_client_check_permission fail (%d)", ret);
+		RETVM_IF(ret != CONTACTS_ERROR_NONE, ret, "ctsvc_ipc_client_check_permission() Fail(%d)", ret);
 		RETVM_IF(result == false, CONTACTS_ERROR_PERMISSION_DENIED, "Permission denied (contact read)");
 	}
 	else {
@@ -196,7 +235,7 @@ API int contacts_db_add_changed_cb_with_info(const char* view_uri,
 
 		if (pims_ipc_subscribe(__ipc, CTSVC_IPC_SUBSCRIBE_MODULE, (char*)view_uri,
 					__ctsvc_db_subscriber_callback, (void*)info) != 0) {
-			CTS_ERR("pims_ipc_subscribe error\n");
+			CTS_ERR("pims_ipc_subscribe() Fail");
 			free(info);
 			ctsvc_mutex_unlock(CTS_MUTEX_PIMS_IPC_PUBSUB);
 			return CONTACTS_ERROR_IPC;
@@ -218,7 +257,7 @@ API int contacts_db_add_changed_cb_with_info(const char* view_uri,
 
 	cb_info = calloc(1, sizeof(db_callback_info_s));
 	if (NULL == cb_info) {
-		CTS_ERR("calloc() Failed");
+		CTS_ERR("calloc() Fail");
 		ctsvc_mutex_unlock(CTS_MUTEX_PIMS_IPC_PUBSUB);
 		return CONTACTS_ERROR_OUT_OF_MEMORY;
 	}

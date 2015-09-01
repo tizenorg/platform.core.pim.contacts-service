@@ -28,6 +28,21 @@
 #include "ctsvc_client_ipc.h"
 #include "ctsvc_mutex.h"
 
+typedef struct
+{
+	contacts_setting_name_display_order_changed_cb cb;
+	void *user_data;
+}ctsvc_name_display_order_changed_cb_info_s;
+
+typedef struct
+{
+	contacts_setting_name_sorting_order_changed_cb cb;
+	void *user_data;
+}ctsvc_name_sorting_order_changed_cb_info_s;
+
+static GSList *__setting_name_display_order_subscribe_list = NULL;
+static GSList *__setting_name_sorting_order_subscribe_list = NULL;
+
 API int contacts_setting_get_name_display_order(contacts_name_display_order_e *name_display_order)
 {
 	int ret = CONTACTS_ERROR_NONE;
@@ -179,14 +194,6 @@ API int contacts_setting_set_name_sorting_order(contacts_name_sorting_order_e na
 	return ret;
 }
 
-typedef struct
-{
-	contacts_setting_name_display_order_changed_cb cb;
-	void *user_data;
-}ctsvc_name_display_order_changed_cb_info_s;
-
-static GSList *__setting_name_display_order_subscribe_list = NULL;
-
 static void __ctsvc_setting_name_display_order_subscriber_callback(pims_ipc_h ipc, pims_ipc_data_h data, void *user_data)
 {
 	int ret;
@@ -204,6 +211,59 @@ static void __ctsvc_setting_name_display_order_subscriber_callback(pims_ipc_h ip
 				cb_info->cb((contacts_name_display_order_e)value, cb_info->user_data);
 		}
 	}
+}
+
+static void __ctsvc_setting_name_sorting_order_subscriber_callback(pims_ipc_h ipc, pims_ipc_data_h data, void *user_data)
+{
+	int ret;
+	int value = -1;
+
+	if (data) {
+		ret = ctsvc_ipc_unmarshal_int(data, &value);
+		WARN_IF(CONTACTS_ERROR_NONE != ret, "() Fail(%d)", ret);
+	}
+
+	if (__setting_name_sorting_order_subscribe_list) {
+		GSList *l;
+		for (l = __setting_name_sorting_order_subscribe_list;l;l=l->next) {
+			ctsvc_name_sorting_order_changed_cb_info_s *cb_info = l->data;
+			if (cb_info->cb)
+				cb_info->cb((contacts_name_sorting_order_e)value, cb_info->user_data);
+		}
+	}
+}
+
+int ctsvc_setting_recover_for_change_subscription()
+{
+	GSList *it;
+
+	for (it = __setting_name_display_order_subscribe_list; it; it=it->next) {
+		ctsvc_name_display_order_changed_cb_info_s *cb_info = it->data;
+		if (cb_info->cb) {
+			if (pims_ipc_subscribe(ctsvc_ipc_get_handle_for_change_subsciption(),
+						CTSVC_IPC_SUBSCRIBE_MODULE, CTSVC_SETTING_DISPLAY_ORDER_CHANGED,
+						__ctsvc_setting_name_display_order_subscriber_callback, NULL) != 0) {
+				CTS_ERR("pims_ipc_subscribe() Fail");
+				return CONTACTS_ERROR_IPC;
+			}
+			break;
+		}
+	}
+
+	for (it = __setting_name_sorting_order_subscribe_list; it; it=it->next) {
+		ctsvc_name_sorting_order_changed_cb_info_s *cb_info = it->data;
+		if (cb_info->cb) {
+			if (pims_ipc_subscribe(ctsvc_ipc_get_handle_for_change_subsciption(),
+						CTSVC_IPC_SUBSCRIBE_MODULE, CTSVC_SETTING_SORTING_ORDER_CHANGED,
+						__ctsvc_setting_name_sorting_order_subscriber_callback, NULL) != 0) {
+				CTS_ERR("pims_ipc_subscribe() Fail");
+				return CONTACTS_ERROR_IPC;
+			}
+			break;
+		}
+	}
+
+	return CONTACTS_ERROR_NONE;
 }
 
 API int contacts_setting_add_name_display_order_changed_cb(
@@ -226,7 +286,7 @@ API int contacts_setting_add_name_display_order_changed_cb(
 		if (pims_ipc_subscribe(ctsvc_ipc_get_handle_for_change_subsciption(),
 					CTSVC_IPC_SUBSCRIBE_MODULE, CTSVC_SETTING_DISPLAY_ORDER_CHANGED,
 					__ctsvc_setting_name_display_order_subscriber_callback, NULL) != 0) {
-			CTS_ERR("pims_ipc_subscribe error\n");
+			CTS_ERR("pims_ipc_subscribe() Fail");
 			ctsvc_mutex_unlock(CTS_MUTEX_PIMS_IPC_PUBSUB);
 			return CONTACTS_ERROR_IPC;
 		}
@@ -284,34 +344,6 @@ API int contacts_setting_remove_name_display_order_changed_cb(
 	return CONTACTS_ERROR_NONE;
 }
 
-typedef struct
-{
-	contacts_setting_name_sorting_order_changed_cb cb;
-	void *user_data;
-}ctsvc_name_sorting_order_changed_cb_info_s;
-
-static GSList *__setting_name_sorting_order_subscribe_list = NULL;
-
-static void __ctsvc_setting_name_sorting_order_subscriber_callback(pims_ipc_h ipc, pims_ipc_data_h data, void *user_data)
-{
-	int ret;
-	int value = -1;
-
-	if (data) {
-		ret = ctsvc_ipc_unmarshal_int(data, &value);
-		WARN_IF(CONTACTS_ERROR_NONE != ret, "() Fail(%d)", ret);
-	}
-
-	if (__setting_name_sorting_order_subscribe_list) {
-		GSList *l;
-		for (l = __setting_name_sorting_order_subscribe_list;l;l=l->next) {
-			ctsvc_name_sorting_order_changed_cb_info_s *cb_info = l->data;
-			if (cb_info->cb)
-				cb_info->cb((contacts_name_sorting_order_e)value, cb_info->user_data);
-		}
-	}
-}
-
 API int contacts_setting_add_name_sorting_order_changed_cb(
 	contacts_setting_name_sorting_order_changed_cb cb, void* user_data)
 {
@@ -332,7 +364,7 @@ API int contacts_setting_add_name_sorting_order_changed_cb(
 		if (pims_ipc_subscribe(ctsvc_ipc_get_handle_for_change_subsciption(),
 					CTSVC_IPC_SUBSCRIBE_MODULE, CTSVC_SETTING_SORTING_ORDER_CHANGED,
 					__ctsvc_setting_name_sorting_order_subscriber_callback, NULL) != 0) {
-			CTS_ERR("pims_ipc_subscribe error\n");
+			CTS_ERR("pims_ipc_subscribe() Fail");
 			ctsvc_mutex_unlock(CTS_MUTEX_PIMS_IPC_PUBSUB);
 			return CONTACTS_ERROR_IPC;
 		}
