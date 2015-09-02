@@ -37,10 +37,6 @@
 #include "ctsvc_server_change_subject.h"
 #endif
 
-#ifdef _CONTACTS_NATIVE
-static int __ctsvc_vconf_ref_count = 0;
-#endif
-
 static int primary_sort = -1;
 static int secondary_sort = -1;
 
@@ -52,7 +48,7 @@ static const char *CTSVC_VCONF_DISPLAY_ORDER = VCONFKEY_CONTACTS_SVC_NAME_DISPLA
 static const char *CTSVC_VCONF_SORTING_ORDER = VCONFKEY_CONTACTS_SVC_NAME_SORTING_ORDER;
 static const char *CTSVC_VCONF_PHONENUMBER_MIN_MATCH_DIGIT = VCONFKEY_CONTACTS_SVC_PHONENUMBER_MIN_MATCH_DIGIT;
 
-API int contacts_setting_get_name_display_order(contacts_name_display_order_e *order)
+int ctsvc_setting_get_name_display_order(contacts_name_display_order_e *order)
 {
 	int ret;
 
@@ -66,7 +62,7 @@ API int contacts_setting_get_name_display_order(contacts_name_display_order_e *o
 	return CONTACTS_ERROR_NONE;
 }
 
-API int contacts_setting_set_name_display_order(contacts_name_display_order_e order)
+int ctsvc_setting_set_name_display_order(contacts_name_display_order_e order)
 {
 	int ret;
 	RETVM_IF(CONTACTS_NAME_DISPLAY_ORDER_FIRSTLAST != order && CONTACTS_NAME_DISPLAY_ORDER_LASTFIRST != order,
@@ -83,7 +79,7 @@ API int contacts_setting_set_name_display_order(contacts_name_display_order_e or
 	return CONTACTS_ERROR_NONE;
 }
 
-API int contacts_setting_get_name_sorting_order(contacts_name_sorting_order_e *order)
+int ctsvc_setting_get_name_sorting_order(contacts_name_sorting_order_e *order)
 {
 	int ret;
 	if (name_sorting_order < 0) {
@@ -96,7 +92,7 @@ API int contacts_setting_get_name_sorting_order(contacts_name_sorting_order_e *o
 	return CONTACTS_ERROR_NONE;
 }
 
-API int contacts_setting_set_name_sorting_order(contacts_name_sorting_order_e order)
+int ctsvc_setting_set_name_sorting_order(contacts_name_sorting_order_e order)
 {
 	int ret;
 	RETVM_IF(CONTACTS_NAME_SORTING_ORDER_FIRSTLAST != order && CONTACTS_NAME_SORTING_ORDER_LASTFIRST != order,
@@ -149,11 +145,6 @@ int ctsvc_register_vconf(void)
 {
 	int ret;
 
-#ifdef _CONTACTS_NATIVE
-	__ctsvc_vconf_ref_count++;
-	if (__ctsvc_vconf_ref_count != 1)
-		return;
-#endif
 
 	// display order
 	ret = vconf_get_int(CTSVC_VCONF_DISPLAY_ORDER, &name_display_order);
@@ -197,11 +188,6 @@ void ctsvc_deregister_vconf(void)
 {
 	int ret;
 
-#ifdef _CONTACTS_NATIVE
-	__ctsvc_vconf_ref_count--;
-	if (__ctsvc_vconf_ref_count != 0)
-		return;
-#endif
 
 	ret = vconf_ignore_key_changed(CTSVC_VCONF_DISPLAY_ORDER, ctsvc_vconf_display_order_cb);
 	RETM_IF(ret<0,"vconf_ignore_key_changed(display order) Fail(%d)", ret);
@@ -216,6 +202,12 @@ int ctsvc_get_phonenumber_min_match_digit(void)
 {
 	return phonenumber_min_match_digit;
 }
+
+void ctsvc_set_phonenumber_min_match_digit(int min)
+{
+	phonenumber_min_match_digit = min;
+}
+
 
 const char* ctsvc_get_default_sort_vconfkey(void)
 {
@@ -238,35 +230,3 @@ int ctsvc_get_secondary_sort(void)
 	return secondary_sort;
 }
 
-#ifdef _CONTACTS_NATIVE
-API int contacts_setting_add_name_display_order_changed_cb(
-	contacts_setting_name_display_order_changed_cb cb, void* user_data)
-{
-	CTS_ERR("Please use contacts-service2 instead of contacts-service3");
-	return CONTACTS_ERROR_INTERNAL;
-}
-
-API int contacts_setting_remove_name_display_order_changed_cb(
-	contacts_setting_name_display_order_changed_cb cb, void* user_data)
-{
-	CTS_ERR("Please use contacts-service2 instead of contacts-service3");
-	return CONTACTS_ERROR_INTERNAL;
-
-}
-
-API int contacts_setting_add_name_sorting_order_changed_cb(
-	contacts_setting_name_sorting_order_changed_cb cb, void* user_data)
-{
-	CTS_ERR("Please use contacts-service2 instead of contacts-service3");
-	return CONTACTS_ERROR_INTERNAL;
-}
-
-
-API int contacts_setting_remove_name_sorting_order_changed_cb(
-	contacts_setting_name_sorting_order_changed_cb cb, void* user_data)
-{
-	CTS_ERR("Please use contacts-service2 instead of contacts-service3");
-	return CONTACTS_ERROR_INTERNAL;
-}
-
-#endif

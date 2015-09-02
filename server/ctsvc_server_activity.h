@@ -20,4 +20,8 @@
 #ifndef __CTSVC_SERVER_ACTIVITY_H__
 #define __CTSVC_SERVER_ACTIVITY_H__
 
+int ctsvc_activity_delete_by_contact_id(int contact_id);
+int ctsvc_activity_delete_by_account_id(int account_id);
+
+
 #endif /* __CTSVC_SERVER_ACTIVITY_H__ */

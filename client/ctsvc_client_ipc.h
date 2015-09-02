@@ -1,7 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,14 +21,15 @@
 #define __CTSVC_CLIENT_IPC_H__
 
 #include <pims-ipc.h>
+#include "contacts_types.h"
 
 pims_ipc_h ctsvc_get_ipc_handle();
 
-int ctsvc_ipc_connect(void);
-int ctsvc_ipc_disconnect(void);
+int ctsvc_ipc_connect(contacts_h contact);
+int ctsvc_ipc_disconnect(contacts_h contact, int connection_count);
 
-int ctsvc_ipc_connect_on_thread(void);
-int ctsvc_ipc_disconnect_on_thread(void);
+int ctsvc_ipc_connect_on_thread(contacts_h contact);
+int ctsvc_ipc_disconnect_on_thread(contacts_h contact, int connection_count);
 
 
 bool ctsvc_ipc_is_busy();
@@ -39,8 +40,8 @@ int ctsvc_ipc_destroy_for_change_subscription();
 
 int ctsvc_ipc_call(char *module, char *function, pims_ipc_h data_in, pims_ipc_data_h *data_out);
 
-void ctsvc_client_ipc_set_change_version(int version);
-int ctsvc_client_ipc_get_change_version(void);
+void ctsvc_client_ipc_set_change_version(contacts_h contact, int version);
+int ctsvc_client_ipc_get_change_version(contacts_h contact);
 
 int ctsvc_ipc_client_check_permission(int permission, bool *result);
 

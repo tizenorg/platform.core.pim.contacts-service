@@ -94,7 +94,7 @@ void ctsvc_change_subject_add_changed_phone_log_id(contacts_changed_e type, int 
 	int info_len = 0;
 	char changed_info[30] = {0};
 
-	if (!__phone_log_chanaged_info) {
+	if (NULL == __phone_log_chanaged_info) {
 		__phone_log_chanaged_info = (char*)calloc(CTSVC_SUBSCRIBE_MAX_LEN, sizeof(char));
 		__phone_log_buf_size = CTSVC_SUBSCRIBE_MAX_LEN;
 		__phone_log_chanaged_info[0] = '\0';

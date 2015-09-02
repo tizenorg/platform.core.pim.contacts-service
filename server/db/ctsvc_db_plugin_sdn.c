@@ -30,27 +30,21 @@
 #include "ctsvc_notification.h"
 #include "ctsvc_server_utils.h"
 
-//static int __ctsvc_db_sdn_insert_record(contacts_record_h record, int *id);
 static int __ctsvc_db_sdn_get_record(int id, contacts_record_h* record);
-//static int __ctsvc_db_sdn_update_record(contacts_record_h record);
-//static int __ctsvc_db_sdn_delete_record(int id);
 static int __ctsvc_db_sdn_get_all_records(int offset, int limit, contacts_list_h* out_list);
 static int __ctsvc_db_sdn_get_records_with_query(contacts_query_h query, int offset, int limit, contacts_list_h* out_list);
-//static int __ctsvc_db_sdn_insert_records(const contacts_list_h in_list, int **ids);
-//static int __ctsvc_db_sdn_update_records(const contacts_list_h in_list);
-//static int __ctsvc_db_sdn_delete_records(int ids[], int count);
 
 ctsvc_db_plugin_info_s ctsvc_db_plugin_sdn = {
 	.is_query_only = false,
-	.insert_record = NULL,//__ctsvc_db_sdn_insert_record,
+	.insert_record = NULL,
 	.get_record = __ctsvc_db_sdn_get_record,
-	.update_record = NULL,//__ctsvc_db_sdn_update_record,
-	.delete_record = NULL,//__ctsvc_db_sdn_delete_record,
+	.update_record = NULL,
+	.delete_record = NULL,
 	.get_all_records = __ctsvc_db_sdn_get_all_records,
 	.get_records_with_query = __ctsvc_db_sdn_get_records_with_query,
-	.insert_records = NULL,//__ctsvc_db_sdn_insert_records,
-	.update_records = NULL,//__ctsvc_db_sdn_update_records,
-	.delete_records = NULL,//__ctsvc_db_sdn_delete_records
+	.insert_records = NULL,
+	.update_records = NULL,
+	.delete_records = NULL,
 	.get_count = NULL,
 	.get_count_with_query = NULL,
 	.replace_record = NULL,
@@ -119,153 +113,6 @@ static int __ctsvc_db_sdn_get_record(int id, contacts_record_h* out_record)
 
 	return CONTACTS_ERROR_NONE;
 }
-
-#if 0
-static int __ctsvc_db_sdn_insert_record(contacts_record_h record, int *id)
-{
-	int ret;
-	ctsvc_sdn_s *sdn = (ctsvc_sdn_s*)record;
-
-	RETV_IF(NULL == record, CONTACTS_ERROR_INVALID_PARAMETER);
-	RETV_IF(NULL == sdn->name, CONTACTS_ERROR_INVALID_PARAMETER);
-	RETVM_IF(CTSVC_RECORD_SDN != sdn->base.r_type, CONTACTS_ERROR_INVALID_PARAMETER,
-			"Invalid parameter : record is invalid type(%d)", sdn->base.r_type);
-
-	cts_stmt stmt = NULL;
-	char query[CTS_SQL_MAX_LEN] = {0};
-
-	snprintf(query, sizeof(query),
-			"INSERT INTO "CTS_TABLE_SDN"(name, number, sim_slot_no) VALUES(?, ?, ?)");
-
-	ret = ctsvc_query_prepare(query, &stmt);
-	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
-
-	ctsvc_stmt_bind_text(stmt, 1, sdn->name);
-	ctsvc_stmt_bind_text(stmt, 2, sdn->number);
-	ctsvc_stmt_bind_int(stmt, 3, sdn->sim_slot_no);
-
-	ret = ctsvc_begin_trans();
-	if (ret < CONTACTS_ERROR_NONE) {
-		CTS_ERR("DB error : ctsvc_begin_trans() Fail(%d)", ret);
-		ctsvc_stmt_finalize(stmt);
-		return ret;
-	}
-
-	ret = ctsvc_stmt_step(stmt);
-	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB error : ctsvc_stmt_step() Fail(%d)", ret);
-		ctsvc_stmt_finalize(stmt);
-		ctsvc_end_trans(false);
-		return ret;
-	}
-
-	//sdn->id = ctsvc_db_get_last_insert_id();
-	if (id)
-		*id = ctsvc_db_get_last_insert_id();
-	ctsvc_stmt_finalize(stmt);
-
-	ctsvc_set_sdn_noti();
-	ret = ctsvc_end_trans(true);
-	if (ret < CONTACTS_ERROR_NONE) {
-		CTS_ERR("DB error : ctsvc_end_trans() Fail(%d)", ret);
-		return ret;
-	}
-
-	return CONTACTS_ERROR_NONE;
-}
-
-static int __ctsvc_db_sdn_update_record(contacts_record_h record)
-{
-	int sdn_id;
-	int ret = CONTACTS_ERROR_NONE;
-	char* set = NULL;
-	GSList *bind_text = NULL;
-	GSList *cursor = NULL;
-	ctsvc_sdn_s *sdn = (ctsvc_sdn_s*)record;
-	char query[CTS_SQL_MIN_LEN] = {0};
-
-	RETV_IF(NULL == record, CONTACTS_ERROR_INVALID_PARAMETER);
-	RETVM_IF(CTSVC_RECORD_SDN != sdn->base.r_type, CONTACTS_ERROR_INVALID_PARAMETER,
-			"Invalid parameter : record is invalid type(%d)", sdn->base.r_type);
-	RETVM_IF(!sdn->id, CONTACTS_ERROR_INVALID_PARAMETER, "sdn of contact has no ID.");
-	RETV_IF(NULL == sdn->name, CONTACTS_ERROR_INVALID_PARAMETER);
-	RETVM_IF(CTSVC_PROPERTY_FLAG_DIRTY != (sdn->base.property_flag & CTSVC_PROPERTY_FLAG_DIRTY), CONTACTS_ERROR_NONE, "No update");
-
-	ret = ctsvc_begin_trans();
-	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "DB error : ctsvc_begin_trans() Fail(%d)", ret);
-
-	snprintf(query, sizeof(query),
-			"SELECT id FROM "CTS_TABLE_SDN" WHERE id = %d", sdn->id);
-	ret = ctsvc_query_get_first_int_result(query, &sdn_id);
-	if (ret != CONTACTS_ERROR_NONE) {
-		CTS_ERR("ctsvc_query_get_first_int_result Fail(%d)", ret);
-		ctsvc_end_trans(false);
-		return ret;
-	}
-
-	do {
-		if (CONTACTS_ERROR_NONE != (ret = ctsvc_db_create_set_query(record, &set, &bind_text))) break;
-		if (CONTACTS_ERROR_NONE != (ret = ctsvc_db_update_record_with_set_query(set, bind_text, CTS_TABLE_SDN, sdn->id))) break;
-		ctsvc_set_sdn_noti();
-	} while (0);
-
-	CTSVC_RECORD_RESET_PROPERTY_FLAGS((ctsvc_record_s *)record);
-	CONTACTS_FREE(set);
-	if (bind_text) {
-		for (cursor=bind_text;cursor;cursor=cursor->next)
-			CONTACTS_FREE(cursor->data);
-		g_slist_free(bind_text);
-	}
-
-	ret = ctsvc_end_trans(true);
-	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "DB error : ctsvc_end_trans() Fail(%d)", ret);
-
-	return CONTACTS_ERROR_NONE;
-}
-
-static int __ctsvc_db_sdn_delete_record(int sdn_id)
-{
-	int ret;
-	int id;
-	char query[CTS_SQL_MAX_LEN] = {0};
-
-	ret = ctsvc_begin_trans();
-	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "DB error : ctsvc_begin_trans() Fail(%d)", ret);
-
-	snprintf(query, sizeof(query),
-			"SELECT id FROM "CTS_TABLE_SDN" WHERE id = %d", sdn_id);
-	ret = ctsvc_query_get_first_int_result(query, &id);
-	if (ret != CONTACTS_ERROR_NONE) {
-		CTS_ERR("ctsvc_query_get_first_int_result Fail(%d)", ret);
-		ctsvc_end_trans(false);
-		return ret;
-	}
-
-	snprintf(query, sizeof(query), "DELETE FROM "CTS_TABLE_SDN" WHERE id = %d", sdn_id);
-	ret = ctsvc_query_exec(query);
-	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB error : ctsvc_query_exec() Fail(%d)", ret);
-		ctsvc_end_trans(false);
-		return ret;
-	}
-
-	ret = ctsvc_db_change();
-	if (ret <= 0) {
-		ret = CONTACTS_ERROR_NO_DATA;
-		ctsvc_end_trans(false);
-		return ret;
-	}
-
-	ctsvc_set_sdn_noti();
-	ret = ctsvc_end_trans(true);
-	if (ret != CONTACTS_ERROR_NONE) {
-		CTS_ERR("DB error : ctsvc_end_trans() Fail(%d)", ret);
-		return ret;
-	}
-
-	return CONTACTS_ERROR_NONE;
-}
-#endif
 
 static int __ctsvc_db_sdn_get_all_records(int offset, int limit,
 	contacts_list_h* out_list)
@@ -389,19 +236,3 @@ static int __ctsvc_db_sdn_get_records_with_query(contacts_query_h query, int off
 	return CONTACTS_ERROR_NONE;
 }
 
-#if 0
-static int __ctsvc_db_sdn_insert_records(const contacts_list_h in_list, int **ids)
-{
-	return CONTACTS_ERROR_NONE;
-}
-
-static int __ctsvc_db_sdn_update_records(const contacts_list_h in_list)
-{
-	return CONTACTS_ERROR_NONE;
-}
-
-static int __ctsvc_db_sdn_delete_records(int ids[], int count)
-{
-	return CONTACTS_ERROR_NONE;
-}
-#endif

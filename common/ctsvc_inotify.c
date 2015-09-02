@@ -28,6 +28,7 @@
 #include "ctsvc_internal.h"
 #include "ctsvc_notify.h"
 #include "ctsvc_view.h"
+#include "ctsvc_handle.h"
 
 #include <stdbool.h>
 
@@ -37,6 +38,7 @@
 
 typedef struct
 {
+	contacts_h contact;
 	int wd;
 	char *view_uri;
 	contacts_db_changed_cb cb;
@@ -240,14 +242,14 @@ static inline const char* __ctsvc_noti_get_file_path(const char *view_uri)
 		return CTSVC_NOTI_SDN_CHANGED;
 	case CTSVC_RECORD_RESULT:
 	default:
-		CTS_ERR("Invalid parameter : The type(%d) is not supported", view_uri);
+		CTS_ERR("Invalid parameter : The type(%s) is not supported", view_uri);
 		return NULL;
 	}
 	return NULL;
 }
 
-int ctsvc_inotify_subscribe(const char *view_uri,
-			contacts_db_changed_cb cb, void *data)
+int ctsvc_inotify_subscribe(contacts_h contact, const char *view_uri,
+			void *cb, void *data)
 {
 	int ret, wd;
 	noti_info *noti, *same_noti = NULL;
@@ -274,7 +276,8 @@ int ctsvc_inotify_subscribe(const char *view_uri,
 		if (it->data) {
 			same_noti = it->data;
 			if (same_noti->wd == wd && same_noti->cb == cb &&
-					STRING_EQUAL == strcmp(same_noti->view_uri, view_uri) && same_noti->cb_data == data)
+					STRING_EQUAL == strcmp(same_noti->view_uri, view_uri) && same_noti->cb_data == data &&
+					0 == ctsvc_handle_compare(contact, same_noti->contact))
 				break;
 			else
 				same_noti = NULL;
@@ -297,6 +300,7 @@ int ctsvc_inotify_subscribe(const char *view_uri,
 	noti->view_uri = strdup(view_uri);
 	noti->cb_data = data;
 	noti->cb = cb;
+	ctsvc_handle_clone(contact, &(noti->contact));
 	noti->blocked = false;
 
 	__noti_list = g_slist_append(__noti_list, noti);
@@ -304,8 +308,8 @@ int ctsvc_inotify_subscribe(const char *view_uri,
 	return CONTACTS_ERROR_NONE;
 }
 
-static inline int __ctsvc_del_noti(GSList **noti_list, int wd,
-		const char *view_uri, contacts_db_changed_cb cb, void *user_data)
+static inline int __ctsvc_del_noti(GSList **noti_list, contacts_h contact, int wd,
+		const char *view_uri, void *cb, void *user_data)
 {
 	int del_cnt, remain_cnt;
 	GSList *it, *result;
@@ -318,9 +322,11 @@ static inline int __ctsvc_del_noti(GSList **noti_list, int wd,
 		noti_info *noti = it->data;
 		if (noti && wd == noti->wd) {
 			if (cb == noti->cb && user_data == noti->cb_data
-				&& STRING_EQUAL == strcmp(noti->view_uri, view_uri)) {
+				&& STRING_EQUAL == strcmp(noti->view_uri, view_uri)
+				&& 0 == ctsvc_handle_compare(contact, noti->contact)) {
 				it = it->next;
 				result = g_slist_remove(result, noti);
+				ctsvc_handle_destroy(noti->contact);
 				free(noti->view_uri);
 				free(noti);
 				del_cnt++;
@@ -339,7 +345,7 @@ static inline int __ctsvc_del_noti(GSList **noti_list, int wd,
 	return remain_cnt;
 }
 
-int ctsvc_inotify_unsubscribe(const char *view_uri, contacts_db_changed_cb cb, void *user_data)
+int ctsvc_inotify_unsubscribe(contacts_h contact, const char *view_uri, void *cb, void *user_data)
 {
 	int ret, wd;
 	const char *path;
@@ -360,7 +366,7 @@ int ctsvc_inotify_unsubscribe(const char *view_uri, contacts_db_changed_cb cb, v
 		return CONTACTS_ERROR_SYSTEM;
 	}
 
-	ret = __ctsvc_del_noti(&__noti_list, wd, view_uri, cb, user_data);
+	ret = __ctsvc_del_noti(&__noti_list, contact, wd, view_uri, cb, user_data);
 	WARN_IF(ret < CONTACTS_ERROR_NONE, "__ctsvc_del_noti() Fail(%d)", ret);
 
 	if (0 == ret)
@@ -412,3 +418,4 @@ void ctsvc_inotify_close(void)
 		__inoti_fd = -1;
 	}
 }
+

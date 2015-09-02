@@ -26,7 +26,7 @@
 #include "ctsvc_notification.h"
 #include "ctsvc_db_access_control.h"
 
-API int contacts_activity_delete_by_contact_id(int contact_id)
+int ctsvc_activity_delete_by_contact_id(int contact_id)
 {
 	char query[CTS_SQL_MAX_LEN] = {0};
 
@@ -51,7 +51,7 @@ API int contacts_activity_delete_by_contact_id(int contact_id)
 	return ret;
 }
 
-API int contacts_activity_delete_by_account_id(int account_id)
+int ctsvc_activity_delete_by_account_id(int account_id)
 {
 	char query[CTS_SQL_MAX_LEN] = {0};
 

@@ -8,12 +8,21 @@ SET(CLIENT contacts-service2)
 SET(SRCS
 	ctsvc_client_activity.c
 	ctsvc_client_db.c
+	ctsvc_client_db_notification.c
 	ctsvc_client_group.c
 	ctsvc_client_person.c
 	ctsvc_client_service.c
 	ctsvc_client_ipc.c
 	ctsvc_client_noti.c
 	ctsvc_client_setting.c
+	ctsvc_client_handle.c
+
+	ctsvc_client_service_helper.c
+	ctsvc_client_db_helper.c
+	ctsvc_client_activity_helper.c
+	ctsvc_client_person_helper.c
+	ctsvc_client_group_helper.c
+	ctsvc_client_phonelog_helper.c
 
 	${CMAKE_SOURCE_DIR}/common/ipc/ctsvc_ipc_marshal.c
 	${CMAKE_SOURCE_DIR}/common/ipc/ctsvc_ipc_addressbook.c
@@ -44,7 +53,6 @@ SET(SRCS
 	${CMAKE_SOURCE_DIR}/common/ipc/ctsvc_ipc_extension.c
 	${CMAKE_SOURCE_DIR}/common/ipc/ctsvc_ipc_profile.c
 
-	${CMAKE_SOURCE_DIR}/common/ctsvc_db_notification.c
 	${CMAKE_SOURCE_DIR}/common/ctsvc_filter.c
 	${CMAKE_SOURCE_DIR}/common/ctsvc_inotify.c
 	${CMAKE_SOURCE_DIR}/common/ctsvc_list.c
@@ -62,6 +70,7 @@ SET(SRCS
 	${CMAKE_SOURCE_DIR}/common/ctsvc_socket.c
 	${CMAKE_SOURCE_DIR}/common/ctsvc_vcard.c
 	${CMAKE_SOURCE_DIR}/common/ctsvc_view.c
+	${CMAKE_SOURCE_DIR}/common/ctsvc_handle.c
 
 	${CMAKE_SOURCE_DIR}/common/ipc/ctsvc_ipc_sdn.c
 	${CMAKE_SOURCE_DIR}/common/ctsvc_record_sdn.c

@@ -487,7 +487,7 @@ static char *langset = NULL;
 
 char* ctsvc_get_langset()
 {
-	return langset;
+	return SAFE_STR(langset);
 }
 
 void ctsvc_set_langset(char *new_langset)

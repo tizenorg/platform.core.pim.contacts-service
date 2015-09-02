@@ -108,9 +108,7 @@ int ctsvc_end_trans(bool is_success)
 
 	if (false == is_success) {
 		ctsvc_nofitication_cancel();
-#ifdef _CONTACTS_IPC_SERVER
 		ctsvc_change_subject_clear_changed_info();
-#endif
 		ret = ctsvc_query_exec("ROLLBACK TRANSACTION");
 
 		return CONTACTS_ERROR_NONE;
@@ -138,18 +136,14 @@ int ctsvc_end_trans(bool is_success)
 		int tmp_ret;
 		CTS_ERR("ctsvc_query_exec() Fail(%d)", ret);
 		ctsvc_nofitication_cancel();
-#ifdef _CONTACTS_IPC_SERVER
 		ctsvc_change_subject_clear_changed_info();
-#endif
 		tmp_ret = ctsvc_query_exec("ROLLBACK TRANSACTION");
 		WARN_IF(CONTACTS_ERROR_NONE != tmp_ret, "ctsvc_query_exec(ROLLBACK) Fail(%d)", tmp_ret);
 		return ret;
 	}
 
 	ctsvc_notification_send();
-#ifdef _CONTACTS_IPC_SERVER
 	ctsvc_change_subject_publish_changed_info();
-#endif
 
 	CTS_DBG("Transaction shut down! : (%d)\n", transaction_ver);
 
@@ -160,7 +154,7 @@ const char* ctsvc_get_display_column(void)
 {
 	contacts_name_display_order_e order;
 
-	contacts_setting_get_name_display_order(&order);
+	ctsvc_setting_get_name_display_order(&order);
 	if (CONTACTS_NAME_DISPLAY_ORDER_FIRSTLAST == order)
 		return "display_name";
 	else
@@ -171,7 +165,7 @@ const char* ctsvc_get_sort_name_column(void)
 {
 	contacts_name_sorting_order_e order;
 
-	contacts_setting_get_name_sorting_order(&order);
+	ctsvc_setting_get_name_sorting_order(&order);
 	if (CONTACTS_NAME_SORTING_ORDER_FIRSTLAST == order)
 		return "sort_name, display_name_language";
 	else
@@ -182,7 +176,7 @@ const char* ctsvc_get_sort_column(void)
 {
 	contacts_name_sorting_order_e order;
 
-	contacts_setting_get_name_sorting_order(&order);
+	ctsvc_setting_get_name_sorting_order(&order);
 	if (CONTACTS_NAME_SORTING_ORDER_FIRSTLAST == order)
 		return "display_name_language, sortkey";
 	else

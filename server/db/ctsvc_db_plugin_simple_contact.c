@@ -303,7 +303,3 @@ static int __ctsvc_db_simple_contact_get_records_with_query(contacts_query_h que
 
 	return CONTACTS_ERROR_NONE;
 }
-
-//static int __ctsvc_db_simple_contact_insert_records(const contacts_list_h in_list, int **ids) { return CONTACTS_ERROR_NONE; }
-//static int __ctsvc_db_simple_contact_update_records(const contacts_list_h in_list) { return CONTACTS_ERROR_NONE; }
-//static int __ctsvc_db_simple_contact_delete_records(int ids[], int count) { return CONTACTS_ERROR_NONE; }

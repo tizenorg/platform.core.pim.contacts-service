@@ -465,17 +465,17 @@ static inline int __ctsvc_vcard_append_name(ctsvc_list_s *names, char **buf, int
 	CTSVC_VCARD_APPEND_STR(buf, buf_size, len, CTSVC_CRLF);
 
 	if (name->first && name->last) {
-		contacts_name_display_order_e order;
+		contacts_name_display_order_e order = CONTACTS_NAME_DISPLAY_ORDER_FIRSTLAST;
+#ifdef _CONTACTS_IPC_CLIENT
 		contacts_setting_get_name_display_order(&order);
+#endif
 		if (CONTACTS_NAME_DISPLAY_ORDER_FIRSTLAST == order) {
 			snprintf(display, sizeof(display), "%s %s", name->first, name->last);
 		}
-#ifdef _CONTACTS_IPC_CLIENT
 		else {
 			/* CONTACTS_NAME_DISPLAY_ORDER_LASTFIRST */
 			snprintf(display, sizeof(display), "%s, %s", name->last, name->first);
 		}
-#endif
 	}
 	else
 		snprintf(display, sizeof(display), "%s%s", SAFE_STR(name->first), SAFE_STR(name->last));
@@ -1792,7 +1792,7 @@ API int contacts_vcard_make_from_my_profile(contacts_record_h record, char **vca
 	return __ctsvc_vcard_make_from_my_profile(my_profile, vcard_stream);
 }
 
-
+#ifdef _CONTACTS_IPC_CLIENT
 static int __ctsvc_vcard_append_person(ctsvc_person_s *person, ctsvc_list_s *list_contacts, char **buf, int *buf_size, int len)
 {
 	int changed_time = 0;
@@ -1921,7 +1921,9 @@ static int __ctsvc_vcard_append_person(ctsvc_person_s *person, ctsvc_list_s *lis
 #endif
 	return len;
 }
+#endif // _CONTACTS_IPC_CLIENT
 
+#ifdef _CONTACTS_IPC_CLIENT
 static int __ctsvc_vcard_make_from_person(ctsvc_person_s *person, ctsvc_list_s *list_contacts,
 		char **vcard_stream)
 {
@@ -1967,7 +1969,9 @@ static int __ctsvc_vcard_make_from_person(ctsvc_person_s *person, ctsvc_list_s *
 
 	return CONTACTS_ERROR_NONE;
 }
+#endif // _CONTACTS_IPC_CLIENT
 
+#ifdef _CONTACTS_IPC_CLIENT
 API int contacts_vcard_make_from_person(contacts_record_h record, char **vcard_stream)
 {
 	int ret;
@@ -1999,6 +2003,7 @@ API int contacts_vcard_make_from_person(contacts_record_h record, char **vcard_s
 	contacts_list_destroy(list, true);
 	return ret;
 }
+#endif
 
 static inline char* __ctsvc_vcard_remove_empty_line(char *src)
 {
@@ -4013,17 +4018,17 @@ static inline void __ctsvc_vcard_make_contact_display_name(ctsvc_contact_s *cont
 			}
 		}
 
+#ifdef _CONTACTS_IPC_CLIENT
 		contacts_setting_get_name_display_order(&name_display_order);
+#endif
 		if (CONTACTS_NAME_DISPLAY_ORDER_FIRSTLAST == name_display_order) {
 			contact->display_name = display;
 			free(reverse_display);
 		}
-#ifdef _CONTACTS_IPC_CLIENT
 		else {
 			contact->display_name = reverse_display;
 			free(display);
 		}
-#endif
 
 		contact->display_source_type = CONTACTS_DISPLAY_NAME_SOURCE_TYPE_NAME;
 	}

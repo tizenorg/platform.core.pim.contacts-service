@@ -21,6 +21,7 @@
 #include <pims-ipc-svc.h>
 #include "contacts.h"
 
+#include "ctsvc_handle.h"
 #include "ctsvc_server_service.h"
 #include "ctsvc_db_init.h"
 #include "ctsvc_db_query.h"
@@ -36,8 +37,22 @@ void ctsvc_ipc_server_connect(pims_ipc_h ipc, pims_ipc_data_h indata, pims_ipc_d
 {
 	CTS_FN_CALL;
 	int ret = CONTACTS_ERROR_NONE;
+	contacts_h contact = NULL;
 
-	ret = contacts_connect();
+	if (indata) {
+		ret = ctsvc_ipc_unmarshal_handle(indata, &contact);
+		if (ret != CONTACTS_ERROR_NONE) {
+			CTS_ERR("ctsvc_ipc_unmarshal_handle fail");
+			goto ERROR_RETURN;
+		}
+	}
+	else {
+		CTS_ERR("There is no indata fail");
+		ret = CONTACTS_ERROR_SYSTEM;
+		goto ERROR_RETURN;
+	}
+
+	ret = ctsvc_connect();
 
 	if (CONTACTS_ERROR_NONE == ret) {
 		char *smack = NULL;
@@ -47,56 +62,64 @@ void ctsvc_ipc_server_connect(pims_ipc_h ipc, pims_ipc_data_h indata, pims_ipc_d
 		free(smack);
 	}
 
+ERROR_RETURN:
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
 		if (NULL == *outdata) {
 			CTS_ERR("pims_ipc_data_create fail");
-			return;
+			goto DATA_FREE;
 		}
 
 		if (pims_ipc_data_put(*outdata,(void*)&ret,sizeof(int)) != 0) {
 			pims_ipc_data_destroy(*outdata);
 			*outdata = NULL;
 			CTS_ERR("pims_ipc_data_put fail");
-			return;
+			goto DATA_FREE;
 		}
 	}
 	else {
 		CTS_ERR("outdata is NULL");
 	}
+DATA_FREE:
+	ctsvc_handle_destroy(contact);
 }
 
 void ctsvc_ipc_server_disconnect(pims_ipc_h ipc, pims_ipc_data_h indata, pims_ipc_data_h *outdata, void *userdata)
 {
 	int ret = CONTACTS_ERROR_NONE;
+	contacts_h contact = NULL;
 
-	ret = contacts_disconnect();
-
-	// related data will be freed in __ctsvc_client_disconnected_cb
-//	if (ret == CONTACTS_ERROR_NONE)
-//		ctsvc_unset_client_access_info();
-
-	if (outdata)
-	{
-		*outdata = pims_ipc_data_create(0);
-		if (NULL == *outdata)
-		{
-			CTS_ERR("pims_ipc_data_create fail");
-			return;
+	if (indata) {
+		ret = ctsvc_ipc_unmarshal_handle(indata, &contact);
+		if (CONTACTS_ERROR_NONE != ret) {
+			CTS_ERR("ctsvc_ipc_unmarshal_handle() Fail(%d)", ret);
+			ret = CONTACTS_ERROR_IPC;
+			goto ERROR_RETURN;
 		}
-		if (pims_ipc_data_put(*outdata,(void*)&ret,sizeof(int)) != 0)
-		{
+	}
+
+	ret = ctsvc_disconnect();
+
+ERROR_RETURN:
+	if (outdata) {
+		*outdata = pims_ipc_data_create(0);
+		if (NULL == *outdata) {
+			CTS_ERR("pims_ipc_data_create fail");
+			goto DATA_FREE;
+		}
+		if (pims_ipc_data_put(*outdata,(void*)&ret,sizeof(int)) != 0) {
 			pims_ipc_data_destroy(*outdata);
 			*outdata = NULL;
 			CTS_ERR("pims_ipc_data_put fail");
-			return;
+			goto DATA_FREE;
 		}
 	}
-	else
-	{
+	else {
 		CTS_ERR("outdata is NULL");
 	}
-	return;
+DATA_FREE:
+	ctsvc_handle_destroy(contact);
+	ctsvc_server_trim_memory();
 }
 
 void ctsvc_ipc_server_check_permission(pims_ipc_h ipc, pims_ipc_data_h indata,
@@ -149,8 +172,16 @@ void ctsvc_ipc_server_db_insert_record(pims_ipc_h ipc, pims_ipc_data_h indata, p
 	int ret = CONTACTS_ERROR_NONE;
 	contacts_record_h record = NULL;
 	int id = 0;
+	contacts_h contact = NULL;
 
 	if (indata) {
+		ret = ctsvc_ipc_unmarshal_handle(indata, &contact);
+		if (CONTACTS_ERROR_NONE != ret) {
+			CTS_ERR("ctsvc_ipc_unmarshal_handle() Fail(%d)", ret);
+			ret = CONTACTS_ERROR_IPC;
+			goto ERROR_RETURN;
+		}
+
 		ret = ctsvc_ipc_unmarshal_record(indata,&record);
 		if (ret != CONTACTS_ERROR_NONE) {
 			CTS_ERR("ctsvc_ipc_unmarshal_record fail");
@@ -168,7 +199,7 @@ void ctsvc_ipc_server_db_insert_record(pims_ipc_h ipc, pims_ipc_data_h indata, p
 		goto ERROR_RETURN;
 	}
 
-	ret = contacts_db_insert_record(record, &id);
+	ret = ctsvc_db_insert_record(record, &id);
 
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
@@ -223,10 +254,9 @@ ERROR_RETURN:
 	}
 
 DATA_FREE:
-	if (record)
-	{
-		contacts_record_destroy(record,true);
-	}
+	ctsvc_handle_destroy(contact);
+	contacts_record_destroy(record,true);
+	ctsvc_server_trim_memory();
 	return;
 }
 
@@ -236,8 +266,15 @@ void ctsvc_ipc_server_db_get_record(pims_ipc_h ipc, pims_ipc_data_h indata, pims
 	char* view_uri = NULL;
 	int id = 0;
 	contacts_record_h record = NULL;
+	contacts_h contact = NULL;
 
 	if (indata) {
+		ret = ctsvc_ipc_unmarshal_handle(indata, &contact);
+		if (CONTACTS_ERROR_NONE != ret) {
+			CTS_ERR("ctsvc_ipc_unmarshal_handle() Fail(%d)", ret);
+			ret = CONTACTS_ERROR_IPC;
+			goto ERROR_RETURN;
+		}
 		ret = ctsvc_ipc_unmarshal_string(indata,&view_uri);
 		if (ret != CONTACTS_ERROR_NONE) {
 			CTS_ERR("ctsvc_ipc_unmarshal_string fail");
@@ -259,7 +296,7 @@ void ctsvc_ipc_server_db_get_record(pims_ipc_h ipc, pims_ipc_data_h indata, pims
 		goto ERROR_RETURN;
 	}
 
-	ret = contacts_db_get_record(view_uri,id,&record);
+	ret = ctsvc_db_get_record(view_uri,id,&record);
 
 ERROR_RETURN:
 	if (outdata) {
@@ -291,10 +328,8 @@ ERROR_RETURN:
 		CTS_ERR("outdata is NULL");
 	}
 DATA_FREE:
-	if (record)
-	{
-		contacts_record_destroy(record,true);
-	}
+	ctsvc_handle_destroy(contact);
+	contacts_record_destroy(record,true);
 	CONTACTS_FREE(view_uri);
 	return;
 }
@@ -303,18 +338,22 @@ void ctsvc_ipc_server_db_update_record(pims_ipc_h ipc, pims_ipc_data_h indata, p
 {
 	int ret = CONTACTS_ERROR_NONE;
 	contacts_record_h record = NULL;
+	contacts_h contact = NULL;
 
-	if (indata)
-	{
+	if (indata) {
+		ret = ctsvc_ipc_unmarshal_handle(indata, &contact);
+		if (CONTACTS_ERROR_NONE != ret) {
+			CTS_ERR("ctsvc_ipc_unmarshal_handle() Fail(%d)", ret);
+			ret = CONTACTS_ERROR_IPC;
+			goto ERROR_RETURN;
+		}
 		ret = ctsvc_ipc_unmarshal_record(indata,&record);
-		if (ret != CONTACTS_ERROR_NONE)
-		{
+		if (ret != CONTACTS_ERROR_NONE) {
 			CTS_ERR("ctsvc_ipc_unmarshal_record fail");
 			goto ERROR_RETURN;
 		}
 	}
-	else
-	{
+	else {
 		CTS_ERR("ctsvc_ipc_server_db_insert_record fail");
 		goto ERROR_RETURN;
 	}
@@ -324,7 +363,7 @@ void ctsvc_ipc_server_db_update_record(pims_ipc_h ipc, pims_ipc_data_h indata, p
 		goto ERROR_RETURN;
 	}
 
-	ret = contacts_db_update_record(record);
+	ret = ctsvc_db_update_record(record);
 
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
@@ -371,10 +410,9 @@ ERROR_RETURN:
 		CTS_ERR("outdata is NULL");
 	}
 DATA_FREE:
-	if (record)
-	{
-		contacts_record_destroy(record,true);
-	}
+	ctsvc_handle_destroy(contact);
+	contacts_record_destroy(record,true);
+	ctsvc_server_trim_memory();
 	return;
 }
 
@@ -383,8 +421,15 @@ void ctsvc_ipc_server_db_delete_record(pims_ipc_h ipc, pims_ipc_data_h indata, p
 	int ret = CONTACTS_ERROR_NONE;
 	char* view_uri = NULL;
 	int id = 0;
+	contacts_h contact = NULL;
 
 	if (indata) {
+		ret = ctsvc_ipc_unmarshal_handle(indata, &contact);
+		if (CONTACTS_ERROR_NONE != ret) {
+			CTS_ERR("ctsvc_ipc_unmarshal_handle() Fail(%d)", ret);
+			ret = CONTACTS_ERROR_IPC;
+			goto ERROR_RETURN;
+		}
 		ret = ctsvc_ipc_unmarshal_string(indata,&view_uri);
 		if (ret != CONTACTS_ERROR_NONE) {
 			CTS_ERR("ctsvc_ipc_unmarshal_record fail");
@@ -406,7 +451,7 @@ void ctsvc_ipc_server_db_delete_record(pims_ipc_h ipc, pims_ipc_data_h indata, p
 		goto ERROR_RETURN;
 	}
 
-	ret = contacts_db_delete_record(view_uri,id);
+	ret = ctsvc_db_delete_record(view_uri,id);
 
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
@@ -455,6 +500,7 @@ ERROR_RETURN:
 
 DATA_FREE:
 
+	ctsvc_handle_destroy(contact);
 	CONTACTS_FREE(view_uri);
 	return;
 }
@@ -465,8 +511,16 @@ void ctsvc_ipc_server_db_replace_record(pims_ipc_h ipc, pims_ipc_data_h indata,
 	int ret = CONTACTS_ERROR_NONE;
 	contacts_record_h record = NULL;
 	int id = 0;
+	contacts_h contact = NULL;
 
 	if (indata) {
+		ret = ctsvc_ipc_unmarshal_handle(indata, &contact);
+		if (CONTACTS_ERROR_NONE != ret) {
+			CTS_ERR("ctsvc_ipc_unmarshal_handle() Fail(%d)", ret);
+			ret = CONTACTS_ERROR_IPC;
+			goto ERROR_RETURN;
+		}
+
 		ret = ctsvc_ipc_unmarshal_record(indata, &record);
 		if (ret != CONTACTS_ERROR_NONE) {
 			CTS_ERR("ctsvc_ipc_unmarshal_record fail");
@@ -490,7 +544,7 @@ void ctsvc_ipc_server_db_replace_record(pims_ipc_h ipc, pims_ipc_data_h indata,
 	}
 
 
-	ret = contacts_db_replace_record(record, id);
+	ret = ctsvc_db_replace_record(record, id);
 
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
@@ -540,8 +594,8 @@ ERROR_RETURN:
 	}
 
 DATA_FREE:
-	if (record)
-		contacts_record_destroy(record, true);
+	ctsvc_handle_destroy(contact);
+	contacts_record_destroy(record, true);
 
 	return;
 }
@@ -553,8 +607,16 @@ void ctsvc_ipc_server_db_get_all_records(pims_ipc_h ipc, pims_ipc_data_h indata,
 	int offset = 0;
 	int limit = 0;
 	contacts_list_h list = NULL;
+	contacts_h contact = NULL;
 
 	if (indata) {
+		ret = ctsvc_ipc_unmarshal_handle(indata, &contact);
+		if (CONTACTS_ERROR_NONE != ret) {
+			CTS_ERR("ctsvc_ipc_unmarshal_handle() Fail(%d)", ret);
+			ret = CONTACTS_ERROR_IPC;
+			goto ERROR_RETURN;
+		}
+
 		ret = ctsvc_ipc_unmarshal_string(indata,&view_uri);
 		if (ret != CONTACTS_ERROR_NONE) {
 			CTS_ERR("ctsvc_ipc_unmarshal_record fail");
@@ -581,7 +643,7 @@ void ctsvc_ipc_server_db_get_all_records(pims_ipc_h ipc, pims_ipc_data_h indata,
 		goto ERROR_RETURN;
 	}
 
-	ret = contacts_db_get_all_records(view_uri,offset,limit,&list);
+	ret = ctsvc_db_get_all_records(view_uri,offset,limit,&list);
 
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
@@ -633,11 +695,8 @@ ERROR_RETURN:
 		CTS_ERR("outdata is NULL");
 	}
 DATA_FREE:
-
-	if (list)
-	{
-		contacts_list_destroy(list,true);
-	}
+	ctsvc_handle_destroy(contact);
+	contacts_list_destroy(list,true);
 	CONTACTS_FREE(view_uri);
 	return;
 }
@@ -649,8 +708,15 @@ void ctsvc_ipc_server_db_get_records_with_query(pims_ipc_h ipc, pims_ipc_data_h 
 	int offset = 0;
 	int limit = 0;
 	contacts_list_h list = NULL;
+	contacts_h contact = NULL;
 
 	if (indata) {
+		ret = ctsvc_ipc_unmarshal_handle(indata, &contact);
+		if (CONTACTS_ERROR_NONE != ret) {
+			CTS_ERR("ctsvc_ipc_unmarshal_handle Fail(%d)", ret);
+			goto ERROR_RETURN;
+		}
+
 		ret = ctsvc_ipc_unmarshal_query(indata,&query);
 		if (ret != CONTACTS_ERROR_NONE) {
 			CTS_ERR("ctsvc_ipc_unmarshal_record fail");
@@ -677,7 +743,7 @@ void ctsvc_ipc_server_db_get_records_with_query(pims_ipc_h ipc, pims_ipc_data_h 
 		goto ERROR_RETURN;
 	}
 
-	ret = contacts_db_get_records_with_query(query,offset,limit,&list);
+	ret = ctsvc_db_get_records_with_query(query,offset,limit,&list);
 
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
@@ -727,15 +793,9 @@ ERROR_RETURN:
 		CTS_ERR("outdata is NULL");
 	}
 DATA_FREE:
-
-	if (list)
-	{
-		contacts_list_destroy(list,true);
-	}
-	if (query)
-	{
-		contacts_query_destroy(query);
-	}
+	ctsvc_handle_destroy(contact);
+	contacts_list_destroy(list,true);
+	contacts_query_destroy(query);
 	return;
 }
 
@@ -745,8 +805,15 @@ void ctsvc_ipc_server_db_get_count(pims_ipc_h ipc, pims_ipc_data_h indata, pims_
 	int ret = CONTACTS_ERROR_NONE;
 	char* view_uri = NULL;
 	int count = 0;
+	contacts_h contact = NULL;
 
 	if (indata) {
+		ret = ctsvc_ipc_unmarshal_handle(indata, &contact);
+		if (CONTACTS_ERROR_NONE != ret) {
+			CTS_ERR("ctsvc_ipc_unmarshal_handle Fail(%d)", ret);
+			goto ERROR_RETURN;
+		}
+
 		ret = ctsvc_ipc_unmarshal_string(indata,&view_uri);
 		if (ret != CONTACTS_ERROR_NONE) {
 			CTS_ERR("ctsvc_ipc_unmarshal_record fail");
@@ -763,7 +830,7 @@ void ctsvc_ipc_server_db_get_count(pims_ipc_h ipc, pims_ipc_data_h indata, pims_
 		goto ERROR_RETURN;
 	}
 
-	ret = contacts_db_get_count(view_uri,&count);
+	ret = ctsvc_db_get_count(view_uri,&count);
 
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
@@ -813,6 +880,7 @@ ERROR_RETURN:
 		CTS_ERR("outdata is NULL");
 	}
 DATA_FREE:
+	ctsvc_handle_destroy(contact);
 	CONTACTS_FREE(view_uri);
 	return;
 }
@@ -822,8 +890,15 @@ void ctsvc_ipc_server_db_get_count_with_query(pims_ipc_h ipc, pims_ipc_data_h in
 	int ret = CONTACTS_ERROR_NONE;
 	contacts_query_h query = NULL;
 	int count = 0;
+	contacts_h contact = NULL;
 
 	if (indata) {
+		ret = ctsvc_ipc_unmarshal_handle(indata, &contact);
+		if (CONTACTS_ERROR_NONE != ret) {
+			CTS_ERR("ctsvc_ipc_unmarshal_handle Fail(%d)", ret);
+			goto ERROR_RETURN;
+		}
+
 		ret = ctsvc_ipc_unmarshal_query(indata,&query);
 		if (ret != CONTACTS_ERROR_NONE) {
 			CTS_ERR("ctsvc_ipc_unmarshal_record fail");
@@ -840,7 +915,7 @@ void ctsvc_ipc_server_db_get_count_with_query(pims_ipc_h ipc, pims_ipc_data_h in
 		goto ERROR_RETURN;
 	}
 
-	ret = contacts_db_get_count_with_query(query,&count);
+	ret = ctsvc_db_get_count_with_query(query,&count);
 
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
@@ -890,10 +965,8 @@ ERROR_RETURN:
 		CTS_ERR("outdata is NULL");
 	}
 DATA_FREE:
-	if (query)
-	{
-		contacts_query_destroy(query);
-	}
+	ctsvc_handle_destroy(contact);
+	contacts_query_destroy(query);
 	return;
 }
 
@@ -902,11 +975,18 @@ void ctsvc_ipc_server_db_insert_records(pims_ipc_h ipc, pims_ipc_data_h indata,
 {
 	int ret = CONTACTS_ERROR_NONE;
 	contacts_list_h list = NULL;
-	unsigned int id_count = 0;
+	int id_count = 0;
 	int *ids = NULL;
 	int i=0;
+	contacts_h contact = NULL;
 
 	if (indata) {
+		ret = ctsvc_ipc_unmarshal_handle(indata, &contact);
+		if (CONTACTS_ERROR_NONE != ret) {
+			CTS_ERR("ctsvc_ipc_unmarshal_handle Fail(%d)", ret);
+			goto ERROR_RETURN;
+		}
+
 		ret = ctsvc_ipc_unmarshal_list(indata,&list);
 		if (ret != CONTACTS_ERROR_NONE) {
 			CTS_ERR("ctsvc_ipc_unmarshal_list fail");
@@ -1005,10 +1085,8 @@ ERROR_RETURN:
 		CTS_ERR("outdata is NULL");
 	}
 DATA_FREE:
-	if (list)
-	{
-		contacts_list_destroy(list,true);
-	}
+	ctsvc_handle_destroy(contact);
+	contacts_list_destroy(list,true);
 	CONTACTS_FREE(ids);
 	return;
 }
@@ -1018,8 +1096,15 @@ void ctsvc_ipc_server_db_update_records(pims_ipc_h ipc, pims_ipc_data_h indata,
 {
 	int ret = CONTACTS_ERROR_NONE;
 	contacts_list_h list = NULL;
+	contacts_h contact = NULL;
 
 	if (indata) {
+		ret = ctsvc_ipc_unmarshal_handle(indata, &contact);
+		if (CONTACTS_ERROR_NONE != ret) {
+			CTS_ERR("ctsvc_ipc_unmarshal_handle Fail(%d)", ret);
+			goto ERROR_RETURN;
+		}
+
 		ret = ctsvc_ipc_unmarshal_list(indata,&list);
 		if (ret != CONTACTS_ERROR_NONE) {
 			CTS_ERR("ctsvc_ipc_unmarshal_list fail");
@@ -1049,7 +1134,7 @@ void ctsvc_ipc_server_db_update_records(pims_ipc_h ipc, pims_ipc_data_h indata,
 		contacts_list_first(list);
 	}
 
-	ret = contacts_db_update_records(list);
+	ret = ctsvc_db_update_records(list);
 
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
@@ -1098,10 +1183,8 @@ ERROR_RETURN:
 		CTS_ERR("outdata is NULL");
 	}
 DATA_FREE:
-	if (list)
-	{
-		contacts_list_destroy(list,true);
-	}
+	ctsvc_handle_destroy(contact);
+	contacts_list_destroy(list,true);
 	return;
 }
 
@@ -1113,8 +1196,15 @@ void ctsvc_ipc_server_db_delete_records(pims_ipc_h ipc, pims_ipc_data_h indata,
 	int *ids = NULL;
 	char *uri = NULL;
 	int i = 0;
+	contacts_h contact = NULL;
 
 	if (indata) {
+		ret = ctsvc_ipc_unmarshal_handle(indata, &contact);
+		if (CONTACTS_ERROR_NONE != ret) {
+			CTS_ERR("ctsvc_ipc_unmarshal_handle Fail(%d)", ret);
+			goto ERROR_RETURN;
+		}
+
 		ret = ctsvc_ipc_unmarshal_string(indata,&uri);
 		if (ret != CONTACTS_ERROR_NONE) {
 			CTS_ERR("ctsvc_ipc_unmarshal_string fail");
@@ -1148,7 +1238,7 @@ void ctsvc_ipc_server_db_delete_records(pims_ipc_h ipc, pims_ipc_data_h indata,
 		goto ERROR_RETURN;
 	}
 
-	ret = contacts_db_delete_records(uri, ids, count);
+	ret = ctsvc_db_delete_records(uri, ids, count);
 
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
@@ -1197,6 +1287,7 @@ ERROR_RETURN:
 		CTS_ERR("outdata is NULL");
 	}
 DATA_FREE:
+	ctsvc_handle_destroy(contact);
 	CONTACTS_FREE(uri);
 	CONTACTS_FREE(ids);
 	return;
@@ -1210,6 +1301,7 @@ void ctsvc_ipc_server_db_replace_records(pims_ipc_h ipc, pims_ipc_data_h indata,
 	int count = 0;
 	int *ids = NULL;
 	int i=0;
+	contacts_h contact = NULL;
 
 	if (indata) {
 		ret = ctsvc_ipc_unmarshal_list(indata, &list);
@@ -1309,9 +1401,8 @@ ERROR_RETURN:
 		CTS_ERR("outdata is NULL");
 	}
 DATA_FREE:
-	if (list) {
-		contacts_list_destroy(list,true);
-	}
+	ctsvc_handle_destroy(contact);
+	contacts_list_destroy(list,true);
 	CONTACTS_FREE(ids);
 	return;
 }
@@ -1324,8 +1415,15 @@ void ctsvc_ipc_server_db_get_changes_by_version(pims_ipc_h ipc, pims_ipc_data_h 
 	int contacts_db_version = 0;
 	contacts_list_h record_list = NULL;
 	int current_contacts_db_version = 0;
+	contacts_h contact = NULL;
 
 	if (indata) {
+		ret = ctsvc_ipc_unmarshal_handle(indata, &contact);
+		if (CONTACTS_ERROR_NONE != ret) {
+			CTS_ERR("ctsvc_ipc_unmarshal_handle Fail(%d)", ret);
+			goto ERROR_RETURN;
+		}
+
 		ret = ctsvc_ipc_unmarshal_string(indata,&view_uri);
 		if (ret != CONTACTS_ERROR_NONE) {
 			CTS_ERR("ctsvc_ipc_unmarshal_string fail");
@@ -1352,7 +1450,7 @@ void ctsvc_ipc_server_db_get_changes_by_version(pims_ipc_h ipc, pims_ipc_data_h 
 		goto ERROR_RETURN;
 	}
 
-	ret = contacts_db_get_changes_by_version(view_uri, address_book_id,contacts_db_version,&record_list,&current_contacts_db_version);
+	ret = ctsvc_db_get_changes_by_version(view_uri, address_book_id,contacts_db_version,&record_list,&current_contacts_db_version);
 
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
@@ -1412,10 +1510,8 @@ ERROR_RETURN:
 		CTS_ERR("outdata is NULL");
 	}
 DATA_FREE:
-	if (record_list)
-	{
-		contacts_list_destroy(record_list,true);
-	}
+	ctsvc_handle_destroy(contact);
+	contacts_list_destroy(record_list,true);
 	CONTACTS_FREE(view_uri);
 	return;
 }
@@ -1424,6 +1520,15 @@ void ctsvc_ipc_server_db_get_current_version(pims_ipc_h ipc, pims_ipc_data_h ind
 {
 	int ret = CONTACTS_ERROR_NONE;
 	int contacts_db_version = 0;
+	contacts_h contact = NULL;
+
+	if (indata) {
+		ret = ctsvc_ipc_unmarshal_handle(indata, &contact);
+		if (CONTACTS_ERROR_NONE != ret) {
+			CTS_ERR("ctsvc_ipc_unmarshal_handle Fail(%d)", ret);
+			goto ERROR_RETURN;
+		}
+	}
 
 	if (!ctsvc_have_permission(ipc, CTSVC_PERMISSION_CONTACT_READ) &&
 			!ctsvc_have_permission(ipc, CTSVC_PERMISSION_PHONELOG_READ)) {
@@ -1431,20 +1536,20 @@ void ctsvc_ipc_server_db_get_current_version(pims_ipc_h ipc, pims_ipc_data_h ind
 		goto ERROR_RETURN;
 	}
 
-	ret = contacts_db_get_current_version(&contacts_db_version);
+	ret = ctsvc_db_get_current_version(&contacts_db_version);
 
 ERROR_RETURN:
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
 		if (NULL == *outdata) {
 			CTS_ERR("pims_ipc_data_create fail");
-			return;
+			goto DATA_FREE;
 		}
 		if (pims_ipc_data_put(*outdata,(void*)&ret,sizeof(int)) != 0) {
 			pims_ipc_data_destroy(*outdata);
 			*outdata = NULL;
 			CTS_ERR("pims_ipc_data_put fail");
-			return;
+			goto DATA_FREE;
 		}
 
 		if (CONTACTS_ERROR_NO_DATA == ret) {
@@ -1454,13 +1559,16 @@ ERROR_RETURN:
 			ret = ctsvc_ipc_marshal_int(contacts_db_version,*outdata);
 			if (ret != CONTACTS_ERROR_NONE) {
 				CTS_ERR("ctsvc_ipc_marshal_int fail");
-				return;
+				goto DATA_FREE;
 			}
 		}
 	}
 	else {
 		CTS_ERR("outdata is NULL");
 	}
+
+DATA_FREE:
+	ctsvc_handle_destroy(contact);
 	return;
 }
 
@@ -1472,8 +1580,14 @@ void ctsvc_ipc_server_db_search_records(pims_ipc_h ipc, pims_ipc_data_h indata, 
 	int offset = 0;
 	int limit = 0;
 	contacts_list_h list = NULL;
+	contacts_h contact = NULL;
 
 	if (indata) {
+		ret = ctsvc_ipc_unmarshal_handle(indata, &contact);
+		if (CONTACTS_ERROR_NONE != ret) {
+			CTS_ERR("ctsvc_ipc_unmarshal_handle Fail(%d)", ret);
+			goto ERROR_RETURN;
+		}
 		ret = ctsvc_ipc_unmarshal_string(indata,&view_uri);
 		if (ret != CONTACTS_ERROR_NONE) {
 			CTS_ERR("ctsvc_ipc_unmarshal_record fail");
@@ -1505,7 +1619,7 @@ void ctsvc_ipc_server_db_search_records(pims_ipc_h ipc, pims_ipc_data_h indata, 
 		goto ERROR_RETURN;
 	}
 
-	ret = contacts_db_search_records(view_uri, keyword, offset,limit,&list);
+	ret = ctsvc_db_search_records(view_uri, keyword, offset,limit,&list);
 
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
@@ -1555,11 +1669,8 @@ ERROR_RETURN:
 		CTS_ERR("outdata is NULL");
 	}
 DATA_FREE:
-
-	if (list)
-	{
-		contacts_list_destroy(list,true);
-	}
+	ctsvc_handle_destroy(contact);
+	contacts_list_destroy(list,true);
 	CONTACTS_FREE(view_uri);
 	CONTACTS_FREE(keyword);
 	return;
@@ -1574,8 +1685,14 @@ void ctsvc_ipc_server_db_search_records_with_range(pims_ipc_h ipc, pims_ipc_data
 	int limit = 0;
 	int range = 0;
 	contacts_list_h list = NULL;
+	contacts_h contact = NULL;
 
 	if (indata) {
+		ret = ctsvc_ipc_unmarshal_handle(indata, &contact);
+		if (CONTACTS_ERROR_NONE != ret) {
+			CTS_ERR("ctsvc_ipc_unmarshal_handle Fail(%d)", ret);
+			goto ERROR_RETURN;
+		}
 		ret = ctsvc_ipc_unmarshal_string(indata,&view_uri);
 		if (ret != CONTACTS_ERROR_NONE) {
 			CTS_ERR("ctsvc_ipc_unmarshal_record fail");
@@ -1612,7 +1729,7 @@ void ctsvc_ipc_server_db_search_records_with_range(pims_ipc_h ipc, pims_ipc_data
 		goto ERROR_RETURN;
 	}
 
-	ret = contacts_db_search_records_with_range(view_uri, keyword, offset,limit,range, &list);
+	ret = ctsvc_db_search_records_with_range(view_uri, keyword, offset,limit,range, &list);
 
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
@@ -1663,9 +1780,8 @@ ERROR_RETURN:
 	}
 
 DATA_FREE:
-
-	if (list)
-		contacts_list_destroy(list,true);
+	ctsvc_handle_destroy(contact);
+	contacts_list_destroy(list,true);
 	free(view_uri);
 	free(keyword);
 	return;
@@ -1679,8 +1795,14 @@ void ctsvc_ipc_server_db_search_records_with_query(pims_ipc_h ipc, pims_ipc_data
 	int offset = 0;
 	int limit = 0;
 	contacts_list_h list = NULL;
+	contacts_h contact = NULL;
 
 	if (indata) {
+		ret = ctsvc_ipc_unmarshal_handle(indata, &contact);
+		if (CONTACTS_ERROR_NONE != ret) {
+			CTS_ERR("ctsvc_ipc_unmarshal_handle Fail(%d)", ret);
+			goto ERROR_RETURN;
+		}
 		ret = ctsvc_ipc_unmarshal_query(indata,&query);
 		if (ret != CONTACTS_ERROR_NONE) {
 			CTS_ERR("ctsvc_ipc_unmarshal_record fail");
@@ -1714,7 +1836,7 @@ void ctsvc_ipc_server_db_search_records_with_query(pims_ipc_h ipc, pims_ipc_data
 	}
 
 
-	ret = contacts_db_search_records_with_query(query, keyword, offset,limit,&list);
+	ret = ctsvc_db_search_records_with_query(query, keyword, offset,limit,&list);
 
 	if (outdata) {
 		*outdata = pims_ipc_data_create(0);
@@ -1764,17 +1886,10 @@ ERROR_RETURN:
 		CTS_ERR("outdata is NULL");
 	}
 DATA_FREE:
-
-	if (list)
-	{
-		contacts_list_destroy(list,true);
-	}
-	if (query)
-	{
-		contacts_query_destroy(query);
-	}
+	ctsvc_handle_destroy(contact);
+	contacts_list_destroy(list,true);
+	contacts_query_destroy(query);
 	CONTACTS_FREE(keyword);
-
 	return;
 }
 
@@ -1783,30 +1898,45 @@ void ctsvc_ipc_server_db_get_status(pims_ipc_h ipc, pims_ipc_data_h indata,
 {
 	int ret = CONTACTS_ERROR_NONE;
 	contacts_db_status_e status;
+	contacts_h contact = NULL;
 
-	RETM_IF(outdata == NULL, "outdata is NULL");
-
-	*outdata = pims_ipc_data_create(0);
-	if (!*outdata) {
-		CTS_ERR("pims_ipc_data_create fail");
-		return;
+	if (indata) {
+		ret = ctsvc_ipc_unmarshal_handle(indata, &contact);
+		if (CONTACTS_ERROR_NONE != ret) {
+			CTS_ERR("ctsvc_ipc_unmarshal_handle Fail(%d)", ret);
+			goto ERROR_RETURN;
+		}
 	}
 
-	ret = contacts_db_get_status(&status);
-	if (pims_ipc_data_put(*outdata, (void*)&ret, sizeof(int)) != 0) {
-		pims_ipc_data_destroy(*outdata);
-		*outdata = NULL;
-		CTS_ERR("pims_ipc_data_put fail (return value)");
-		return;
-	}
+	ret = ctsvc_db_get_status(&status);
 
-	if (pims_ipc_data_put(*outdata, (void*)&status, sizeof(int)) != 0) {
-		pims_ipc_data_destroy(*outdata);
-		*outdata = NULL;
-		CTS_ERR("pims_ipc_data_put fail (id)");
-		return;
-	}
+ERROR_RETURN:
+	if (outdata) {
+		*outdata = pims_ipc_data_create(0);
+		if (NULL == *outdata) {
+			CTS_ERR("pims_ipc_data_create fail");
+			goto DATA_FREE;
+		}
 
+		if (pims_ipc_data_put(*outdata, (void*)&ret, sizeof(int)) != 0) {
+			pims_ipc_data_destroy(*outdata);
+			*outdata = NULL;
+			CTS_ERR("pims_ipc_data_put fail (return value)");
+			goto DATA_FREE;
+		}
+
+		if (pims_ipc_data_put(*outdata, (void*)&status, sizeof(int)) != 0) {
+			pims_ipc_data_destroy(*outdata);
+			*outdata = NULL;
+			CTS_ERR("pims_ipc_data_put fail (id)");
+			goto DATA_FREE;
+		}
+	}
+	else {
+		CTS_ERR("outdata is NULL");
+	}
+DATA_FREE:
+	ctsvc_handle_destroy(contact);
 	return;
 }
 

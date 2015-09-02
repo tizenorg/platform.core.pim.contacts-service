@@ -68,6 +68,7 @@ _CONTACTS_HANDLE(contacts_record_h)
 _CONTACTS_HANDLE(contacts_filter_h)
 _CONTACTS_HANDLE(contacts_list_h)
 _CONTACTS_HANDLE(contacts_query_h)
+_CONTACTS_HANDLE(contacts_h)
 
 /**
  * @file contacts_types.h

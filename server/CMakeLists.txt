@@ -41,7 +41,6 @@ SET(SRCS
 	${CMAKE_SOURCE_DIR}/common/ipc/ctsvc_ipc_speeddial.c
 
 	${CMAKE_SOURCE_DIR}/common/ctsvc_filter.c
-	${CMAKE_SOURCE_DIR}/common/ctsvc_db_notification.c
 	${CMAKE_SOURCE_DIR}/common/ctsvc_inotify.c
 	${CMAKE_SOURCE_DIR}/common/ctsvc_list.c
 	${CMAKE_SOURCE_DIR}/common/ctsvc_localize_utils.c
@@ -60,6 +59,7 @@ SET(SRCS
 	${CMAKE_SOURCE_DIR}/common/ctsvc_view.c
 	${CMAKE_SOURCE_DIR}/common/ctsvc_record_speeddial.c
 	${CMAKE_SOURCE_DIR}/common/ctsvc_record_sdn.c
+	${CMAKE_SOURCE_DIR}/common/ctsvc_handle.c
 
 	db/ctsvc_db_access_control.c
 	db/ctsvc_db_init.c

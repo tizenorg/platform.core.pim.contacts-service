@@ -94,7 +94,7 @@ int ctsvc_group_add_contact_in_transaction(int group_id, int contact_id)
 	return ret;
 }
 
-API int contacts_group_add_contact(int group_id, int contact_id)
+int ctsvc_group_add_contact(int group_id, int contact_id)
 {
 	int ret;
 	int addressbook_id;
@@ -189,7 +189,7 @@ int ctsvc_group_remove_contact_in_transaction(int group_id, int contact_id)
 	return CONTACTS_ERROR_NONE;
 }
 
-API int contacts_group_remove_contact(int group_id, int contact_id)
+int ctsvc_group_remove_contact(int group_id, int contact_id)
 {
 	int ret;
 	int addressbook_id;
@@ -251,7 +251,7 @@ API int contacts_group_remove_contact(int group_id, int contact_id)
 }
 
 
-API int contacts_group_set_group_order(int group_id, int previous_group_id, int next_group_id)
+int ctsvc_group_set_group_order(int group_id, int previous_group_id, int next_group_id)
 {
 	int ret;
 	double previous_prio = 0.0;

@@ -42,6 +42,9 @@ typedef struct {
 int ctsvc_ipc_unmarshal_record(const pims_ipc_data_h ipc_data, contacts_record_h* precord);
 int ctsvc_ipc_marshal_record(const contacts_record_h record, pims_ipc_data_h ipc_data);
 
+int ctsvc_ipc_marshal_handle(const contacts_h contact, pims_ipc_data_h ipc_data);
+int ctsvc_ipc_unmarshal_handle(const pims_ipc_data_h ipc_data, contacts_h *pcontact);
+
 /*
  * string
  * char의 경우 NULL 설정의 이슈로 인하여, [int:string length]+[char*] 로 넘길 수 있도록 설정..

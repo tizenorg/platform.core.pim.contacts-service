@@ -20,10 +20,16 @@
 #ifndef __CTSVC_SERVER_SETTING_H__
 #define __CTSVC_SERVER_SETTING_H__
 
+int ctsvc_setting_get_name_display_order(contacts_name_display_order_e *order);
+int ctsvc_setting_set_name_display_order(contacts_name_display_order_e order);
+int ctsvc_setting_get_name_sorting_order(contacts_name_sorting_order_e *order);
+int ctsvc_setting_set_name_sorting_order(contacts_name_sorting_order_e order);
+
 int ctsvc_register_vconf(void);
 void ctsvc_deregister_vconf(void);
 
 int ctsvc_get_phonenumber_min_match_digit(void);
+void ctsvc_set_phonenumber_min_match_digit(int min);
 int ctsvc_get_primary_sort(void);
 int ctsvc_get_secondary_sort(void);
 const char *ctsvc_get_default_sort_vconfkey(void);
