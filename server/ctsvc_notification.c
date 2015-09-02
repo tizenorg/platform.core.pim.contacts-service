@@ -52,6 +52,15 @@ static TLS bool image_change = false;
 static TLS bool profile_change = false;
 static TLS bool company_change = false;
 
+void ctsvc_noti_publish_socket_initialize(void)
+{
+	int fd = open(CTSVC_NOTI_IPC_READY, O_TRUNC | O_RDWR);
+
+	if (0 <= fd) {
+		close(fd);
+	}
+}
+
 static inline void __ctsvc_noti_publish_contact_change(void)
 {
 	int fd = open(CTSVC_NOTI_CONTACT_CHANGED, O_TRUNC | O_RDWR);

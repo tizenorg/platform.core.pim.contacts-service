@@ -29,5 +29,6 @@ int ctsvc_client_connect(contacts_h contact);
 int ctsvc_client_disconnect(contacts_h contact);
 int ctsvc_client_connect_on_thread(contacts_h contact);
 int ctsvc_client_disconnect_on_thread(contacts_h contact);
+int ctsvc_client_get_thread_connection_count();
 
 #endif /* __CTSVC_CLIENT_SERVICE_HELPER_H__ */
