@@ -26,6 +26,7 @@
 #include "contacts_filter.h"
 #include "contacts_list.h"
 #include "ctsvc_list.h"
+#include "ctsvc_handle.h"
 
 extern ctsvc_ipc_marshal_record_plugin_cb_s _ctsvc_ipc_record_contact_plugin_cb;
 extern ctsvc_ipc_marshal_record_plugin_cb_s _ctsvc_ipc_record_my_profile_plugin_cb;
@@ -399,6 +400,38 @@ static int __ctsvc_ipc_marshal_attribute_filter(const ctsvc_attribute_filter_s* 
 	return CONTACTS_ERROR_NONE;
 }
 
+int ctsvc_ipc_marshal_handle(const contacts_h contact, pims_ipc_data_h ipc_data)
+{
+	int ret;
+	ctsvc_base_s *base = (ctsvc_base_s *)contact;
+
+	ret = ctsvc_ipc_marshal_int(base->version, ipc_data);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_ipc_marshal_int() Fail(%d)", ret);
+
+	ret = ctsvc_ipc_marshal_int(base->connection_count, ipc_data);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_ipc_marshal_int() Fail(%d)", ret);
+
+	return CONTACTS_ERROR_NONE;
+}
+
+int ctsvc_ipc_unmarshal_handle(const pims_ipc_data_h ipc_data, contacts_h *pcontact)
+{
+	int ret;
+	ctsvc_base_s *base = NULL;
+
+	ret = ctsvc_handle_create(pcontact);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_handle_create() Fail(%d)", ret);
+
+	base = (ctsvc_base_s *)*pcontact;
+
+	ret = ctsvc_ipc_unmarshal_int(ipc_data, &(base->version));
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_ipc_unmarshal_int() Fail(%d)", ret);
+
+	ret = ctsvc_ipc_unmarshal_int(ipc_data, &(base->connection_count));
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_ipc_unmarshal_int() Fail(%d)", ret);
+
+	return CONTACTS_ERROR_NONE;
+}
 
 int ctsvc_ipc_unmarshal_record(const pims_ipc_data_h ipc_data, contacts_record_h* precord)
 {

@@ -450,7 +450,11 @@ int ctsvc_server_socket_init(void)
 	RETVM_IF(-1 == sockfd, CONTACTS_ERROR_SYSTEM, "socket() Fail(errno = %d)", errno);
 
 	ret = bind(sockfd, (struct sockaddr *)&addr, sizeof(addr));
-	RETVM_IF(-1 == ret, CONTACTS_ERROR_SYSTEM, "bind() Fail(errno = %d)", errno);
+	if (-1 == ret){
+		close(sockfd);
+		CTS_ERR("bind() Failed(errno = %d)", errno);
+		return CONTACTS_ERROR_SYSTEM;
+	}
 
 	ret = chown(sock_file, getuid(), CTS_SECURITY_FILE_GROUP);
 	if (0 != ret)

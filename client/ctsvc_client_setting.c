@@ -1,7 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -168,11 +168,13 @@ static GSList *__setting_name_display_order_subscribe_list = NULL;
 
 static void __ctsvc_setting_name_display_order_subscriber_callback(pims_ipc_h ipc, pims_ipc_data_h data, void *user_data)
 {
+	int ret;
 	int value = -1;
-	unsigned int size = 0;
-	if (data)
-		value = *(int*)pims_ipc_data_get(data, &size);
 
+	if (data) {
+		ret = ctsvc_ipc_unmarshal_int(data, &value);
+		WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_ipc_unmarshal_int() Fail(%d)", ret);
+	}
 	if (__setting_name_display_order_subscribe_list) {
 		GSList *l;
 		for (l = __setting_name_display_order_subscribe_list;l;l=l->next) {
@@ -213,6 +215,7 @@ API int contacts_setting_add_name_display_order_changed_cb(
 		ctsvc_name_display_order_changed_cb_info_s *cb_info = l->data;
 		if (cb_info->cb == cb && cb_info->user_data == user_data) {
 			CTS_ERR("The same callback(%s) is already exist");
+			ctsvc_mutex_unlock(CTS_MUTEX_PIMS_IPC_PUBSUB);
 			return CONTACTS_ERROR_INVALID_PARAMETER;
 		}
 	}
@@ -270,10 +273,13 @@ static GSList *__setting_name_sorting_order_subscribe_list = NULL;
 
 static void __ctsvc_setting_name_sorting_order_subscriber_callback(pims_ipc_h ipc, pims_ipc_data_h data, void *user_data)
 {
+	int ret;
 	int value = -1;
-	unsigned int size = 0;
-	if (data)
-		value = *(int*)pims_ipc_data_get(data, &size);
+
+	if (data) {
+		ret = ctsvc_ipc_unmarshal_int(data, &value);
+		WARN_IF(CONTACTS_ERROR_NONE != ret, "() Fail(%d)", ret);
+	}
 
 	if (__setting_name_sorting_order_subscribe_list) {
 		GSList *l;
@@ -315,6 +321,7 @@ API int contacts_setting_add_name_sorting_order_changed_cb(
 		ctsvc_name_sorting_order_changed_cb_info_s *cb_info = l->data;
 		if (cb_info->cb == cb && cb_info->user_data == user_data) {
 			CTS_ERR("The same callback(%s) is already exist");
+			ctsvc_mutex_unlock(CTS_MUTEX_PIMS_IPC_PUBSUB);
 			return CONTACTS_ERROR_INVALID_PARAMETER;
 		}
 	}

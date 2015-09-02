@@ -39,6 +39,7 @@
 #include "ctsvc_db_utils.h"
 #include "ctsvc_list.h"
 #include "ctsvc_db_access_control.h"
+#include "ctsvc_db_query.h"
 
 /* #define CTSVC_SIM_FIELD_FULL_SUPPORT// support ANR,EMAIL2,3,NICK NAME */
 #define DEFAULT_ADDRESS_BOOK_ID 0

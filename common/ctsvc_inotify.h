@@ -1,7 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Contact: Youngjae Shin <yj99.shin@samsung.com>
  *
@@ -25,7 +25,7 @@
 
 int ctsvc_inotify_init(void);
 void ctsvc_inotify_close(void);
-int ctsvc_inotify_subscribe(const char *view_uri, contacts_db_changed_cb cb, void *data);
-int ctsvc_inotify_unsubscribe(const char *view_uri, contacts_db_changed_cb cb, void *user_data);
+int ctsvc_inotify_subscribe(contacts_h contact, const char *view_uri, contacts_db_changed_cb cb, void *data);
+int ctsvc_inotify_unsubscribe(contacts_h contact, const char *view_uri, contacts_db_changed_cb cb, void *user_data);
 
 #endif /* __CTSVC_INOTIFY_H__ */

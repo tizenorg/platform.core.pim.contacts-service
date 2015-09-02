@@ -1,0 +1,30 @@
+/*
+ * Contacts Service
+ *
+ * Copyright (c) 2015 Samsung Electronics Co., Ltd. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+#ifndef __CTSVC_HANDLE_H__
+#define __CTSVC_HANDLE_H__
+
+#include "contacts_types.h"
+
+int ctsvc_handle_create(contacts_h *contact);
+int ctsvc_handle_destroy(contacts_h contact);
+int ctsvc_handle_clone(contacts_h contact, contacts_h *pcontact);
+int ctsvc_handle_compare(contacts_h contact1, contacts_h contact2);
+
+
+#endif // __CTSVC_HANDLE_H__

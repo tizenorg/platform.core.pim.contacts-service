@@ -1,7 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,10 @@
  *
  */
 
-#include <glib.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <glib.h>
 #include <pims-ipc-data.h>
 
 #include "ctsvc_client_ipc.h"
@@ -32,14 +34,12 @@
 #include "ctsvc_ipc_marshal.h"
 #include "ctsvc_view.h"
 #include "ctsvc_mutex.h"
+#include "ctsvc_handle.h"
 
 static __thread pims_ipc_h __contacts_ipc = NULL;
 static pims_ipc_h __contacts_global_ipc = NULL;
 
-static __thread int __contacts_change_version = 0;
-static int __contacts_global_change_version = 0;
-
-int ctsvc_ipc_connect_on_thread(void)
+int ctsvc_ipc_connect_on_thread(contacts_h contact)
 {
 	int ret = CONTACTS_ERROR_NONE;
 	pims_ipc_data_h outdata = NULL;
@@ -60,10 +60,7 @@ int ctsvc_ipc_connect_on_thread(void)
 			}
 		}
 	}
-	else {
-		CTS_DBG("contacts already connected");
-		return CONTACTS_ERROR_NONE;
-	}
+
 
 	// ipc call
 	if (pims_ipc_call(__contacts_ipc, CTSVC_IPC_MODULE, CTSVC_IPC_SERVER_CONNECT, NULL, &outdata) != 0) {
@@ -93,7 +90,7 @@ DATA_FREE:
 	return ret;
 }
 
-int ctsvc_ipc_disconnect_on_thread(void)
+int ctsvc_ipc_disconnect_on_thread(contacts_h contact, int connection_count)
 {
 	int ret = CONTACTS_ERROR_NONE;
 	pims_ipc_data_h outdata = NULL;
@@ -113,8 +110,10 @@ int ctsvc_ipc_disconnect_on_thread(void)
 		if (ret != CONTACTS_ERROR_NONE)
 			CTS_ERR("[GLOBAL_IPC_CHANNEL] pims_ipc didn't destroyed!!!(%d)", ret);
 
-		pims_ipc_destroy(__contacts_ipc);
-		__contacts_ipc = NULL;
+		if (1 == connection_count) {
+			pims_ipc_destroy(__contacts_ipc);
+			__contacts_ipc = NULL;
+		}
 	}
 	else {
 		CTS_ERR("pims_ipc_call out data is NULL");
@@ -156,7 +155,7 @@ bool ctsvc_ipc_is_busy()
 	return ret;
 }
 
-int ctsvc_ipc_connect(void)
+int ctsvc_ipc_connect(contacts_h contact)
 {
 	int ret = CONTACTS_ERROR_NONE;
 	pims_ipc_data_h outdata = NULL;
@@ -177,10 +176,6 @@ int ctsvc_ipc_connect(void)
 			}
 		}
 	}
-	else {
-		CTS_DBG("[GLOBAL_IPC_CHANNEL] contacts already connected");
-		return CONTACTS_ERROR_NONE;
-	}
 
 	/* ipc call */
 	if (pims_ipc_call(__contacts_global_ipc, CTSVC_IPC_MODULE, CTSVC_IPC_SERVER_CONNECT, NULL, &outdata) != 0) {
@@ -199,6 +194,7 @@ int ctsvc_ipc_connect(void)
 			goto DATA_FREE;
 		}
 	}
+
 	return ret;
 
 DATA_FREE:
@@ -208,7 +204,7 @@ DATA_FREE:
 }
 
 
-int ctsvc_ipc_disconnect(void)
+int ctsvc_ipc_disconnect(contacts_h contact, int connection_count)
 {
 	int ret = CONTACTS_ERROR_NONE;
 	pims_ipc_data_h outdata = NULL;
@@ -230,8 +226,13 @@ int ctsvc_ipc_disconnect(void)
 			return ret;
 		}
 
-		pims_ipc_destroy(__contacts_global_ipc);
-		__contacts_global_ipc = NULL;
+		ctsvc_base_s *base = (ctsvc_base_s *)contact;
+		base->connection_count--;
+
+		if (1 == connection_count) {
+			pims_ipc_destroy(__contacts_global_ipc);
+			__contacts_global_ipc = NULL;
+		}
 	}
 	else {
 		CTS_ERR("pims_ipc_call out data is NULL");
@@ -266,23 +267,18 @@ int ctsvc_ipc_call(char *module, char *function, pims_ipc_h data_in, pims_ipc_da
 	return ret;
 }
 
-void ctsvc_client_ipc_set_change_version(int version)
+void ctsvc_client_ipc_set_change_version(contacts_h contact, int version)
 {
-	if (__contacts_ipc == NULL) {
-		__contacts_global_change_version = version;
-		CTS_DBG("change_version = %d", version);
-		return;
-	}
-	__contacts_change_version = version;
-	CTS_DBG("change_version = %d", version);
+	RETM_IF(NULL == contact, "contact is NULL");
+	ctsvc_base_s *base = (ctsvc_base_s *)contact;
+	base->version = version;
 }
 
-int ctsvc_client_ipc_get_change_version(void)
+int ctsvc_client_ipc_get_change_version(contacts_h contact)
 {
-	if (__contacts_ipc == NULL)
-		return __contacts_global_change_version;
-
-	return __contacts_change_version;
+	RETVM_IF(NULL == contact, -1, "contact is NULL");
+	ctsvc_base_s *base = (ctsvc_base_s *)contact;
+	return base->version;
 }
 
 int ctsvc_ipc_client_check_permission(int permission, bool *result)

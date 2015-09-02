@@ -862,7 +862,7 @@ static int __ctsvc_db_my_profile_get_all_records(int offset, int limit, contacts
 			return ret;
 		}
 		my_profile_id = ctsvc_stmt_get_int(stmt, 0);
-		ret = contacts_db_get_record(_contacts_my_profile._uri, my_profile_id, &record);
+		ret = ctsvc_db_get_record(_contacts_my_profile._uri, my_profile_id, &record);
 		if (CONTACTS_ERROR_NONE != ret) {
 			CTS_ERR("DB error : contacts_db_get_record() Fail(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
@@ -1000,10 +1000,6 @@ static int __ctsvc_db_my_profile_get_records_with_query(contacts_query_h query, 
 
 	return CONTACTS_ERROR_NONE;
 }
-
-//static int __ctsvc_db_my_profile_insert_records(const contacts_list_h in_list, int **ids) { return CONTACTS_ERROR_NONE; }
-//static int __ctsvc_db_my_profile_update_records(const contacts_list_h in_list) { return CONTACTS_ERROR_NONE; }
-//static int __ctsvc_db_my_profile_delete_records(int ids[], int count) { return CONTACTS_ERROR_NONE; }
 
 static int __ctsvc_my_profile_insert_data(ctsvc_my_profile_s *contact)
 {

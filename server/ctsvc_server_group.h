@@ -21,8 +21,12 @@
 #define __CTSVC_SERVER_GROUP_H__
 
 int ctsvc_group_add_contact_in_transaction(int group_id, int contact_id);
-
 int ctsvc_group_remove_contact_in_transaction(int group_id, int contact_id);
+int ctsvc_group_add_contact(int group_id, int contact_id);
+int ctsvc_group_remove_contact(int group_id, int contact_id);
+int ctsvc_group_set_group_order(int group_id, int previous_group_id, int next_group_id);
+
+
 /*
 int ctsvc_group_add_contacts_in_person(int group_id, int person_id);
 int ctsvc_group_remove_contacts_in_person(int group_id, int person_id);

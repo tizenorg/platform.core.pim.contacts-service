@@ -46,7 +46,8 @@
 
 static __thread sqlite3 *ctsvc_db = NULL;
 
-int ctsvc_db_open(void) {
+int ctsvc_db_open(void)
+{
 	CTS_FN_CALL;
 	int ret;
 
@@ -93,7 +94,8 @@ int ctsvc_db_open(void) {
 	return CONTACTS_ERROR_NONE /*CTS_SUCCESS*/;
 }
 
-int ctsvc_db_close(void) {
+int ctsvc_db_close(void)
+{
 	int ret = 0;
 
 	if (ctsvc_db) {
@@ -106,15 +108,18 @@ int ctsvc_db_close(void) {
 	return CONTACTS_ERROR_NONE /*CTS_SUCCESS*/;
 }
 
-int ctsvc_db_change(void) {
+int ctsvc_db_change(void)
+{
 	return sqlite3_changes(ctsvc_db);
 }
 
-int ctsvc_db_get_last_insert_id(void) {
+int ctsvc_db_get_last_insert_id(void)
+{
 	return sqlite3_last_insert_rowid(ctsvc_db);
 }
 
-int ctsvc_db_get_next_id(const char *table) {
+int ctsvc_db_get_next_id(const char *table)
+{
 	int id;
 	int ret;
 	char query[CTS_SQL_MAX_LEN] = { 0 };
@@ -133,7 +138,8 @@ int ctsvc_db_get_next_id(const char *table) {
 	}
 }
 
-int ctsvc_query_get_first_int_result(const char *query, int *result) {
+int ctsvc_query_get_first_int_result(const char *query, int *result)
+{
 	int ret;
 	struct timeval from, now, diff;
 	bool retry = false;
@@ -204,7 +210,8 @@ int ctsvc_query_get_first_int_result(const char *query, int *result) {
 	return CONTACTS_ERROR_NONE;
 }
 
-int ctsvc_query_exec(const char *query) {
+int ctsvc_query_exec(const char *query)
+{
 	int ret;
 	cts_stmt stmt = NULL;
 	char *err_msg = NULL;
@@ -223,7 +230,8 @@ int ctsvc_query_exec(const char *query) {
 	return ret;
 }
 
-int ctsvc_query_prepare(char *query, cts_stmt *stmt) {
+int ctsvc_query_prepare(char *query, cts_stmt *stmt)
+{
 	int ret = -1;
 	struct timeval from, now, diff;
 	bool retry = false;
@@ -256,7 +264,8 @@ int ctsvc_query_prepare(char *query, cts_stmt *stmt) {
 		return CONTACTS_ERROR_DB;
 }
 
-int ctsvc_stmt_get_first_int_result(cts_stmt stmt, int *result) {
+int ctsvc_stmt_get_first_int_result(cts_stmt stmt, int *result)
+{
 	int ret;
 	struct timeval from, now, diff;
 	bool retry = false;
@@ -298,7 +307,8 @@ int ctsvc_stmt_get_first_int_result(cts_stmt stmt, int *result) {
 	return CONTACTS_ERROR_NONE;
 }
 
-int ctsvc_stmt_step(cts_stmt stmt) {
+int ctsvc_stmt_step(cts_stmt stmt)
+{
 	int ret = CONTACTS_ERROR_NONE;
 	struct timeval from, now, diff;
 	bool retry = false;
@@ -354,12 +364,14 @@ int ctsvc_stmt_step(cts_stmt stmt) {
 	return ret;
 }
 
-void ctsvc_stmt_reset(cts_stmt stmt) {
+void ctsvc_stmt_reset(cts_stmt stmt)
+{
 	sqlite3_reset(stmt);
 	sqlite3_clear_bindings(stmt);
 }
 
-void ctsvc_stmt_finalize(cts_stmt stmt) {
+void ctsvc_stmt_finalize(cts_stmt stmt)
+{
 	int ret;
 
 	if (NULL == stmt)

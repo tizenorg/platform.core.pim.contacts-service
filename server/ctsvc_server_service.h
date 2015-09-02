@@ -24,6 +24,8 @@
 #ifndef __CTSVC_SERVER_SERVICE_H__
 #define __CTSVC_SERVER_SERVICE_H__
 
+int ctsvc_connect();
+int ctsvc_disconnect();
 int ctsvc_contacts_internal_disconnect();
 
 #endif /*  __CTSVC_SERVER_SERVICE_H__ */

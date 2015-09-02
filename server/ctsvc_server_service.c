@@ -38,7 +38,7 @@
 static int ctsvc_connection = 0;
 static __thread int thread_connection = 0;
 
-API int contacts_connect()
+int ctsvc_connect()
 {
 	CTS_FN_CALL;
 	int ret;
@@ -75,7 +75,7 @@ API int contacts_connect()
 	return CONTACTS_ERROR_NONE;
 }
 
-API int contacts_disconnect()
+int ctsvc_disconnect()
 {
 	ctsvc_mutex_lock(CTS_MUTEX_CONNECTION);
 

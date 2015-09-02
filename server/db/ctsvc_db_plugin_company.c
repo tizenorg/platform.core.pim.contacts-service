@@ -39,9 +39,6 @@ static int __ctsvc_db_company_update_record(contacts_record_h record);
 static int __ctsvc_db_company_delete_record(int id);
 static int __ctsvc_db_company_get_all_records(int offset, int limit, contacts_list_h* out_list);
 static int __ctsvc_db_company_get_records_with_query(contacts_query_h query, int offset, int limit, contacts_list_h* out_list);
-//static int __ctsvc_db_company_insert_records(const contacts_list_h in_list, int **ds);
-//static int __ctsvc_db_company_update_records(const contacts_list_h in_list);
-//static int __ctsvc_db_company_delete_records(int ids[], int count);
 
 ctsvc_db_plugin_info_s ctsvc_db_plugin_company = {
 	.is_query_only = false,
@@ -51,9 +48,9 @@ ctsvc_db_plugin_info_s ctsvc_db_plugin_company = {
 	.delete_record = __ctsvc_db_company_delete_record,
 	.get_all_records = __ctsvc_db_company_get_all_records,
 	.get_records_with_query = __ctsvc_db_company_get_records_with_query,
-	.insert_records = NULL, /* __ctsvc_db_company_insert_records, */
-	.update_records = NULL, /* __ctsvc_db_company_update_records, */
-	.delete_records = NULL, /* __ctsvc_db_company_delete_records, */
+	.insert_records = NULL,
+	.update_records = NULL,
+	.delete_records = NULL,
 	.get_count = NULL,
 	.get_count_with_query = NULL,
 	.replace_record = NULL,
@@ -455,7 +452,3 @@ static int __ctsvc_db_company_get_records_with_query(contacts_query_h query, int
 	*out_list = list;
 	return CONTACTS_ERROR_NONE;
 }
-
-//static int __ctsvc_db_company_insert_records(const contacts_list_h in_list, int **ids) { return CONTACTS_ERROR_NONE; }
-//static int __ctsvc_db_company_update_records(const contacts_list_h in_list) { return CONTACTS_ERROR_NONE; }
-//static int __ctsvc_db_company_delete_records(int ids[], int count) { return CONTACTS_ERROR_NONE; }

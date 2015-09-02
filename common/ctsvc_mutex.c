@@ -40,6 +40,7 @@ static pthread_mutex_t sockfd_mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t ipc_mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t ipc_pubsub_mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t access_control_mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t handle_mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t socket_client_info_mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t cynara_mutex = PTHREAD_MUTEX_INITIALIZER;
 
@@ -65,6 +66,9 @@ static inline pthread_mutex_t* __ctsvc_mutex_get_mutex(int type)
 		break;
 	case CTS_MUTEX_ACCESS_CONTROL:
 		ret_val = &access_control_mutex;
+		break;
+	case CTS_MUTEX_HANDLE:
+		ret_val = &handle_mutex;
 		break;
 	case CTS_MUTEX_SOCKET_CLIENT_INFO:
 		ret_val = &socket_client_info_mutex;

@@ -36,6 +36,8 @@
 #include "ctsvc_server_utils.h"
 #include "ctsvc_server_bg.h"
 #include "ctsvc_server_update.h"
+#include "ctsvc_server_service.h"
+
 #include "ctsvc_db_access_control.h"
 
 #include "ctsvc_ipc_define.h"
@@ -108,7 +110,7 @@ static int __server_main(void)
 		snprintf(sock_file, sizeof(sock_file), CTSVC_SOCK_PATH"/.%s_for_subscribe", getuid(), CTSVC_IPC_SERVICE);
 		pims_ipc_svc_init_for_publish(sock_file, CTS_SECURITY_FILE_GROUP, 0660);
 
-		ret = contacts_connect();
+		ret = ctsvc_connect();
 		if (CONTACTS_ERROR_NONE != ret) {
 			CTS_ERR("contacts_connect fail(%d)", ret);
 			break;
@@ -132,7 +134,7 @@ static int __server_main(void)
 
 		ctsvc_unset_client_access_info();
 
-		ret = contacts_disconnect();
+		ret = ctsvc_disconnect();
 		if (CONTACTS_ERROR_NONE != ret)
 			CTS_DBG("%d", ret);
 
@@ -168,8 +170,7 @@ void ctsvc_create_file_set_permission(const char* file, mode_t mode)
 
 void ctsvc_create_rep_set_permission(const char* directory, mode_t mode)
 {
-	if (-1 == access (directory, F_OK))
-	{
+	if (-1 == access (directory, F_OK)) {
 		mkdir(directory, mode);
 	}
 }

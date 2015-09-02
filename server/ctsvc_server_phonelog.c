@@ -35,14 +35,14 @@
 #include "ctsvc_server_sim.h"
 #endif /* _CONTACTS_IPC_SERVER */
 
-API int contacts_phone_log_reset_statistics()
+int ctsvc_phone_log_reset_statistics()
 {
 	char query[CTS_SQL_MIN_LEN] = {0};
 	snprintf(query, sizeof(query),"DELETE FROM "CTS_TABLE_PHONELOG_STAT);
 	return ctsvc_query_exec(query);
 }
 
-API int contacts_phone_log_delete(contacts_phone_log_delete_e op, ...)
+int ctsvc_phone_log_delete(contacts_phone_log_delete_e op, ...)
 {
 	int ret;
 	int extra_data1;

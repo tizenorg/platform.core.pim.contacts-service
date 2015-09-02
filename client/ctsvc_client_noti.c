@@ -17,6 +17,8 @@
  *
  */
 
+#include <stdio.h>
+#include <unistd.h>
 #include <pims-ipc.h>
 #include <pims-ipc-svc.h>
 #include <pims-ipc-data.h>
@@ -24,6 +26,7 @@
 #include "contacts.h"
 #include "ctsvc_internal.h"
 #include "ctsvc_ipc_define.h"
+#include "ctsvc_ipc_marshal.h"
 #include "ctsvc_mutex.h"
 #include "ctsvc_client_ipc.h"
 #include "contacts_extension.h"
@@ -46,16 +49,18 @@ static GSList *__db_change_subscribe_list = NULL;
 
 static void __ctsvc_db_subscriber_callback(pims_ipc_h ipc, pims_ipc_data_h data, void *user_data)
 {
-	unsigned int size = 0;
+	int ret;
 	char *str = NULL;
 	subscribe_info_s *info = user_data;
 
-	if (data)
-		str = (char*)pims_ipc_data_get(data, &size);
+	if (data) {
+		ret = ctsvc_ipc_unmarshal_string(data, &str);
+		WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_ipc_unmarshal_string() Fail(%d)", ret);
+	}
 
 	if (NULL == str) {
 		CTS_ERR("There is no changed data");
-		return;
+		goto DATA_FREE;
 	}
 
 	if (info) {
@@ -67,6 +72,8 @@ static void __ctsvc_db_subscriber_callback(pims_ipc_h ipc, pims_ipc_data_h data,
 			}
 		}
 	}
+DATA_FREE:
+	free(str);
 }
 
 /* This API should be called in CTS_MUTEX_PIMS_IPC_PUBSUB mutex */

@@ -916,7 +916,7 @@ static bool __ctsvc_get_person_favorite_info(int person_id, double *priority)
 	return false;
 }
 
-API int contacts_person_link_person(int base_person_id, int person_id)
+int ctsvc_person_link_person(int base_person_id, int person_id)
 {
 	int ret;
 	char query[CTS_SQL_MIN_LEN] = {0};
@@ -1177,7 +1177,7 @@ static int __ctsvc_update_primary_default_data(int person_id)
 	return CONTACTS_ERROR_NONE;
 }
 
-API int contacts_person_unlink_contact(int person_id, int contact_id, int* out_person_id)
+int ctsvc_person_unlink_contact(int person_id, int contact_id, int* out_person_id)
 {
 	int ret;
 	int id;
@@ -1319,7 +1319,7 @@ int ctsvc_person_do_garbage_collection(void)
 	return CONTACTS_ERROR_NONE;
 }
 
-API int contacts_person_reset_usage(int person_id, contacts_usage_type_e type)
+int ctsvc_person_reset_usage(int person_id, contacts_usage_type_e type)
 {
 	int ret ;
 	char query[CTS_SQL_MAX_LEN] = {0};
@@ -1349,7 +1349,7 @@ API int contacts_person_reset_usage(int person_id, contacts_usage_type_e type)
 		return CONTACTS_ERROR_NONE;
 }
 
-API int contacts_person_set_favorite_order(int person_id, int front_person_id, int back_person_id)
+int ctsvc_person_set_favorite_order(int person_id, int front_person_id, int back_person_id)
 {
 	int ret;
 	double front_prio = 0.0;
@@ -1407,7 +1407,7 @@ API int contacts_person_set_favorite_order(int person_id, int front_person_id, i
 		return CONTACTS_ERROR_NONE;
 }
 
-API int contacts_person_set_default_property(contacts_person_property_e property, int person_id,
+int ctsvc_person_set_default_property(contacts_person_property_e property, int person_id,
 		int id)
 {
 	int ret;
@@ -1447,7 +1447,7 @@ API int contacts_person_set_default_property(contacts_person_property_e property
 	return ret;
 }
 
-API int contacts_person_get_default_property(contacts_person_property_e property, int person_id,
+int ctsvc_person_get_default_property(contacts_person_property_e property, int person_id,
 		int *id)
 {
 	int ret = CONTACTS_ERROR_NONE;
