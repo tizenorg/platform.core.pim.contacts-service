@@ -31,6 +31,7 @@
 #define CTS_LOGO_IMAGE_LOCATION tzplatform_mkpath(TZ_USER_DATA,"contacts-svc/img/logo")
 #define CTSVC_CONTACT_IMG_FULL_LOCATION tzplatform_mkpath(TZ_USER_DATA,"contacts-svc/img/contact")
 
+#define CTSVC_NOTI_IPC_READY tzplatform_mkpath(TZ_USER_DATA,"contacts-svc/.CONTACTS_SVC_IPC_READY")
 #define CTSVC_NOTI_ADDRESSBOOK_CHANGED tzplatform_mkpath(TZ_USER_DATA,"contacts-svc/.CONTACTS_SVC_AB_CHANGED")
 #define CTSVC_NOTI_GROUP_CHANGED tzplatform_mkpath(TZ_USER_DATA,"contacts-svc/.CONTACTS_SVC_GROUP_CHANGED")
 #define CTSVC_NOTI_PERSON_CHANGED tzplatform_mkpath(TZ_USER_DATA,"contacts-svc/.CONTACTS_SVC_PERSON_CHANGED")
