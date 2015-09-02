@@ -46,6 +46,14 @@ typedef struct
 	bool blocked;
 }noti_info;
 
+struct socket_init_noti_info {
+	int wd;
+	int subscribe_count;
+	void (*cb)(void *);
+	void *cb_data;
+};
+
+static GHashTable *_ctsvc_socket_init_noti_table = NULL;
 static int __ctsvc_inoti_ref = 0;
 static int __inoti_fd = -1;
 static guint __inoti_handler = 0;
@@ -76,6 +84,16 @@ static inline void __ctsvc_inotify_handle_callback(GSList *noti_list, int wd, ui
 	}
 }
 
+static void _ctsvc_inotify_socket_init_noti_table_foreach_cb(gpointer key, gpointer value, gpointer user_data)
+{
+	GList *c;
+	struct socket_init_noti_info *noti_info = value;
+
+	int wd = GPOINTER_TO_INT(user_data);
+	if (noti_info->wd == wd)
+		noti_info->cb(noti_info->cb_data);
+}
+
 static gboolean __ctsvc_inotify_gio_cb(GIOChannel *src, GIOCondition cond, gpointer data)
 {
 	int fd, ret;
@@ -86,6 +104,9 @@ static gboolean __ctsvc_inotify_gio_cb(GIOChannel *src, GIOCondition cond, gpoin
 
 	while (0 < (ret = read(fd, &ie, sizeof(ie)))) {
 		if (sizeof(ie) == ret) {
+			if (_ctsvc_socket_init_noti_table)
+				g_hash_table_foreach(_ctsvc_socket_init_noti_table, _ctsvc_inotify_socket_init_noti_table_foreach_cb, GINT_TO_POINTER(ie.wd));
+
 			if (__noti_list)
 				__ctsvc_inotify_handle_callback(__noti_list, ie.wd, ie.mask);
 
@@ -247,6 +268,75 @@ static inline const char* __ctsvc_noti_get_file_path(const char *view_uri)
 	}
 	return NULL;
 }
+
+int ctsvc_inotify_subscribe_ipc_ready(contacts_h contact, void (*cb)(void *), void *user_data)
+{
+	char *noti_path = NULL;
+	struct socket_init_noti_info *noti_info = NULL;
+
+	ctsvc_zone_get_canonicalize_path(contact, CTSVC_NOTI_IPC_READY, &noti_path);
+	if (NULL == _ctsvc_socket_init_noti_table)
+		_ctsvc_socket_init_noti_table = g_hash_table_new_full(g_str_hash, g_str_equal, free, free);
+	else
+		noti_info = g_hash_table_lookup(_ctsvc_socket_init_noti_table, noti_path);
+
+	if (NULL == noti_info) {
+		int wd = __ctsvc_inotify_get_wd(__inoti_fd, noti_path);
+		if (-1 == wd) {
+			free(noti_path);
+			CTS_ERR("__ctsvc_inotify_get_wd() Failed(noti_path=%s, errno : %d)", noti_path, errno);
+			if (errno == EACCES)
+				return CONTACTS_ERROR_PERMISSION_DENIED;
+			return CONTACTS_ERROR_SYSTEM;
+		}
+
+		int ret = __ctsvc_inotify_watch(__inoti_fd, noti_path);
+		if (CONTACTS_ERROR_NONE != ret) {
+			CTS_ERR("__ctsvc_inotify_watch() Failed");
+			free(noti_path);
+			return ret;
+		}
+
+		noti_info = calloc(1, sizeof(struct socket_init_noti_info));
+		if (NULL == noti_info) {
+			CTS_ERR("calloc() return NULL");
+			free(noti_path);
+			return ret;
+		}
+
+		noti_info->wd = wd;
+		noti_info->cb = cb;
+		noti_info->cb_data = user_data;
+		g_hash_table_insert(_ctsvc_socket_init_noti_table, strdup(noti_path), noti_info);
+	}
+	free(noti_path);
+	noti_info->subscribe_count++;
+	return CONTACTS_ERROR_NONE;
+}
+
+int ctsvc_inotify_unsubscribe_ipc_ready(contacts_h contact)
+{
+	RETVM_IF(NULL == _ctsvc_socket_init_noti_table, CONTACTS_ERROR_INVALID_PARAMETER, "_ctsvc_socket_init_noti_table is NULL");
+
+	char *noti_path = NULL;
+	struct socket_init_noti_info *noti_info = NULL;
+
+	ctsvc_zone_get_canonicalize_path(contact, CTSVC_NOTI_IPC_READY, &noti_path);
+	noti_info = g_hash_table_lookup(_ctsvc_socket_init_noti_table, noti_path);
+	RETVM_IF(NULL == noti_info, CONTACTS_ERROR_INVALID_PARAMETER, "g_hash_table_lookup() return NULL");
+
+	if (1 == noti_info->subscribe_count) {
+		int wd = noti_info->wd;
+		inotify_rm_watch(__inoti_fd, wd);
+		g_hash_table_remove(_ctsvc_socket_init_noti_table, noti_path); // free noti_info automatically
+	}
+	else {
+		noti_info->subscribe_count--;
+	}
+
+	return CONTACTS_ERROR_NONE;
+}
+
 
 int ctsvc_inotify_subscribe(contacts_h contact, const char *view_uri,
 			void *cb, void *data)

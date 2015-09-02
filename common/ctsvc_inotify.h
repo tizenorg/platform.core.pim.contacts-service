@@ -28,4 +28,7 @@ void ctsvc_inotify_close(void);
 int ctsvc_inotify_subscribe(contacts_h contact, const char *view_uri, contacts_db_changed_cb cb, void *data);
 int ctsvc_inotify_unsubscribe(contacts_h contact, const char *view_uri, contacts_db_changed_cb cb, void *user_data);
 
+int ctsvc_inotify_subscribe_ipc_ready(contacts_h contact, void (*cb)(void *), void *user_data);
+int ctsvc_inotify_unsubscribe_ipc_ready(contacts_h contact);
+
 #endif /* __CTSVC_INOTIFY_H__ */
