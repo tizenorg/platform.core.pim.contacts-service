@@ -30,15 +30,10 @@ static GHashTable *_ctsvc_handle_table = NULL;
 
 static int _ctsvc_client_handle_get_key(unsigned int id, char *key, int key_len)
 {
-	int ret;
-	int len;
+	RETV_IF(NULL == key, CONTACTS_ERROR_INVALID_PARAMETER);
 
-	ret = gethostname(key, key_len);
-	RETVM_IF(0 != ret, CONTACTS_ERROR_SYSTEM, "gethostname() Failed(%d)", errno);
-
-	len = strlen(key);
-	snprintf(key+len, key_len-len, ":%u", id);
-
+	snprintf(key, key_len, "%d:%u", getuid(), id);
+	CTS_DBG("key[%s]", key);
 	return CONTACTS_ERROR_NONE;
 }
 
@@ -49,6 +44,7 @@ int ctsvc_client_handle_get_p_with_id(unsigned int id, contacts_h *p_contact)
 	contacts_h contact = NULL;
 
 	RETVM_IF(NULL == _ctsvc_handle_table, CONTACTS_ERROR_NO_DATA, "_ctsvc_handle_table is NULL");
+	RETV_IF(NULL == p_contact, CONTACTS_ERROR_INVALID_PARAMETER);
 
 	ret = _ctsvc_client_handle_get_key(id, key, sizeof(key));
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "_ctsvc_client_handle_get_key() Fail(%d)", ret);
@@ -58,7 +54,7 @@ int ctsvc_client_handle_get_p_with_id(unsigned int id, contacts_h *p_contact)
 	ctsvc_mutex_unlock(CTS_MUTEX_HANDLE);
 
 	if (NULL == contact) {
-		CTS_ERR("g_hash_table_lookup() return NULL");
+		CTS_ERR("g_hash_table_lookup() Fail. key[%s]", key);
 		return CONTACTS_ERROR_NO_DATA;
 	}
 
@@ -73,6 +69,7 @@ int ctsvc_client_handle_get_p(contacts_h *p_contact)
 	contacts_h contact = NULL;
 
 	RETVM_IF(NULL == _ctsvc_handle_table, CONTACTS_ERROR_NO_DATA, "_ctsvc_handle_table is NULL");
+	RETV_IF(NULL == p_contact, CONTACTS_ERROR_INVALID_PARAMETER);
 
 	ret = _ctsvc_client_handle_get_key(ctsvc_client_get_tid(), key, sizeof(key));
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "_ctsvc_client_handle_get_key() Fail(%d)", ret);
@@ -89,7 +86,7 @@ int ctsvc_client_handle_get_p(contacts_h *p_contact)
 		contact = g_hash_table_lookup(_ctsvc_handle_table, key);
 		ctsvc_mutex_unlock(CTS_MUTEX_HANDLE);
 
-		RETVM_IF(NULL == contact, CONTACTS_ERROR_NO_DATA, "g_hash_table_lookup() return NULL");
+		RETVM_IF(NULL == contact, CONTACTS_ERROR_NO_DATA, "g_hash_table_lookup() Fail. key[%s]", key);
 	}
 	*p_contact = contact;
 	return CONTACTS_ERROR_NONE;
@@ -101,7 +98,7 @@ int ctsvc_client_handle_create(unsigned int id, contacts_h *p_contact)
 	char handle_key[CTSVC_STR_SHORT_LEN] = {0};
 	contacts_h contact = NULL;
 
-	RETVM_IF(NULL == p_contact, CONTACTS_ERROR_INVALID_PARAMETER, "p_contact is NULL");
+	RETV_IF(NULL == p_contact, CONTACTS_ERROR_INVALID_PARAMETER);
 	*p_contact = NULL;
 
 	ret = _ctsvc_client_handle_get_key(id, handle_key, sizeof(handle_key));
@@ -115,6 +112,7 @@ int ctsvc_client_handle_create(unsigned int id, contacts_h *p_contact)
 		_ctsvc_handle_table = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
 
 	g_hash_table_insert(_ctsvc_handle_table, strdup(handle_key), contact);
+	CTS_INFO("handle insert key[%s]", handle_key);
 	ctsvc_mutex_unlock(CTS_MUTEX_HANDLE);
 
 	*p_contact = contact;
@@ -132,7 +130,7 @@ int ctsvc_client_handle_remove(unsigned int id, contacts_h contact)
 
 	ctsvc_mutex_lock(CTS_MUTEX_HANDLE);
 	if (false == g_hash_table_remove(_ctsvc_handle_table, key))
-		CTS_ERR("g_hash_table_remove() Fail. key:%s", key);
+		CTS_ERR("g_hash_table_remove() Fail. key[%s]", key);
 
 	if (0 == g_hash_table_size(_ctsvc_handle_table)) {
 		g_hash_table_destroy(_ctsvc_handle_table);

@@ -28,9 +28,13 @@ API int contacts_phone_log_reset_statistics(void)
 	contacts_h contact = NULL;
 
 	ret = ctsvc_client_handle_get_p(&contact);
+	if (CONTACTS_ERROR_INVALID_PARAMETER == ret)
+		ret = CONTACTS_ERROR_IPC;
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_client_handle_get_p() Fail(%d)", ret);
 
 	ret = ctsvc_client_phone_log_reset_statistics(contact);
+	if (CONTACTS_ERROR_INVALID_PARAMETER == ret)
+		ret = CONTACTS_ERROR_IPC;
 
 	return ret;
 }
