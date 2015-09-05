@@ -1083,7 +1083,6 @@ static void __ctsvc_vcard_get_clean_number_for_export(char *str, char *dest)
 		else if (1 == char_len) {
 			switch (*s) {
 				case '/':
-				case 'N':
 				case '.':
 				case '0' ... '9':
 				case '#':
@@ -1106,6 +1105,20 @@ static void __ctsvc_vcard_get_clean_number_for_export(char *str, char *dest)
 				case 'w':
 				case 'W':
 					*r = 'w';
+					r++;
+					s++;
+					break;
+				case 'a' ... 'o':
+				case 'q' ... 'v':
+				case 'x' ... 'z':
+					*r = *s - 0x20;
+					r++;
+					s++;
+					break;
+				case 'A' ... 'O':
+				case 'Q' ... 'V':
+				case 'X' ... 'Z':
+					*r = *s;
 					r++;
 					s++;
 					break;
@@ -3200,7 +3213,6 @@ static char* __ctsvc_vcard_get_clean_number_for_import(char *str)
 		else if (1 == char_len) {
 			switch (*s) {
 				case '/':
-				case 'N':
 				case '.':
 				case '0' ... '9':
 				case '#':
@@ -3223,6 +3235,20 @@ static char* __ctsvc_vcard_get_clean_number_for_import(char *str)
 				case 'w':
 				case 'W':
 					*r = ';';
+					r++;
+					s++;
+					break;
+				case 'a' ... 'o':
+				case 'q' ... 'v':
+				case 'x' ... 'z':
+					*r = *s - 0x20;
+					r++;
+					s++;
+					break;
+				case 'A' ... 'O':
+				case 'Q' ... 'V':
+				case 'X' ... 'Z':
+					*r = *s;
 					r++;
 					s++;
 					break;
