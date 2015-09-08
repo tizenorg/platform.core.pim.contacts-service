@@ -326,12 +326,12 @@ int ctsvc_db_name_update(contacts_record_h record, bool is_my_profile)
 	case CTSVC_LANG_ENGLISH:
 	default:
 		if (normal_name[CTSVC_NN_FIRST] && normal_name[CTSVC_NN_FIRST][0])
-			temp_normal_first = normal_name[CTSVC_NN_FIRST];
+			temp_normal_first = SAFE_STRDUP(normal_name[CTSVC_NN_FIRST]);
 		else
 			name->first = NULL;
 
 		if (normal_name[CTSVC_NN_LAST] && normal_name[CTSVC_NN_LAST][0])
-			temp_normal_last = normal_name[CTSVC_NN_LAST];
+			temp_normal_last = SAFE_STRDUP(normal_name[CTSVC_NN_LAST]);
 		else
 			name->last = NULL;
 		break;
@@ -353,6 +353,8 @@ int ctsvc_db_name_update(contacts_record_h record, bool is_my_profile)
 	__ctsvc_make_name_lookup(CONTACTS_NAME_DISPLAY_ORDER_LASTFIRST,
 								temp_normal_first, temp_normal_last, &name->reverse_lookup);
 
+	free(temp_normal_first);
+	free(temp_normal_last);
 	free(normal_name[CTSVC_NN_FIRST]);
 	free(normal_name[CTSVC_NN_LAST]);
 
