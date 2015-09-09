@@ -188,14 +188,14 @@ static int __ctsvc_db_person_update_record(contacts_record_h record)
 	/* update favorite */
 	index_favorite = CTSVC_PROPERTY_PERSON_IS_FAVORITE & 0x000000FF;
 	if (person->base.properties_flags &&
-			CTSVC_PROPERTY_FLAG_DIRTY == person->base.properties_flags[index_favorite]) {
+				ctsvc_record_check_property_flag(person, index_favorite, CTSVC_PROPERTY_FLAG_DIRTY)) {
 		ret = ctsvc_db_person_set_favorite(person->person_id, person->is_favorite, true);
 		if (CONTACTS_ERROR_NONE != ret) {
 			CTS_ERR("ctsvc_db_person_set_favorite() Fail(%d)", ret);
 			ctsvc_end_trans(false);
 			return ret;
 		}
-		person->base.properties_flags[index_favorite] = 0;
+		person->base.properties_flags[index_favorite] &= 0xFFFFFFFD; /* remove dirty bit */
 		ctsvc_set_contact_noti();
 	}
 
