@@ -2725,27 +2725,27 @@ static inline int __ctsvc_vcard_get_event(ctsvc_list_s *event_list, int type, ch
 {
 	int ret;
 	contacts_record_h event;
-	char *dest, *src, *temp;
+	char *dest, *src, *date;
 
-	temp = __ctsvc_get_content_value(val);
-	if (NULL == temp) {
+	date = __ctsvc_get_content_value(val);
+	if (NULL == date) {
 		CTS_ERR("Invalid parameter : vcard");
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 
-	dest = src = val;
+	dest = src = date;
 	while (*src) {
 		if ('0' <= *src && *src <= '9') {
 			*dest = *src;
 			dest++;
 		}
 		src++;
-		if (8 <= dest - val)
+		if (8 <= dest - date)
 			break;
 	}
 	*dest = '\0';
-	if ('\0' == *val) {
-		CTS_ERR("Invalid parameter : val(%d)", val);
+	if ('\0' == *date) {
+		CTS_ERR("Invalid parameter : date(%d)", date);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 
@@ -2755,7 +2755,7 @@ static inline int __ctsvc_vcard_get_event(ctsvc_list_s *event_list, int type, ch
 		return ret;
 	}
 
-	contacts_record_set_int(event, _contacts_event.date, atoi(val));
+	contacts_record_set_int(event, _contacts_event.date, atoi(date));
 
 	if (CTSVC_VCARD_VALUE_BDAY == type)
 		contacts_record_set_int(event, _contacts_event.type, CONTACTS_EVENT_TYPE_BIRTH);
