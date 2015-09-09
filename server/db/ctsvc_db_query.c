@@ -2389,7 +2389,7 @@ static inline int __ctsvc_db_search_records_with_query_exec(ctsvc_query_s *s_que
 				else
 					property_id = s_query->projection[i];
 
-				type = __ctsvc_db_get_property_type(s_query->properties, s_query->property_count, s_query->projection[i]);
+				type = __ctsvc_db_get_property_type(s_query->properties, s_query->property_count, property_id);
 				if (type == CTSVC_VIEW_DATA_TYPE_INT)
 					ctsvc_record_set_int(record,property_id, ctsvc_stmt_get_int(stmt, i));
 				else if (type == CTSVC_VIEW_DATA_TYPE_STR)
