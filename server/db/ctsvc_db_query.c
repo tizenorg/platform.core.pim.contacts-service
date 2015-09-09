@@ -2185,6 +2185,7 @@ static inline int __ctsvc_db_search_records_with_query_exec(ctsvc_query_s *s_que
 	int ret;
 	int i;
 	int type;
+	bool person_contact_query = false;
 	GSList *cursor;
 	cts_stmt stmt = NULL;
 	contacts_list_h list = NULL;
@@ -2222,12 +2223,15 @@ static inline int __ctsvc_db_search_records_with_query_exec(ctsvc_query_s *s_que
 			|| STRING_EQUAL == strcmp(s_query->view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP_NOT_ASSIGNED)) {
 		temp_len = SAFE_SNPRINTF(&query, &query_size, len, table);
 		if (0 <= temp_len) len+= temp_len;
-		temp_len = SAFE_SNPRINTF(&query, &query_size, len, " WHERE ");
+		temp_len = SAFE_SNPRINTF(&query, &query_size, len, " WHERE person_id IN ");
 		if (0 <= temp_len) len+= temp_len;
-		temp_len = SAFE_SNPRINTF(&query, &query_size, len, table);
+		temp_len = SAFE_SNPRINTF(&query, &query_size, len, " ( SELECT person_id FROM ");
 		if (0 <= temp_len) len+= temp_len;
-		temp_len = SAFE_SNPRINTF(&query, &query_size, len, ".contact_id IN ");
+		temp_len = SAFE_SNPRINTF(&query, &query_size, len, CTS_TABLE_CONTACTS);
 		if (0 <= temp_len) len+= temp_len;
+		temp_len = SAFE_SNPRINTF(&query, &query_size, len, " WHERE deleted = 0 AND contact_id IN ");
+		if (0 <= temp_len) len+= temp_len;
+		person_contact_query = true;
 	}
 	else if (STRING_EQUAL == strcmp(s_query->view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_NUMBER)
 			|| STRING_EQUAL == strcmp(s_query->view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_EMAIL)) {
@@ -2253,9 +2257,26 @@ static inline int __ctsvc_db_search_records_with_query_exec(ctsvc_query_s *s_que
 	temp_len = __ctsvc_db_append_search_query(keyword, &query, &query_size, len, range);
 	if (0 <= temp_len) len = temp_len;
 
-	if (condition && *condition) {
-		temp_len = SAFE_SNPRINTF(&query, &query_size, len, " AND (");
+	if (person_contact_query) {
+		temp_len = SAFE_SNPRINTF(&query, &query_size, len, " ) ");
 		if (0 <= temp_len) len+= temp_len;
+	}
+
+	if (condition && *condition) {
+		if (person_contact_query) {
+			temp_len = SAFE_SNPRINTF(&query, &query_size, len, " AND contact_id IN (");
+			if (0 <= temp_len) len+= temp_len;
+			temp_len = SAFE_SNPRINTF(&query, &query_size, len, " SELECT contact_id FROM ");
+			if (0 <= temp_len) len+= temp_len;
+			temp_len = SAFE_SNPRINTF(&query, &query_size, len, table);
+			if (0 <= temp_len) len+= temp_len;
+			temp_len = SAFE_SNPRINTF(&query, &query_size, len, " WHERE ");
+			if (0 <= temp_len) len+= temp_len;
+		}
+		else {
+			temp_len = SAFE_SNPRINTF(&query, &query_size, len, " AND (");
+			if (0 <= temp_len) len+= temp_len;
+		}
 		temp_len = SAFE_SNPRINTF(&query, &query_size, len, condition);
 		if (0 <= temp_len) len+= temp_len;
 		temp_len = SAFE_SNPRINTF(&query, &query_size, len, ")");
