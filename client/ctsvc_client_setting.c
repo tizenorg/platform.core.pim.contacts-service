@@ -295,7 +295,7 @@ API int contacts_setting_add_name_display_order_changed_cb(
 	for (l = __setting_name_display_order_subscribe_list;l;l=l->next) {
 		ctsvc_name_display_order_changed_cb_info_s *cb_info = l->data;
 		if (cb_info->cb == cb && cb_info->user_data == user_data) {
-			CTS_ERR("The same callback(%s) is already exist");
+			CTS_ERR("The same callback(%x) is already exist", cb);
 			ctsvc_mutex_unlock(CTS_MUTEX_PIMS_IPC_PUBSUB);
 			return CONTACTS_ERROR_INVALID_PARAMETER;
 		}
@@ -373,7 +373,7 @@ API int contacts_setting_add_name_sorting_order_changed_cb(
 	for (l = __setting_name_sorting_order_subscribe_list;l;l=l->next) {
 		ctsvc_name_sorting_order_changed_cb_info_s *cb_info = l->data;
 		if (cb_info->cb == cb && cb_info->user_data == user_data) {
-			CTS_ERR("The same callback(%s) is already exist");
+			CTS_ERR("The same callback(%x) is already exist", cb);
 			ctsvc_mutex_unlock(CTS_MUTEX_PIMS_IPC_PUBSUB);
 			return CONTACTS_ERROR_INVALID_PARAMETER;
 		}
