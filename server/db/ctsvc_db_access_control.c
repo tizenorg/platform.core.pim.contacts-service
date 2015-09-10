@@ -16,6 +16,7 @@
  * limitations under the License.
  *
  */
+#include <unistd.h>
 #include <pthread.h>
 #include <sys/smack.h>
 #include <pims-ipc-svc.h>
@@ -73,52 +74,13 @@ static ctsvc_permission_info_s * __ctsvc_find_access_info(unsigned int thread_id
  */
 int ctsvc_have_file_read_permission(const char *path)
 {
-	int ret;
-	int permission = -1;
-	char *file_label = NULL;
-	ctsvc_permission_info_s *find = NULL;
-	const char *smack_label;
-	int have_smack;
-	unsigned int thread_id;
-
-	have_smack = __ctsvc_have_smack();
-	if (have_smack != 1)   /* smack disable */
-		return CONTACTS_ERROR_NONE;
-
-	/* Get SMACK label of the file */
-	ret = smack_getlabel(path, &file_label, SMACK_LABEL_ACCESS);
-	if (ret < 0) {
-		CTS_ERR("smack_getlabel Fail (%d)", ret);
-		return CONTACTS_ERROR_SYSTEM;
+	CTS_FN_CALL;
+	if (0 != access(path, F_OK|R_OK)) {
+		CTS_ERR("access(%s) Fail(%d)", path, errno);
+		return CONTACTS_ERROR_PERMISSION_DENIED;
 	}
 
-	ctsvc_mutex_lock(CTS_MUTEX_ACCESS_CONTROL);
-	thread_id = (unsigned int)pthread_self();
-	find = __ctsvc_find_access_info(thread_id);
-	if (NULL == find) {
-		CTS_ERR("does not have access info of the thread");
-		free(file_label);
-		ctsvc_mutex_unlock(CTS_MUTEX_ACCESS_CONTROL);
-		return CONTACTS_ERROR_INTERNAL;
-	}
-
-	smack_label = find->smack;
-	permission = smack_have_access(smack_label, file_label, "r");
-	free(file_label);
-	 if (permission == 0) {
-		CTS_ERR("Thread(0x%x), smack_have_access Fail(%d) : does not have permission", thread_id, permission);
-		ret = CONTACTS_ERROR_PERMISSION_DENIED;
-	}
-	else if (permission != 1) {
-		CTS_ERR("Thread(0x%x), smack_have_access Fail(%d)", thread_id, ret);
-		ret = CONTACTS_ERROR_SYSTEM;
-	}
-	else {
-		ret= CONTACTS_ERROR_NONE;
-	}
-
-	ctsvc_mutex_unlock(CTS_MUTEX_ACCESS_CONTROL);
-	return ret;
+	return CONTACTS_ERROR_NONE;
 }
 
 /* this function is called in mutex lock */
