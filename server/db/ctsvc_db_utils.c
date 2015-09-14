@@ -63,7 +63,7 @@ struct image_transform{
 #define CTS_IMAGE_ENCODE_QUALITY 50
 #define CTS_IMAGE_MAX_SIZE 1080
 #define CTS_COMMIT_TRY_MAX 500000 /* For 3second */
-#define CTS_IMAGE_TRANSFORM_WAIT_TIME 500 * G_TIME_SPAN_MILLISECOND /* 0.5 sec */
+#define CTS_IMAGE_TRANSFORM_WAIT_TIME 1000 * G_TIME_SPAN_MILLISECOND /* 1 sec */
 
 int ctsvc_begin_trans(void)
 {
