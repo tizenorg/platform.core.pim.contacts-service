@@ -1445,11 +1445,18 @@ int ctsvc_client_db_get_status(contacts_h contact, contacts_db_status_e *status)
 int ctsvc_client_db_add_status_changed_cb(contacts_h contact,
 		contacts_db_status_changed_cb cb, void* user_data)
 {
+	int ret;
 	status_callback_info_s *cb_info = NULL;
 
 	RETVM_IF(NULL == contact, CONTACTS_ERROR_INVALID_PARAMETER, "contact is NULL");
 	RETVM_IF(NULL == cb, CONTACTS_ERROR_INVALID_PARAMETER,
 			"Invalid parameter : callback is null");
+
+	ret = ctsvc_ipc_create_for_change_subscription();
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("ctsvc_ipc_create_for_change_subscription() Fail(%d)", ret);
+		return ret;
+	}
 
 	ctsvc_mutex_lock(CTS_MUTEX_PIMS_IPC_PUBSUB);
 
@@ -1478,11 +1485,18 @@ int ctsvc_client_db_add_status_changed_cb(contacts_h contact,
 int ctsvc_client_db_remove_status_changed_cb(contacts_h contact,
 	contacts_db_status_changed_cb cb, void* user_data)
 {
+	int ret;
 	GSList *l;
 
 	RETVM_IF(NULL == contact, CONTACTS_ERROR_INVALID_PARAMETER, "contact is NULL");
 	RETVM_IF(NULL == cb, CONTACTS_ERROR_INVALID_PARAMETER,
 			"Invalid parameter : callback is null");
+
+	ret = ctsvc_ipc_destroy_for_change_subscription(false);
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("ctsvc_ipc_destroy_for_change_subscription() Fail(%d)", ret);
+		return ret;
+	}
 
 	ctsvc_mutex_lock(CTS_MUTEX_PIMS_IPC_PUBSUB);
 	for (l = __status_change_subscribe_list;l;l=l->next) {

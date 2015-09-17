@@ -35,7 +35,7 @@ bool ctsvc_ipc_is_busy();
 pims_ipc_h ctsvc_ipc_get_handle_for_change_subsciption();
 
 int ctsvc_ipc_create_for_change_subscription();
-int ctsvc_ipc_destroy_for_change_subscription();
+int ctsvc_ipc_destroy_for_change_subscription(bool is_disconnect);
 int ctsvc_ipc_recover_for_change_subscription();
 
 int ctsvc_ipc_call(char *module, char *function, pims_ipc_h data_in, pims_ipc_data_h *data_out);
