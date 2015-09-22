@@ -571,7 +571,7 @@ int contacts_db_get_current_version(int* contacts_db_version);
  * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_note, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_url, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_event, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_image, \n
  * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_company, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_nickname, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_messenger, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_extension, \n
  * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_profile, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_relationship, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_activity, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_activity_photo, \n
- * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_speeddial. \n\n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_speeddial, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_sdn, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_group_relation.\n\n
  * %http://tizen.org/privilege/callhistory.read	is needed for record which is related to @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_phone_log.
  * If successive change notification produced on the view_uri are identical,
  * then they are coalesced into a single notification if the older notification has not yet been called
@@ -605,18 +605,6 @@ int contacts_db_add_changed_cb(const char* view_uri, contacts_db_changed_cb call
  * @brief Unregisters a callback function.
  *
  * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
- * @privlevel public
- * @privilege %http://tizen.org/privilege/contact.read
- * @privilege %http://tizen.org/privilege/callhistory.read
- *
- * @remarks %http://tizen.org/privilege/contact.read is needed for record which is related to @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_address_book, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_person, \n
- * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_contact, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_simple_contact, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_group, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_my_profile, \n
- * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_name, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_number, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_email, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_address, \n
- * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_note, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_url, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_event, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_image, \n
- * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_company, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_nickname, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_messenger, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_extension, \n
- * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_profile, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_relationship, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_activity, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_activity_photo, \n
- * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_speeddial. \n\n
- * %http://tizen.org/privilege/callhistory.read is needed for record which is related to @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_phone_log.
  *
  * @param[in]   view_uri    The view URI of records whose changes are monitored
  * @param[in]   callback    The callback function to register
