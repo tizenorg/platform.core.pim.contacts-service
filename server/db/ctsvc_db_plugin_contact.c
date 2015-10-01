@@ -1221,30 +1221,30 @@ static int __ctsvc_db_contact_update_record(contacts_record_h record)
 		}
 	}
 
-	/******************************/
-	/* this code will be removed. */
+	/* thumbnail */
 	if (contact->images) {
 		int ret = CONTACTS_ERROR_NONE;
-		contacts_record_h record_image = NULL;
 		int count = 0;
 		ctsvc_image_s *image;
 
 		contacts_list_get_count((contacts_list_h)contact->images, &count);
 		if (count) {
 			contacts_list_first((contacts_list_h)contact->images);
-			ret = contacts_list_get_current_record_p((contacts_list_h)contact->images, &record_image);
+			do {
+				ret = contacts_list_get_current_record_p((contacts_list_h)contact->images, (contacts_record_h*)&image);
+				if (CONTACTS_ERROR_NONE != ret) {
+					CTS_ERR("contacts_list_get_current_record_p() Fail(%d)", ret);
+					ctsvc_end_trans(false);
+					return CONTACTS_ERROR_DB;
+				}
 
-			if (CONTACTS_ERROR_NONE != ret) {
-				CTS_ERR("contacts_list_get_current_record_p() Fail(%d)", ret);
-				ctsvc_end_trans(false);
-				return CONTACTS_ERROR_DB;
-			}
-
-			image = (ctsvc_image_s*)record_image;
+				if (image->is_default)
+					break;
+			} while (CONTACTS_ERROR_NONE == contacts_list_next((contacts_list_h)contact->images));
 
 			if ((NULL == contact->image_thumbnail_path && image->path) ||
 					(contact->image_thumbnail_path && NULL == image->path) ||
-					(contact->image_thumbnail_path && image->path && STRING_EQUAL != strcmp(contact->image_thumbnail_path, image->path))) {
+					(contact->image_thumbnail_path && image->path && (STRING_EQUAL != strcmp(contact->image_thumbnail_path, image->path)))) {
 				ctsvc_record_set_property_flag((ctsvc_record_s *)contact, _contacts_contact.image_thumbnail_path, CTSVC_PROPERTY_FLAG_DIRTY);
 
 				if (ctsvc_contact_check_image_location(image->path))
@@ -1268,8 +1268,6 @@ static int __ctsvc_db_contact_update_record(contacts_record_h record)
 			}
 		}
 	}
-	/* this code will be removed. */
-	/******************************/
 
 	if (is_invalid) {
 		ctsvc_contact_s* temp_contact;
@@ -2050,19 +2048,14 @@ static int __ctsvc_db_contact_insert_record(contacts_record_h record, int *id)
 		return ret;
 	}
 
-	/******************************/
-	/* this code will be removed. */
+	/* thumbnail */
 	free(contact->image_thumbnail_path);
 	contact->image_thumbnail_path = NULL;
-
 	if (contact->images) {
 		ctsvc_image_s *image;
-		int count = 0;
 
-		contacts_list_get_count((contacts_list_h)contact->images, &count);
-
-		while (count) {
-			contacts_list_first((contacts_list_h)contact->images);
+		contacts_list_first((contacts_list_h)contact->images);
+		do {
 			ret = contacts_list_get_current_record_p((contacts_list_h)contact->images, (contacts_record_h*)&image);
 			if (CONTACTS_ERROR_NONE != ret) {
 				CTS_ERR("contacts_list_get_current_record_p() Fail(%d)", ret);
@@ -2074,11 +2067,8 @@ static int __ctsvc_db_contact_insert_record(contacts_record_h record, int *id)
 				contact->image_thumbnail_path = strdup(image->path);
 				break;
 			}
-			count--;
-		}
+		} while (CONTACTS_ERROR_NONE == contacts_list_next((contacts_list_h)contact->images));
 	}
-	/* this code will be removed. */
-	/******************************/
 
 	version = ctsvc_get_next_ver();
 
@@ -2311,26 +2301,27 @@ static int __ctsvc_db_contact_replace_record(contacts_record_h record, int conta
 		}
 	}
 
-	/******************************/
-	/* this code will be removed. */
+	/* thumbnail */
 	if (contact->images) {
 		int ret = CONTACTS_ERROR_NONE;
-		contacts_record_h record_image = NULL;
 		int count = 0;
 		ctsvc_image_s *image;
 
 		contacts_list_get_count((contacts_list_h)contact->images, &count);
 		if (count) {
 			contacts_list_first((contacts_list_h)contact->images);
-			ret = contacts_list_get_current_record_p((contacts_list_h)contact->images, &record_image);
+			do {
+				ret = contacts_list_get_current_record_p((contacts_list_h)contact->images, (contacts_record_h*)&image);
+				if (CONTACTS_ERROR_NONE != ret) {
+					CTS_ERR("contacts_list_get_current_record_p() Fail(%d)", ret);
+					ctsvc_end_trans(false);
+					return CONTACTS_ERROR_DB;
+				}
 
-			if (CONTACTS_ERROR_NONE != ret) {
-				CTS_ERR("contacts_list_get_current_record_p() Fail(%d)", ret);
-				ctsvc_end_trans(false);
-				return CONTACTS_ERROR_DB;
-			}
+				if (image->is_default)
+					break;
+			} while (CONTACTS_ERROR_NONE == contacts_list_next((contacts_list_h)contact->images));
 
-			image = (ctsvc_image_s*)record_image;
 			if ((NULL == contact->image_thumbnail_path && image->path) ||
 					(contact->image_thumbnail_path && NULL == image->path) ||
 					(contact->image_thumbnail_path && image->path && STRING_EQUAL != strcmp(contact->image_thumbnail_path, image->path))) {
@@ -2356,8 +2347,6 @@ static int __ctsvc_db_contact_replace_record(contacts_record_h record, int conta
 			}
 		}
 	}
-	/* this code will be removed. */
-	/******************************/
 	version = ctsvc_get_next_ver();
 
 	len = snprintf(query, sizeof(query),
