@@ -318,9 +318,12 @@ char* ctsvc_get_network_cc(bool reload)
 	if (temp && 3 < strlen(temp))
 		temp[3] = '\0';
 	mcc = atoi(temp);
-	for (i=0;i<sizeof(__mcc_cc_list)/sizeof(ctsvc_mcc_cc_map);i++)
-		if (__mcc_cc_list[i].mcc == mcc)
+	for (i=0;i<sizeof(__mcc_cc_list)/sizeof(ctsvc_mcc_cc_map);i++) {
+		if (__mcc_cc_list[i].mcc == mcc) {
 			cc = __mcc_cc_list[i].cc;
+			break;
+		}
+	}
 #endif
 	return cc;
 }
