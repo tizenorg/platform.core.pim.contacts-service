@@ -141,6 +141,24 @@ void ctsvc_extra_normalize(UChar *word, int32_t word_size)
 	}
 }
 
+void ctsvc_extra_index_normalize(UChar *word, int32_t word_size)
+{
+	int i;
+	for (i=0;i<word_size;i++) {
+		// FF00 ~ FF60, FFE0~FFE6 : fullwidth -> halfwidth
+		if (CTSVC_COMPARE_BETWEEN((UChar)0xFF00, word[i], (UChar)0xFF60)) {
+			int unicode_value1 = 0;
+			int unicode_value2 = 0;
+			unicode_value1 = 0x0;
+			unicode_value2 = (0xFF & word[i]) + 0x20;
+			word[i] = unicode_value1 << 8 | unicode_value2;
+		}
+		else if (ctsvc_is_hangul(word[i])) {
+			ctsvc_hangul_jamo2compatibility(&word[i]);
+		}
+	}
+}
+
 const char *ctsvc_get_language_locale(int lang)
 {
 	char *langset = ctsvc_get_langset();

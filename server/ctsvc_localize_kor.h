@@ -27,5 +27,6 @@ bool ctsvc_has_chosung(const char *src);
 bool ctsvc_is_chosung(const char *src);
 bool ctsvc_is_hangul(UChar src);
 void ctsvc_hangul_compatibility2jamo(UChar *src);
+void ctsvc_hangul_jamo2compatibility(UChar *src);
 
 #endif /* __CTSVC_LOCALIZE_KOR_H__ */

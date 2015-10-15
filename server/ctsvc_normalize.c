@@ -156,7 +156,7 @@ int ctsvc_collation_str(char *src, char **dest)
 	return __ctsvc_collation_str(temp, dest);
 }
 
-static int __ctsvc_normalize_str(const char *src, char **dest)
+static int __ctsvc_normalize_str(const char *src, char **dest, bool is_index)
 {
 	int32_t tmp_size = 100;
 	int32_t upper_size;
@@ -266,7 +266,10 @@ static int __ctsvc_normalize_str(const char *src, char **dest)
 	}
 
 	ctsvc_check_language(result);
-	ctsvc_extra_normalize(result, size);
+	if (is_index)
+		ctsvc_extra_index_normalize(result, size);
+	else
+		ctsvc_extra_normalize(result, size);
 
 	/* remove diacritical : U+3000 ~ U+034F */
 	int i, j;
@@ -429,7 +432,7 @@ int ctsvc_normalize_str(const char *src, char **dest)
 	ret = __ctsvc_remove_special_char(src, temp, strlen(src) + 1);
 	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "__ctsvc_remove_special_char() Fail(%d)", ret);
 
-	ret = __ctsvc_normalize_str(temp, dest);
+	ret = __ctsvc_normalize_str(temp, dest, false);
 	return ret;
 }
 
@@ -483,8 +486,7 @@ int ctsvc_normalize_index(const char *src, char **dest)
 			return CONTACTS_ERROR_INVALID_PARAMETER;
 		}
 	}
-	ret = __ctsvc_normalize_str(first_str, dest);
-
+	ret = __ctsvc_normalize_str(first_str, dest, true);
 	RETVM_IF(dest == NULL, ret, "__ctsvc_normalize_str() Fail");
 
 	if ((*dest)[0] != '\0') {

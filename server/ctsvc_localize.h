@@ -65,5 +65,6 @@ int ctsvc_get_sort_type_from_language(int language);
 int ctsvc_get_language_type(const char *system_lang);
 const char *ctsvc_get_language_locale(int lang);
 void ctsvc_extra_normalize(UChar *word, int32_t word_size);
+void ctsvc_extra_index_normalize(UChar *word, int32_t word_size);
 
 #endif /* __CTSVC_LOCALIZE_H__ */
