@@ -89,6 +89,10 @@ int ctsvc_db_open(void)
 				ctsvc_db_phone_number_equal_callback, NULL, NULL);
 		RETVM_IF(SQLITE_OK != ret, CONTACTS_ERROR_DB,
 				"sqlite3_create_function() Fail(%d)", ret);
+		ret = sqlite3_create_collation(ctsvc_db, "_NAME_SORT_", SQLITE_UTF8, (void *)SQLITE_UTF8,
+				ctsvc_db_group_name_sort_callback);
+		RETVM_IF(SQLITE_OK != ret, CONTACTS_ERROR_DB,
+				"sqlite3_create_collation() Fail(%d)", ret);
 	}
 
 	return CONTACTS_ERROR_NONE /*CTS_SUCCESS*/;

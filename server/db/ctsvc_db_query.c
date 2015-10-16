@@ -1026,6 +1026,11 @@ int ctsvc_db_make_get_records_query_stmt(ctsvc_query_s *s_query, int offset, int
 				temp_len = SAFE_SNPRINTF(&query, &query_size, len, field_name);
 				if (0 <= temp_len) len+= temp_len;
 
+				if (CTSVC_PROPERTY_GROUP_NAME == s_query->sort_property_id) {
+					temp_len = SAFE_SNPRINTF(&query, &query_size, len, " COLLATE _NAME_SORT_ ");
+					if (0 <= temp_len) len+= temp_len;
+				}
+
 				if (false == s_query->sort_asc) {
 					temp_len = SAFE_SNPRINTF(&query, &query_size, len, " DESC ");
 					if (0 <= temp_len) len+= temp_len;
