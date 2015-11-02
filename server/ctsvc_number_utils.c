@@ -658,7 +658,7 @@ static int __ctsvc_number_has_ip_and_cc(const char*number, int len, int *index)
 							start_index++;
 							if (len <= start_index) {
 								*index = start_index-1;   /* '+0 1' */
-								return (have_plus?CTSVC_PLUS_IP_CC:CTSVC_IP_CC);
+								return (have_plus?CTSVC_PLUS_IP_CC:CTSVC_NONE);
 							}
 
 							switch(number[start_index]) {
@@ -684,7 +684,7 @@ static int __ctsvc_number_has_ip_and_cc(const char*number, int len, int *index)
 								break;
 							default:
 								*index = start_index-1;   /* '+0 1' */
-								return (have_plus?CTSVC_PLUS_IP_CC:CTSVC_IP_CC);
+								return (have_plus?CTSVC_PLUS_IP_CC:CTSVC_NONE);
 							}
 						}
 						break;
