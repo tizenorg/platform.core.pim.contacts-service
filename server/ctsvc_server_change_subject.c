@@ -91,7 +91,7 @@ void ctsvc_change_subject_clear_changed_info()
 void ctsvc_change_subject_add_changed_phone_log_id(contacts_changed_e type, int id)
 {
 	CTS_FN_CALL;
-	int len = 0;
+	int cur_len = 0;
 	int info_len = 0;
 	char changed_info[30] = {0};
 
@@ -101,15 +101,16 @@ void ctsvc_change_subject_add_changed_phone_log_id(contacts_changed_e type, int 
 		__phone_log_chanaged_info[0] = '\0';
 	}
 
-	len = snprintf(changed_info, sizeof(changed_info), "%d:%d,", type, id);
-	info_len = strlen(__phone_log_chanaged_info);
-	CTS_DBG("%s(len : %d), %s (crrent_len : %d), max_len : %d",
-		changed_info, len, __phone_log_chanaged_info, info_len, __phone_log_buf_size);
-	if (__phone_log_buf_size < info_len + len) {
-		__phone_log_chanaged_info = realloc(__phone_log_chanaged_info, __phone_log_buf_size * 2);
+	info_len = snprintf(changed_info, sizeof(changed_info), "%d:%d,", type, id);
+	cur_len = strlen(__phone_log_chanaged_info);
+	CTS_DBG("%s(info_len : %d), %s(crrent_len : %d), max_len : %u",
+		changed_info, info_len, __phone_log_chanaged_info, cur_len, __phone_log_buf_size);
+
+	if (__phone_log_buf_size <= (cur_len + info_len)) {
 		__phone_log_buf_size *= 2;
+		__phone_log_chanaged_info = realloc(__phone_log_chanaged_info, __phone_log_buf_size);
 	}
-	snprintf(__phone_log_chanaged_info + info_len, __phone_log_buf_size - info_len, "%s", changed_info);
+	snprintf(__phone_log_chanaged_info + cur_len, __phone_log_buf_size - cur_len, "%s", changed_info);
 	CTS_DBG("%s", __phone_log_chanaged_info);
 }
 #endif /* ENABLE_LOG_FEATURE */
@@ -117,7 +118,7 @@ void ctsvc_change_subject_add_changed_phone_log_id(contacts_changed_e type, int 
 void ctsvc_change_subject_add_changed_person_id(contacts_changed_e type, int id)
 {
 	CTS_FN_CALL;
-	int len = 0;
+	int cur_len = 0;
 	int info_len = 0;
 	char changed_info[30] = {0};
 
@@ -127,13 +128,16 @@ void ctsvc_change_subject_add_changed_person_id(contacts_changed_e type, int id)
 		__person_changed_info[0] = '\0';
 	}
 
-	len = snprintf(changed_info, sizeof(changed_info), "%d:%d,", type, id);
-	info_len = strlen(__person_changed_info);
-	if (__person_buf_size < info_len + len) {
-		__person_changed_info = realloc(__person_changed_info, __person_buf_size * 2);
+	info_len = snprintf(changed_info, sizeof(changed_info), "%d:%d,", type, id);
+	cur_len = strlen(__person_changed_info);
+	CTS_DBG("%s(info_len : %d), %s(crrent_len : %d), max_len : %u",
+		changed_info, info_len, __person_changed_info, cur_len, __person_buf_size);
+
+	if (__person_buf_size <= (cur_len + info_len)) {
 		__person_buf_size *= 2;
+		__person_changed_info = realloc(__person_changed_info, __person_buf_size);
 	}
-	snprintf(__person_changed_info + info_len, __person_buf_size - info_len, "%s", changed_info);
+	snprintf(__person_changed_info + cur_len, __person_buf_size - cur_len, "%s", changed_info);
 }
 
 void ctsvc_change_subject_publish_setting(const char *setting_id, int value)
