@@ -163,9 +163,18 @@ int ctsvc_ipc_recover_for_change_subscription()
 	return CONTACTS_ERROR_NONE;
 }
 
-int ctsvc_ipc_destroy_for_change_subscription()
+int ctsvc_ipc_destroy_for_change_subscription(bool is_disconnect)
 {
 	ctsvc_mutex_lock(CTS_MUTEX_PIMS_IPC_PUBSUB);
+	if (is_disconnect) {
+		if (0 < __ipc_pubsub_ref) {
+			pims_ipc_destroy_for_subscribe(__ipc);
+			__ipc = NULL;
+			__ipc_pubsub_ref = 0;
+		}
+		ctsvc_mutex_unlock(CTS_MUTEX_PIMS_IPC_PUBSUB);
+		return CONTACTS_ERROR_NONE;
+	}
 
 	if (1 == __ipc_pubsub_ref) {
 		pims_ipc_destroy_for_subscribe(__ipc);
@@ -211,6 +220,12 @@ API int contacts_db_add_changed_cb_with_info(const char* view_uri,
 	else {
 		CTS_ERR("We support this API for only %s and %s", CTSVC_VIEW_URI_PERSON, CTSVC_VIEW_URI_PHONELOG);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+	}
+
+	ret = ctsvc_ipc_create_for_change_subscription();
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("ctsvc_ipc_create_for_change_subscription() Fail(%d)", ret);
+		return ret;
 	}
 
 	ctsvc_mutex_lock(CTS_MUTEX_PIMS_IPC_PUBSUB);
@@ -272,6 +287,7 @@ API int contacts_db_add_changed_cb_with_info(const char* view_uri,
 API int contacts_db_remove_changed_cb_with_info(const char* view_uri,
 		contacts_db_change_cb_with_info cb, void* user_data)
 {
+	int ret;
 	GSList *it = NULL;
 	subscribe_info_s *info = NULL;
 
@@ -282,6 +298,12 @@ API int contacts_db_remove_changed_cb_with_info(const char* view_uri,
 			STRING_EQUAL != strcmp(view_uri, CTSVC_VIEW_URI_PERSON)) {
 		CTS_ERR("We support this API for only %s and %s", CTSVC_VIEW_URI_PERSON, CTSVC_VIEW_URI_PHONELOG);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+	}
+
+	ret = ctsvc_ipc_destroy_for_change_subscription(false);
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("ctsvc_ipc_destroy_for_change_subscription() Fail(%d)", ret);
+		return ret;
 	}
 
 	ctsvc_mutex_lock(CTS_MUTEX_PIMS_IPC_PUBSUB);

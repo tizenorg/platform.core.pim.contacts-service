@@ -280,6 +280,12 @@ API int contacts_setting_add_name_display_order_changed_cb(
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_ipc_client_check_permission fail (%d)", ret);
 	RETVM_IF(result == false, CONTACTS_ERROR_PERMISSION_DENIED, "Permission denied (contact read)");
 
+	ret = ctsvc_ipc_create_for_change_subscription();
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("ctsvc_ipc_create_for_change_subscription() Fail(%d)", ret);
+		return ret;
+	}
+
 	ctsvc_mutex_lock(CTS_MUTEX_PIMS_IPC_PUBSUB);
 
 	if (NULL == __setting_name_display_order_subscribe_list) {
@@ -318,7 +324,14 @@ API int contacts_setting_add_name_display_order_changed_cb(
 API int contacts_setting_remove_name_display_order_changed_cb(
 	contacts_setting_name_display_order_changed_cb cb, void* user_data)
 {
+	int ret;
 	RETVM_IF(cb == NULL, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : callback is NULL");
+
+	ret = ctsvc_ipc_destroy_for_change_subscription(false);
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("ctsvc_ipc_destroy_for_change_subscription() Fail(%d)", ret);
+		return ret;
+	}
 
 	ctsvc_mutex_lock(CTS_MUTEX_PIMS_IPC_PUBSUB);
 
@@ -358,6 +371,12 @@ API int contacts_setting_add_name_sorting_order_changed_cb(
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_ipc_client_check_permission fail (%d)", ret);
 	RETVM_IF(result == false, CONTACTS_ERROR_PERMISSION_DENIED, "Permission denied (contact read)");
 
+	ret = ctsvc_ipc_create_for_change_subscription();
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("ctsvc_ipc_create_for_change_subscription() Fail(%d)", ret);
+		return ret;
+	}
+
 	ctsvc_mutex_lock(CTS_MUTEX_PIMS_IPC_PUBSUB);
 
 	if (NULL == __setting_name_sorting_order_subscribe_list) {
@@ -396,7 +415,14 @@ API int contacts_setting_add_name_sorting_order_changed_cb(
 API int contacts_setting_remove_name_sorting_order_changed_cb(
 	contacts_setting_name_sorting_order_changed_cb cb, void* user_data)
 {
+	int ret;
 	RETVM_IF(cb == NULL, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : callback is NULL");
+
+	ret = ctsvc_ipc_destroy_for_change_subscription(false);
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("ctsvc_ipc_destroy_for_change_subscription() Fail(%d)", ret);
+		return ret;
+	}
 
 	ctsvc_mutex_lock(CTS_MUTEX_PIMS_IPC_PUBSUB);
 
