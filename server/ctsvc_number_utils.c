@@ -277,7 +277,6 @@ static TapiHandle *handle_for_cc = NULL;
 
 char* ctsvc_get_network_cc(bool reload)
 {
-#if 0 // for build
 	int i;
 	int state;
 	int ret;
@@ -324,7 +323,7 @@ char* ctsvc_get_network_cc(bool reload)
 			break;
 		}
 	}
-#endif
+
 	return cc;
 }
 
@@ -335,7 +334,6 @@ static void __ctsvc_network_cc_changed(TapiHandle *handle, const char *noti_id, 
 
 void* ctsvc_init_tapi_handle_for_cc()
 {
-#if 0 // for build
 	if (handle_for_cc)
 		return handle_for_cc;
 
@@ -347,20 +345,18 @@ void* ctsvc_init_tapi_handle_for_cc()
 	}
 	else
 		CTS_ERR("tel_init fail");
-#endif
+
 	return handle_for_cc;
 }
 
 void ctsvc_deinit_tapi_handle_for_cc()
 {
-#if 0 // for build
 	if (handle_for_cc) {
 		int ret = tel_deregister_noti_event(handle_for_cc,  TAPI_PROP_NETWORK_PLMN);
 		WARN_IF(ret != TAPI_API_SUCCESS, "tel_register_noti_event Fail(%d)", ret);
 		tel_deinit(handle_for_cc);
 	}
 	handle_for_cc = NULL;
-#endif
 }
 
 static inline int __ctsvc_phone_number_has_country_code(const char *src, int len)
