@@ -1192,22 +1192,26 @@ static int __ctsvc_db_my_profile_insert_record(contacts_record_h record, int *id
 	free(my_profile->image_thumbnail_path);
 	my_profile->image_thumbnail_path = NULL;
 	if (my_profile->images) {
+		int count = 0;
 		ctsvc_image_s *image;
 
-		contacts_list_first((contacts_list_h)my_profile->images);
-		do {
-			ret = contacts_list_get_current_record_p((contacts_list_h)my_profile->images, (contacts_record_h*)&image);
-			if (CONTACTS_ERROR_NONE != ret) {
-				CTS_ERR("contacts_list_get_current_record_p() Fail(%d)", ret);
-				ctsvc_end_trans(false);
-				return CONTACTS_ERROR_DB;
-			}
+		contacts_list_get_count((contacts_list_h)my_profile->images, &count);
+		if (count) {
+			contacts_list_first((contacts_list_h)my_profile->images);
+			do {
+				ret = contacts_list_get_current_record_p((contacts_list_h)my_profile->images, (contacts_record_h*)&image);
+				if (CONTACTS_ERROR_NONE != ret) {
+					CTS_ERR("contacts_list_get_current_record_p() Fail(%d)", ret);
+					ctsvc_end_trans(false);
+					return CONTACTS_ERROR_DB;
+				}
 
-			if (image->path && image->is_default) {
-				my_profile->image_thumbnail_path = strdup(image->path);
-				break;
-			}
-		} while (CONTACTS_ERROR_NONE == contacts_list_next((contacts_list_h)my_profile->images));
+				if (image->path && image->is_default) {
+					my_profile->image_thumbnail_path = strdup(image->path);
+					break;
+				}
+			} while (CONTACTS_ERROR_NONE == contacts_list_next((contacts_list_h)my_profile->images));
+		}
 	}
 
 	version = ctsvc_get_next_ver();
