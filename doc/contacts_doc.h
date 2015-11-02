@@ -237,7 +237,20 @@
  * contacts_record_add_child_record(contact, _contacts_contact.image, image);
  * @endcode
  *
- *
+ * <table class="note">
+ *    <tbody>
+ *     <tr>
+ *      <th class="note">Note</th>
+ *     </tr>
+ *     <tr>
+ *      <td class="note">For an application to insert private images in contacts, it needs to follow below conditions:<br/>
+ * &nbsp;&nbsp;&nbsp;1. Application must have privilege of http://tizen.org/privilege/contact.write to use APIs such as contacts_db_insert_record().<br/>
+ * &nbsp;&nbsp;&nbsp;2. Application's private directory and files must have 'read' permission of others, '644' for example. SMACK protects read permission from the other applications.<br/>
+ * &nbsp;&nbsp;&nbsp;3. Application may erase the image after destroying the contact record (contacts_record_destroy).<br/>
+ *      </td>
+ *     </tr>
+ *    </tbody>
+ * </table>
  *
  * @section CAPI_SOCIAL_CONTACTS_SVC_MODULE_RECORDS Records
  * In contacts-service, one of basic concept is a record.
