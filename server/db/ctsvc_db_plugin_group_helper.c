@@ -27,6 +27,9 @@
 #include "ctsvc_db_utils.h"
 #include "ctsvc_db_plugin_group_helper.h"
 #include "ctsvc_notify.h"
+#include "ctsvc_normalize.h"
+#include "ctsvc_server_setting.h"
+#include "ctsvc_localize.h"
 
 /*
  * Whenever deleting group, this function will be called
@@ -55,4 +58,79 @@ void ctsvc_db_group_delete_callback(sqlite3_context *context, int argc, sqlite3_
 	return;
 }
 
+static int _ctsvc_db_group_name_collation_str(const char *str1, const char *str2)
+{
+	int ret;
+	int len1, len2;
+	char *str_dest1 = NULL;
+	char *str_dest2 = NULL;
+
+	ctsvc_collation_str((char *)str1, &str_dest1);
+	ctsvc_collation_str((char *)str2, &str_dest2);
+
+	len1 = strlen(str_dest1);
+	len2 = strlen(str_dest2);
+	if (len1 < len2)
+		ret = strncmp(str_dest1, str_dest2, len1);
+	else
+		ret = strncmp(str_dest1, str_dest2, len2);
+
+	free(str_dest1);
+	free(str_dest2);
+	return ret;
+}
+
+int ctsvc_db_group_name_sort_callback(void *context, int str1_len, const void *str1, int str2_len, const void *str2)
+{
+	int ret;
+	int str1_sort_type;
+	int str2_sort_type;
+	char str_src1[CTSVC_STR_SHORT_LEN] = {0};
+	char str_src2[CTSVC_STR_SHORT_LEN] = {0};
+	int prim_sort  = ctsvc_get_primary_sort();
+
+	strncpy(str_src1, str1, str1_len);
+	strncpy(str_src2, str2, str2_len);
+	str1_sort_type = ctsvc_get_name_sort_type(str_src1);
+	str2_sort_type = ctsvc_get_name_sort_type(str_src2);
+
+	switch (str1_sort_type) {
+	case CTSVC_SORT_NUMBER:
+		if (CTSVC_SORT_OTHERS == str2_sort_type)
+			ret = 1;
+		else if (CTSVC_SORT_NUMBER == str2_sort_type)
+			ret = _ctsvc_db_group_name_collation_str(str_src1, str_src2);
+		else
+			ret = -1;
+		break;
+
+	case CTSVC_SORT_OTHERS:
+		if (CTSVC_SORT_OTHERS == str2_sort_type)
+			ret = _ctsvc_db_group_name_collation_str(str_src1, str_src2);
+		else
+			ret = -1;
+		break;
+
+	default:
+		if (CTSVC_SORT_NUMBER >= str2_sort_type) {
+			ret = 1;
+		}
+		else {
+			if (str1_sort_type != str2_sort_type) {
+				if (str1_sort_type == prim_sort)
+					ret = -1;
+				else if (str2_sort_type == prim_sort)
+					ret = 1;
+				else
+					ret = _ctsvc_db_group_name_collation_str(str_src1, str_src2);
+			}
+			else {
+				ret = _ctsvc_db_group_name_collation_str(str_src1, str_src2);
+			}
+		}
+		break;
+	}
+
+	return ret;
+}
 

@@ -25,5 +25,6 @@
 #include <tzplatform_config.h>
 
 void ctsvc_db_group_delete_callback(sqlite3_context *context, int argc, sqlite3_value ** argv);
+int ctsvc_db_group_name_sort_callback(void *context, int str1_len, const void *str1, int str2_len, const void *str2);
 
 #endif /* __CTSVC_DB_PLUGIN_GROUP_HELPER_H__ */
