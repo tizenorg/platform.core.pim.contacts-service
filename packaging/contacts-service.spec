@@ -26,6 +26,7 @@ BuildRequires:  pkgconfig(cynara-session)
 BuildRequires:  pkgconfig(cynara-creds-socket)
 BuildRequires:  pkgconfig(capi-system-info)
 BuildRequires:  pkgconfig(icu-uc)
+BuildRequires:  pkgconfig(phonenumber-utils)
 Requires(post): /usr/bin/sqlite3, /bin/chmod, /bin/chown
 Requires(post): /sbin/ldconfig
 Requires(postun): /sbin/ldconfig

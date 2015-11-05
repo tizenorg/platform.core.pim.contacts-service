@@ -161,6 +161,7 @@ pkg_check_modules(ctsvc_server_pkgs REQUIRED
 	cynara-session
 	cynara-creds-socket
 	capi-system-info
+	phonenumber-utils
 )
 
 FOREACH(flag ${ctsvc_server_pkgs_CFLAGS})
