@@ -34,7 +34,7 @@
  * You have to update user version schema.sql
  *			PRAGMA user_version = 100;
  */
-#define CTSVC_SCHEMA_VERSION 101
+#define CTSVC_SCHEMA_VERSION 102
 
 #ifdef ENABLE_LOG_FEATURE
 static int __ctsvc_server_find_person_id_of_phonelog(sqlite3 *__db, char *normal_num,
@@ -155,7 +155,7 @@ static void __ctsvc_server_number_info_update(sqlite3 *__db)
 				sqlite3_bind_text(update_stmt, 1, normal_num, strlen(normal_num), SQLITE_STATIC);
 				ret = ctsvc_get_minmatch_number(normal_num, minmatch, sizeof(minmatch), ctsvc_get_phonenumber_min_match_digit());
 				if (CONTACTS_ERROR_NONE == ret) {
-					sqlite3_bind_text(stmt, 3, minmatch, strlen(minmatch), SQLITE_STATIC);
+					sqlite3_bind_text(update_stmt, 3, minmatch, strlen(minmatch), SQLITE_STATIC);
 					find_person_id  = __ctsvc_server_find_person_id_of_phonelog(__db, normal_num, minmatch, person_id, &number_type);
 				}
 
@@ -212,7 +212,7 @@ static void __ctsvc_server_number_info_update(sqlite3 *__db)
 				sqlite3_bind_text(update_stmt, 2, normal_num, strlen(normal_num), SQLITE_STATIC);
 				ret = ctsvc_get_minmatch_number(normal_num, minmatch, sizeof(minmatch), ctsvc_get_phonenumber_min_match_digit());
 				if (CONTACTS_ERROR_NONE == ret)
-					ctsvc_stmt_bind_text(stmt, 1, minmatch);
+					ctsvc_stmt_bind_text(update_stmt, 1, minmatch);
 			}
 			sqlite3_bind_int(update_stmt, 4, id);
 			ret = sqlite3_step(update_stmt);
@@ -408,6 +408,13 @@ int ctsvc_server_db_update(void)
 		}
 
 		old_version = 101;
+	}
+
+	if (old_version <= 101) {
+		/* update phonelog, data number value */
+		__ctsvc_server_number_info_update(__db);
+
+		old_version = 102;
 	}
 
 	snprintf(query, sizeof(query),

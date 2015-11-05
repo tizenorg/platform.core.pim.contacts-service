@@ -20,7 +20,7 @@
 
 --PRAGMA journal_mode = PERSIST;
 --PRAGMA journal_mode = TRUNCATE;
-PRAGMA user_version = 101;
+PRAGMA user_version = 102;
 
 CREATE TABLE persons
 (

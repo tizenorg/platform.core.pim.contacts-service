@@ -23,6 +23,7 @@
 #include <TapiUtility.h>
 #include <ITapiNetwork.h>
 #include <sqlite3.h>
+#include <phone_number.h>
 
 #include "contacts.h"
 #include "ctsvc_internal.h"
@@ -753,11 +754,12 @@ static int __ctsvc_number_has_ip_and_cc(const char*number, int len, int *index)
 
 int ctsvc_normalize_number(const char *src, char *dest, int dest_size, bool replace_alphabet)
 {
-	int index;
-	int n;
-	char *cc = NULL;
-	int d_pos = 0;
-	int first_zero = 0;
+	int ret;
+	int d_pos;
+	int s_pos;
+	char *normalized_out = NULL;
+	char temp[dest_size];
+
 
 	if (NULL == src) {
 		CTS_ERR("The parameter(src) is NULL");
@@ -768,60 +770,27 @@ int ctsvc_normalize_number(const char *src, char *dest, int dest_size, bool repl
 	if (d_pos <= 0)
 		return d_pos;
 
-	cc = ctsvc_get_network_cc(false);
-	n = __ctsvc_number_has_ip_and_cc(src, d_pos-ctsvc_get_phonenumber_min_match_digit(), &index);
-
-	if (src[0] == '0'   /* remove first '0' */
-			|| (cc && cc[0] == '7' && src[0] == '8'))   /* Russian */
-		first_zero = 1;
-
-	/*
-	 * 001 82 10 1234 5678 -> +82 10 1234 5678
-	 * +001 82 10 1234 5678 -> +82 10 1234 5678
-	 * 82 10 1234 5678 -> +82 10 1234 5678
-	 * add '+'
-	 * do not append + if the number without cc is too short
-	 * cc 010-1234-5678 ==> +cc 010-1234-5678, cc3456 => cc3456
-	 */
-	if (CTSVC_IP_CC == n || CTSVC_CC_ONLY == n) {
-		if (d_pos + 1 < dest_size) {
-			dest[0] = '+';
-			memcpy(dest+1, src, d_pos+1);
-			d_pos++;
-			dest[d_pos] = 0;
-			return d_pos;
-		}
+	d_pos = 0;
+	s_pos = 0;
+	if (src[s_pos] == '+')
+		temp[d_pos++] = src[s_pos++];
+	while (src[s_pos] != 0) {
+		if (src[s_pos] == '+' || src[s_pos] == ';')
+			s_pos++;
+		temp[d_pos++] = src[s_pos++];
 	}
-	else if (CTSVC_PLUS_ONLY == n || CTSVC_PLUS_CC_ONLY == n
-		 || CTSVC_PLUS_IP_ONLY == n || CTSVC_PLUS_IP_CC == n) {
-		if (d_pos < dest_size) {
-			/* Just copy */
-			memcpy(dest, src, d_pos+1);
-			dest[d_pos] = 0;
-			return d_pos;
-		}
+	temp[d_pos] = 0;
+
+	ret = phone_number_get_normalized_number(temp, &normalized_out);
+	if (PHONE_NUMBER_ERROR_NONE == ret) {
+		d_pos = strlen(normalized_out);
+		memcpy(dest, normalized_out, d_pos+1);
+		free(normalized_out);
 	}
-	/* append country code */
-	else {	/* CTSVC_NONE,        invalid case : CTSVC_IP_ONLY */
-		if (cc && ctsvc_get_phonenumber_min_match_digit() <= d_pos) {
-			/*
-			 * add '+cc'
-			 * do not append cc if the number is too short
-			 * 010-1234-5678 ==> +cc 10-1234-5678, 1234 ==> 1234
-			 * 8 XXX-XXX-XX-XX ===> +7 XXX-XXX-XX-XX
-			 */
-			if (d_pos + strlen(cc) + 1 < dest_size) {
-				dest[0] = '+';
-				memcpy(dest+1, cc, strlen(cc));
-				memcpy(dest+1+strlen(cc), src+first_zero, d_pos+1-first_zero);
-				d_pos += (1+strlen(cc));
-				dest[d_pos] = 0;
-				return d_pos;
-			}
-		}
+	else {
+		memcpy(dest, temp, d_pos+1);
 	}
 
-	memcpy(dest, src, d_pos+1);
 	dest[d_pos] = 0;
 
 	return d_pos;

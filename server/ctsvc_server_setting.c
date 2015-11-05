@@ -200,6 +200,15 @@ void ctsvc_deregister_vconf(void)
 
 int ctsvc_get_phonenumber_min_match_digit(void)
 {
+	int ret = 0;
+	if (phonenumber_min_match_digit <= 0) {
+		ret = vconf_get_int(CTSVC_VCONF_PHONENUMBER_MIN_MATCH_DIGIT, &phonenumber_min_match_digit);
+		if (ret < 0) {
+			CTS_ERR("vconf_get_int() Fail(%d)", ret);
+			phonenumber_min_match_digit = 8;
+		}
+	}
+
 	return phonenumber_min_match_digit;
 }
 
