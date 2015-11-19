@@ -36,7 +36,6 @@ Contacts Service Library
 
 %package -n contacts-service2
 Summary:	       New Contacts service library
-Requires(post): libprivilege-control-conf
 
 %description -n contacts-service2
 New Contact Serivce Library files
