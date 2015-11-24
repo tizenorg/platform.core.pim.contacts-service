@@ -2247,7 +2247,7 @@ static inline int __ctsvc_db_search_records_with_query_exec(ctsvc_query_s *s_que
 		temp_len = SAFE_SNPRINTF(&query, &query_size, len, table);
 		if (0 <= temp_len) len+= temp_len;
 		temp_len = SAFE_SNPRINTF(&query, &query_size, len, ", "
-						"(SELECT contact_id, person_id person_id_in_contact, addressbook_id FROM ");
+						"(SELECT contact_id, person_id, person_id_in_contact, addressbook_id FROM ");
 		if (0 <= temp_len) len+= temp_len;
 		temp_len = SAFE_SNPRINTF(&query, &query_size, len, CTS_TABLE_CONTACTS);
 		if (0 <= temp_len) len+= temp_len;
