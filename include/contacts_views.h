@@ -295,6 +295,7 @@ _CONTACTS_END_READ_ONLY_VIEW(_contacts_simple_contact)
  * <tr><td>record</td><td>relationship</td><td>read, write</td><td> _contacts_relationship child record (multiple)</td></tr>
  * <tr><td>record</td><td>image</td><td>read, write</td><td> _contacts_image child record (multiple)</td></tr>
  * <tr><td>record</td><td>group_relation</td><td>read, write</td><td> _contacts_group_relation child record (multiple)</td></tr>
+ * <tr><td>record</td><td>sip</td><td>read, write</td><td> _contacts_sip child record (multiple) </td></tr>
  * </table>
  */
 _CONTACTS_BEGIN_VIEW()
@@ -327,6 +328,7 @@ _CONTACTS_BEGIN_VIEW()
     _CONTACTS_PROPERTY_CHILD_MULTIPLE(relationship)   /* read, write */
     _CONTACTS_PROPERTY_CHILD_MULTIPLE(group_relation) /* read, write */
     _CONTACTS_PROPERTY_CHILD_MULTIPLE(extension)      /* read, write */
+    _CONTACTS_PROPERTY_CHILD_MULTIPLE(sip)            /* read, write (Since 3.0) */
     _CONTACTS_PROPERTY_STR(message_alert)             /* read, write */
 _CONTACTS_END_VIEW(_contacts_contact)
 
@@ -360,6 +362,7 @@ _CONTACTS_END_VIEW(_contacts_contact)
  * <tr><td>record</td><td>profile</td><td>read, write</td><td> _contacts_profile child record (multiple) </td></tr>
  * <tr><td>record</td><td>relationship</td><td>read, write</td><td> _contacts_relationship child record (multiple) </td></tr>
  * <tr><td>record</td><td>image</td><td>read, write</td><td> _contacts_image child record (multiple) </td></tr>
+ * <tr><td>record</td><td>sip</td><td>read, write</td><td> _contacts_sip child record (multiple) </td></tr>
  * </table>
  */
 _CONTACTS_BEGIN_VIEW()
@@ -383,6 +386,7 @@ _CONTACTS_BEGIN_VIEW()
     _CONTACTS_PROPERTY_CHILD_MULTIPLE(profile)        /* read, write */
     _CONTACTS_PROPERTY_CHILD_MULTIPLE(relationship)   /* read, write */
     _CONTACTS_PROPERTY_CHILD_MULTIPLE(extension)      /* read, write */
+    _CONTACTS_PROPERTY_CHILD_MULTIPLE(sip)            /* read, write (Since 3.0) */
 _CONTACTS_END_VIEW(_contacts_my_profile)
 
 
@@ -1692,6 +1696,32 @@ _CONTACTS_BEGIN_READ_ONLY_VIEW()
     _CONTACTS_PROPERTY_PROJECTION_INT(log_count)
     _CONTACTS_PROPERTY_INT(log_type)
 _CONTACTS_END_READ_ONLY_VIEW(_contacts_phone_log_stat)
+
+/**
+ * @addtogroup CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE View/Property
+ * @section CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_sip _contacts_sip view
+ * <table>
+ * <tr>
+ *    <th>Type</th>
+ *    <th>Property ID</th>
+ *    <th>Read, Write</th>
+ *    <th>Description</th>
+ * </tr>
+ * <tr><td>string</td><td>_uri</td><td>read only</td><td> Identifier of this contacts sip view </td></tr>
+ * <tr><td>integer</td><td> id </td><td>read only</td><td> DB record ID of the sip </td></tr>
+ * <tr><td>integer</td><td> contact_id </td><td>read, write once</td><td> Contact ID that the sip belongs to </td></tr>
+ * <tr><td>string/td><td> address </td><td>read, write</td><td> SIP address </td></tr>
+ * <tr><td>integer</td><td> type </td><td>read, write</td><td> sip type, refer to the @ref contacts_sip_type_e </td></tr>
+ * <tr><td>string</td><td> label </td><td>read, write</td><td> Custom sip type label, when the sip type is #CONTACTS_SIP_TYPE_CUSTOM </td></tr>
+ * </table>
+ */
+_CONTACTS_BEGIN_VIEW()                        /* (Since 3.0) */
+    _CONTACTS_PROPERTY_INT(id)                /* read only */
+    _CONTACTS_PROPERTY_INT(contact_id)        /* read, write once */
+    _CONTACTS_PROPERTY_STR(address)           /* read, write */
+    _CONTACTS_PROPERTY_INT(type)              /* read, write */
+    _CONTACTS_PROPERTY_STR(label)             /* read, write */
+_CONTACTS_END_VIEW(_contacts_sip)
 
 #ifdef __cplusplus
 }

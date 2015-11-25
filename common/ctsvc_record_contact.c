@@ -226,6 +226,15 @@ static int __ctsvc_url_get_str_p(contacts_record_h record, unsigned int property
 static int __ctsvc_url_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty);
 static int __ctsvc_url_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty);
 
+static int __ctsvc_sip_create(contacts_record_h *out_record);
+static int __ctsvc_sip_destroy(contacts_record_h record, bool delete_child);
+static int __ctsvc_sip_clone(contacts_record_h record, contacts_record_h *out_record);
+static int __ctsvc_sip_get_int(contacts_record_h record, unsigned int property_id, int *out);
+static int __ctsvc_sip_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
+static int __ctsvc_sip_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
+static int __ctsvc_sip_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty);
+static int __ctsvc_sip_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty);
+
 static GHashTable *__ctsvc_temp_image_file_hash_table = NULL;
 
 ctsvc_record_plugin_cb_s name_plugin_cbs = {
@@ -646,6 +655,29 @@ ctsvc_record_plugin_cb_s simple_contact_plugin_cbs = {
 	.clone_child_record_list = NULL,
 };
 
+ctsvc_record_plugin_cb_s sip_plugin_cbs = {
+	.create = __ctsvc_sip_create,
+	.destroy = __ctsvc_sip_destroy,
+	.clone = __ctsvc_sip_clone,
+	.get_str = __ctsvc_sip_get_str,
+	.get_str_p = __ctsvc_sip_get_str_p,
+	.get_int = __ctsvc_sip_get_int,
+	.get_bool = NULL,
+	.get_lli = NULL,
+	.get_double = NULL,
+	.set_str = __ctsvc_sip_set_str,
+	.set_int = __ctsvc_sip_set_int,
+	.set_bool = NULL,
+	.set_lli = NULL,
+	.set_double = NULL,
+	.add_child_record = NULL,
+	.remove_child_record = NULL,
+	.get_child_record_count = NULL,
+	.get_child_record_at_p = NULL,
+	.clone_child_record_list = NULL,
+};
+
+
 static int __ctsvc_activity_create(contacts_record_h *out_record)
 {
 	ctsvc_activity_s *activity;
@@ -849,6 +881,17 @@ static int __ctsvc_url_create(contacts_record_h *out_record)
 			"Out of memory : calloc is Fail");
 
 	*out_record = (contacts_record_h)url;
+	return CONTACTS_ERROR_NONE;
+}
+
+static int __ctsvc_sip_create(contacts_record_h *out_record)
+{
+	ctsvc_sip_s *sip;
+	sip = calloc(1, sizeof(ctsvc_sip_s));
+	RETVM_IF(NULL == sip, CONTACTS_ERROR_OUT_OF_MEMORY,
+			"Out of memory : calloc is Fail");
+
+	*out_record = (contacts_record_h)sip;
 	return CONTACTS_ERROR_NONE;
 }
 
@@ -1169,6 +1212,19 @@ static int __ctsvc_simple_contact_destroy(contacts_record_h record, bool delete_
 	return CONTACTS_ERROR_NONE;
 }
 
+static int __ctsvc_sip_destroy(contacts_record_h record, bool delete_child)
+{
+	ctsvc_sip_s *sip = (ctsvc_sip_s*)record;
+	sip->base.plugin_cbs = NULL; /* help to find double destroy bug (refer to the contacts_record_destroy) */
+	free(sip->base.properties_flags);
+
+	free(sip->address);
+	free(sip->label);
+	free(sip);
+
+	return CONTACTS_ERROR_NONE;
+}
+
 static int __ctsvc_contact_create(contacts_record_h *out_record)
 {
 	ctsvc_contact_s *contact;
@@ -1253,6 +1309,11 @@ static int __ctsvc_contact_create(contacts_record_h *out_record)
 			break;
 		contact->extensions->l_type = CTSVC_RECORD_EXTENSION;
 
+		contact->sips = calloc(1, sizeof(ctsvc_list_s));
+		if (NULL == contact->sips)
+			break;
+		contact->sips->l_type = CTSVC_RECORD_SIP;
+
 		*out_record = (contacts_record_h)contact;
 		return CONTACTS_ERROR_NONE;
 	} while (0);
@@ -1273,6 +1334,7 @@ static int __ctsvc_contact_create(contacts_record_h *out_record)
 	free(contact->note);
 	free(contact->company);
 	free(contact->name);
+	free(contact->sips);
 	free(contact);
 	return CONTACTS_ERROR_OUT_OF_MEMORY;
 }
@@ -1324,6 +1386,8 @@ static int __ctsvc_contact_destroy(contacts_record_h record, bool delete_child)
 	contacts_list_destroy((contacts_list_h)contact->images, delete_child);
 
 	contacts_list_destroy((contacts_list_h)contact->extensions, delete_child);
+
+	contacts_list_destroy((contacts_list_h)contact->sips, delete_child);
 	free(contact);
 
 	return CONTACTS_ERROR_NONE;
@@ -1817,6 +1881,26 @@ static int __ctsvc_extension_get_int(contacts_record_h record, unsigned int prop
 	return CONTACTS_ERROR_NONE;
 }
 
+static int __ctsvc_sip_get_int(contacts_record_h record, unsigned int property_id, int *out)
+{
+	ctsvc_sip_s *sip = (ctsvc_sip_s *)record;
+
+	switch(property_id) {
+	case CTSVC_PROPERTY_SIP_ID:
+		*out = sip->id;
+		break;
+	case CTSVC_PROPERTY_SIP_CONTACT_ID:
+		*out = sip->contact_id;
+		break;
+	case CTSVC_PROPERTY_SIP_TYPE:
+		*out = sip->type;
+		break;
+	default:
+		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(sip)", property_id);
+		return CONTACTS_ERROR_INVALID_PARAMETER;
+	}
+	return CONTACTS_ERROR_NONE;
+}
 
 static int __ctsvc_contact_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty)
 {
@@ -2359,6 +2443,34 @@ static int __ctsvc_extension_set_int(contacts_record_h record, unsigned int prop
 	return CONTACTS_ERROR_NONE;
 }
 
+static int __ctsvc_sip_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty)
+{
+	ctsvc_sip_s *sip = (ctsvc_sip_s *)record;
+
+	switch(property_id) {
+	case CTSVC_PROPERTY_SIP_ID:
+		CHECK_DIRTY_VAL(sip->id, value, is_dirty);
+		sip->id = value;
+		break;
+	case CTSVC_PROPERTY_SIP_CONTACT_ID:
+		RETVM_IF(0 < sip->id, CONTACTS_ERROR_INVALID_PARAMETER,
+				"Invalid parameter : property_id(%d) is a read-only value (sip)", property_id);
+		CHECK_DIRTY_VAL(sip->contact_id, value, is_dirty);
+		sip->contact_id = value;
+		break;
+	case CTSVC_PROPERTY_SIP_TYPE:
+		RETVM_IF(value < CONTACTS_SIP_TYPE_OTHER,
+				CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : sip type is in invalid range (%d)", value);
+		CHECK_DIRTY_VAL(sip->type, value, is_dirty);
+		sip->type = value;
+		break;
+	default:
+		CTS_ERR("Invalid parameter : property_id(0x%x) is not supported in value(sip)", property_id);
+		return CONTACTS_ERROR_INVALID_PARAMETER;
+	}
+	return CONTACTS_ERROR_NONE;
+}
+
 static int __ctsvc_contact_get_str_real(contacts_record_h record, unsigned int property_id, char** out_str, bool copy)
 {
 	ctsvc_contact_s *contact = (ctsvc_contact_s*)record;
@@ -2448,6 +2560,9 @@ static int __ctsvc_contact_get_record_list_p(contacts_record_h record,
 		break;
 	case CTSVC_PROPERTY_CONTACT_EXTENSION:
 		*list = (contacts_list_h)contact->extensions;
+		break;
+	case CTSVC_PROPERTY_CONTACT_SIP:
+		*list = (contacts_list_h)contact->sips;
 		break;
 	default :
 		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(contact)", property_id);
@@ -2569,6 +2684,9 @@ static int __ctsvc_contact_reset_child_record_id(contacts_record_h child_record)
 	case CTSVC_RECORD_EXTENSION:
 		((ctsvc_extension_s *)record)->id = 0;
 		break;
+	case CTSVC_RECORD_SIP:
+		((ctsvc_sip_s *)record)->id = 0;
+		break;
 	default :
 		CTS_ERR("Invalid parameter : record(%d) is not child of contact", record->r_type);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
@@ -2613,6 +2731,8 @@ static int __ctsvc_contact_get_child_record_id(contacts_record_h child_record)
 		return ((ctsvc_image_s *)record)->id;
 	case CTSVC_RECORD_EXTENSION:
 		return ((ctsvc_extension_s *)record)->id;
+	case CTSVC_RECORD_SIP:
+		return ((ctsvc_sip_s *)record)->id;
 	default :
 		CTS_ERR("Invalid parameter : record(%d) is not child of contact", record->r_type);
 		return 0;
@@ -3277,6 +3397,34 @@ static int __ctsvc_extension_get_str(contacts_record_h record, unsigned int prop
 	return __ctsvc_extension_get_str_real(record, property_id, out_str, true);
 }
 
+static int __ctsvc_sip_get_str_real(contacts_record_h record, unsigned int property_id, char** out_str, bool copy)
+{
+	ctsvc_sip_s *sip = (ctsvc_sip_s *)record;
+
+	switch(property_id) {
+	case CTSVC_PROPERTY_SIP_ADDRESS:
+		*out_str = GET_STR(copy, sip->address);
+		break;
+	case CTSVC_PROPERTY_SIP_LABEL:
+		*out_str = GET_STR(copy, sip->label);
+		break;
+	default :
+		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(sip)", property_id);
+		return CONTACTS_ERROR_INVALID_PARAMETER;
+	}
+	return CONTACTS_ERROR_NONE;
+}
+
+static int __ctsvc_sip_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str)
+{
+	return __ctsvc_sip_get_str_real(record, property_id, out_str, false);
+}
+
+static int __ctsvc_sip_get_str(contacts_record_h record, unsigned int property_id, char** out_str)
+{
+	return __ctsvc_sip_get_str_real(record, property_id, out_str, true);
+}
+
 static int __ctsvc_contact_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty )
 {
 	ctsvc_contact_s *contact = (ctsvc_contact_s *)record;
@@ -3838,6 +3986,26 @@ static int __ctsvc_extension_set_str(contacts_record_h record, unsigned int prop
 	return CONTACTS_ERROR_NONE;
 }
 
+static int __ctsvc_sip_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty )
+{
+	ctsvc_sip_s *sip = (ctsvc_sip_s *)record;
+
+	switch(property_id) {
+	case CTSVC_PROPERTY_SIP_ADDRESS:
+		CHECK_DIRTY_STR(sip->address, str, is_dirty);
+		FREEandSTRDUP(sip->address, str);
+		break;
+	case CTSVC_PROPERTY_SIP_LABEL:
+		CHECK_DIRTY_STR(sip->label, str, is_dirty);
+		FREEandSTRDUP(sip->label, str);
+		break;
+	default :
+		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(sip)", property_id);
+		return CONTACTS_ERROR_INVALID_PARAMETER;
+	}
+	return CONTACTS_ERROR_NONE;
+}
+
 static int __ctsvc_contact_get_bool(contacts_record_h record, unsigned int property_id, bool *value)
 {
 	ctsvc_contact_s *contact = (ctsvc_contact_s *)record;
@@ -4136,6 +4304,9 @@ static int __ctsvc_contact_clone(contacts_record_h record, contacts_record_h *ou
 
 	ctsvc_list_clone((contacts_list_h)src_data->extensions, (contacts_list_h*)&out_data->extensions);
 	out_data->extensions->l_type = CTSVC_RECORD_EXTENSION;
+
+	ctsvc_list_clone((contacts_list_h)src_data->sips, (contacts_list_h*)&out_data->sips);
+	out_data->sips->l_type = CTSVC_RECORD_SIP;
 
 	int ret = ctsvc_record_copy_base(&(out_data->base), &(src_data->base));
 	if (CONTACTS_ERROR_NONE != ret) {
@@ -4701,3 +4872,29 @@ static int __ctsvc_url_clone(contacts_record_h record, contacts_record_h *out_re
 	return CONTACTS_ERROR_NONE;
 }
 
+static int __ctsvc_sip_clone(contacts_record_h record, contacts_record_h *out_record)
+{
+	ctsvc_sip_s *out_data = NULL;
+	ctsvc_sip_s *src_data = NULL;
+
+	src_data = (ctsvc_sip_s*)record;
+	out_data = calloc(1, sizeof(ctsvc_sip_s));
+	RETVM_IF(NULL == out_data, CONTACTS_ERROR_OUT_OF_MEMORY,
+			"Out of memeory : calloc(ctsvc_sip_s) Fail(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
+
+	out_data->id = src_data->id;
+	out_data->contact_id = src_data->contact_id;
+	out_data->address = SAFE_STRDUP(src_data->address);
+	out_data->type = src_data->type;
+	out_data->label = SAFE_STRDUP(src_data->label);
+
+	int ret = ctsvc_record_copy_base(&(out_data->base), &(src_data->base));
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("ctsvc_record_copy_base() Fail");
+		__ctsvc_sip_destroy((contacts_record_h)out_data, true);
+		return ret;
+	}
+
+	*out_record = (contacts_record_h)out_data;
+	return CONTACTS_ERROR_NONE;
+}
