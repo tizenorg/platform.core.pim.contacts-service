@@ -53,6 +53,7 @@ SET(SRCS
 	${CMAKE_SOURCE_DIR}/common/ipc/ctsvc_ipc_url.c
 	${CMAKE_SOURCE_DIR}/common/ipc/ctsvc_ipc_extension.c
 	${CMAKE_SOURCE_DIR}/common/ipc/ctsvc_ipc_profile.c
+	${CMAKE_SOURCE_DIR}/common/ipc/ctsvc_ipc_sip.c
 
 	${CMAKE_SOURCE_DIR}/common/ctsvc_filter.c
 	${CMAKE_SOURCE_DIR}/common/ctsvc_inotify.c
