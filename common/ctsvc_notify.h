@@ -57,6 +57,7 @@
 #define CTSVC_NOTI_ACTIVITY_PHOTO_CHANGED tzplatform_mkpath(TZ_USER_DATA, "contacts-svc/.CONTACTS_SVC_ACTIVITY_PHOTO_CHANGED")
 #define CTSVC_NOTI_PHONELOG_CHANGED tzplatform_mkpath(TZ_USER_DATA, "contacts-svc/.CONTACTS_SVC_PLOG_CHANGED")
 #define CTSVC_NOTI_SPEEDDIAL_CHANGED tzplatform_mkpath(TZ_USER_DATA, "contacts-svc/.CONTACTS_SVC_SPEED_CHANGED")
+#define CTSVC_NOTI_SIP_CHANGED tzplatform_mkpath(TZ_USER_DATA, "contacts-svc/.CONTACTS_SVC_SIP_CHANGED")
 #define CTSVC_SETTING_DISPLAY_ORDER_CHANGED "contacts.setting.display_order"
 #define CTSVC_SETTING_SORTING_ORDER_CHANGED "contacts.setting.sorting_order"
 

@@ -78,6 +78,7 @@
 #define CTSVC_DB_VIEW_NOTE "view_note"
 #define CTSVC_DB_VIEW_PROFILE "view_profile"
 #define CTSVC_DB_VIEW_EXTENSION "view_extension"
+#define CTSVC_DB_VIEW_SIP "view_sip"
 
 #define CTSVC_DB_VIEW_ACTIVITY "view_activity"
 #define CTSVC_DB_VIEW_ACTIVITY_PHOTOS "view_activity_photos"

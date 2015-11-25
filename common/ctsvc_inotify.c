@@ -255,6 +255,8 @@ static inline const char* __ctsvc_noti_get_file_path(const char *view_uri)
 		return CTSVC_NOTI_SPEEDDIAL_CHANGED;
 	case CTSVC_RECORD_SDN:
 		return CTSVC_NOTI_SDN_CHANGED;
+	case CTSVC_RECORD_SIP:
+		return CTSVC_NOTI_SIP_CHANGED;
 	case CTSVC_RECORD_RESULT:
 	default:
 		ERR("The type(%s) is not supported", view_uri);

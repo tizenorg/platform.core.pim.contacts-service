@@ -52,25 +52,26 @@ static int _client_noti_check_read_permission(const char *view_uri)
 			|| STRING_EQUAL == strncmp(view_uri, CTSVC_VIEW_URI_ACTIVITY_PHOTO, strlen(CTSVC_VIEW_URI_ACTIVITY_PHOTO))
 			|| STRING_EQUAL == strncmp(view_uri, CTSVC_VIEW_URI_SPEEDDIAL, strlen(CTSVC_VIEW_URI_SPEEDDIAL))
 			|| STRING_EQUAL == strncmp(view_uri, CTSVC_VIEW_URI_SDN, strlen(CTSVC_VIEW_URI_SDN))
-			|| STRING_EQUAL == strncmp(view_uri, CTSVC_VIEW_URI_GROUP_RELATION, strlen(CTSVC_VIEW_URI_GROUP_RELATION))) {
-				ret = ctsvc_ipc_client_check_permission(CTSVC_PERMISSION_CONTACT_READ, &result);
-				if (CONTACTS_ERROR_NONE != ret) {
-					ERR("ctsvc_ipc_client_check_permission() Fail(%d)", ret);
-					return ret;
-				}
+			|| STRING_EQUAL == strncmp(view_uri, CTSVC_VIEW_URI_GROUP_RELATION, strlen(CTSVC_VIEW_URI_GROUP_RELATION))
+			|| STRING_EQUAL == strncmp(view_uri, CTSVC_VIEW_URI_SIP, strlen(CTSVC_VIEW_URI_SIP))) {
+		ret = ctsvc_ipc_client_check_permission(CTSVC_PERMISSION_CONTACT_READ, &result);
+		if (CONTACTS_ERROR_NONE != ret) {
+			ERR("ctsvc_ipc_client_check_permission() Fail(%d)", ret);
+			return ret;
+		}
 
-				RETVM_IF(result == false, CONTACTS_ERROR_PERMISSION_DENIED,
-						"Permission denied(contact read)");
-			} else if (STRING_EQUAL == strncmp(view_uri, CTSVC_VIEW_URI_PHONELOG, strlen(CTSVC_VIEW_URI_PHONELOG))) {
-				ret = ctsvc_ipc_client_check_permission(CTSVC_PERMISSION_PHONELOG_READ, &result);
-				if (CONTACTS_ERROR_NONE != ret) {
-					ERR("ctsvc_ipc_client_check_permission() Fail(%d)", ret);
-					return ret;
-				}
+		RETVM_IF(result == false, CONTACTS_ERROR_PERMISSION_DENIED,
+				"Permission denied(contact read)");
+	} else if (STRING_EQUAL == strncmp(view_uri, CTSVC_VIEW_URI_PHONELOG, strlen(CTSVC_VIEW_URI_PHONELOG))) {
+		ret = ctsvc_ipc_client_check_permission(CTSVC_PERMISSION_PHONELOG_READ, &result);
+		if (CONTACTS_ERROR_NONE != ret) {
+			ERR("ctsvc_ipc_client_check_permission() Fail(%d)", ret);
+			return ret;
+		}
 
-				RETVM_IF(result == false, CONTACTS_ERROR_PERMISSION_DENIED,
-						"Permission denied(phonelog read)");
-			}
+		RETVM_IF(result == false, CONTACTS_ERROR_PERMISSION_DENIED,
+				"Permission denied(phonelog read)");
+	}
 
 	return CONTACTS_ERROR_NONE;
 }
