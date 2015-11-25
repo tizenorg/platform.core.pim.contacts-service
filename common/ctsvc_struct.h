@@ -73,6 +73,7 @@ enum {
 	CTSVC_DATA_RELATIONSHIP = 11,
 	CTSVC_DATA_NOTE = 12,
 	CTSVC_DATA_IMAGE = 13,
+	CTSVC_DATA_SIP = 14,
 	CTSVC_DATA_EXTENSION = 100
 };
 
@@ -114,6 +115,7 @@ typedef enum {
 	CTSVC_RECORD_SPEEDDIAL,
 	CTSVC_RECORD_SDN,
 	CTSVC_RECORD_RESULT,
+	CTSVC_RECORD_SIP,
 } ctsvc_record_type_e;
 
 typedef enum {
@@ -542,6 +544,7 @@ typedef struct {
 	ctsvc_list_s *relationships;
 	ctsvc_list_s *images;
 	ctsvc_list_s *extensions;
+	ctsvc_list_s *sips;
 } ctsvc_contact_s;
 
 typedef struct {
@@ -567,8 +570,8 @@ typedef struct {
 	ctsvc_list_s *relationships;
 	ctsvc_list_s *images;
 	ctsvc_list_s *extensions;
+	ctsvc_list_s *sips;
 } ctsvc_my_profile_s;
-
 
 typedef struct {
 	ctsvc_record_s base;
@@ -600,6 +603,15 @@ typedef struct {
 	char *number;
 	int dial_number;
 } ctsvc_speeddial_s;
+
+typedef struct {
+	ctsvc_record_s base;
+	int id;
+	int contact_id;
+	char *address;
+	int type;
+	char *label;
+}ctsvc_sip_s;
 
 typedef struct {
 	int property_id;

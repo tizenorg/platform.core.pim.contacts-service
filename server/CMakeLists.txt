@@ -37,6 +37,7 @@ SET(SRCS
 	${CMAKE_SOURCE_DIR}/common/ipc/ctsvc_ipc_image.c
 	${CMAKE_SOURCE_DIR}/common/ipc/ctsvc_ipc_sdn.c
 	${CMAKE_SOURCE_DIR}/common/ipc/ctsvc_ipc_speeddial.c
+	${CMAKE_SOURCE_DIR}/common/ipc/ctsvc_ipc_sip.c
 
 	${CMAKE_SOURCE_DIR}/common/ctsvc_filter.c
 	${CMAKE_SOURCE_DIR}/common/ctsvc_inotify.c
@@ -105,6 +106,8 @@ SET(SRCS
 	db/ctsvc_db_plugin_url.c
 	db/ctsvc_db_plugin_sdn.c
 	db/ctsvc_db_plugin_speeddial.c
+	db/ctsvc_db_plugin_sip_helper.c
+	db/ctsvc_db_plugin_sip.c
 	db/ctsvc_db_query.c
 	db/ctsvc_db_sqlite.c
 	db/ctsvc_db_utils.c

@@ -51,6 +51,7 @@
 #include "ctsvc_db_plugin_relationship_helper.h"
 #include "ctsvc_db_plugin_image_helper.h"
 #include "ctsvc_db_plugin_extension_helper.h"
+#include "ctsvc_db_plugin_sip_helper.h"
 
 #include "ctsvc_server_person.h"
 #include "ctsvc_server_group.h"
@@ -1459,6 +1460,16 @@ int ctsvc_get_data_info_extension(cts_stmt stmt, contacts_list_h list)
 	return CONTACTS_ERROR_NONE;
 }
 
+int ctsvc_get_data_info_sip(cts_stmt stmt, contacts_list_h list)
+{
+	contacts_record_h record;
+
+	ctsvc_db_sip_get_value_from_stmt(stmt, &record, 1);
+	contacts_list_add(list, record);
+
+	return CONTACTS_ERROR_NONE;
+}
+
 bool ctsvc_contact_check_default_number(contacts_list_h number_list)
 {
 	bool has_default = false;
@@ -2130,6 +2141,48 @@ int ctsvc_contact_update_data_extension(contacts_list_h extension_list, int cont
 	return ret;
 }
 
+int ctsvc_contact_update_data_sip(contacts_list_h sip_list, int contact_id, bool is_my_profile)
+{
+	CTS_FN_CALL;
+	int ret = CONTACTS_ERROR_NONE;
+	contacts_record_h record = NULL;
+	int count = 0;
+	ctsvc_list_s *list = (ctsvc_list_s*)sip_list;
+	ctsvc_sip_s *sip;
+	GList *cursor;
+
+	RETV_IF(NULL == sip_list, CONTACTS_ERROR_INVALID_PARAMETER);
+
+	for (cursor = list->deleted_records;cursor;cursor=cursor->next) {
+		sip = (ctsvc_sip_s *)cursor->data;
+		ctsvc_db_sip_delete(sip->id, is_my_profile);
+	}
+
+	ret = contacts_list_get_count(sip_list, &count);
+	if (0 == count)
+		return CONTACTS_ERROR_NONE;
+
+	contacts_list_first(sip_list);
+	do {
+		contacts_list_get_current_record_p(sip_list, &record);
+		sip = (ctsvc_sip_s*)record;
+		if (0 < sip->id) {
+			if (sip->address)
+				ret = ctsvc_db_sip_update(record, is_my_profile);
+			else
+				ret = ctsvc_db_sip_delete(sip->id, is_my_profile);
+		}
+		else
+			ret = ctsvc_db_sip_insert(record, contact_id, is_my_profile, NULL);
+		if (CONTACTS_ERROR_DB == ret) {
+			ERR("DB error : return (%d)", ret);
+			break;
+		}
+	} while (CONTACTS_ERROR_NONE == contacts_list_next(sip_list));
+
+	return ret;
+}
+
 int ctsvc_contact_update_data_number(contacts_list_h number_list,
 		int contact_id, bool is_my_profile, bool *had_phonenumber)
 {
@@ -2568,6 +2621,31 @@ int ctsvc_contact_insert_data_extension(contacts_list_h extension_list, int cont
 			break;
 		}
 	} while (CONTACTS_ERROR_NONE == contacts_list_next(extension_list));
+
+	return ret;
+}
+
+int ctsvc_contact_insert_data_sip(contacts_list_h sip_list, int contact_id, bool is_my_profile)
+{
+	CTS_FN_CALL;
+	int ret = CONTACTS_ERROR_NONE;
+	contacts_record_h record;
+	int count = 0;
+
+	RETV_IF(NULL == sip_list, CONTACTS_ERROR_INVALID_PARAMETER);
+	ret = contacts_list_get_count(sip_list, &count);
+	if (0 == count)
+		return CONTACTS_ERROR_NONE;
+
+	contacts_list_first(sip_list);
+	do {
+		contacts_list_get_current_record_p(sip_list, &record);
+		ret = ctsvc_db_sip_insert(record, contact_id, is_my_profile, NULL);
+		if (CONTACTS_ERROR_DB == ret) {
+			ERR("DB error : ctsvc_db_sip_insert");
+			break;
+		}
+	} while (CONTACTS_ERROR_NONE == contacts_list_next(sip_list));
 
 	return ret;
 }
