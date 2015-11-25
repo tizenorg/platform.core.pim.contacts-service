@@ -349,6 +349,19 @@ typedef enum {
 }contacts_search_range_e;
 
 /**
+ * @brief Enumeration for SIP(Session Intialion Protocol) type range
+ *
+ * @since_tizen @if MOBILE 3.0 @elseif WEARABLE 3.0 @endif
+ *
+ */
+typedef enum {
+	CONTACTS_SIP_TYPE_OTHER,            /**< Other sip type */
+	CONTACTS_SIP_TYPE_CUSTOM,           /**< Custom sip type */
+	CONTACTS_SIP_TYPE_HOME,             /**< Home sip type */
+	CONTACTS_SIP_TYPE_WORK,             /**< Work sip type */
+}contacts_sip_type_e;
+
+/**
  * @}
  */
 
