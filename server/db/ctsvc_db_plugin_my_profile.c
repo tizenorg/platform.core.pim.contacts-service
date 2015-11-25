@@ -179,6 +179,9 @@ static int __ctsvc_db_my_profile_get_data(int id, ctsvc_my_profile_s *my_profile
 		case CTSVC_DATA_EXTENSION:
 			ctsvc_get_data_info_extension(stmt, (contacts_list_h)my_profile->extensions);
 			break;
+		case CTSVC_DATA_SIP:
+			ctsvc_get_data_info_sip(stmt, (contacts_list_h)my_profile->sips);
+			break;
 		default:
 			CTS_ERR("Intenal : Not supported data type (%d)", datatype);
 			break;
