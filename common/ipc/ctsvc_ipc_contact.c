@@ -75,6 +75,7 @@ static int __ctsvc_ipc_unmarshal_contact(pims_ipc_data_h ipc_data, const char* v
 		if (ctsvc_ipc_unmarshal_child_list(ipc_data, (contacts_list_h*)&pcontact->relationships) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_child_list(ipc_data, (contacts_list_h*)&pcontact->images) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_unmarshal_child_list(ipc_data, (contacts_list_h*)&pcontact->extensions) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_unmarshal_child_list(ipc_data, (contacts_list_h*)&pcontact->sips) != CONTACTS_ERROR_NONE) break;
 
 		return CONTACTS_ERROR_NONE;
 	} while (0);
@@ -129,6 +130,7 @@ static int __ctsvc_ipc_marshal_contact(const contacts_record_h record, pims_ipc_
 		if (ctsvc_ipc_marshal_list((contacts_list_h)pcontact->relationships, ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_list((contacts_list_h)pcontact->images, ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_list((contacts_list_h)pcontact->extensions, ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_list((contacts_list_h)pcontact->sips, ipc_data) != CONTACTS_ERROR_NONE) break;
 
 		return CONTACTS_ERROR_NONE;
 	} while (0);
