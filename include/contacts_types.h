@@ -234,7 +234,7 @@ typedef enum {
     CONTACTS_EVENT_TYPE_ANNIVERSARY     /**< Anniversary event type */
 }contacts_event_type_e;
 
-/**
+/*x*
  * @brief Enumeration for Contact event calendar type.
  *
  * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
@@ -347,6 +347,20 @@ typedef enum {
     CONTACTS_SEARCH_RANGE_DATA  = 0x00000004,    /**< Search record from name,number and data */
     CONTACTS_SEARCH_RANGE_EMAIL  = 0x00000008,   /**< Search record from name,number,data and email. Now, support only _contacts_person_email view_uri*/
 }contacts_search_range_e;
+
+/*TODO: ACR */
+/**
+ * @brief Enumeration for SIP(Session Intialion Protocol) type range
+ *
+ * @since_tizen @if MOBILE 3.0 @elseif WEARABLE 3.0 @endif
+ *
+ */
+typedef enum {
+    CONTACTS_SIP_TYPE_OTHER,            /**< Other sip type */
+	CONTACTS_SIP_TYPE_CUSTIOM,          /**< Custom sip type */
+	CONTACTS_SIP_TYPE_HOME,             /**< Home sip type */
+	CONTACTS_SIP_TYPE_WORK,             /**< Work sip type */
+}contacts_sip_type_e;
 
 /**
  * @}

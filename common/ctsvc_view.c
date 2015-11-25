@@ -98,6 +98,7 @@ API const _contacts_contact_property_ids _contacts_contact = {
 	.image					= CTSVC_PROPERTY_CONTACT_IMAGE,
 	.group_relation			= CTSVC_PROPERTY_CONTACT_GROUP_RELATION,
 	.extension				= CTSVC_PROPERTY_CONTACT_EXTENSION,
+	.sip					= CTSVC_PROPERTY_CONTACT_SIP,
 };
 
 API const _contacts_my_profile_property_ids _contacts_my_profile = {
@@ -122,6 +123,7 @@ API const _contacts_my_profile_property_ids _contacts_my_profile = {
 	.relationship			= CTSVC_PROPERTY_MY_PROFILE_RELATIONSHIP,
 	.image					= CTSVC_PROPERTY_MY_PROFILE_IMAGE,
 	.extension				= CTSVC_PROPERTY_MY_PROFILE_EXTENSION,
+	.sip					= CTSVC_PROPERTY_MY_PROFILE_SIP,
 };
 
 API const _contacts_simple_contact_property_ids _contacts_simple_contact = {
@@ -649,6 +651,15 @@ API const _contacts_contact_activity_property_ids _contacts_contact_activity = {
 	.account_id		= CTSVC_PROPERTY_ADDRESSBOOK_ACCOUNT_ID,
 };
 
+API const _contacts_sip_property_ids _contacts_sip= {
+	._uri		= CTSVC_VIEW_URI_SIP,
+	.id         = CTSVC_PROPERTY_SIP_ID,
+	.contact_id	= CTSVC_PROPERTY_SIP_CONTACT_ID,
+	.address    = CTSVC_PROPERTY_SIP_ADDRESS,
+	.type		= CTSVC_PROPERTY_SIP_TYPE,
+	.label		= CTSVC_PROPERTY_SIP_LABEL,
+};
+
 #ifdef ENABLE_LOG_FEATURE
 API const _contacts_phone_log_stat_property_ids _contacts_phone_log_stat = {
 	._uri		= CTSVC_VIEW_URI_READ_ONLY_PHONELOG_STAT,
@@ -893,6 +904,14 @@ const property_info_s __property_extension[] = {
 	{CTSVC_PROPERTY_EXTENSION_DATA12,		CTSVC_SEARCH_PROPERTY_ALL,	"data12"},
 };
 
+const property_info_s __property_sip[] = {
+	{CTSVC_PROPERTY_SIP_ID,             CTSVC_SEARCH_PROPERTY_ALL,	"id"},
+	{CTSVC_PROPERTY_SIP_CONTACT_ID,     CTSVC_SEARCH_PROPERTY_ALL,	"contact_id"},
+	{CTSVC_PROPERTY_SIP_ADDRESS,        CTSVC_SEARCH_PROPERTY_ALL,	"data1"},
+	{CTSVC_PROPERTY_SIP_TYPE,			CTSVC_SEARCH_PROPERTY_ALL,	"data2"},
+	{CTSVC_PROPERTY_SIP_LABEL,          CTSVC_SEARCH_PROPERTY_ALL,	"data3"},
+};
+
 const property_info_s __property_contact[] = {
 	{CTSVC_PROPERTY_CONTACT_ID,					CTSVC_SEARCH_PROPERTY_ALL,	"contact_id"},
 	{CTSVC_PROPERTY_CONTACT_DISPLAY_NAME,		CTSVC_SEARCH_PROPERTY_ALL,	NULL},        /* dispaly_name, reverse_display_name */
@@ -924,6 +943,7 @@ const property_info_s __property_contact[] = {
 	{CTSVC_PROPERTY_CONTACT_IMAGE,				CTSVC_SEARCH_PROPERTY_NONE,(void*)__property_image},
 	{CTSVC_PROPERTY_CONTACT_GROUP_RELATION,		CTSVC_SEARCH_PROPERTY_NONE,(void*)__property_group_relation},
 	{CTSVC_PROPERTY_CONTACT_EXTENSION,			CTSVC_SEARCH_PROPERTY_NONE,(void*)__property_extension},
+	{CTSVC_PROPERTY_CONTACT_SIP,				CTSVC_SEARCH_PROPERTY_NONE,(void*)__property_sip},
 };
 
 const property_info_s __property_my_profile[] = {
@@ -947,6 +967,7 @@ const property_info_s __property_my_profile[] = {
 	{CTSVC_PROPERTY_MY_PROFILE_RELATIONSHIP,		CTSVC_SEARCH_PROPERTY_NONE,(void*)__property_relationship},
 	{CTSVC_PROPERTY_MY_PROFILE_IMAGE,				CTSVC_SEARCH_PROPERTY_NONE,(void*)__property_image},
 	{CTSVC_PROPERTY_MY_PROFILE_EXTENSION,			CTSVC_SEARCH_PROPERTY_NONE,(void*)__property_extension},
+	{CTSVC_PROPERTY_MY_PROFILE_SIP,				CTSVC_SEARCH_PROPERTY_NONE,(void*)__property_sip},
 };
 
 const property_info_s __property_speeddial[] = {   /* _contacts_speeddial */
@@ -1265,6 +1286,7 @@ static const view_uri_info_s __tables[] = {
 	{CTSVC_VIEW_URI_MESSENGER,		CTSVC_RECORD_MESSENGER,			PTR_COUNT(__property_messenger)},
 	{CTSVC_VIEW_URI_GROUP_RELATION, CTSVC_RECORD_GROUP_RELATION,	PTR_COUNT(__property_group_relation)},
 	{CTSVC_VIEW_URI_EXTENSION,			CTSVC_RECORD_EXTENSION,			PTR_COUNT(__property_extension)},
+	{CTSVC_VIEW_URI_SIP,			CTSVC_RECORD_SIP,			PTR_COUNT(__property_sip)},
 
 	{CTSVC_VIEW_URI_GROUPS_UPDATED_INFO,  CTSVC_RECORD_UPDATED_INFO, NULL, 0},
 	{CTSVC_VIEW_URI_GROUPS_MEMBER_UPDATED_INFO,  CTSVC_RECORD_UPDATED_INFO, NULL, 0},
