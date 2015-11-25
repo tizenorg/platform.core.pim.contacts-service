@@ -244,6 +244,7 @@ int main(int argc, char *argv[])
 	ctsvc_create_file_set_permission(CTSVC_NOTI_ACTIVITY_PHOTO_CHANGED, 0660);
 	ctsvc_create_file_set_permission(CTSVC_NOTI_PHONELOG_CHANGED, 0660);
 	ctsvc_create_file_set_permission(CTSVC_NOTI_SPEEDDIAL_CHANGED, 0660);
+	ctsvc_create_file_set_permission(CTSVC_NOTI_SIP_CHANGED, 0660);
 
 	// update DB for compatability
 	ctsvc_server_db_update();

@@ -51,6 +51,7 @@ static TLS bool relationship_change = false;
 static TLS bool image_change = false;
 static TLS bool profile_change = false;
 static TLS bool company_change = false;
+static TLS bool sip_change = false;
 
 void ctsvc_noti_publish_socket_initialize(void)
 {
@@ -287,6 +288,15 @@ static inline void __ctsvc_noti_publish_activity_photo_change(void)
 	}
 }
 
+static inline void __ctsvc_noti_publish_sip_change(void)
+{
+	int fd = open(CTSVC_NOTI_SIP_CHANGED, O_TRUNC | O_RDWR);
+	if (0 <= fd) {
+		close(fd);
+		sip_change = false;
+	}
+}
+
 void ctsvc_nofitication_cancel(void)
 {
 	contact_change = false;
@@ -314,6 +324,7 @@ void ctsvc_nofitication_cancel(void)
 	image_change = false;
 	profile_change = false;
 	company_change = false;
+	sip_change = false;
 }
 
 void ctsvc_set_contact_noti(void)
@@ -441,6 +452,11 @@ void ctsvc_set_company_noti(void)
 	company_change = true;
 }
 
+void ctsvc_set_sip_noti(void)
+{
+	sip_change = true;
+}
+
 void ctsvc_notification_send()
 {
 	if (contact_change) __ctsvc_noti_publish_contact_change();
@@ -468,6 +484,7 @@ void ctsvc_notification_send()
 	if (relationship_change) __ctsvc_noti_publish_relationship_change();
 	if (image_change) __ctsvc_noti_publish_image_change();
 	if (profile_change) __ctsvc_noti_publish_profile_change();
+	if (sip_change) __ctsvc_noti_publish_sip_change();
 }
 
 /*
@@ -529,6 +546,9 @@ void ctsvc_db_data_delete_callback(sqlite3_context * context,
 		break;
 	case CTSVC_DATA_EXTENSION:
 		ctsvc_set_data_noti();
+		break;
+	case CTSVC_DATA_SIP:
+		ctsvc_set_sip_noti();
 		break;
 	default:
 		break;
