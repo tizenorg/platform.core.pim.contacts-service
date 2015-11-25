@@ -138,6 +138,11 @@ static int __ctsvc_my_profile_create(contacts_record_h *out_record)
 			break;
 		my_profile->extensions->l_type = CTSVC_RECORD_EXTENSION;
 
+		my_profile->sips = calloc(1, sizeof(ctsvc_list_s));
+		if (NULL == my_profile->sips)
+			break;
+		my_profile->sips->l_type = CTSVC_RECORD_SIP;
+
 		*out_record = (contacts_record_h)my_profile;
 		return CONTACTS_ERROR_NONE;
 	} while (0);
@@ -335,7 +340,10 @@ static int __ctsvc_my_profile_get_record_list_p(contacts_record_h record,
 	case CTSVC_PROPERTY_MY_PROFILE_EXTENSION:
 		*list = (contacts_list_h)contact->extensions;
 		break;
-	default:
+	case CTSVC_PROPERTY_MY_PROFILE_SIP:
+		*list = (contacts_list_h)contact->sips;
+		break;
+	default :
 		ERR("property_id(%d) is not supported in value(contact)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
@@ -454,7 +462,10 @@ static int __ctsvc_my_profile_reset_child_record_id(contacts_record_h child_reco
 	case CTSVC_RECORD_EXTENSION:
 		((ctsvc_extension_s*)record)->id = 0;
 		break;
-	default:
+	case CTSVC_RECORD_SIP:
+		((ctsvc_sip_s *)record)->id = 0;
+		break;
+	default :
 		ERR("record(%d) is not child of contact", record->r_type);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
@@ -529,7 +540,9 @@ static int __ctsvc_my_profile_get_child_record_id(contacts_record_h child_record
 		return ((ctsvc_image_s*)record)->id;
 	case CTSVC_RECORD_EXTENSION:
 		return ((ctsvc_extension_s*)record)->id;
-	default:
+	case CTSVC_RECORD_SIP:
+		return ((ctsvc_sip_s *)record)->id;
+	default :
 		ERR("record(%d) is not child of contact", record->r_type);
 		return 0;
 	}
@@ -639,6 +652,9 @@ static int __ctsvc_my_profile_clone(contacts_record_h record,
 
 	ctsvc_list_clone((contacts_list_h)src_data->extensions, (contacts_list_h*)&out_data->extensions);
 	out_data->extensions->l_type = CTSVC_RECORD_EXTENSION;
+
+	ctsvc_list_clone((contacts_list_h)src_data->sips, (contacts_list_h*)&out_data->sips);
+	out_data->sips->l_type = CTSVC_RECORD_SIP;
 
 	int ret = ctsvc_record_copy_base(&(out_data->base), &(src_data->base));
 	if (CONTACTS_ERROR_NONE != ret) {

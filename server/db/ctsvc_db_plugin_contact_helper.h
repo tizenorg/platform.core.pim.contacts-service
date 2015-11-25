@@ -53,6 +53,7 @@ int ctsvc_get_data_info_image(cts_stmt stmt, contacts_list_h list);
 int ctsvc_get_data_info_url(cts_stmt stmt, contacts_list_h list);
 int ctsvc_get_data_info_nickname(cts_stmt stmt, contacts_list_h list);
 int ctsvc_get_data_info_extension(cts_stmt stmt, contacts_list_h list);
+int ctsvc_get_data_info_sip(cts_stmt stmt, contacts_list_h list);
 
 bool ctsvc_contact_check_default_number(contacts_list_h number_list);
 bool ctsvc_contact_check_default_email(contacts_list_h email_list);
@@ -88,6 +89,8 @@ int ctsvc_contact_update_data_number(contacts_list_h number_list, int contact_id
 		bool is_my_profile, bool *had_phonenumber);
 int ctsvc_contact_update_data_email(contacts_list_h email_list, int contact_id,
 		bool is_my_profile, bool *had_email);
+int ctsvc_contact_update_data_sip(contacts_list_h sip_list, int contact_id,
+		bool is_my_profile);
 
 int ctsvc_contact_insert_data_name(contacts_list_h name_list, int contact_id,
 		bool is_my_profile);
@@ -116,6 +119,8 @@ int ctsvc_contact_insert_data_relationship(contacts_list_h relationship_list,
 int ctsvc_contact_insert_data_image(contacts_list_h image_list, int contact_id,
 		bool is_my_profile);
 int ctsvc_contact_insert_data_extension(contacts_list_h extension_list, int contact_id,
+		bool is_my_profile);
+int ctsvc_contact_insert_data_sip(contacts_list_h sip_list, int contact_id,
 		bool is_my_profile);
 
 #endif /* __CTSVC_DB_PLUGIN_CONTACT_HELPER_H__ */

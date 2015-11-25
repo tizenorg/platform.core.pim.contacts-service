@@ -57,6 +57,7 @@ extern ctsvc_db_plugin_info_s ctsvc_db_plugin_number;
 extern ctsvc_db_plugin_info_s ctsvc_db_plugin_url;
 extern ctsvc_db_plugin_info_s ctsvc_db_plugin_extension;
 extern ctsvc_db_plugin_info_s ctsvc_db_plugin_profile;
+extern ctsvc_db_plugin_info_s ctsvc_db_plugin_sip;
 
 
 #ifdef _CONTACTS_NATIVE
@@ -105,6 +106,7 @@ static const db_table_info_s __db_tables[] = {
 	{CTSVC_VIEW_URI_MESSENGER,		CTSVC_DB_VIEW_MESSENGER, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_WRITE, true},
 	{CTSVC_VIEW_URI_GROUP_RELATION, CTSVC_DB_VIEW_GROUP_RELATION, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_WRITE, true},
 	{CTSVC_VIEW_URI_EXTENSION,		CTSVC_DB_VIEW_EXTENSION, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_WRITE, true},
+	{CTSVC_VIEW_URI_SIP,			CTSVC_DB_VIEW_SIP, CTSVC_PERMISSION_CONTACT_READ, CTSVC_PERMISSION_CONTACT_WRITE, true},
 
 	/* Do not support get_all_records, get_records_with_query, get_count, get_count_with_query */
 	/*
@@ -300,6 +302,8 @@ ctsvc_db_plugin_info_s *ctsvc_db_get_plugin_info(ctsvc_record_type_e type)
 		return &ctsvc_db_plugin_speeddial;
 	case CTSVC_RECORD_SDN:
 		return &ctsvc_db_plugin_sdn;
+	case CTSVC_RECORD_SIP:
+		return &ctsvc_db_plugin_sip;
 	case CTSVC_RECORD_UPDATED_INFO:
 	case CTSVC_RECORD_RESULT:
 	default:
@@ -900,6 +904,21 @@ static int __ctsvc_db_create_views()
 			"ORDER BY timestamp DESC");
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_query_exec() Fail(%d)", ret);
+
+	/* CTSVC_DB_VIEW_SIP */
+	snprintf(query, sizeof(query),
+		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_SIP" AS "
+			"SELECT id, "
+					"data.contact_id, "
+					"data1 address, "
+					"data2 type, "
+					"data3 label "
+			"FROM "CTS_TABLE_DATA", "CTSVC_DB_VIEW_CONTACT" "
+			"ON "CTS_TABLE_DATA".contact_id = "CTSVC_DB_VIEW_CONTACT".contact_id "
+			"WHERE datatype = %d AND is_my_profile = 0 ",
+				CTSVC_DATA_SIP);
+	ret = ctsvc_query_exec(query);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "DB error : ctsvc_query_exec() Fail(%d)", ret);
 
 	__ctsvc_db_view_already_created = true;
 

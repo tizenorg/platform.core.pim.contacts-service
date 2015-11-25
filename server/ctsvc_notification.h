@@ -47,6 +47,7 @@ void ctsvc_set_image_noti(void);
 void ctsvc_set_profile_noti(void);
 void ctsvc_set_sdn_noti(void);
 void ctsvc_set_company_noti(void);
+void ctsvc_set_sip_noti(void);
 
 void ctsvc_notification_send(void);
 void ctsvc_nofitication_cancel(void);

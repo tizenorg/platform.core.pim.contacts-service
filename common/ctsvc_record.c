@@ -54,6 +54,7 @@ extern ctsvc_record_plugin_cb_s extension_plugin_cbs;
 #ifdef ENABLE_LOG_FEATURE
 extern ctsvc_record_plugin_cb_s phonelog_plugin_cbs;
 #endif /* ENABLE_LOG_FEATURE */
+extern ctsvc_record_plugin_cb_s sip_plugin_cbs;
 
 static const ctsvc_record_plugin_cb_s *__ctsvc_record_get_plugin_cb(int r_type)
 {
@@ -116,6 +117,8 @@ static const ctsvc_record_plugin_cb_s *__ctsvc_record_get_plugin_cb(int r_type)
 		return &updated_info_plugin_cbs;
 	case CTSVC_RECORD_RESULT:
 		return &result_plugin_cbs;
+	case CTSVC_RECORD_SIP:
+		return &sip_plugin_cbs;
 	default:
 		return NULL;
 	}
