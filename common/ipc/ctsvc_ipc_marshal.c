@@ -58,6 +58,7 @@ extern ctsvc_ipc_marshal_record_plugin_cb_s _ctsvc_ipc_record_profile_plugin_cb;
 extern ctsvc_ipc_marshal_record_plugin_cb_s _ctsvc_ipc_record_relationship_plugin_cb;
 extern ctsvc_ipc_marshal_record_plugin_cb_s _ctsvc_ipc_record_url_plugin_cb;
 extern ctsvc_ipc_marshal_record_plugin_cb_s _ctsvc_ipc_record_image_plugin_cb;
+extern ctsvc_ipc_marshal_record_plugin_cb_s _ctsvc_ipc_record_sip_plugin_cb;
 
 static ctsvc_ipc_marshal_record_plugin_cb_s* __ctsvc_ipc_marshal_get_plugin_cb(ctsvc_record_type_e type);
 
@@ -129,6 +130,8 @@ static ctsvc_ipc_marshal_record_plugin_cb_s* __ctsvc_ipc_marshal_get_plugin_cb(c
 		return (&_ctsvc_ipc_record_image_plugin_cb);
 	case CTSVC_RECORD_EXTENSION:
 		return (&_ctsvc_ipc_record_extension_plugin_cb);
+	case CTSVC_RECORD_SIP:
+		return (&_ctsvc_ipc_record_sip_plugin_cb);
 	default:
 		ASSERT_NOT_REACHED("Unimplemented IPC module (%d)", type);
 		return NULL;

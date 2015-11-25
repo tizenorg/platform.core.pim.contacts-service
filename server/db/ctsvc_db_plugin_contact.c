@@ -186,6 +186,9 @@ static int __ctsvc_db_get_data(int id, ctsvc_contact_s *contact)
 		case CTSVC_DATA_EXTENSION:
 			ctsvc_get_data_info_extension(stmt, (contacts_list_h)contact->extensions);
 			break;
+		case CTSVC_DATA_SIP:
+			ctsvc_get_data_info_sip(stmt, (contacts_list_h)contact->sips);
+			break;
 		default:
 			ERR("Intenal : Not supported data type (%d)", datatype);
 			break;
@@ -396,6 +399,13 @@ static inline int __ctsvc_contact_update_data(ctsvc_contact_s *contact)
 		}
 	}
 
+	if (contact->sips) {
+		ret = ctsvc_contact_update_data_sip((contacts_list_h)contact->sips, contact->id, false);
+		if (CONTACTS_ERROR_NONE != ret) {
+			CTS_ERR("ctsvc_contact_update_data_sips() Fail(%d)", ret);
+			return ret;
+		}
+	}
 	return CONTACTS_ERROR_NONE;
 }
 
@@ -1744,6 +1754,15 @@ static int __ctsvc_contact_insert_data(ctsvc_contact_s *contact)
 		ret = ctsvc_contact_insert_data_extension((contacts_list_h)contact->extensions, contact->id, false);
 		if (CONTACTS_ERROR_NONE != ret) {
 			ERR("ctsvc_contact_insert_data_extension() Fail(%d)", ret);
+			return ret;
+		}
+	}
+
+	/* Insert the sips */
+	if (contact->sips) {
+		ret = ctsvc_contact_insert_data_sip((contacts_list_h)contact->sips, contact->id, false);
+		if (CONTACTS_ERROR_NONE != ret) {
+			CTS_ERR("ctsvc_insert_contact_data_sip() Fail(%d)", ret);
 			return ret;
 		}
 	}
