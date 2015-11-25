@@ -854,6 +854,7 @@ static int __ctsvc_db_create_projection(const char *view_uri, const property_inf
 	char out_projection[CTS_SQL_MAX_LEN] = {0};
 	char temp[CTS_SQL_MAX_LEN] = {0};
 
+ERR("[%s]", view_uri);
 	len = 0;
 	first = true;
 	if (0 < pro_count) {
@@ -881,14 +882,16 @@ static int __ctsvc_db_create_projection(const char *view_uri, const property_inf
 			if (CTSVC_VIEW_DATA_TYPE_REC == (properties[i].property_id & CTSVC_VIEW_DATA_TYPE_MASK))
 				continue;
 
-			if (properties[i].fields)
+			if (properties[i].fields) {
 				field_name = properties[i].fields;
+			}
 			else if (properties[i].property_id == CTSVC_PROPERTY_PERSON_DISPLAY_NAME_INDEX) {
 				snprintf(temp, sizeof(temp), "_NORMALIZE_INDEX_(%s)", ctsvc_get_sort_name_column());
 				field_name = temp;
 			}
-			else
+			else {
 				field_name = ctsvc_get_display_column();
+			}
 
 			if (first) {
 				len += snprintf(out_projection+len, sizeof(out_projection)-len, "%s", field_name);
