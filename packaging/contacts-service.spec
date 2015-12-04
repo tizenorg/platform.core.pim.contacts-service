@@ -7,11 +7,6 @@ License:    Apache-2.0
 Source0:    %{name}-%{version}.tar.gz
 Source1:    contacts-service.service
 Source2:    contacts-service.socket
-
-%if "%{?tizen_profile_name}" == "tv"
-ExcludeArch: %{arm} %ix86 x86_64
-%endif
-
 BuildRequires:  cmake
 BuildRequires:  pkgconfig(db-util)
 BuildRequires:  pkgconfig(vconf)
