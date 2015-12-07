@@ -649,7 +649,7 @@ ctsvc_record_plugin_cb_s simple_contact_plugin_cbs = {
 static int __ctsvc_activity_create(contacts_record_h *out_record)
 {
 	ctsvc_activity_s *activity;
-	activity = (ctsvc_activity_s*)calloc(1, sizeof(ctsvc_activity_s));
+	activity = calloc(1, sizeof(ctsvc_activity_s));
 	RETVM_IF(NULL == activity, CONTACTS_ERROR_OUT_OF_MEMORY,
 			"Out of memory : calloc is Fail");
 
@@ -668,7 +668,7 @@ static int __ctsvc_activity_create(contacts_record_h *out_record)
 static int __ctsvc_activity_photo_create(contacts_record_h *out_record)
 {
 	ctsvc_activity_photo_s *photo;
-	photo = (ctsvc_activity_photo_s*)calloc(1, sizeof(ctsvc_activity_photo_s));
+	photo = calloc(1, sizeof(ctsvc_activity_photo_s));
 	RETVM_IF(NULL == photo, CONTACTS_ERROR_OUT_OF_MEMORY,
 			"Out of memory : calloc is Fail");
 
@@ -679,8 +679,7 @@ static int __ctsvc_activity_photo_create(contacts_record_h *out_record)
 static int __ctsvc_address_create(contacts_record_h *out_record)
 {
 	ctsvc_address_s *address;
-
-	address = (ctsvc_address_s*)calloc(1, sizeof(ctsvc_address_s));
+	address = calloc(1, sizeof(ctsvc_address_s));
 	RETVM_IF(NULL == address, CONTACTS_ERROR_OUT_OF_MEMORY,
 			"Out of memory : calloc is Fail");
 
@@ -691,8 +690,7 @@ static int __ctsvc_address_create(contacts_record_h *out_record)
 static int __ctsvc_company_create(contacts_record_h *out_record)
 {
 	ctsvc_company_s *company;
-
-	company = (ctsvc_company_s*)calloc(1, sizeof(ctsvc_company_s));
+	company = calloc(1, sizeof(ctsvc_company_s));
 	RETVM_IF(NULL == company, CONTACTS_ERROR_OUT_OF_MEMORY,
 			"Out of memory : calloc is Fail");
 
@@ -703,7 +701,7 @@ static int __ctsvc_company_create(contacts_record_h *out_record)
 static int __ctsvc_email_create(contacts_record_h *out_record)
 {
 	ctsvc_email_s *email;
-	email = (ctsvc_email_s*)calloc(1, sizeof(ctsvc_email_s));
+	email = calloc(1, sizeof(ctsvc_email_s));
 	RETVM_IF(NULL == email, CONTACTS_ERROR_OUT_OF_MEMORY,
 			"Out of memory : calloc is Fail");
 
@@ -714,7 +712,7 @@ static int __ctsvc_email_create(contacts_record_h *out_record)
 static int __ctsvc_event_create(contacts_record_h *out_record)
 {
 	ctsvc_event_s *event;
-	event = (ctsvc_event_s*)calloc(1, sizeof(ctsvc_event_s));
+	event = calloc(1, sizeof(ctsvc_event_s));
 	RETVM_IF(NULL == event, CONTACTS_ERROR_OUT_OF_MEMORY,
 			"Out of memory : calloc is Fail");
 
@@ -725,7 +723,7 @@ static int __ctsvc_event_create(contacts_record_h *out_record)
 static int __ctsvc_extension_create(contacts_record_h *out_record)
 {
 	ctsvc_extension_s *extension;
-	extension = (ctsvc_extension_s*)calloc(1, sizeof(ctsvc_extension_s));
+	extension = calloc(1, sizeof(ctsvc_extension_s));
 	RETVM_IF(NULL == extension, CONTACTS_ERROR_OUT_OF_MEMORY,
 			"Out of memory : calloc is Fail");
 
@@ -736,7 +734,7 @@ static int __ctsvc_extension_create(contacts_record_h *out_record)
 static int __ctsvc_group_relation_create(contacts_record_h *out_record)
 {
 	ctsvc_group_relation_s *group_relation;
-	group_relation = (ctsvc_group_relation_s*)calloc(1, sizeof(ctsvc_group_relation_s));
+	group_relation = calloc(1, sizeof(ctsvc_group_relation_s));
 	RETVM_IF(NULL == group_relation, CONTACTS_ERROR_OUT_OF_MEMORY,
 			"Out of memory : calloc is Fail");
 
@@ -747,7 +745,7 @@ static int __ctsvc_group_relation_create(contacts_record_h *out_record)
 static int __ctsvc_messenger_create(contacts_record_h *out_record)
 {
 	ctsvc_messenger_s *messenger;
-	messenger = (ctsvc_messenger_s*)calloc(1, sizeof(ctsvc_messenger_s));
+	messenger = calloc(1, sizeof(ctsvc_messenger_s));
 	RETVM_IF(NULL == messenger, CONTACTS_ERROR_OUT_OF_MEMORY,
 			"Out of memory : calloc is Fail");
 
@@ -758,8 +756,7 @@ static int __ctsvc_messenger_create(contacts_record_h *out_record)
 static int __ctsvc_name_create(contacts_record_h *out_record)
 {
 	ctsvc_name_s *name;
-
-	name = (ctsvc_name_s*)calloc(1, sizeof(ctsvc_name_s));
+	name = calloc(1, sizeof(ctsvc_name_s));
 	RETVM_IF(NULL == name, CONTACTS_ERROR_OUT_OF_MEMORY,
 			"Out of memory : calloc is Fail");
 
@@ -770,8 +767,7 @@ static int __ctsvc_name_create(contacts_record_h *out_record)
 static int __ctsvc_nickname_create(contacts_record_h *out_record)
 {
 	ctsvc_nickname_s *nickname;
-
-	nickname = (ctsvc_nickname_s*)calloc(1, sizeof(ctsvc_nickname_s));
+	nickname = calloc(1, sizeof(ctsvc_nickname_s));
 	RETVM_IF(NULL == nickname, CONTACTS_ERROR_OUT_OF_MEMORY,
 			"Out of memory : calloc is Fail");
 
@@ -782,8 +778,7 @@ static int __ctsvc_nickname_create(contacts_record_h *out_record)
 static int __ctsvc_note_create(contacts_record_h *out_record)
 {
 	ctsvc_note_s *note;
-
-	note = (ctsvc_note_s*)calloc(1, sizeof(ctsvc_note_s));
+	note = calloc(1, sizeof(ctsvc_note_s));
 	RETVM_IF(NULL == note, CONTACTS_ERROR_OUT_OF_MEMORY,
 			"Out of memory : calloc is Fail");
 
@@ -794,8 +789,7 @@ static int __ctsvc_note_create(contacts_record_h *out_record)
 static int __ctsvc_number_create(contacts_record_h *out_record)
 {
 	ctsvc_number_s *number;
-
-	number = (ctsvc_number_s*)calloc(1, sizeof(ctsvc_number_s));
+	number = calloc(1, sizeof(ctsvc_number_s));
 	RETVM_IF(NULL == number, CONTACTS_ERROR_OUT_OF_MEMORY,
 			"Out of memory : calloc is Fail");
 
@@ -806,8 +800,7 @@ static int __ctsvc_number_create(contacts_record_h *out_record)
 static int __ctsvc_profile_create(contacts_record_h *out_record)
 {
 	ctsvc_profile_s *profile;
-
-	profile = (ctsvc_profile_s*)calloc(1, sizeof(ctsvc_profile_s));
+	profile = calloc(1, sizeof(ctsvc_profile_s));
 	RETVM_IF(NULL == profile, CONTACTS_ERROR_OUT_OF_MEMORY,
 			"Out of memory : calloc is Fail");
 
@@ -818,8 +811,7 @@ static int __ctsvc_profile_create(contacts_record_h *out_record)
 static int __ctsvc_relationship_create(contacts_record_h *out_record)
 {
 	ctsvc_relationship_s *relationship;
-
-	relationship = (ctsvc_relationship_s*)calloc(1, sizeof(ctsvc_relationship_s));
+	relationship = calloc(1, sizeof(ctsvc_relationship_s));
 	RETVM_IF(NULL == relationship, CONTACTS_ERROR_OUT_OF_MEMORY,
 			"Out of memory : calloc is Fail");
 
@@ -830,8 +822,7 @@ static int __ctsvc_relationship_create(contacts_record_h *out_record)
 static int __ctsvc_image_create(contacts_record_h *out_record)
 {
 	ctsvc_image_s *image;
-
-	image = (ctsvc_image_s*)calloc(1, sizeof(ctsvc_image_s));
+	image = calloc(1, sizeof(ctsvc_image_s));
 	RETVM_IF(NULL == image, CONTACTS_ERROR_OUT_OF_MEMORY,
 			"Out of memory : calloc is Fail");
 
@@ -842,8 +833,7 @@ static int __ctsvc_image_create(contacts_record_h *out_record)
 static int __ctsvc_simple_contact_create(contacts_record_h *out_record)
 {
 	ctsvc_simple_contact_s *simple_contact;
-
-	simple_contact = (ctsvc_simple_contact_s*)calloc(1, sizeof(ctsvc_simple_contact_s));
+	simple_contact = calloc(1, sizeof(ctsvc_simple_contact_s));
 	RETVM_IF(NULL == simple_contact, CONTACTS_ERROR_OUT_OF_MEMORY,
 			"Out of memory : calloc is Fail");
 
@@ -854,8 +844,7 @@ static int __ctsvc_simple_contact_create(contacts_record_h *out_record)
 static int __ctsvc_url_create(contacts_record_h *out_record)
 {
 	ctsvc_url_s *url;
-
-	url = (ctsvc_url_s*)calloc(1, sizeof(ctsvc_url_s));
+	url = calloc(1, sizeof(ctsvc_url_s));
 	RETVM_IF(NULL == url, CONTACTS_ERROR_OUT_OF_MEMORY,
 			"Out of memory : calloc is Fail");
 
