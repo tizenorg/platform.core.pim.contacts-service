@@ -92,7 +92,7 @@ ln -s ../contacts-service.socket %{buildroot}%{_unitdir_user}/sockets.target.wan
 %{_unitdir_user}/sockets.target.wants/contacts-service.socket
 %{_unitdir_user}/contacts-service.socket
 %license LICENSE.APLv2
-
+/usr/bin/test-contacts
 
 %files -n contacts-service2-devel
 %defattr(-,root,root,-)
