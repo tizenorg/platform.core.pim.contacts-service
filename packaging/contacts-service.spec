@@ -100,6 +100,7 @@ cp LICENSE.APLv2 %{buildroot}/usr/share/license/contacts-service2-devel
 %{_unitdir_user}/sockets.target.wants/contacts-service.socket
 %{_unitdir_user}/contacts-service.socket
 /usr/share/license/%{name}2
+/usr/bin/test-contacts
 
 %files -n contacts-service2-devel
 %defattr(-,root,root,-)
