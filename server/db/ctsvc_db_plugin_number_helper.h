@@ -1,7 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,18 @@
  * limitations under the License.
  *
  */
-
 #ifndef __CTSVC_DB_PLUGIN_NUMBER_HELPER_H__
 #define __CTSVC_DB_PLUGIN_NUMBER_HELPER_H__
 
 #include "contacts.h"
 #include "ctsvc_db_sqlite.h"
 
-int ctsvc_db_number_insert(contacts_record_h record, int contact_id, bool is_my_profile, int *id);
+int ctsvc_db_number_insert(contacts_record_h record, int contact_id, bool is_my_profile,
+		int *id);
 int ctsvc_db_number_update(contacts_record_h record, bool is_my_profile);
 int ctsvc_db_number_delete(int id, bool is_my_profile);
 
-int ctsvc_db_number_get_value_from_stmt(cts_stmt stmt, contacts_record_h *record, int start_count);
+int ctsvc_db_number_get_value_from_stmt(cts_stmt stmt, contacts_record_h *record,
+		int start_count);
 
 #endif /* __CTSVC_DB_PLUGIN_NUMBER_HELPER_H__ */

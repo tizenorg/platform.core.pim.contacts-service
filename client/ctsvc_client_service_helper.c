@@ -1,11 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
- *
- * Contact: Dohyung Jin <dh.jin@samsung.com>
- *                 Jongwon Lee <gogosing.lee@samsung.com>
- *                 Donghee Ye <donghee.ye@samsung.com>
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,9 +56,9 @@ int ctsvc_client_connect_with_flags(contacts_h contact, unsigned int flags)
 	if (flags & CONTACTS_CONNECT_FLAG_RETRY) {
 		int i;
 		int waiting_time = 500;
-		for (i=0;i<9;i++) {
+		for (i = 0; i < 9; i++) {
 			usleep(waiting_time * 1000);
-			CTS_DBG("retry cnt=%d, ret=%x, %d",(i+1), ret, waiting_time);
+			DBG("retry cnt=%d, ret=%x, %d", (i+1), ret, waiting_time);
 			ret = ctsvc_client_connect(contact);
 			if (ret == CONTACTS_ERROR_NONE)
 				break;
@@ -90,14 +86,14 @@ int ctsvc_client_connect(contacts_h contact)
 {
 	CTS_FN_CALL;
 	int ret;
-	ctsvc_base_s *base = (ctsvc_base_s *)contact;
+	ctsvc_base_s *base = (ctsvc_base_s*)contact;
 	RETV_IF(NULL == base, CONTACTS_ERROR_INVALID_PARAMETER);
 
- 	ctsvc_mutex_lock(CTS_MUTEX_CONNECTION);
+	ctsvc_mutex_lock(CTS_MUTEX_CONNECTION);
 	if (0 == base->connection_count) {
 		ret = ctsvc_ipc_connect(contact, ctsvc_client_get_pid());
 		if (ret != CONTACTS_ERROR_NONE) {
-			CTS_ERR("ctsvc_ipc_connect() Fail(%d)", ret);
+			ERR("ctsvc_ipc_connect() Fail(%d)", ret);
 			ctsvc_mutex_unlock(CTS_MUTEX_CONNECTION);
 			return ret;
 		}
@@ -107,22 +103,22 @@ int ctsvc_client_connect(contacts_h contact)
 	if (0 == _ctsvc_connection) {
 		ret = ctsvc_socket_init();
 		if (ret != CONTACTS_ERROR_NONE) {
-			CTS_ERR("ctsvc_socket_init() Fail(%d)", ret);
+			ERR("ctsvc_socket_init() Fail(%d)", ret);
 			ctsvc_mutex_unlock(CTS_MUTEX_CONNECTION);
 			return ret;
 		}
 
 		ret = ctsvc_inotify_init();
 		if (ret != CONTACTS_ERROR_NONE) {
-			CTS_ERR("ctsvc_inotify_init() Fail(%d)", ret);
+			ERR("ctsvc_inotify_init() Fail(%d)", ret);
 			ctsvc_socket_final();
 			ctsvc_mutex_unlock(CTS_MUTEX_CONNECTION);
 			return ret;
 		}
 		ctsvc_view_uri_init();
+	} else {
+		DBG("Contacts service has been already connected(%d)", _ctsvc_connection + 1);
 	}
-	else
-		CTS_DBG("System : Contacts service has been already connected(%d)", _ctsvc_connection + 1);
 
 	if (1 == base->connection_count)
 		ctsvc_inotify_subscribe_ipc_ready(contact, _ctsvc_ipc_initialized_cb, NULL);
@@ -137,7 +133,7 @@ int ctsvc_client_disconnect(contacts_h contact)
 {
 	CTS_FN_CALL;
 	int ret;
-	ctsvc_base_s *base = (ctsvc_base_s *)contact;
+	ctsvc_base_s *base = (ctsvc_base_s*)contact;
 	RETV_IF(NULL == base, CONTACTS_ERROR_INVALID_PARAMETER);
 
 	ctsvc_mutex_lock(CTS_MUTEX_CONNECTION);
@@ -146,7 +142,7 @@ int ctsvc_client_disconnect(contacts_h contact)
 		ret = ctsvc_ipc_disconnect(contact, ctsvc_client_get_pid(), _ctsvc_connection);
 		if (ret != CONTACTS_ERROR_NONE) {
 			ctsvc_mutex_unlock(CTS_MUTEX_CONNECTION);
-			CTS_ERR("ctsvc_ipc_disconnect() Fail(%d)", ret);
+			ERR("ctsvc_ipc_disconnect() Fail(%d)", ret);
 			return ret;
 		}
 		ctsvc_inotify_unsubscribe_ipc_ready(contact);
@@ -159,11 +155,10 @@ int ctsvc_client_disconnect(contacts_h contact)
 		ctsvc_inotify_close();
 		ctsvc_socket_final();
 
-	}
-	else if (1 < _ctsvc_connection)
-		CTS_DBG("System : connection count is %d", _ctsvc_connection);
-	else {
-		CTS_DBG("System : please call contacts_connect(), connection count is (%d)", _ctsvc_connection);
+	} else if (1 < _ctsvc_connection) {
+		DBG("connection count is %d", _ctsvc_connection);
+	} else {
+		DBG("call contacts_connect(), connection count is %d", _ctsvc_connection);
 		ctsvc_mutex_unlock(CTS_MUTEX_CONNECTION);
 		return CONTACTS_ERROR_DB;
 	}
@@ -171,7 +166,7 @@ int ctsvc_client_disconnect(contacts_h contact)
 	_ctsvc_connection--;
 
 	if (0 == base->connection_count) {
-		CTS_INFO("connection_count is 0. remove handle");
+		INFO("connection_count is 0. remove handle");
 		ret = ctsvc_client_handle_remove(ctsvc_client_get_pid(), contact);
 		WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_client_handle_remove() Fail(%d)", ret);
 	}
@@ -183,7 +178,7 @@ int ctsvc_client_disconnect(contacts_h contact)
 int ctsvc_client_connect_on_thread(contacts_h contact)
 {
 	int ret;
-	ctsvc_base_s *base = (ctsvc_base_s *)contact;
+	ctsvc_base_s *base = (ctsvc_base_s*)contact;
 	RETV_IF(NULL == base, CONTACTS_ERROR_INVALID_PARAMETER);
 
 	ctsvc_mutex_lock(CTS_MUTEX_CONNECTION);
@@ -191,7 +186,7 @@ int ctsvc_client_connect_on_thread(contacts_h contact)
 	if (0 == base->connection_count) {
 		ret = ctsvc_ipc_connect(contact, ctsvc_client_get_tid());
 		if (ret != CONTACTS_ERROR_NONE) {
-			CTS_ERR("ctsvc_ipc_connect() Fail(%d)", ret);
+			ERR("ctsvc_ipc_connect() Fail(%d)", ret);
 			ctsvc_mutex_unlock(CTS_MUTEX_CONNECTION);
 			return ret;
 		}
@@ -201,22 +196,22 @@ int ctsvc_client_connect_on_thread(contacts_h contact)
 	if (0 == _ctsvc_connection_on_thread) {
 		ret = ctsvc_socket_init();
 		if (ret != CONTACTS_ERROR_NONE) {
-			CTS_ERR("ctsvc_socket_init() Fail(%d)", ret);
+			ERR("ctsvc_socket_init() Fail(%d)", ret);
 			ctsvc_mutex_unlock(CTS_MUTEX_CONNECTION);
 			return ret;
 		}
 
 		ret = ctsvc_inotify_init();
 		if (ret != CONTACTS_ERROR_NONE) {
-			CTS_ERR("ctsvc_inotify_init() Fail(%d)", ret);
+			ERR("ctsvc_inotify_init() Fail(%d)", ret);
 			ctsvc_socket_final();
 			ctsvc_mutex_unlock(CTS_MUTEX_CONNECTION);
 			return ret;
 		}
 		ctsvc_view_uri_init();
+	} else if (0 < _ctsvc_connection_on_thread) {
+		DBG("System : Contacts service has been already connected");
 	}
-	else if (0 < _ctsvc_connection_on_thread)
-		CTS_DBG("System : Contacts service has been already connected");
 
 	if (1 == base->connection_count)
 		ctsvc_inotify_subscribe_ipc_ready(contact, _ctsvc_ipc_initialized_cb, NULL);
@@ -231,15 +226,16 @@ int ctsvc_client_connect_on_thread(contacts_h contact)
 int ctsvc_client_disconnect_on_thread(contacts_h contact)
 {
 	int ret;
-	ctsvc_base_s *base = (ctsvc_base_s *)contact;
+	ctsvc_base_s *base = (ctsvc_base_s*)contact;
 	RETV_IF(NULL == base, CONTACTS_ERROR_INVALID_PARAMETER);
 
 	ctsvc_mutex_lock(CTS_MUTEX_CONNECTION);
 
 	if (1 == base->connection_count) {
-		ret = ctsvc_ipc_disconnect(contact, ctsvc_client_get_tid(), _ctsvc_connection_on_thread);
+		ret = ctsvc_ipc_disconnect(contact, ctsvc_client_get_tid(),
+				_ctsvc_connection_on_thread);
 		if (ret != CONTACTS_ERROR_NONE) {
-			CTS_ERR("ctsvc_ipc_disconnect() Fail(%d)", ret);
+			ERR("ctsvc_ipc_disconnect() Fail(%d)", ret);
 			ctsvc_mutex_unlock(CTS_MUTEX_CONNECTION);
 			return ret;
 		}
@@ -253,13 +249,12 @@ int ctsvc_client_disconnect_on_thread(contacts_h contact)
 		ctsvc_view_uri_deinit();
 		ctsvc_inotify_close();
 		ctsvc_socket_final();
-		CTS_DBG("System : connection_on_thread was destroyed successfully");
-	}
-	else if (1 < _ctsvc_connection_on_thread) {
-		CTS_DBG("System : connection count is %d", _ctsvc_connection_on_thread);
-	}
-	else {
-		CTS_DBG("System : please call contacts_connect_on_thread(), connection count is (%d)", _ctsvc_connection_on_thread);
+		DBG("System : connection_on_thread was destroyed successfully");
+	} else if (1 < _ctsvc_connection_on_thread) {
+		DBG("connection count is %d", _ctsvc_connection_on_thread);
+	} else {
+		DBG("call contacts_connect_on_thread(), connection count is %d",
+				_ctsvc_connection_on_thread);
 		ctsvc_mutex_unlock(CTS_MUTEX_CONNECTION);
 		return CONTACTS_ERROR_DB;
 	}
@@ -267,7 +262,7 @@ int ctsvc_client_disconnect_on_thread(contacts_h contact)
 	_ctsvc_connection_on_thread--;
 
 	if (0 == base->connection_count) {
-		CTS_INFO("connection_count is 0. remove handle");
+		INFO("connection_count is 0. remove handle");
 		ret = ctsvc_client_handle_remove(ctsvc_client_get_tid(), contact);
 		WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_client_handle_remove() Fail(%d)", ret);
 	}

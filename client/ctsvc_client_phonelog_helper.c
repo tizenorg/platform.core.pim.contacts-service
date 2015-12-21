@@ -1,7 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
  * limitations under the License.
  *
  */
-
 #include <pims-ipc-data.h>
 
 #include "contacts.h"
@@ -27,10 +26,10 @@
 #include "ctsvc_ipc_marshal.h"
 
 
-static const char CONTACTS_READ_PRIVILEGE_ID[] =  "http://tizen.org/privilege/contact.read";
-static const char CONTACTS_WRITE_PRIVILEGE_ID[] =  "http://tizen.org/privilege/contact.write";
-static const char PHONELOG_READ_PRIVILEGE_ID[] =  "http://tizen.org/privilege/callhistory.read";
-static const char PHONELOG_WRITE_PRIVILEGE_ID[] =  "http://tizen.org/privilege/callhistory.write";
+static const char CONTACTS_READ_PRIVILEGE_ID[] = "http://tizen.org/privilege/contact.read";
+static const char CONTACTS_WRITE_PRIVILEGE_ID[] = "http://tizen.org/privilege/contact.write";
+static const char PHONELOG_READ_PRIVILEGE_ID[] = "http://tizen.org/privilege/callhistory.read";
+static const char PHONELOG_WRITE_PRIVILEGE_ID[] = "http://tizen.org/privilege/callhistory.write";
 
 int ctsvc_client_phone_log_reset_statistics(contacts_h contact)
 {
@@ -43,26 +42,27 @@ int ctsvc_client_phone_log_reset_statistics(contacts_h contact)
 	pims_ipc_data_h indata = NULL;
 	pims_ipc_data_h outdata = NULL;
 
-	RETVM_IF(NULL == contact, CONTACTS_ERROR_INVALID_PARAMETER, "contact is NULL");
+	RETV_IF(NULL == contact, CONTACTS_ERROR_INVALID_PARAMETER);
 
 	/* make indata */
 	indata = pims_ipc_data_create(0);
 	if (indata == NULL) {
-		CTS_ERR("ipc data created fail!");
+		ERR("pims_ipc_data_create() Fail");
 		ret = CONTACTS_ERROR_OUT_OF_MEMORY;
 		return ret;
 	}
 
 	ret = ctsvc_ipc_marshal_handle(contact, indata);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_ipc_marshal_handle() Fail(%d)", ret);
+		ERR("ctsvc_ipc_marshal_handle() Fail(%d)", ret);
 		pims_ipc_data_destroy(indata);
 		return ret;
 	}
 
 	/* ipc call */
-	if (ctsvc_ipc_call(CTSVC_IPC_PHONELOG_MODULE, CTSVC_IPC_SERVER_PHONELOG_RESET_STATISTICS, indata, &outdata) != 0) {
-		CTS_ERR("ctsvc_ipc_call failed");
+	if (ctsvc_ipc_call(CTSVC_IPC_PHONELOG_MODULE, CTSVC_IPC_SERVER_PHONELOG_RESET_STATISTICS,
+				indata, &outdata) != 0) {
+		ERR("ctsvc_ipc_call() Fail");
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
 	}
@@ -71,7 +71,7 @@ int ctsvc_client_phone_log_reset_statistics(contacts_h contact)
 
 	if (outdata) {
 		if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(outdata, &ret)) {
-			CTS_ERR("ctsvc_ipc_unmarshal_int() Fail");
+			ERR("ctsvc_ipc_unmarshal_int() Fail");
 			pims_ipc_data_destroy(outdata);
 			return CONTACTS_ERROR_IPC;
 		}
@@ -79,7 +79,7 @@ int ctsvc_client_phone_log_reset_statistics(contacts_h contact)
 		if (CONTACTS_ERROR_NONE == ret) {
 			int transaction_ver = 0;
 			if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(outdata, &transaction_ver)) {
-				CTS_ERR("ctsvc_ipc_unmarshal_int() Fail");
+				ERR("ctsvc_ipc_unmarshal_int() Fail");
 				pims_ipc_data_destroy(outdata);
 				return CONTACTS_ERROR_IPC;
 			}
@@ -93,7 +93,8 @@ int ctsvc_client_phone_log_reset_statistics(contacts_h contact)
 
 }
 
-int ctsvc_client_phone_log_delete(contacts_h contact, contacts_phone_log_delete_e op, va_list args)
+int ctsvc_client_phone_log_delete(contacts_h contact, contacts_phone_log_delete_e op,
+		va_list args)
 {
 #ifndef ENABLE_LOG_FEATURE
 	return CONTACTS_ERROR_NOT_SUPPORTED;
@@ -106,11 +107,11 @@ int ctsvc_client_phone_log_delete(contacts_h contact, contacts_phone_log_delete_
 	char *number = NULL;
 	int extra_data1;
 
-	RETVM_IF(NULL == contact, CONTACTS_ERROR_INVALID_PARAMETER, "contact is NULL");
+	RETV_IF(NULL == contact, CONTACTS_ERROR_INVALID_PARAMETER);
 
 	indata = pims_ipc_data_create(0);
 	if (indata == NULL) {
-		CTS_ERR("ipc data created fail!");
+		ERR("pims_ipc_data_create() Fail");
 		ret = CONTACTS_ERROR_OUT_OF_MEMORY;
 		pims_ipc_data_destroy(indata);
 		return ret;
@@ -118,19 +119,19 @@ int ctsvc_client_phone_log_delete(contacts_h contact, contacts_phone_log_delete_
 
 	ret = ctsvc_ipc_marshal_handle(contact, indata);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_ipc_marshal_handle() Fail(%d)", ret);
+		ERR("ctsvc_ipc_marshal_handle() Fail(%d)", ret);
 		pims_ipc_data_destroy(indata);
 		return ret;
 	}
 
 	ret = ctsvc_ipc_marshal_int(op, indata);
 	if (ret != CONTACTS_ERROR_NONE) {
-		CTS_ERR("ctsvc_ipc_marshal_int fail");
+		ERR("ctsvc_ipc_marshal_int fail");
 		pims_ipc_data_destroy(indata);
 		return ret;
 	}
 
-	switch(op) {
+	switch (op) {
 	case CONTACTS_PHONE_LOG_DELETE_BY_ADDRESS:
 		number = va_arg(args, char *);
 		if (NULL == number) {
@@ -139,7 +140,7 @@ int ctsvc_client_phone_log_delete(contacts_h contact, contacts_phone_log_delete_
 		}
 		ret = ctsvc_ipc_marshal_string(number, indata);
 		if (ret != CONTACTS_ERROR_NONE) {
-			CTS_ERR("ctsvc_ipc_marshal_string fail");
+			ERR("ctsvc_ipc_marshal_string fail");
 			pims_ipc_data_destroy(indata);
 			return ret;
 		}
@@ -149,20 +150,20 @@ int ctsvc_client_phone_log_delete(contacts_h contact, contacts_phone_log_delete_
 		extra_data1 = va_arg(args, int);
 		ret = ctsvc_ipc_marshal_int(extra_data1, indata);
 		if (ret != CONTACTS_ERROR_NONE) {
-			CTS_ERR("ctsvc_ipc_marshal_int fail");
+			ERR("ctsvc_ipc_marshal_int fail");
 			pims_ipc_data_destroy(indata);
 			return ret;
 		}
 		break;
 	default:
-		CTS_ERR("Invalid parameter : operation is not proper (%d)", ret);
+		ERR("operation is not proper (%d)", ret);
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 
 	if (ctsvc_ipc_call(CTSVC_IPC_PHONELOG_MODULE,
-			CTSVC_IPC_SERVER_PHONELOG_DELETE, indata, &outdata) != 0) {
-		CTS_ERR("ctsvc_ipc_call failed");
+				CTSVC_IPC_SERVER_PHONELOG_DELETE, indata, &outdata) != 0) {
+		ERR("ctsvc_ipc_call() Fail");
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
 	}
@@ -171,14 +172,14 @@ int ctsvc_client_phone_log_delete(contacts_h contact, contacts_phone_log_delete_
 
 	if (outdata) {
 		if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(outdata, &ret)) {
-			CTS_ERR("ctsvc_ipc_unmarshal_int() Fail");
+			ERR("ctsvc_ipc_unmarshal_int() Fail");
 			pims_ipc_data_destroy(outdata);
 			return CONTACTS_ERROR_IPC;
 		}
 		if (CONTACTS_ERROR_NONE == ret) {
 			int transaction_ver = 0;
 			if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(outdata, &transaction_ver)) {
-				CTS_ERR("ctsvc_ipc_unmarshal_int() Fail");
+				ERR("ctsvc_ipc_unmarshal_int() Fail");
 				pims_ipc_data_destroy(outdata);
 				return CONTACTS_ERROR_IPC;
 			}

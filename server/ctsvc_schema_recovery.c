@@ -1,7 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,7 +56,7 @@ static inline int __ctsvc_server_remake_db_file()
 
 	ret = sqlite3_exec(db, schema_query, NULL, 0, &errmsg);
 	if (SQLITE_OK != ret) {
-		CTS_ERR("remake contacts DB file is Fail : %s", errmsg);
+		ERR("remake contacts DB file is Fail : %s", errmsg);
 		sqlite3_free(errmsg);
 	}
 
@@ -67,10 +67,10 @@ static inline int __ctsvc_server_remake_db_file()
 
 	ret = fchown(fd, getuid(), CTS_SECURITY_FILE_GROUP);
 	if (0 != ret)
-		CTS_ERR("fchown(%s) Fail(%d)", CTSVC_DB_PATH, ret);
+		ERR("fchown(%s) Fail(%d)", CTSVC_DB_PATH, ret);
 	ret = fchmod(fd, CTS_SECURITY_DEFAULT_PERMISSION);
 	if (0 != ret)
-		CTS_ERR("fchown(%s) Fail(%d)", CTSVC_DB_PATH, ret);
+		ERR("fchown(%s) Fail(%d)", CTSVC_DB_PATH, ret);
 	close(fd);
 
 	fd = open(CTSVC_DB_JOURNAL_PATH, O_CREAT | O_RDWR, 0660);
@@ -78,10 +78,10 @@ static inline int __ctsvc_server_remake_db_file()
 
 	ret = fchown(fd, getuid(), CTS_SECURITY_FILE_GROUP);
 	if (0 != ret)
-		CTS_ERR("fchown(%s) Fail(%d)", CTSVC_DB_JOURNAL_PATH, ret);
+		ERR("fchown(%s) Fail(%d)", CTSVC_DB_JOURNAL_PATH, ret);
 	ret = fchmod(fd, CTS_SECURITY_DEFAULT_PERMISSION);
 	if (0 != ret)
-		CTS_ERR("fchown(%s) Fail(%d)", CTSVC_DB_JOURNAL_PATH, ret);
+		ERR("fchown(%s) Fail(%d)", CTSVC_DB_JOURNAL_PATH, ret);
 	close(fd);
 
 	return CONTACTS_ERROR_NONE;
@@ -102,14 +102,14 @@ static int __ctsvc_server_check_table()
 			CTS_TABLE_CONTACTS);
 	ret = sqlite3_prepare_v2(db, query, strlen(query), &stmt, NULL);
 	if (SQLITE_OK != ret) {
-		CTS_ERR("DB error : sqlite3_prepare_v2(%s) Fail(%s)", query, sqlite3_errmsg(db));
+		ERR("sqlite3_prepare_v2(%s) Fail(%s)", query, sqlite3_errmsg(db));
 		ctsvc_server_db_close();
 		return CONTACTS_ERROR_DB;
 	}
 
 	ret = sqlite3_step(stmt);
 	if (SQLITE_ROW != ret) {
-		CTS_ERR("contacts table does not exist in contacts DB file : %s", sqlite3_errmsg(db));
+		ERR("contacts table does not exist in contacts DB file : %s", sqlite3_errmsg(db));
 		sqlite3_finalize(stmt);
 		ctsvc_server_db_close();
 		return CTSVC_ERR_NO_TABLE;

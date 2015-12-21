@@ -16,7 +16,6 @@
  * limitations under the License.
  *
  */
-
 #ifndef __CTSVC_IPC_DEFINE_H__
 #define __CTSVC_IPC_DEFINE_H__
 

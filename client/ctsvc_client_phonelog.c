@@ -16,7 +16,6 @@
  * limitations under the License.
  *
  */
-
 #include "contacts.h"
 #include "ctsvc_internal.h"
 #include "ctsvc_client_handle.h"

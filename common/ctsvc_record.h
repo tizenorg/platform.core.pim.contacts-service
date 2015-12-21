@@ -1,11 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
- *
- * Contact: Dohyung Jin <dh.jin@samsung.com>
- *                 Jongwon Lee <gogosing.lee@samsung.com>
- *                 Donghee Ye <donghee.ye@samsung.com>
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +37,7 @@ static inline int ctsvc_record_copy_base(ctsvc_record_s *dest, ctsvc_record_s *s
 	if (src->properties_flags) {
 		dest->properties_flags = calloc(dest->property_max_count, sizeof(char));
 		if (NULL == dest->properties_flags) {
-			CTS_ERR("calloc() Fail");
+			ERR("calloc() Fail");
 			return CONTACTS_ERROR_OUT_OF_MEMORY;
 		}
 		if (dest->properties_flags) {
@@ -61,13 +57,13 @@ static inline int ctsvc_record_copy_base(ctsvc_record_s *dest, ctsvc_record_s *s
 	}\
 } while (0)
 
-int ctsvc_record_set_property_flag(ctsvc_record_s* _record, int property_id, contacts_property_flag_e flag);
+int ctsvc_record_set_property_flag(ctsvc_record_s *_record, int property_id, contacts_property_flag_e flag);
 int ctsvc_record_set_projection_flags(contacts_record_h record, const unsigned int *projection, const unsigned int projection_count, const unsigned int property_max_count);
-int ctsvc_record_set_str(contacts_record_h record, unsigned int property_id, const char* value);
+int ctsvc_record_set_str(contacts_record_h record, unsigned int property_id, const char *value);
 int ctsvc_record_set_bool(contacts_record_h record, unsigned int property_id, bool value);
 int ctsvc_record_set_int(contacts_record_h record, unsigned int property_id, int value);
 int ctsvc_record_set_lli(contacts_record_h record, unsigned int property_id, long long int value);
 int ctsvc_record_set_double(contacts_record_h record, unsigned int property_id, double value);
-bool ctsvc_record_check_property_flag(const ctsvc_record_s* s_record, unsigned int property_id, contacts_property_flag_e flag);
+bool ctsvc_record_check_property_flag(const ctsvc_record_s *s_record, unsigned int property_id, contacts_property_flag_e flag);
 
 #endif /* __CTSVC_RECORD_H__ */

@@ -1,11 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
- *
- * Contact: Dohyung Jin <dh.jin@samsung.com>
- *                 Jongwon Lee <gogosing.lee@samsung.com>
- *                 Donghee Ye <donghee.ye@samsung.com>
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,12 +27,12 @@ static int __ctsvc_my_profile_create(contacts_record_h *out_record);
 static int __ctsvc_my_profile_destroy(contacts_record_h record, bool delete_child);
 static int __ctsvc_my_profile_clone(contacts_record_h record, contacts_record_h *out_record);
 static int __ctsvc_my_profile_get_int(contacts_record_h record, unsigned int property_id, int *out);
-static int __ctsvc_my_profile_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
-static int __ctsvc_my_profile_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
+static int __ctsvc_my_profile_get_str(contacts_record_h record, unsigned int property_id, char **out_str);
+static int __ctsvc_my_profile_get_str_p(contacts_record_h record, unsigned int property_id, char **out_str);
 static int __ctsvc_my_profile_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty);
-static int __ctsvc_my_profile_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty);
-static int __ctsvc_my_profile_clone_child_record_list(contacts_record_h record, unsigned int property_id, contacts_list_h* out_list);
-static int __ctsvc_my_profile_get_child_record_at_p(contacts_record_h record, unsigned int property_id, int index, contacts_record_h* out_record);
+static int __ctsvc_my_profile_set_str(contacts_record_h record, unsigned int property_id, const char *str, bool *is_dirty);
+static int __ctsvc_my_profile_clone_child_record_list(contacts_record_h record, unsigned int property_id, contacts_list_h *out_list);
+static int __ctsvc_my_profile_get_child_record_at_p(contacts_record_h record, unsigned int property_id, int index, contacts_record_h *out_record);
 static int __ctsvc_my_profile_get_child_record_count(contacts_record_h record, unsigned int property_id, int *count);
 static int __ctsvc_my_profile_add_child_record(contacts_record_h record, unsigned int property_id, contacts_record_h child_record);
 static int __ctsvc_my_profile_remove_child_record(contacts_record_h record, unsigned int property_id, contacts_record_h child_record);
@@ -69,7 +65,7 @@ static int __ctsvc_my_profile_create(contacts_record_h *out_record)
 
 	my_profile = calloc(1, sizeof(ctsvc_my_profile_s));
 	RETVM_IF(NULL == my_profile, CONTACTS_ERROR_OUT_OF_MEMORY,
-			"Out of memory : calloc is Fail");
+			"calloc() Fail");
 
 	do {
 		my_profile->name = calloc(1, sizeof(ctsvc_list_s));
@@ -146,7 +142,7 @@ static int __ctsvc_my_profile_create(contacts_record_h *out_record)
 		return CONTACTS_ERROR_NONE;
 	} while (0);
 
-	CTS_ERR("calloc() Fail");
+	ERR("calloc() Fail");
 	free(my_profile->extensions);
 	free(my_profile->images);
 	free(my_profile->relationships);
@@ -168,7 +164,9 @@ static int __ctsvc_my_profile_create(contacts_record_h *out_record)
 static int __ctsvc_my_profile_destroy(contacts_record_h record, bool delete_child)
 {
 	ctsvc_my_profile_s *my_profile = (ctsvc_my_profile_s*)record;
-	my_profile->base.plugin_cbs = NULL; /* help to find double destroy bug (refer to the contacts_record_destroy) */
+
+	/* help to find double destroy bug (refer to the contacts_record_destroy) */
+	my_profile->base.plugin_cbs = NULL;
 	free(my_profile->base.properties_flags);
 
 	free(my_profile->display_name);
@@ -211,9 +209,9 @@ static int __ctsvc_my_profile_destroy(contacts_record_h record, bool delete_chil
 
 static int __ctsvc_my_profile_get_int(contacts_record_h record, unsigned int property_id, int *out)
 {
-	ctsvc_my_profile_s *my_profile = (ctsvc_my_profile_s *)record;
+	ctsvc_my_profile_s *my_profile = (ctsvc_my_profile_s*)record;
 
-	switch(property_id) {
+	switch (property_id) {
 	case CTSVC_PROPERTY_MY_PROFILE_ID:
 		*out = my_profile->id;
 		break;
@@ -224,7 +222,7 @@ static int __ctsvc_my_profile_get_int(contacts_record_h record, unsigned int pro
 		*out = my_profile->changed_time;
 		break;
 	default:
-		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(my_profile)", property_id);
+		ERR("property_id(%d) is not supported in value(my_profile)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
@@ -232,9 +230,9 @@ static int __ctsvc_my_profile_get_int(contacts_record_h record, unsigned int pro
 
 static int __ctsvc_my_profile_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty)
 {
-	ctsvc_my_profile_s *my_profile = (ctsvc_my_profile_s *)record;
+	ctsvc_my_profile_s *my_profile = (ctsvc_my_profile_s*)record;
 
-	switch(property_id) {
+	switch (property_id) {
 	case CTSVC_PROPERTY_MY_PROFILE_ID:
 		CHECK_DIRTY_VAL(my_profile->id, value, is_dirty);
 		my_profile->id = value;
@@ -245,21 +243,22 @@ static int __ctsvc_my_profile_set_int(contacts_record_h record, unsigned int pro
 		break;
 	case CTSVC_PROPERTY_MY_PROFILE_ADDRESSBOOK_ID:
 		RETVM_IF(0 < my_profile->id, CONTACTS_ERROR_INVALID_PARAMETER,
-				"Invalid parameter : property_id(%d) is a read-only value (my_profile)", property_id);
+				"property_id(%d) is a read-only value (my_profile)", property_id);
 		CHECK_DIRTY_VAL(my_profile->addressbook_id, value, is_dirty);
 		my_profile->addressbook_id = value;
 		break;
 	default:
-		CTS_ERR("Invalid parameter : property_id(%d) is not supported in valuecontact)", property_id);
+		ERR("property_id(%d) is not supported in valuecontact)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_my_profile_get_str_real(contacts_record_h record, unsigned int property_id, char** out_str, bool copy)
+static int __ctsvc_my_profile_get_str_real(contacts_record_h record,
+		unsigned int property_id, char **out_str, bool copy)
 {
 	ctsvc_my_profile_s *my_profile = (ctsvc_my_profile_s*)record;
-	switch(property_id) {
+	switch (property_id) {
 	case CTSVC_PROPERTY_MY_PROFILE_DISPLAY_NAME:
 		*out_str = GET_STR(copy, my_profile->display_name);
 		break;
@@ -269,19 +268,21 @@ static int __ctsvc_my_profile_get_str_real(contacts_record_h record, unsigned in
 	case CTSVC_PROPERTY_MY_PROFILE_UID:
 		*out_str = GET_STR(copy, my_profile->uid);
 		break;
-	default :
-		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(my_profile)", property_id);
+	default:
+		ERR("property_id(%d) is not supported in value(my_profile)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_my_profile_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str)
+static int __ctsvc_my_profile_get_str_p(contacts_record_h record,
+		unsigned int property_id, char **out_str)
 {
 	return __ctsvc_my_profile_get_str_real(record, property_id, out_str, false);
 }
 
-static int __ctsvc_my_profile_get_str(contacts_record_h record, unsigned int property_id, char** out_str)
+static int __ctsvc_my_profile_get_str(contacts_record_h record, unsigned int property_id,
+		char **out_str)
 {
 	return __ctsvc_my_profile_get_str_real(record, property_id, out_str, true);
 }
@@ -289,9 +290,9 @@ static int __ctsvc_my_profile_get_str(contacts_record_h record, unsigned int pro
 static int __ctsvc_my_profile_get_record_list_p(contacts_record_h record,
 		unsigned int property_id, contacts_list_h *list)
 {
-	ctsvc_my_profile_s *contact = (ctsvc_my_profile_s *)record;
+	ctsvc_my_profile_s *contact = (ctsvc_my_profile_s*)record;
 
-	switch(property_id) {
+	switch (property_id) {
 	case CTSVC_PROPERTY_MY_PROFILE_NAME:
 		*list = (contacts_list_h)contact->name;
 		break;
@@ -334,8 +335,8 @@ static int __ctsvc_my_profile_get_record_list_p(contacts_record_h record,
 	case CTSVC_PROPERTY_MY_PROFILE_EXTENSION:
 		*list = (contacts_list_h)contact->extensions;
 		break;
-	default :
-		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(contact)", property_id);
+	default:
+		ERR("property_id(%d) is not supported in value(contact)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
@@ -359,7 +360,7 @@ static int __ctsvc_my_profile_get_child_record_count(contacts_record_h record,
 }
 
 static int __ctsvc_my_profile_get_child_record_at_p(contacts_record_h record,
-		unsigned int property_id, int index, contacts_record_h* out_record)
+		unsigned int property_id, int index, contacts_record_h *out_record)
 {
 	int ret;
 	int count;
@@ -371,18 +372,16 @@ static int __ctsvc_my_profile_get_child_record_at_p(contacts_record_h record,
 
 	contacts_list_get_count(list, &count);
 	if (count < index) {
-		CTS_ERR("The index(%d) is greather than total length(%d)", index, count);
+		ERR("The index(%d) is greather than total length(%d)", index, count);
 		*out_record = NULL;
 		return CONTACTS_ERROR_NO_DATA;
-	}
-	else
+	} else {
 		return ctsvc_list_get_nth_record_p(list, index, out_record);
-
-	return CONTACTS_ERROR_NONE;
+	}
 }
 
 static int __ctsvc_my_profile_clone_child_record_list(contacts_record_h record,
-		unsigned int property_id, contacts_list_h* out_list)
+		unsigned int property_id, contacts_list_h *out_list)
 {
 	int ret;
 	int count;
@@ -406,57 +405,57 @@ static int __ctsvc_my_profile_reset_child_record_id(contacts_record_h child_reco
 {
 	ctsvc_record_s *record = (ctsvc_record_s*)child_record;
 
-	switch(record->r_type) {
+	switch (record->r_type) {
 	case CTSVC_RECORD_NAME:
-		((ctsvc_name_s *)record)->id = 0;
+		((ctsvc_name_s*)record)->id = 0;
 		break;
 	case CTSVC_RECORD_COMPANY:
-		((ctsvc_company_s *)record)->id = 0;
+		((ctsvc_company_s*)record)->id = 0;
 		break;
 	case CTSVC_RECORD_NOTE:
-		((ctsvc_note_s *)record)->id = 0;
+		((ctsvc_note_s*)record)->id = 0;
 		break;
 	case CTSVC_RECORD_NUMBER:
-		((ctsvc_number_s *)record)->id = 0;
+		((ctsvc_number_s*)record)->id = 0;
 		break;
 	case CTSVC_RECORD_EMAIL:
-		((ctsvc_email_s *)record)->id = 0;
+		((ctsvc_email_s*)record)->id = 0;
 		break;
 	case CTSVC_RECORD_URL:
-		((ctsvc_url_s *)record)->id = 0;
+		((ctsvc_url_s*)record)->id = 0;
 		break;
 	case CTSVC_RECORD_EVENT:
-		((ctsvc_event_s *)record)->id = 0;
+		((ctsvc_event_s*)record)->id = 0;
 		break;
 	case CTSVC_RECORD_NICKNAME:
-		((ctsvc_nickname_s *)record)->id = 0;
+		((ctsvc_nickname_s*)record)->id = 0;
 		break;
 	case CTSVC_RECORD_ADDRESS:
-		((ctsvc_address_s *)record)->id = 0;
+		((ctsvc_address_s*)record)->id = 0;
 		break;
 	case CTSVC_RECORD_MESSENGER:
-		((ctsvc_messenger_s *)record)->id = 0;
+		((ctsvc_messenger_s*)record)->id = 0;
 		break;
 	case CTSVC_RECORD_GROUP_RELATION:
-		((ctsvc_group_relation_s *)record)->id = 0;
+		((ctsvc_group_relation_s*)record)->id = 0;
 		break;
 	case CTSVC_RECORD_ACTIVITY:
-		((ctsvc_activity_s *)record)->id = 0;
+		((ctsvc_activity_s*)record)->id = 0;
 		break;
 	case CTSVC_RECORD_PROFILE:
-		((ctsvc_profile_s *)record)->id = 0;
+		((ctsvc_profile_s*)record)->id = 0;
 		break;
 	case CTSVC_RECORD_RELATIONSHIP:
-		((ctsvc_relationship_s *)record)->id = 0;
+		((ctsvc_relationship_s*)record)->id = 0;
 		break;
 	case CTSVC_RECORD_IMAGE:
-		((ctsvc_image_s *)record)->id = 0;
+		((ctsvc_image_s*)record)->id = 0;
 		break;
 	case CTSVC_RECORD_EXTENSION:
-		((ctsvc_extension_s *)record)->id = 0;
+		((ctsvc_extension_s*)record)->id = 0;
 		break;
-	default :
-		CTS_ERR("Invalid parameter : record(%d) is not child of contact", record->r_type);
+	default:
+		ERR("record(%d) is not child of contact", record->r_type);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
@@ -468,19 +467,19 @@ static int __ctsvc_my_profile_add_child_record(contacts_record_h record,
 {
 	int ret;
 	contacts_list_h list = NULL;
-	ctsvc_record_s *s_record = (ctsvc_record_s *)child_record;
+	ctsvc_record_s *s_record = (ctsvc_record_s*)child_record;
 
 	ret = __ctsvc_my_profile_get_record_list_p(record, property_id, &list);
 	if (CONTACTS_ERROR_INVALID_PARAMETER == ret)
 		return ret;
 
-	if (CTSVC_RECORD_NAME == s_record->r_type && 1 == ((ctsvc_list_s *)list)->count) {
-		CTS_ERR("This type(%d) of child_record can not be added anymore", s_record->r_type);
+	if (CTSVC_RECORD_NAME == s_record->r_type && 1 == ((ctsvc_list_s*)list)->count) {
+		ERR("This type(%d) of child_record can not be added anymore", s_record->r_type);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 
-	if (CTSVC_RECORD_IMAGE == s_record->r_type && 1 == ((ctsvc_list_s *)list)->count) {
-		CTS_ERR("This type(%d) of child_record can not be added anymore", s_record->r_type);
+	if (CTSVC_RECORD_IMAGE == s_record->r_type && 1 == ((ctsvc_list_s*)list)->count) {
+		ERR("This type(%d) of child_record can not be added anymore", s_record->r_type);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 
@@ -497,41 +496,41 @@ static int __ctsvc_my_profile_get_child_record_id(contacts_record_h child_record
 {
 	ctsvc_record_s *record = (ctsvc_record_s*)child_record;
 
-	switch(record->r_type) {
+	switch (record->r_type) {
 	case CTSVC_RECORD_NAME:
-		return ((ctsvc_name_s *)record)->id;
+		return ((ctsvc_name_s*)record)->id;
 	case CTSVC_RECORD_COMPANY:
-		return ((ctsvc_company_s *)record)->id;
+		return ((ctsvc_company_s*)record)->id;
 	case CTSVC_RECORD_NOTE:
-		return ((ctsvc_note_s *)record)->id;
+		return ((ctsvc_note_s*)record)->id;
 	case CTSVC_RECORD_NUMBER:
-		return ((ctsvc_number_s *)record)->id;
+		return ((ctsvc_number_s*)record)->id;
 	case CTSVC_RECORD_EMAIL:
-		return ((ctsvc_email_s *)record)->id;
+		return ((ctsvc_email_s*)record)->id;
 	case CTSVC_RECORD_URL:
-		return ((ctsvc_url_s *)record)->id;
+		return ((ctsvc_url_s*)record)->id;
 	case CTSVC_RECORD_EVENT:
-		return ((ctsvc_event_s *)record)->id;
+		return ((ctsvc_event_s*)record)->id;
 	case CTSVC_RECORD_NICKNAME:
-		return ((ctsvc_nickname_s *)record)->id;
+		return ((ctsvc_nickname_s*)record)->id;
 	case CTSVC_RECORD_ADDRESS:
-		return ((ctsvc_address_s *)record)->id;
+		return ((ctsvc_address_s*)record)->id;
 	case CTSVC_RECORD_MESSENGER:
-		return ((ctsvc_messenger_s *)record)->id;
+		return ((ctsvc_messenger_s*)record)->id;
 	case CTSVC_RECORD_GROUP_RELATION:
-		return ((ctsvc_group_relation_s *)record)->id;
+		return ((ctsvc_group_relation_s*)record)->id;
 	case CTSVC_RECORD_ACTIVITY:
-		return ((ctsvc_activity_s *)record)->id;
+		return ((ctsvc_activity_s*)record)->id;
 	case CTSVC_RECORD_PROFILE:
-		return ((ctsvc_profile_s *)record)->id;
+		return ((ctsvc_profile_s*)record)->id;
 	case CTSVC_RECORD_RELATIONSHIP:
-		return ((ctsvc_relationship_s *)record)->id;
+		return ((ctsvc_relationship_s*)record)->id;
 	case CTSVC_RECORD_IMAGE:
-		return ((ctsvc_image_s *)record)->id;
+		return ((ctsvc_image_s*)record)->id;
 	case CTSVC_RECORD_EXTENSION:
-		return ((ctsvc_extension_s *)record)->id;
-	default :
-		CTS_ERR("Invalid parameter : record(%d) is not child of contact", record->r_type);
+		return ((ctsvc_extension_s*)record)->id;
+	default:
+		ERR("record(%d) is not child of contact", record->r_type);
 		return 0;
 	}
 	return 0;
@@ -550,16 +549,17 @@ static int __ctsvc_my_profile_remove_child_record(contacts_record_h record,
 		return ret;
 
 	id = __ctsvc_my_profile_get_child_record_id(child_record);
-	ctsvc_list_remove_child(list, child_record, (id?true:false));
+	ctsvc_list_remove_child(list, child_record, id ? true : false);
 
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_my_profile_set_str(contacts_record_h record, unsigned int property_id, const char *str, bool *is_dirty )
+static int __ctsvc_my_profile_set_str(contacts_record_h record, unsigned int property_id,
+		const char *str, bool *is_dirty)
 {
-	ctsvc_my_profile_s *my_profile = (ctsvc_my_profile_s *)record;
+	ctsvc_my_profile_s *my_profile = (ctsvc_my_profile_s*)record;
 
-	switch(property_id) {
+	switch (property_id) {
 	case CTSVC_PROPERTY_MY_PROFILE_DISPLAY_NAME:
 		CHECK_DIRTY_STR(my_profile->display_name, str, is_dirty);
 		FREEandSTRDUP(my_profile->display_name, str);
@@ -572,22 +572,22 @@ static int __ctsvc_my_profile_set_str(contacts_record_h record, unsigned int pro
 		CHECK_DIRTY_STR(my_profile->uid, str, is_dirty);
 		FREEandSTRDUP(my_profile->uid, str);
 		break;
-	default :
-		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(my_profile)", property_id);
+	default:
+		ERR("property_id(%d) is not supported in value(my_profile)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_my_profile_clone(contacts_record_h record, contacts_record_h *out_record)
+static int __ctsvc_my_profile_clone(contacts_record_h record,
+		contacts_record_h *out_record)
 {
 	ctsvc_my_profile_s *out_data = NULL;
 	ctsvc_my_profile_s *src_data = NULL;
 
 	src_data = (ctsvc_my_profile_s*)record;
 	out_data = calloc(1, sizeof(ctsvc_my_profile_s));
-	RETVM_IF(NULL == out_data, CONTACTS_ERROR_OUT_OF_MEMORY,
-			"Out of memeory : calloc(ctsvc_my_profile_s) Fail(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
+	RETVM_IF(NULL == out_data, CONTACTS_ERROR_OUT_OF_MEMORY, "calloc() Fail");
 
 	out_data->id = src_data->id;
 	out_data->addressbook_id = src_data->addressbook_id;
@@ -642,7 +642,7 @@ static int __ctsvc_my_profile_clone(contacts_record_h record, contacts_record_h 
 
 	int ret = ctsvc_record_copy_base(&(out_data->base), &(src_data->base));
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_record_copy_base() Fail");
+		ERR("ctsvc_record_copy_base() Fail");
 		__ctsvc_my_profile_destroy((contacts_record_h)out_data, true);
 		return ret;
 	}

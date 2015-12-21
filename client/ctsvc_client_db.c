@@ -3,9 +3,6 @@
  *
  * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
- * Contact: Dohyung Jin <dh.jin@samsung.com>
- *                 Jongwon Lee <gogosing.lee@samsung.com>
- *                 Donghee Ye <donghee.ye@samsung.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +36,7 @@ API int contacts_db_insert_record(contacts_record_h record, int *id)
 	return ret;
 }
 
-API int contacts_db_get_record(const char* view_uri, int id, contacts_record_h* out_record)
+API int contacts_db_get_record(const char *view_uri, int id, contacts_record_h *out_record)
 {
 	int ret;
 	contacts_h contact = NULL;
@@ -65,7 +62,7 @@ API int contacts_db_update_record(contacts_record_h record)
 	return ret;
 }
 
-API int contacts_db_delete_record(const char* view_uri, int id)
+API int contacts_db_delete_record(const char *view_uri, int id)
 {
 	int ret;
 	contacts_h contact = NULL;
@@ -92,7 +89,7 @@ API int contacts_db_replace_record(contacts_record_h record, int id)
 
 }
 
-API int contacts_db_get_all_records(const char* view_uri, int offset, int limit, contacts_list_h* out_list)
+API int contacts_db_get_all_records(const char *view_uri, int offset, int limit, contacts_list_h *out_list)
 {
 	int ret;
 	contacts_h contact = NULL;
@@ -105,7 +102,7 @@ API int contacts_db_get_all_records(const char* view_uri, int offset, int limit,
 	return ret;
 }
 
-API int contacts_db_get_records_with_query(contacts_query_h query, int offset, int limit, contacts_list_h* out_list)
+API int contacts_db_get_records_with_query(contacts_query_h query, int offset, int limit, contacts_list_h *out_list)
 {
 	int ret;
 	contacts_h contact = NULL;
@@ -119,7 +116,7 @@ API int contacts_db_get_records_with_query(contacts_query_h query, int offset, i
 }
 
 
-API int contacts_db_get_count(const char* view_uri, int *out_count)
+API int contacts_db_get_count(const char *view_uri, int *out_count)
 {
 	int ret;
 	contacts_h contact = NULL;
@@ -171,7 +168,7 @@ API int contacts_db_update_records(contacts_list_h list)
 	return ret;
 }
 
-API int contacts_db_delete_records(const char* view_uri, int ids[], int count)
+API int contacts_db_delete_records(const char *view_uri, int ids[], int count)
 {
 	int ret;
 	contacts_h contact = NULL;
@@ -197,8 +194,8 @@ API int contacts_db_replace_records(contacts_list_h list, int ids[], int count)
 	return ret;
 }
 
-API int contacts_db_get_changes_by_version(const char* view_uri, int addressbook_id,
-		int contacts_db_version, contacts_list_h* record_list, int* current_contacts_db_version)
+API int contacts_db_get_changes_by_version(const char *view_uri, int addressbook_id,
+		int contacts_db_version, contacts_list_h *record_list, int *current_contacts_db_version)
 {
 	int ret;
 	contacts_h contact = NULL;
@@ -211,7 +208,7 @@ API int contacts_db_get_changes_by_version(const char* view_uri, int addressbook
 	return ret;
 }
 
-API int contacts_db_get_current_version(int* contacts_db_version)
+API int contacts_db_get_current_version(int *contacts_db_version)
 {
 	int ret;
 	contacts_h contact = NULL;
@@ -225,8 +222,8 @@ API int contacts_db_get_current_version(int* contacts_db_version)
 
 }
 
-API int contacts_db_search_records(const char* view_uri, const char *keyword,
-		int offset, int limit, contacts_list_h* out_list)
+API int contacts_db_search_records(const char *view_uri, const char *keyword,
+		int offset, int limit, contacts_list_h *out_list)
 {
 	int ret;
 	contacts_h contact = NULL;
@@ -239,8 +236,8 @@ API int contacts_db_search_records(const char* view_uri, const char *keyword,
 	return ret;
 }
 
-API int contacts_db_search_records_with_range(const char* view_uri, const char *keyword,
-		int offset, int limit, int range, contacts_list_h* out_list)
+API int contacts_db_search_records_with_range(const char *view_uri, const char *keyword,
+		int offset, int limit, int range, contacts_list_h *out_list)
 {
 	int ret;
 	contacts_h contact = NULL;
@@ -254,7 +251,7 @@ API int contacts_db_search_records_with_range(const char* view_uri, const char *
 }
 
 API int contacts_db_search_records_with_query(contacts_query_h query, const char *keyword,
-		int offset, int limit, contacts_list_h* out_list)
+		int offset, int limit, contacts_list_h *out_list)
 {
 	int ret;
 	contacts_h contact = NULL;
@@ -267,7 +264,7 @@ API int contacts_db_search_records_with_query(contacts_query_h query, const char
 	return ret;
 }
 
-API int contacts_db_get_last_change_version(int* last_version)
+API int contacts_db_get_last_change_version(int *last_version)
 {
 	int ret;
 	contacts_h contact = NULL;
@@ -294,7 +291,7 @@ API int contacts_db_get_status(contacts_db_status_e *status)
 }
 
 API int contacts_db_add_status_changed_cb(
-		contacts_db_status_changed_cb cb, void* user_data)
+		contacts_db_status_changed_cb cb, void *user_data)
 {
 	int ret;
 	contacts_h contact = NULL;
@@ -308,7 +305,7 @@ API int contacts_db_add_status_changed_cb(
 }
 
 API int contacts_db_remove_status_changed_cb(
-		contacts_db_status_changed_cb cb, void* user_data)
+		contacts_db_status_changed_cb cb, void *user_data)
 {
 	int ret;
 	contacts_h contact = NULL;

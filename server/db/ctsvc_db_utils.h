@@ -1,7 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
  * limitations under the License.
  *
  */
-
 #ifndef __CTSVC_DB_UTILS_H__
 #define __CTSVC_DB_UTILS_H__
 
@@ -27,11 +26,12 @@ const char* ctsvc_get_sort_name_column(void);
 int ctsvc_begin_trans(void);
 int ctsvc_end_trans(bool is_success);
 int ctsvc_get_next_ver(void);
-int ctsvc_get_current_version(int* out_current_version);
+int ctsvc_get_current_version(int *out_current_version);
 int ctsvc_get_transaction_ver(void);
 
 int ctsvc_utils_copy_image(const char *dir, const char *src, const char *file);
-void ctsvc_utils_make_image_file_name(int parent_id, int id, char *src_img, char *dest, int dest_size);
+void ctsvc_utils_make_image_file_name(int parent_id, int id, char *src_img, char *dest,
+		int dest_size);
 
 int SAFE_SNPRINTF(char **buf, int *buf_size, int len, const char *src);
 

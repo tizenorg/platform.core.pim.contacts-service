@@ -1,7 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,6 @@
 #ifndef __TIZEN_SOCIAL_CONTACTS_SETTING_H__
 #define __TIZEN_SOCIAL_CONTACTS_SETTING_H__
 
-#ifndef API
-#define API __attribute__ ((visibility("default")))
-#endif
 
 #ifdef __cplusplus
 extern "C"
@@ -185,7 +182,7 @@ int contacts_setting_set_name_sorting_order(contacts_name_sorting_order_e name_s
  * @see contacts_setting_add_name_display_order_changed_cb()
  * @see contacts_setting_remove_name_display_order_changed_cb()
  */
-typedef void (*contacts_setting_name_display_order_changed_cb)(contacts_name_display_order_e name_display_order, void* user_data);
+typedef void (*contacts_setting_name_display_order_changed_cb)(contacts_name_display_order_e name_display_order, void *user_data);
 
 
 /**
@@ -214,7 +211,7 @@ typedef void (*contacts_setting_name_display_order_changed_cb)(contacts_name_dis
  * @see contacts_setting_remove_name_display_order_changed_cb()
  */
 
-int contacts_setting_add_name_display_order_changed_cb(contacts_setting_name_display_order_changed_cb callback, void* user_data);
+int contacts_setting_add_name_display_order_changed_cb(contacts_setting_name_display_order_changed_cb callback, void *user_data);
 
 /**
  * @brief Unregisters a callback function.
@@ -236,7 +233,7 @@ int contacts_setting_add_name_display_order_changed_cb(contacts_setting_name_dis
  * @see contacts_setting_add_name_display_order_changed_cb()
  */
 
-int contacts_setting_remove_name_display_order_changed_cb(contacts_setting_name_display_order_changed_cb callback, void* user_data);
+int contacts_setting_remove_name_display_order_changed_cb(contacts_setting_name_display_order_changed_cb callback, void *user_data);
 
 /**
  * @brief Called when a designated view changes.
@@ -251,7 +248,7 @@ int contacts_setting_remove_name_display_order_changed_cb(contacts_setting_name_
  * @see contacts_setting_add_name_sorting_order_changed_cb()
  * @see contacts_setting_remove_name_sorting_order_changed_cb()
  */
-typedef void (*contacts_setting_name_sorting_order_changed_cb)(contacts_name_sorting_order_e name_sorting_order, void* user_data);
+typedef void (*contacts_setting_name_sorting_order_changed_cb)(contacts_name_sorting_order_e name_sorting_order, void *user_data);
 
 
 /**
@@ -280,7 +277,7 @@ typedef void (*contacts_setting_name_sorting_order_changed_cb)(contacts_name_sor
  * @see contacts_setting_remove_name_sorting_order_changed_cb()
  */
 
-int contacts_setting_add_name_sorting_order_changed_cb(contacts_setting_name_sorting_order_changed_cb callback, void* user_data);
+int contacts_setting_add_name_sorting_order_changed_cb(contacts_setting_name_sorting_order_changed_cb callback, void *user_data);
 
 /**
  * @brief Unregisters a callback function.
@@ -302,7 +299,7 @@ int contacts_setting_add_name_sorting_order_changed_cb(contacts_setting_name_sor
  * @see contacts_setting_add_name_sorting_order_changed_cb()
  */
 
-int contacts_setting_remove_name_sorting_order_changed_cb(contacts_setting_name_sorting_order_changed_cb callback, void* user_data);
+int contacts_setting_remove_name_sorting_order_changed_cb(contacts_setting_name_sorting_order_changed_cb callback, void *user_data);
 
 /**
  * @}
