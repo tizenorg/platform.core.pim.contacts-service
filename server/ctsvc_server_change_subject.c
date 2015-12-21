@@ -57,6 +57,7 @@ static gboolean __ctsvc_publish_changes_with_data(const char *view_uri, char *da
 
 	if (pims_ipc_svc_publish(CTSVC_IPC_SUBSCRIBE_MODULE, (char*)view_uri, indata) != 0) {
 		CTS_ERR("pims_ipc_svc_publish error (%s)\n", view_uri);
+		pims_ipc_data_destroy(indata);
 		return false;
 	}
 

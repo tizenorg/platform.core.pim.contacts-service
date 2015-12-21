@@ -219,8 +219,11 @@ int ctsvc_ipc_disconnect(contacts_h contact, unsigned int handle_id, int connect
 	}
 
 	ret = ctsvc_ipc_marshal_handle(contact, indata);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_ipc_marshal_handle() Fail(%d)", ret);
-
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("ctsvc_ipc_marshal_handle() Fail(%d)", ret);
+		pims_ipc_data_destroy(indata);
+		return ret;
+	}
 	if (pims_ipc_call(ipc_data->ipc, CTSVC_IPC_MODULE, CTSVC_IPC_SERVER_DISCONNECT, indata, &outdata) != 0) {
 		pims_ipc_data_destroy(indata);
 		CTS_ERR("[GLOBAL_IPC_CHANNEL] pims_ipc_call failed");
