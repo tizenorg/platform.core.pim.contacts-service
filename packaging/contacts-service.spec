@@ -1,33 +1,33 @@
 Name:       contacts-service
 Summary:    Contacts Service
-Version:    0.13.43
-Release:    1
-Group:      Social & Content/Pim
+Version:    0.13.44
+Release:    0
+Group:      Social & Content/Service
 License:    Apache-2.0
 Source0:    %{name}-%{version}.tar.gz
-Source1:    contacts-service.service
-Source2:    contacts-service.socket
-BuildRequires:  cmake
-BuildRequires:  pkgconfig(db-util)
-BuildRequires:  pkgconfig(vconf)
-BuildRequires:  pkgconfig(dlog)
-BuildRequires:  pkgconfig(sqlite3)
-BuildRequires:  pkgconfig(tapi)
-BuildRequires:  pkgconfig(glib-2.0)
-BuildRequires:  pkgconfig(capi-base-common)
-BuildRequires:  pkgconfig(capi-media-image-util)
-BuildRequires:  pkgconfig(pims-ipc)
-BuildRequires:  pkgconfig(accounts-svc)
-BuildRequires:  pkgconfig(libexif)
-BuildRequires:  pkgconfig(libsmack)
-BuildRequires:  pkgconfig(libtzplatform-config)
-BuildRequires:  pkgconfig(cynara-client)
-BuildRequires:  pkgconfig(cynara-session)
-BuildRequires:  pkgconfig(cynara-creds-socket)
-BuildRequires:  pkgconfig(capi-system-info)
-BuildRequires:  pkgconfig(icu-uc)
-BuildRequires:  pkgconfig(phonenumber-utils)
-Requires(post): /usr/bin/sqlite3, /bin/chmod, /bin/chown
+Source1:    %{name}.service
+Source2:    %{name}.socket
+Source1001: %{name}.manifest
+BuildRequires: cmake
+BuildRequires: pkgconfig(db-util)
+BuildRequires: pkgconfig(vconf)
+BuildRequires: pkgconfig(dlog)
+BuildRequires: pkgconfig(sqlite3)
+BuildRequires: pkgconfig(tapi)
+BuildRequires: pkgconfig(glib-2.0)
+BuildRequires: pkgconfig(capi-base-common)
+BuildRequires: pkgconfig(capi-media-image-util)
+BuildRequires: pkgconfig(pims-ipc)
+BuildRequires: pkgconfig(accounts-svc)
+BuildRequires: pkgconfig(libexif)
+BuildRequires: pkgconfig(libsmack)
+BuildRequires: pkgconfig(libtzplatform-config)
+BuildRequires: pkgconfig(cynara-client)
+BuildRequires: pkgconfig(cynara-session)
+BuildRequires: pkgconfig(cynara-creds-socket)
+BuildRequires: pkgconfig(capi-system-info)
+BuildRequires: pkgconfig(icu-uc)
+BuildRequires: pkgconfig(phonenumber-utils)
 Requires(post): /sbin/ldconfig
 Requires(postun): /sbin/ldconfig
 
@@ -35,21 +35,24 @@ Requires(postun): /sbin/ldconfig
 Contacts Service Library
 
 %package -n contacts-service2
-Summary:	       New Contacts service library
+Summary:	New Contacts service library
 
 %description -n contacts-service2
-New Contact Serivce Library files
+New Contact Serivce 2 Client Library
 
 
 %package -n contacts-service2-devel
-Summary:    New Contacts Service  (devel)
-Requires:   %{name}2 = %{version}-%{release}
+Summary:  New Contacts Service(devel)
+Group:    Social & Content/Development
+Requires: %{name}2 = %{version}-%{release}
 
 %description -n contacts-service2-devel
 New Contacts Service Library (devel) files
 
 %prep
 %setup -q
+chmod g-w %_sourcedir/*
+cp %{SOURCE1001} ./%{name}.manifest
 
 
 %build
@@ -58,10 +61,9 @@ export CXXFLAGS="$CXXFLAGS -DTIZEN_ENGINEER_MODE"
 export FFLAGS="$FFLAGS -DTIZEN_ENGINEER_MODE"
 
 MAJORVER=`echo %{version} | awk 'BEGIN {FS="."}{print $1}'`
-%cmake . -DTZ_SYS_ETC=%TZ_SYS_ETC \
--DENABLE_LOG_FEATURE:BOOL=ON \
--DMAJORVER=${MAJORVER} \
--DFULLVER=%{version}
+%cmake . -DCMAKE_VERBOSE_MAKEFILE=OFF -DMAJORVER=${MAJORVER} -DFULLVER=%{version} -DBIN_INSTALL_DIR:PATH=%{_bindir} \
+		-DTZ_SYS_ETC=%TZ_SYS_ETC -DENABLE_LOG_FEATURE:BOOL=ON
+
 %__make %{?_smp_mflags}
 
 %install
@@ -76,17 +78,12 @@ mkdir -p %{buildroot}%{_unitdir_user}/sockets.target.wants
 install -m 0644 %SOURCE2 %{buildroot}%{_unitdir_user}/contacts-service.socket
 ln -s ../contacts-service.socket %{buildroot}%{_unitdir_user}/sockets.target.wants/contacts-service.socket
 
-mkdir -p %{buildroot}/usr/share/license
-cp LICENSE.APLv2 %{buildroot}/usr/share/license/contacts-service2
-cp LICENSE.APLv2 %{buildroot}/usr/share/license/contacts-service2-devel
+%post -n contacts-service2 -p /sbin/ldconfig
 
-%post -n contacts-service2
-/sbin/ldconfig
-
-%postun -p /sbin/ldconfig
+%postun -n contacts-service2 -p /sbin/ldconfig
 
 %files -n contacts-service2
-%manifest contacts-service2.manifest
+%manifest %{name}.manifest
 %defattr(-,root,root,-)
 %{_libdir}/libcontacts-service2.so.*
 %{_bindir}/contacts-service-ipcd*
@@ -94,7 +91,8 @@ cp LICENSE.APLv2 %{buildroot}/usr/share/license/contacts-service2-devel
 %{_unitdir_user}/default.target.wants/contacts-service.service
 %{_unitdir_user}/sockets.target.wants/contacts-service.socket
 %{_unitdir_user}/contacts-service.socket
-/usr/share/license/%{name}2
+%license LICENSE.APLv2
+
 
 %files -n contacts-service2-devel
 %defattr(-,root,root,-)
@@ -102,4 +100,5 @@ cp LICENSE.APLv2 %{buildroot}/usr/share/license/contacts-service2-devel
 %{_libdir}/pkgconfig/contacts-service2.pc
 %{_includedir}/contacts-svc/contacts.h
 %{_includedir}/contacts-svc/contacts_*.h
-/usr/share/license/contacts-service2-devel
+%license LICENSE.APLv2
+

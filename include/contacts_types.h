@@ -1,11 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
- *
- * Contact: Dohyung Jin <dh.jin@samsung.com>
- *                 Jongwon Lee <gogosing.lee@samsung.com>
- *                 Donghee Ye <donghee.ye@samsung.com>
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,17 +20,13 @@
 #ifndef __TIZEN_SOCIAL_CONTACTS_TYPES_H__
 #define __TIZEN_SOCIAL_CONTACTS_TYPES_H__
 
-#ifndef API
-#define API __attribute__ ((visibility("default")))
-#endif
-
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
 #define _CONTACTS_BEGIN_VIEW() \
-    typedef struct{ \
+    typedef struct { \
         const char* const _uri;
 #define _CONTACTS_BEGIN_READ_ONLY_VIEW() _CONTACTS_BEGIN_VIEW()
 #define _CONTACTS_PROPERTY_INT(property_id_name)    unsigned int property_id_name;
@@ -59,7 +51,7 @@ extern "C"
 #define _CONTACTS_PROPERTY_PROJECTION_LLI(property_id_name)     unsigned int property_id_name;
 #define _CONTACTS_END_VIEW(name) \
     } name##_property_ids; \
-    extern API const name##_property_ids name;
+    extern __attribute__ ((visibility("default"))) const name##_property_ids name;
 #define _CONTACTS_END_READ_ONLY_VIEW(name) _CONTACTS_END_VIEW(name)
 
 #define _CONTACTS_HANDLE(A) typedef struct __##A{}* A;
@@ -173,7 +165,7 @@ typedef enum {
  * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
  *
  */
-typedef enum{
+typedef enum {
     CONTACTS_MESSENGER_TYPE_OTHER,      /**< Other messenger type */
     CONTACTS_MESSENGER_TYPE_CUSTOM,     /**< Custom messenger type */
     CONTACTS_MESSENGER_TYPE_GOOGLE,     /**< Google messenger type */
@@ -305,7 +297,7 @@ typedef enum {
  * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
  *
  */
-typedef enum{
+typedef enum {
     CONTACTS_CONTACT_LINK_MODE_NONE,            /**< Auto link immediately */
     CONTACTS_CONTACT_LINK_MODE_IGNORE_ONCE,     /**< Do not auto link when the contact is inserted */
 }contacts_contact_link_mode_e;
@@ -343,9 +335,9 @@ typedef enum {
  */
 typedef enum {
     CONTACTS_SEARCH_RANGE_NAME = 0x00000001,     /**< Search record from name */
-    CONTACTS_SEARCH_RANGE_NUMBER  = 0x00000002,  /**< Search record from name and number */
-    CONTACTS_SEARCH_RANGE_DATA  = 0x00000004,    /**< Search record from name,number and data */
-    CONTACTS_SEARCH_RANGE_EMAIL  = 0x00000008,   /**< Search record from name,number,data and email. Now, support only _contacts_person_email view_uri*/
+    CONTACTS_SEARCH_RANGE_NUMBER = 0x00000002,  /**< Search record from name and number */
+    CONTACTS_SEARCH_RANGE_DATA = 0x00000004,    /**< Search record from name,number and data */
+    CONTACTS_SEARCH_RANGE_EMAIL = 0x00000008,   /**< Search record from name,number,data and email. Now, support only _contacts_person_email view_uri*/
 }contacts_search_range_e;
 
 /**

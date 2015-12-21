@@ -1,7 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,6 @@
 #ifndef __TIZEN_SOCIAL_CONTACTS_LIST_H__
 #define __TIZEN_SOCIAL_CONTACTS_LIST_H__
 
-#ifndef API
-#define API __attribute__ ((visibility("default")))
-#endif
 
 #ifdef __cplusplus
 extern "C"
@@ -64,7 +61,7 @@ extern "C"
  *
  * @see contacts_list_destroy()
  */
-int contacts_list_create(contacts_list_h* contacts_list);
+int contacts_list_create(contacts_list_h *contacts_list);
 
 /**
  * @brief Destroys a contacts list and releases its all resources.
@@ -165,7 +162,7 @@ int contacts_list_remove(contacts_list_h contacts_list, contacts_record_h record
  * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
  * @retval  #CONTACTS_ERROR_NO_DATA             Requested data does not exist
  */
-int contacts_list_get_current_record_p(contacts_list_h contacts_list, contacts_record_h* record);
+int contacts_list_get_current_record_p(contacts_list_h contacts_list, contacts_record_h *record);
 
 /**
  * @brief Moves a contacts list to the previous position.

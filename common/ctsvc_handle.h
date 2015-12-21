@@ -27,4 +27,4 @@ int ctsvc_handle_clone(contacts_h contact, contacts_h *pcontact);
 int ctsvc_handle_compare(contacts_h contact1, contacts_h contact2);
 
 
-#endif // __CTSVC_HANDLE_H__
+#endif /* __CTSVC_HANDLE_H__ */

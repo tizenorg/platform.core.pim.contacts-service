@@ -1,7 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,6 @@
 #ifndef __TIZEN_SOCIAL_CONTACTS_FILTER_H__
 #define __TIZEN_SOCIAL_CONTACTS_FILTER_H__
 
-#ifndef API
-#define API __attribute__ ((visibility("default")))
-#endif
 
 #ifdef __cplusplus
 extern "C"
@@ -112,7 +109,7 @@ typedef enum {
  *
  * @see contacts_filter_destroy()
  */
-int contacts_filter_create(const char* view_uri, contacts_filter_h* filter);
+int contacts_filter_create(const char *view_uri, contacts_filter_h *filter);
 
 /**
  * @brief Destroys a filter.
@@ -150,7 +147,7 @@ int contacts_filter_destroy(contacts_filter_h filter);
  *
  * @see contacts_filter_add_operator()
  */
-int contacts_filter_add_str(contacts_filter_h filter, unsigned int property_id, contacts_match_str_flag_e match, const char* match_value);
+int contacts_filter_add_str(contacts_filter_h filter, unsigned int property_id, contacts_match_str_flag_e match, const char *match_value);
 
 /**
  * @brief Adds a condition for an integer type property.

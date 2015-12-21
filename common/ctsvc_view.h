@@ -1,11 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
- *
- * Contact: Dohyung Jin <dh.jin@samsung.com>
- *                 Jongwon Lee <gogosing.lee@samsung.com>
- *                 Donghee Ye <donghee.ye@samsung.com>
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -460,13 +456,13 @@ typedef enum {
 	CTSVC_PROPERTY_PHONELOG_STAT_LOG_COUNT = (CTSVC_PROPERTY_PHONELOG_STAT | CTSVC_VIEW_DATA_TYPE_INT | CTSVC_READ_ONLY_PROPERTY),
 	CTSVC_PROPERTY_PHONELOG_STAT_LOG_TYPE = (CTSVC_PROPERTY_PHONELOG_STAT | CTSVC_VIEW_DATA_TYPE_INT | CTSVC_READ_ONLY_PROPERTY) +1,
 
-}ctsvc_property_ids_e;
+} ctsvc_property_ids_e;
 
 void ctsvc_view_uri_init();
 void ctsvc_view_uri_deinit();
 
-const char* ctsvc_view_get_uri(const char* view_uri);
-ctsvc_record_type_e ctsvc_view_get_record_type(const char* view_uri);
+const char* ctsvc_view_get_uri(const char *view_uri);
+ctsvc_record_type_e ctsvc_view_get_record_type(const char *view_uri);
 const property_info_s* ctsvc_view_get_all_property_infos(const char *view_uri, unsigned int *count);
 
 #endif /* __CTSVC_VIEW_H__ */

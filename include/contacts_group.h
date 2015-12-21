@@ -1,7 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,6 @@
  */
 #ifndef __TIZEN_SOCIAL_CONTACTS_GROUP_H__
 #define __TIZEN_SOCIAL_CONTACTS_GROUP_H__
-
-#ifndef API
-#define API __attribute__ ((visibility("default")))
-#endif
 
 
 #ifdef __cplusplus

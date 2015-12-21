@@ -35,7 +35,7 @@ API int contacts_person_link_person(int base_person_id, int person_id)
 	return ret;
 }
 
-API int contacts_person_unlink_contact(int person_id, int contact_id, int* unlinked_person_id)
+API int contacts_person_unlink_contact(int person_id, int contact_id, int *unlinked_person_id)
 {
 	int ret;
 	contacts_h contact = NULL;
@@ -43,7 +43,8 @@ API int contacts_person_unlink_contact(int person_id, int contact_id, int* unlin
 	ret = ctsvc_client_handle_get_p(&contact);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_client_handle_get_p() Fail(%d)", ret);
 
-	ret = ctsvc_client_person_unlink_contact(contact, person_id, contact_id, unlinked_person_id);
+	ret = ctsvc_client_person_unlink_contact(contact, person_id, contact_id,
+			unlinked_person_id);
 
 	return ret;
 
@@ -62,7 +63,8 @@ API int contacts_person_reset_usage(int person_id, contacts_usage_type_e type)
 	return ret;
 }
 
-API int contacts_person_set_favorite_order(int person_id, int previous_person_id, int next_person_id)
+API int contacts_person_set_favorite_order(int person_id, int previous_person_id,
+		int next_person_id)
 {
 	int ret;
 	contacts_h contact = NULL;
@@ -70,7 +72,8 @@ API int contacts_person_set_favorite_order(int person_id, int previous_person_id
 	ret = ctsvc_client_handle_get_p(&contact);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_client_handle_get_p() Fail(%d)", ret);
 
-	ret = ctsvc_client_person_set_favorite_order(contact, person_id, previous_person_id, next_person_id);
+	ret = ctsvc_client_person_set_favorite_order(contact, person_id, previous_person_id,
+			next_person_id);
 
 	return ret;
 }

@@ -1,11 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
- *
- * Contact: Dohyung Jin <dh.jin@samsung.com>
- *                 Jongwon Lee <gogosing.lee@samsung.com>
- *                 Donghee Ye <donghee.ye@samsung.com>
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,12 +24,12 @@
 
 static int __ctsvc_addressbook_create(contacts_record_h *out_record);
 static int __ctsvc_addressbook_destroy(contacts_record_h record, bool delete_child);
-static int __ctsvc_addressbook_clone(contacts_record_h record, contacts_record_h* out_record);
+static int __ctsvc_addressbook_clone(contacts_record_h record, contacts_record_h *out_record);
 static int __ctsvc_addressbook_get_int(contacts_record_h record, unsigned int property_id, int *out);
-static int __ctsvc_addressbook_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
-static int __ctsvc_addressbook_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
+static int __ctsvc_addressbook_get_str(contacts_record_h record, unsigned int property_id, char **out_str);
+static int __ctsvc_addressbook_get_str_p(contacts_record_h record, unsigned int property_id, char **out_str);
 static int __ctsvc_addressbook_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty);
-static int __ctsvc_addressbook_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty);
+static int __ctsvc_addressbook_set_str(contacts_record_h record, unsigned int property_id, const char *str, bool *is_dirty);
 
 ctsvc_record_plugin_cb_s addressbook_plugin_cbs = {
 	.create = __ctsvc_addressbook_create,
@@ -61,9 +57,8 @@ static int __ctsvc_addressbook_create(contacts_record_h *out_record)
 {
 	ctsvc_addressbook_s *addressbook;
 
-	addressbook = (ctsvc_addressbook_s*)calloc(1, sizeof(ctsvc_addressbook_s));
-	RETVM_IF(NULL == addressbook, CONTACTS_ERROR_OUT_OF_MEMORY,
-			"Out of memory : calloc is Fail");
+	addressbook = calloc(1, sizeof(ctsvc_addressbook_s));
+	RETVM_IF(NULL == addressbook, CONTACTS_ERROR_OUT_OF_MEMORY, "calloc() Fail");
 
 	*out_record = (contacts_record_h)addressbook;
 	return CONTACTS_ERROR_NONE;
@@ -81,18 +76,18 @@ static int __ctsvc_addressbook_destroy(contacts_record_h record, bool delete_chi
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_addressbook_clone(contacts_record_h record, contacts_record_h* out_record)
+static int __ctsvc_addressbook_clone(contacts_record_h record, contacts_record_h *out_record)
 {
 	ctsvc_addressbook_s *src = (ctsvc_addressbook_s*)record;
 	ctsvc_addressbook_s *dest;
 
 	dest = calloc(1, sizeof(ctsvc_addressbook_s));
 	RETVM_IF(NULL == dest, CONTACTS_ERROR_OUT_OF_MEMORY,
-			"Out of memory : calloc is Fail");
+			"calloc() Fail");
 
 	int ret = ctsvc_record_copy_base(&(dest->base), &(src->base));
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_record_copy_base() Fail");
+		ERR("ctsvc_record_copy_base() Fail");
 		free(dest);
 		return ret;
 	}
@@ -108,43 +103,43 @@ static int __ctsvc_addressbook_clone(contacts_record_h record, contacts_record_h
 }
 
 static int __ctsvc_addressbook_get_str_real(contacts_record_h record,
-		unsigned int property_id, char** out_str, bool copy)
+		unsigned int property_id, char **out_str, bool copy)
 {
 	ctsvc_addressbook_s *addressbook = (ctsvc_addressbook_s*)record;
 
-	switch(property_id) {
+	switch (property_id) {
 	case CTSVC_PROPERTY_ADDRESSBOOK_NAME:
 		*out_str = GET_STR(copy, addressbook->name);
 		break;
-	default :
-		CTS_ERR("This field(%d) is not supported in value(addressbook)", property_id);
+	default:
+		ERR("This field(%d) is not supported in value(addressbook)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_addressbook_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str)
+static int __ctsvc_addressbook_get_str_p(contacts_record_h record, unsigned int property_id, char **out_str)
 {
 	return __ctsvc_addressbook_get_str_real(record, property_id, out_str, false);
 }
 
-static int __ctsvc_addressbook_get_str(contacts_record_h record, unsigned int property_id, char** out_str)
+static int __ctsvc_addressbook_get_str(contacts_record_h record, unsigned int property_id, char **out_str)
 {
 	return __ctsvc_addressbook_get_str_real(record, property_id, out_str, true);
 }
 
 static int __ctsvc_addressbook_set_str(contacts_record_h record,
-		unsigned int property_id, const char* str, bool *is_dirty )
+		unsigned int property_id, const char *str, bool *is_dirty)
 {
 	ctsvc_addressbook_s *addressbook = (ctsvc_addressbook_s*)record;
 
-	switch(property_id) {
+	switch (property_id) {
 	case CTSVC_PROPERTY_ADDRESSBOOK_NAME:
 		CHECK_DIRTY_STR(addressbook->name, str, is_dirty);
 		FREEandSTRDUP(addressbook->name, str);
 		break;
-	default :
-		CTS_ERR("This field(%d) is not supported in value(addressbook)", property_id);
+	default:
+		ERR("This field(%d) is not supported in value(addressbook)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
@@ -155,7 +150,7 @@ static int __ctsvc_addressbook_get_int(contacts_record_h record,
 {
 	ctsvc_addressbook_s *addressbook = (ctsvc_addressbook_s*)record;
 
-	switch(property_id) {
+	switch (property_id) {
 	case CTSVC_PROPERTY_ADDRESSBOOK_ID:
 		*out = addressbook->id;
 		break;
@@ -166,7 +161,7 @@ static int __ctsvc_addressbook_get_int(contacts_record_h record,
 		*out = addressbook->mode;
 		break;
 	default:
-		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(addressbook)", property_id);
+		ERR("property_id(%d) is not supported in value(addressbook)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
@@ -177,26 +172,26 @@ static int __ctsvc_addressbook_set_int(contacts_record_h record,
 {
 	ctsvc_addressbook_s *addressbook = (ctsvc_addressbook_s*)record;
 
-	switch(property_id) {
+	switch (property_id) {
 	case CTSVC_PROPERTY_ADDRESSBOOK_ID:
 		CHECK_DIRTY_VAL(addressbook->id, value, is_dirty);
 		addressbook->id = value;
 		break;
 	case CTSVC_PROPERTY_ADDRESSBOOK_MODE:
 		RETVM_IF(value != CONTACTS_ADDRESS_BOOK_MODE_NONE
-						&& value != CONTACTS_ADDRESS_BOOK_MODE_READONLY,
-				CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : address_book mode is %d", value);
+				&& value != CONTACTS_ADDRESS_BOOK_MODE_READONLY,
+				CONTACTS_ERROR_INVALID_PARAMETER, "address_book mode is %d", value);
 		CHECK_DIRTY_VAL(addressbook->mode, value, is_dirty);
 		addressbook->mode = value;
 		break;
 	case CTSVC_PROPERTY_ADDRESSBOOK_ACCOUNT_ID:
 		RETVM_IF(0 < addressbook->id, CONTACTS_ERROR_INVALID_PARAMETER,
-				"Invalid parameter : property_id(%d) is a read-only value (addressbook)", property_id);
+				"property_id(%d) is a read-only value (addressbook)", property_id);
 		CHECK_DIRTY_VAL(addressbook->account_id, value, is_dirty);
 		addressbook->account_id = value;
 		break;
 	default:
-		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(addressbook)", property_id);
+		ERR("property_id(%d) is not supported in value(addressbook)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;

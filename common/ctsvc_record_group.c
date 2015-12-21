@@ -1,11 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
- *
- * Contact: Dohyung Jin <dh.jin@samsung.com>
- *                 Jongwon Lee <gogosing.lee@samsung.com>
- *                 Donghee Ye <donghee.ye@samsung.com>
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,11 +26,11 @@ static int __ctsvc_group_create(contacts_record_h *out_record);
 static int __ctsvc_group_destroy(contacts_record_h record, bool delete_child);
 static int __ctsvc_group_clone(contacts_record_h record, contacts_record_h *out_record);
 static int __ctsvc_group_get_int(contacts_record_h record, unsigned int property_id, int *out);
-static int __ctsvc_group_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
-static int __ctsvc_group_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
+static int __ctsvc_group_get_str(contacts_record_h record, unsigned int property_id, char **out_str);
+static int __ctsvc_group_get_str_p(contacts_record_h record, unsigned int property_id, char **out_str);
 static int __ctsvc_group_get_bool(contacts_record_h record, unsigned int property_id, bool *value);
 static int __ctsvc_group_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty);
-static int __ctsvc_group_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty);
+static int __ctsvc_group_set_str(contacts_record_h record, unsigned int property_id, const char *str, bool *is_dirty);
 static int __ctsvc_group_set_bool(contacts_record_h record, unsigned int property_id, bool value, bool *is_dirty);
 
 
@@ -64,9 +60,8 @@ static int __ctsvc_group_create(contacts_record_h *out_record)
 {
 	ctsvc_group_s *group;
 
-	group = (ctsvc_group_s*)calloc(1, sizeof(ctsvc_group_s));
-	RETVM_IF(NULL == group, CONTACTS_ERROR_OUT_OF_MEMORY,
-			"calloc is Fail");
+	group = calloc(1, sizeof(ctsvc_group_s));
+	RETVM_IF(NULL == group, CONTACTS_ERROR_OUT_OF_MEMORY, "calloc() Fail");
 
 	*out_record = (contacts_record_h)group;
 	return CONTACTS_ERROR_NONE;
@@ -97,8 +92,8 @@ static int __ctsvc_group_clone(contacts_record_h record, contacts_record_h *out_
 	src_data = (ctsvc_group_s*)record;
 	out_data = calloc(1, sizeof(ctsvc_group_s));
 	RETVM_IF(NULL == out_data, CONTACTS_ERROR_OUT_OF_MEMORY,
-    		"Out of memeory : calloc(ctsvc_group_s) Fail(%d)",
-    		CONTACTS_ERROR_OUT_OF_MEMORY);
+			"Out of memeory : calloc(ctsvc_group_s) Fail(%d)",
+			CONTACTS_ERROR_OUT_OF_MEMORY);
 
 	out_data->id = src_data->id;
 	out_data->addressbook_id = src_data->addressbook_id;
@@ -112,7 +107,7 @@ static int __ctsvc_group_clone(contacts_record_h record, contacts_record_h *out_
 
 	int ret = ctsvc_record_copy_base(&(out_data->base), &(src_data->base));
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_record_copy_base() Fail");
+		ERR("ctsvc_record_copy_base() Fail");
 		__ctsvc_group_destroy((contacts_record_h)out_data, true);
 		return ret;
 	}
@@ -125,7 +120,7 @@ static int __ctsvc_group_get_int(contacts_record_h record, unsigned int property
 {
 	ctsvc_group_s *group = (ctsvc_group_s*)record;
 
-	switch(property_id) {
+	switch (property_id) {
 	case CTSVC_PROPERTY_GROUP_ID:
 		*out = group->id;
 		break;
@@ -133,17 +128,17 @@ static int __ctsvc_group_get_int(contacts_record_h record, unsigned int property
 		*out = group->addressbook_id;
 		break;
 	default:
-		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(group)", property_id);
+		ERR("property_id(%d) is not supported in value(group)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_group_get_str_real(contacts_record_h record, unsigned int property_id, char** out_str, bool copy)
+static int __ctsvc_group_get_str_real(contacts_record_h record, unsigned int property_id, char **out_str, bool copy)
 {
 	ctsvc_group_s *group = (ctsvc_group_s*)record;
 
-	switch(property_id) {
+	switch (property_id) {
 	case CTSVC_PROPERTY_GROUP_NAME:
 		*out_str = GET_STR(copy, group->name);
 		break;
@@ -162,19 +157,19 @@ static int __ctsvc_group_get_str_real(contacts_record_h record, unsigned int pro
 	case CTSVC_PROPERTY_GROUP_EXTRA_DATA:
 		*out_str = GET_STR(copy, group->extra_data);
 		break;
-	default :
-		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(group)", property_id);
+	default:
+		ERR("property_id(%d) is not supported in value(group)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_group_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str)
+static int __ctsvc_group_get_str_p(contacts_record_h record, unsigned int property_id, char **out_str)
 {
 	return __ctsvc_group_get_str_real(record, property_id, out_str, false);
 }
 
-static int __ctsvc_group_get_str(contacts_record_h record, unsigned int property_id, char** out_str)
+static int __ctsvc_group_get_str(contacts_record_h record, unsigned int property_id, char **out_str)
 {
 	return __ctsvc_group_get_str_real(record, property_id, out_str, true);
 }
@@ -183,29 +178,29 @@ static int __ctsvc_group_set_int(contacts_record_h record, unsigned int property
 {
 	ctsvc_group_s *group = (ctsvc_group_s*)record;
 
-	switch(property_id) {
+	switch (property_id) {
 	case CTSVC_PROPERTY_GROUP_ID:
 		CHECK_DIRTY_VAL(group->id, value, is_dirty);
 		group->id = value;
 		break;
 	case CTSVC_PROPERTY_GROUP_ADDRESSBOOK_ID:
 		RETVM_IF(0 < group->id, CONTACTS_ERROR_INVALID_PARAMETER,
-				"Invalid parameter : property_id(%d) is a read-only value (group)", property_id);
+				"property_id(%d) is a read-only value (group)", property_id);
 		CHECK_DIRTY_VAL(group->addressbook_id, value, is_dirty);
 		group->addressbook_id = value;
 		break;
 	default:
-		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(group)", property_id);
+		ERR("property_id(%d) is not supported in value(group)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_group_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty)
+static int __ctsvc_group_set_str(contacts_record_h record, unsigned int property_id, const char *str, bool *is_dirty)
 {
 	ctsvc_group_s *group = (ctsvc_group_s*)record;
 
-	switch(property_id) {
+	switch (property_id) {
 	case CTSVC_PROPERTY_GROUP_NAME:
 		CHECK_DIRTY_STR(group->name, str, is_dirty);
 		FREEandSTRDUP(group->name, str);
@@ -230,8 +225,8 @@ static int __ctsvc_group_set_str(contacts_record_h record, unsigned int property
 		CHECK_DIRTY_STR(group->extra_data, str, is_dirty);
 		FREEandSTRDUP(group->extra_data, str);
 		break;
-	default :
-		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(group)", property_id);
+	default:
+		ERR("property_id(%d) is not supported in value(group)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
@@ -245,7 +240,7 @@ static int __ctsvc_group_get_bool(contacts_record_h record, unsigned int propert
 		*value = group->is_read_only;
 		break;
 	default:
-		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(group)", property_id);
+		ERR("property_id(%d) is not supported in value(group)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
@@ -255,15 +250,15 @@ static int __ctsvc_group_set_bool(contacts_record_h record, unsigned int propert
 {
 	ctsvc_group_s *group = (ctsvc_group_s*)record;
 
-	switch(property_id) {
+	switch (property_id) {
 	case CTSVC_PROPERTY_GROUP_IS_READ_ONLY:
 		RETVM_IF(0 < group->id, CONTACTS_ERROR_INVALID_PARAMETER,
-				"Invalid parameter : property_id(%d) is a read-only value (group)", property_id);
+				"property_id(%d) is a read-only value (group)", property_id);
 		CHECK_DIRTY_VAL(group->is_read_only, value, is_dirty);
 		group->is_read_only = value;
 		break;
 	default:
-		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(group)", property_id);
+		ERR("property_id(%d) is not supported in value(group)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;

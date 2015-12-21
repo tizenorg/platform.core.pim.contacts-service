@@ -1,11 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
- *
- * Contact: Dohyung Jin <dh.jin@samsung.com>
- *                 Jongwon Lee <gogosing.lee@samsung.com>
- *                 Donghee Ye <donghee.ye@samsung.com>
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,9 +37,6 @@
 
 #define LOG_TAG "CONTACTS_SERVICE"
 #include <dlog.h>
-#define DLOG(prio, fmt, arg...) \
-	do { SLOG(prio, LOG_TAG, fmt, ##arg); } while (0)
-
 
 #if defined(_CONTACTS_IPC_SERVER)
 #define IPC_ROLE "[SERVER]"
@@ -53,79 +46,85 @@
 #define IPC_ROLE "[LIB]"
 #endif
 
-#define INFO(fmt, arg...) SLOGI(IPC_ROLE" "fmt, ##arg)
-#define ERR(fmt, arg...) SLOGE(IPC_ROLE" "fmt, ##arg)
-#define DBG(fmt, arg...) SLOGD(IPC_ROLE" "fmt, ##arg)
-#define WARN(fmt, arg...) SLOGD(IPC_ROLE" "fmt, ##arg)
-#define VERBOSE(fmt, arg...) SLOGV(IPC_ROLE" "fmt, ##arg)
+#define CTS_LOG_RED "\033[0;31m"
+#define CTS_LOG_GREEN "\033[0;32m"
+#define CTS_LOG_BROWN "\033[0;33m"
+#define CTS_LOG_BLUE "\033[0;34m"
+#define CTS_LOG_END "\033[0;m"
+
+#define _INFO(fmt, arg...) SLOGI(CTS_LOG_GREEN IPC_ROLE CTS_LOG_END fmt, ##arg)
+#define _ERR(fmt, arg...) SLOGE(CTS_LOG_GREEN IPC_ROLE CTS_LOG_END fmt, ##arg)
+#define _DBG(fmt, arg...) SLOGD(CTS_LOG_GREEN IPC_ROLE CTS_LOG_END fmt, ##arg)
+#define _WARN(fmt, arg...) SLOGW(CTS_LOG_GREEN IPC_ROLE CTS_LOG_END fmt, ##arg)
 
 #ifdef CONTACTS_DEBUGGING
 
-	#define CTS_FN_CALL DBG(">>>>>>>> called")
-	#define CTS_FN_END DBG("<<<<<<<< ended")
+	#define CTS_FN_CALL _DBG(">>>>>>>> called")
+	#define CTS_FN_END _DBG("<<<<<<<< ended")
 
-	#define CTS_DBG(fmt, arg...) DBG(fmt, ##arg)
-	#define CTS_WARN(fmt, arg...) WARN(fmt, ##arg)
-	#define CTS_ERR(fmt, arg...) ERR(fmt, ##arg)
-	#define CTS_INFO(fmt, arg...) INFO(fmt, ##arg)
-	#define CTS_VERBOSE(fmt, arg...) VERBOSE(fmt, ##arg)
+	#define DBG(fmt, arg...) _DBG(fmt, ##arg)
+	#define WARN(fmt, arg...) _WARN(CTS_LOG_BROWN fmt CTS_LOG_END, ##arg)
+	#define ERR(fmt, arg...) _ERR(CTS_LOG_RED fmt CTS_LOG_END, ##arg)
+	#define INFO(fmt, arg...) _INFO(CTS_LOG_BLUE fmt CTS_LOG_END, ##arg)
 
 #else /* CONTACTS_DEBUGGING */
 	#define CTS_FN_CALL
 	#define CTS_FN_END
 
-	#define CTS_DBG(fmt, arg...)
-	#define CTS_WARN(fmt, arg...)
-	#define CTS_ERR(fmt, arg...) ERR(fmt, ##arg)
-	#define CTS_INFO(fmt, arg...) INFO(fmt, ##arg)
-	#define CTS_VERBOSE(fmt, arg...)
+	#define DBG(fmt, arg...)
+	#define WARN(fmt, arg...)
+	#define ERR(fmt, arg...) _ERR(fmt, ##arg)
+	#define INFO(fmt, arg...) _INFO(fmt, ##arg)
 
 	#define G_DISABLE_ASSERT
 #endif /* CONTACTS_DEBUGGING */
 
-#define WARN_IF(expr, fmt, arg...) do { \
-	if (expr) { \
-		CTS_WARN(fmt, ##arg); \
-	} \
-} while (0)
-#define RET_IF(expr) do { \
-	if (expr) { \
-		CTS_ERR("(%s)", #expr); \
-		return; \
-	} \
-} while (0)
-#define RETV_IF(expr, val) do { \
-	if (expr) { \
-		CTS_ERR("(%s)", #expr); \
-		return (val); \
-	} \
-} while (0)
-#define RETM_IF(expr, fmt, arg...) do { \
-	if (expr) { \
-		CTS_ERR(fmt, ##arg); \
-		return; \
-	} \
-} while (0)
-#define RETVM_IF(expr, val, fmt, arg...) do { \
-	if (expr) { \
-		CTS_ERR(fmt, ##arg); \
-		return (val); \
-	} \
-} while (0)
+#define RET_IF(expr) \
+	do { \
+		if (expr) { \
+			ERR("(%s)", #expr); \
+			return; \
+		}\
+	} while(0)
+
+#define RETV_IF(expr, val) \
+	do { \
+		if (expr) { \
+			ERR("(%s)", #expr); \
+			return (val); \
+		} \
+	} while (0)
+
+#define RETM_IF(expr, fmt, arg...) \
+	do { \
+		if (expr) { \
+			ERR(fmt, ##arg); \
+			return; \
+		} \
+	} while (0)
+
+#define RETVM_IF(expr, val, fmt, arg...) \
+	do { \
+		if (expr) { \
+			ERR(fmt, ##arg); \
+			return (val); \
+		} \
+	} while (0)
+
+#define WARN_IF(expr, fmt, arg...) \
+	do { \
+		if (expr) { \
+			WARN(fmt, ##arg); \
+		} \
+	} while (0)
 
 
 /* TO DISABLE THIS MACRO, DEFINE "G_DISABLE_ASSERT" */
 #define ASSERT_NOT_REACHED(fmt, arg...) do { \
-        CTS_ERR(fmt, ##arg); \
+        ERR(fmt, ##arg); \
         assert(!"DO NOT REACH HERE!"); \
 	} while (0)
 
-
-#define CONTACTS_FREE(ptr) \
-	do { \
-		free(ptr); \
-		ptr = NULL; \
-	} while (0)
 
 /* Thread-local storage */
 #ifdef _CONTACTS_IPC_SERVER

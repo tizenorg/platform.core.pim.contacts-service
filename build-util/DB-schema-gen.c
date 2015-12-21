@@ -1,9 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
- *
- * Contact: Youngjae Shin <yj99.shin@samsung.com>
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,14 +39,14 @@ int main(int argc, char **argv)
 				while ('\n' != c && EOF != c)
 					c = fgetc(fp);
 				printf("\\\n");
+			} else {
+				printf("-%c", c);
 			}
-			else printf("-%c",c);
 			break;
 		case EOF:
 			break;
 		default:
-			printf("%c",c);
-			break;
+			printf("%c", c);
 		}
 	} while (EOF != c);
 

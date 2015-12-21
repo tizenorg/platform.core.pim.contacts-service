@@ -1,9 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
- *
- * Contact: Youngjae Shin <yj99.shin@samsung.com>
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,12 +23,11 @@
 #include "ctsvc_mutex.h"
 
 typedef struct {
-	int (* lock) (pthread_mutex_t *mutex);
-	int (* unlock) (pthread_mutex_t *mutex);
-}cts_mutex_fns;
+	int (*lock) (pthread_mutex_t *mutex);
+	int (*unlock) (pthread_mutex_t *mutex);
+} cts_mutex_fns;
 
-static cts_mutex_fns __ctsvc_mutex_funtions =
-{
+static cts_mutex_fns __ctsvc_mutex_funtions = {
 	pthread_mutex_lock,
 	pthread_mutex_unlock
 };
@@ -81,7 +78,7 @@ static inline pthread_mutex_t* __ctsvc_mutex_get_mutex(int type)
 		ret_val = &cynara_mutex;
 		break;
 	default:
-		CTS_ERR("unknown type(%d)", type);
+		ERR("unknown type(%d)", type);
 		ret_val = NULL;
 		break;
 	}
@@ -111,7 +108,7 @@ void ctsvc_mutex_lock(int type)
 
 	if (__ctsvc_mutex_funtions.lock) {
 		ret = __ctsvc_mutex_funtions.lock(mutex);
-		WARN_IF(ret, "mutex_lock Failed(%d)", ret);
+		WARN_IF(ret, "mutex_lock Fail(%d)", ret);
 	}
 }
 
@@ -124,12 +121,11 @@ void ctsvc_mutex_unlock(int type)
 
 	if (__ctsvc_mutex_funtions.unlock) {
 		ret = __ctsvc_mutex_funtions.unlock(mutex);
-		WARN_IF(ret, "mutex_unlock Failed(%d)", ret);
+		WARN_IF(ret, "mutex_unlock Fail(%d)", ret);
 	}
 
 	__defered_ref--;
-	if (__defered_ref == 0) {
+	if (__defered_ref == 0)
 		pthread_setcanceltype(__old_type, NULL);
-	}
 }
 

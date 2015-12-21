@@ -1,7 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -104,11 +104,11 @@ static inline bool is_chosung(UChar src)
 		return true;
 
 	if (unicode_value1 == 0xA9
-			&& (0x60 <= unicode_value2  && unicode_value2 <= 0x7C)) /* jamo Extended-A */
+			&& (0x60 <= unicode_value2 && unicode_value2 <= 0x7C)) /* jamo Extended-A */
 		return true;
 
 	if (unicode_value1 == 0x11
-			&& (0x00 <= unicode_value2  && unicode_value2 <= 0x5E))  /* jamo */
+			&& (0x00 <= unicode_value2 && unicode_value2 <= 0x5E))  /* jamo */
 		return true;
 
 	return false;
@@ -121,10 +121,11 @@ bool ctsvc_is_hangul(UChar src)
 			|| CTSVC_COMPARE_BETWEEN(CTSVC_JAMO_B_START, src, CTSVC_JAMO_B_END)
 			|| CTSVC_COMPARE_BETWEEN(CTSVC_HAN_C_START, src, CTSVC_HAN_C_END)
 			|| CTSVC_COMPARE_BETWEEN(CTSVC_HAN_HALF_START, src, CTSVC_HAN_HALF_END)
-			|| CTSVC_COMPARE_BETWEEN(CTSVC_HAN_SYLLABLES_START, src, CTSVC_HAN_SYLLABLES_END))
+			|| CTSVC_COMPARE_BETWEEN(CTSVC_HAN_SYLLABLES_START, src, CTSVC_HAN_SYLLABLES_END)) {
 		return true;
-	else
+	} else {
 		return FALSE;
+	}
 }
 
 
@@ -160,13 +161,11 @@ void ctsvc_hangul_compatibility2jamo(UChar *src)
 			unicode_value1 = 0x11;
 			unicode_value2 = hangul_jamo_choseong[pos - hangul_compatibility_choseong];
 			(*src) = unicode_value1 << 8 | unicode_value2;
-		}
-		else if ((pos = strchr(hangul_compatibility_jungseong, unicode_value2))) {
+		} else if ((pos = strchr(hangul_compatibility_jungseong, unicode_value2))) {
 			unicode_value1 = 0x11;
 			unicode_value2 = hangul_jamo_jungseong[pos - hangul_compatibility_jungseong];
 			(*src) = unicode_value1 << 8 | unicode_value2;
-		}
-		else if ((pos = strchr(hangul_compatibility_jongseong, unicode_value2))) {
+		} else if ((pos = strchr(hangul_compatibility_jongseong, unicode_value2))) {
 			unicode_value1 = 0x11;
 			unicode_value2 = hangul_jamo_jongseong[pos - hangul_compatibility_jongseong];
 			(*src) = unicode_value1 << 8 | unicode_value2;
@@ -206,13 +205,11 @@ void ctsvc_hangul_jamo2compatibility(UChar *src)
 			unicode_value1 = 0x31;
 			unicode_value2 = hangul_compatibility_choseong[pos - hangul_jamo_choseong];
 			(*src) = unicode_value1 << 8 | unicode_value2;
-		}
-		else if ((pos = strchr(hangul_jamo_jungseong, unicode_value2))) {
+		} else if ((pos = strchr(hangul_jamo_jungseong, unicode_value2))) {
 			unicode_value1 = 0x31;
 			unicode_value2 = hangul_compatibility_jungseong[pos - hangul_jamo_jungseong];
 			(*src) = unicode_value1 << 8 | unicode_value2;
-		}
-		else if ((pos = strchr(hangul_jamo_jongseong, unicode_value2))) {
+		} else if ((pos = strchr(hangul_jamo_jongseong, unicode_value2))) {
 			unicode_value1 = 0x31;
 			unicode_value2 = hangul_compatibility_jongseong[pos - hangul_jamo_jongseong];
 			(*src) = unicode_value1 << 8 | unicode_value2;
@@ -226,12 +223,12 @@ int ctsvc_get_chosung(const char *src, char *dest, int dest_size)
 	UErrorCode status = 0;
 	UChar tmp_result[10];
 	UChar result[10];
-	int chosung_len=0, count = 0, i=0, j=0;
+	int chosung_len = 0, count = 0, i = 0, j = 0;
 	int char_len = 0;
 	int str_len = strlen(src);
 	char temp[dest_size];
 
-	for (i=0;i<str_len;i+=char_len) {
+	for (i = 0; i < str_len; i += char_len) {
 		char char_src[10];
 		char_len = ctsvc_check_utf8(src[i]);
 		RETVM_IF(char_len <= 0, CONTACTS_ERROR_INVALID_PARAMETER, "check_utf8 Fail");
@@ -273,11 +270,11 @@ int ctsvc_get_korean_search_pattern(const char *src, char *dest, int dest_size)
 	UErrorCode status = 0;
 	UChar tmp_result[10];
 	UChar result[10];
-	int i=0, j=0, count=0;
+	int i = 0, j = 0, count = 0;
 	int char_len = 0;
 	int str_len = strlen(src);
 
-	for (i=0;i<str_len;i+=char_len) {
+	for (i = 0; i < str_len; i += char_len) {
 		char char_src[10];
 		char_len = ctsvc_check_utf8(src[i]);
 		RETVM_IF(char_len <= 0, CONTACTS_ERROR_INVALID_PARAMETER, "check_utf8 Fail");
@@ -300,8 +297,7 @@ int ctsvc_get_korean_search_pattern(const char *src, char *dest, int dest_size)
 			j += size;
 			dest[j] = '*';
 			j++;
-		}
-		else {
+		} else {
 			u_strToUpper(tmp_result, array_sizeof(tmp_result), tmp_result, -1, NULL, &status);
 			RETVM_IF(U_FAILURE(status), CONTACTS_ERROR_SYSTEM,
 					"u_strToUpper() Fail(%s)", u_errorName(status));
@@ -343,11 +339,11 @@ bool ctsvc_is_chosung(const char *src)
 
 bool ctsvc_has_chosung(const char *src)
 {
-	int  i=0;
+	int  i = 0;
 	int char_len = 0;
 	int str_len = strlen(src);
 
-	for (i=0;i<str_len;i+=char_len) {
+	for (i = 0; i < str_len; i += char_len) {
 		char_len = ctsvc_check_utf8(src[i]);
 		if (ctsvc_is_chosung(&(src[i])))
 			return true;
@@ -363,30 +359,30 @@ static bool __ctsvc_is_hangul(const char *src)
 	if (char_len <= 0) return false;   /* invalid value */
 
 	if (char_len == 3) {
-		switch(src[0]) {
-		/*
-		 * Hangul Jamo : 0x1100 ~ 0x11FF
-		 *  e1 84 80 ~ e1 87 bf
-		 */
+		switch (src[0]) {
+			/*
+			 * Hangul Jamo : 0x1100 ~ 0x11FF
+			 *  e1 84 80 ~ e1 87 bf
+			 */
 		case 0xE1:
-			switch(src[1]) {
+			switch (src[1]) {
 			case 0x84 ... 0x87:
 				if (0x80 <= src[2] && src[2] <= 0xBF)
 					return true;
 				else return false;
-			default :
+			default:
 				return false;
 			}
 			break;
 
-		/*
-		 * Hangul Compatibility Jamo : 0x3130 ~ 0x318F
-		 *  e3 84 b0 ~ e3 84 bf
-		 *  e3 85 80 ~ e3 85 bf
-		 *  e3 86 80 ~ e3 86 8f
-		 */
+			/*
+			 * Hangul Compatibility Jamo : 0x3130 ~ 0x318F
+			 *  e3 84 b0 ~ e3 84 bf
+			 *  e3 85 80 ~ e3 85 bf
+			 *  e3 86 80 ~ e3 86 8f
+			 */
 		case 0xE3:
-			switch(src[1]) {
+			switch (src[1]) {
 			case 0x84:
 				if (0xB0 <= src[2] && src[2] <= 0xBF)
 					return true;
@@ -399,21 +395,21 @@ static bool __ctsvc_is_hangul(const char *src)
 				if (0x80 <= src[2] && src[2] <= 0x8F)
 					return true;
 				else return false;
-			default :
+			default:
 				return false;
 			}
 			break;
 
-		/*
-		 * Hangul Jamo Extended A : 0xA960 ~ 0xA97F
-		 *  ea a5 a0  ~ ea a5 bf
-		 */
-		/*
-		 * Hangul syllables : 0xAC00 ~ 0xD7AF
-		 *  ea b0 80 ~ ea bf bf
-		 */
+			/*
+			 * Hangul Jamo Extended A : 0xA960 ~ 0xA97F
+			 *  ea a5 a0  ~ ea a5 bf
+			 */
+			/*
+			 * Hangul syllables : 0xAC00 ~ 0xD7AF
+			 *  ea b0 80 ~ ea bf bf
+			 */
 		case 0xEA:
-			switch(src[1]) {
+			switch (src[1]) {
 			case 0xA5:
 				if (0xA0 <= src[2] && src[2] <= 0xBF)
 					return true;
@@ -422,53 +418,53 @@ static bool __ctsvc_is_hangul(const char *src)
 				if (0x80 <= src[2] && src[2] <= 0xBF)
 					return true;
 				else return false;
-			default :
+			default:
 				return false;
 			}
 			break;
 
-		/*
-		 * Hangul syllables : 0xAC00 ~ 0xD7AF
-		 *  eb 80 80 ~ eb bf bf
-		 *  ec 80 80 ~ ec bf bf
-		 */
+			/*
+			 * Hangul syllables : 0xAC00 ~ 0xD7AF
+			 *  eb 80 80 ~ eb bf bf
+			 *  ec 80 80 ~ ec bf bf
+			 */
 		case 0xEB ... 0xEC:
-			switch(src[1]) {
+			switch (src[1]) {
 			case 0x80 ... 0xBF:
 				if (0x80 <= src[2] && src[2] <= 0xBF)
 					return true;
 				else return false;
 				break;
-			default :
+			default:
 				return false;
 			}
 			break;
 
-		/*
-		 * Hangul syllables : 0xAC00 ~ 0xD7AF
-		 *  ed 80 80 ~ ed 9e af
-		 */
-		/*
-		 * Hangul Jamo Extended B : 0xD7B0 ~ 0xD7FF
-		 *  ed 9e b0 ~ ed 9f bf
-		 */
+			/*
+			 * Hangul syllables : 0xAC00 ~ 0xD7AF
+			 *  ed 80 80 ~ ed 9e af
+			 */
+			/*
+			 * Hangul Jamo Extended B : 0xD7B0 ~ 0xD7FF
+			 *  ed 9e b0 ~ ed 9f bf
+			 */
 		case 0xED:
-			switch(src[1]) {
+			switch (src[1]) {
 			case 0x80 ... 0x9F:
 				if (0x80 <= src[2] && src[2] <= 0xBF)
 					return true;
 				else return false;
-			default :
+			default:
 				return false;
 			}
 			break;
 
-		/*
-		 * Hangul halfwidth : 0xFFA0 ~ 0xFFDC
-		 *  ef be a0 ~ ef bf 9c
-		 */
+			/*
+			 * Hangul halfwidth : 0xFFA0 ~ 0xFFDC
+			 *  ef be a0 ~ ef bf 9c
+			 */
 		case 0xEF:
-			switch(src[1]) {
+			switch (src[1]) {
 			case 0xBE:
 				if (0xA0 <= src[2] && src[2] <= 0xBF)
 					return true;
@@ -477,7 +473,7 @@ static bool __ctsvc_is_hangul(const char *src)
 				if (0x80 <= src[2] && src[2] <= 0x9C)
 					return true;
 				else return false;
-			default :
+			default:
 				return false;
 			}
 			break;
@@ -490,11 +486,11 @@ static bool __ctsvc_is_hangul(const char *src)
 
 bool ctsvc_has_korean(const char *src)
 {
-	int  i=0;
+	int  i = 0;
 	int char_len = 0;
 	int str_len = strlen(src);
 
-	for (i=0;i<str_len;i+=char_len) {
+	for (i = 0; i < str_len; i += char_len) {
 		char_len = ctsvc_check_utf8(src[i]);
 		RETV_IF(CONTACTS_ERROR_INVALID_PARAMETER == char_len, false);
 		if (__ctsvc_is_hangul(&(src[i])))

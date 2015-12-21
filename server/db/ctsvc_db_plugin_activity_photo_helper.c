@@ -1,7 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ int ctsvc_db_activity_photo_get_value_from_stmt(cts_stmt stmt, contacts_record_h
 	ctsvc_activity_photo_s *activity_photo;
 	int start_count = 0;
 
-	ret = contacts_record_create(_contacts_activity_photo._uri, (contacts_record_h *)&activity_photo);
+	ret = contacts_record_create(_contacts_activity_photo._uri, (contacts_record_h*)&activity_photo);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "contacts_record_create Fail(%d)", ret);
 
 	activity_photo->id = ctsvc_stmt_get_int(stmt, start_count++);
@@ -52,31 +52,28 @@ int ctsvc_db_activity_photo_insert(contacts_record_h record, int activity_id, in
 {
 	int ret;
 	cts_stmt stmt = NULL;
-	ctsvc_activity_photo_s *activity_photo =(ctsvc_activity_photo_s*)record;
+	ctsvc_activity_photo_s *activity_photo = (ctsvc_activity_photo_s*)record;
 	char query[CTS_SQL_MAX_LEN] = {0};
 
 	RETVM_IF(activity_id <= 0, CONTACTS_ERROR_INVALID_PARAMETER,
-			"Invalid parameter : activity_id(%d) is mandatory field to insert activity_photo record ", activity_id);
-
+			"activity_id(%d) Invalid", activity_id);
 	RETVM_IF(0 < activity_photo->id, CONTACTS_ERROR_INVALID_PARAMETER,
-			"Invalid parameter : id(%d), This record is already inserted", activity_photo->id);
-
-	RETVM_IF(NULL == activity_photo->photo_url, CONTACTS_ERROR_INVALID_PARAMETER,
-			"Invalid parameter : activity_photo->photo_url is NULL");
+			"id(%d), This record is already inserted", activity_photo->id);
+	RETV_IF(NULL == activity_photo->photo_url, CONTACTS_ERROR_INVALID_PARAMETER);
 
 	snprintf(query, sizeof(query),
-		"INSERT INTO "CTS_TABLE_ACTIVITY_PHOTOS"(activity_id, photo_url, sort_index) "
-					"VALUES(%d, ?, %d)",
+			"INSERT INTO "CTS_TABLE_ACTIVITY_PHOTOS"(activity_id, photo_url, sort_index) "
+			"VALUES(%d, ?, %d)",
 			activity_id, activity_photo->sort_index);
 
 	ret = ctsvc_query_prepare(query, &stmt);
-	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
+	RETVM_IF(NULL == stmt, ret, "ctsvc_query_prepare() Fail(%d)", ret);
 
 	sqlite3_bind_text(stmt, 1, activity_photo->photo_url, strlen(activity_photo->photo_url), SQLITE_STATIC);
 
 	ret = ctsvc_stmt_step(stmt);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_stmt_step() Fail(%d)", ret);
+		ERR("ctsvc_stmt_step() Fail(%d)", ret);
 		ctsvc_stmt_finalize(stmt);
 		return ret;
 	}
@@ -94,7 +91,7 @@ int ctsvc_db_activity_photo_update(contacts_record_h record)
 {
 	int id;
 	int ret = CONTACTS_ERROR_NONE;
-	char* set = NULL;
+	char *set = NULL;
 	GSList *bind_text = NULL;
 	GSList *cursor = NULL;
 	ctsvc_activity_photo_s *activity_photo = (ctsvc_activity_photo_s*)record;
@@ -116,11 +113,14 @@ int ctsvc_db_activity_photo_update(contacts_record_h record)
 		ctsvc_set_activity_photo_noti();
 	} while (0);
 
-	CTSVC_RECORD_RESET_PROPERTY_FLAGS((ctsvc_record_s *)record);
-	CONTACTS_FREE(set);
+	CTSVC_RECORD_RESET_PROPERTY_FLAGS((ctsvc_record_s*)record);
+	free(set);
+
 	if (bind_text) {
-		for (cursor=bind_text;cursor;cursor=cursor->next)
-			CONTACTS_FREE(cursor->data);
+		for (cursor = bind_text; cursor; cursor = cursor->next) {
+			free(cursor->data);
+			cursor->data = NULL;
+		}
 		g_slist_free(bind_text);
 	}
 
@@ -152,16 +152,16 @@ int ctsvc_db_activity_photo_get_records(int activity_id, contacts_record_h recor
 	contacts_list_h list;
 
 	snprintf(query, sizeof(query), "SELECT activity_id, activity_id, photo_url, sort_index "
-						"FROM "CTSVC_DB_VIEW_ACTIVITY_PHOTOS" WHERE activity_id = %d "
-						"ORDER BY sort_index ASC", activity_id);
+			"FROM "CTSVC_DB_VIEW_ACTIVITY_PHOTOS" WHERE activity_id = %d "
+			"ORDER BY sort_index ASC", activity_id);
 
 	ret = ctsvc_query_prepare(query, &stmt);
-	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
+	RETVM_IF(NULL == stmt, ret, "ctsvc_query_prepare() Fail(%d)", ret);
 
 	contacts_list_create(&list);
 	while ((ret = ctsvc_stmt_step(stmt))) {
 		if (1 != ret) {
-			CTS_ERR("DB error : ctsvc_stmt_step() Fail(%d)", ret);
+			ERR("ctsvc_stmt_step() Fail(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
 			contacts_list_destroy(list, true);
 			return ret;

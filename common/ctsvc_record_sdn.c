@@ -1,11 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
- *
- * Contact: Dohyung Jin <dh.jin@samsung.com>
- *                 Jongwon Lee <gogosing.lee@samsung.com>
- *                 Donghee Ye <donghee.ye@samsung.com>
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,14 +22,14 @@
 #include "ctsvc_record.h"
 #include "ctsvc_view.h"
 
-static int __ctsvc_sdn_create(contacts_record_h* out_record);
+static int __ctsvc_sdn_create(contacts_record_h *out_record);
 static int __ctsvc_sdn_destroy(contacts_record_h record, bool delete_child);
 static int __ctsvc_sdn_clone(contacts_record_h record, contacts_record_h *out_record);
 static int __ctsvc_sdn_get_int(contacts_record_h record, unsigned int property_id, int *out);
-static int __ctsvc_sdn_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
-static int __ctsvc_sdn_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
+static int __ctsvc_sdn_get_str(contacts_record_h record, unsigned int property_id, char **out_str);
+static int __ctsvc_sdn_get_str_p(contacts_record_h record, unsigned int property_id, char **out_str);
 static int __ctsvc_sdn_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty);
-static int __ctsvc_sdn_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty);
+static int __ctsvc_sdn_set_str(contacts_record_h record, unsigned int property_id, const char *str, bool *is_dirty);
 
 ctsvc_record_plugin_cb_s sdn_plugin_cbs = {
 	.create = __ctsvc_sdn_create,
@@ -57,12 +53,11 @@ ctsvc_record_plugin_cb_s sdn_plugin_cbs = {
 	.clone_child_record_list = NULL,
 };
 
-static int __ctsvc_sdn_create(contacts_record_h* out_record)
+static int __ctsvc_sdn_create(contacts_record_h *out_record)
 {
 	ctsvc_sdn_s *sdn;
-	sdn = (ctsvc_sdn_s*)calloc(1, sizeof(ctsvc_sdn_s));
-	RETVM_IF(NULL == sdn, CONTACTS_ERROR_OUT_OF_MEMORY,
-			"Out of memory calloc is Fail");
+	sdn = calloc(1, sizeof(ctsvc_sdn_s));
+	RETVM_IF(NULL == sdn, CONTACTS_ERROR_OUT_OF_MEMORY, "calloc() Fail");
 
 	*out_record = (contacts_record_h)sdn;
 	return CONTACTS_ERROR_NONE;
@@ -70,7 +65,7 @@ static int __ctsvc_sdn_create(contacts_record_h* out_record)
 
 static int __ctsvc_sdn_destroy(contacts_record_h record, bool delete_child)
 {
-	ctsvc_sdn_s* sdn = (ctsvc_sdn_s*)record;
+	ctsvc_sdn_s *sdn = (ctsvc_sdn_s*)record;
 	sdn->base.plugin_cbs = NULL; /* help to find double destroy bug (refer to the contacts_record_destroy) */
 	free(sdn->base.properties_flags);
 
@@ -83,13 +78,13 @@ static int __ctsvc_sdn_destroy(contacts_record_h record, bool delete_child)
 
 static int __ctsvc_sdn_clone(contacts_record_h record, contacts_record_h *out_record)
 {
-    ctsvc_sdn_s *out_data = NULL;
-    ctsvc_sdn_s *src_data = NULL;
+	ctsvc_sdn_s *out_data = NULL;
+	ctsvc_sdn_s *src_data = NULL;
 
-    src_data = (ctsvc_sdn_s*)record;
-    out_data = calloc(1, sizeof(ctsvc_sdn_s));
-    RETVM_IF(NULL == out_data, CONTACTS_ERROR_OUT_OF_MEMORY,
-			 "Out of memeory : calloc(ctsvc_sdn_s) Fail(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
+	src_data = (ctsvc_sdn_s*)record;
+	out_data = calloc(1, sizeof(ctsvc_sdn_s));
+	RETVM_IF(NULL == out_data, CONTACTS_ERROR_OUT_OF_MEMORY,
+			"Out of memeory : calloc(ctsvc_sdn_s) Fail(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
 
 	out_data->id = src_data->id;
 	out_data->name = SAFE_STRDUP(src_data->name);
@@ -98,7 +93,7 @@ static int __ctsvc_sdn_clone(contacts_record_h record, contacts_record_h *out_re
 
 	int ret = ctsvc_record_copy_base(&(out_data->base), &(src_data->base));
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_record_copy_base() Fail");
+		ERR("ctsvc_record_copy_base() Fail");
 		__ctsvc_sdn_destroy((contacts_record_h)out_data, true);
 		return ret;
 	}
@@ -109,9 +104,9 @@ static int __ctsvc_sdn_clone(contacts_record_h record, contacts_record_h *out_re
 
 static int __ctsvc_sdn_get_int(contacts_record_h record, unsigned int property_id, int *out)
 {
-	ctsvc_sdn_s* sdn = (ctsvc_sdn_s*)record;
+	ctsvc_sdn_s *sdn = (ctsvc_sdn_s*)record;
 
-	switch(property_id) {
+	switch (property_id) {
 	case CTSVC_PROPERTY_SDN_ID:
 		*out = sdn->id;
 		break;
@@ -119,45 +114,45 @@ static int __ctsvc_sdn_get_int(contacts_record_h record, unsigned int property_i
 		*out = sdn->sim_slot_no;
 		break;
 	default:
-		CTS_ERR("This field(%d) is not supported in value(sdn)", property_id);
+		ERR("This field(%d) is not supported in value(sdn)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_sdn_get_str_real(contacts_record_h record, unsigned int property_id, char** out_str, bool copy)
+static int __ctsvc_sdn_get_str_real(contacts_record_h record, unsigned int property_id, char **out_str, bool copy)
 {
-	ctsvc_sdn_s* sdn = (ctsvc_sdn_s*)record;
+	ctsvc_sdn_s *sdn = (ctsvc_sdn_s*)record;
 
-	switch(property_id) {
+	switch (property_id) {
 	case CTSVC_PROPERTY_SDN_NAME:
 		*out_str = GET_STR(copy, sdn->name);
 		break;
 	case CTSVC_PROPERTY_SDN_NUMBER:
 		*out_str = GET_STR(copy, sdn->number);
 		break;
-	default :
-		CTS_ERR("This field(%d) is not supported in value(sdn)", property_id);
+	default:
+		ERR("This field(%d) is not supported in value(sdn)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_sdn_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str)
+static int __ctsvc_sdn_get_str_p(contacts_record_h record, unsigned int property_id, char **out_str)
 {
 	return __ctsvc_sdn_get_str_real(record, property_id, out_str, false);
 }
 
-static int __ctsvc_sdn_get_str(contacts_record_h record, unsigned int property_id, char** out_str)
+static int __ctsvc_sdn_get_str(contacts_record_h record, unsigned int property_id, char **out_str)
 {
 	return __ctsvc_sdn_get_str_real(record, property_id, out_str, true);
 }
 
 static int __ctsvc_sdn_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty)
 {
-	ctsvc_sdn_s* sdn = (ctsvc_sdn_s*)record;
+	ctsvc_sdn_s *sdn = (ctsvc_sdn_s*)record;
 
-	switch(property_id) {
+	switch (property_id) {
 	case CTSVC_PROPERTY_SDN_ID:
 		CHECK_DIRTY_VAL(sdn->id, value, is_dirty);
 		sdn->id = value;
@@ -167,17 +162,17 @@ static int __ctsvc_sdn_set_int(contacts_record_h record, unsigned int property_i
 		sdn->sim_slot_no = value;
 		break;
 	default:
-		CTS_ERR("This field(%d) is not supported in value(sdn)", property_id);
+		ERR("This field(%d) is not supported in value(sdn)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_sdn_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty)
+static int __ctsvc_sdn_set_str(contacts_record_h record, unsigned int property_id, const char *str, bool *is_dirty)
 {
-	ctsvc_sdn_s* sdn = (ctsvc_sdn_s*)record;
+	ctsvc_sdn_s *sdn = (ctsvc_sdn_s*)record;
 
-	switch(property_id) {
+	switch (property_id) {
 	case CTSVC_PROPERTY_SDN_NAME:
 		CHECK_DIRTY_STR(sdn->name, str, is_dirty);
 		FREEandSTRDUP(sdn->name, str);
@@ -186,8 +181,8 @@ static int __ctsvc_sdn_set_str(contacts_record_h record, unsigned int property_i
 		CHECK_DIRTY_STR(sdn->number, str, is_dirty);
 		FREEandSTRDUP(sdn->number, str);
 		break;
-	default :
-		CTS_ERR("This field(%d) is not supported in value(sdn)", property_id);
+	default:
+		ERR("This field(%d) is not supported in value(sdn)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;

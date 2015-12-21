@@ -1,7 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,6 @@
 #ifndef __TIZEN_SOCIAL_CONTACTS_PERSON_H__
 #define __TIZEN_SOCIAL_CONTACTS_PERSON_H__
 
-#ifndef API
-#define API __attribute__ ((visibility("default")))
-#endif
 
 #ifdef __cplusplus
 extern "C"
@@ -99,7 +96,7 @@ int contacts_person_link_person(int base_person_id, int person_id);
  *
  * @see  contacts_connect()
  */
-int contacts_person_unlink_contact(int person_id, int contact_id, int* unlinked_person_id);
+int contacts_person_unlink_contact(int person_id, int contact_id, int *unlinked_person_id);
 
 /**
  * @brief Resets a person's usage count.

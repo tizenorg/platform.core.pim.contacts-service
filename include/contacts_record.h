@@ -1,7 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,6 @@
 #ifndef __TIZEN_SOCIAL_CONTACTS_RECORD_H__
 #define __TIZEN_SOCIAL_CONTACTS_RECORD_H__
 
-#ifndef API
-#define API __attribute__ ((visibility("default")))
-#endif
 
 #ifdef __cplusplus
 extern "C"
@@ -68,7 +65,7 @@ extern "C"
  *
  * @see contacts_record_destroy()
  */
-int contacts_record_create(const char* view_uri, contacts_record_h* record);
+int contacts_record_create(const char *view_uri, contacts_record_h *record);
 
 /**
  * @brief Destroys a record and releases its all resources.
@@ -108,7 +105,7 @@ int contacts_record_destroy(contacts_record_h record, bool delete_child);
  *
  * @see contacts_record_destroy()
  */
-int contacts_record_clone(contacts_record_h record, contacts_record_h* cloned_record);
+int contacts_record_clone(contacts_record_h record, contacts_record_h *cloned_record);
 
 /**
  * @brief Gets a string from the record handle.
@@ -131,7 +128,7 @@ int contacts_record_clone(contacts_record_h record, contacts_record_h* cloned_re
  * @see contacts_record_get_str_p()
  * @see contacts_record_set_str()
  */
-int contacts_record_get_str(contacts_record_h record, unsigned int property_id, char** value);
+int contacts_record_get_str(contacts_record_h record, unsigned int property_id, char **value);
 
 /**
  * @brief Gets a string pointer from the record handle.
@@ -154,7 +151,7 @@ int contacts_record_get_str(contacts_record_h record, unsigned int property_id, 
  * @see contacts_record_get_str()
  * @see contacts_record_set_str()
  */
-int contacts_record_get_str_p(contacts_record_h record, unsigned int property_id, char** value);
+int contacts_record_get_str_p(contacts_record_h record, unsigned int property_id, char **value);
 
 /**
  * @brief Sets a string to a record.
@@ -175,7 +172,7 @@ int contacts_record_get_str_p(contacts_record_h record, unsigned int property_id
  * @see contacts_record_get_str()
  * @see contacts_record_get_str_p()
  */
-int contacts_record_set_str(contacts_record_h record, unsigned int property_id, const char* value);
+int contacts_record_set_str(contacts_record_h record, unsigned int property_id, const char *value);
 
 /**
  * @brief Gets a record's integer value.
@@ -195,7 +192,7 @@ int contacts_record_set_str(contacts_record_h record, unsigned int property_id, 
  *
  * @see contacts_record_set_int()
  */
-int contacts_record_get_int(contacts_record_h record, unsigned int property_id, int* value);
+int contacts_record_get_int(contacts_record_h record, unsigned int property_id, int *value);
 
 /**
  * @brief Sets an integer value to a record.
@@ -422,7 +419,7 @@ int contacts_record_get_child_record_count(contacts_record_h record, unsigned in
  * @see contacts_record_remove_child_record()
  * @see contacts_record_get_child_record_count()
  */
-int contacts_record_get_child_record_at_p(contacts_record_h record, unsigned int property_id, int index, contacts_record_h* child_record);
+int contacts_record_get_child_record_at_p(contacts_record_h record, unsigned int property_id, int index, contacts_record_h *child_record);
 
 /**
  * @brief Clones a child record list of the given parent record.
@@ -444,7 +441,7 @@ int contacts_record_get_child_record_at_p(contacts_record_h record, unsigned int
  *
  * @see contacts_list_destroy()
  */
-int contacts_record_clone_child_record_list(contacts_record_h record, unsigned int property_id, contacts_list_h* cloned_list);
+int contacts_record_clone_child_record_list(contacts_record_h record, unsigned int property_id, contacts_list_h *cloned_list);
 
 /**
  * @brief Gets URI string from a record.
@@ -461,7 +458,7 @@ int contacts_record_clone_child_record_list(contacts_record_h record, unsigned i
  * @retval  #CONTACTS_ERROR_INVALID_PARAMETER    Invalid parameter
  * @retval  #CONTACTS_ERROR_NOT_SUPPORTED       Not supported
  */
-int contacts_record_get_uri_p(contacts_record_h record, const char** view_uri);
+int contacts_record_get_uri_p(contacts_record_h record, const char **view_uri);
 
 /**
  * @}

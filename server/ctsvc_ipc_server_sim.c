@@ -28,12 +28,12 @@
 
 void ctsvc_ipc_sim_insert_contact(pims_ipc_h ipc, pims_ipc_data_h indata, pims_ipc_data_h *outdata, void *userdata)
 {
-    return;
+	return;
 }
 
 void ctsvc_ipc_sim_update_contact(pims_ipc_h ipc, pims_ipc_data_h indata, pims_ipc_data_h *outdata, void *userdata)
 {
-    return;
+	return;
 }
 
 void ctsvc_ipc_sim_delete_contact(pims_ipc_h ipc, pims_ipc_data_h indata, pims_ipc_data_h *outdata, void *userdata)
