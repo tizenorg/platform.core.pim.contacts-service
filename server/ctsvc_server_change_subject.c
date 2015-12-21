@@ -1,7 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,7 +96,7 @@ void ctsvc_change_subject_add_changed_phone_log_id(contacts_changed_e type, int 
 	char changed_info[30] = {0};
 
 	if (NULL == __phone_log_chanaged_info) {
-		__phone_log_chanaged_info = (char*)calloc(CTSVC_SUBSCRIBE_MAX_LEN, sizeof(char));
+		__phone_log_chanaged_info = calloc(CTSVC_SUBSCRIBE_MAX_LEN, sizeof(char));
 		__phone_log_buf_size = CTSVC_SUBSCRIBE_MAX_LEN;
 		__phone_log_chanaged_info[0] = '\0';
 	}
@@ -104,7 +104,7 @@ void ctsvc_change_subject_add_changed_phone_log_id(contacts_changed_e type, int 
 	info_len = snprintf(changed_info, sizeof(changed_info), "%d:%d,", type, id);
 	cur_len = strlen(__phone_log_chanaged_info);
 	CTS_DBG("%s(info_len : %d), %s(crrent_len : %d), max_len : %u",
-		changed_info, info_len, __phone_log_chanaged_info, cur_len, __phone_log_buf_size);
+			changed_info, info_len, __phone_log_chanaged_info, cur_len, __phone_log_buf_size);
 
 	if (__phone_log_buf_size <= (cur_len + info_len)) {
 		__phone_log_buf_size *= 2;
@@ -123,7 +123,7 @@ void ctsvc_change_subject_add_changed_person_id(contacts_changed_e type, int id)
 	char changed_info[30] = {0};
 
 	if (NULL == __person_changed_info) {
-		__person_changed_info = (char*)calloc(CTSVC_SUBSCRIBE_MAX_LEN, sizeof(char));
+		__person_changed_info = calloc(CTSVC_SUBSCRIBE_MAX_LEN, sizeof(char));
 		__person_buf_size = CTSVC_SUBSCRIBE_MAX_LEN;
 		__person_changed_info[0] = '\0';
 	}
@@ -131,7 +131,7 @@ void ctsvc_change_subject_add_changed_person_id(contacts_changed_e type, int id)
 	info_len = snprintf(changed_info, sizeof(changed_info), "%d:%d,", type, id);
 	cur_len = strlen(__person_changed_info);
 	CTS_DBG("%s(info_len : %d), %s(crrent_len : %d), max_len : %u",
-		changed_info, info_len, __person_changed_info, cur_len, __person_buf_size);
+			changed_info, info_len, __person_changed_info, cur_len, __person_buf_size);
 
 	if (__person_buf_size <= (cur_len + info_len)) {
 		__person_buf_size *= 2;

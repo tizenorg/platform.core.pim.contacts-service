@@ -1,7 +1,7 @@
 #
 # Contacts Service
 #
-# Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
+# Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
 #
 # Contact: Youngjae Shin <yj99.shin@samsung.com>
 #

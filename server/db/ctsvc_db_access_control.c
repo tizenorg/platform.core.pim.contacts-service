@@ -1,7 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ typedef struct {
 	char *smack;
 	int *write_list;
 	int write_list_count;
-}ctsvc_permission_info_s;
+} ctsvc_permission_info_s;
 
 static GList *__thread_list = NULL;
 
@@ -58,7 +58,7 @@ static ctsvc_permission_info_s * __ctsvc_find_access_info(unsigned int thread_id
 {
 	GList *cursor;
 	CTS_VERBOSE("thread id : %08x", thread_id);
-	for (cursor=__thread_list;cursor;cursor = cursor->next) {
+	for (cursor = __thread_list; cursor; cursor = cursor->next) {
 		ctsvc_permission_info_s *info = NULL;
 		info = cursor->data;
 		if (info->thread_id == thread_id)
@@ -70,7 +70,7 @@ static ctsvc_permission_info_s * __ctsvc_find_access_info(unsigned int thread_id
 /*
  * Check the client has read permission of the file(path)
  * success : CONTACTS_ERROR_NONE
- * fail : return negative value
+ * Fail: return negative value
  */
 int ctsvc_have_file_read_permission(const char *path)
 {
@@ -118,7 +118,7 @@ static void __ctsvc_set_permission_info(ctsvc_permission_info_s *info)
 			"SELECT count(addressbook_id) FROM "CTS_TABLE_ADDRESSBOOKS);
 	ret = ctsvc_query_get_first_int_result(query, &count);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB error : ctsvc_query_get_first_int_result() Fail(%d)", ret);
+		CTS_ERR(" ctsvc_query_get_first_int_result() Fail(%d)", ret);
 		return;
 	}
 	info->write_list = calloc(count, sizeof(int));
@@ -129,7 +129,7 @@ static void __ctsvc_set_permission_info(ctsvc_permission_info_s *info)
 			"SELECT addressbook_id, mode, smack_label FROM "CTS_TABLE_ADDRESSBOOKS);
 	ret = ctsvc_query_prepare(query, &stmt);
 	if (NULL == stmt) {
-		CTS_ERR("DB error : ctsvc_query_prepare() Fail(%d)", ret);
+		CTS_ERR("ctsvc_query_prepare() Fail(%d)", ret);
 		return;
 	}
 
@@ -140,7 +140,7 @@ static void __ctsvc_set_permission_info(ctsvc_permission_info_s *info)
 		char *temp = NULL;
 
 		if (1 != ret) {
-			CTS_ERR("DB error : ctsvc_stmt_step() Fail(%d)", ret);
+			CTS_ERR("ctsvc_stmt_step() Fail(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
 			return;
 		}
@@ -149,11 +149,11 @@ static void __ctsvc_set_permission_info(ctsvc_permission_info_s *info)
 		mode = ctsvc_stmt_get_int(stmt, 1);
 		temp = ctsvc_stmt_get_text(stmt, 2);
 
-		if (!smack_enabled) // smack disabled
+		if (!smack_enabled) /* smack disabled */
 			info->write_list[write_index++] = id;
-		else if (NULL == info->ipc) // contacts-service daemon
+		else if (NULL == info->ipc) /* contacts-service daemon */
 			info->write_list[write_index++] = id;
-		else if (info->smack && temp && STRING_EQUAL == strcmp(temp, info->smack)) // owner
+		else if (info->smack && temp && STRING_EQUAL == strcmp(temp, info->smack))/* owner */
 			info->write_list[write_index++] = id;
 		else if (CONTACTS_ADDRESS_BOOK_MODE_NONE == mode)
 			info->write_list[write_index++] = id;
@@ -243,8 +243,8 @@ void ctsvc_reset_all_client_access_info()
 {
 	GList *cursor;
 	ctsvc_mutex_lock(CTS_MUTEX_ACCESS_CONTROL);
-	for (cursor=__thread_list;cursor;cursor=cursor->next) {
-		ctsvc_permission_info_s *info = (ctsvc_permission_info_s *)cursor->data;
+	for (cursor = __thread_list; cursor; cursor = cursor->next) {
+		ctsvc_permission_info_s *info = (ctsvc_permission_info_s*)cursor->data;
 		if (info == NULL) continue;
 		__ctsvc_set_permission_info(info);
 	}
@@ -257,7 +257,7 @@ bool ctsvc_have_permission(pims_ipc_h ipc, int permission)
 	if (have_smack != 1)   /* smack disable */
 		return true;
 
-	if (NULL == ipc) // contacts-service daemon
+	if (NULL == ipc) /* contacts-service daemon */
 		return true;
 
 	if ((CTSVC_PERMISSION_CONTACT_READ & permission) &&
@@ -304,7 +304,7 @@ bool ctsvc_have_ab_write_permission(int addressbook_id)
 		return false;
 	}
 
-	for (i=0;i<find->write_list_count;i++) {
+	for (i = 0; i < find->write_list_count; i++) {
 		if (addressbook_id == find->write_list[i]) {
 			ctsvc_mutex_unlock(CTS_MUTEX_ACCESS_CONTROL);
 			return true;
@@ -375,10 +375,10 @@ int ctsvc_is_owner(int addressbook_id)
 
 	snprintf(query, sizeof(query),
 			"SELECT addressbook_name, smack_label FROM "CTS_TABLE_ADDRESSBOOKS" "
-				"WHERE addressbook_id = %d", addressbook_id);
+			"WHERE addressbook_id = %d", addressbook_id);
 	ret = ctsvc_query_prepare(query, &stmt);
 	if (NULL == stmt) {
-		CTS_ERR("DB error : ctsvc_query_prepare() Fail(%d)", ret);
+		CTS_ERR("ctsvc_query_prepare() Fail(%d)", ret);
 		return ret;
 	}
 

@@ -1,7 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ typedef struct {
 	UChar letter;
 	char start;
 	char end;
-}hiragana_group_letter;
+} hiragana_group_letter;
 
 static hiragana_group_letter hiragana_group[13] = {
 	{0x3042, 0x41, 0x4a}, /* ぁ あ ぃ い ぅ う ぇ え ぉ お */
@@ -57,7 +57,7 @@ static hiragana_group_letter hiragana_group[13] = {
 
 static int __ctsvc_remove_special_char(const char *src, char *dest, int dest_size)
 {
-	int s_pos=0, d_pos=0, char_type, src_size;
+	int s_pos = 0, d_pos = 0, char_type, src_size;
 
 	if (NULL == src) {
 		CTS_ERR("The parameter(src) is NULL");
@@ -73,8 +73,7 @@ static int __ctsvc_remove_special_char(const char *src, char *dest, int dest_siz
 			memcpy(dest+d_pos, src+s_pos, char_type);
 			d_pos += char_type;
 			s_pos += char_type;
-		}
-		else {
+		} else {
 			CTS_ERR("The parameter(src:%s) has invalid character set", src);
 			dest[d_pos] = '\0';
 			return CONTACTS_ERROR_INVALID_PARAMETER;
@@ -188,8 +187,7 @@ static int __ctsvc_normalize_str(const char *src, char **dest, bool is_index)
 			free(tmp_result);
 			return CONTACTS_ERROR_SYSTEM;
 		}
-	}
-	else if (U_FAILURE(status)) {
+	} else if (U_FAILURE(status)) {
 		CTS_ERR("u_strFromUTF8() Fail(%s)", u_errorName(status));
 		free(tmp_result);
 		return CONTACTS_ERROR_SYSTEM;
@@ -220,8 +218,7 @@ static int __ctsvc_normalize_str(const char *src, char **dest, bool is_index)
 			free(tmp_upper);
 			return CONTACTS_ERROR_SYSTEM;
 		}
-	}
-	else if (U_FAILURE(status)) {
+	} else if (U_FAILURE(status)) {
 		CTS_ERR("u_strToUpper() Fail(%s)", u_errorName(status));
 		free(tmp_result);
 		free(tmp_upper);
@@ -256,8 +253,7 @@ static int __ctsvc_normalize_str(const char *src, char **dest, bool is_index)
 			free(result);
 			return CONTACTS_ERROR_SYSTEM;
 		}
-	}
-	else if (U_FAILURE(status)) {
+	} else if (U_FAILURE(status)) {
 		CTS_ERR("unorm_normalize() Fail(%s)", u_errorName(status));
 		free(tmp_result);
 		free(tmp_upper);
@@ -284,22 +280,22 @@ static int __ctsvc_normalize_str(const char *src, char **dest, bool is_index)
 	}
 
 	bool replaced = false;
-	for (i=0,j=0; i<size;i++) {
+	for (i = 0, j = 0; i < size; i++) {
 		if (CTSVC_COMPARE_BETWEEN((UChar)CTSVC_COMBINING_DIACRITICAL_MARKS_START,
-			result[i], (UChar)CTSVC_COMBINING_DIACRITICAL_MARKS_END)) {
+					result[i], (UChar)CTSVC_COMBINING_DIACRITICAL_MARKS_END)) {
 			replaced = true;
-		}
-		else
+		} else {
 			temp_result[j++] = result[i];
+		}
 	}
 
 	if (replaced) {
 		temp_result[j] = 0x0;
 		free(result);
 		result = temp_result;
-	}
-	else
+	} else {
 		free(temp_result);
+	}
 
 	u_strToUTF8(NULL, 0, &size, result, -1, &status);
 	status = U_ZERO_ERROR;
@@ -343,7 +339,7 @@ static int __ctsvc_convert_halfwidth_ascii_and_symbol(const char *src, UChar *de
 	*str_size = size;
 
 	/* full width -> half width */
-	for (i=0;i<size;i++) {
+	for (i = 0; i < size; i++) {
 		/* FF00 ~ FF60: Fullwidth ASCII variants */
 		if (CTSVC_COMPARE_BETWEEN((UChar)0xFF00, dest[i], (UChar)0xFF60)) {
 			int unicode_value1 = 0;
@@ -351,37 +347,24 @@ static int __ctsvc_convert_halfwidth_ascii_and_symbol(const char *src, UChar *de
 			unicode_value1 = 0x0;
 			unicode_value2 = (0xFF & dest[i]) + 0x20;
 			dest[i] = unicode_value1 << 8 | unicode_value2;
-		}
-		/* FFE0~FFE6: Fullwidth symbol variants */
-		else if (CTSVC_COMPARE_BETWEEN((UChar)0xFFE0, dest[i], (UChar)0xFFE6)) {
-			if (dest[i] == (UChar)0xFFE0) {
+		} else if (CTSVC_COMPARE_BETWEEN((UChar)0xFFE0, dest[i], (UChar)0xFFE6)) {
+			/* FFE0~FFE6: Fullwidth symbol variants */
+			if (dest[i] == (UChar)0xFFE0)
 				dest[i] = (UChar)0x00A2;
-			}
-			else if (dest[i] == (UChar)0xFFE1) {
+			else if (dest[i] == (UChar)0xFFE1)
 				dest[i] = (UChar)0x00A3;
-			}
-			else if (dest[i] == (UChar)0xFFE2) {
+			else if (dest[i] == (UChar)0xFFE2)
 				dest[i] = (UChar)0x00AC;
-			}
-			else if (dest[i] == (UChar)0xFFE3) {
+			else if (dest[i] == (UChar)0xFFE3)
 				dest[i] = (UChar)0x00AF;
-			}
-			else if (dest[i] == (UChar)0xFFE4) {
+			else if (dest[i] == (UChar)0xFFE4)
 				dest[i] = (UChar)0x00A6;
-			}
-			else if (dest[i] == (UChar)0xFFE5) {
+			else if (dest[i] == (UChar)0xFFE5)
 				dest[i] = (UChar)0x00A5;
-			}
-			else if (dest[i] == (UChar)0xFFE6) {
+			else if (dest[i] == (UChar)0xFFE6)
 				dest[i] = (UChar)0x20A9;
-			}
-			else {
-
-			}
-		}
-		else {
-
-		}
+			/* else */
+		} /* else */
 
 	}
 
@@ -391,14 +374,13 @@ static int __ctsvc_convert_halfwidth_ascii_and_symbol(const char *src, UChar *de
 
 #define LARGE_BUFFER_SIZE 100
 
-int ctsvc_get_halfwidth_string(const char *src, char** dest, int* dest_size)
+int ctsvc_get_halfwidth_string(const char *src, char **dest, int *dest_size)
 {
 	UChar unicodes[LARGE_BUFFER_SIZE+1];
 	int ustr_size = 0;
 
 	if (CONTACTS_ERROR_NONE != __ctsvc_convert_halfwidth_ascii_and_symbol(src, unicodes, LARGE_BUFFER_SIZE, &ustr_size)) {
-		CTS_ERR("convert to halfwidth Fail! %s ", src);
-
+		CTS_ERR("__ctsvc_convert_halfwidth_ascii_and_symbol() Fail");
 		return CONTACTS_ERROR_SYSTEM;
 	}
 
@@ -450,7 +432,7 @@ static void __ctsvc_convert_japanese_group_letter(char *dest)
 
 	unicode_value = (0xFF & (tmp_result[0]));
 
-	for (i=0; i < 13; i++) {
+	for (i = 0; i < 13; i++) {
 		if (hiragana_group[i].start <= unicode_value
 				&& unicode_value <= hiragana_group[i].end)
 			result[0] = hiragana_group[i].letter;
@@ -463,9 +445,9 @@ static void __ctsvc_convert_japanese_group_letter(char *dest)
 
 static bool __ctsvc_check_range_out_index(const char src[])
 {
-	if (src[0] == 0xe2 && src[1] == 0x80 && src[2] == 0xa6) {
+	if (src[0] == 0xe2 && src[1] == 0x80 && src[2] == 0xa6)
 		return true;
-	}
+
 	return false;
 }
 
@@ -477,9 +459,9 @@ int ctsvc_normalize_index(const char *src, char **dest)
 
 	if (first_str[0] == '\0' || __ctsvc_check_range_out_index(first_str)) {
 		length = ctsvc_check_utf8(src[0]);
-
 		RETVM_IF(length <= 0, CONTACTS_ERROR_INTERNAL, "check_utf8() Fail");
-		memset(first_str,0x00, sizeof(first_str));
+
+		memset(first_str, 0x00, sizeof(first_str));
 		strncpy(first_str, src, length);
 		if (length != strlen(first_str)) {
 			CTS_ERR("length : %d, first_str : %s, strlne : %d", length, first_str, strlen(first_str));
@@ -494,9 +476,8 @@ int ctsvc_normalize_index(const char *src, char **dest)
 		(*dest)[length] = '\0';
 	}
 
-	if (ret == CTSVC_LANG_JAPANESE) {
+	if (ret == CTSVC_LANG_JAPANESE)
 		__ctsvc_convert_japanese_group_letter(*dest);
-	}
 
 	return ret;
 }

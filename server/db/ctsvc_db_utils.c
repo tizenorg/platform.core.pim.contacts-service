@@ -1,7 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ static __thread int transaction_count = 0;
 static __thread int transaction_ver = 0;
 static __thread bool version_up = false;
 
-struct image_transform{
+struct image_transform {
 	int ret;
 	uint64_t size;
 	void *buffer;
@@ -99,7 +99,7 @@ int ctsvc_end_trans(bool is_success)
 	char query[CTS_SQL_MIN_LEN] = {0};
 
 	transaction_count--;
-	INFO("%s, transaction_count : %d", is_success?"True": "False",  transaction_count);
+	INFO("%s, transaction_count : %d", is_success ? "True" : "False",  transaction_count);
 
 	if (0 != transaction_count) {
 		CTS_DBG("contact transaction_count : %d.", transaction_count);
@@ -119,26 +119,30 @@ int ctsvc_end_trans(bool is_success)
 		snprintf(query, sizeof(query), "UPDATE %s SET ver = %d",
 				CTS_TABLE_VERSION, transaction_ver);
 		ret = ctsvc_query_exec(query);
-		WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_query_exec(version up) Fail(%d)", ret);
+		if (CONTACTS_ERROR_NONE != ret)
+			CTS_ERR("ctsvc_query_exec(version up) Fail(%d)", ret);
 	}
 
 	INFO("start commit");
 	progress = 100000;
 	ret = ctsvc_query_exec("COMMIT TRANSACTION");
-	while (CONTACTS_ERROR_DB == ret && progress<CTS_COMMIT_TRY_MAX) {
+	while (CONTACTS_ERROR_DB == ret && progress < CTS_COMMIT_TRY_MAX) {
 		usleep(progress);
 		ret = ctsvc_query_exec("COMMIT TRANSACTION");
 		progress *= 2;
 	}
-	INFO("%s", (CONTACTS_ERROR_NONE == ret)?"commit": "rollback");
+	INFO("%s", (CONTACTS_ERROR_NONE == ret) ? "commit" : "rollback");
 
 	if (CONTACTS_ERROR_NONE != ret) {
 		int tmp_ret;
 		CTS_ERR("ctsvc_query_exec() Fail(%d)", ret);
 		ctsvc_nofitication_cancel();
 		ctsvc_change_subject_clear_changed_info();
+
 		tmp_ret = ctsvc_query_exec("ROLLBACK TRANSACTION");
-		WARN_IF(CONTACTS_ERROR_NONE != tmp_ret, "ctsvc_query_exec(ROLLBACK) Fail(%d)", tmp_ret);
+		if (CONTACTS_ERROR_NONE != tmp_ret)
+			ERR("ctsvc_query_exec(ROLLBACK) Fail(%d)", tmp_ret);
+
 		return ret;
 	}
 
@@ -183,7 +187,8 @@ const char* ctsvc_get_sort_column(void)
 		return "reverse_display_name_language, reverse_sortkey";
 }
 
-void ctsvc_utils_make_image_file_name(int parent_id, int id, char *src_img, char *dest, int dest_size)
+void ctsvc_utils_make_image_file_name(int parent_id, int id, char *src_img, char *dest,
+		int dest_size)
 {
 	char *ext;
 	char *temp;
@@ -211,13 +216,14 @@ void ctsvc_utils_make_image_file_name(int parent_id, int id, char *src_img, char
 	free(lower_ext);
 }
 
-static inline bool ctsvc_check_available_image_space(void) {
+static inline bool ctsvc_check_available_image_space(void)
+{
 	int ret;
 	struct statfs buf;
 	long long size;
-	ret = statfs(CTSVC_NOTI_IMG_REPERTORY, &buf);
 
-	RETVM_IF(ret!=0, false, "statfs Fail(%d)", ret);
+	ret = statfs(CTSVC_NOTI_IMG_REPERTORY, &buf);
+	RETVM_IF(ret != 0, false, "statfs() Fail(%d)", ret);
 
 	size = (long long)buf.f_bavail * (buf.f_bsize);
 
@@ -250,7 +256,7 @@ static image_util_rotation_e _ctsvc_image_get_rotation_info(const char *path)
 	if (ed)
 		exif_data_unref(ed);
 
-	switch(orientation) {
+	switch (orientation) {
 	case 1: /* Top-left */
 		rotation = IMAGE_UTIL_ROTATION_NONE;
 		break;
@@ -284,7 +290,7 @@ typedef struct {
 	const char *src;
 	const char *dest;
 	int ret;
-}image_info;
+} image_info;
 
 static int _ctsvc_image_get_mimetype(image_util_colorspace_e colorspace,
 		int *p_mimetype)
@@ -427,7 +433,7 @@ static media_packet_h _ctsvc_image_create_media_packet(media_format_h fmt,
 	return packet;
 }
 
-static void _ctsvc_image_transform_completed_cb(media_packet_h *dst,
+static void _image_transform_completed_cb(media_packet_h *dst,
 		image_util_error_e error, void *user_data)
 {
 	int ret;
@@ -476,8 +482,7 @@ static void _ctsvc_image_transform_completed_cb(media_packet_h *dst,
 		memcpy(info->buffer, buffer, (int)size);
 		info->size = size;
 		info->ret = CONTACTS_ERROR_NONE;
-	}
-	else {
+	} else {
 		CTS_ERR("transform_run() Fail(%d)", error);
 		info->ret = CONTACTS_ERROR_SYSTEM;
 	}
@@ -506,7 +511,7 @@ static int _ctsvc_image_util_transform_run(transformation_h transform,
 	g_mutex_init(&info->mutex);
 
 	g_mutex_lock(&info->mutex);
-	image_util_transform_run(transform, packet, _ctsvc_image_transform_completed_cb, info);
+	image_util_transform_run(transform, packet, _image_transform_completed_cb, info);
 
 	end_time = g_get_monotonic_time() + CTS_IMAGE_TRANSFORM_WAIT_TIME;
 	if (!g_cond_wait_until(&info->cond, &info->mutex, end_time)) {
@@ -603,8 +608,8 @@ static bool _ctsvc_image_util_supported_jpeg_colorspace_cb(
 		return true;
 	}
 
-	ret = image_util_decode_jpeg(info->src, colorspace, (unsigned char **)&buffer, &width,
-			&height, (unsigned int *)&size);
+	ret = image_util_decode_jpeg(info->src, colorspace, (unsigned char **)&buffer,
+			&width, &height, (unsigned int *)&size);
 	if (IMAGE_UTIL_ERROR_NONE != ret) {
 		info->ret = CONTACTS_ERROR_SYSTEM;
 		return true;
@@ -659,11 +664,10 @@ static bool _ctsvc_image_util_supported_jpeg_colorspace_cb(
 		media_packet_h packet;
 
 		/* set resize */
-		if (width>height) {
+		if (width > height) {
 			resized_width = CTS_IMAGE_MAX_SIZE;
 			resized_height = height * CTS_IMAGE_MAX_SIZE / width;
-		}
-		else {
+		} else {
 			resized_height = CTS_IMAGE_MAX_SIZE;
 			resized_width = width * CTS_IMAGE_MAX_SIZE / height;
 		}
@@ -778,14 +782,17 @@ int ctsvc_utils_copy_image(const char *dir, const char *src, const char *file)
 		return CONTACTS_ERROR_FILE_NO_SPACE;
 
 	ret = _ctsvc_image_encode(src, dest);
-	if (CONTACTS_ERROR_NONE == ret) {
+	if (CONTACTS_ERROR_NONE == ret)
 		return ret;
-	}
 	else
 		CTS_ERR("_ctsvc_image_encode Fail(%d)", ret);
 
 	src_fd = open(src, O_RDONLY);
-	RETVM_IF(src_fd < 0, CONTACTS_ERROR_SYSTEM, "System : Open(src:%s) Fail(%d)", src, errno);
+	if (src_fd < 0) {
+		CTS_ERR("System : Open(%s) Fail(%d)", src, errno);
+		return CONTACTS_ERROR_SYSTEM;
+	}
+
 	dest_fd = open(dest, O_WRONLY|O_CREAT|O_TRUNC, 0660);
 	if (dest_fd < 0) {
 		CTS_ERR("Open Fail(%d)", errno);
@@ -796,9 +803,9 @@ int ctsvc_utils_copy_image(const char *dir, const char *src, const char *file)
 	while (0 < (size = read(src_fd, buf, CTSVC_COPY_SIZE_MAX))) {
 		ret = write(dest_fd, buf, size);
 		if (ret <= 0) {
-			if (EINTR == errno)
+			if (EINTR == errno) {
 				continue;
-			else {
+			} else {
 				CTS_ERR("write() Fail(%d)", errno);
 				if (ENOSPC == errno)
 					ret = CONTACTS_ERROR_FILE_NO_SPACE; /* No space */
@@ -813,13 +820,13 @@ int ctsvc_utils_copy_image(const char *dir, const char *src, const char *file)
 	}
 
 	ret = fchown(dest_fd, getuid(), CTS_SECURITY_FILE_GROUP);
-	if (0 != ret) {
+	if (0 != ret)
 		CTS_ERR("fchown() Fail(%d)", ret);
-	}
+
 	ret = fchmod(dest_fd, CTS_SECURITY_IMAGE_PERMISSION);
-	if (0 != ret) {
+	if (0 != ret)
 		CTS_ERR("fchmod() Fail(%d)", ret);
-	}
+
 	close(src_fd);
 	close(dest_fd);
 
@@ -847,17 +854,23 @@ int ctsvc_get_next_ver(void)
 	return (1 + version);
 }
 
-int ctsvc_get_current_version(int* out_current_version) {
+int ctsvc_get_current_version(int *out_current_version)
+{
 	if (transaction_count <= 0) {
 		int ret;
 		int version = 0;
 		const char *query = "SELECT ver FROM "CTS_TABLE_VERSION;
+
 		ret = ctsvc_query_get_first_int_result(query, &version);
-		RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_query_get_first_int_result() Fail(%d)", ret);
+		if (CONTACTS_ERROR_NONE != ret) {
+			CTS_ERR("ctsvc_query_get_first_int_result() Fail(%d)", ret);
+			return ret;
+		}
+
 		*out_current_version = version;
-	}
-	else
+	} else {
 		*out_current_version = transaction_ver;
+	}
 	return CONTACTS_ERROR_NONE;
 }
 
@@ -878,8 +891,7 @@ int SAFE_SNPRINTF(char **buf, int *buf_size, int len, const char *src)
 	if (strlen(src) + 1 < remain) {
 		temp_len = snprintf((*buf)+len, remain, "%s", src);
 		return temp_len;
-	}
-	else {
+	} else {
 		char *temp;
 		while (1) {
 			temp = realloc(*buf, *buf_size*2);

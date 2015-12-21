@@ -1,7 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ int ctsvc_contact_add_image_file(int parent_id, int img_id,
 		char *src_img, char *dest_name, int dest_size);
 int ctsvc_contact_update_image_file(int parent_id, int img_id,
 		char *src_img, char *dest_name, int dest_size);
-int ctsvc_contact_delete_image_file_with_path(const unsigned char* image_path);
+int ctsvc_contact_delete_image_file_with_path(const unsigned char *image_path);
 
 void ctsvc_contact_make_display_name(ctsvc_contact_s *contact);
 int ctsvc_contact_make_search_name(ctsvc_contact_s *contact, char **search_name);
@@ -37,7 +37,7 @@ int ctsvc_db_contact_update_changed_time(int contact_id);
 int ctsvc_contact_update_display_name(int contact_id, contacts_display_name_source_type_e changed_record_type);
 
 int ctsvc_db_contact_delete(int contact_id);
-int ctsvc_db_contact_get(int id, contacts_record_h* out_record);
+int ctsvc_db_contact_get(int id, contacts_record_h *out_record);
 
 int ctsvc_get_data_info_name(cts_stmt stmt, contacts_list_h name_list);
 int ctsvc_get_data_info_event(cts_stmt stmt, contacts_list_h list);

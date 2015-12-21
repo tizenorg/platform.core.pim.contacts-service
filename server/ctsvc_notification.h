@@ -1,7 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ void ctsvc_notification_send(void);
 void ctsvc_nofitication_cancel(void);
 void ctsvc_noti_publish_socket_initialize(void);
 
-void ctsvc_db_data_delete_callback(sqlite3_context * context,
-		int argc, sqlite3_value ** argv);
+void ctsvc_db_data_delete_callback(sqlite3_context  *context,
+		int argc, sqlite3_value **argv);
 
 #endif /* __CTSVC_NOTIFICATION_H__ */

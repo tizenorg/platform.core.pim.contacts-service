@@ -1,11 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
- *
- * Contact: Dohyung Jin <dh.jin@samsung.com>
- *                 Jongwon Lee <gogosing.lee@samsung.com>
- *                 Donghee Ye <donghee.ye@samsung.com>
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +38,7 @@ API int contacts_sim_get_initialization_status(bool *completed)
 	int ret;
 
 	RETVM_IF(completed == NULL, CONTACTS_ERROR_INVALID_PARAMETER,
-					"parameter is NULL");
+			"parameter is NULL");
 	ctsvc_mutex_lock(CTS_MUTEX_SOCKET_FD);
 	ret = ctsvc_request_sim_get_initialization_status(0, completed);
 	ctsvc_mutex_unlock(CTS_MUTEX_SOCKET_FD);

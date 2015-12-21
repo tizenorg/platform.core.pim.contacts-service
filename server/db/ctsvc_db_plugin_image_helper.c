@@ -1,7 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ int ctsvc_db_image_get_value_from_stmt(cts_stmt stmt, contacts_record_h *record,
 	char *temp;
 	ctsvc_image_s *image;
 
-	ret = contacts_record_create(_contacts_image._uri, (contacts_record_h *)&image);
+	ret = contacts_record_create(_contacts_image._uri, (contacts_record_h*)&image);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "contacts_record_create Fail(%d)", ret);
 
 	image->id = ctsvc_stmt_get_int(stmt, start_count++);
@@ -85,14 +85,14 @@ int ctsvc_db_image_insert(contacts_record_h record, int contact_id, bool is_my_p
 	cts_stmt stmt = NULL;
 	char query[CTS_SQL_MAX_LEN] = {0};
 	char image_path[CTSVC_IMG_FULL_PATH_SIZE_MAX] = {0};
-	ctsvc_image_s *image = (ctsvc_image_s *)record;
+	ctsvc_image_s *image = (ctsvc_image_s*)record;
 
 	/* These check should be done in client side */
 	RETV_IF(NULL == image->path, CONTACTS_ERROR_NONE);
 	RETVM_IF(contact_id <= 0, CONTACTS_ERROR_INVALID_PARAMETER,
-				"Invalid parameter : contact_id(%d) is mandatory field to insert image record", image->contact_id);
+			"Invalid parameter : contact_id(%d) is mandatory field to insert image record", image->contact_id);
 	RETVM_IF(0 < image->id, CONTACTS_ERROR_INVALID_PARAMETER,
-				"Invalid parameter : id(%d), This record is already inserted", image->id);
+			"Invalid parameter : id(%d), This record is already inserted", image->id);
 
 	ret = ctsvc_have_file_read_permission(image->path);
 	RETVM_IF(ret != CONTACTS_ERROR_NONE, ret, "ctsvc_have_file_read_permission fail(%d)", ret);
@@ -112,13 +112,13 @@ int ctsvc_db_image_insert(contacts_record_h record, int contact_id, bool is_my_p
 			image_id, contact_id, is_my_profile, CTSVC_DATA_IMAGE, image->is_default, image->is_default, image->type);
 
 	ret = ctsvc_query_prepare(query, &stmt);
-	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
+	RETVM_IF(NULL == stmt, ret, "ctsvc_query_prepare() Fail(%d)", ret);
 
 	__ctsvc_image_bind_stmt(stmt, image, 1);
 
 	ret = ctsvc_stmt_step(stmt);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB error : ctsvc_stmt_step() Fail(%d)", ret);
+		CTS_ERR("ctsvc_stmt_step() Fail(%d)", ret);
 		ctsvc_stmt_finalize(stmt);
 		return ret;
 	}
@@ -128,7 +128,7 @@ int ctsvc_db_image_insert(contacts_record_h record, int contact_id, bool is_my_p
 		*id = image_id;
 	ctsvc_stmt_finalize(stmt);
 
-	if (ctsvc_record_check_property_flag((ctsvc_record_s *)record, _contacts_image.is_default, CTSVC_PROPERTY_FLAG_DIRTY)) {
+	if (ctsvc_record_check_property_flag((ctsvc_record_s*)record, _contacts_image.is_default, CTSVC_PROPERTY_FLAG_DIRTY)) {
 		if (image->is_default)
 			__ctsvc_db_image_reset_default(image_id, contact_id);
 	}
@@ -143,7 +143,7 @@ int ctsvc_db_image_update(contacts_record_h record, int contact_id, bool is_my_p
 {
 	int id;
 	int ret = CONTACTS_ERROR_NONE;
-	char* set = NULL;
+	char *set = NULL;
 	GSList *bind_text = NULL;
 	GSList *cursor = NULL;
 	ctsvc_image_s *image = (ctsvc_image_s*)record;
@@ -157,7 +157,7 @@ int ctsvc_db_image_update(contacts_record_h record, int contact_id, bool is_my_p
 	ret = ctsvc_query_get_first_int_result(query, &id);
 	RETV_IF(ret != CONTACTS_ERROR_NONE, ret);
 
-	if (ctsvc_record_check_property_flag((ctsvc_record_s *)record, _contacts_image.path, CTSVC_PROPERTY_FLAG_DIRTY)) {
+	if (ctsvc_record_check_property_flag((ctsvc_record_s*)record, _contacts_image.path, CTSVC_PROPERTY_FLAG_DIRTY)) {
 		char image_path[CTSVC_IMG_FULL_PATH_SIZE_MAX] = {0};
 		if (image->path) {
 			ret = ctsvc_have_file_read_permission(image->path);
@@ -176,7 +176,7 @@ int ctsvc_db_image_update(contacts_record_h record, int contact_id, bool is_my_p
 		}
 	}
 
-	if (ctsvc_record_check_property_flag((ctsvc_record_s *)record, _contacts_image.is_default, CTSVC_PROPERTY_FLAG_DIRTY)) {
+	if (ctsvc_record_check_property_flag((ctsvc_record_s*)record, _contacts_image.is_default, CTSVC_PROPERTY_FLAG_DIRTY)) {
 		if (image->is_default)
 			__ctsvc_db_image_reset_default(image->id, contact_id);
 	}
@@ -188,10 +188,10 @@ int ctsvc_db_image_update(contacts_record_h record, int contact_id, bool is_my_p
 			ctsvc_set_image_noti();
 	} while (0);
 
-	CTSVC_RECORD_RESET_PROPERTY_FLAGS((ctsvc_record_s *)record);
+	CTSVC_RECORD_RESET_PROPERTY_FLAGS((ctsvc_record_s*)record);
 	CONTACTS_FREE(set);
 	if (bind_text) {
-		for (cursor=bind_text;cursor;cursor=cursor->next)
+		for (cursor = bind_text; cursor; cursor = cursor->next)
 			CONTACTS_FREE(cursor->data);
 		g_slist_free(bind_text);
 	}
@@ -219,10 +219,10 @@ int ctsvc_db_image_delete(int id, bool is_my_profile)
  * Whenever deleting image recode in data table, this funcion will be called
  * in order to delete the image file
  */
-void ctsvc_db_image_delete_callback(sqlite3_context *context, int argc, sqlite3_value ** argv)
+void ctsvc_db_image_delete_callback(sqlite3_context *context, int argc, sqlite3_value **argv)
 {
 	int ret;
-	const unsigned char* image_path;
+	const unsigned char *image_path;
 
 	if (1 < argc) {
 		sqlite3_result_null(context);
@@ -231,8 +231,8 @@ void ctsvc_db_image_delete_callback(sqlite3_context *context, int argc, sqlite3_
 	image_path = sqlite3_value_text(argv[0]);
 
 	ret = ctsvc_contact_delete_image_file_with_path(image_path);
-	WARN_IF (CONTACTS_ERROR_NONE != ret && CONTACTS_ERROR_NO_DATA != ret,
-			"ctsvc_contact_delete_image_file_with_path Fail(%d)", ret);
+	WARN_IF(CONTACTS_ERROR_NONE != ret && CONTACTS_ERROR_NO_DATA != ret,
+			"ctsvc_contact_delete_image_file_with_path() Fail(%d)", ret);
 
 	return;
 }

@@ -1,8 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
- *
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,8 +69,7 @@ void ctsvc_socket_final(void)
 		CTS_DBG("socket ref count : %d", __ctsvc_conn_refcnt);
 		__ctsvc_conn_refcnt--;
 		return;
-	}
-	else if (__ctsvc_conn_refcnt < 1) {
+	} else if (__ctsvc_conn_refcnt < 1) {
 		CTS_DBG("Please call connection API. socket ref count : %d", __ctsvc_conn_refcnt);
 		return;
 	}
@@ -83,7 +81,7 @@ void ctsvc_socket_final(void)
 
 static inline int __ctsvc_safe_write(int fd, const char *buf, int buf_size)
 {
-	int ret, writed=0;
+	int ret, writed = 0;
 	while (buf_size) {
 		ret = write(fd, buf+writed, buf_size);
 		if (-1 == ret) {
@@ -100,7 +98,7 @@ static inline int __ctsvc_safe_write(int fd, const char *buf, int buf_size)
 
 static inline int __ctsvc_safe_read(int fd, char *buf, int buf_size)
 {
-	int ret, read_size=0;
+	int ret, read_size = 0;
 	while (buf_size) {
 		ret = read(fd, buf+read_size, buf_size);
 		if (-1 == ret) {
@@ -127,7 +125,7 @@ static int __ctsvc_socket_handle_return(int fd, ctsvc_socket_msg_s *msg)
 			"Unknown Type(%d), ret=%d, attach_num= %d,"
 			"attach1 = %d, attach2 = %d, attach3 = %d, attach4 = %d",
 			msg->type, msg->val, msg->attach_num,
-			msg->attach_sizes[0],msg->attach_sizes[1],msg->attach_sizes[2],
+			msg->attach_sizes[0], msg->attach_sizes[1], msg->attach_sizes[2],
 			msg->attach_sizes[3]);
 
 	RETVM_IF(CTSVC_SOCKET_MSG_REQUEST_MAX_ATTACH < msg->attach_num, CONTACTS_ERROR_IPC,
@@ -151,8 +149,7 @@ static void __ctsvc_remove_invalid_msg(int fd, int size)
 					return;
 			}
 			size -= ret;
-		}
-		else {
+		} else {
 			ret = read(fd, dummy, size);
 			if (-1 == ret) {
 				if (EINTR == errno)
@@ -189,7 +186,7 @@ int ctsvc_request_sim_import(int sim_slot_no)
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "__ctsvc_socket_handle_return() Fail(%d)", ret);
 	CTS_DBG("attach_num = %d", msg.attach_num);
 
-	for (i=0;i<msg.attach_num;i++)
+	for (i = 0; i < msg.attach_num; i++)
 		__ctsvc_remove_invalid_msg(__ctsvc_sockfd, msg.attach_sizes[i]);
 
 	return msg.val;
@@ -223,7 +220,7 @@ int ctsvc_request_sim_get_initialization_status(int sim_slot_no, bool *completed
 	ret = __ctsvc_safe_read(__ctsvc_sockfd, dest, msg.attach_sizes[0]);
 	RETVM_IF(-1 == ret, CONTACTS_ERROR_IPC, "__ctsvc_safe_read() Fail(errno = %d)", errno);
 
-	if (atoi(dest) ==0)
+	if (atoi(dest) == 0)
 		*completed = false;
 	else
 		*completed = true;

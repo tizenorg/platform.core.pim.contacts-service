@@ -1,7 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,9 +64,9 @@ static int __ctsvc_server_find_person_id_of_phonelog(sqlite3 *__db, char *normal
 
 	ret = sqlite3_prepare_v2(__db, query, sizeof(query), &stmt, NULL);
 	if (stmt == NULL) {
-		CTS_ERR("sqlite3_prepare_v2 fail(%d)", ret);
+		CTS_ERR("sqlite3_prepare_v2 Fail(%d)", ret);
 		if (bind_text) {
-			for (cursor=bind_text;cursor;cursor=cursor->next,i++)
+			for (cursor = bind_text; cursor; cursor = cursor->next, i++)
 				free(cursor->data);
 			g_slist_free(bind_text);
 		}
@@ -74,7 +74,7 @@ static int __ctsvc_server_find_person_id_of_phonelog(sqlite3 *__db, char *normal
 	}
 
 	if (bind_text) {
-		for (cursor=bind_text,i=1;cursor;cursor=cursor->next,i++) {
+		for (cursor = bind_text, i = 1; cursor; cursor = cursor->next, i++) {
 			const char *text = cursor->data;
 			if (text && *text)
 				sqlite3_bind_text(stmt, i, text, strlen(text), SQLITE_STATIC);
@@ -84,8 +84,8 @@ static int __ctsvc_server_find_person_id_of_phonelog(sqlite3 *__db, char *normal
 	while ((ret = sqlite3_step(stmt))) {
 		id = sqlite3_column_int(stmt, 0);
 		number_type = sqlite3_column_int(stmt, 1);
-		if (find_person_id <= 0 && id > 0) {
-			find_person_id = id;	/* find first match person_id */
+		if (find_person_id <= 0 && 0 < id) {
+			find_person_id = id;   /* find first match person_id */
 			*find_number_type = number_type;
 			if (person_id <= 0)
 				break;
@@ -100,7 +100,7 @@ static int __ctsvc_server_find_person_id_of_phonelog(sqlite3 *__db, char *normal
 	sqlite3_finalize(stmt);
 
 	if (bind_text) {
-		for (cursor=bind_text;cursor;cursor=cursor->next,i++)
+		for (cursor = bind_text; cursor; cursor = cursor->next, i++)
 			free(cursor->data);
 		g_slist_free(bind_text);
 	}

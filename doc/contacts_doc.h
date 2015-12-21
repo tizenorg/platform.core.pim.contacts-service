@@ -450,7 +450,7 @@
  * int i = 0;
  * contacts_db_get_record(_contacts_contact._uri, contact_id, &contact);
  * contacts_record_get_child_record_count(contact, _contacts_contact.address, &address_num);
- * for (i=0; i<address_num; i++) {
+ * for (i = 0; i < address_num; i++) {
  * 	contacts_record_h address = NULL;
  * 	contacts_record_get_child_record_at_p(contact, _contacts_contact.address, i, &address);
  * 	contacts_record_set_str(address, _contacts_address.country, "Korea");

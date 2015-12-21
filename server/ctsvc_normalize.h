@@ -1,7 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,6 @@
 int ctsvc_normalize_str(const char *src, char **dest);
 int ctsvc_collation_str(char *src, char **dest);
 int ctsvc_normalize_index(const char *src, char **dest);
-int ctsvc_get_halfwidth_string(const char *src, char** dest, int* dest_size);
+int ctsvc_get_halfwidth_string(const char *src, char **dest, int *dest_size);
 
-#endif /*  __CTSVC_NORMALIZE_H__ */
+#endif /* __CTSVC_NORMALIZE_H__ */

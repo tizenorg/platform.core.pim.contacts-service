@@ -31,7 +31,7 @@
  * unmarshal : cal_common_s 는 먼저 marshal 하여, view_uri 만 넘겨준 이후,
  *              각 plug in에서 cal_common_s를 제외 한 사항에 대하여 unmarshal
  */
-typedef int (*ctsvc_ipc_unmarshal_record_cb)(const pims_ipc_data_h ipc_data, const char* view_uri, contacts_record_h precord);
+typedef int (*ctsvc_ipc_unmarshal_record_cb)(const pims_ipc_data_h ipc_data, const char *view_uri, contacts_record_h precord);
 typedef int (*ctsvc_ipc_marshal_record_cb)(const contacts_record_h record, pims_ipc_data_h ipc_data);
 
 typedef struct {
@@ -39,7 +39,7 @@ typedef struct {
     ctsvc_ipc_marshal_record_cb marshal_record;
 } ctsvc_ipc_marshal_record_plugin_cb_s;
 
-int ctsvc_ipc_unmarshal_record(const pims_ipc_data_h ipc_data, contacts_record_h* precord);
+int ctsvc_ipc_unmarshal_record(const pims_ipc_data_h ipc_data, contacts_record_h *precord);
 int ctsvc_ipc_marshal_record(const contacts_record_h record, pims_ipc_data_h ipc_data);
 
 int ctsvc_ipc_marshal_handle(const contacts_h contact, pims_ipc_data_h ipc_data);
@@ -49,20 +49,20 @@ int ctsvc_ipc_unmarshal_handle(const pims_ipc_data_h ipc_data, contacts_h *pcont
  * string
  * char의 경우 NULL 설정의 이슈로 인하여, [int:string length]+[char*] 로 넘길 수 있도록 설정..
  */
-int ctsvc_ipc_unmarshal_string(const pims_ipc_data_h ipc_data, char** ppbufchar);
+int ctsvc_ipc_unmarshal_string(const pims_ipc_data_h ipc_data, char **ppbufchar);
 int ctsvc_ipc_unmarshal_bool(const pims_ipc_data_h data, bool *pout);
 int ctsvc_ipc_unmarshal_int(const pims_ipc_data_h data, int *pout);
 int ctsvc_ipc_unmarshal_unsigned_int(const pims_ipc_data_h data, unsigned int *pout);
-int ctsvc_ipc_unmarshal_record_common(const pims_ipc_data_h ipc_data, ctsvc_record_s* common);
+int ctsvc_ipc_unmarshal_record_common(const pims_ipc_data_h ipc_data, ctsvc_record_s *common);
 
 /*
  * NULL 이슈로 ctsvc_ipc_unmarshal_string / ctsvc_ipc_marshal_string 는 pair 를 이루어야함.
  */
-int ctsvc_ipc_marshal_string(const char* bufchar, pims_ipc_data_h ipc_data);
+int ctsvc_ipc_marshal_string(const char *bufchar, pims_ipc_data_h ipc_data);
 int ctsvc_ipc_marshal_bool(const bool in, pims_ipc_data_h ipc_data);
 int ctsvc_ipc_marshal_int(const int in, pims_ipc_data_h ipc_data);
 int ctsvc_ipc_marshal_unsigned_int(const unsigned int in, pims_ipc_data_h ipc_data);
-int ctsvc_ipc_marshal_record_common(const ctsvc_record_s* common, pims_ipc_data_h ipc_data);
+int ctsvc_ipc_marshal_record_common(const ctsvc_record_s *common, pims_ipc_data_h ipc_data);
 
 /*
  * filter, query
@@ -73,7 +73,7 @@ int ctsvc_ipc_marshal_record_common(const ctsvc_record_s* common, pims_ipc_data_
 int ctsvc_ipc_unmarshal_query(const pims_ipc_data_h ipc_data, contacts_query_h *query);
 int ctsvc_ipc_marshal_query(const contacts_query_h query, pims_ipc_data_h ipc_data);
 int ctsvc_ipc_unmarshal_list(const pims_ipc_data_h ipc_data, contacts_list_h *list);
-int ctsvc_ipc_unmarshal_child_list(const pims_ipc_data_h ipc_data, contacts_list_h* list);
+int ctsvc_ipc_unmarshal_child_list(const pims_ipc_data_h ipc_data, contacts_list_h *list);
 int ctsvc_ipc_marshal_list(const contacts_list_h list, pims_ipc_data_h ipc_data);
 
 #endif /* __ctsvc_ipc_marshal__ */

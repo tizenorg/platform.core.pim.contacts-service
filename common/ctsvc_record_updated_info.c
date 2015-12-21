@@ -1,7 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@
 #include "ctsvc_record.h"
 #include "ctsvc_view.h"
 
-static int __ctsvc_updated_info_create(contacts_record_h* out_record);
+static int __ctsvc_updated_info_create(contacts_record_h *out_record);
 static int __ctsvc_updated_info_destroy(contacts_record_h record, bool delete_child);
 static int __ctsvc_updated_info_clone(contacts_record_h record, contacts_record_h *out_record);
 static int __ctsvc_updated_info_get_int(contacts_record_h record, unsigned int property_id, int *out);
@@ -52,12 +52,11 @@ ctsvc_record_plugin_cb_s updated_info_plugin_cbs = {
 	.clone_child_record_list = NULL,
 };
 
-static int __ctsvc_updated_info_create(contacts_record_h* out_record)
+static int __ctsvc_updated_info_create(contacts_record_h *out_record)
 {
 	ctsvc_updated_info_s *updated_info;
-	updated_info = (ctsvc_updated_info_s*)calloc(1, sizeof(ctsvc_updated_info_s));
-	RETVM_IF(NULL == updated_info, CONTACTS_ERROR_OUT_OF_MEMORY,
-			"Out of memory calloc is Fail");
+	updated_info = calloc(1, sizeof(ctsvc_updated_info_s));
+	RETVM_IF(NULL == updated_info, CONTACTS_ERROR_OUT_OF_MEMORY, "calloc() is Fail");
 
 	*out_record = (contacts_record_h)updated_info;
 	return CONTACTS_ERROR_NONE;
@@ -65,7 +64,7 @@ static int __ctsvc_updated_info_create(contacts_record_h* out_record)
 
 static int __ctsvc_updated_info_destroy(contacts_record_h record, bool delete_child)
 {
-	ctsvc_updated_info_s* updated_info = (ctsvc_updated_info_s*)record;
+	ctsvc_updated_info_s *updated_info = (ctsvc_updated_info_s*)record;
 	updated_info->base.plugin_cbs = NULL; /* help to find double destroy bug (refer to the contacts_record_destroy) */
 	free(updated_info->base.properties_flags);
 	free(updated_info);
@@ -75,13 +74,13 @@ static int __ctsvc_updated_info_destroy(contacts_record_h record, bool delete_ch
 
 static int __ctsvc_updated_info_clone(contacts_record_h record, contacts_record_h *out_record)
 {
-    ctsvc_updated_info_s *out_data = NULL;
-    ctsvc_updated_info_s *src_data = NULL;
+	ctsvc_updated_info_s *out_data = NULL;
+	ctsvc_updated_info_s *src_data = NULL;
 
-    src_data = (ctsvc_updated_info_s*)record;
-    out_data = calloc(1, sizeof(ctsvc_updated_info_s));
-    RETVM_IF(NULL == out_data, CONTACTS_ERROR_OUT_OF_MEMORY,
-			 "Out of memeory : calloc(ctsvc_updated_info_s) Fail(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
+	src_data = (ctsvc_updated_info_s*)record;
+	out_data = calloc(1, sizeof(ctsvc_updated_info_s));
+	RETVM_IF(NULL == out_data, CONTACTS_ERROR_OUT_OF_MEMORY,
+			"Out of memeory : calloc(ctsvc_updated_info_s) Fail(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
 
 	out_data->id = src_data->id;
 	out_data->changed_type = src_data->changed_type;
@@ -103,10 +102,10 @@ static int __ctsvc_updated_info_clone(contacts_record_h record, contacts_record_
 
 static int __ctsvc_updated_info_get_int(contacts_record_h record, unsigned int property_id, int *out)
 {
-	ctsvc_updated_info_s* updated_info = (ctsvc_updated_info_s*)record;
+	ctsvc_updated_info_s *updated_info = (ctsvc_updated_info_s*)record;
 
-	switch(property_id) {
-	case CTSVC_PROPERTY_UPDATE_INFO_ID :
+	switch (property_id) {
+	case CTSVC_PROPERTY_UPDATE_INFO_ID:
 		*out = updated_info->id;
 		break;
 	case CTSVC_PROPERTY_UPDATE_INFO_ADDRESSBOOK_ID:
@@ -130,10 +129,10 @@ static int __ctsvc_updated_info_get_int(contacts_record_h record, unsigned int p
 
 static int __ctsvc_updated_info_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty)
 {
-	ctsvc_updated_info_s* updated_info = (ctsvc_updated_info_s*)record;
+	ctsvc_updated_info_s *updated_info = (ctsvc_updated_info_s*)record;
 
-	switch(property_id) {
-	case CTSVC_PROPERTY_UPDATE_INFO_ID :
+	switch (property_id) {
+	case CTSVC_PROPERTY_UPDATE_INFO_ID:
 		CHECK_DIRTY_VAL(updated_info->id, value, is_dirty);
 		updated_info->id = value;
 		break;
@@ -143,7 +142,7 @@ static int __ctsvc_updated_info_set_int(contacts_record_h record, unsigned int p
 		break;
 	case CTSVC_PROPERTY_UPDATE_INFO_TYPE:
 		RETVM_IF(value < CONTACTS_CHANGE_INSERTED
-						|| CONTACTS_CHANGE_DELETED < value,
+				|| CONTACTS_CHANGE_DELETED < value,
 				CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : update info type is in invalid range (%d)", value);
 		CHECK_DIRTY_VAL(updated_info->changed_type, value, is_dirty);
 		updated_info->changed_type = value;
@@ -165,10 +164,10 @@ static int __ctsvc_updated_info_set_int(contacts_record_h record, unsigned int p
 
 static int __ctsvc_updated_info_get_bool(contacts_record_h record, unsigned int property_id, bool *out)
 {
-	ctsvc_updated_info_s* updated_info = (ctsvc_updated_info_s*)record;
+	ctsvc_updated_info_s *updated_info = (ctsvc_updated_info_s*)record;
 
-	switch(property_id) {
-	case CTSVC_PROPERTY_UPDATE_INFO_IMAGE_CHANGED :
+	switch (property_id) {
+	case CTSVC_PROPERTY_UPDATE_INFO_IMAGE_CHANGED:
 		*out = updated_info->image_changed;
 		break;
 	default:
@@ -180,10 +179,10 @@ static int __ctsvc_updated_info_get_bool(contacts_record_h record, unsigned int 
 
 static int __ctsvc_updated_info_set_bool(contacts_record_h record, unsigned int property_id, bool value, bool *is_dirty)
 {
-	ctsvc_updated_info_s* updated_info = (ctsvc_updated_info_s*)record;
+	ctsvc_updated_info_s *updated_info = (ctsvc_updated_info_s*)record;
 
-	switch(property_id) {
-	case CTSVC_PROPERTY_UPDATE_INFO_IMAGE_CHANGED :
+	switch (property_id) {
+	case CTSVC_PROPERTY_UPDATE_INFO_IMAGE_CHANGED:
 		CHECK_DIRTY_VAL(updated_info->image_changed, value, is_dirty);
 		updated_info->image_changed = value;
 		break;

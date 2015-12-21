@@ -1,11 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
- *
- * Contact: Dohyung Jin <dh.jin@samsung.com>
- *                 Jongwon Lee <gogosing.lee@samsung.com>
- *                 Donghee Ye <donghee.ye@samsung.com>
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -152,7 +148,7 @@ API const _contacts_name_property_ids _contacts_name = {
 	.suffix			= CTSVC_PROPERTY_NAME_SUFFIX,
 	.prefix			= CTSVC_PROPERTY_NAME_PREFIX,
 	.phonetic_first	= CTSVC_PROPERTY_NAME_PHONETIC_FIRST,
-	.phonetic_middle= CTSVC_PROPERTY_NAME_PHONETIC_MIDDLE,
+	.phonetic_middle = CTSVC_PROPERTY_NAME_PHONETIC_MIDDLE,
 	.phonetic_last	= CTSVC_PROPERTY_NAME_PHONETIC_LAST
 };
 
@@ -684,17 +680,17 @@ const property_info_s __property_group[] = {
 };
 
 const property_info_s __property_person[] = {
-	{CTSVC_PROPERTY_PERSON_ID,					CTSVC_SEARCH_PROPERTY_ALL,	"person_id"},
-	{CTSVC_PROPERTY_PERSON_DISPLAY_NAME,		CTSVC_SEARCH_PROPERTY_ALL,	NULL},         /* "dispaly_name" or "reverse_dispaly_name" */
+	{CTSVC_PROPERTY_PERSON_ID,					CTSVC_SEARCH_PROPERTY_ALL, "person_id"},
+	{CTSVC_PROPERTY_PERSON_DISPLAY_NAME,		CTSVC_SEARCH_PROPERTY_ALL, NULL},         /* "dispaly_name" or "reverse_dispaly_name" */
 	{CTSVC_PROPERTY_PERSON_DISPLAY_NAME_INDEX,	CTSVC_SEARCH_PROPERTY_PROJECTION,	NULL}, /* "dispaly_name" or "reverse_dispaly_name" */
-	{CTSVC_PROPERTY_PERSON_DISPLAY_CONTACT_ID,CTSVC_SEARCH_PROPERTY_ALL,	"name_contact_id"},
-	{CTSVC_PROPERTY_PERSON_RINGTONE,			CTSVC_SEARCH_PROPERTY_ALL,	"ringtone_path"},
-	{CTSVC_PROPERTY_PERSON_IMAGE_THUMBNAIL, CTSVC_SEARCH_PROPERTY_ALL,	"image_thumbnail_path"},
-	{CTSVC_PROPERTY_PERSON_VIBRATION,		CTSVC_SEARCH_PROPERTY_ALL,	"vibration"},
-	{CTSVC_PROPERTY_PERSON_MESSAGE_ALERT,	CTSVC_SEARCH_PROPERTY_ALL,	"message_alert"},
-	{CTSVC_PROPERTY_PERSON_STATUS,			CTSVC_SEARCH_PROPERTY_ALL,	"status"},
-	{CTSVC_PROPERTY_PERSON_IS_FAVORITE,		CTSVC_SEARCH_PROPERTY_ALL,	"is_favorite"},
-	{CTSVC_PROPERTY_PERSON_FAVORITE_PRIORITY,	CTSVC_SEARCH_PROPERTY_FILTER,	"favorite_prio"},
+	{CTSVC_PROPERTY_PERSON_DISPLAY_CONTACT_ID, CTSVC_SEARCH_PROPERTY_ALL, "name_contact_id"},
+	{CTSVC_PROPERTY_PERSON_RINGTONE,			CTSVC_SEARCH_PROPERTY_ALL, "ringtone_path"},
+	{CTSVC_PROPERTY_PERSON_IMAGE_THUMBNAIL, CTSVC_SEARCH_PROPERTY_ALL, "image_thumbnail_path"},
+	{CTSVC_PROPERTY_PERSON_VIBRATION,		CTSVC_SEARCH_PROPERTY_ALL, "vibration"},
+	{CTSVC_PROPERTY_PERSON_MESSAGE_ALERT,	CTSVC_SEARCH_PROPERTY_ALL, "message_alert"},
+	{CTSVC_PROPERTY_PERSON_STATUS,			CTSVC_SEARCH_PROPERTY_ALL, "status"},
+	{CTSVC_PROPERTY_PERSON_IS_FAVORITE,		CTSVC_SEARCH_PROPERTY_ALL, "is_favorite"},
+	{CTSVC_PROPERTY_PERSON_FAVORITE_PRIORITY,	CTSVC_SEARCH_PROPERTY_FILTER, "favorite_prio"},
 	{CTSVC_PROPERTY_PERSON_LINK_COUNT,		CTSVC_SEARCH_PROPERTY_ALL,	"link_count"},
 	{CTSVC_PROPERTY_PERSON_ADDRESSBOOK_IDS,	CTSVC_SEARCH_PROPERTY_PROJECTION,	"addressbook_ids"},
 	{CTSVC_PROPERTY_PERSON_HAS_PHONENUMBER,	CTSVC_SEARCH_PROPERTY_ALL,	"has_phonenumber"},
@@ -707,7 +703,7 @@ const property_info_s __property_simple_contact[] = {
 	{CTSVC_PROPERTY_CONTACT_DISPLAY_SOURCE_DATA_ID,	CTSVC_SEARCH_PROPERTY_ALL,	"display_name_source"},
 	{CTSVC_PROPERTY_CONTACT_ADDRESSBOOK_ID,	CTSVC_SEARCH_PROPERTY_ALL,	"addressbook_id"},
 	{CTSVC_PROPERTY_CONTACT_RINGTONE,		CTSVC_SEARCH_PROPERTY_ALL,	"ringtone_path"},
-	{CTSVC_PROPERTY_CONTACT_IMAGE_THUMBNAIL,CTSVC_SEARCH_PROPERTY_ALL,	"image_thumbnail_path"},
+	{CTSVC_PROPERTY_CONTACT_IMAGE_THUMBNAIL, CTSVC_SEARCH_PROPERTY_ALL,	"image_thumbnail_path"},
 	{CTSVC_PROPERTY_CONTACT_IS_FAVORITE,		CTSVC_SEARCH_PROPERTY_ALL,	"is_favorite"},
 	{CTSVC_PROPERTY_CONTACT_HAS_PHONENUMBER, CTSVC_SEARCH_PROPERTY_ALL,	"has_phonenumber"},
 	{CTSVC_PROPERTY_CONTACT_HAS_EMAIL,		CTSVC_SEARCH_PROPERTY_ALL,	"has_email"},
@@ -758,7 +754,7 @@ const property_info_s __property_address[] = {
 	{CTSVC_PROPERTY_ADDRESS_TYPE,			CTSVC_SEARCH_PROPERTY_ALL,	"data1"},
 	{CTSVC_PROPERTY_ADDRESS_LABEL,		CTSVC_SEARCH_PROPERTY_ALL,	"data2"},
 	{CTSVC_PROPERTY_ADDRESS_POSTBOX,		CTSVC_SEARCH_PROPERTY_ALL,	"data3"},
-	{CTSVC_PROPERTY_ADDRESS_POSTAL_CODE,CTSVC_SEARCH_PROPERTY_ALL,	"data4"},
+	{CTSVC_PROPERTY_ADDRESS_POSTAL_CODE, CTSVC_SEARCH_PROPERTY_ALL,	"data4"},
 	{CTSVC_PROPERTY_ADDRESS_REGION,		CTSVC_SEARCH_PROPERTY_ALL,	"data5"},
 	{CTSVC_PROPERTY_ADDRESS_LOCALITY,	CTSVC_SEARCH_PROPERTY_ALL,	"data6"},
 	{CTSVC_PROPERTY_ADDRESS_STREET,		CTSVC_SEARCH_PROPERTY_ALL,	"data7"},
@@ -788,7 +784,7 @@ const property_info_s __property_event[] = {
 const property_info_s __property_group_relation[] = {
 	{CTSVC_PROPERTY_GROUP_RELATION_GROUP_ID,	CTSVC_SEARCH_PROPERTY_ALL,	"group_id"},
 	{CTSVC_PROPERTY_GROUP_RELATION_CONTACT_ID,	CTSVC_SEARCH_PROPERTY_ALL,	"contact_id"},
-	{CTSVC_PROPERTY_GROUP_RELATION_GROUP_NAME,CTSVC_SEARCH_PROPERTY_ALL,	"group_name"},
+	{CTSVC_PROPERTY_GROUP_RELATION_GROUP_NAME, CTSVC_SEARCH_PROPERTY_ALL,	"group_name"},
 };
 
 const property_info_s __property_relationship[] = {
@@ -873,7 +869,7 @@ const property_info_s __property_activity[] = {
 	{CTSVC_PROPERTY_ACTIVITY_TIMESTAMP,		CTSVC_SEARCH_PROPERTY_ALL,	"timestamp"},
 	{CTSVC_PROPERTY_ACTIVITY_SERVICE_OPERATION, CTSVC_SEARCH_PROPERTY_ALL,	"service_operation"},
 	{CTSVC_PROPERTY_ACTIVITY_URI,				CTSVC_SEARCH_PROPERTY_ALL,	"uri"},
-	{CTSVC_PROPERTY_ACTIVITY_ACTIVITY_PHOTO,CTSVC_SEARCH_PROPERTY_NONE,	(void*)__property_activity_photo},
+	{CTSVC_PROPERTY_ACTIVITY_ACTIVITY_PHOTO, CTSVC_SEARCH_PROPERTY_NONE,	(void*)__property_activity_photo},
 };
 
 const property_info_s __property_extension[] = {
@@ -909,21 +905,21 @@ const property_info_s __property_contact[] = {
 	{CTSVC_PROPERTY_CONTACT_MESSAGE_ALERT,		CTSVC_SEARCH_PROPERTY_ALL,	"message_alert"},
 	{CTSVC_PROPERTY_CONTACT_CHANGED_TIME,		CTSVC_SEARCH_PROPERTY_ALL,	"changed_time"},
 	{CTSVC_PROPERTY_CONTACT_LINK_MODE,			CTSVC_SEARCH_PROPERTY_ALL,	"link_mode"},
-	{CTSVC_PROPERTY_CONTACT_NAME,					CTSVC_SEARCH_PROPERTY_NONE,(void*)__property_name},
-	{CTSVC_PROPERTY_CONTACT_COMPANY,				CTSVC_SEARCH_PROPERTY_NONE,(void*)__property_company},
-	{CTSVC_PROPERTY_CONTACT_NOTE,					CTSVC_SEARCH_PROPERTY_NONE,(void*)__property_note},
-	{CTSVC_PROPERTY_CONTACT_NUMBER,				CTSVC_SEARCH_PROPERTY_NONE,(void*)__property_number},
-	{CTSVC_PROPERTY_CONTACT_EMAIL,				CTSVC_SEARCH_PROPERTY_NONE,(void*)__property_email},
-	{CTSVC_PROPERTY_CONTACT_EVENT,				CTSVC_SEARCH_PROPERTY_NONE,(void*)__property_event},
-	{CTSVC_PROPERTY_CONTACT_MESSENGER,			CTSVC_SEARCH_PROPERTY_NONE,(void*)__property_messenger},
-	{CTSVC_PROPERTY_CONTACT_ADDRESS,				CTSVC_SEARCH_PROPERTY_NONE,(void*)__property_address},
-	{CTSVC_PROPERTY_CONTACT_URL,					CTSVC_SEARCH_PROPERTY_NONE,(void*)__property_url},
-	{CTSVC_PROPERTY_CONTACT_NICKNAME,			CTSVC_SEARCH_PROPERTY_NONE,(void*)__property_nickname},
-	{CTSVC_PROPERTY_CONTACT_PROFILE,				CTSVC_SEARCH_PROPERTY_NONE,(void*)__property_profile},
-	{CTSVC_PROPERTY_CONTACT_RELATIONSHIP,		CTSVC_SEARCH_PROPERTY_NONE,(void*)__property_relationship},
-	{CTSVC_PROPERTY_CONTACT_IMAGE,				CTSVC_SEARCH_PROPERTY_NONE,(void*)__property_image},
-	{CTSVC_PROPERTY_CONTACT_GROUP_RELATION,		CTSVC_SEARCH_PROPERTY_NONE,(void*)__property_group_relation},
-	{CTSVC_PROPERTY_CONTACT_EXTENSION,			CTSVC_SEARCH_PROPERTY_NONE,(void*)__property_extension},
+	{CTSVC_PROPERTY_CONTACT_NAME,					CTSVC_SEARCH_PROPERTY_NONE, (void*)__property_name},
+	{CTSVC_PROPERTY_CONTACT_COMPANY,				CTSVC_SEARCH_PROPERTY_NONE, (void*)__property_company},
+	{CTSVC_PROPERTY_CONTACT_NOTE,					CTSVC_SEARCH_PROPERTY_NONE, (void*)__property_note},
+	{CTSVC_PROPERTY_CONTACT_NUMBER,				CTSVC_SEARCH_PROPERTY_NONE, (void*)__property_number},
+	{CTSVC_PROPERTY_CONTACT_EMAIL,				CTSVC_SEARCH_PROPERTY_NONE, (void*)__property_email},
+	{CTSVC_PROPERTY_CONTACT_EVENT,				CTSVC_SEARCH_PROPERTY_NONE, (void*)__property_event},
+	{CTSVC_PROPERTY_CONTACT_MESSENGER,			CTSVC_SEARCH_PROPERTY_NONE, (void*)__property_messenger},
+	{CTSVC_PROPERTY_CONTACT_ADDRESS,				CTSVC_SEARCH_PROPERTY_NONE, (void*)__property_address},
+	{CTSVC_PROPERTY_CONTACT_URL,					CTSVC_SEARCH_PROPERTY_NONE, (void*)__property_url},
+	{CTSVC_PROPERTY_CONTACT_NICKNAME,			CTSVC_SEARCH_PROPERTY_NONE, (void*)__property_nickname},
+	{CTSVC_PROPERTY_CONTACT_PROFILE,				CTSVC_SEARCH_PROPERTY_NONE, (void*)__property_profile},
+	{CTSVC_PROPERTY_CONTACT_RELATIONSHIP,		CTSVC_SEARCH_PROPERTY_NONE, (void*)__property_relationship},
+	{CTSVC_PROPERTY_CONTACT_IMAGE,				CTSVC_SEARCH_PROPERTY_NONE, (void*)__property_image},
+	{CTSVC_PROPERTY_CONTACT_GROUP_RELATION,		CTSVC_SEARCH_PROPERTY_NONE, (void*)__property_group_relation},
+	{CTSVC_PROPERTY_CONTACT_EXTENSION,			CTSVC_SEARCH_PROPERTY_NONE, (void*)__property_extension},
 };
 
 const property_info_s __property_my_profile[] = {
@@ -933,20 +929,20 @@ const property_info_s __property_my_profile[] = {
 	{CTSVC_PROPERTY_MY_PROFILE_IMAGE_THUMBNAIL,	CTSVC_SEARCH_PROPERTY_ALL,	"image_thumbnail_path"},
 	{CTSVC_PROPERTY_MY_PROFILE_UID,					CTSVC_SEARCH_PROPERTY_ALL,	"uid"},
 	{CTSVC_PROPERTY_MY_PROFILE_CHANGED_TIME,		CTSVC_SEARCH_PROPERTY_ALL,	"changed_time"},
-	{CTSVC_PROPERTY_MY_PROFILE_NAME,					CTSVC_SEARCH_PROPERTY_NONE,(void*)__property_name},
-	{CTSVC_PROPERTY_MY_PROFILE_COMPANY,				CTSVC_SEARCH_PROPERTY_NONE,(void*)__property_company},
-	{CTSVC_PROPERTY_MY_PROFILE_NOTE,					CTSVC_SEARCH_PROPERTY_NONE,(void*)__property_note},
-	{CTSVC_PROPERTY_MY_PROFILE_NUMBER,				CTSVC_SEARCH_PROPERTY_NONE,(void*)__property_number},
-	{CTSVC_PROPERTY_MY_PROFILE_EMAIL,				CTSVC_SEARCH_PROPERTY_NONE,(void*)__property_email},
-	{CTSVC_PROPERTY_MY_PROFILE_EVENT,				CTSVC_SEARCH_PROPERTY_NONE,(void*)__property_event},
-	{CTSVC_PROPERTY_MY_PROFILE_MESSENGER,			CTSVC_SEARCH_PROPERTY_NONE,(void*)__property_messenger},
-	{CTSVC_PROPERTY_MY_PROFILE_ADDRESS,				CTSVC_SEARCH_PROPERTY_NONE,(void*)__property_address},
-	{CTSVC_PROPERTY_MY_PROFILE_URL,					CTSVC_SEARCH_PROPERTY_NONE,(void*)__property_url},
-	{CTSVC_PROPERTY_MY_PROFILE_NICKNAME,				CTSVC_SEARCH_PROPERTY_NONE,(void*)__property_nickname},
-	{CTSVC_PROPERTY_MY_PROFILE_PROFILE,				CTSVC_SEARCH_PROPERTY_NONE,(void*)__property_profile},
-	{CTSVC_PROPERTY_MY_PROFILE_RELATIONSHIP,		CTSVC_SEARCH_PROPERTY_NONE,(void*)__property_relationship},
-	{CTSVC_PROPERTY_MY_PROFILE_IMAGE,				CTSVC_SEARCH_PROPERTY_NONE,(void*)__property_image},
-	{CTSVC_PROPERTY_MY_PROFILE_EXTENSION,			CTSVC_SEARCH_PROPERTY_NONE,(void*)__property_extension},
+	{CTSVC_PROPERTY_MY_PROFILE_NAME,					CTSVC_SEARCH_PROPERTY_NONE, (void*)__property_name},
+	{CTSVC_PROPERTY_MY_PROFILE_COMPANY,				CTSVC_SEARCH_PROPERTY_NONE, (void*)__property_company},
+	{CTSVC_PROPERTY_MY_PROFILE_NOTE,					CTSVC_SEARCH_PROPERTY_NONE, (void*)__property_note},
+	{CTSVC_PROPERTY_MY_PROFILE_NUMBER,				CTSVC_SEARCH_PROPERTY_NONE, (void*)__property_number},
+	{CTSVC_PROPERTY_MY_PROFILE_EMAIL,				CTSVC_SEARCH_PROPERTY_NONE, (void*)__property_email},
+	{CTSVC_PROPERTY_MY_PROFILE_EVENT,				CTSVC_SEARCH_PROPERTY_NONE, (void*)__property_event},
+	{CTSVC_PROPERTY_MY_PROFILE_MESSENGER,			CTSVC_SEARCH_PROPERTY_NONE, (void*)__property_messenger},
+	{CTSVC_PROPERTY_MY_PROFILE_ADDRESS,				CTSVC_SEARCH_PROPERTY_NONE, (void*)__property_address},
+	{CTSVC_PROPERTY_MY_PROFILE_URL,					CTSVC_SEARCH_PROPERTY_NONE, (void*)__property_url},
+	{CTSVC_PROPERTY_MY_PROFILE_NICKNAME,				CTSVC_SEARCH_PROPERTY_NONE, (void*)__property_nickname},
+	{CTSVC_PROPERTY_MY_PROFILE_PROFILE,				CTSVC_SEARCH_PROPERTY_NONE, (void*)__property_profile},
+	{CTSVC_PROPERTY_MY_PROFILE_RELATIONSHIP,		CTSVC_SEARCH_PROPERTY_NONE, (void*)__property_relationship},
+	{CTSVC_PROPERTY_MY_PROFILE_IMAGE,				CTSVC_SEARCH_PROPERTY_NONE, (void*)__property_image},
+	{CTSVC_PROPERTY_MY_PROFILE_EXTENSION,			CTSVC_SEARCH_PROPERTY_NONE, (void*)__property_extension},
 };
 
 const property_info_s __property_speeddial[] = {   /* _contacts_speeddial */
@@ -1231,7 +1227,7 @@ typedef struct {
 	ctsvc_record_type_e type;
 	property_info_s *properties;
 	unsigned int property_count;
-}view_uri_info_s;
+} view_uri_info_s;
 
 #define PTR_COUNT(X)	(void*)(X), sizeof(X)/sizeof(property_info_s)
 
@@ -1315,7 +1311,7 @@ void ctsvc_view_uri_init()
 
 	i = 0;
 	count = sizeof(__tables)/sizeof(view_uri_info_s);
-	for (i=0;i<count;i++)
+	for (i = 0; i < count; i++)
 		g_hash_table_insert(__ctsvc_view_uri_hash, __tables[i].view_uri, GINT_TO_POINTER(&__tables[i]));
 }
 
@@ -1337,9 +1333,9 @@ void ctsvc_view_uri_deinit()
 #endif
 }
 
-ctsvc_record_type_e ctsvc_view_get_record_type(const char* view_uri)
+ctsvc_record_type_e ctsvc_view_get_record_type(const char *view_uri)
 {
-	view_uri_info_s* view_uri_info = NULL;
+	view_uri_info_s *view_uri_info = NULL;
 	ctsvc_record_type_e type = CTSVC_RECORD_INVALID;
 
 	if (NULL == __ctsvc_view_uri_hash) {
@@ -1354,9 +1350,9 @@ ctsvc_record_type_e ctsvc_view_get_record_type(const char* view_uri)
 	return type;
 }
 
-const char* ctsvc_view_get_uri(const char* view_uri)
+const char* ctsvc_view_get_uri(const char *view_uri)
 {
-	view_uri_info_s* view_uri_info = NULL;
+	view_uri_info_s *view_uri_info = NULL;
 
 	if (NULL == __ctsvc_view_uri_hash) {
 		CTS_ERR("contacts-service is not initialized");
@@ -1372,7 +1368,7 @@ const char* ctsvc_view_get_uri(const char* view_uri)
 
 const property_info_s* ctsvc_view_get_all_property_infos(const char *view_uri, unsigned int *count)
 {
-	view_uri_info_s* view_uri_info = NULL;
+	view_uri_info_s *view_uri_info = NULL;
 
 	if (NULL == __ctsvc_view_uri_hash) {
 		CTS_ERR("contacts-service is not initialized");

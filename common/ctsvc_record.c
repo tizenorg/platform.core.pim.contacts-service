@@ -1,11 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
- *
- * Contact: Dohyung Jin <dh.jin@samsung.com>
- *                 Jongwon Lee <gogosing.lee@samsung.com>
- *                 Donghee Ye <donghee.ye@samsung.com>
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,7 +57,7 @@ extern ctsvc_record_plugin_cb_s phonelog_plugin_cbs;
 
 static const ctsvc_record_plugin_cb_s *__ctsvc_record_get_plugin_cb(int r_type)
 {
-	switch((int)r_type) {
+	switch ((int)r_type) {
 	case CTSVC_RECORD_ADDRESSBOOK:
 		return &addressbook_plugin_cbs;
 	case CTSVC_RECORD_GROUP:
@@ -126,14 +122,14 @@ static const ctsvc_record_plugin_cb_s *__ctsvc_record_get_plugin_cb(int r_type)
 }
 
 #define __INVALID_PARAMETER_ERROR_HANDLING() \
-		CTS_ERR("Invalid parameter: Operation restricted."); \
-		return CONTACTS_ERROR_INVALID_PARAMETER;
+	CTS_ERR("Invalid parameter: Operation restricted."); \
+return CONTACTS_ERROR_INVALID_PARAMETER;
 
 /*
  * This function is used for view_uri which is able to CRUD.
  * The view_uri's property should be sequencial value because it is used to find index at the below logic.
  */
-bool ctsvc_record_check_property_flag(const ctsvc_record_s* s_record, unsigned int property_id, contacts_property_flag_e flag)
+bool ctsvc_record_check_property_flag(const ctsvc_record_s *s_record, unsigned int property_id, contacts_property_flag_e flag)
 {
 	int index = property_id & 0x000000FF;
 
@@ -165,7 +161,7 @@ bool ctsvc_record_check_property_flag(const ctsvc_record_s* s_record, unsigned i
 	return (s_record->properties_flags[index] & flag) ? true : false;
 }
 
-int ctsvc_record_set_property_flag(ctsvc_record_s* _record, int property_id, contacts_property_flag_e flag)
+int ctsvc_record_set_property_flag(ctsvc_record_s *_record, int property_id, contacts_property_flag_e flag)
 {
 	int index = property_id & 0x000000FF;
 
@@ -179,7 +175,7 @@ int ctsvc_record_set_property_flag(ctsvc_record_s* _record, int property_id, con
 
 		_record->properties_flags = calloc(count, sizeof(char));
 		_record->property_max_count = count;
-		RETVM_IF(NULL == _record->properties_flags, CONTACTS_ERROR_OUT_OF_MEMORY, "calloc Fail");
+		RETVM_IF(NULL == _record->properties_flags, CONTACTS_ERROR_OUT_OF_MEMORY, "calloc() Fail");
 	}
 	_record->property_flag |= flag;
 	_record->properties_flags[index] |= flag;
@@ -200,7 +196,7 @@ int ctsvc_record_set_property_flag(ctsvc_record_s* _record, int property_id, con
 	}
 
 /* Record constuct/destruct */
-API int contacts_record_create(const char* view_uri, contacts_record_h* out_record)
+API int contacts_record_create(const char *view_uri, contacts_record_h *out_record)
 {
 	int ret;
 	ctsvc_record_type_e r_type;
@@ -211,15 +207,15 @@ API int contacts_record_create(const char* view_uri, contacts_record_h* out_reco
 	*out_record = NULL;
 
 	r_type = ctsvc_view_get_record_type(view_uri);
-	RETVM_IF (CTSVC_RECORD_INVALID == r_type, CONTACTS_ERROR_INVALID_PARAMETER,
-					"Invalid parameter : view_uri(%s)", view_uri);
+	RETVM_IF(CTSVC_RECORD_INVALID == r_type, CONTACTS_ERROR_INVALID_PARAMETER,
+			"Invalid parameter : view_uri(%s)", view_uri);
 
 	plugin_cb = __ctsvc_record_get_plugin_cb(r_type);
 	if (plugin_cb && plugin_cb->create) {
 		ret = plugin_cb->create(out_record);
-		if (CONTACTS_ERROR_NONE == ret) {
+		if (CONTACTS_ERROR_NONE == ret)
 			CTSVC_RECORD_INIT_BASE((ctsvc_record_s*)*out_record, r_type, plugin_cb, ctsvc_view_get_uri(view_uri));
-		}
+
 		return ret;
 	}
 
@@ -231,7 +227,7 @@ API int contacts_record_destroy(contacts_record_h record, bool delete_child)
 	ctsvc_record_s *s_record;
 
 	RETV_IF(NULL == record, CONTACTS_ERROR_INVALID_PARAMETER);
-	s_record = (ctsvc_record_s *)record;
+	s_record = (ctsvc_record_s*)record;
 
 	if (s_record && s_record->plugin_cbs && s_record->plugin_cbs->destroy)
 		return s_record->plugin_cbs->destroy(record, delete_child);
@@ -239,7 +235,7 @@ API int contacts_record_destroy(contacts_record_h record, bool delete_child)
 	__INVALID_PARAMETER_ERROR_HANDLING();
 }
 
-API int contacts_record_clone(contacts_record_h record, contacts_record_h* out_record)
+API int contacts_record_clone(contacts_record_h record, contacts_record_h *out_record)
 {
 	ctsvc_record_s *s_record;
 
@@ -247,7 +243,7 @@ API int contacts_record_clone(contacts_record_h record, contacts_record_h* out_r
 	*out_record = NULL;
 
 	RETV_IF(NULL == record, CONTACTS_ERROR_INVALID_PARAMETER);
-	s_record = (ctsvc_record_s *)record;
+	s_record = (ctsvc_record_s*)record;
 
 	if (s_record->plugin_cbs && s_record->plugin_cbs->clone)
 		return s_record->plugin_cbs->clone(record, out_record);
@@ -255,21 +251,21 @@ API int contacts_record_clone(contacts_record_h record, contacts_record_h* out_r
 	__INVALID_PARAMETER_ERROR_HANDLING();
 }
 
-API int contacts_record_get_uri_p(contacts_record_h record, const char** out_str)
+API int contacts_record_get_uri_p(contacts_record_h record, const char **out_str)
 {
-    int ret = CONTACTS_ERROR_NONE;
+	int ret = CONTACTS_ERROR_NONE;
 
-    ctsvc_record_s *temp = (ctsvc_record_s*)(record);
+	ctsvc_record_s *temp = (ctsvc_record_s*)(record);
 
-    RETVM_IF(NULL == record || NULL == out_str, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter");
+	RETVM_IF(NULL == record || NULL == out_str, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter");
 
-    *out_str = (temp->view_uri);
+	*out_str = (temp->view_uri);
 
-    return ret;
+	return ret;
 }
 
 /* Record get/set int,str, etc.. */
-API int contacts_record_get_str(contacts_record_h record, unsigned int property_id, char** out_str)
+API int contacts_record_get_str(contacts_record_h record, unsigned int property_id, char **out_str)
 {
 	ctsvc_record_s *s_record;
 
@@ -277,7 +273,7 @@ API int contacts_record_get_str(contacts_record_h record, unsigned int property_
 	*out_str = NULL;
 
 	RETV_IF(NULL == record, CONTACTS_ERROR_INVALID_PARAMETER);
-	s_record = (ctsvc_record_s *)record;
+	s_record = (ctsvc_record_s*)record;
 
 	__CHECK_PROJECTED_PROPERTY();
 
@@ -295,7 +291,7 @@ API int contacts_record_get_lli(contacts_record_h record, unsigned int property_
 	*value = 0;
 
 	RETV_IF(NULL == record, CONTACTS_ERROR_INVALID_PARAMETER);
-	s_record = (ctsvc_record_s *)record;
+	s_record = (ctsvc_record_s*)record;
 
 	__CHECK_PROJECTED_PROPERTY();
 
@@ -313,7 +309,7 @@ API int contacts_record_get_double(contacts_record_h record, unsigned int proper
 	*value = 0;
 
 	RETV_IF(NULL == record, CONTACTS_ERROR_INVALID_PARAMETER);
-	s_record = (ctsvc_record_s *)record;
+	s_record = (ctsvc_record_s*)record;
 
 	__CHECK_PROJECTED_PROPERTY();
 
@@ -323,7 +319,7 @@ API int contacts_record_get_double(contacts_record_h record, unsigned int proper
 	__INVALID_PARAMETER_ERROR_HANDLING();
 }
 
-API int contacts_record_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str)
+API int contacts_record_get_str_p(contacts_record_h record, unsigned int property_id, char **out_str)
 {
 	ctsvc_record_s *s_record;
 
@@ -331,7 +327,7 @@ API int contacts_record_get_str_p(contacts_record_h record, unsigned int propert
 	*out_str = NULL;
 
 	RETV_IF(NULL == record, CONTACTS_ERROR_INVALID_PARAMETER);
-	s_record = (ctsvc_record_s *)record;
+	s_record = (ctsvc_record_s*)record;
 
 	__CHECK_PROJECTED_PROPERTY();
 
@@ -341,7 +337,7 @@ API int contacts_record_get_str_p(contacts_record_h record, unsigned int propert
 	__INVALID_PARAMETER_ERROR_HANDLING();
 }
 
-API int contacts_record_get_int(contacts_record_h record, unsigned int property_id, int* out_value)
+API int contacts_record_get_int(contacts_record_h record, unsigned int property_id, int *out_value)
 {
 	ctsvc_record_s *s_record;
 
@@ -349,7 +345,7 @@ API int contacts_record_get_int(contacts_record_h record, unsigned int property_
 	*out_value = 0;
 
 	RETV_IF(NULL == record, CONTACTS_ERROR_INVALID_PARAMETER);
-	s_record = (ctsvc_record_s *)record;
+	s_record = (ctsvc_record_s*)record;
 
 	__CHECK_PROJECTED_PROPERTY();
 
@@ -359,7 +355,7 @@ API int contacts_record_get_int(contacts_record_h record, unsigned int property_
 	__INVALID_PARAMETER_ERROR_HANDLING();
 }
 
-API int contacts_record_set_str(contacts_record_h record, unsigned int property_id, const char* value)
+API int contacts_record_set_str(contacts_record_h record, unsigned int property_id, const char *value)
 {
 	RETV_IF(NULL == record, CONTACTS_ERROR_INVALID_PARAMETER);
 
@@ -368,13 +364,13 @@ API int contacts_record_set_str(contacts_record_h record, unsigned int property_
 	return ctsvc_record_set_str(record, property_id, value);
 }
 
-int ctsvc_record_set_str(contacts_record_h record, unsigned int property_id, const char* value)
+int ctsvc_record_set_str(contacts_record_h record, unsigned int property_id, const char *value)
 {
 	char *str;
 	ctsvc_record_s *s_record;
 	int ret;
 
-	s_record = (ctsvc_record_s *)record;
+	s_record = (ctsvc_record_s*)record;
 	__CHECK_PROJECTED_PROPERTY();
 
 	if (value && *value)
@@ -394,7 +390,7 @@ int ctsvc_record_set_str(contacts_record_h record, unsigned int property_id, con
 	__INVALID_PARAMETER_ERROR_HANDLING();
 }
 
-API int contacts_record_get_bool(contacts_record_h record, unsigned int property_id, bool* value)
+API int contacts_record_get_bool(contacts_record_h record, unsigned int property_id, bool *value)
 {
 	ctsvc_record_s *s_record;
 
@@ -402,7 +398,7 @@ API int contacts_record_get_bool(contacts_record_h record, unsigned int property
 	*value = false;
 
 	RETV_IF(NULL == record, CONTACTS_ERROR_INVALID_PARAMETER);
-	s_record = (ctsvc_record_s *)record;
+	s_record = (ctsvc_record_s*)record;
 
 	__CHECK_PROJECTED_PROPERTY();
 
@@ -425,7 +421,7 @@ int ctsvc_record_set_bool(contacts_record_h record, unsigned int property_id, bo
 {
 	int ret;
 	ctsvc_record_s *s_record;
-	s_record = (ctsvc_record_s *)record;
+	s_record = (ctsvc_record_s*)record;
 	__CHECK_PROJECTED_PROPERTY();
 
 	if (s_record->plugin_cbs && s_record->plugin_cbs->set_bool) {
@@ -458,7 +454,7 @@ int ctsvc_record_set_int(contacts_record_h record, unsigned int property_id, int
 {
 	int ret;
 	ctsvc_record_s *s_record;
-	s_record = (ctsvc_record_s *)record;
+	s_record = (ctsvc_record_s*)record;
 	__CHECK_PROJECTED_PROPERTY();
 
 	if (s_record->plugin_cbs && s_record->plugin_cbs->set_int) {
@@ -484,7 +480,7 @@ int ctsvc_record_set_lli(contacts_record_h record, unsigned int property_id, lon
 {
 	int ret;
 	ctsvc_record_s *s_record;
-	s_record = (ctsvc_record_s *)record;
+	s_record = (ctsvc_record_s*)record;
 	__CHECK_PROJECTED_PROPERTY();
 
 	if (s_record->plugin_cbs && s_record->plugin_cbs->set_lli) {
@@ -512,7 +508,7 @@ int ctsvc_record_set_double(contacts_record_h record, unsigned int property_id, 
 	int ret;
 	ctsvc_record_s *s_record;
 
-	s_record = (ctsvc_record_s *)record;
+	s_record = (ctsvc_record_s*)record;
 	__CHECK_PROJECTED_PROPERTY();
 
 	if (s_record->plugin_cbs && s_record->plugin_cbs->set_double) {
@@ -534,7 +530,7 @@ API int contacts_record_add_child_record(contacts_record_h record,
 
 	RETV_IF(NULL == record, CONTACTS_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == child_record, CONTACTS_ERROR_INVALID_PARAMETER);
-	s_record = (ctsvc_record_s *)record;
+	s_record = (ctsvc_record_s*)record;
 
 	if (s_record->plugin_cbs && s_record->plugin_cbs->add_child_record)
 		return s_record->plugin_cbs->add_child_record(record, property_id, child_record);
@@ -549,7 +545,7 @@ API int contacts_record_remove_child_record(contacts_record_h record,
 
 	RETV_IF(NULL == record, CONTACTS_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == child_record, CONTACTS_ERROR_INVALID_PARAMETER);
-	s_record = (ctsvc_record_s *)record;
+	s_record = (ctsvc_record_s*)record;
 
 	if (s_record->plugin_cbs && s_record->plugin_cbs->remove_child_record)
 		return s_record->plugin_cbs->remove_child_record(record, property_id, child_record);
@@ -566,7 +562,7 @@ API int contacts_record_get_child_record_count(contacts_record_h record,
 	*count = 0;
 
 	RETV_IF(NULL == record, CONTACTS_ERROR_INVALID_PARAMETER);
-	s_record = (ctsvc_record_s *)record;
+	s_record = (ctsvc_record_s*)record;
 
 	if (s_record->plugin_cbs && s_record->plugin_cbs->get_child_record_count)
 		return s_record->plugin_cbs->get_child_record_count(record, property_id, count);
@@ -575,7 +571,7 @@ API int contacts_record_get_child_record_count(contacts_record_h record,
 }
 
 API int contacts_record_get_child_record_at_p(contacts_record_h record,
-		unsigned int property_id, int index, contacts_record_h* out_record)
+		unsigned int property_id, int index, contacts_record_h *out_record)
 {
 	ctsvc_record_s *s_record;
 
@@ -583,7 +579,7 @@ API int contacts_record_get_child_record_at_p(contacts_record_h record,
 	*out_record = NULL;
 
 	RETV_IF(NULL == record, CONTACTS_ERROR_INVALID_PARAMETER);
-	s_record = (ctsvc_record_s *)record;
+	s_record = (ctsvc_record_s*)record;
 
 	if (s_record->plugin_cbs && s_record->plugin_cbs->get_child_record_at_p)
 		return s_record->plugin_cbs->get_child_record_at_p(record, property_id, index, out_record);
@@ -592,7 +588,7 @@ API int contacts_record_get_child_record_at_p(contacts_record_h record,
 }
 
 API int contacts_record_clone_child_record_list(contacts_record_h record,
-		unsigned int property_id, contacts_list_h* out_list)
+		unsigned int property_id, contacts_list_h *out_list)
 {
 	ctsvc_record_s *s_record;
 
@@ -600,7 +596,7 @@ API int contacts_record_clone_child_record_list(contacts_record_h record,
 	*out_list = NULL;
 
 	RETV_IF(NULL == record, CONTACTS_ERROR_INVALID_PARAMETER);
-	s_record = (ctsvc_record_s *)record;
+	s_record = (ctsvc_record_s*)record;
 
 	if (s_record->plugin_cbs && s_record->plugin_cbs->clone_child_record_list)
 		return s_record->plugin_cbs->clone_child_record_list(record, property_id, out_list);
@@ -614,7 +610,7 @@ int ctsvc_record_set_projection_flags(contacts_record_h record, const unsigned i
 
 	RETV_IF(record == NULL, CONTACTS_ERROR_INVALID_PARAMETER);
 
-	ctsvc_record_s *_record = (ctsvc_record_s *)record;
+	ctsvc_record_s *_record = (ctsvc_record_s*)record;
 
 	CONTACTS_FREE(_record->properties_flags);
 
@@ -624,10 +620,10 @@ int ctsvc_record_set_projection_flags(contacts_record_h record, const unsigned i
 
 	_record->property_max_count = property_max_count;
 
-	if (CTSVC_RECORD_RESULT == _record->r_type)
+	if (CTSVC_RECORD_RESULT == _record->r_type) {
 		_record->property_flag |= CTSVC_PROPERTY_FLAG_PROJECTION;
-	else {
-		for (i=0;i<projection_count;i++)
+	} else {
+		for (i = 0; i < projection_count; i++)
 			ctsvc_record_set_property_flag(_record, projection[i], CTSVC_PROPERTY_FLAG_PROJECTION);
 	}
 

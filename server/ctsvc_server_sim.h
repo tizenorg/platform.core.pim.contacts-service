@@ -1,7 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,10 +39,10 @@ typedef struct {
 int ctsvc_server_sim_init(void);
 int ctsvc_server_sim_final(void);
 
-int ctsvc_server_sim_import_contact(void* data, int sim_slot_no);
+int ctsvc_server_sim_import_contact(void *data, int sim_slot_no);
 int ctsvc_server_sim_get_info_id_by_sim_slot_no(int sim_slot_no);
 int ctsvc_server_sim_get_sim_slot_no_by_info_id(int sim_info_id);
-int ctsvc_server_socket_get_sim_init_status(void* data, int sim_slot_no);
+int ctsvc_server_socket_get_sim_init_status(void *data, int sim_slot_no);
 
 #endif /* __CTSVC_SERVER_SIM_H__ */
 

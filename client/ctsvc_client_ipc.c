@@ -93,11 +93,10 @@ static int _ctsvc_ipc_create(pims_ipc_h *p_ipc)
 	pims_ipc_h ipc = pims_ipc_create(sock_file);
 	if (NULL == ipc) {
 		if (errno == EACCES) {
-			CTS_ERR("pims_ipc_create() Failed(%d)", CONTACTS_ERROR_PERMISSION_DENIED);
+			CTS_ERR("pims_ipc_create() Fail(%d)", CONTACTS_ERROR_PERMISSION_DENIED);
 			return CONTACTS_ERROR_PERMISSION_DENIED;
-		}
-		else {
-			CTS_ERR("pims_ipc_create() Failed(%d)", CONTACTS_ERROR_IPC_NOT_AVALIABLE);
+		} else {
+			CTS_ERR("pims_ipc_create() Fail(%d)", CONTACTS_ERROR_IPC_NOT_AVALIABLE);
 			return CONTACTS_ERROR_IPC_NOT_AVALIABLE;
 		}
 	}
@@ -137,7 +136,7 @@ static int _ctsvc_ipc_connect(contacts_h contact, pims_ipc_h ipc)
 
 	ret = ctsvc_ipc_marshal_handle(contact, indata);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_ipc_marshal_handle Fail(%d)", ret);
+		CTS_ERR("ctsvc_ipc_marshal_handle() Fail(%d)", ret);
 		pims_ipc_data_destroy(indata);
 		return ret;
 	}
@@ -178,8 +177,7 @@ int ctsvc_ipc_connect(contacts_h contact, unsigned int handle_id)
 
 	if (NULL == ipc_data) {
 		ipc_data = calloc(1, sizeof(struct ctsvc_ipc_s));
-		if (NULL == ipc_data)
-		{
+		if (NULL == ipc_data) {
 			CTS_ERR("calloc() Fail");
 			return CONTACTS_ERROR_OUT_OF_MEMORY;
 		}
@@ -214,18 +212,23 @@ int ctsvc_ipc_disconnect(contacts_h contact, unsigned int handle_id, int connect
 
 	indata = pims_ipc_data_create(0);
 	if (indata == NULL) {
-		CTS_ERR("ipc data created fail!");
+		CTS_ERR("pims_ipc_data_create() Fail");
 		return CONTACTS_ERROR_OUT_OF_MEMORY;
 	}
 
 	ret = ctsvc_ipc_marshal_handle(contact, indata);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_ipc_marshal_handle() Fail(%d)", ret);
+	if (CONTACTS_ERROR_NONE != ret) {
+		pims_ipc_data_destroy(indata);
+		CTS_ERR("ctsvc_ipc_marshal_handle() Fail(%d)", ret);
+		return ret;
+	}
 
 	if (pims_ipc_call(ipc_data->ipc, CTSVC_IPC_MODULE, CTSVC_IPC_SERVER_DISCONNECT, indata, &outdata) != 0) {
 		pims_ipc_data_destroy(indata);
 		CTS_ERR("[GLOBAL_IPC_CHANNEL] pims_ipc_call failed");
 		return CONTACTS_ERROR_IPC;
 	}
+	pims_ipc_data_destroy(indata);
 
 	if (outdata) {
 		ctsvc_ipc_unmarshal_int(outdata, &ret);
@@ -236,11 +239,9 @@ int ctsvc_ipc_disconnect(contacts_h contact, unsigned int handle_id, int connect
 			return ret;
 		}
 
-		if (1 == connection_count) {
+		if (1 == connection_count)
 			g_hash_table_remove(_ctsvc_ipc_table, ipc_key);
-		}
-	}
-	else {
+	} else {
 		CTS_ERR("pims_ipc_call out data is NULL");
 		return CONTACTS_ERROR_IPC;
 	}
@@ -282,14 +283,14 @@ int ctsvc_ipc_call(char *module, char *function, pims_ipc_h data_in, pims_ipc_da
 void ctsvc_client_ipc_set_change_version(contacts_h contact, int version)
 {
 	RETM_IF(NULL == contact, "contact is NULL");
-	ctsvc_base_s *base = (ctsvc_base_s *)contact;
+	ctsvc_base_s *base = (ctsvc_base_s*)contact;
 	base->version = version;
 }
 
 int ctsvc_client_ipc_get_change_version(contacts_h contact)
 {
 	RETVM_IF(NULL == contact, -1, "contact is NULL");
-	ctsvc_base_s *base = (ctsvc_base_s *)contact;
+	ctsvc_base_s *base = (ctsvc_base_s*)contact;
 	return base->version;
 }
 
@@ -304,13 +305,13 @@ int ctsvc_ipc_client_check_permission(int permission, bool *result)
 
 	indata = pims_ipc_data_create(0);
 	if (indata == NULL) {
-		CTS_ERR("ipc data created fail !");
+		CTS_ERR("pims_ipc_data_create() Fail");
 		return CONTACTS_ERROR_OUT_OF_MEMORY;
 	}
 
 	ret = ctsvc_ipc_marshal_int(permission, indata);
 	if (ret != CONTACTS_ERROR_NONE) {
-		CTS_ERR("marshal fail");
+		CTS_ERR("ctsvc_ipc_marshal_int() Fail(%d)", ret);
 		pims_ipc_data_destroy(indata);
 		return ret;
 	}
@@ -378,7 +379,7 @@ static void _ctsvc_ipc_recovery_foreach_cb(gpointer key, gpointer value, gpointe
 	RETM_IF(CONTACTS_ERROR_NONE != ret, "_ctsvc_ipc_create() Fail(%d)", ret);
 	ctsvc_ipc_set_disconnected_cb(ipc_data->ipc, _ctsvc_ipc_disconnected_cb, NULL);
 
-	for (c=ipc_data->list_handle;c;c=c->next) {
+	for (c = ipc_data->list_handle; c; c = c->next) {
 		contacts_h contact = c->data;
 		ret = _ctsvc_ipc_connect(contact, ipc_data->ipc);
 		WARN_IF(CONTACTS_ERROR_NONE != ret, "_ctsvc_ipc_connect() Fail(%d)", ret);

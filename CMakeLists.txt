@@ -1,48 +1,24 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 PROJECT(contacts-service C CXX)
 
+INCLUDE(FindPkgConfig)
+
 #IF("${CMAKE_BUILD_TYPE}" STREQUAL "")
 #	SET(CMAKE_BUILD_TYPE "Release")
 #ENDIF("${CMAKE_BUILD_TYPE}" STREQUAL "")
 #MESSAGE("Build type: ${CMAKE_BUILD_TYPE}")
 
-SET(DEST_INCLUDE_DIR "include/contacts-svc")
-SET(SRC_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/include")
-
-SET(PREFIX ${CMAKE_INSTALL_PREFIX})
-SET(EXEC_PREFIX "\${prefix}")
-SET(LIBDIR "\${prefix}/lib")
-SET(INCLUDEDIR "\${prefix}/${DEST_INCLUDE_DIR}")
-
 EXECUTE_PROCESS(COMMAND build-util/generator.sh)
 
-#INCLUDE_DIRECTORIES(${SRC_INCLUDE_DIR})
-SET(EXTRA_CFLAGS "${EXTRA_CFLAGS} -I${SRC_INCLUDE_DIR}")
-
-INCLUDE(FindPkgConfig)
-pkg_check_modules(pkgs REQUIRED glib-2.0 pims-ipc capi-base-common vconf dlog db-util libtzplatform-config gobject-2.0 icu-uc)
-
-FOREACH(flag ${pkgs_CFLAGS})
-	SET(EXTRA_CFLAGS "${EXTRA_CFLAGS} ${flag}")
-ENDFOREACH(flag)
-
-SET(EXTRA_CFLAGS "${EXTRA_CFLAGS} -fvisibility=hidden -fdata-sections -ffunction-sections -Wl,--gc-sections")
-
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${EXTRA_CFLAGS} -fPIC")
+SET(EXTRA_CFLAGS "-fvisibility=hidden -fdata-sections -ffunction-sections -Wl,--gc-sections")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${EXTRA_CFLAGS} -Werror-implicit-function-declaration ")
 #SET(CMAKE_C_FLAGS_DEBUG "-O0 -g")
 #SET(CMAKE_C_FLAGS_RELEASE "-mabi=aapcs-linux -march=armv7-a -msoft-float -O2")
-
-ADD_DEFINITIONS("-DPREFIX=\"${PREFIX}\"")
 
 # for tizen open build test
 IF(ENABLE_LOG_FEATURE)
 	ADD_DEFINITIONS("-DENABLE_LOG_FEATURE")
 ENDIF(ENABLE_LOG_FEATURE)
-
-
-# Install header file
-FILE(GLOB HEADER_FILES ${CMAKE_CURRENT_SOURCE_DIR}/include/*.h)
-INSTALL(FILES ${HEADER_FILES} DESTINATION ${DEST_INCLUDE_DIR})
 
 ADD_SUBDIRECTORY(client)
 ADD_SUBDIRECTORY(server)

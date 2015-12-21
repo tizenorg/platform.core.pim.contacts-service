@@ -1,7 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@
 #include "ctsvc_server_setting.h"
 #include "ctsvc_notification.h"
 
-enum{
+enum {
 	CTSVC_NN_FIRST,
 	CTSVC_NN_LAST,
 	CTSVC_NN_MAX,
@@ -39,11 +39,11 @@ enum{
 static inline void __ctsvc_make_name_lookup(int op_code, const char *name_first,
 		const char *name_last, char **name_lookup)
 {
-	if (name_first && NULL == name_last)
+	if (name_first && NULL == name_last) {
 		*name_lookup = SAFE_STRDUP(name_first);
-	else if (NULL == name_first && name_last)
+	} else if (NULL == name_first && name_last) {
 		*name_lookup = SAFE_STRDUP(name_last);
-	else {
+	} else {
 		if (CONTACTS_NAME_DISPLAY_ORDER_FIRSTLAST == op_code) {
 			*name_lookup = calloc(1, SAFE_STRLEN(name_first) + SAFE_STRLEN(name_last) + 3);
 			if (NULL == *name_lookup) {
@@ -52,8 +52,7 @@ static inline void __ctsvc_make_name_lookup(int op_code, const char *name_first,
 			}
 			snprintf(*name_lookup, SAFE_STRLEN(name_first) + SAFE_STRLEN(name_last) + 3, "%s %c%s",
 					SAFE_STR(name_first), 0x7E, SAFE_STR(name_last));
-		}
-		else {
+		} else {
 			*name_lookup = calloc(1, SAFE_STRLEN(name_first) + SAFE_STRLEN(name_last) + 5);
 			if (NULL == *name_lookup) {
 				CTS_ERR("calloc() Fail");
@@ -127,8 +126,8 @@ int ctsvc_db_name_insert(contacts_record_h record, int contact_id, bool is_my_pr
 	int ret, len = 0;
 	cts_stmt stmt = NULL;
 	ctsvc_name_s *name = (ctsvc_name_s*)record;
-	char query[CTS_SQL_MAX_LEN]={0};
-	char *normal_name[CTSVC_NN_MAX]={NULL}; /* insert name search info */
+	char query[CTS_SQL_MAX_LEN] = {0};
+	char *normal_name[CTSVC_NN_MAX] = {NULL}; /* insert name search info */
 	char *temp_normal_first = NULL;
 	char *temp_normal_last = NULL;
 	int len_normal_first = 0;
@@ -137,35 +136,35 @@ int ctsvc_db_name_insert(contacts_record_h record, int contact_id, bool is_my_pr
 	RETV_IF(NULL == name, CONTACTS_ERROR_INVALID_PARAMETER);
 
 	RETVM_IF(contact_id <= 0, CONTACTS_ERROR_INVALID_PARAMETER,
-				"Invalid parameter : contact_id(%d) is mandatory field to insert name record ", name->contact_id);
+			"Invalid parameter : contact_id(%d) is mandatory field to insert name record ", name->contact_id);
 	RETVM_IF(0 < name->id, CONTACTS_ERROR_INVALID_PARAMETER,
-				"Invalid parameter : id(%d), This record is already inserted", name->id);
+			"Invalid parameter : id(%d), This record is already inserted", name->id);
 
 	if (name->first || name->last || name->addition || name->prefix || name->suffix
-		|| name->phonetic_first || name->phonetic_middle || name->phonetic_last) {
+			|| name->phonetic_first || name->phonetic_middle || name->phonetic_last) {
 		/*
 		 * If name record already exists, delete current name record
 		 * If user update record with out-of-date record, name record can be two
 		 */
 		snprintf(query, sizeof(query),
 				"DELETE FROM "CTS_TABLE_DATA" "
-						"WHERE contact_id = %d AND datatype=%d "
-									"AND is_my_profile = %d",
-						contact_id, CTSVC_DATA_NAME, is_my_profile);
+				"WHERE contact_id = %d AND datatype=%d "
+				"AND is_my_profile = %d",
+				contact_id, CTSVC_DATA_NAME, is_my_profile);
 		ret = ctsvc_query_exec(query);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("ctsvc_query_exec Faild(%d)", ret);
+			CTS_ERR("ctsvc_query_exec() Faild(%d)", ret);
 			return ret;
 		}
 
 		snprintf(query, sizeof(query),
-			"INSERT INTO "CTS_TABLE_DATA"(contact_id, is_my_profile, datatype, is_default, data1, data2, data3, "
-						"data4, data5, data6, data7, data8, data9, data10, data11, data12) "
-						"VALUES(%d, %d, %d, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+				"INSERT INTO "CTS_TABLE_DATA"(contact_id, is_my_profile, datatype, is_default, data1, data2, data3, "
+				"data4, data5, data6, data7, data8, data9, data10, data11, data12) "
+				"VALUES(%d, %d, %d, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 				contact_id, is_my_profile, CTSVC_DATA_NAME);
 
 		ret = ctsvc_query_prepare(query, &stmt);
-		RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
+		RETVM_IF(NULL == stmt, ret, "ctsvc_query_prepare() Fail(%d)", ret);
 
 		ret = __ctsvc_normalize_name(name, normal_name);
 		WARN_IF(ret < CONTACTS_ERROR_NONE, "__ctsvc_normalize_name() Fail(%d)", ret);
@@ -177,11 +176,11 @@ int ctsvc_db_name_insert(contacts_record_h record, int contact_id, bool is_my_pr
 			temp_normal_first = calloc(1, len_normal_first + len_normal_last + 1);
 			if (normal_name[CTSVC_NN_LAST]) {
 				len = snprintf(temp_normal_first, len_normal_first + len_normal_last + 1,
-					"%s", normal_name[CTSVC_NN_LAST]);
+						"%s", normal_name[CTSVC_NN_LAST]);
 			}
 			if (normal_name[CTSVC_NN_FIRST]) {
 				snprintf(temp_normal_first+len, len_normal_first + len_normal_last + 1 - len,
-					"%s", normal_name[CTSVC_NN_FIRST]);
+						"%s", normal_name[CTSVC_NN_FIRST]);
 			}
 			temp_normal_last = NULL;
 			break;
@@ -206,10 +205,10 @@ int ctsvc_db_name_insert(contacts_record_h record, int contact_id, bool is_my_pr
 
 
 		__ctsvc_make_name_lookup(CONTACTS_NAME_DISPLAY_ORDER_FIRSTLAST,
-									temp_normal_first, temp_normal_last, &name->lookup);
+				temp_normal_first, temp_normal_last, &name->lookup);
 
 		__ctsvc_make_name_lookup(CONTACTS_NAME_DISPLAY_ORDER_LASTFIRST,
-									temp_normal_first, temp_normal_last, &name->reverse_lookup);
+				temp_normal_first, temp_normal_last, &name->reverse_lookup);
 
 		free(temp_normal_first);
 		free(temp_normal_last);
@@ -220,7 +219,7 @@ int ctsvc_db_name_insert(contacts_record_h record, int contact_id, bool is_my_pr
 
 		ret = ctsvc_stmt_step(stmt);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("DB error : ctsvc_stmt_step() Fail(%d)", ret);
+			CTS_ERR("ctsvc_stmt_step() Fail(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
 			return ret;
 		}
@@ -246,7 +245,7 @@ int ctsvc_db_name_get_value_from_stmt(cts_stmt stmt, contacts_record_h *record, 
 	char *temp;
 	ctsvc_name_s *name;
 
-	ret = contacts_record_create(_contacts_name._uri, (contacts_record_h *)&name);
+	ret = contacts_record_create(_contacts_name._uri, (contacts_record_h*)&name);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "contacts_record_create Fail(%d)", ret);
 
 	name->id = ctsvc_stmt_get_int(stmt, start_count++);
@@ -281,9 +280,9 @@ int ctsvc_db_name_get_value_from_stmt(cts_stmt stmt, contacts_record_h *record, 
 
 int ctsvc_db_name_update(contacts_record_h record, bool is_my_profile)
 {
-	int ret, len=0;
+	int ret, len = 0;
 	int id;
-	char* set = NULL;
+	char *set = NULL;
 	GSList *cursor = NULL;
 	GSList *bind_text = NULL;
 	ctsvc_name_s *name = (ctsvc_name_s*)record;
@@ -315,11 +314,11 @@ int ctsvc_db_name_update(contacts_record_h record, bool is_my_profile)
 		temp_normal_first = calloc(1, SAFE_STRLEN(normal_name[CTSVC_NN_LAST]) +  SAFE_STRLEN(normal_name[CTSVC_NN_LAST]) + 1);
 		if (normal_name[CTSVC_NN_LAST]) {
 			len = snprintf(temp_normal_first, SAFE_STRLEN(normal_name[CTSVC_NN_LAST]) +  SAFE_STRLEN(normal_name[CTSVC_NN_LAST]) + 1,
-				"%s", normal_name[CTSVC_NN_LAST]);
+					"%s", normal_name[CTSVC_NN_LAST]);
 		}
 		if (normal_name[CTSVC_NN_FIRST]) {
 			snprintf(temp_normal_first+len, SAFE_STRLEN(normal_name[CTSVC_NN_LAST]) +  SAFE_STRLEN(normal_name[CTSVC_NN_LAST]) + 1 - len,
-				"%s", normal_name[CTSVC_NN_FIRST]);
+					"%s", normal_name[CTSVC_NN_FIRST]);
 		}
 		temp_normal_last = NULL;
 		break;
@@ -340,7 +339,7 @@ int ctsvc_db_name_update(contacts_record_h record, bool is_my_profile)
 	if (ctsvc_get_primary_sort() == ret)
 		name->language_type = CTSVC_LANG_DEFAULT;
 	else if (ctsvc_get_secondary_sort() == ret)
-			name->language_type = CTSVC_LANG_SECONDARY;
+		name->language_type = CTSVC_LANG_SECONDARY;
 	else
 		name->language_type = ret;
 
@@ -348,10 +347,10 @@ int ctsvc_db_name_update(contacts_record_h record, bool is_my_profile)
 	name->last = tmp_last;
 
 	__ctsvc_make_name_lookup(CONTACTS_NAME_DISPLAY_ORDER_FIRSTLAST,
-								temp_normal_first, temp_normal_last, &name->lookup);
+			temp_normal_first, temp_normal_last, &name->lookup);
 
 	__ctsvc_make_name_lookup(CONTACTS_NAME_DISPLAY_ORDER_LASTFIRST,
-								temp_normal_first, temp_normal_last, &name->reverse_lookup);
+			temp_normal_first, temp_normal_last, &name->reverse_lookup);
 
 	free(temp_normal_first);
 	free(temp_normal_last);
@@ -371,10 +370,10 @@ int ctsvc_db_name_update(contacts_record_h record, bool is_my_profile)
 			ctsvc_set_name_noti();
 	} while (0);
 
-	CTSVC_RECORD_RESET_PROPERTY_FLAGS((ctsvc_record_s *)record);
+	CTSVC_RECORD_RESET_PROPERTY_FLAGS((ctsvc_record_s*)record);
 	CONTACTS_FREE(set);
 	if (bind_text) {
-		for (cursor=bind_text;cursor;cursor=cursor->next)
+		for (cursor = bind_text; cursor; cursor = cursor->next)
 			CONTACTS_FREE(cursor->data);
 		g_slist_free(bind_text);
 	}

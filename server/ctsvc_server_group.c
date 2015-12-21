@@ -1,7 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,7 +73,7 @@ int ctsvc_group_add_contact_in_transaction(int group_id, int contact_id)
 	snprintf(query, sizeof(query), "INSERT OR REPLACE INTO %s VALUES(%d, %d, %d, 0)",
 			CTS_TABLE_GROUP_RELATIONS, group_id, contact_id, version);
 	ret = ctsvc_query_prepare(query, &stmt);
-	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
+	RETVM_IF(NULL == stmt, ret, "ctsvc_query_prepare() Fail(%d)", ret);
 
 	ret = ctsvc_stmt_step(stmt);
 	WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_stmt_step() Fail(%d)", ret);
@@ -126,14 +126,14 @@ int ctsvc_group_add_contact(int group_id, int contact_id)
 	do {
 		int changed = ctsvc_group_add_contact_in_transaction(group_id, contact_id);
 		if (changed < CONTACTS_ERROR_NONE) {
-			CTS_ERR("DB error : ctsvc_group_add_contact_in_transaction() Fail(%d)", changed);
+			CTS_ERR("ctsvc_group_add_contact_in_transaction() Fail(%d)", changed);
 			ret = changed;
 			break;
 		}
 
 		ret = ctsvc_db_contact_update_changed_time(contact_id);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("DB error : ctsvc_db_contact_update_changed_time() Fail(%d)", ret);
+			CTS_ERR("ctsvc_db_contact_update_changed_time() Fail(%d)", ret);
 			ret = CONTACTS_ERROR_DB;
 			break;
 		}
@@ -141,7 +141,7 @@ int ctsvc_group_add_contact(int group_id, int contact_id)
 
 		ret = ctsvc_end_trans(true);
 		if (ret < CONTACTS_ERROR_NONE) {
-			CTS_ERR("DB error : ctsvc_end_trans() Fail(%d)", ret);
+			CTS_ERR("ctsvc_end_trans() Fail(%d)", ret);
 			return ret;
 		}
 
@@ -168,7 +168,7 @@ int ctsvc_group_remove_contact_in_transaction(int group_id, int contact_id)
 			CTS_TABLE_GROUP_RELATIONS, version, group_id, contact_id);
 
 	ret = ctsvc_query_prepare(query, &stmt);
-	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
+	RETVM_IF(NULL == stmt, ret, "ctsvc_query_prepare() Fail(%d)", ret);
 
 	ret = ctsvc_stmt_step(stmt);
 	WARN_IF(CONTACTS_ERROR_NONE != ret, "DB Error: ctsvc_stmt_step() Fail(%d)", ret);
@@ -221,14 +221,14 @@ int ctsvc_group_remove_contact(int group_id, int contact_id)
 	do {
 		int changed = ctsvc_group_remove_contact_in_transaction(group_id, contact_id);
 		if (changed < CONTACTS_ERROR_NONE) {
-			CTS_ERR("DB error : ctsvc_group_remove_contact_in_transaction() Fail(%d)", changed);
+			CTS_ERR("ctsvc_group_remove_contact_in_transaction() Fail(%d)", changed);
 			ret = changed;
 			break;
 		}
 
 		ret = ctsvc_db_contact_update_changed_time(contact_id);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("DB error : ctsvc_db_contact_update_changed_time() Fail(%d)", ret);
+			CTS_ERR("ctsvc_db_contact_update_changed_time() Fail(%d)", ret);
 			ret = CONTACTS_ERROR_DB;
 			break;
 		}
@@ -236,7 +236,7 @@ int ctsvc_group_remove_contact(int group_id, int contact_id)
 
 		ret = ctsvc_end_trans(true);
 		if (ret < CONTACTS_ERROR_NONE) {
-			CTS_ERR("DB error : ctsvc_end_trans() Fail(%d)", ret);
+			CTS_ERR("ctsvc_end_trans() Fail(%d)", ret);
 			return ret;
 		}
 
@@ -277,7 +277,7 @@ int ctsvc_group_set_group_order(int group_id, int previous_group_id, int next_gr
 	snprintf(query, sizeof(query), "SELECT group_prio, addressbook_id FROM "CTS_TABLE_GROUPS" WHERE group_id = ?");
 
 	ret = ctsvc_query_prepare(query, &stmt);
-	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
+	RETVM_IF(NULL == stmt, ret, "ctsvc_query_prepare() Fail(%d)", ret);
 
 	ctsvc_stmt_bind_int(stmt, 1, previous_group_id);
 	ret = ctsvc_stmt_step(stmt);
@@ -295,19 +295,19 @@ int ctsvc_group_set_group_order(int group_id, int previous_group_id, int next_gr
 	ctsvc_stmt_reset(stmt);
 	ctsvc_stmt_bind_int(stmt, 1, group_id);
 	ret = ctsvc_stmt_step(stmt);
-	if (1 /*CTS_TRUE*/ == ret) {
+	if (1 /*CTS_TRUE*/ == ret)
 		addressbook_id = ctsvc_stmt_get_int(stmt, 1);
-	}
+
 	ctsvc_stmt_finalize(stmt);
 
 	RETVM_IF(0.0 == previous_prio && 0.0 == next_prio, CONTACTS_ERROR_INVALID_PARAMETER,
 			"The indexes for previous and next are invalid.");
 	RETVM_IF(previous_group_id && previous_addressbook_id != addressbook_id, CONTACTS_ERROR_INVALID_PARAMETER,
-				"previous group(%d) and group(%d) are not the same addressbook(%d, %d) groups",
-				previous_group_id, group_id, previous_addressbook_id, addressbook_id);
+			"previous group(%d) and group(%d) are not the same addressbook(%d, %d) groups",
+			previous_group_id, group_id, previous_addressbook_id, addressbook_id);
 	RETVM_IF(next_group_id && next_addressbook_id != addressbook_id, CONTACTS_ERROR_INVALID_PARAMETER,
-				"next group(%d) and group(%d) are not the same addressbook(%d, %d) groups",
-				next_group_id, group_id, next_addressbook_id, addressbook_id);
+			"next group(%d) and group(%d) are not the same addressbook(%d, %d) groups",
+			next_group_id, group_id, next_addressbook_id, addressbook_id);
 
 	if (0.0 == next_prio)
 		prio = previous_prio + 1;
@@ -332,21 +332,21 @@ int ctsvc_group_set_group_order(int group_id, int previous_group_id, int next_gr
 
 	ret = ctsvc_end_trans(true);
 	if (ret < CONTACTS_ERROR_NONE) {
-		CTS_ERR("DB error : ctsvc_end_trans() Fail(%d)", ret);
+		CTS_ERR("ctsvc_end_trans() Fail(%d)", ret);
 		return ret;
-	}
-	else
+	} else {
 		return CONTACTS_ERROR_NONE;
+	}
 }
 
 /*
-API int contacts_group_add_person(int group_id, int person_id)
-{
-	return CONTACTS_ERROR_NONE;
-}
-API int contacts_group_remove_person(int group_id, int person_id)
-{
-	return CONTACTS_ERROR_NONE;
-}
-*/
+   API int contacts_group_add_person(int group_id, int person_id)
+   {
+   return CONTACTS_ERROR_NONE;
+   }
+   API int contacts_group_remove_person(int group_id, int person_id)
+   {
+   return CONTACTS_ERROR_NONE;
+   }
+   */
 

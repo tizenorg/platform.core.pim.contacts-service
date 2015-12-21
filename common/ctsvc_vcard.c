@@ -1,11 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
- *
- * Contact: Dohyung Jin <dh.jin@samsung.com>
- *                 Jongwon Lee <gogosing.lee@samsung.com>
- *                 Donghee Ye <donghee.ye@samsung.com>
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +22,7 @@
 #include <ctype.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <sys/time.h>
 #include <unicode/ucnv.h>
 #include <unicode/ustring.h>
 #include <tzplatform_config.h>
@@ -43,7 +40,7 @@
 
 #define DEFAULT_ADDRESS_BOOK_ID 0
 
-#define SMART_STRDUP(src) (src && *src)?strdup(src):NULL
+#define SMART_STRDUP(src) (src && *src) ? strdup(src) : NULL
 #define CTSVC_VCARD_PHOTO_MAX_SIZE 1024*1024
 
 #define CTSVC_VCARD_APPEND_STR(buf, buf_size, len, str) do { \
@@ -117,7 +114,7 @@ enum {
 	CTSVC_VCARD_VALUE_MAX
 };
 
-enum{
+enum {
 	CTSVC_VCARD_IMG_NONE,
 	CTSVC_VCARD_IMG_PNG,    /* Portable Network Graphics */
 	/* vcard  2.1 spec */
@@ -233,8 +230,7 @@ static int __ctsvc_vcard_append_str(char **buf, int *buf_size, int len, const ch
 					*r = '\\';
 					r++;
 					*r = 'n';
-				}
-				else {
+				} else {
 					*r = *s;
 				}
 				break;
@@ -242,11 +238,11 @@ static int __ctsvc_vcard_append_str(char **buf, int *buf_size, int len, const ch
 				*r = '\\';
 				r++;
 				str_len++;
-				if (*buf_size<str_len+len+1) {
+				if (*buf_size < str_len+len+1) {
 					*buf_size = *buf_size * 2;
-					if (NULL == (tmp = realloc(*buf, *buf_size)))
+					if (NULL == (tmp = realloc(*buf, *buf_size))) {
 						return -1;
-					else {
+					} else {
 						*buf = tmp;
 						r = (char *)(*buf+len+str_len);
 					}
@@ -262,11 +258,11 @@ static int __ctsvc_vcard_append_str(char **buf, int *buf_size, int len, const ch
 				*r = '\\';
 				r++;
 				str_len++;
-				if (*buf_size<str_len+len+1) {
+				if (*buf_size < str_len+len+1) {
 					*buf_size = *buf_size * 2;
-					if (NULL == (tmp = realloc(*buf, *buf_size)))
+					if (NULL == (tmp = realloc(*buf, *buf_size))) {
 						return -1;
-					else {
+					} else {
 						*buf = tmp;
 						r = (char *)(*buf+len+str_len);
 					}
@@ -278,11 +274,11 @@ static int __ctsvc_vcard_append_str(char **buf, int *buf_size, int len, const ch
 					*r = '\\';
 					r++;
 					str_len++;
-					if (*buf_size<str_len+len+1) {
+					if (*buf_size < str_len+len+1) {
 						*buf_size = *buf_size * 2;
-						if (NULL == (tmp = realloc(*buf, *buf_size)))
+						if (NULL == (tmp = realloc(*buf, *buf_size))) {
 							return -1;
-						else {
+						} else {
 							*buf = tmp;
 							r = (char *)(*buf+len+str_len);
 						}
@@ -291,18 +287,17 @@ static int __ctsvc_vcard_append_str(char **buf, int *buf_size, int len, const ch
 					*r = *s;
 					r++;
 					s++;
-					if (*buf_size<str_len+len+1) {
+					if (*buf_size < str_len+len+1) {
 						*buf_size = *buf_size * 2;
-						if (NULL == (tmp = realloc(*buf, *buf_size)))
+						if (NULL == (tmp = realloc(*buf, *buf_size))) {
 							return -1;
-						else {
+						} else {
 							*buf = tmp;
 							r = (char *)(*buf+len+str_len);
 						}
 					}
 					*r = *s;
-				}
-				else {
+				} else {
 					*r = *s;
 				}
 				break;
@@ -311,11 +306,11 @@ static int __ctsvc_vcard_append_str(char **buf, int *buf_size, int len, const ch
 					*r = '\\';
 					r++;
 					str_len++;
-					if (*buf_size<str_len+len+1) {
+					if (*buf_size < str_len+len+1) {
 						*buf_size = *buf_size * 2;
-						if (NULL == (tmp = realloc(*buf, *buf_size)))
+						if (NULL == (tmp = realloc(*buf, *buf_size))) {
 							return -1;
-						else {
+						} else {
 							*buf = tmp;
 							r = (char *)(*buf+len+str_len);
 						}
@@ -324,18 +319,17 @@ static int __ctsvc_vcard_append_str(char **buf, int *buf_size, int len, const ch
 					*r = *s;
 					r++;
 					s++;
-					if (*buf_size<str_len+len+1) {
+					if (*buf_size < str_len+len+1) {
 						*buf_size = *buf_size * 2;
-						if (NULL == (tmp = realloc(*buf, *buf_size)))
+						if (NULL == (tmp = realloc(*buf, *buf_size))) {
 							return -1;
-						else {
+						} else {
 							*buf = tmp;
 							r = (char *)(*buf+len+str_len);
 						}
 					}
 					*r = *s;
-				}
-				else {
+				} else {
 					*r = *s;
 				}
 				break;
@@ -347,8 +341,7 @@ static int __ctsvc_vcard_append_str(char **buf, int *buf_size, int len, const ch
 			s++;
 		}
 		len_temp = str_len;
-	}
-	else {
+	} else {
 		len_temp = snprintf(*buf+len, *buf_size-len+1, "%s", safe_str);
 	}
 	len += len_temp;
@@ -384,8 +377,7 @@ static inline int __ctsvc_vcard_add_folding(char **buf, int *buf_size, int buf_l
 			if (NULL == (tmp = realloc(buf_copy, *buf_size))) {
 				free(buf_copy);
 				return -1;
-			}
-			else {
+			} else {
 				buf_copy = tmp;
 				r = (buf_copy + result_len);
 			}
@@ -398,9 +390,9 @@ static inline int __ctsvc_vcard_add_folding(char **buf, int *buf_size, int buf_l
 				encode_64 = true;
 		}
 
-		if ('\r' == *s)
+		if ('\r' == *s) {
 			len--;
-		else if ('\n' == *s) {
+		} else if ('\n' == *s) {
 			len = -1;
 			char_len = 0;
 			content_start = false;
@@ -446,7 +438,7 @@ static inline int __ctsvc_vcard_append_name(ctsvc_list_s *names, char **buf, int
 
 	RETV_IF(NULL == cursor, len);
 
-	name = (ctsvc_name_s *)cursor->data;
+	name = (ctsvc_name_s*)cursor->data;
 
 	CTSVC_VCARD_APPEND_STR(buf, buf_size, len, content_name[CTSVC_VCARD_VALUE_N]);
 
@@ -471,14 +463,13 @@ static inline int __ctsvc_vcard_append_name(ctsvc_list_s *names, char **buf, int
 #endif
 		if (CONTACTS_NAME_DISPLAY_ORDER_FIRSTLAST == order) {
 			snprintf(display, sizeof(display), "%s %s", name->first, name->last);
-		}
-		else {
+		} else {
 			/* CONTACTS_NAME_DISPLAY_ORDER_LASTFIRST */
 			snprintf(display, sizeof(display), "%s, %s", name->last, name->first);
 		}
-	}
-	else
+	} else {
 		snprintf(display, sizeof(display), "%s%s", SAFE_STR(name->first), SAFE_STR(name->last));
+	}
 
 	CTSVC_VCARD_APPEND_STR(buf, buf_size, len, content_name[CTSVC_VCARD_VALUE_FN]);
 	CTSVC_VCARD_APPEND_CONTENT(buf, buf_size, len, display);
@@ -712,16 +703,14 @@ static bool __ctsvc_vcard_is_valid_custom_label(char *label)
 	return true;
 }
 
-static inline int __ctsvc_vcard_put_company_type(int type, char *label, char **buf, int* buf_size, int len)
+static inline int __ctsvc_vcard_put_company_type(int type, char *label, char **buf, int *buf_size, int len)
 {
 	if (type == CONTACTS_COMPANY_TYPE_WORK) {
-		CTSVC_VCARD_APPEND_STR(buf,buf_size,len,";TYPE=WORK");
-	}
-
-	else if (type == CONTACTS_COMPANY_TYPE_CUSTOM) {
+		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";TYPE=WORK");
+	} else if (type == CONTACTS_COMPANY_TYPE_CUSTOM) {
 		if (__ctsvc_vcard_is_valid_custom_label(label)) {
-			CTSVC_VCARD_APPEND_STR(buf,buf_size,len,";TYPE=X-");
-			CTSVC_VCARD_APPEND_STR(buf,buf_size,len, label);
+			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";TYPE=X-");
+			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, label);
 		}
 	}
 	return len;
@@ -732,9 +721,9 @@ static inline int __ctsvc_vcard_append_company(ctsvc_list_s *company_list, char 
 	GList *cursor;
 	ctsvc_company_s *company;
 
-	for (cursor=company_list->records;cursor;cursor=cursor->next) {
+	for (cursor = company_list->records; cursor; cursor = cursor->next) {
 
-		company = (ctsvc_company_s *)cursor->data;
+		company = (ctsvc_company_s*)cursor->data;
 
 		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, content_name[CTSVC_VCARD_VALUE_ORG]);
 
@@ -742,42 +731,42 @@ static inline int __ctsvc_vcard_append_company(ctsvc_list_s *company_list, char 
 		RETV_IF(len < 0, CONTACTS_ERROR_OUT_OF_MEMORY);
 
 		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";CHARSET=UTF-8");
-		CTSVC_VCARD_APPEND_STR(buf,buf_size,len,":");
-		CTSVC_VCARD_APPEND_CONTENT_STR(buf,buf_size,len,company->name);
+		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ":");
+		CTSVC_VCARD_APPEND_CONTENT_STR(buf, buf_size, len, company->name);
 		if (company->department) {
-			CTSVC_VCARD_APPEND_STR(buf,buf_size,len,";");
-			CTSVC_VCARD_APPEND_CONTENT_STR(buf,buf_size,len,company->department);
+			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";");
+			CTSVC_VCARD_APPEND_CONTENT_STR(buf, buf_size, len, company->department);
 		}
 
-		CTSVC_VCARD_APPEND_STR(buf,buf_size,len,CTSVC_CRLF);
+		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, CTSVC_CRLF);
 
 		if (company->job_title) {
-			CTSVC_VCARD_APPEND_STR(buf,buf_size,len,content_name[CTSVC_VCARD_VALUE_TITLE]);
+			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, content_name[CTSVC_VCARD_VALUE_TITLE]);
 			CTSVC_VCARD_APPEND_CONTENT(buf, buf_size, len, company->job_title);
 		}
 
 		if (company->role) {
-			CTSVC_VCARD_APPEND_STR(buf,buf_size,len,content_name[CTSVC_VCARD_VALUE_ROLE]);
+			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, content_name[CTSVC_VCARD_VALUE_ROLE]);
 			CTSVC_VCARD_APPEND_CONTENT(buf, buf_size, len, company->role);
 		}
 
 		if (company->location) {
-			CTSVC_VCARD_APPEND_STR(buf,buf_size,len,content_name[CTSVC_VCARD_VALUE_X_TIZEN_COMPANY_LOCATION]);
+			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, content_name[CTSVC_VCARD_VALUE_X_TIZEN_COMPANY_LOCATION]);
 			CTSVC_VCARD_APPEND_CONTENT(buf, buf_size, len, company->location);
 		}
 
 		if (company->description) {
-			CTSVC_VCARD_APPEND_STR(buf,buf_size,len,content_name[CTSVC_VCARD_VALUE_X_TIZEN_COMPANY_DESCRIPTION]);
+			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, content_name[CTSVC_VCARD_VALUE_X_TIZEN_COMPANY_DESCRIPTION]);
 			CTSVC_VCARD_APPEND_CONTENT(buf, buf_size, len, company->description);
 		}
 
 		if (company->phonetic_name) {
-			CTSVC_VCARD_APPEND_STR(buf,buf_size,len,content_name[CTSVC_VCARD_VALUE_X_TIZEN_COMPANY_PHONETIC_NAME]);
+			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, content_name[CTSVC_VCARD_VALUE_X_TIZEN_COMPANY_PHONETIC_NAME]);
 			CTSVC_VCARD_APPEND_CONTENT(buf, buf_size, len, company->phonetic_name);
 		}
 
 		if (company->assistant_name) {
-			CTSVC_VCARD_APPEND_STR(buf,buf_size,len,content_name[CTSVC_VCARD_VALUE_X_TIZEN_COMPANY_ASSISTANT_NAME]);
+			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, content_name[CTSVC_VCARD_VALUE_X_TIZEN_COMPANY_ASSISTANT_NAME]);
 			CTSVC_VCARD_APPEND_CONTENT(buf, buf_size, len, company->assistant_name);
 		}
 
@@ -795,8 +784,8 @@ static inline int __ctsvc_vcard_append_note(ctsvc_list_s *note_list, char **buf,
 	GList *cursor;
 	ctsvc_note_s *note;
 
-	for (cursor=note_list->records;cursor;cursor=cursor->next) {
-		note = (ctsvc_note_s *)cursor->data;
+	for (cursor = note_list->records; cursor; cursor = cursor->next) {
+		note = (ctsvc_note_s*)cursor->data;
 		if (note->note) {
 			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, content_name[CTSVC_VCARD_VALUE_NOTE]);
 			CTSVC_VCARD_APPEND_CONTENT(buf, buf_size, len, note->note);
@@ -857,12 +846,12 @@ static inline int __ctsvc_vcard_put_postal_type(int type, char *label, char **bu
 	return len;
 }
 
-static inline int __ctsvc_vcard_append_postals(ctsvc_list_s *address_list, char **buf, int* buf_size, int len)
+static inline int __ctsvc_vcard_append_postals(ctsvc_list_s *address_list, char **buf, int *buf_size, int len)
 {
 	GList *cursor;
 	ctsvc_address_s *address;
 
-	for (cursor = address_list->records;cursor;cursor=cursor->next) {
+	for (cursor = address_list->records; cursor; cursor = cursor->next) {
 		address = cursor->data;
 		if (address) {
 			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, content_name[CTSVC_VCARD_VALUE_ADR]);
@@ -870,9 +859,8 @@ static inline int __ctsvc_vcard_append_postals(ctsvc_list_s *address_list, char 
 			len = __ctsvc_vcard_put_postal_type(address->type, SAFE_STR(address->label), buf, buf_size, len);
 			RETV_IF(len < 0, CONTACTS_ERROR_OUT_OF_MEMORY);
 
-			if (address->is_default) {
+			if (address->is_default)
 				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";PREF");
-			}
 
 			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";CHARSET=UTF-8");
 			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ":");
@@ -897,14 +885,14 @@ static inline int __ctsvc_vcard_append_postals(ctsvc_list_s *address_list, char 
 	return len;
 }
 
-static inline int __ctsvc_vcard_append_nicknames(ctsvc_list_s *nickname_list, char **buf, int* buf_size, int len)
+static inline int __ctsvc_vcard_append_nicknames(ctsvc_list_s *nickname_list, char **buf, int *buf_size, int len)
 {
 	bool first;
 	GList *cursor;
 	ctsvc_nickname_s *nickname;
 
 	first = true;
-	for (cursor=nickname_list->records;cursor;cursor=cursor->next) {
+	for (cursor = nickname_list->records; cursor; cursor = cursor->next) {
 		nickname = cursor->data;
 		if (nickname->nickname && *nickname->nickname) {
 			if (first) {
@@ -913,8 +901,7 @@ static inline int __ctsvc_vcard_append_nicknames(ctsvc_list_s *nickname_list, ch
 				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ":");
 				CTSVC_VCARD_APPEND_CONTENT_STR(buf, buf_size, len, nickname->nickname);
 				first = false;
-			}
-			else {
+			} else {
 				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ",");
 				CTSVC_VCARD_APPEND_CONTENT_STR(buf, buf_size, len, nickname->nickname);
 			}
@@ -1028,7 +1015,7 @@ static int __ctsvc_vcard_check_utf8(char c)
 static void __ctsvc_vcard_get_clean_number_for_export(char *str, char *dest)
 {
 	int char_len = 0;
-	char *s= SAFE_STR(str);
+	char *s = SAFE_STR(str);
 	char *r = NULL;
 
 	r = dest;
@@ -1038,126 +1025,120 @@ static void __ctsvc_vcard_get_clean_number_for_export(char *str, char *dest)
 		if (3 == char_len) {
 			if (*s == 0xef) {
 				if (*(s+1) == 0xbc) {
-					if (0x90 <= *(s+2) && *(s+2) <= 0x99) {  /* ef bc 90 : '0' ~ ef bc 99 : '9' */
+					if (0x90 <= *(s+2) && *(s+2) <= 0x99) {
+						/* ef bc 90 : '0' ~ ef bc 99 : '9' */
 						*r = '0' + (*(s+2) - 0x90);
 						r++;
-						s+=3;
-					}
-					else if (0x8b == *(s+2)) {   /* ef bc 8b : '+' */
+						s += 3;
+					} else if (0x8b == *(s+2)) {
+						/* ef bc 8b : '+' */
 						*r = '+';
 						r++;
-						s+=3;
-					}
-					else if (0x8a == *(s+2)) {   /* ef bc 8a : '*' */
+						s += 3;
+					} else if (0x8a == *(s+2)) {
+						/* ef bc 8a : '*' */
 						*r = '*';
 						r++;
-						s+=3;
-					}
-					else if (0x83 == *(s+2)) {   /* ef bc 83 : '#' */
+						s += 3;
+					} else if (0x83 == *(s+2)) {
+						/* ef bc 83 : '#' */
 						*r = '#';
 						r++;
-						s+=3;
-					}
-					else if (0x8c == *(s+2)) {   /* ef bc 8c : ',' */
+						s += 3;
+					} else if (0x8c == *(s+2)) {
+						/* ef bc 8c : ',' */
 						*r = 'p';
 						r++;
-						s+=3;
-					}
-					else if (0x9b == *(s+2)) {   /* ef bc 9b : ';' */
+						s += 3;
+					} else if (0x9b == *(s+2)) {
+						/* ef bc 9b : ';' */
 						*r = 'w';
 						r++;
-						s+=3;
+						s += 3;
+					} else {
+						s += char_len;
 					}
-					else {
-						s+=char_len;
-					}
+				} else {
+					s += char_len;
 				}
-				else {
-					s+=char_len;
-				}
+			} else {
+				s += char_len;
 			}
-			else {
-				s+=char_len;
-			}
-		}
-		else if (1 == char_len) {
+		} else if (1 == char_len) {
 			switch (*s) {
-				case '/':
-				case '.':
-				case '0' ... '9':
-				case '#':
-				case '*':
-				case '(':
-				case ')':
-				case '+':
-					*r = *s;
-					r++;
-					s++;
-					break;
-				case ',':
-				case 'p':
-				case 'P':
-					*r = 'p';
-					r++;
-					s++;
-					break;
-				case ';':
-				case 'w':
-				case 'W':
-					*r = 'w';
-					r++;
-					s++;
-					break;
-				case 'a' ... 'o':
-				case 'q' ... 'v':
-				case 'x' ... 'z':
-					*r = *s - 0x20;
-					r++;
-					s++;
-					break;
-				case 'A' ... 'O':
-				case 'Q' ... 'V':
-				case 'X' ... 'Z':
-					*r = *s;
-					r++;
-					s++;
-					break;
-				default:
-					s++;
-					break;
+			case '/':
+			case '.':
+			case '0' ... '9':
+			case '#':
+			case '*':
+			case '(':
+			case ')':
+			case '+':
+				*r = *s;
+				r++;
+				s++;
+				break;
+			case ',':
+			case 'p':
+			case 'P':
+				*r = 'p';
+				r++;
+				s++;
+				break;
+			case ';':
+			case 'w':
+			case 'W':
+				*r = 'w';
+				r++;
+				s++;
+				break;
+			case 'a' ... 'o':
+			case 'q' ... 'v':
+			case 'x' ... 'z':
+				*r = *s - 0x20;
+				r++;
+				s++;
+				break;
+			case 'A' ... 'O':
+			case 'Q' ... 'V':
+			case 'X' ... 'Z':
+				*r = *s;
+				r++;
+				s++;
+				break;
+			default:
+				s++;
+				break;
 			}
-		}
-		else {
-			s+=char_len;
+		} else {
+			s += char_len;
 		}
 	}
 	*r = '\0';
 	return;
 }
 
-static inline int __ctsvc_vcard_append_numbers(ctsvc_list_s *number_list, char **buf, int* buf_size, int len)
+static inline int __ctsvc_vcard_append_numbers(ctsvc_list_s *number_list, char **buf, int *buf_size, int len)
 {
 	GList *cursor;
 	ctsvc_number_s *number;
 
-	for (cursor=number_list->records;cursor;cursor=cursor->next) {
+	for (cursor = number_list->records; cursor; cursor = cursor->next) {
 		number = cursor->data;
 		if (number->number) {
 			char clean_number[strlen(number->number)+1];
 			clean_number[0] = '\0';
-			CTSVC_VCARD_APPEND_STR(buf,buf_size,len,content_name[CTSVC_VCARD_VALUE_TEL]);
+			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, content_name[CTSVC_VCARD_VALUE_TEL]);
 
 			len = __ctsvc_vcard_put_number_type(number->type, SAFE_STR(number->label), buf, buf_size, len);
 			RETV_IF(len < 0, CONTACTS_ERROR_OUT_OF_MEMORY);
 
-			if (number->is_default) {
-				CTSVC_VCARD_APPEND_STR(buf,buf_size,len,";PREF");
-			}
+			if (number->is_default)
+				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";PREF");
 
 			__ctsvc_vcard_get_clean_number_for_export(number->number, clean_number);
-			if (*clean_number) {
+			if (*clean_number)
 				CTSVC_VCARD_APPEND_CONTENT(buf, buf_size, len, clean_number);
-			}
 		}
 	}
 	return len;
@@ -1178,13 +1159,13 @@ static inline int __ctsvc_vcard_2_put_email_type(int type, char *dest, int dest_
 static inline int __ctsvc_vcard_put_email_type(int type, char *label, char **buf, int *buf_size, int len)
 {
 	char *type_str = NULL;
-	if (CONTACTS_EMAIL_TYPE_HOME == type)
+	if (CONTACTS_EMAIL_TYPE_HOME == type) {
 		type_str = "HOME";
-	else if (CONTACTS_EMAIL_TYPE_WORK == type)
+	} else if (CONTACTS_EMAIL_TYPE_WORK == type) {
 		type_str = "WORK";
-	else if (CONTACTS_EMAIL_TYPE_MOBILE == type)
+	} else if (CONTACTS_EMAIL_TYPE_MOBILE == type) {
 		type_str = "CELL";
-	else if (CONTACTS_EMAIL_TYPE_CUSTOM == type) {
+	} else if (CONTACTS_EMAIL_TYPE_CUSTOM == type) {
 		if (__ctsvc_vcard_is_valid_custom_label(label)) {
 			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";TYPE=X-");
 			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, label);
@@ -1204,7 +1185,7 @@ static inline int __ctsvc_vcard_append_emails(ctsvc_list_s *email_list, char **b
 	GList *cursor;
 	ctsvc_email_s *email;
 
-	for (cursor=email_list->records;cursor;cursor=cursor->next) {
+	for (cursor = email_list->records; cursor; cursor = cursor->next) {
 		email = cursor->data;
 		if (email->email_addr) {
 			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, content_name[CTSVC_VCARD_VALUE_EMAIL]);
@@ -1212,9 +1193,9 @@ static inline int __ctsvc_vcard_append_emails(ctsvc_list_s *email_list, char **b
 			len = __ctsvc_vcard_put_email_type(email->type, SAFE_STR(email->label), buf, buf_size, len);
 			RETV_IF(len < 0, CONTACTS_ERROR_OUT_OF_MEMORY);
 
-			if (email->is_default) {
+			if (email->is_default)
 				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";PREF");
-			}
+
 			CTSVC_VCARD_APPEND_CONTENT(buf, buf_size, len, email->email_addr);
 		}
 	}
@@ -1225,11 +1206,11 @@ static inline int __ctsvc_vcard_put_url_type(int type, char *label, char **buf, 
 {
 	char *type_str = NULL;
 
-	if (CONTACTS_URL_TYPE_HOME == type)
+	if (CONTACTS_URL_TYPE_HOME == type) {
 		type_str = "HOME";
-	else if (CONTACTS_URL_TYPE_WORK == type)
+	} else if (CONTACTS_URL_TYPE_WORK == type) {
 		type_str = "WORK";
-	else if (CONTACTS_URL_TYPE_CUSTOM == type) {
+	} else if (CONTACTS_URL_TYPE_CUSTOM == type) {
 		if (__ctsvc_vcard_is_valid_custom_label(label)) {
 			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";TYPE=X-");
 			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, label);
@@ -1248,7 +1229,7 @@ static inline int __ctsvc_vcard_append_webs(ctsvc_list_s *url_list, char **buf, 
 	GList *cursor;
 	ctsvc_url_s *url;
 
-	for (cursor=url_list->records;cursor;cursor=cursor->next) {
+	for (cursor = url_list->records; cursor; cursor = cursor->next) {
 		url = cursor->data;
 
 		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, content_name[CTSVC_VCARD_VALUE_URL]);
@@ -1271,7 +1252,7 @@ static inline int __ctsvc_vcard_append_events(ctsvc_list_s *event_list, char **b
 	ctsvc_event_s *data;
 	char event[VCARD_ITEM_LENGTH] = {0};
 
-	for (cursor=event_list->records;cursor;cursor=cursor->next) {
+	for (cursor = event_list->records; cursor; cursor = cursor->next) {
 		data = cursor->data;
 		if (0 == data->date) continue;
 
@@ -1281,29 +1262,25 @@ static inline int __ctsvc_vcard_append_events(ctsvc_list_s *event_list, char **b
 					content_name[CTSVC_VCARD_VALUE_BDAY],
 					data->date/10000, (data->date%10000)/100, data->date%100,
 					CTSVC_CRLF);
-		}
-		else if (CONTACTS_EVENT_TYPE_ANNIVERSARY == data->type) {
+		} else if (CONTACTS_EVENT_TYPE_ANNIVERSARY == data->type) {
 			snprintf(event, sizeof(event), "%s;TYPE=ANNIVERSARY:%d-%02d-%02d%s",
 					content_name[CTSVC_VCARD_VALUE_X_TIZEN_EVENT],
 					data->date/10000, (data->date%10000)/100, data->date%100,
 					CTSVC_CRLF);
-		}
-		else if (CONTACTS_EVENT_TYPE_CUSTOM == data->type) {
+		} else if (CONTACTS_EVENT_TYPE_CUSTOM == data->type) {
 			if (__ctsvc_vcard_is_valid_custom_label(data->label)) {
 				snprintf(event, sizeof(event), "%s;TYPE=X-%s:%d-%02d-%02d%s",
 						content_name[CTSVC_VCARD_VALUE_X_TIZEN_EVENT],
 						SAFE_STR(data->label),
 						data->date/10000, (data->date%10000)/100, data->date%100,
 						CTSVC_CRLF);
-			}
-			else {
+			} else {
 				snprintf(event, sizeof(event), "%s:%d-%02d-%02d%s",
 						content_name[CTSVC_VCARD_VALUE_X_TIZEN_EVENT],
 						data->date/10000, (data->date%10000)/100, data->date%100,
 						CTSVC_CRLF);
 			}
-		}
-		else {
+		} else {
 			snprintf(event, sizeof(event), "%s:%d-%02d-%02d%s",
 					content_name[CTSVC_VCARD_VALUE_X_TIZEN_EVENT],
 					data->date/10000, (data->date%10000)/100, data->date%100,
@@ -1322,7 +1299,7 @@ static inline int __ctsvc_vcard_append_messengers(ctsvc_list_s *messenger_list, 
 	const char *content_name_messenger = NULL;
 	const char *content_name_x_type = NULL;
 
-	for (cursor=messenger_list->records;cursor;cursor=cursor->next) {
+	for (cursor = messenger_list->records; cursor; cursor = cursor->next) {
 		messenger = cursor->data;
 
 		content_name_messenger = NULL;
@@ -1377,8 +1354,7 @@ static inline int __ctsvc_vcard_append_messengers(ctsvc_list_s *messenger_list, 
 			if (content_name_messenger) {
 				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, content_name_messenger);
 				CTSVC_VCARD_APPEND_CONTENT(buf, buf_size, len, messenger->im_id);
-			}
-			else if (content_name_x_type) {
+			} else if (content_name_x_type) {
 				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, content_name[CTSVC_VCARD_VALUE_X_TIZEN_MESSENGER]);
 				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, ";TYPE=");
 				CTSVC_VCARD_APPEND_STR(buf, buf_size, len, content_name_x_type);
@@ -1389,7 +1365,7 @@ static inline int __ctsvc_vcard_append_messengers(ctsvc_list_s *messenger_list, 
 	return len;
 }
 
-static inline int __ctsvc_vcard_put_relationship_type(int type, char *label, char **buf, int* buf_size, int len)
+static inline int __ctsvc_vcard_put_relationship_type(int type, char *label, char **buf, int *buf_size, int len)
 {
 	const char *type_str = NULL;
 
@@ -1457,7 +1433,7 @@ static inline int __ctsvc_vcard_append_relationships(ctsvc_list_s *relationship_
 	GList *cursor;
 	ctsvc_relationship_s *relationship;
 
-	for (cursor=relationship_list->records;cursor;cursor=cursor->next) {
+	for (cursor = relationship_list->records; cursor; cursor = cursor->next) {
 		relationship = cursor->data;
 
 		if (relationship->name) {
@@ -1483,7 +1459,7 @@ static inline int __ctsvc_vcard_put_photo(ctsvc_list_s *image_list, char **buf, 
 	GList *cursor;
 	ctsvc_image_s *data;
 
-	for (cursor=image_list->records;cursor;cursor=cursor->next) {
+	for (cursor = image_list->records; cursor; cursor = cursor->next) {
 		data = cursor->data;
 		if (NULL == data->path) continue;
 
@@ -1592,7 +1568,7 @@ static inline int __ctsvc_vcard_append_contact(ctsvc_contact_s *contact, char **
 		CTSVC_VCARD_APPEND_STR(buf, buf_size, len, temp);
 	}
 #if 0
-	ctsvc_list_s* profile;
+	ctsvc_list_s *profile;
 #endif
 	return len;
 }
@@ -1667,7 +1643,7 @@ static inline int __ctsvc_vcard_append_my_profile(ctsvc_my_profile_s *my_profile
 	}
 
 #if 0
-		ctsvc_list_s* profile;
+	ctsvc_list_s *profile;
 #endif
 	return len;
 }
@@ -1780,11 +1756,11 @@ API int contacts_vcard_make_from_contact(contacts_record_h record, char **vcard_
 	*vcard_stream = NULL;
 
 	RETVM_IF(NULL == record, CONTACTS_ERROR_INVALID_PARAMETER,
-		"Invalid parameter : contact(%p), vcard_stream(%p)", record, vcard_stream);
+			"Invalid parameter : contact(%p), vcard_stream(%p)", record, vcard_stream);
 
 	contact = (ctsvc_contact_s*)record;
 	RETVM_IF(CTSVC_RECORD_CONTACT != contact->base.r_type, CONTACTS_ERROR_INVALID_PARAMETER,
-		"Invalid parameter : The record is not conatct record (type : %d)", contact->base.r_type);
+			"Invalid parameter : The record is not conatct record (type : %d)", contact->base.r_type);
 
 	return __ctsvc_vcard_make(contact, vcard_stream);
 }
@@ -1796,11 +1772,11 @@ API int contacts_vcard_make_from_my_profile(contacts_record_h record, char **vca
 	*vcard_stream = NULL;
 
 	RETVM_IF(NULL == record, CONTACTS_ERROR_INVALID_PARAMETER,
-		"Invalid parameter : my_profile(%p), vcard_stream(%p)", record, vcard_stream);
+			"Invalid parameter : my_profile(%p), vcard_stream(%p)", record, vcard_stream);
 
 	my_profile = (ctsvc_my_profile_s*)record;
 	RETVM_IF(CTSVC_RECORD_MY_PROFILE != my_profile->base.r_type, CONTACTS_ERROR_INVALID_PARAMETER,
-		"Invalid parameter : The record is not conatct record (type : %d)", my_profile->base.r_type);
+			"Invalid parameter : The record is not conatct record (type : %d)", my_profile->base.r_type);
 
 	return __ctsvc_vcard_make_from_my_profile(my_profile, vcard_stream);
 }
@@ -1812,106 +1788,106 @@ static int __ctsvc_vcard_append_person(ctsvc_person_s *person, ctsvc_list_s *lis
 	ctsvc_contact_s *contact;
 	GList *cursor = NULL;
 
-	for (cursor=list_contacts->records;cursor;cursor=cursor->next) {
-		contact = (ctsvc_contact_s *)cursor->data;
+	for (cursor = list_contacts->records; cursor; cursor = cursor->next) {
+		contact = (ctsvc_contact_s*)cursor->data;
 		if (contact && contact->id == person->name_contact_id && contact->name) {
 			len = __ctsvc_vcard_append_name(contact->name, buf, buf_size, len);
 			RETV_IF(len < 0, len);
 		}
 	}
 
-	for (cursor=list_contacts->records;cursor;cursor=cursor->next) {
-		contact = (ctsvc_contact_s *)cursor->data;
+	for (cursor = list_contacts->records; cursor; cursor = cursor->next) {
+		contact = (ctsvc_contact_s*)cursor->data;
 		if (contact && contact->company && contact->company->cursor) {
 			len = __ctsvc_vcard_append_company(contact->company, buf, buf_size, len);
 			RETV_IF(len < 0, len);
 		}
 	}
 
-	for (cursor=list_contacts->records;cursor;cursor=cursor->next) {
-		contact = (ctsvc_contact_s *)cursor->data;
+	for (cursor = list_contacts->records; cursor; cursor = cursor->next) {
+		contact = (ctsvc_contact_s*)cursor->data;
 		if (contact && contact->note && contact->note->cursor) {
 			len = __ctsvc_vcard_append_note(contact->note, buf, buf_size, len);
 			RETV_IF(len < 0, len);
 		}
 	}
-	for (cursor=list_contacts->records;cursor;cursor=cursor->next) {
-		contact = (ctsvc_contact_s *)cursor->data;
+	for (cursor = list_contacts->records; cursor; cursor = cursor->next) {
+		contact = (ctsvc_contact_s*)cursor->data;
 		if (contact && contact->postal_addrs && contact->postal_addrs->cursor) {
 			len = __ctsvc_vcard_append_postals(contact->postal_addrs, buf, buf_size, len);
 			RETV_IF(len < 0, len);
 		}
 	}
-	for (cursor=list_contacts->records;cursor;cursor=cursor->next) {
-		contact = (ctsvc_contact_s *)cursor->data;
+	for (cursor = list_contacts->records; cursor; cursor = cursor->next) {
+		contact = (ctsvc_contact_s*)cursor->data;
 		if (contact && contact->numbers && contact->numbers->cursor) {
 			len = __ctsvc_vcard_append_numbers(contact->numbers, buf, buf_size, len);
 			RETV_IF(len < 0, len);
 		}
 	}
 
-	for (cursor=list_contacts->records;cursor;cursor=cursor->next) {
-		contact = (ctsvc_contact_s *)cursor->data;
+	for (cursor = list_contacts->records; cursor; cursor = cursor->next) {
+		contact = (ctsvc_contact_s*)cursor->data;
 		if (contact && contact->emails && contact->emails->cursor) {
 			len = __ctsvc_vcard_append_emails(contact->emails, buf, buf_size, len);
 			RETV_IF(len < 0, len);
 		}
 	}
 
-	for (cursor=list_contacts->records;cursor;cursor=cursor->next) {
-		contact = (ctsvc_contact_s *)cursor->data;
+	for (cursor = list_contacts->records; cursor; cursor = cursor->next) {
+		contact = (ctsvc_contact_s*)cursor->data;
 		if (contact && contact->nicknames && contact->nicknames->cursor) {
 			len = __ctsvc_vcard_append_nicknames(contact->nicknames, buf, buf_size, len);
 			RETV_IF(len < 0, len);
 		}
 	}
-	for (cursor=list_contacts->records;cursor;cursor=cursor->next) {
-		contact = (ctsvc_contact_s *)cursor->data;
+	for (cursor = list_contacts->records; cursor; cursor = cursor->next) {
+		contact = (ctsvc_contact_s*)cursor->data;
 		if (contact && contact->urls && contact->urls->cursor) {
 			len = __ctsvc_vcard_append_webs(contact->urls, buf, buf_size, len);
 			RETV_IF(len < 0, len);
 		}
 	}
 
-	for (cursor=list_contacts->records;cursor;cursor=cursor->next) {
-		contact = (ctsvc_contact_s *)cursor->data;
+	for (cursor = list_contacts->records; cursor; cursor = cursor->next) {
+		contact = (ctsvc_contact_s*)cursor->data;
 		if (contact && contact->events && contact->events->cursor) {
 			len = __ctsvc_vcard_append_events(contact->events, buf, buf_size, len);
 			RETV_IF(len < 0, len);
 		}
 	}
-	for (cursor=list_contacts->records;cursor;cursor=cursor->next) {
-		contact = (ctsvc_contact_s *)cursor->data;
+	for (cursor = list_contacts->records; cursor; cursor = cursor->next) {
+		contact = (ctsvc_contact_s*)cursor->data;
 		if (contact && contact->images && contact->images->cursor) {
 			len = __ctsvc_vcard_put_photo(contact->images, buf, buf_size, len);
 			RETV_IF(len < 0, len);
 		}
 	}
-	for (cursor=list_contacts->records;cursor;cursor=cursor->next) {
-		contact = (ctsvc_contact_s *)cursor->data;
+	for (cursor = list_contacts->records; cursor; cursor = cursor->next) {
+		contact = (ctsvc_contact_s*)cursor->data;
 		if (contact && contact->messengers && contact->messengers->cursor) {
 			len = __ctsvc_vcard_append_messengers(contact->messengers, buf, buf_size, len);
 			RETV_IF(len < 0, len);
 		}
 	}
 
-	for (cursor=list_contacts->records;cursor;cursor=cursor->next) {
-		contact = (ctsvc_contact_s *)cursor->data;
+	for (cursor = list_contacts->records; cursor; cursor = cursor->next) {
+		contact = (ctsvc_contact_s*)cursor->data;
 		if (contact && contact->relationships && contact->relationships->cursor) {
 			len = __ctsvc_vcard_append_relationships(contact->relationships, buf, buf_size, len);
 			RETV_IF(len < 0, len);
 		}
 	}
 
-	for (cursor=list_contacts->records;cursor;cursor=cursor->next) {
-		contact = (ctsvc_contact_s *)cursor->data;
+	for (cursor = list_contacts->records; cursor; cursor = cursor->next) {
+		contact = (ctsvc_contact_s*)cursor->data;
 		if (contact && contact->uid && DEFAULT_ADDRESS_BOOK_ID == contact->addressbook_id) {
 			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, content_name[CTSVC_VCARD_VALUE_UID]);
 			CTSVC_VCARD_APPEND_CONTENT(buf, buf_size, len, contact->uid);
 		}
 	}
-	for (cursor=list_contacts->records;cursor;cursor=cursor->next) {
-		contact = (ctsvc_contact_s *)cursor->data;
+	for (cursor = list_contacts->records; cursor; cursor = cursor->next) {
+		contact = (ctsvc_contact_s*)cursor->data;
 		if (contact && changed_time < contact->changed_time)
 			changed_time = contact->changed_time;
 	}
@@ -1930,11 +1906,11 @@ static int __ctsvc_vcard_append_person(ctsvc_person_s *person, ctsvc_list_s *lis
 	}
 
 #if 0
-	ctsvc_list_s* profile;
+	ctsvc_list_s *profile;
 #endif
 	return len;
 }
-#endif // _CONTACTS_IPC_CLIENT
+#endif /* _CONTACTS_IPC_CLIENT */
 
 #ifdef _CONTACTS_IPC_CLIENT
 static int __ctsvc_vcard_make_from_person(ctsvc_person_s *person, ctsvc_list_s *list_contacts,
@@ -1982,7 +1958,7 @@ static int __ctsvc_vcard_make_from_person(ctsvc_person_s *person, ctsvc_list_s *
 
 	return CONTACTS_ERROR_NONE;
 }
-#endif // _CONTACTS_IPC_CLIENT
+#endif /* _CONTACTS_IPC_CLIENT */
 
 #ifdef _CONTACTS_IPC_CLIENT
 API int contacts_vcard_make_from_person(contacts_record_h record, char **vcard_stream)
@@ -1994,13 +1970,13 @@ API int contacts_vcard_make_from_person(contacts_record_h record, char **vcard_s
 	contacts_list_h list = NULL;
 
 	RETVM_IF(NULL == record || NULL == vcard_stream, CONTACTS_ERROR_INVALID_PARAMETER,
-		"Invalid parameter : person(%p), vcard_stream(%p)", record, vcard_stream);
+			"Invalid parameter : person(%p), vcard_stream(%p)", record, vcard_stream);
 	*vcard_stream = NULL;
 
-	person = (ctsvc_person_s *)record;
+	person = (ctsvc_person_s*)record;
 
 	RETVM_IF(CTSVC_RECORD_PERSON != person->base.r_type, CONTACTS_ERROR_INVALID_PARAMETER,
-		"Invalid parameter : The record is not conatct record (type : %d)", person->base.r_type);
+			"Invalid parameter : The record is not conatct record (type : %d)", person->base.r_type);
 
 	do {
 		if (CONTACTS_ERROR_NONE != (ret = contacts_filter_create(_contacts_contact._uri, &filter))) break;
@@ -2008,7 +1984,7 @@ API int contacts_vcard_make_from_person(contacts_record_h record, char **vcard_s
 		if (CONTACTS_ERROR_NONE != (ret = contacts_query_create(_contacts_contact._uri, &query))) break;
 		if (CONTACTS_ERROR_NONE != (ret = contacts_query_set_filter(query, filter))) break;
 		if (CONTACTS_ERROR_NONE != (ret = contacts_db_get_records_with_query(query, 0, 0, &list))) break;
-		if (CONTACTS_ERROR_NONE != (ret = __ctsvc_vcard_make_from_person(person, (ctsvc_list_s *)list, vcard_stream))) break;
+		if (CONTACTS_ERROR_NONE != (ret = __ctsvc_vcard_make_from_person(person, (ctsvc_list_s*)list, vcard_stream))) break;
 	} while (0);
 	WARN_IF(CONTACTS_ERROR_NONE != ret, "__ctsvc_vcard_make_from_person() Fail(%d)", ret);
 	contacts_query_destroy(query);
@@ -2069,15 +2045,15 @@ static int __ctsvc_vcard_check_content_type(char **vcard)
 	int i;
 	char *new_start;
 
-	for (i=CTSVC_VCARD_VALUE_NONE+1;i<CTSVC_VCARD_VALUE_MAX;i++) {
+	for (i = CTSVC_VCARD_VALUE_NONE+1; i < CTSVC_VCARD_VALUE_MAX; i++) {
 		new_start = __ctsvc_vcard_check_word(*vcard, content_name[i]);
 		if (new_start && (':' == *new_start || ';' == *new_start))
 			break;
 	}
 
-	if (CTSVC_VCARD_VALUE_MAX == i)
+	if (CTSVC_VCARD_VALUE_MAX == i) {
 		return CTSVC_VCARD_VALUE_NONE;
-	else {
+	} else {
 		*vcard = new_start;
 		return i;
 	}
@@ -2139,7 +2115,7 @@ static inline int __ctsvc_vcard_check_quoted(char *src, int max, int *quoted)
 				*quoted = TRUE;
 				return TRUE;
 			}
-		}else if (':' == *src) {
+		} else if (':' == *src) {
 			break;
 		}
 		src++;
@@ -2228,8 +2204,7 @@ static inline char* __ctsvc_vcard_translate_charset(char *src, int len)
 				val += sizeof("CHARSET");
 				break;
 			}
-		}
-		else if (':' == *val) {
+		} else if (':' == *val) {
 			return NULL;
 		}
 		val++;
@@ -2244,9 +2219,9 @@ static inline char* __ctsvc_vcard_translate_charset(char *src, int len)
 		int src_len, i = 0;
 		char enc[32] = {0}, *dest;
 
-		while (';' != *val && ':' != *val) {
+		while (';' != *val && ':' != *val)
 			enc[i++] = *val++;
-		}
+
 		enc[i] = '\0';
 		if (0 == strcasecmp("UTF-8", enc))
 			return NULL;
@@ -2295,8 +2270,7 @@ static void __ctsvc_vcard_get_prefix(char **prefix, char *src)
 		*prefix = calloc(len+1, sizeof(char));
 		if (*prefix)
 			snprintf(*prefix, len+1, "%s", src);
-	}
-	else {
+	} else {
 		*prefix = NULL;
 	}
 }
@@ -2341,8 +2315,7 @@ static char* __ctsvc_vcard_get_val(int ver, char *src, char **prefix, char **des
 
 			cursor++;
 		}
-	}
-	else {
+	} else {
 		while (*cursor) {
 			if ('\r' == *cursor && '\n' == *(cursor+1) && ' ' != *(cursor+2))
 				break;
@@ -2357,8 +2330,7 @@ static char* __ctsvc_vcard_get_val(int ver, char *src, char **prefix, char **des
 	if (src == cursor) {
 		*dest = NULL;
 		return NULL;
-	}
-	else {
+	} else {
 		int len = 0;
 		char temp = *cursor;
 		char *new_dest;
@@ -2400,7 +2372,7 @@ static inline char* __ctsvc_get_content_value(char *val)
 		temp = val;
 
 	RETVM_IF('\0' == *(temp) || '\r' == *(temp) || '\n' == *(temp),
-		NULL, "Invalid vcard content");
+			NULL, "Invalid vcard content");
 
 	return temp;
 }
@@ -2432,7 +2404,7 @@ static char* __ctsvc_vcard_remove_escape_char(char *str)
 					*r = *n;
 					r++;
 					*r = *(n+1);
-					s+=2;
+					s += 2;
 				}
 				break;
 			case 0x81:  /* en/em backslash */
@@ -2440,7 +2412,7 @@ static char* __ctsvc_vcard_remove_escape_char(char *str)
 					*r = *n;
 					r++;
 					*r = *(n+1);
-					s+=2;
+					s += 2;
 				}
 				break;
 			default:
@@ -2449,8 +2421,7 @@ static char* __ctsvc_vcard_remove_escape_char(char *str)
 			}
 			r++;
 			s++;
-		}
-		else {
+		} else {
 			*r = *s;
 			r++;
 			s++;
@@ -2477,8 +2448,7 @@ static inline int __ctsvc_vcard_get_display_name(ctsvc_list_s *name_list, char *
 		ret = contacts_record_create(_contacts_name._uri, &name);
 		RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create is Fail(%d)", ret);
 		contacts_list_add((contacts_list_h)name_list, name);
-	}
-	else {
+	} else {
 		contacts_list_get_current_record_p((contacts_list_h)name_list, &name);
 	}
 
@@ -2494,7 +2464,7 @@ static inline int __ctsvc_vcard_get_display_name(ctsvc_list_s *name_list, char *
 }
 
 #define CTS_GET_MULTIPLE_COMPONENT(dest, src, src_temp, separator) \
-src_temp = src; \
+	src_temp = src; \
 separator = false; \
 while (src_temp && *src_temp) { \
 	if (*src_temp == ';') { \
@@ -2506,7 +2476,7 @@ while (src_temp && *src_temp) { \
 		break; \
 	} \
 	else if (*src_temp == '\\') {\
-		src_temp+=2; \
+		src_temp += 2; \
 		continue; \
 	} \
 	src_temp++; \
@@ -2530,10 +2500,9 @@ static inline int __ctsvc_vcard_get_name(ctsvc_list_s *name_list, char *val)
 	contacts_list_get_count((contacts_list_h)name_list, &count);
 	if (count <= 0) {
 		ret = contacts_record_create(_contacts_name._uri, &name);
-		RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create is Fail(%d)", ret);
+		RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create() Fail(%d)", ret);
 		contacts_list_add((contacts_list_h)name_list, name);
-	}
-	else {
+	} else {
 		contacts_list_get_current_record_p((contacts_list_h)name_list, &name);
 	}
 
@@ -2570,10 +2539,9 @@ static inline int __ctsvc_vcard_get_phonetic_name(ctsvc_list_s *name_list, int t
 	contacts_list_get_count((contacts_list_h)name_list, &count);
 	if (count <= 0) {
 		ret = contacts_record_create(_contacts_name._uri, &name);
-		RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create is Fail(%d)", ret);
+		RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create() Fail(%d)", ret);
 		contacts_list_add((contacts_list_h)name_list, name);
-	}
-	else {
+	} else {
 		contacts_list_get_current_record_p((contacts_list_h)name_list, &name);
 	}
 
@@ -2606,8 +2574,8 @@ static inline int __ctsvc_vcard_get_nickname(ctsvc_list_s *nickname_list, char *
 		ret = contacts_record_create(_contacts_nickname._uri, &nickname);
 		if (ret < CONTACTS_ERROR_NONE) {
 			GList *cursor = NULL;
-			CTS_ERR("contacts_record_create is Fail(%d)", ret);
-			for (cursor = nickname_list->records;cursor;cursor=cursor->next)
+			CTS_ERR("contacts_record_create() Fail(%d)", ret);
+			for (cursor = nickname_list->records; cursor; cursor = cursor->next)
 				contacts_record_destroy((contacts_record_h)(cursor->data), true);
 			g_list_free(nickname_list->records);
 			nickname_list->records = NULL;
@@ -2657,9 +2625,9 @@ static inline int __ctsvc_vcard_get_photo(contacts_record_h contact, ctsvc_list_
 	while (0 < size) {
 		ret = write(fd, buf, size);
 		if (ret <= 0) {
-			if (EINTR == errno)
+			if (EINTR == errno) {
 				continue;
-			else {
+			} else {
 				CTS_ERR("write() Fail(%d)", errno);
 				close(fd);
 				if (ENOSPC == errno)
@@ -2675,15 +2643,15 @@ static inline int __ctsvc_vcard_get_photo(contacts_record_h contact, ctsvc_list_
 	g_free(buf);
 
 	ret = contacts_record_create(_contacts_image._uri, &image);
-	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create is Fail(%d)", ret);
+	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create() Fail(%d)", ret);
 
 	contacts_record_set_str(image, _contacts_image.path, dest);
-	((ctsvc_image_s *)image)->is_vcard = true;
+	((ctsvc_image_s*)image)->is_vcard = true;
 
 	contacts_list_add((contacts_list_h)image_list, image);
 
 	/* _contacts_contact.image_thumbnail_path is a read-only property */
-	((ctsvc_contact_s *)contact)->image_thumbnail_path = strdup(dest);
+	((ctsvc_contact_s*)contact)->image_thumbnail_path = strdup(dest);
 
 	return CONTACTS_ERROR_NONE;
 
@@ -2707,9 +2675,9 @@ static inline void __ctsvc_vcard_get_event_type(contacts_record_h event, char *v
 			*lower_temp = tolower(*lower_temp);
 			lower_temp++;
 		}
-		if (strstr(lower, "anniversary"))
+		if (strstr(lower, "anniversary")) {
 			type = CONTACTS_EVENT_TYPE_ANNIVERSARY;
-		else if ((result = strstr(lower, "x-"))) {
+		} else if ((result = strstr(lower, "x-"))) {
 			type = CONTACTS_EVENT_TYPE_CUSTOM;
 			contacts_record_set_str(event, _contacts_event.label, temp+(result-lower)+2);
 		}
@@ -2751,7 +2719,7 @@ static inline int __ctsvc_vcard_get_event(ctsvc_list_s *event_list, int type, ch
 
 	ret = contacts_record_create(_contacts_event._uri, &event);
 	if (ret < CONTACTS_ERROR_NONE) {
-		CTS_ERR("contacts_record_create is Fail(%d)", ret);
+		CTS_ERR("contacts_record_create() Fail(%d)", ret);
 		return ret;
 	}
 
@@ -2761,9 +2729,9 @@ static inline int __ctsvc_vcard_get_event(ctsvc_list_s *event_list, int type, ch
 		contacts_record_set_int(event, _contacts_event.type, CONTACTS_EVENT_TYPE_BIRTH);
 	else if (CTSVC_VCARD_VALUE_X_ANNIVERSARY == type)
 		contacts_record_set_int(event, _contacts_event.type, CONTACTS_EVENT_TYPE_ANNIVERSARY);
-	else if (CTSVC_VCARD_VALUE_X_TIZEN_EVENT == type) {
+	else if (CTSVC_VCARD_VALUE_X_TIZEN_EVENT == type)
 		__ctsvc_vcard_get_event_type(event, prefix);
-	}
+
 	contacts_list_add((contacts_list_h)event_list, event);
 	return CONTACTS_ERROR_NONE;
 }
@@ -2832,7 +2800,7 @@ static inline int __ctsvc_vcard_get_company_value(ctsvc_list_s *company_list, in
 	company = __ctsvc_vcard_get_company_empty_record(company_list, property_id);
 	if (NULL == company) {
 		int ret = contacts_record_create(_contacts_company._uri, &company);
-		RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create is Fail(%d)", ret);
+		RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create() Fail(%d)", ret);
 		contacts_list_add((contacts_list_h)company_list, company);
 	}
 
@@ -2853,7 +2821,7 @@ static inline int __ctsvc_vcard_get_company(ctsvc_list_s *company_list, char *pr
 	company = __ctsvc_vcard_get_company_empty_record(company_list, _contacts_company.name);
 	if (NULL == company) {
 		int ret = contacts_record_create(_contacts_company._uri, &company);
-		RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create is Fail(%d)", ret);
+		RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create() Fail(%d)", ret);
 		contacts_list_add((contacts_list_h)company_list, company);
 	}
 
@@ -2886,7 +2854,7 @@ static inline int __ctsvc_vcard_get_company_logo(ctsvc_list_s *company_list, cha
 	company = __ctsvc_vcard_get_company_empty_record(company_list, _contacts_company.logo);
 	if (NULL == company) {
 		ret = contacts_record_create(_contacts_company._uri, &company);
-		RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create is Fail(%d)", ret);
+		RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create() Fail(%d)", ret);
 		contacts_list_add((contacts_list_h)company_list, company);
 	}
 
@@ -2912,9 +2880,9 @@ static inline int __ctsvc_vcard_get_company_logo(ctsvc_list_s *company_list, cha
 	while (0 < size) {
 		ret = write(fd, buf, size);
 		if (ret <= 0) {
-			if (EINTR == errno)
+			if (EINTR == errno) {
 				continue;
-			else {
+			} else {
 				CTS_ERR("write() Fail(%d)", errno);
 				close(fd);
 				if (ENOSPC == errno)
@@ -2929,7 +2897,7 @@ static inline int __ctsvc_vcard_get_company_logo(ctsvc_list_s *company_list, cha
 	close(fd);
 	g_free(buf);
 
-	((ctsvc_company_s *)company)->is_vcard = true;
+	((ctsvc_company_s*)company)->is_vcard = true;
 	contacts_record_set_str(company, _contacts_company.logo, dest);
 
 	return CONTACTS_ERROR_NONE;
@@ -2942,7 +2910,7 @@ static inline int __ctsvc_vcard_get_note(ctsvc_list_s *note_list, char *val)
 	contacts_record_h note;
 
 	ret = contacts_record_create(_contacts_note._uri, &note);
-	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create is Fail(%d)", ret);
+	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create() Fail(%d)", ret);
 	contacts_list_add((contacts_list_h)note_list, note);
 
 	temp = __ctsvc_get_content_value(val);
@@ -2964,7 +2932,7 @@ static inline int __ctsvc_vcard_get_time(char *val)
 	while (*val) {
 		tmp[i++] = *val;
 		val++;
-		if (4<=i || *val < '0' || '9' < *val) break;
+		if (4 <= i || *val < '0' || '9' < *val) break;
 	}
 	tmp[i] = 0;
 	ts.tm_year = atoi(tmp)-1900;
@@ -2974,7 +2942,7 @@ static inline int __ctsvc_vcard_get_time(char *val)
 	while (*val) {
 		tmp[i++] = *val;
 		val++;
-		if (2<=i || *val < '0' || '9' < *val) break;
+		if (2 <= i || *val < '0' || '9' < *val) break;
 	}
 	tmp[i] = 0;
 	ts.tm_mon = atoi(tmp)-1;
@@ -2984,7 +2952,7 @@ static inline int __ctsvc_vcard_get_time(char *val)
 	while (*val) {
 		tmp[i++] = *val;
 		val++;
-		if (2<=i || *val < '0' || '9' < *val) break;
+		if (2 <= i || *val < '0' || '9' < *val) break;
 	}
 	tmp[i] = 0;
 	ts.tm_mday = atoi(tmp);
@@ -2994,7 +2962,7 @@ static inline int __ctsvc_vcard_get_time(char *val)
 	while (*val) {
 		tmp[i++] = *val;
 		val++;
-		if (2<=i || *val < '0' || '9' < *val) break;
+		if (2 <= i || *val < '0' || '9' < *val) break;
 	}
 	tmp[i] = 0;
 	ts.tm_hour = atoi(tmp);
@@ -3004,7 +2972,7 @@ static inline int __ctsvc_vcard_get_time(char *val)
 	while (*val) {
 		tmp[i++] = *val;
 		val++;
-		if (2<=i || *val < '0' || '9' < *val) break;
+		if (2 <= i || *val < '0' || '9' < *val) break;
 	}
 	tmp[i] = 0;
 	ts.tm_min = atoi(tmp);
@@ -3014,7 +2982,7 @@ static inline int __ctsvc_vcard_get_time(char *val)
 	while (*val) {
 		tmp[i++] = *val;
 		val++;
-		if (2<=i || *val < '0' || '9' < *val) break;
+		if (2 <= i || *val < '0' || '9' < *val) break;
 	}
 	tmp[i] = 0;
 	ts.tm_sec = atoi(tmp);
@@ -3056,7 +3024,7 @@ static inline void __ctsvc_vcard_get_url_type(contacts_record_h url, char *val)
 	contacts_record_set_int(url, _contacts_url.type, type);
 }
 
-static inline int __ctsvc_vcard_get_url(ctsvc_list_s* url_list, char *prefix, char *val)
+static inline int __ctsvc_vcard_get_url(ctsvc_list_s *url_list, char *prefix, char *val)
 {
 	int ret;
 	contacts_record_h url;
@@ -3066,7 +3034,7 @@ static inline int __ctsvc_vcard_get_url(ctsvc_list_s* url_list, char *prefix, ch
 	RETVM_IF(NULL == temp, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : vcard");
 
 	ret = contacts_record_create(_contacts_url._uri, &url);
-	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create is Fail(%d)", ret);
+	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create() Fail(%d)", ret);
 
 	contacts_record_set_str(url, _contacts_url.url, __ctsvc_vcard_remove_escape_char(temp));
 	__ctsvc_vcard_get_url_type(url, prefix);
@@ -3124,15 +3092,15 @@ static inline bool __ctsvc_vcard_get_number_type(contacts_record_h number, char 
 		if (result) type |= CONTACTS_NUMBER_TYPE_PCS;
 		result = strstr(lower, "x-");
 		if (result) {
-			if (strstr(lower, "x-assistant"))
+			if (strstr(lower, "x-assistant")) {
 				type |= CONTACTS_NUMBER_TYPE_ASSISTANT;
-			else if (strstr(lower, "x-radio"))
+			} else if (strstr(lower, "x-radio")) {
 				type |= CONTACTS_NUMBER_TYPE_RADIO;
-			else if (strstr(lower, "x-company-main"))
+			} else if (strstr(lower, "x-company-main")) {
 				type |= CONTACTS_NUMBER_TYPE_COMPANY_MAIN;
-			else if (strstr(lower, "x-main"))
+			} else if (strstr(lower, "x-main")) {
 				type |= CONTACTS_NUMBER_TYPE_MAIN;
-			else {
+			} else {
 				type = CONTACTS_NUMBER_TYPE_CUSTOM;
 				contacts_record_set_str(number, _contacts_number.label, temp+(result-lower)+2);
 			}
@@ -3159,106 +3127,94 @@ static char* __ctsvc_vcard_get_clean_number_for_import(char *str)
 					if (0x90 <= *(s+2) && *(s+2) <= 0x99) {   /* ef bc 90 : '0' ~ ef bc 99 : '9' */
 						*r = '0' + (*(s+2) - 0x90);
 						r++;
-						s+=3;
-					}
-					else if (0x8b == *(s+2)) {   /* ef bc 8b : '+' */
+						s += 3;
+					} else if (0x8b == *(s+2)) {   /* ef bc 8b : '+' */
 						*r = '+';
 						r++;
-						s+=3;
-					}
-					else if (0x8a == *(s+2)) {   /* ef bc 8a : '*' */
+						s += 3;
+					} else if (0x8a == *(s+2)) {   /* ef bc 8a : '*' */
 						*r = '*';
 						r++;
-						s+=3;
-					}
-					else if (0x83 == *(s+2)) {   /* ef bc 83 : '#' */
+						s += 3;
+					} else if (0x83 == *(s+2)) {   /* ef bc 83 : '#' */
 						*r = '#';
 						r++;
-						s+=3;
-					}
-					else if (0xb0 == *(s+2) || 0x8c == *(s+2)) {   /* ef bc b0 : 'P', ef bc 8c : ',' */
+						s += 3;
+					} else if (0xb0 == *(s+2) || 0x8c == *(s+2)) {   /* ef bc b0 : 'P', ef bc 8c : ',' */
 						*r = ',';
 						r++;
-						s+=3;
-					}
-					else if (0xb7 == *(s+2) || 0x9b == *(s+2)) {   /* ef bc b7 : 'W', ef bc 9b : ';' */
+						s += 3;
+					} else if (0xb7 == *(s+2) || 0x9b == *(s+2)) {   /* ef bc b7 : 'W', ef bc 9b : ';' */
 						*r = ';';
 						r++;
-						s+=3;
+						s += 3;
+					} else {
+						s += char_len;
 					}
-					else {
-						s+=char_len;
-					}
-				}
-				else if (*(s+1) == 0xbd) {
+				} else if (*(s+1) == 0xbd) {
 					if (0x90 == *(s+2)) {
 						*r = ',';
 						r++;
-						s+=3;
-					}
-					else if (0x97 == *(s+2)) {
+						s += 3;
+					} else if (0x97 == *(s+2)) {
 						*r = ';';
 						r++;
-						s+=3;
+						s += 3;
 					}
+				} else {
+					s += char_len;
 				}
-				else {
-					s+=char_len;
-				}
+			} else {
+				s += char_len;
 			}
-			else {
-				s+=char_len;
-			}
-		}
-		else if (1 == char_len) {
+		} else if (1 == char_len) {
 			switch (*s) {
-				case '/':
-				case '.':
-				case '0' ... '9':
-				case '#':
-				case '*':
-				case '(':
-				case ')':
-				case ',':
-				case ';':
-				case '+':
-					*r = *s;
-					r++;
-					s++;
-					break;
-				case 'p':
-				case 'P':
-					*r = ',';
-					r++;
-					s++;
-					break;
-				case 'w':
-				case 'W':
-					*r = ';';
-					r++;
-					s++;
-					break;
-				case 'a' ... 'o':
-				case 'q' ... 'v':
-				case 'x' ... 'z':
-					*r = *s - 0x20;
-					r++;
-					s++;
-					break;
-				case 'A' ... 'O':
-				case 'Q' ... 'V':
-				case 'X' ... 'Z':
-					*r = *s;
-					r++;
-					s++;
-					break;
-				default:
-					s++;
-					break;
+			case '/':
+			case '.':
+			case '0' ... '9':
+			case '#':
+			case '*':
+			case '(':
+			case ')':
+			case ',':
+			case ';':
+			case '+':
+				*r = *s;
+				r++;
+				s++;
+				break;
+			case 'p':
+			case 'P':
+				*r = ',';
+				r++;
+				s++;
+				break;
+			case 'w':
+			case 'W':
+				*r = ';';
+				r++;
+				s++;
+				break;
+			case 'a' ... 'o':
+			case 'q' ... 'v':
+			case 'x' ... 'z':
+				*r = *s - 0x20;
+				r++;
+				s++;
+				break;
+			case 'A' ... 'O':
+			case 'Q' ... 'V':
+			case 'X' ... 'Z':
+				*r = *s;
+				r++;
+				s++;
+				break;
+			default:
+				s++;
+				break;
 			}
-		}
-		else {
-			s+=char_len;
+		} else {
+			s += char_len;
 		}
 	}
 	*r = '\0';
@@ -3276,13 +3232,13 @@ static inline int __ctsvc_vcard_get_number(ctsvc_list_s *numbers, char *prefix, 
 	RETVM_IF(NULL == temp, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : vcard");
 
 	ret = contacts_record_create(_contacts_number._uri, &number);
-	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create is Fail(%d)", ret);
+	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create() Fail(%d)", ret);
 
 	temp = __ctsvc_vcard_remove_escape_char(temp);
 	contacts_record_set_str(number, _contacts_number.number, __ctsvc_vcard_get_clean_number_for_import(temp));
 
 	is_default = __ctsvc_vcard_get_number_type(number, prefix);
-		contacts_record_set_bool(number, _contacts_number.is_default, is_default);
+	contacts_record_set_bool(number, _contacts_number.is_default, is_default);
 	contacts_list_add((contacts_list_h)numbers, number);
 
 	return CONTACTS_ERROR_NONE;
@@ -3309,13 +3265,14 @@ static inline bool __ctsvc_vcard_get_email_type(contacts_record_h email, char *v
 		}
 		if (strstr(lower, "pref"))
 			pref = true;
-		if (strstr(lower, "home"))
+
+		if (strstr(lower, "home")) {
 			type = CONTACTS_EMAIL_TYPE_HOME;
-		else if (strstr(lower, "work"))
+		} else if (strstr(lower, "work")) {
 			type = CONTACTS_EMAIL_TYPE_WORK;
-		else if (strstr(lower, "cell"))
+		} else if (strstr(lower, "cell")) {
 			type = CONTACTS_EMAIL_TYPE_MOBILE;
-		else if ((result = strstr(lower, "x-"))) {
+		} else if ((result = strstr(lower, "x-"))) {
 			type = CONTACTS_EMAIL_TYPE_CUSTOM;
 			contacts_record_set_str(email, _contacts_email.label, temp+(result-lower)+2);
 		}
@@ -3328,7 +3285,7 @@ static inline bool __ctsvc_vcard_get_email_type(contacts_record_h email, char *v
 	return pref;
 }
 
-static inline int __ctsvc_vcard_get_email(ctsvc_list_s* emails, char *prefix, char *val)
+static inline int __ctsvc_vcard_get_email(ctsvc_list_s *emails, char *prefix, char *val)
 {
 	bool is_default;
 	int ret;
@@ -3339,11 +3296,11 @@ static inline int __ctsvc_vcard_get_email(ctsvc_list_s* emails, char *prefix, ch
 	RETVM_IF(NULL == temp, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : vcard");
 
 	ret = contacts_record_create(_contacts_email._uri, &email);
-	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create is Fail(%d)", ret);
+	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create() Fail(%d)", ret);
 
 	contacts_record_set_str(email, _contacts_email.email, __ctsvc_vcard_remove_escape_char(temp));
 	is_default = __ctsvc_vcard_get_email_type(email, prefix);
-		contacts_record_set_bool(email, _contacts_email.is_default, is_default);
+	contacts_record_set_bool(email, _contacts_email.is_default, is_default);
 	contacts_list_add((contacts_list_h)emails, email);
 
 	return CONTACTS_ERROR_NONE;
@@ -3410,9 +3367,9 @@ static inline int __ctsvc_vcard_get_address(ctsvc_list_s *address_list, char *pr
 		if (text) {
 			text++;
 			*(text-1) = '\0';
-		}
-		else
+		} else {
 			text = val;
+		}
 
 		while (true) {
 			bool separator = false;
@@ -3478,7 +3435,7 @@ static inline void __ctsvc_vcard_get_messenger_type(contacts_record_h messenger,
 	contacts_record_set_int(messenger, _contacts_messenger.type, type);
 }
 
-static inline int __ctsvc_vcard_get_messenger(ctsvc_list_s* messenger_list, int type, char *prefix, char *val)
+static inline int __ctsvc_vcard_get_messenger(ctsvc_list_s *messenger_list, int type, char *prefix, char *val)
 {
 	int ret;
 	contacts_record_h messenger;
@@ -3488,7 +3445,7 @@ static inline int __ctsvc_vcard_get_messenger(ctsvc_list_s* messenger_list, int 
 	RETVM_IF(NULL == temp, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : vcard");
 
 	ret = contacts_record_create(_contacts_messenger._uri, &messenger);
-	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create is Fail(%d)", ret);
+	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create() Fail(%d)", ret);
 
 	contacts_record_set_str(messenger, _contacts_messenger.im_id, __ctsvc_vcard_remove_escape_char(temp));
 
@@ -3545,35 +3502,36 @@ static inline void __ctsvc_vcard_get_relationship_type(contacts_record_h relatio
 			*lower_temp = tolower(*lower_temp);
 			lower_temp++;
 		}
-		if (strstr(lower, "assistant"))
+
+		if (strstr(lower, "assistant")) {
 			type = CONTACTS_RELATIONSHIP_TYPE_ASSISTANT;
-		else if (strstr(lower, "brother"))
+		} else if (strstr(lower, "brother")) {
 			type = CONTACTS_RELATIONSHIP_TYPE_BROTHER;
-		else if (strstr(lower, "child"))
+		} else if (strstr(lower, "child")) {
 			type = CONTACTS_RELATIONSHIP_TYPE_CHILD;
-		else if (strstr(lower, "domestic_partner"))
+		} else if (strstr(lower, "domestic_partner")) {
 			type = CONTACTS_RELATIONSHIP_TYPE_DOMESTIC_PARTNER;
-		else if (strstr(lower, "father"))
+		} else if (strstr(lower, "father")) {
 			type = CONTACTS_RELATIONSHIP_TYPE_FATHER;
-		else if (strstr(lower, "friend"))
+		} else if (strstr(lower, "friend")) {
 			type = CONTACTS_RELATIONSHIP_TYPE_FRIEND;
-		else if (strstr(lower, "manager"))
+		} else if (strstr(lower, "manager")) {
 			type = CONTACTS_RELATIONSHIP_TYPE_MANAGER;
-		else if (strstr(lower, "mother"))
+		} else if (strstr(lower, "mother")) {
 			type = CONTACTS_RELATIONSHIP_TYPE_MOTHER;
-		else if (strstr(lower, "parent"))
+		} else if (strstr(lower, "parent")) {
 			type = CONTACTS_RELATIONSHIP_TYPE_PARENT;
-		else if (strstr(lower, "partner"))
+		} else if (strstr(lower, "partner")) {
 			type = CONTACTS_RELATIONSHIP_TYPE_PARTNER;
-		else if (strstr(lower, "referred_by"))
+		} else if (strstr(lower, "referred_by")) {
 			type = CONTACTS_RELATIONSHIP_TYPE_REFERRED_BY;
-		else if (strstr(lower, "relative"))
+		} else if (strstr(lower, "relative")) {
 			type = CONTACTS_RELATIONSHIP_TYPE_RELATIVE;
-		else if (strstr(lower, "sister"))
+		} else if (strstr(lower, "sister")) {
 			type = CONTACTS_RELATIONSHIP_TYPE_SISTER;
-		else if (strstr(lower, "spouse"))
+		} else if (strstr(lower, "spouse")) {
 			type = CONTACTS_RELATIONSHIP_TYPE_SPOUSE;
-		else if ((result = strstr(lower, "x-"))) {
+		} else if ((result = strstr(lower, "x-"))) {
 			type = CONTACTS_RELATIONSHIP_TYPE_CUSTOM;
 			contacts_record_set_str(relationship, _contacts_relationship.label, temp+(result-lower)+2);
 		}
@@ -3584,7 +3542,7 @@ static inline void __ctsvc_vcard_get_relationship_type(contacts_record_h relatio
 }
 
 
-static inline int __ctsvc_vcard_get_relationship(ctsvc_list_s* relationship_list, int type, char *prefix, char *val)
+static inline int __ctsvc_vcard_get_relationship(ctsvc_list_s *relationship_list, int type, char *prefix, char *val)
 {
 	int ret;
 	char *temp;
@@ -3594,7 +3552,7 @@ static inline int __ctsvc_vcard_get_relationship(ctsvc_list_s* relationship_list
 	RETVM_IF(NULL == temp, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : vcard");
 
 	ret = contacts_record_create(_contacts_relationship._uri, &relationship);
-	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create is Fail(%d)", ret);
+	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "contacts_record_create() Fail(%d)", ret);
 
 	contacts_record_set_str(relationship, _contacts_relationship.name, __ctsvc_vcard_remove_escape_char(temp));
 	__ctsvc_vcard_get_relationship_type(relationship, prefix);
@@ -3650,9 +3608,9 @@ static inline int __ctsvc_vcard_get_contact(int ver, char *vcard, contacts_recor
 			if (new_start) {
 				cursor = new_start;
 				continue;
-			}
-			else
+			} else {
 				break;
+			}
 		}
 
 		if (CTSVC_VCARD_VALUE_PHOTO != type && CTSVC_VCARD_VALUE_LOGO != type)
@@ -3824,11 +3782,13 @@ static inline void __ctsvc_vcard_make_contact_display_name(ctsvc_contact_s *cont
 	free(contact->reverse_display_name);
 	contact->reverse_display_name = NULL;
 
-	if (0 < contact->name->count && contact->name->records && contact->name->records->data) {
-		name = (ctsvc_name_s *)contact->name->records->data;
+	if (0 < contact->name->count && contact->name->records
+			&& contact->name->records->data) {
+		name = (ctsvc_name_s*)contact->name->records->data;
 	}
 
-	if (name && (name->first || name->last || name->prefix || name->addition || name->suffix)) {
+	if (name && (name->first || name->last || name->prefix || name->addition
+				|| name->suffix)) {
 		int reverse_lang_type = -1;
 		char *display = NULL;
 		char *reverse_display = NULL;
@@ -3846,9 +3806,9 @@ static inline void __ctsvc_vcard_make_contact_display_name(ctsvc_contact_s *cont
 		 *    But, if there is only prefix, reverse sort_name is prefix
 		 */
 		temp_display_len = SAFE_STRLEN(name->first)
-						+ SAFE_STRLEN(name->addition)
-						+ SAFE_STRLEN(name->last)
-						+ SAFE_STRLEN(name->suffix);
+			+ SAFE_STRLEN(name->addition)
+			+ SAFE_STRLEN(name->last)
+			+ SAFE_STRLEN(name->suffix);
 		if (0 < temp_display_len) {
 			temp_display_len += 7;
 			temp_display = calloc(1, temp_display_len);
@@ -3857,14 +3817,13 @@ static inline void __ctsvc_vcard_make_contact_display_name(ctsvc_contact_s *cont
 				return;
 			}
 
-			len=0;
+			len = 0;
 
 			if (name->last) {
 				len += snprintf(temp_display + len, temp_display_len - len, "%s", name->last);
 
-				if (reverse_lang_type < 0) {
+				if (reverse_lang_type < 0)
 					reverse_lang_type = ctsvc_check_language_type(temp_display);
-				}
 
 				if (reverse_lang_type != CTSVC_LANG_KOREAN &&
 						reverse_lang_type != CTSVC_LANG_CHINESE &&
@@ -3875,15 +3834,12 @@ static inline void __ctsvc_vcard_make_contact_display_name(ctsvc_contact_s *cont
 			}
 
 			if (reverse_lang_type < 0) {
-				if (*temp_display) {
+				if (*temp_display)
 					reverse_lang_type = ctsvc_check_language_type(temp_display);
-				}
-				else if (name->first) {
+				else if (name->first)
 					reverse_lang_type = ctsvc_check_language_type(name->first);
-				}
-				else if (name->addition) {
+				else if (name->addition)
 					reverse_lang_type = ctsvc_check_language_type(name->addition);
-				}
 			}
 
 			if (reverse_lang_type == CTSVC_LANG_JAPANESE) {
@@ -3899,14 +3855,12 @@ static inline void __ctsvc_vcard_make_contact_display_name(ctsvc_contact_s *cont
 						len += snprintf(temp_display + len, temp_display_len - len, " ");
 					len += snprintf(temp_display + len, temp_display_len - len, "%s", name->first);
 				}
-			}
-			else {
+			} else {
 				/* make temp_display name Prefix - Last - First -Middle - Suffix */
 				if (name->first) {
 					if (*temp_display) {
-						if (reverse_lang_type < 0) {
+						if (reverse_lang_type < 0)
 							reverse_lang_type = ctsvc_check_language_type(temp_display);
-						}
 
 						if (reverse_lang_type != CTSVC_LANG_KOREAN &&
 								reverse_lang_type != CTSVC_LANG_CHINESE)
@@ -3917,9 +3871,8 @@ static inline void __ctsvc_vcard_make_contact_display_name(ctsvc_contact_s *cont
 
 				if (name->addition) {
 					if (*temp_display) {
-						if (reverse_lang_type < 0) {
+						if (reverse_lang_type < 0)
 							reverse_lang_type = ctsvc_check_language_type(temp_display);
-						}
 
 						if (reverse_lang_type != CTSVC_LANG_KOREAN &&
 								reverse_lang_type != CTSVC_LANG_CHINESE)
@@ -3931,15 +3884,15 @@ static inline void __ctsvc_vcard_make_contact_display_name(ctsvc_contact_s *cont
 
 			if (name->suffix) {
 				if (*temp_display) {
-					if (reverse_lang_type < 0) {
+					if (reverse_lang_type < 0)
 						reverse_lang_type = ctsvc_check_language_type(temp_display);
-					}
 
-					if (reverse_lang_type == CTSVC_LANG_JAPANESE)
+					if (reverse_lang_type == CTSVC_LANG_JAPANESE) {
 						len += snprintf(temp_display + len, temp_display_len - len, " ");
-					else if (reverse_lang_type != CTSVC_LANG_KOREAN &&
-									reverse_lang_type != CTSVC_LANG_CHINESE)
+					} else if (reverse_lang_type != CTSVC_LANG_KOREAN &&
+							reverse_lang_type != CTSVC_LANG_CHINESE)  {
 						len += snprintf(temp_display + len, temp_display_len - len, ", ");
+					}
 				}
 				len += snprintf(temp_display + len, temp_display_len - len, "%s", name->suffix);
 			}
@@ -3955,11 +3908,9 @@ static inline void __ctsvc_vcard_make_contact_display_name(ctsvc_contact_s *cont
 			}
 			snprintf(reverse_display, display_len, "%s %s", name->prefix, temp_display);
 			free(temp_display);
-		}
-		else if (temp_display) {
+		} else if (temp_display) {
 			reverse_display = temp_display;
-		}
-		else if (name->prefix) {
+		} else if (name->prefix) {
 			reverse_display = strdup(name->prefix);
 		}
 
@@ -3973,15 +3924,15 @@ static inline void __ctsvc_vcard_make_contact_display_name(ctsvc_contact_s *cont
 		 */
 
 		if (reverse_lang_type == CTSVC_LANG_KOREAN ||
-			reverse_lang_type == CTSVC_LANG_CHINESE)
+				reverse_lang_type == CTSVC_LANG_CHINESE) {
 			display = strdup(reverse_display);
-		else {
+		} else {
 			int lang_type = -1;
 			temp_display = NULL;
 			temp_display_len = SAFE_STRLEN(name->first)
-								+ SAFE_STRLEN(name->addition)
-								+ SAFE_STRLEN(name->last)
-								+ SAFE_STRLEN(name->suffix);
+				+ SAFE_STRLEN(name->addition)
+				+ SAFE_STRLEN(name->last)
+				+ SAFE_STRLEN(name->suffix);
 			if (0 < temp_display_len) {
 				temp_display_len += 6;
 				/* make reverse_temp_display_name */
@@ -4035,11 +3986,9 @@ static inline void __ctsvc_vcard_make_contact_display_name(ctsvc_contact_s *cont
 				}
 				snprintf(display, display_len, "%s %s", name->prefix, temp_display);
 				free(temp_display);
-			}
-			else if (temp_display) {
+			} else if (temp_display) {
 				display = temp_display;
-			}
-			else if (name->prefix) {
+			} else if (name->prefix) {
 				display = strdup(name->prefix);
 			}
 		}
@@ -4050,20 +3999,19 @@ static inline void __ctsvc_vcard_make_contact_display_name(ctsvc_contact_s *cont
 		if (CONTACTS_NAME_DISPLAY_ORDER_FIRSTLAST == name_display_order) {
 			contact->display_name = display;
 			free(reverse_display);
-		}
-		else {
+#ifdef _CONTACTS_IPC_CLIENT
+		} else {
 			contact->display_name = reverse_display;
 			free(display);
+#endif
 		}
-
 		contact->display_source_type = CONTACTS_DISPLAY_NAME_SOURCE_TYPE_NAME;
-	}
-	else {
+	} else {
 		GList *cur;
 		bool set_display_name = false;
 		if (contact->company && contact->company->records) {
-			for (cur=contact->company->records;cur;cur=cur->next) {
-				ctsvc_company_s *company = (ctsvc_company_s *)cur->data;
+			for (cur = contact->company->records; cur; cur = cur->next) {
+				ctsvc_company_s *company = (ctsvc_company_s*)cur->data;
 				if (company && company->name) {
 					set_display_name = true;
 					contact->display_name = SAFE_STRDUP(company->name);
@@ -4075,8 +4023,8 @@ static inline void __ctsvc_vcard_make_contact_display_name(ctsvc_contact_s *cont
 
 		if (false == set_display_name &&
 				contact->nicknames && contact->nicknames->records) {
-			for (cur=contact->nicknames->records;cur;cur=cur->next) {
-				ctsvc_nickname_s *nickname = (ctsvc_nickname_s *)cur->data;
+			for (cur = contact->nicknames->records; cur; cur = cur->next) {
+				ctsvc_nickname_s *nickname = (ctsvc_nickname_s*)cur->data;
 				if (nickname && nickname->nickname) {
 					set_display_name = true;
 					contact->display_name = SAFE_STRDUP(nickname->nickname);
@@ -4088,8 +4036,8 @@ static inline void __ctsvc_vcard_make_contact_display_name(ctsvc_contact_s *cont
 
 		if (false == set_display_name &&
 				contact->numbers && contact->numbers->records) {
-			for (cur=contact->numbers->records;cur;cur=cur->next) {
-				ctsvc_number_s *number = (ctsvc_number_s *)cur->data;
+			for (cur = contact->numbers->records; cur; cur = cur->next) {
+				ctsvc_number_s *number = (ctsvc_number_s*)cur->data;
 				if (number && number->number) {
 					set_display_name = true;
 					contact->display_name = SAFE_STRDUP(number->number);
@@ -4101,8 +4049,8 @@ static inline void __ctsvc_vcard_make_contact_display_name(ctsvc_contact_s *cont
 
 		if (false == set_display_name &&
 				contact->emails && contact->emails->records) {
-			for (cur=contact->emails->records;cur;cur=cur->next) {
-				ctsvc_email_s *email = (ctsvc_email_s *)cur->data;
+			for (cur = contact->emails->records; cur; cur = cur->next) {
+				ctsvc_email_s *email = (ctsvc_email_s*)cur->data;
 				if (email && email->email_addr) {
 					set_display_name = true;
 					contact->display_name = SAFE_STRDUP(email->email_addr);
@@ -4140,26 +4088,21 @@ static int __ctsvc_vcard_parse(const void *vcard_stream, contacts_record_h *reco
 
 	val_begin = __ctsvc_vcard_check_word(vcard, "VERSION:");
 	new_start = __ctsvc_vcard_get_val(CTSVC_VCARD_VER_NONE, val_begin, NULL, &val);
-	if (NULL == new_start || NULL == val)
+	if (NULL == new_start || NULL == val) {
 		ver = CTSVC_VCARD_VER_2_1;
-	else {
+	} else {
 		ver = __ctsvc_vcard_check_version(val);
 		free(val);
 		vcard = new_start;
 	}
 
-	contacts_record_create(_contacts_contact._uri, (contacts_record_h *)&contact);
+	contacts_record_create(_contacts_contact._uri, (contacts_record_h*)&contact);
 	RETVM_IF(NULL == contact, CONTACTS_ERROR_OUT_OF_MEMORY, "Out of memory : contacts_record_create() Fail");
 
-	ret = __ctsvc_vcard_get_contact(ver, vcard, (contacts_record_h *)&contact);
-	if (CONTACTS_ERROR_NONE!= ret) {
+	ret = __ctsvc_vcard_get_contact(ver, vcard, (contacts_record_h*)&contact);
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("cts_vcard_get_contact() Fail(%d)", ret);
 		contacts_record_destroy((contacts_record_h)contact, true);
-		if (CONTACTS_ERROR_INVALID_PARAMETER == ret) {
-			CTS_ERR("cts_vcard_get_contact() Fail(%d)", ret);
-		}
-		else
-			CTS_ERR("cts_vcard_get_contact() Fail(%d)", ret);
-
 		return ret;
 	}
 	__ctsvc_vcard_make_contact_display_name(contact);
@@ -4174,7 +4117,7 @@ static const char* __contacts_vcard_remove_line_break(const char *c)
 {
 	while (c) {
 		if ('\r' == *c && '\n' == *(c+1))
-			c+=2;
+			c += 2;
 		else if ('\n' == *c)
 			c++;
 		else
@@ -4194,7 +4137,7 @@ static void __contacts_vcard_free_sub_vcard_info_list(GList *list)
 		return;
 
 	GList *cursor;
-	for (cursor=list;cursor;cursor=cursor->next) {
+	for (cursor = list; cursor; cursor = cursor->next) {
 		sub_vcard_info_s *vcard_info = cursor->data;
 		free(vcard_info);
 	}
@@ -4207,7 +4150,7 @@ static void __contacts_vcard_free_vcard_object_list(GList *list)
 		return;
 
 	GList *cursor;
-	for (cursor=list;cursor;cursor=cursor->next) {
+	for (cursor = list; cursor; cursor = cursor->next) {
 		char *vcard_object = cursor->data;
 		free(vcard_object);
 	}
@@ -4249,7 +4192,7 @@ static const char* __contacts_vcard_parse_get_vcard_object(const char *cursor, G
 				vcard_cursor = __contacts_vcard_remove_line_break(vcard_cursor);
 
 				pos_start = vcard_start_cursor;
-				for (sub_vcard_cursor=sub_vcard_list;sub_vcard_cursor;sub_vcard_cursor=sub_vcard_cursor->next) {
+				for (sub_vcard_cursor = sub_vcard_list; sub_vcard_cursor; sub_vcard_cursor = sub_vcard_cursor->next) {
 					sub_vcard_info_s *sub_vcard_info = sub_vcard_cursor->data;
 					const char *pos_end = sub_vcard_info->pos_start;
 					vcard_len += (pos_end - pos_start);
@@ -4265,7 +4208,7 @@ static const char* __contacts_vcard_parse_get_vcard_object(const char *cursor, G
 
 				vcard_len = 0;
 				pos_start = vcard_start_cursor;
-				for (sub_vcard_cursor=sub_vcard_list;sub_vcard_cursor;sub_vcard_cursor=sub_vcard_cursor->next) {
+				for (sub_vcard_cursor = sub_vcard_list; sub_vcard_cursor; sub_vcard_cursor = sub_vcard_cursor->next) {
 					sub_vcard_info_s *sub_vcard_info = sub_vcard_cursor->data;
 					const char *pos_end = sub_vcard_info->pos_start;
 					memcpy(vcard_object+vcard_len, pos_start, pos_end - pos_start);
@@ -4277,8 +4220,8 @@ static const char* __contacts_vcard_parse_get_vcard_object(const char *cursor, G
 				*plist_vcard_object = g_list_append(*plist_vcard_object, vcard_object);
 
 				return vcard_cursor;
-			}
-			else if (STRING_EQUAL == strncmp(vcard_cursor, begin, strlen(begin))) { /* sub vcard */
+			} else if (STRING_EQUAL == strncmp(vcard_cursor, begin, strlen(begin))) {
+				/* sub vcard */
 				sub_vcard_info_s *sub_vcard_info = calloc(1, sizeof(sub_vcard_info_s));
 				if (NULL == sub_vcard_info) {
 					CTS_ERR("calloc() Fail");
@@ -4327,14 +4270,14 @@ API int contacts_vcard_parse_to_contacts(const char *vcard_stream, contacts_list
 		if (NULL == list_vcard_object)
 			break;
 
-		for (vcard_cursor=list_vcard_object;vcard_cursor;vcard_cursor=vcard_cursor->next) {
+		for (vcard_cursor = list_vcard_object; vcard_cursor; vcard_cursor = vcard_cursor->next) {
 			vcard_object = vcard_cursor->data;
 			if (NULL == vcard_object)
 				continue;
 
 			ret = __ctsvc_vcard_parse(vcard_object, &record);
 			if (ret < CONTACTS_ERROR_NONE) {
-				CTS_ERR("Invalid parameter : vcard stream parsing error");
+				CTS_ERR("__ctsvc_vcard_parse() Fail(%d)", ret);
 				__contacts_vcard_free_vcard_object_list(list_vcard_object);
 				contacts_list_destroy(list, true);
 				return ret;
@@ -4366,7 +4309,7 @@ API int contacts_vcard_parse_to_contact_foreach(const char *vcard_file_name,
 	RETV_IF(NULL == cb, CONTACTS_ERROR_INVALID_PARAMETER);
 
 	file = fopen(vcard_file_name, "r");
-	RETVM_IF(NULL == file, CONTACTS_ERROR_SYSTEM, "System : fopen() Fail(%d)", errno);
+	RETVM_IF(NULL == file, CONTACTS_ERROR_SYSTEM, "fopen() Fail(%d)", errno);
 
 	len = 0;
 	buf_size = CTSVC_VCARD_MAX_SIZE;
@@ -4382,15 +4325,15 @@ API int contacts_vcard_parse_to_contact_foreach(const char *vcard_file_name,
 			if (STRING_EQUAL != strncmp(line, "BEGIN:VCARD", strlen("BEGIN:VCARD")))
 				continue;
 
-		if (len + sizeof(line) < buf_size)
+		if (len + sizeof(line) < buf_size) {
 			len += snprintf(stream + len, buf_size - len, "%s", line);
-		else {
+		} else {
 			char *new_stream;
 			buf_size += sizeof(line) * 2;
 			new_stream = realloc(stream, buf_size);
-			if (new_stream)
+			if (new_stream) {
 				stream = new_stream;
-			else {
+			} else {
 				free(stream);
 				fclose(file);
 				return CONTACTS_ERROR_OUT_OF_MEMORY;
@@ -4413,7 +4356,7 @@ API int contacts_vcard_parse_to_contact_foreach(const char *vcard_file_name,
 					if (NULL == list_vcard_object)
 						break;
 
-					for (vcard_cursor=list_vcard_object;vcard_cursor;vcard_cursor=vcard_cursor->next) {
+					for (vcard_cursor = list_vcard_object; vcard_cursor; vcard_cursor = vcard_cursor->next) {
 						char *vcard_object = vcard_cursor->data;
 
 						if (NULL == vcard_object)
@@ -4441,8 +4384,7 @@ API int contacts_vcard_parse_to_contact_foreach(const char *vcard_file_name,
 					list_vcard_object = NULL;
 				}
 			}
-		}
-		else if (STRING_EQUAL == strncmp(line, "BEGIN:VCARD", 11)) { /* sub vcard object */
+		} else if (STRING_EQUAL == strncmp(line, "BEGIN:VCARD", 11)) { /* sub vcard object */
 			vcard_depth++;
 		}
 	}

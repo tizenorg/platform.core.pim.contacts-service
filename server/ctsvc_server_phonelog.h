@@ -1,7 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,8 +25,8 @@
 
 int ctsvc_phone_log_reset_statistics();
 int ctsvc_phone_log_delete(contacts_phone_log_delete_e op, ...);
-void ctsvc_db_phone_log_delete_callback(sqlite3_context * context,
-		int argc, sqlite3_value ** argv);
+void ctsvc_db_phone_log_delete_callback(sqlite3_context  *context,
+		int argc, sqlite3_value **argv);
 int ctsvc_db_phone_log_update_person_id(const char *number, int old_person_id, int candidate_person_id, bool person_link);
 
 #endif /* __CTSVC_SERVER_PHONELOG_H__ */

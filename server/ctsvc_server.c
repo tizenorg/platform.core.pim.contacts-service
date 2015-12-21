@@ -37,9 +37,8 @@
 #include "ctsvc_server_bg.h"
 #include "ctsvc_server_update.h"
 #include "ctsvc_server_service.h"
-
+#include "ctsvc_notification.h"
 #include "ctsvc_db_access_control.h"
-
 #include "ctsvc_ipc_define.h"
 #include "ctsvc_ipc_server.h"
 #include "ctsvc_ipc_server2.h"
@@ -168,16 +167,14 @@ int ctsvc_server_get_timeout_sec(void)
 }
 
 #define CTSVC_SECURITY_FILE_GROUP 6005
-void ctsvc_create_file_set_permission(const char* file, mode_t mode)
+void ctsvc_create_file_set_permission(const char *file, mode_t mode)
 {
 	int fd, ret;
 	fd = creat(file, mode);
-	if (0 <= fd)
-	{
+	if (0 <= fd) {
 		ret = fchown(fd, -1, CTSVC_SECURITY_FILE_GROUP);
-		if (-1 == ret)
-		{
-			printf("Fail to fchown\n");
+		if (-1 == ret) {
+			CTS_ERR("fchown() Fail");
 			return;
 		}
 		close(fd);
@@ -185,11 +182,10 @@ void ctsvc_create_file_set_permission(const char* file, mode_t mode)
 
 }
 
-void ctsvc_create_rep_set_permission(const char* directory, mode_t mode)
+void ctsvc_create_rep_set_permission(const char *directory, mode_t mode)
 {
-	if (-1 == access (directory, F_OK)) {
+	if (-1 == access(directory, F_OK))
 		mkdir(directory, mode);
-	}
 }
 
 int main(int argc, char *argv[])
@@ -201,7 +197,7 @@ int main(int argc, char *argv[])
 	if (getuid() == 0) {   /* root */
 		gid_t glist[] = {CTS_SECURITY_FILE_GROUP};
 		ret = setgroups(1, glist);   /* client and server should have same Groups */
-		WARN_IF(ret <0, "setgroups Fail(%d)", ret);
+		WARN_IF(ret < 0, "setgroups Fail(%d)", ret);
 	}
 
 	if (2 <= argc && STRING_EQUAL == strcmp(argv[1], "timeout"))
@@ -245,7 +241,7 @@ int main(int argc, char *argv[])
 	ctsvc_create_file_set_permission(CTSVC_NOTI_PHONELOG_CHANGED, 0660);
 	ctsvc_create_file_set_permission(CTSVC_NOTI_SPEEDDIAL_CHANGED, 0660);
 
-	// update DB for compatability
+	/* update DB for compatability */
 	ctsvc_server_db_update();
 
 	ctsvc_server_load_feature_list();
