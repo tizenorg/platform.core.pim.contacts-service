@@ -1,7 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,7 +82,7 @@ int contacts_db_get_status(contacts_db_status_e *status);
  * @see contacts_db_add_status_changed_cb()
  */
 
-typedef void (*contacts_db_status_changed_cb)(contacts_db_status_e status, void* user_data);
+typedef void (*contacts_db_status_changed_cb)(contacts_db_status_e status, void *user_data);
 
 /**
  * @brief  Registers a callback function.
@@ -104,7 +104,7 @@ typedef void (*contacts_db_status_changed_cb)(contacts_db_status_e status, void*
  * @see contacts_db_remove_status_changed_cb()
  */
 
-int contacts_db_add_status_changed_cb(contacts_db_status_changed_cb callback, void* user_data);
+int contacts_db_add_status_changed_cb(contacts_db_status_changed_cb callback, void *user_data);
 
 /**
  * @brief  Unregisters a callback function.
@@ -126,7 +126,7 @@ int contacts_db_add_status_changed_cb(contacts_db_status_changed_cb callback, vo
  * @see contacts_db_add_status_changed_cb()
  */
 
-int contacts_db_remove_status_changed_cb(contacts_db_status_changed_cb callback, void* user_data);
+int contacts_db_remove_status_changed_cb(contacts_db_status_changed_cb callback, void *user_data);
 
 /**
  * @}

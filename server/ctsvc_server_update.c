@@ -1,7 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,9 +64,9 @@ static int __ctsvc_server_find_person_id_of_phonelog(sqlite3 *__db, char *normal
 
 	ret = sqlite3_prepare_v2(__db, query, sizeof(query), &stmt, NULL);
 	if (stmt == NULL) {
-		CTS_ERR("sqlite3_prepare_v2 fail(%d)", ret);
+		ERR("sqlite3_prepare_v2 Fail(%d)", ret);
 		if (bind_text) {
-			for (cursor=bind_text;cursor;cursor=cursor->next,i++)
+			for (cursor = bind_text; cursor; cursor = cursor->next, i++)
 				free(cursor->data);
 			g_slist_free(bind_text);
 		}
@@ -74,7 +74,7 @@ static int __ctsvc_server_find_person_id_of_phonelog(sqlite3 *__db, char *normal
 	}
 
 	if (bind_text) {
-		for (cursor=bind_text,i=1;cursor;cursor=cursor->next,i++) {
+		for (cursor = bind_text, i = 1; cursor; cursor = cursor->next, i++) {
 			const char *text = cursor->data;
 			if (text && *text)
 				sqlite3_bind_text(stmt, i, text, strlen(text), SQLITE_STATIC);
@@ -84,8 +84,8 @@ static int __ctsvc_server_find_person_id_of_phonelog(sqlite3 *__db, char *normal
 	while ((ret = sqlite3_step(stmt))) {
 		id = sqlite3_column_int(stmt, 0);
 		number_type = sqlite3_column_int(stmt, 1);
-		if (find_person_id <= 0 && id > 0) {
-			find_person_id = id;	/* find first match person_id */
+		if (find_person_id <= 0 && 0 < id) {
+			find_person_id = id;   /* find first match person_id */
 			*find_number_type = number_type;
 			if (person_id <= 0)
 				break;
@@ -100,7 +100,7 @@ static int __ctsvc_server_find_person_id_of_phonelog(sqlite3 *__db, char *normal
 	sqlite3_finalize(stmt);
 
 	if (bind_text) {
-		for (cursor=bind_text;cursor;cursor=cursor->next,i++)
+		for (cursor = bind_text; cursor; cursor = cursor->next, i++)
 			free(cursor->data);
 		g_slist_free(bind_text);
 	}
@@ -123,7 +123,7 @@ static void __ctsvc_server_number_info_update(sqlite3 *__db)
 			"WHERE log_type < %d", CONTACTS_PLOG_TYPE_EMAIL_RECEIVED);
 	ret = sqlite3_prepare_v2(__db, query, strlen(query), &stmt, NULL);
 	if (SQLITE_OK != ret) {
-		CTS_ERR("sqlite3_prepare_v2() Fail(%s)", sqlite3_errmsg(__db));
+		ERR("sqlite3_prepare_v2() Fail(%s)", sqlite3_errmsg(__db));
 		return;
 	}
 
@@ -132,7 +132,7 @@ static void __ctsvc_server_number_info_update(sqlite3 *__db)
 			"minmatch=?, person_id=?, number_type=? WHERE id = ?");
 	ret = sqlite3_prepare_v2(__db, query, strlen(query), &update_stmt, NULL);
 	if (SQLITE_OK != ret) {
-		CTS_ERR("sqlite3_prepare_v2() Fail(%s)", sqlite3_errmsg(__db));
+		ERR("sqlite3_prepare_v2() Fail(%s)", sqlite3_errmsg(__db));
 		sqlite3_finalize(stmt);
 		return;
 	}
@@ -168,7 +168,7 @@ static void __ctsvc_server_number_info_update(sqlite3 *__db)
 
 			ret = sqlite3_step(update_stmt);
 			if (SQLITE_DONE != ret) {
-				CTS_ERR("sqlite3_step() Fail(%d, %s)", ret, sqlite3_errmsg(__db));
+				ERR("sqlite3_step() Fail(%d, %s)", ret, sqlite3_errmsg(__db));
 				break;
 			}
 			sqlite3_reset(update_stmt);
@@ -184,7 +184,7 @@ static void __ctsvc_server_number_info_update(sqlite3 *__db)
 			"WHERE datatype = %d", CTSVC_DATA_NUMBER);
 	ret = sqlite3_prepare_v2(__db, query, strlen(query), &stmt, NULL);
 	if (SQLITE_OK != ret) {
-		CTS_ERR("sqlite3_prepare_v2() Fail(%s)", sqlite3_errmsg(__db));
+		ERR("sqlite3_prepare_v2() Fail(%s)", sqlite3_errmsg(__db));
 		return;
 	}
 
@@ -192,7 +192,7 @@ static void __ctsvc_server_number_info_update(sqlite3 *__db)
 			"UPDATE "CTS_TABLE_DATA" SET data4=?, data5=?, data6=?  WHERE id = ?");
 	ret = sqlite3_prepare_v2(__db, query, strlen(query), &update_stmt, NULL);
 	if (SQLITE_OK != ret) {
-		CTS_ERR("sqlite3_prepare_v2() Fail(%s)", sqlite3_errmsg(__db));
+		ERR("sqlite3_prepare_v2() Fail(%s)", sqlite3_errmsg(__db));
 		sqlite3_finalize(stmt);
 		return;
 	}
@@ -217,7 +217,7 @@ static void __ctsvc_server_number_info_update(sqlite3 *__db)
 			sqlite3_bind_int(update_stmt, 4, id);
 			ret = sqlite3_step(update_stmt);
 			if (SQLITE_DONE != ret) {
-				CTS_ERR("sqlite3_step() Fail(%d, %s)", ret, sqlite3_errmsg(__db));
+				ERR("sqlite3_step() Fail(%d, %s)", ret, sqlite3_errmsg(__db));
 				break;
 			}
 			sqlite3_reset(update_stmt);
@@ -240,12 +240,12 @@ static int __ctsvc_server_get_db_version(sqlite3 *db, int *version)
 	snprintf(query, sizeof(query), "PRAGMA user_version;");
 	ret = sqlite3_prepare_v2(db, query, strlen(query), &stmt, NULL);
 	if (SQLITE_OK != ret) {
-		CTS_ERR("sqlite3_prepare_v2() Fail(%s)", sqlite3_errmsg(db));
+		ERR("sqlite3_prepare_v2() Fail(%s)", sqlite3_errmsg(db));
 		return CONTACTS_ERROR_DB;
 	}
 	ret = sqlite3_step(stmt);
 	if (SQLITE_ROW != ret) {
-		CTS_ERR("sqlite3_step() Fail(%s)", sqlite3_errmsg(db));
+		ERR("sqlite3_step() Fail(%s)", sqlite3_errmsg(db));
 		sqlite3_finalize(stmt);
 		return CONTACTS_ERROR_DB;
 	}
@@ -273,20 +273,20 @@ int ctsvc_server_db_update(void)
 	if (old_version <= 100) {
 		ret = sqlite3_exec(__db, "CREATE INDEX name_lookup_idx1 ON name_lookup(contact_id);", NULL, 0, &errmsg);
 		if (SQLITE_OK != ret) {
-			CTS_ERR("drop view view_person_contact_group Fail(%d) : %s", ret, errmsg);
+			ERR("drop view view_person_contact_group Fail(%d) : %s", ret, errmsg);
 			sqlite3_free(errmsg);
 		}
 
 		ret = sqlite3_exec(__db, "CREATE INDEX phone_lookup_idx1 ON phone_lookup(contact_id);", NULL, 0, &errmsg);
 		if (SQLITE_OK != ret) {
-			CTS_ERR("drop view view_person_contact_group Fail(%d) : %s", ret, errmsg);
+			ERR("drop view view_person_contact_group Fail(%d) : %s", ret, errmsg);
 			sqlite3_free(errmsg);
 		}
 
 		/* add view_activity_photos */
 		ret = sqlite3_exec(__db, "DROP VIEW view_phonelog_number", NULL, 0, &errmsg);
 		if (SQLITE_OK != ret) {
-			CTS_ERR("drop view view_person_contact_group Fail(%d) : %s", ret, errmsg);
+			ERR("drop view view_person_contact_group Fail(%d) : %s", ret, errmsg);
 			sqlite3_free(errmsg);
 		}
 
@@ -295,63 +295,63 @@ int ctsvc_server_db_update(void)
 		/* change DB VIEW view_person_contact_group for performance */
 		ret = sqlite3_exec(__db, "DROP VIEW "CTSVC_DB_VIEW_PERSON_GROUP, NULL, 0, &errmsg);
 		if (SQLITE_OK != ret) {
-			CTS_ERR("drop view view_person_contact_group Fail(%d) : %s", ret, errmsg);
+			ERR("drop view view_person_contact_group Fail(%d) : %s", ret, errmsg);
 			sqlite3_free(errmsg);
 		}
 
 		/* change DB VIEW view_contact_group for performance */
 		ret = sqlite3_exec(__db, "DROP VIEW "CTSVC_DB_VIEW_CONTACT_GROUP, NULL, 0, &errmsg);
 		if (SQLITE_OK != ret) {
-			CTS_ERR("drop view view_contact_group Fail : %s", errmsg);
+			ERR("drop view view_contact_group Fail : %s", errmsg);
 			sqlite3_free(errmsg);
 		}
 
 		/* for number compare */
 		ret = sqlite3_exec(__db, "DROP VIEW "CTSVC_DB_VIEW_NUMBER, NULL, 0, &errmsg);
 		if (SQLITE_OK != ret) {
-			CTS_ERR("drop view %s Fail(%d) : %s", CTSVC_DB_VIEW_NUMBER, ret, errmsg);
+			ERR("drop view %s Fail(%d) : %s", CTSVC_DB_VIEW_NUMBER, ret, errmsg);
 			sqlite3_free(errmsg);
 		}
 
 		ret = sqlite3_exec(__db, "DROP VIEW "CTSVC_DB_VIEW_SPEEDIDAL, NULL, 0, &errmsg);
 		if (SQLITE_OK != ret) {
-			CTS_ERR("drop view %s Fail(%d) : %s", CTSVC_DB_VIEW_SPEEDIDAL, ret, errmsg);
+			ERR("drop view %s Fail(%d) : %s", CTSVC_DB_VIEW_SPEEDIDAL, ret, errmsg);
 			sqlite3_free(errmsg);
 		}
 
 		ret = sqlite3_exec(__db, "DROP VIEW "CTSVC_DB_VIEW_PERSON_NUMBER, NULL, 0, &errmsg);
 		if (SQLITE_OK != ret) {
-			CTS_ERR("drop view %s Fail(%d) : %s", CTSVC_DB_VIEW_PERSON_NUMBER, ret, errmsg);
+			ERR("drop view %s Fail(%d) : %s", CTSVC_DB_VIEW_PERSON_NUMBER, ret, errmsg);
 			sqlite3_free(errmsg);
 		}
 
 		ret = sqlite3_exec(__db, "DROP VIEW "CTSVC_DB_VIEW_CONTACT_NUMBER, NULL, 0, &errmsg);
 		if (SQLITE_OK != ret) {
-			CTS_ERR("drop view %s Fail(%d) : %s", CTSVC_DB_VIEW_CONTACT_NUMBER, ret, errmsg);
+			ERR("drop view %s Fail(%d) : %s", CTSVC_DB_VIEW_CONTACT_NUMBER, ret, errmsg);
 			sqlite3_free(errmsg);
 		}
 
 		ret = sqlite3_exec(__db, "DROP VIEW "CTSVC_DB_VIEW_PERSON_PHONELOG, NULL, 0, &errmsg);
 		if (SQLITE_OK != ret) {
-			CTS_ERR("drop view %s Fail(%d) : %s", CTSVC_DB_VIEW_PERSON_PHONELOG, ret, errmsg);
+			ERR("drop view %s Fail(%d) : %s", CTSVC_DB_VIEW_PERSON_PHONELOG, ret, errmsg);
 			sqlite3_free(errmsg);
 		}
 
 		ret = sqlite3_exec(__db, "ALTER TABLE "CTS_TABLE_PHONELOGS" ADD COLUMN clean_num TEXT", NULL, 0, &errmsg);
 		if (SQLITE_OK != ret) {
-			CTS_ERR("add phonelogs.clean_num Fail(%d) : %s", ret, errmsg);
+			ERR("add phonelogs.clean_num Fail(%d) : %s", ret, errmsg);
 			sqlite3_free(errmsg);
 		}
 
 		ret = sqlite3_exec(__db, "ALTER TABLE "CTS_TABLE_PHONELOGS" ADD COLUMN sim_id TEXT", NULL, 0, &errmsg);
 		if (SQLITE_OK != ret) {
-			CTS_ERR("add phonelogs.sim_id Fail(%d) : %s", ret, errmsg);
+			ERR("add phonelogs.sim_id Fail(%d) : %s", ret, errmsg);
 			sqlite3_free(errmsg);
 		}
 
 		ret = sqlite3_exec(__db, "ALTER TABLE "CTS_TABLE_PHONELOGS" ADD COLUMN number_type TEXT", NULL, 0, &errmsg);
 		if (SQLITE_OK != ret) {
-			CTS_ERR("add phonelogs.number_type Fail(%d) : %s", ret, errmsg);
+			ERR("add phonelogs.number_type Fail(%d) : %s", ret, errmsg);
 			sqlite3_free(errmsg);
 		}
 
@@ -360,18 +360,18 @@ int ctsvc_server_db_update(void)
 
 		ret = sqlite3_exec(__db, "ALTER TABLE "CTS_TABLE_SDN" ADD COLUMN sim_slot_no TEXT", NULL, 0, &errmsg);
 		if (SQLITE_OK != ret) {
-			CTS_ERR("add sdn.sim_id Fail(%d) : %s", ret, errmsg);
+			ERR("add sdn.sim_id Fail(%d) : %s", ret, errmsg);
 			sqlite3_free(errmsg);
 		}
 
 		ret = sqlite3_exec(__db, "ALTER TABLE "CTS_TABLE_ADDRESSBOOKS" ADD COLUMN smack_label TEXT", NULL, 0, &errmsg);
 		if (SQLITE_OK != ret) {
-			CTS_ERR("add sdn.sim_id Fail(%d) : %s", ret, errmsg);
+			ERR("add sdn.sim_id Fail(%d) : %s", ret, errmsg);
 			sqlite3_free(errmsg);
 		}
 		ret = sqlite3_exec(__db, "UPDATE "CTS_TABLE_ADDRESSBOOKS" SET='org.tizen.contact' WHERE addressbook_id = 0", NULL, 0, &errmsg);
 		if (SQLITE_OK != ret) {
-			CTS_ERR("add sdn.sim_id Fail(%d) : %s", ret, errmsg);
+			ERR("add sdn.sim_id Fail(%d) : %s", ret, errmsg);
 			sqlite3_free(errmsg);
 		}
 
@@ -382,13 +382,13 @@ int ctsvc_server_db_update(void)
 				"UNIQUE(unique_id))");
 		ret = sqlite3_exec(__db, query, NULL, 0, &errmsg);
 		if (SQLITE_OK != ret) {
-			CTS_ERR("create sim_info table(%d)", ret);
+			ERR("create sim_info table(%d)", ret);
 			sqlite3_free(errmsg);
 		}
 
 		ret = sqlite3_exec(__db, "DROP trigger trg_contacts_update", NULL, 0, &errmsg);
 		if (SQLITE_OK != ret) {
-			CTS_ERR("drop trigger trg_contacts_update Fail(%d) : %s", ret, errmsg);
+			ERR("drop trigger trg_contacts_update Fail(%d) : %s", ret, errmsg);
 			sqlite3_free(errmsg);
 		}
 		ret = sqlite3_exec(__db,
@@ -403,7 +403,7 @@ int ctsvc_server_db_update(void)
 				" END;",
 				NULL, 0, &errmsg);
 		if (SQLITE_OK != ret) {
-			CTS_ERR("create trigger trg_contacts_update Fail(%d) : %s", ret, errmsg);
+			ERR("create trigger trg_contacts_update Fail(%d) : %s", ret, errmsg);
 			sqlite3_free(errmsg);
 		}
 
@@ -421,7 +421,7 @@ int ctsvc_server_db_update(void)
 			"PRAGMA user_version = %d", CTSVC_SCHEMA_VERSION);
 	ret = sqlite3_exec(__db, query, NULL, 0, &errmsg);
 	if (SQLITE_OK != ret) {
-		CTS_ERR("sqlite3_exec() Fail(%s)", errmsg);
+		ERR("sqlite3_exec() Fail(%s)", errmsg);
 		sqlite3_free(errmsg);
 	}
 

@@ -1,7 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ const char* ctsvc_get_sort_name_column(void);
 int ctsvc_begin_trans(void);
 int ctsvc_end_trans(bool is_success);
 int ctsvc_get_next_ver(void);
-int ctsvc_get_current_version(int* out_current_version);
+int ctsvc_get_current_version(int *out_current_version);
 int ctsvc_get_transaction_ver(void);
 
 int ctsvc_utils_copy_image(const char *dir, const char *src, const char *file);

@@ -1,11 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
- *
- * Contact: Dohyung Jin <dh.jin@samsung.com>
- *                 Jongwon Lee <gogosing.lee@samsung.com>
- *                 Donghee Ye <donghee.ye@samsung.com>
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -118,7 +114,7 @@ typedef enum {
 	CTSVC_RECORD_SPEEDDIAL,
 	CTSVC_RECORD_SDN,
 	CTSVC_RECORD_RESULT,
-}ctsvc_record_type_e;
+} ctsvc_record_type_e;
 
 typedef enum {
 	CTSVC_FILTER_BOOL,
@@ -127,26 +123,26 @@ typedef enum {
 	CTSVC_FILTER_STR,
 	CTSVC_FILTER_DOUBLE,
 	CTSVC_FILTER_COMPOSITE,
-}ctsvc_filter_type_e;
+} ctsvc_filter_type_e;
 
 typedef struct{
 	unsigned int property_id;
 	int property_type;
-	void* fields;
+	void *fields;
 }property_info_s;
 
-typedef int (*__ctsvc_record_create_cb)(contacts_record_h* out_record);
+typedef int (*__ctsvc_record_create_cb)(contacts_record_h *out_record);
 typedef int (*__ctsvc_record_destroy_cb)(contacts_record_h record, bool delete_child);
-typedef int (*__ctsvc_record_clone_cb)(contacts_record_h record, contacts_record_h* out_record);
+typedef int (*__ctsvc_record_clone_cb)(contacts_record_h record, contacts_record_h *out_record);
 
-typedef int (*__ctsvc_record_get_str_cb)(contacts_record_h record, unsigned int property_id,char** out_str);
-typedef int (*__ctsvc_record_get_str_p_cb)(contacts_record_h record, unsigned int property_id,char** out_str);
-typedef int (*__ctsvc_record_get_int_cb)(contacts_record_h record, unsigned int property_id, int* out_value);
+typedef int (*__ctsvc_record_get_str_cb)(contacts_record_h record, unsigned int property_id,char **out_str);
+typedef int (*__ctsvc_record_get_str_p_cb)(contacts_record_h record, unsigned int property_id,char **out_str);
+typedef int (*__ctsvc_record_get_int_cb)(contacts_record_h record, unsigned int property_id, int *out_value);
 typedef int (*__ctsvc_record_get_bool_cb)(contacts_record_h record, unsigned int property_id, bool *value);
 typedef int (*__ctsvc_record_get_lli_cb)(contacts_record_h record, unsigned int property_id, long long int *value);
 typedef int (*__ctsvc_record_get_double_cb)(contacts_record_h record, unsigned int property_id, double *value);
 
-typedef int (*__ctsvc_record_set_str_cb)(contacts_record_h record, unsigned int property_id, const char* value, bool *is_dirty);
+typedef int (*__ctsvc_record_set_str_cb)(contacts_record_h record, unsigned int property_id, const char *value, bool *is_dirty);
 typedef int (*__ctsvc_record_set_int_cb)(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty);
 typedef int (*__ctsvc_record_set_bool_cb)(contacts_record_h record, unsigned int property_id, bool value, bool *is_dirty);
 typedef int (*__ctsvc_record_set_lli_cb)(contacts_record_h record, unsigned int property_id, long long int value, bool *is_dirty);
@@ -155,8 +151,8 @@ typedef int (*__ctsvc_record_set_double_cb)(contacts_record_h record, unsigned i
 typedef int (*__ctsvc_record_add_child_record_cb)(contacts_record_h record, unsigned int property_id, contacts_record_h child_record);
 typedef int (*__ctsvc_record_remove_child_record_cb)(contacts_record_h record, unsigned int property_id, contacts_record_h child_record);
 typedef int (*__ctsvc_record_get_child_record_count_cb)(contacts_record_h record, unsigned int property_id, int *count);
-typedef int (*__ctsvc_record_get_child_record_at_p_cb)(contacts_record_h record, unsigned int property_id, int index, contacts_record_h* out_record);
-typedef int (*__ctsvc_record_clone_child_record_list_cb)(contacts_record_h record, unsigned int property_id, contacts_list_h* out_list);
+typedef int (*__ctsvc_record_get_child_record_at_p_cb)(contacts_record_h record, unsigned int property_id, int index, contacts_record_h *out_record);
+typedef int (*__ctsvc_record_clone_child_record_list_cb)(contacts_record_h record, unsigned int property_id, contacts_list_h *out_list);
 
 typedef struct {
 	__ctsvc_record_create_cb create;
@@ -178,20 +174,20 @@ typedef struct {
 	__ctsvc_record_get_child_record_count_cb get_child_record_count;
 	__ctsvc_record_get_child_record_at_p_cb get_child_record_at_p;
 	__ctsvc_record_clone_child_record_list_cb clone_child_record_list;
-}ctsvc_record_plugin_cb_s;
+} ctsvc_record_plugin_cb_s;
 
 typedef struct {
 	int r_type;
 	const ctsvc_record_plugin_cb_s *plugin_cbs;
-	const char* view_uri;
+	const char *view_uri;
 	unsigned int property_max_count;
-	unsigned char* properties_flags;
+	unsigned char *properties_flags;
 	unsigned char property_flag;
-}ctsvc_record_s;
+} ctsvc_record_s;
 
-typedef struct  {
+typedef struct {
 	int filter_type;
-}ctsvc_filter_s;
+} ctsvc_filter_s;
 
 typedef struct {
 	int filter_type;
@@ -200,9 +196,9 @@ typedef struct {
 	GSList *filters;    /* ctsvc_filter_h l_filter; */
 	property_info_s *properties;
 	unsigned int property_count;
-}ctsvc_composite_filter_s;
+} ctsvc_composite_filter_s;
 
-typedef struct  {
+typedef struct {
 	int filter_type;
 	int property_id;
 	int match;
@@ -213,10 +209,10 @@ typedef struct  {
 		long long int l;
 		double d;
 	}value;
-}ctsvc_attribute_filter_s;
+} ctsvc_attribute_filter_s;
 
-typedef struct  {
-	char* view_uri;
+typedef struct {
+	char *view_uri;
 	ctsvc_composite_filter_s *filter;
 	unsigned int *projection;
 	unsigned int projection_count;
@@ -225,7 +221,7 @@ typedef struct  {
 	property_info_s *properties;
 	unsigned int property_count;
 	bool distinct;
-}ctsvc_query_s;
+} ctsvc_query_s;
 
 typedef struct {
 	int l_type;
@@ -233,7 +229,7 @@ typedef struct {
 	GList *records;
 	GList *deleted_records;
 	GList *cursor;
-}ctsvc_list_s;
+} ctsvc_list_s;
 
 typedef struct {
 	ctsvc_record_s base;
@@ -241,7 +237,7 @@ typedef struct {
 	char *name;
 	int account_id;
 	int mode;
-}ctsvc_addressbook_s;
+} ctsvc_addressbook_s;
 
 typedef struct {
 	ctsvc_record_s base;
@@ -254,7 +250,7 @@ typedef struct {
 	char *vibration;
 	char *image_thumbnail_path;
 	char *message_alert;
-}ctsvc_group_s;
+} ctsvc_group_s;
 
 typedef struct {
 	ctsvc_record_s base;
@@ -272,7 +268,7 @@ typedef struct {
 	char *status;
 	int link_count;
 	char *addressbook_ids;
-}ctsvc_person_s;
+} ctsvc_person_s;
 
 typedef struct {
 	ctsvc_record_s base;
@@ -290,7 +286,7 @@ typedef struct {
 	char *display_name;
 	char *uid;
 	int display_source_type;
-}ctsvc_simple_contact_s;
+} ctsvc_simple_contact_s;
 
 typedef struct {
 	ctsvc_record_s base;
@@ -308,7 +304,7 @@ typedef struct {
 	char *phonetic_last;
 	char *lookup;
 	char *reverse_lookup;
-}ctsvc_name_s;
+} ctsvc_name_s;
 
 typedef struct {
 	ctsvc_record_s base;
@@ -321,7 +317,7 @@ typedef struct {
 	char *cleaned;     /* internally used */
 	char *normalized;  /* internally used */
 	char *lookup;      /* internally used : for min match */
-}ctsvc_number_s;
+} ctsvc_number_s;
 
 typedef struct {
 	ctsvc_record_s base;
@@ -331,7 +327,7 @@ typedef struct {
 	int type;
 	char *label;
 	char *email_addr;
-}ctsvc_email_s;
+} ctsvc_email_s;
 
 typedef struct {
 	ctsvc_record_s base;
@@ -340,7 +336,7 @@ typedef struct {
 	int type;
 	char *label;
 	char *url;
-}ctsvc_url_s;
+} ctsvc_url_s;
 
 typedef struct {
 	ctsvc_record_s base;
@@ -356,7 +352,7 @@ typedef struct {
 	char *street;
 	char *extended;
 	char *country;
-}ctsvc_address_s;
+} ctsvc_address_s;
 
 typedef struct {
 	ctsvc_record_s base;
@@ -367,7 +363,7 @@ typedef struct {
 	int date;
 	bool is_leap_month;  /* deprecated */
 	int calendar_type;
-}ctsvc_event_s;
+} ctsvc_event_s;
 
 typedef struct {
 	ctsvc_record_s base;
@@ -376,7 +372,7 @@ typedef struct {
 	int type;
 	char *label;
 	char *im_id;
-}ctsvc_messenger_s;
+} ctsvc_messenger_s;
 
 typedef struct {
 	ctsvc_record_s base;
@@ -384,7 +380,7 @@ typedef struct {
 	int contact_id;
 	int group_id;
 	char *group_name;
-}ctsvc_group_relation_s;
+} ctsvc_group_relation_s;
 
 typedef struct {
 	ctsvc_record_s base;
@@ -393,7 +389,7 @@ typedef struct {
 	int type;
 	char *label;
 	char *nickname;
-}ctsvc_nickname_s;
+} ctsvc_nickname_s;
 
 typedef struct {
 	ctsvc_record_s base;
@@ -408,7 +404,7 @@ typedef struct {
 	char *uri;
 	char *category;
 	char *extra_data;
-}ctsvc_profile_s;
+} ctsvc_profile_s;
 
 typedef struct {
 	ctsvc_record_s base;
@@ -417,7 +413,7 @@ typedef struct {
 	int type;
 	char *label;
 	char *name;
-}ctsvc_relationship_s;
+} ctsvc_relationship_s;
 
 typedef struct {
 	ctsvc_record_s base;
@@ -428,14 +424,14 @@ typedef struct {
 	int type;
 	char *label;
 	char *path;
-}ctsvc_image_s;
+} ctsvc_image_s;
 
 typedef struct {
 	ctsvc_record_s base;
 	int id;
 	int contact_id;
 	char *note;
-}ctsvc_note_s;
+} ctsvc_note_s;
 
 typedef struct {
 	ctsvc_record_s base;
@@ -444,10 +440,10 @@ typedef struct {
 	char *source_name;
 	char *status;
 	int timestamp;
-	ctsvc_list_s* photos;
+	ctsvc_list_s *photos;
 	char *service_operation;
 	char *uri;
-}ctsvc_activity_s;
+} ctsvc_activity_s;
 
 typedef struct {
 	ctsvc_record_s base;
@@ -455,7 +451,7 @@ typedef struct {
 	int activity_id;
 	char *photo_url;
 	int sort_index;
-}ctsvc_activity_photo_s;
+} ctsvc_activity_photo_s;
 
 typedef struct {
 	ctsvc_record_s base;
@@ -474,7 +470,7 @@ typedef struct {
 	char *location;
 	char *description;
 	char *phonetic_name;
-}ctsvc_company_s;
+} ctsvc_company_s;
 
 typedef struct {
 	ctsvc_record_s base;
@@ -486,7 +482,7 @@ typedef struct {
 	int extra_data1; /* duration, message_id */
 	char *extra_data2; /*short message*/
 	int sim_slot_no;
-}ctsvc_phonelog_s;
+} ctsvc_phonelog_s;
 
 typedef struct {
 	ctsvc_record_s base;
@@ -504,7 +500,7 @@ typedef struct {
 	char *data10;
 	char *data11;
 	char *data12;
-}ctsvc_extension_s;
+} ctsvc_extension_s;
 
 typedef struct {
 	ctsvc_record_s base;
@@ -531,22 +527,22 @@ typedef struct {
 	char *ringtone_path;
 	char *vibration;
 	char *message_alert;
-	ctsvc_list_s* name;
-	ctsvc_list_s* note;
-	ctsvc_list_s* company;
-	ctsvc_list_s* numbers;
-	ctsvc_list_s* emails;
-	ctsvc_list_s* grouprelations;
-	ctsvc_list_s* events;
-	ctsvc_list_s* messengers;
-	ctsvc_list_s* postal_addrs;
-	ctsvc_list_s* urls;
-	ctsvc_list_s* nicknames;
-	ctsvc_list_s* profiles;
-	ctsvc_list_s* relationships;
-	ctsvc_list_s* images;
-	ctsvc_list_s* extensions;
-}ctsvc_contact_s;
+	ctsvc_list_s *name;
+	ctsvc_list_s *note;
+	ctsvc_list_s *company;
+	ctsvc_list_s *numbers;
+	ctsvc_list_s *emails;
+	ctsvc_list_s *grouprelations;
+	ctsvc_list_s *events;
+	ctsvc_list_s *messengers;
+	ctsvc_list_s *postal_addrs;
+	ctsvc_list_s *urls;
+	ctsvc_list_s *nicknames;
+	ctsvc_list_s *profiles;
+	ctsvc_list_s *relationships;
+	ctsvc_list_s *images;
+	ctsvc_list_s *extensions;
+} ctsvc_contact_s;
 
 typedef struct {
 	ctsvc_record_s base;
@@ -557,21 +553,21 @@ typedef struct {
 	char *reverse_display_name;
 	char *uid;
 	char *image_thumbnail_path;
-	ctsvc_list_s* name;
-	ctsvc_list_s* note;
-	ctsvc_list_s* company;
-	ctsvc_list_s* numbers;
-	ctsvc_list_s* emails;
-	ctsvc_list_s* events;
-	ctsvc_list_s* messengers;
-	ctsvc_list_s* postal_addrs;
-	ctsvc_list_s* urls;
-	ctsvc_list_s* nicknames;
-	ctsvc_list_s* profiles;
-	ctsvc_list_s* relationships;
-	ctsvc_list_s* images;
-	ctsvc_list_s* extensions;
-}ctsvc_my_profile_s;
+	ctsvc_list_s *name;
+	ctsvc_list_s *note;
+	ctsvc_list_s *company;
+	ctsvc_list_s *numbers;
+	ctsvc_list_s *emails;
+	ctsvc_list_s *events;
+	ctsvc_list_s *messengers;
+	ctsvc_list_s *postal_addrs;
+	ctsvc_list_s *urls;
+	ctsvc_list_s *nicknames;
+	ctsvc_list_s *profiles;
+	ctsvc_list_s *relationships;
+	ctsvc_list_s *images;
+	ctsvc_list_s *extensions;
+} ctsvc_my_profile_s;
 
 
 typedef struct {
@@ -580,7 +576,7 @@ typedef struct {
 	char *name;
 	char *number;
 	int sim_slot_no;
-}ctsvc_sdn_s;
+} ctsvc_sdn_s;
 
 typedef struct {
 	ctsvc_record_s base;
@@ -590,7 +586,7 @@ typedef struct {
 	int addressbook_id;
 	bool image_changed;
 	int last_changed_type;  /* it is used for _contacts_my_profile_updated_info */
-}ctsvc_updated_info_s;
+} ctsvc_updated_info_s;
 
 typedef struct {
 	ctsvc_record_s base;
@@ -603,7 +599,7 @@ typedef struct {
 	char *label;
 	char *number;
 	int dial_number;
-}ctsvc_speeddial_s;
+} ctsvc_speeddial_s;
 
 typedef struct {
 	int property_id;
@@ -615,16 +611,16 @@ typedef struct {
 		long long int l;
 		double d;
 	}value;
-}ctsvc_result_value_s;
+} ctsvc_result_value_s;
 
 typedef struct {
 	ctsvc_record_s base;
 	GSList *values;
-}ctsvc_result_s;
+} ctsvc_result_s;
 
 typedef struct {
 	int version;
 	int connection_count;
-}ctsvc_base_s;
+} ctsvc_base_s;
 
 #endif /* __CTSVC_STRUCT_H__ */

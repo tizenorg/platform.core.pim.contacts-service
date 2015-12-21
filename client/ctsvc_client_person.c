@@ -35,7 +35,7 @@ API int contacts_person_link_person(int base_person_id, int person_id)
 	return ret;
 }
 
-API int contacts_person_unlink_contact(int person_id, int contact_id, int* unlinked_person_id)
+API int contacts_person_unlink_contact(int person_id, int contact_id, int *unlinked_person_id)
 {
 	int ret;
 	contacts_h contact = NULL;

@@ -1,7 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,7 +67,7 @@ extern "C"
  *
  * @see contacts_query_destroy()
  */
-int contacts_query_create(const char* view_uri, contacts_query_h* query);
+int contacts_query_create(const char *view_uri, contacts_query_h *query);
 
 /**
  * @brief Destroys a query.

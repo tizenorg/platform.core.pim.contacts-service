@@ -37,9 +37,8 @@
 #include "ctsvc_server_bg.h"
 #include "ctsvc_server_update.h"
 #include "ctsvc_server_service.h"
-
+#include "ctsvc_notification.h"
 #include "ctsvc_db_access_control.h"
-
 #include "ctsvc_ipc_define.h"
 #include "ctsvc_ipc_server.h"
 #include "ctsvc_ipc_server2.h"
@@ -112,13 +111,14 @@ static int __server_main(void)
 		if (pims_ipc_svc_register(CTSVC_IPC_SETTING_MODULE, CTSVC_IPC_SERVER_SETTING_GET_NAME_SORTING_ORDER, ctsvc_ipc_setting_get_name_sorting_order, NULL) != 0) break;
 		if (pims_ipc_svc_register(CTSVC_IPC_SETTING_MODULE, CTSVC_IPC_SERVER_SETTING_SET_NAME_SORTING_ORDER, ctsvc_ipc_setting_set_name_sorting_order, NULL) != 0) break;
 
-		snprintf(sock_file, sizeof(sock_file), CTSVC_SOCK_PATH"/.%s_for_subscribe", getuid(), CTSVC_IPC_SERVICE);
+		snprintf(sock_file, sizeof(sock_file), CTSVC_SOCK_PATH"/.%s_for_subscribe",
+				getuid(), CTSVC_IPC_SERVICE);
 		pims_ipc_svc_init_for_publish(sock_file, CTS_SECURITY_FILE_GROUP, 0660);
 		ctsvc_noti_publish_socket_initialize();
 
 		ret = ctsvc_connect();
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("contacts_connect fail(%d)", ret);
+			ERR("contacts_connect fail(%d)", ret);
 			break;
 		}
 		ctsvc_set_client_access_info(NULL, NULL);
@@ -127,7 +127,7 @@ static int __server_main(void)
 		ctsvc_server_bg_delete_start();
 
 		ret = ctsvc_server_init_configuration();
-		CTS_DBG("%d", ret);
+		DBG("%d", ret);
 
 		main_loop = g_main_loop_new(NULL, FALSE);
 
@@ -141,7 +141,7 @@ static int __server_main(void)
 
 		ret = ctsvc_disconnect();
 		if (CONTACTS_ERROR_NONE != ret)
-			CTS_DBG("%d", ret);
+			DBG("%d", ret);
 
 		pims_ipc_svc_deinit_for_publish();
 
@@ -151,7 +151,7 @@ static int __server_main(void)
 
 	} while (0);
 
-	CTS_ERR("pims_ipc_svc_register error");
+	ERR("pims_ipc_svc_register error");
 	return -1;
 }
 
@@ -163,31 +163,29 @@ void ctsvc_server_quit(void)
 
 int ctsvc_server_get_timeout_sec(void)
 {
-	CTS_DBG("ctsvc_timeout_sec:%d", ctsvc_timeout_sec);
+	DBG("ctsvc_timeout_sec:%d", ctsvc_timeout_sec);
 	return ctsvc_timeout_sec;
 }
 
 #define CTSVC_SECURITY_FILE_GROUP 6005
-void ctsvc_create_file_set_permission(const char* file, mode_t mode)
+void ctsvc_create_file_set_permission(const char *file, mode_t mode)
 {
 	int fd, ret;
 	fd = creat(file, mode);
-	if (0 <= fd)
-	{
+	if (0 <= fd) {
 		ret = fchown(fd, -1, CTSVC_SECURITY_FILE_GROUP);
 		if (-1 == ret)
-			printf("Fail to fchown\n");
+			ERR("fchown() Fail");
 
 		close(fd);
 	}
 
 }
 
-void ctsvc_create_rep_set_permission(const char* directory, mode_t mode)
+void ctsvc_create_rep_set_permission(const char *directory, mode_t mode)
 {
-	if (-1 == access (directory, F_OK)) {
+	if (-1 == access(directory, F_OK))
 		mkdir(directory, mode);
-	}
 }
 
 int main(int argc, char *argv[])
@@ -199,7 +197,7 @@ int main(int argc, char *argv[])
 	if (getuid() == 0) {   /* root */
 		gid_t glist[] = {CTS_SECURITY_FILE_GROUP};
 		ret = setgroups(1, glist);   /* client and server should have same Groups */
-		WARN_IF(ret <0, "setgroups Fail(%d)", ret);
+		WARN_IF(ret < 0, "setgroups Fail(%d)", ret);
 	}
 
 	if (2 <= argc && STRING_EQUAL == strcmp(argv[1], "timeout"))
@@ -243,12 +241,12 @@ int main(int argc, char *argv[])
 	ctsvc_create_file_set_permission(CTSVC_NOTI_PHONELOG_CHANGED, 0660);
 	ctsvc_create_file_set_permission(CTSVC_NOTI_SPEEDDIAL_CHANGED, 0660);
 
-	// update DB for compatability
+	/* update DB for compatability */
 	ctsvc_server_db_update();
 
 	ctsvc_server_load_feature_list();
 	ret = ctsvc_server_socket_init();
-	CTS_DBG("%d", ret);
+	DBG("%d", ret);
 
 	__server_main();
 

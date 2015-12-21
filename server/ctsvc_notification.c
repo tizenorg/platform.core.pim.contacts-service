@@ -1,7 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,9 +56,8 @@ void ctsvc_noti_publish_socket_initialize(void)
 {
 	int fd = open(CTSVC_NOTI_IPC_READY, O_TRUNC | O_RDWR);
 
-	if (0 <= fd) {
+	if (0 <= fd)
 		close(fd);
-	}
 }
 
 static inline void __ctsvc_noti_publish_contact_change(void)
@@ -474,8 +473,8 @@ void ctsvc_notification_send()
  * Whenever deleting data table record, this function will be called
  * in order to set notification
  */
-void ctsvc_db_data_delete_callback(sqlite3_context * context,
-		int argc, sqlite3_value ** argv)
+void ctsvc_db_data_delete_callback(sqlite3_context  *context,
+		int argc, sqlite3_value **argv)
 {
 	CTS_FN_CALL;
 	int datatype;
@@ -487,7 +486,7 @@ void ctsvc_db_data_delete_callback(sqlite3_context * context,
 
 	datatype = sqlite3_value_int(argv[1]);
 
-	switch(datatype) {
+	switch (datatype) {
 	case CTSVC_DATA_NAME:
 		ctsvc_set_name_noti();
 		break;
@@ -538,15 +537,15 @@ void ctsvc_db_data_delete_callback(sqlite3_context * context,
 }
 
 API int contacts_db_add_status_changed_cb(
-		contacts_db_status_changed_cb cb, void* user_data)
+		contacts_db_status_changed_cb cb, void *user_data)
 {
-	CTS_ERR("Please use contacts-service2 instead of contacts-service3");
+	ERR("Please use contacts-service2 instead of contacts-service3");
 	return CONTACTS_ERROR_INTERNAL;
 }
 
 API int contacts_db_remove_status_changed_cb(
-		contacts_db_status_changed_cb cb, void* user_data)
+		contacts_db_status_changed_cb cb, void *user_data)
 {
-	CTS_ERR("Please use contacts-service2 instead of contacts-service3");
+	ERR("Please use contacts-service2 instead of contacts-service3");
 	return CONTACTS_ERROR_INTERNAL;
 }

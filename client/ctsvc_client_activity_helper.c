@@ -17,7 +17,6 @@
  *
  */
 
-#include <glib.h>
 #include <pims-ipc-data.h>
 
 #include "contacts.h"
@@ -38,34 +37,37 @@ int ctsvc_client_activity_delete_by_contact_id(contacts_h contact, int contact_i
 	pims_ipc_data_h indata = NULL;
 	pims_ipc_data_h outdata = NULL;
 
-	RETVM_IF(NULL == contact, CONTACTS_ERROR_INVALID_PARAMETER, "contact is NULL");
-	RETVM_IF(contact_id <= 0,CONTACTS_ERROR_INVALID_PARAMETER,"id should be greater than 0");
+	RETV_IF(NULL == contact, CONTACTS_ERROR_INVALID_PARAMETER);
+	RETVM_IF(contact_id <= 0, CONTACTS_ERROR_INVALID_PARAMETER,
+			"id should be greater than 0");
 
 	/* make indata */
 	indata = pims_ipc_data_create(0);
 	if (indata == NULL) {
-		CTS_ERR("ipc data created fail!");
+		ERR("pims_ipc_data_create() Fail");
 		ret = CONTACTS_ERROR_OUT_OF_MEMORY;
 		return ret;
 	}
 
 	ret = ctsvc_ipc_marshal_handle(contact, indata);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_ipc_marshal_handle() Fail(%d)", ret);
+		ERR("ctsvc_ipc_marshal_handle() Fail(%d)", ret);
 		pims_ipc_data_destroy(indata);
 		return ret;
 	}
 
 	ret = ctsvc_ipc_marshal_int(contact_id, indata);
 	if (ret != CONTACTS_ERROR_NONE) {
-		CTS_ERR("marshal fail");
+		ERR("ctsvc_ipc_marshal_record() Fail");
 		pims_ipc_data_destroy(indata);
 		return ret;
 	}
 
 	/* ipc call */
-	if (ctsvc_ipc_call(CTSVC_IPC_ACTIVITY_MODULE, CTSVC_IPC_SERVER_ACTIVITY_DELETE_BY_CONTACT_ID, indata, &outdata) != 0) {
-		CTS_ERR("ctsvc_ipc_call failed");
+	ret = ctsvc_ipc_call(CTSVC_IPC_ACTIVITY_MODULE,
+			CTSVC_IPC_SERVER_ACTIVITY_DELETE_BY_CONTACT_ID, indata, &outdata);
+	if (0 != ret) {
+		ERR("ctsvc_ipc_call() Fail(%d)", ret);
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
 	}
@@ -75,15 +77,15 @@ int ctsvc_client_activity_delete_by_contact_id(contacts_h contact, int contact_i
 	if (outdata) {
 		int transaction_ver = 0;
 
-		// check result
+		/* check result */
 		if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(outdata, &ret)) {
-			CTS_ERR("ctsvc_ipc_unmarshal_int() Fail");
+			ERR("ctsvc_ipc_unmarshal_int() Fail");
 			pims_ipc_data_destroy(outdata);
 			return CONTACTS_ERROR_IPC;
 		}
 		if (CONTACTS_ERROR_NONE == ret) {
 			if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(outdata, &transaction_ver)) {
-				CTS_ERR("ctsvc_ipc_unmarshal_int() Fail");
+				ERR("ctsvc_ipc_unmarshal_int() Fail");
 				pims_ipc_data_destroy(outdata);
 				return CONTACTS_ERROR_IPC;
 			}
@@ -101,34 +103,37 @@ int ctsvc_client_activity_delete_by_account_id(contacts_h contact, int account_i
 	pims_ipc_data_h indata = NULL;
 	pims_ipc_data_h outdata = NULL;
 
-	RETVM_IF(NULL == contact, CONTACTS_ERROR_INVALID_PARAMETER, "contact is NULL");
-	RETVM_IF(account_id <= 0,CONTACTS_ERROR_INVALID_PARAMETER,"id should be greater than 0");
+	RETV_IF(NULL == contact, CONTACTS_ERROR_INVALID_PARAMETER);
+	RETVM_IF(account_id <= 0, CONTACTS_ERROR_INVALID_PARAMETER,
+			"id should be greater than 0");
 
 	/* make indata */
 	indata = pims_ipc_data_create(0);
 	if (indata == NULL) {
-		CTS_ERR("ipc data created fail!");
+		ERR("pims_ipc_data_create() Fail");
 		ret = CONTACTS_ERROR_OUT_OF_MEMORY;
 		return ret;
 	}
 
 	ret = ctsvc_ipc_marshal_handle(contact, indata);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_ipc_marshal_handle() Fail(%d)", ret);
+		ERR("ctsvc_ipc_marshal_handle() Fail(%d)", ret);
 		pims_ipc_data_destroy(indata);
 		return ret;
 	}
 
 	ret = ctsvc_ipc_marshal_int(account_id, indata);
 	if (ret != CONTACTS_ERROR_NONE) {
-		CTS_ERR("marshal fail");
+		ERR("ctsvc_ipc_marshal_record() Fail");
 		pims_ipc_data_destroy(indata);
 		return ret;
 	}
 
 	/* ipc call */
-	if (ctsvc_ipc_call(CTSVC_IPC_ACTIVITY_MODULE, CTSVC_IPC_SERVER_ACTIVITY_DELETE_BY_ACCOUNT_ID, indata, &outdata) != 0) {
-		CTS_ERR("ctsvc_ipc_call failed");
+	ret = ctsvc_ipc_call(CTSVC_IPC_ACTIVITY_MODULE,
+			CTSVC_IPC_SERVER_ACTIVITY_DELETE_BY_ACCOUNT_ID, indata, &outdata);
+	if (0 != ret) {
+		ERR("ctsvc_ipc_call() Fail(%d)", ret);
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
 	}
@@ -138,14 +143,14 @@ int ctsvc_client_activity_delete_by_account_id(contacts_h contact, int account_i
 	if (outdata) {
 		int transaction_ver = 0;
 		if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(outdata, &ret)) {
-			CTS_ERR("ctsvc_ipc_unmarshal_int() Fail");
+			ERR("ctsvc_ipc_unmarshal_int() Fail");
 			pims_ipc_data_destroy(outdata);
 			return CONTACTS_ERROR_IPC;
 		}
 
 		if (CONTACTS_ERROR_NONE == ret) {
 			if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(outdata, &transaction_ver)) {
-				CTS_ERR("ctsvc_ipc_unmarshal_int() Fail");
+				ERR("ctsvc_ipc_unmarshal_int() Fail");
 				pims_ipc_data_destroy(outdata);
 				return CONTACTS_ERROR_IPC;
 			}

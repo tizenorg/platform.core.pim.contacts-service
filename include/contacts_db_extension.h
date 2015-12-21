@@ -45,7 +45,7 @@ extern "C"
  * @see contacts_db_add_changed_cb_with_info()
  */
 
-typedef void (*contacts_db_change_cb_with_info)(const char* view_uri, char *changes, void* user_data);
+typedef void (*contacts_db_change_cb_with_info)(const char *view_uri, char *changes, void *user_data);
 
 /**
  * @brief Registers a callback function.
@@ -80,7 +80,7 @@ typedef void (*contacts_db_change_cb_with_info)(const char* view_uri, char *chan
  * @see contacts_db_changed_cb_with_info()
  * @see contacts_db_remove_changed_cb_with_info()
  */
-int contacts_db_add_changed_cb_with_info(const char* view_uri, contacts_db_change_cb_with_info callback, void* user_data);
+int contacts_db_add_changed_cb_with_info(const char *view_uri, contacts_db_change_cb_with_info callback, void *user_data);
 
 /**
  * @brief Unregisters a callback function.
@@ -105,7 +105,7 @@ int contacts_db_add_changed_cb_with_info(const char* view_uri, contacts_db_chang
  * @see contacts_db_changed_cb_with_info()
  * @see contacts_db_add_changed_cb_with_info()
  */
-int contacts_db_remove_changed_cb_with_info(const char* view_uri, contacts_db_change_cb_with_info callback, void* user_data);
+int contacts_db_remove_changed_cb_with_info(const char *view_uri, contacts_db_change_cb_with_info callback, void *user_data);
 
 
 #ifdef __cplusplus

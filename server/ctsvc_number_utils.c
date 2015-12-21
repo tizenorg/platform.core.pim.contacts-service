@@ -1,7 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,9 +35,9 @@
 typedef struct {
 	int mcc;
 	char *cc;
-}ctsvc_mcc_cc_map;
+} ctsvc_mcc_cc_map;
 
-const static ctsvc_mcc_cc_map __mcc_cc_list[] = {
+static const ctsvc_mcc_cc_map __mcc_cc_list[] = {
 	{0, "1"},
 	{202, "30"},
 	{204, "31"},
@@ -296,7 +296,7 @@ char* ctsvc_get_network_cc(bool reload)
 
 	ret = tel_get_property_int(handle, TAPI_PROP_NETWORK_SERVICE_TYPE, &state);
 	if (ret != TAPI_API_SUCCESS) {
-		CTS_ERR("tel_get_property_int Fail(%d)", ret);
+		ERR("tel_get_property_int Fail(%d)", ret);
 		tel_deinit(handle);
 		return NULL;
 	}
@@ -305,13 +305,13 @@ char* ctsvc_get_network_cc(bool reload)
 			|| state == TAPI_NETWORK_SERVICE_TYPE_NO_SERVICE
 			|| state == TAPI_NETWORK_SERVICE_TYPE_EMERGENCY
 			|| state == TAPI_NETWORK_SERVICE_TYPE_SEARCH) {
-		CTS_INFO("network service is not working : state(%d)", state);
+		INFO("network service is not working : state(%d)", state);
 		return NULL;
 	}
 
 	ret = tel_get_property_string(handle, TAPI_PROP_NETWORK_PLMN,  &temp);
 	if (ret != TAPI_API_SUCCESS) {
-		CTS_ERR("tel_get_property_string Fail(%d)", ret);
+		ERR("tel_get_property_string Fail(%d)", ret);
 		return NULL;
 	}
 
@@ -320,7 +320,7 @@ char* ctsvc_get_network_cc(bool reload)
 			temp[3] = '\0';
 		mcc = atoi(temp);
 	}
-	for (i=0;i<sizeof(__mcc_cc_list)/sizeof(ctsvc_mcc_cc_map);i++) {
+	for (i = 0; i < sizeof(__mcc_cc_list)/sizeof(ctsvc_mcc_cc_map); i++) {
 		if (__mcc_cc_list[i].mcc == mcc) {
 			cc = __mcc_cc_list[i].cc;
 			break;
@@ -330,7 +330,8 @@ char* ctsvc_get_network_cc(bool reload)
 	return cc;
 }
 
-static void __ctsvc_network_cc_changed(TapiHandle *handle, const char *noti_id, void *data, void *user_data)
+static void _numutil_network_cc_changed(TapiHandle *handle, const char *noti_id,
+		void *data, void *user_data)
 {
 	ctsvc_get_network_cc(true);
 }
@@ -343,11 +344,11 @@ void* ctsvc_init_tapi_handle_for_cc()
 	handle_for_cc = tel_init(NULL);
 	if (handle_for_cc) {
 		int ret = tel_register_noti_event(handle_for_cc,
-				TAPI_PROP_NETWORK_PLMN, __ctsvc_network_cc_changed, NULL);
+				TAPI_PROP_NETWORK_PLMN, _numutil_network_cc_changed, NULL);
 		WARN_IF(ret != TAPI_API_SUCCESS, "tel_register_noti_event Fail(%d)", ret);
+	} else {
+		ERR("tel_init() Fail");
 	}
-	else
-		CTS_ERR("tel_init fail");
 
 	return handle_for_cc;
 }
@@ -356,13 +357,13 @@ void ctsvc_deinit_tapi_handle_for_cc()
 {
 	if (handle_for_cc) {
 		int ret = tel_deregister_noti_event(handle_for_cc,  TAPI_PROP_NETWORK_PLMN);
-		WARN_IF(ret != TAPI_API_SUCCESS, "tel_register_noti_event Fail(%d)", ret);
+		WARN_IF(ret != TAPI_API_SUCCESS, "tel_register_noti_event() Fail(%d)", ret);
 		tel_deinit(handle_for_cc);
 	}
 	handle_for_cc = NULL;
 }
 
-static inline int __ctsvc_phone_number_has_country_code(const char *src, int len)
+static inline int _numutil_has_country_code(const char *src, int len)
 {
 	int ret = 0;
 
@@ -390,7 +391,7 @@ static inline int __ctsvc_phone_number_has_country_code(const char *src, int len
 			ret += 1;
 			break;
 		default:
-			CTS_ERR("The parameter(src:%s) has invalid character set", src);
+			ERR("The parameter(src:%s) has invalid character set", src);
 		}
 		break;
 	case 3:
@@ -410,7 +411,7 @@ static inline int __ctsvc_phone_number_has_country_code(const char *src, int len
 			ret += 1;
 			break;
 		default:
-			CTS_ERR("The parameter(src:%s) has invalid character set", src);
+			ERR("The parameter(src:%s) has invalid character set", src);
 		}
 		break;
 	case 4:
@@ -430,7 +431,7 @@ static inline int __ctsvc_phone_number_has_country_code(const char *src, int len
 			ret += 1;
 			break;
 		default:
-			CTS_ERR("The parameter(src:%s) has invalid character set", src);
+			ERR("The parameter(src:%s) has invalid character set", src);
 		}
 		break;
 	case 5:
@@ -450,7 +451,7 @@ static inline int __ctsvc_phone_number_has_country_code(const char *src, int len
 			ret += 1;
 			break;
 		default:
-			CTS_ERR("The parameter(src:%s) has invalid character set", src);
+			ERR("The parameter(src:%s) has invalid character set", src);
 		}
 		break;
 	case 6:
@@ -470,7 +471,7 @@ static inline int __ctsvc_phone_number_has_country_code(const char *src, int len
 			ret += 1;
 			break;
 		default:
-			CTS_ERR("The parameter(src:%s) has invalid character set", src);
+			ERR("The parameter(src:%s) has invalid character set", src);
 		}
 		break;
 	case 8:
@@ -490,7 +491,7 @@ static inline int __ctsvc_phone_number_has_country_code(const char *src, int len
 			ret += 1;
 			break;
 		default:
-			CTS_ERR("The parameter(src:%s) has invalid character set", src);
+			ERR("The parameter(src:%s) has invalid character set", src);
 		}
 		break;
 	case 9:
@@ -510,12 +511,12 @@ static inline int __ctsvc_phone_number_has_country_code(const char *src, int len
 			ret += 1;
 			break;
 		default:
-			CTS_ERR("The parameter(src:%s) has invalid character set", src);
+			ERR("The parameter(src:%s) has invalid character set", src);
 		}
 		break;
 	case 0:
 	default:
-		CTS_ERR("The parameter(src:%s) has invalid character set", src);
+		ERR("The parameter(src:%s) has invalid character set", src);
 		return 0;
 	}
 
@@ -537,7 +538,7 @@ enum {
 	CTSVC_NONE,
 };
 
-static int __ctsvc_number_has_ip_and_cc(const char*number, int len, int *index)
+static int _numutil_has_ip_and_cc(const char*number, int len, int *index)
 {
 	bool have_cc = false;
 	bool have_plus = false;
@@ -550,7 +551,7 @@ static int __ctsvc_number_has_ip_and_cc(const char*number, int len, int *index)
 	start_index = 0;
 	match_len = 0;
 
-	switch(number[start_index]) {
+	switch (number[start_index]) {
 	case '+':
 		start_index++;
 		have_plus = true;
@@ -559,185 +560,181 @@ static int __ctsvc_number_has_ip_and_cc(const char*number, int len, int *index)
 			return CTSVC_PLUS_ONLY;   /* '+' */
 		}
 	default:
-		{
-			/*
-			 * IP can be
-			 *  0 (Turks and Caicos Islands, Samoa)
-			 *  00, 011, 0011, 010, 000
-			 *  001/007 (Cambodia), 001/008 (Indonesia, Singapore)
-			 *  001/002 (Korea), 002(Taiwan)
-			 *  810 (Belarus, Kazakhstan, Russian, Tajikistan, Turkmenistan)
-			 *  009/007/005(Colombia), 009(Nigeria)
-			 *  119 (Cuba)
-			 *  00/012/013/014 (Israel)
-			 */
-			switch(number[start_index]) {
-			case '0':   /* '+0' */
-				{
+		/*
+		 * IP can be
+		 *  0 (Turks and Caicos Islands, Samoa)
+		 *  00, 011, 0011, 010, 000
+		 *  001/007 (Cambodia), 001/008 (Indonesia, Singapore)
+		 *  001/002 (Korea), 002(Taiwan)
+		 *  810 (Belarus, Kazakhstan, Russian, Tajikistan, Turkmenistan)
+		 *  009/007/005(Colombia), 009(Nigeria)
+		 *  119 (Cuba)
+		 *  00/012/013/014 (Israel)
+		 */
+		switch (number[start_index]) {
+		case '0':   /* '+0' */
+			start_index++;
+			if (len <= start_index) {
+				*index = start_index;
+				return (have_plus ? CTSVC_PLUS_IP_ONLY : CTSVC_IP_ONLY); /* '+0' */
+			}
+
+			switch (number[start_index]) {
+			case '0':   /* '+00' */
+				start_index++;
+				if (len <= start_index) {
+					*index = start_index;
+					return (have_plus ? CTSVC_PLUS_IP_ONLY : CTSVC_IP_ONLY); /* '+00' */
+				}
+
+				switch (number[start_index]) {
+				case '0':   /* '+000' */
+				case '2':   /* '+002' */
+				case '5':   /* '+005' */
+				case '7':   /* '+007' */
+				case '8':   /* '+008' */
+				case '9':   /* '+009' */
+					/* or '+00 CC' */
 					start_index++;
 					if (len <= start_index) {
 						*index = start_index;
-						return (have_plus?CTSVC_PLUS_IP_ONLY:CTSVC_IP_ONLY); /* '+0' */
+						return (have_plus ? CTSVC_PLUS_IP_ONLY : CTSVC_IP_ONLY);  /* '+00Y' */
 					}
 
-					switch(number[start_index]) {
-					case '0':   /* '+00' */
-						{
-							start_index++;
-							if (len <= start_index) {
-								*index = start_index;
-								return (have_plus?CTSVC_PLUS_IP_ONLY:CTSVC_IP_ONLY);      /* '+00' */
-							}
-
-							switch(number[start_index]) {
-							case '0':   /* '+000' */
-							case '2':   /* '+002' */
-							case '5':   /* '+005' */
-							case '7':   /* '+007' */
-							case '8':   /* '+008' */
-							case '9':   /* '+009' */
-									    /* or '+00 CC' */
-								start_index++;
-								if (len <= start_index) {
-									*index = start_index;
-									return (have_plus?CTSVC_PLUS_IP_ONLY:CTSVC_IP_ONLY);  /* '+00Y' */
-								}
-
-								have_cc = __ctsvc_phone_number_has_country_code(&number[start_index], len-start_index);
-								if (0 < have_cc) {
-									*index = start_index;
-									return (have_plus?CTSVC_PLUS_IP_CC:CTSVC_IP_CC);      /* '+00Y CC' */
-								}
-								else {
-									have_cc = __ctsvc_phone_number_has_country_code(&number[start_index-1], len-start_index+1);
-									if (0 < have_cc) {
-										*index = start_index-1;
-										return (have_plus?CTSVC_PLUS_IP_CC:CTSVC_IP_CC);  /* '+00 CC' */
-									}
-								}
-								*index = start_index;
-								return (have_plus?CTSVC_PLUS_IP_ONLY:CTSVC_IP_ONLY);      /* '+00Y XXX' */
-							case '1':   /* '+001' */
-								start_index++;
-								if (len <= start_index) {
-									*index = start_index;
-									return (have_plus?CTSVC_PLUS_IP_ONLY:CTSVC_IP_ONLY);  /* '+001' */
-								}
-
-								if (number[start_index] == '1') {
-									start_index++;
-									if (len <= start_index) {
-										*index = start_index;
-										return (have_plus?CTSVC_PLUS_IP_ONLY:CTSVC_IP_ONLY);   /* '+0011' */
-									}
-
-									have_cc = __ctsvc_phone_number_has_country_code(&number[start_index], len-start_index);
-									if (0 < have_cc) {
-										*index = start_index;
-										return (have_plus?CTSVC_PLUS_IP_CC:CTSVC_IP_CC);  /*  '+0011 CC' */
-									}
-									start_index--;
-								}
-
-								have_cc = __ctsvc_phone_number_has_country_code(&number[start_index], len-start_index);
-								*index = start_index;
-								if (0 < have_cc)
-									return (have_plus?CTSVC_PLUS_IP_CC:CTSVC_IP_CC);      /* '+001 CC' */
-								else
-									return (have_plus?CTSVC_PLUS_IP_ONLY:CTSVC_IP_ONLY);  /* '+001 XXX' */
-							default:   /* '+00 3', '+00 4', '+00 6' */
-								*index = start_index;
-								have_cc = __ctsvc_phone_number_has_country_code(&number[start_index], len-start_index);
-								if (0 < have_cc)
-									return (have_plus?CTSVC_PLUS_IP_CC:CTSVC_IP_CC);      /* '+00 CC' */
-								else
-									return (have_plus?CTSVC_PLUS_IP_ONLY:CTSVC_IP_ONLY);  /* '+00 XXX' */
-							}   /* end of fourth switch */
+					have_cc = _numutil_has_country_code(&number[start_index],
+							len-start_index);
+					if (0 < have_cc) {
+						*index = start_index;
+						return (have_plus ? CTSVC_PLUS_IP_CC : CTSVC_IP_CC);      /* '+00Y CC' */
+					} else {
+						have_cc = _numutil_has_country_code(&number[start_index-1],
+								len-start_index+1);
+						if (0 < have_cc) {
+							*index = start_index-1;
+							return (have_plus ? CTSVC_PLUS_IP_CC : CTSVC_IP_CC);  /* '+00 CC' */
 						}
-						break;
-					case '1':   /* '+01' */
-						{
-							start_index++;
-							if (len <= start_index) {
-								*index = start_index-1;   /* '+0 1' */
-								return (have_plus?CTSVC_PLUS_IP_CC:CTSVC_NONE);
-							}
+					}
+					*index = start_index;
+					return (have_plus ? CTSVC_PLUS_IP_ONLY : CTSVC_IP_ONLY);      /* '+00Y XXX' */
+				case '1':   /* '+001' */
+					start_index++;
+					if (len <= start_index) {
+						*index = start_index;
+						return (have_plus ? CTSVC_PLUS_IP_ONLY : CTSVC_IP_ONLY);  /* '+001' */
+					}
 
-							switch(number[start_index]) {
-							case '0':   /* '+010' */
-							case '1':   /* '+011' */
-							case '2':   /* '+012' */
-							case '3':   /* '+013' */
-							case '4':   /* '+014' */
-								{
-									start_index++;
-									if (len <= start_index) {
-										*index = start_index;
-										return (have_plus?CTSVC_PLUS_IP_ONLY:CTSVC_IP_ONLY);   /* '+01Y' */
-									}
-
-									have_cc = __ctsvc_phone_number_has_country_code(&number[start_index], len-start_index);
-									*index = start_index;
-									if (0 < have_cc)
-										return (have_plus?CTSVC_PLUS_IP_CC:CTSVC_IP_CC);   /* '+01Y CC' */
-									else
-										return (have_plus?CTSVC_PLUS_IP_ONLY:CTSVC_IP_ONLY);   /* '+01Y XXX' */
-								}
-								break;
-							default:
-								*index = start_index-1;   /* '+0 1' */
-								return (have_plus?CTSVC_PLUS_IP_CC:CTSVC_NONE);
-							}
-						}
-						break;
-					default:   /* '+0 CC' */
-						{
-							have_cc = __ctsvc_phone_number_has_country_code(&number[start_index], len-start_index);
+					if (number[start_index] == '1') {
+						start_index++;
+						if (len <= start_index) {
 							*index = start_index;
-							if (0 < have_cc)
-								return (have_plus?CTSVC_PLUS_IP_CC:CTSVC_IP_CC);          /* '+0 CC' */
-							else
-								return (have_plus?CTSVC_PLUS_IP_ONLY:CTSVC_IP_ONLY);      /* '+0 XXX' */
+							return (have_plus ? CTSVC_PLUS_IP_ONLY : CTSVC_IP_ONLY);   /* '+0011' */
 						}
-						break;
-					}   /* end of third switch */
-				}
-				break;   /* end of '+0' */
-			case '1':   /* '+1' */
+
+						have_cc = _numutil_has_country_code(&number[start_index],
+								len-start_index);
+						if (0 < have_cc) {
+							*index = start_index;
+							return (have_plus ? CTSVC_PLUS_IP_CC : CTSVC_IP_CC);  /*  '+0011 CC' */
+						}
+						start_index--;
+					}
+
+					have_cc = _numutil_has_country_code(&number[start_index],
+							len-start_index);
+					*index = start_index;
+					if (0 < have_cc)
+						return (have_plus ? CTSVC_PLUS_IP_CC : CTSVC_IP_CC);      /* '+001 CC' */
+					else
+						return (have_plus ? CTSVC_PLUS_IP_ONLY : CTSVC_IP_ONLY);  /* '+001 XXX' */
+				default:   /* '+00 3', '+00 4', '+00 6' */
+					*index = start_index;
+					have_cc = _numutil_has_country_code(&number[start_index],
+							len-start_index);
+					if (0 < have_cc)
+						return (have_plus ? CTSVC_PLUS_IP_CC : CTSVC_IP_CC);      /* '+00 CC' */
+					else
+						return (have_plus ? CTSVC_PLUS_IP_ONLY : CTSVC_IP_ONLY);  /* '+00 XXX' */
+				}   /* end of fourth switch */
+				break;
+			case '1':   /* '+01' */
 				start_index++;
-				if (start_index+2 <= len && STRING_EQUAL == strncmp(&number[start_index], "19", 2)) {   /* '+119' */
-					match_len = start_index + 2;
-					ret = (have_plus?CTSVC_PLUS_IP_ONLY:CTSVC_IP_ONLY);
+				if (len <= start_index) {
+					*index = start_index-1;   /* '+0 1' */
+					return (have_plus ? CTSVC_PLUS_IP_CC : CTSVC_NONE);
 				}
-				else {
-					match_len = start_index-1;
-					ret = (have_plus?CTSVC_PLUS_ONLY:CTSVC_NONE);   /* '+ CC' */
+
+				switch (number[start_index]) {
+				case '0':   /* '+010' */
+				case '1':   /* '+011' */
+				case '2':   /* '+012' */
+				case '3':   /* '+013' */
+				case '4':   /* '+014' */
+					{
+						start_index++;
+						if (len <= start_index) {
+							*index = start_index;
+							return (have_plus ? CTSVC_PLUS_IP_ONLY : CTSVC_IP_ONLY);   /* '+01Y' */
+						}
+
+						have_cc = _numutil_has_country_code(&number[start_index],
+								len-start_index);
+						*index = start_index;
+						if (0 < have_cc)
+							return (have_plus ? CTSVC_PLUS_IP_CC : CTSVC_IP_CC);   /* '+01Y CC' */
+						else
+							return (have_plus ? CTSVC_PLUS_IP_ONLY : CTSVC_IP_ONLY);   /* '+01Y XXX' */
+					}
+					break;
+				default:
+					*index = start_index-1;   /* '+0 1' */
+					return (have_plus ? CTSVC_PLUS_IP_CC : CTSVC_NONE);
 				}
 				break;
-			case '8':   /* '+8' */
-				start_index++;
-				if (start_index+2 <= len && STRING_EQUAL == strncmp(&number[start_index], "10", 2)) {   /* '+810' */
-					match_len = start_index + 2;
-					ret = (have_plus?CTSVC_PLUS_IP_ONLY:CTSVC_IP_ONLY);
-				}
-				else {
-					match_len = start_index-1;
-					ret = (have_plus?CTSVC_PLUS_ONLY:CTSVC_NONE);   /* '+ CC' */
-				}
+			default:   /* '+0 CC' */
+				have_cc = _numutil_has_country_code(&number[start_index],
+						len-start_index);
+				*index = start_index;
+				if (0 < have_cc)
+					return (have_plus ? CTSVC_PLUS_IP_CC : CTSVC_IP_CC);          /* '+0 CC' */
+				else
+					return (have_plus ? CTSVC_PLUS_IP_ONLY : CTSVC_IP_ONLY);      /* '+0 XXX' */
 				break;
-			default:
-				match_len = start_index;
-				ret = (have_plus?CTSVC_PLUS_ONLY:CTSVC_NONE);   /* '+ CC' */
-				break;
-			}   /* end of second switch */
-		}
+			}   /* end of third switch */
+			break;   /* end of '+0' */
+		case '1':   /* '+1' */
+			start_index++;
+			if (start_index + 2 <= len
+					&& STRING_EQUAL == strncmp(&number[start_index], "19", 2)) {   /* '+119' */
+				match_len = start_index + 2;
+				ret = (have_plus ? CTSVC_PLUS_IP_ONLY : CTSVC_IP_ONLY);
+			} else {
+				match_len = start_index-1;
+				ret = (have_plus ? CTSVC_PLUS_ONLY : CTSVC_NONE);   /* '+ CC' */
+			}
+			break;
+		case '8':   /* '+8' */
+			start_index++;
+			if (start_index+2 <= len
+					&& STRING_EQUAL == strncmp(&number[start_index], "10", 2)) {   /* '+810' */
+				match_len = start_index + 2;
+				ret = (have_plus ? CTSVC_PLUS_IP_ONLY : CTSVC_IP_ONLY);
+			} else {
+				match_len = start_index-1;
+				ret = (have_plus ? CTSVC_PLUS_ONLY : CTSVC_NONE);   /* '+ CC' */
+			}
+			break;
+		default:
+			match_len = start_index;
+			ret = (have_plus ? CTSVC_PLUS_ONLY : CTSVC_NONE);   /* '+ CC' */
+			break;
+		}   /* end of second switch */
 		break;   /* '+' default */
 	}   /* end of first switch */
 	*index = match_len;
 
 	/* Check CC */
 	if (match_len < len) {
-		have_cc = __ctsvc_phone_number_has_country_code(&number[match_len], len-match_len);
+		have_cc = _numutil_has_country_code(&number[match_len], len-match_len);
 		if (0 < have_cc) {
 			switch (ret) {
 			case CTSVC_NONE:
@@ -754,7 +751,8 @@ static int __ctsvc_number_has_ip_and_cc(const char*number, int len, int *index)
 	return ret;
 }
 
-int ctsvc_normalize_number(const char *src, char *dest, int dest_size, bool replace_alphabet)
+int ctsvc_normalize_number(const char *src, char *dest, int dest_size,
+		bool replace_alphabet)
 {
 	int ret;
 	int d_pos;
@@ -764,7 +762,7 @@ int ctsvc_normalize_number(const char *src, char *dest, int dest_size, bool repl
 
 
 	if (NULL == src) {
-		CTS_ERR("The parameter(src) is NULL");
+		ERR("The parameter(src) is NULL");
 		return 0;
 	}
 
@@ -788,8 +786,7 @@ int ctsvc_normalize_number(const char *src, char *dest, int dest_size, bool repl
 		d_pos = strlen(normalized_out);
 		memcpy(dest, normalized_out, d_pos+1);
 		free(normalized_out);
-	}
-	else {
+	} else {
 		memcpy(dest, temp, d_pos+1);
 	}
 
@@ -810,7 +807,7 @@ int ctsvc_clean_number(const char *src, char *dest, int dest_size, bool replace_
 	char temp[dest_size];
 
 	if (NULL == src) {
-		CTS_ERR("The parameter(src) is NULL");
+		ERR("The parameter(src) is NULL");
 		return 0;
 	}
 
@@ -818,20 +815,19 @@ int ctsvc_clean_number(const char *src, char *dest, int dest_size, bool replace_
 	pos = 0;
 	while (src[s_pos] != 0) {
 		int char_len;
-		if (dest_size-2 < pos) break;
+		if (dest_size - 2 < pos) break;
 
 		char_len = ctsvc_check_utf8(src[s_pos]);
-		if (char_len <= 0) {
+		if (char_len <= 0)
 			break;
-		}
 
 		if (char_len == 3) {
 			/* fullwidth -> halfwidth */
 			if (src[s_pos] == 0xef) {
 				if (src[s_pos+1] == 0xbc) {
-					if (0x90 <= src[s_pos+2] && src[s_pos+2] <= 0x99)        /* ef bc 90 : '0' ~ ef bc 99 : '9' */
+					if (0x90 <= src[s_pos+2] && src[s_pos+2] <= 0x99) /* ef bc 90 : '0' ~ ef bc 99 : '9' */
 						temp[pos++] = src[s_pos+2] - 0x60;
-					else if (0xa1 <= src[s_pos+2] && src[s_pos+2] <= 0xba)   /* ef bc a1 : 'A' ~ ef bc ba : 'Z' */
+					else if (0xa1 <= src[s_pos+2] && src[s_pos+2] <= 0xba) /* ef bc a1 : 'A' ~ ef bc ba : 'Z' */
 						temp[pos++] = src[s_pos+2] - 0x60;
 					else if (0x8b == src[s_pos+2])   /* ef bc 8b : '+' */
 						temp[pos++] = '+';
@@ -843,17 +839,16 @@ int ctsvc_clean_number(const char *src, char *dest, int dest_size, bool replace_
 						temp[pos++] = ',';
 					else if (0x9b == src[s_pos+2])   /* ef bc 9b : ';' */
 						temp[pos++] = ';';
-				}
-				else if (src[s_pos+1] == 0xbd
-						&& (0x81 <= src[s_pos+2] && src[s_pos+2] <= 0x9a))   /* ef bd 81 : 'a' ~ ef bd 9a : 'z' */
+				} else if (src[s_pos+1] == 0xbd
+						&& (0x81 <= src[s_pos+2] && src[s_pos+2] <= 0x9a)) {
+					/* ef bd 81 : 'a' ~ ef bd 9a : 'z' */
 					temp[pos++] = src[s_pos+2] - 0x40;
-			}
-			else {
+				}
+			} else {
 				s_pos += char_len;
 				continue;
 			}
-		}
-		else if (char_len == 1) {
+		} else if (char_len == 1) {
 			if (0x41 <= src[s_pos] && src[s_pos] <= 0x5a)        /* 'A' ~ 'Z' */
 				temp[pos++] = src[s_pos];
 			else if (0x61 <= src[s_pos] && src[s_pos] <= 0x7a)   /* 'a' ~ 'z' */
@@ -880,7 +875,8 @@ int ctsvc_clean_number(const char *src, char *dest, int dest_size, bool replace_
 	return d_pos;
 }
 
-static int __ctsvc_minmatch_number(const char *src, char *dest, int dest_size, int min_match)
+static int _numutil_minmatch_number(const char *src, char *dest, int dest_size,
+		int min_match)
 {
 	int i;
 	int len = 0;
@@ -889,15 +885,15 @@ static int __ctsvc_minmatch_number(const char *src, char *dest, int dest_size, i
 	const char *cc = ctsvc_get_network_cc(false);
 
 	if ('+' == src[0]) {
-		len = __ctsvc_phone_number_has_country_code(&src[1], strlen(src)-1);
+		len = _numutil_has_country_code(&src[1], strlen(src)-1);
 		temp_number = src + len +1;
-	}
-	else if ('0' == src[0])
+	} else if ('0' == src[0]) {
 		temp_number = src+1;
-	else if (cc && cc[0] == '7' && src[0] == '8')
+	} else if (cc && cc[0] == '7' && src[0] == '8') {
 		temp_number = src+1;
-	else
+	} else {
 		temp_number = src;
+	}
 
 	len = strlen(temp_number);
 
@@ -905,7 +901,7 @@ static int __ctsvc_minmatch_number(const char *src, char *dest, int dest_size, i
 		while (0 <= (len-d_pos-1) && temp_number[len-d_pos-1]
 				&& d_pos < min_match) {
 			if (dest_size-d_pos == 0) {
-				CTS_ERR("Destination string buffer is not enough(%s)", src);
+				ERR("Destination string buffer is not enough(%s)", src);
 				return CONTACTS_ERROR_INTERNAL;
 			}
 
@@ -915,14 +911,13 @@ static int __ctsvc_minmatch_number(const char *src, char *dest, int dest_size, i
 		dest[d_pos] = 0;
 
 		len = strlen(dest);
-		for (i=0; i<len/2;i++) {
+		for (i = 0; i < len/2; i++) {
 			char c;
 			c = dest[i];
 			dest[i] = dest[len-i-1];
 			dest[len-i-1] = c;
 		}
-	}
-	else {
+	} else {
 		memcpy(dest, src, strlen(src));
 		dest[strlen(src)] = 0;
 	}
@@ -937,25 +932,25 @@ int ctsvc_get_minmatch_number(const char *src, char *dest, int dest_size, int mi
 	RETV_IF(NULL == src, CONTACTS_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == dest, CONTACTS_ERROR_INVALID_PARAMETER);
 
-	ret = __ctsvc_minmatch_number(src, dest, dest_size, min_match);
+	ret = _numutil_minmatch_number(src, dest, dest_size, min_match);
 	if (ret != CONTACTS_ERROR_NONE) {
-		CTS_ERR("__ctsvc_minmatch_number() Fail(%d)", ret);
+		ERR("_numutil_minmatch_number() Fail(%d)", ret);
 		return ret;
 	}
 
 	return CONTACTS_ERROR_NONE;
 }
 
-static bool __ctsvc_is_phonenumber_halfwidth(const char* keyword)
+static bool _numutil_is_phonenumber_halfwidth(const char *keyword)
 {
 	int i;
 	int len = strlen(keyword);
 
 	/* TODO: we should add predicate including '+' */
 	/* TODO: finally, we try to check the number with regular expression. */
-	for (i=0; i<len; i++) {
+	for (i = 0; i < len; i++) {
 		if ((keyword[i] < '0' || '9' < keyword[i]) && keyword[i] != '+') {
-			CTS_ERR("keyword[%d]: %c is not number)", i, keyword[i]);
+			ERR("keyword[%d]: %c is not number)", i, keyword[i]);
 			return false;
 		}
 	}
@@ -963,7 +958,7 @@ static bool __ctsvc_is_phonenumber_halfwidth(const char* keyword)
 }
 
 #define UTF8_FULLWIDTH_LENGTH 3
-static bool __ctsvc_is_phonenumber_fullwidth(const char* keyword)
+static bool _numutil_is_phonenumber_fullwidth(const char *keyword)
 {
 	int char_len = 1;
 	int str_len;
@@ -972,36 +967,36 @@ static bool __ctsvc_is_phonenumber_fullwidth(const char* keyword)
 		return false;
 
 	str_len = strlen(keyword);
-	for (i=0;i<str_len;i += char_len) {
+	for (i = 0; i < str_len; i += char_len) {
 		char_len = ctsvc_check_utf8(keyword[i]);
 		if (char_len != UTF8_FULLWIDTH_LENGTH || str_len-i < UTF8_FULLWIDTH_LENGTH)
 			return false;
 
 		if (keyword[i] == 0xef) {
 			if (keyword[i+1] == 0xbc) {
-				if (0x90 <= keyword[i+2] && keyword[i+2] <= 0x99)            /* ef bc 90 : '0' ~ ef bc 99 : '9' */
+				if (0x90 <= keyword[i+2] && keyword[i+2] <= 0x99) /* ef bc 90 : '0' ~ ef bc 99 : '9' */
 					continue;
 				else if (0x8b == keyword[i+2])   /* ef bc 8b : '+' */
 					continue;
 				else
 					return false;
-			}
-			else
+			} else {
 				return false;
-		}
-		else
+			}
+		} else {
 			return false;
+		}
 	}
 	return true;
 }
 
-bool ctsvc_is_phonenumber(const char* src)
+bool ctsvc_is_phonenumber(const char *src)
 {
-	return (__ctsvc_is_phonenumber_halfwidth(src) || __ctsvc_is_phonenumber_fullwidth(src));
+	return (_numutil_is_phonenumber_halfwidth(src) || _numutil_is_phonenumber_fullwidth(src));
 }
 
 /* numbers are cleaned number or normalized number */
-static bool __ctsvc_number_compare(const char *number1, const char *number2)
+static bool _numutil_number_compare(const char *number1, const char *number2)
 {
 	int len1;
 	int len2;
@@ -1029,7 +1024,7 @@ static bool __ctsvc_number_compare(const char *number1, const char *number2)
 		return true;
 
 	/* one is substring of the other string */
-	if (minmatch_len <= matched&& (len1 == 0 || len2 == 0))
+	if (minmatch_len <= matched && (len1 == 0 || len2 == 0))
 		return true;
 
 	/* one is +IPCC or +CC, the other is start wth NTP (National trunk prefix) */
@@ -1046,46 +1041,47 @@ static bool __ctsvc_number_compare(const char *number1, const char *number2)
 		 * So, when comparing number, just check IP validation and CC and natinal number matching.
 		 */
 
-		int n1 = __ctsvc_number_has_ip_and_cc(number1, len1, &index1);
-		int n2 = __ctsvc_number_has_ip_and_cc(number2, len2, &index2);
+		int n1 = _numutil_has_ip_and_cc(number1, len1, &index1);
+		int n2 = _numutil_has_ip_and_cc(number2, len2, &index2);
 
 		/*
 		 * + (IP) CC XXXXXXXX, 0XXXXXXXX
 		 * + (810) 7 XXX XXX XX XX, 8XXX XXX XX XX (Russian)
 		 */
 		if ((CTSVC_PLUS_IP_CC == n1 || CTSVC_PLUS_CC_ONLY == n1 ||
-				CTSVC_IP_CC == n1 || CTSVC_CC_ONLY == n1)
-				&& (number2[0] == '0' || (cc && cc[0] == '7' && number2[0] == '8')))
+					CTSVC_IP_CC == n1 || CTSVC_CC_ONLY == n1)
+				&& (number2[0] == '0' || (cc && cc[0] == '7' && number2[0] == '8'))) {
 			return true;
-		else if ((CTSVC_PLUS_IP_CC == n2 || CTSVC_PLUS_CC_ONLY == n2 ||
+		} else if ((CTSVC_PLUS_IP_CC == n2 || CTSVC_PLUS_CC_ONLY == n2 ||
 					CTSVC_IP_CC == n2 || CTSVC_CC_ONLY == n2)
-				&& (number1[0] == '0' || (cc && cc[0] == '7' && number1[0] == '8')))
+				&& (number1[0] == '0' || (cc && cc[0] == '7' && number1[0] == '8'))) {
 			return true;
-		/*
-		 * + IP CC XXXXXXXX, + CC XXXXXXXX  (ex. +001 82  11 1234 5678, +82 10 1234 5678)
-		 */
-		else if ((CTSVC_PLUS_IP_CC == n1 || CTSVC_IP_CC == n1)
+		} else if ((CTSVC_PLUS_IP_CC == n1 || CTSVC_IP_CC == n1)
 				&& (CTSVC_PLUS_CC_ONLY == n2 || CTSVC_CC_ONLY == n2)) {
-			int p = (CTSVC_PLUS_CC_ONLY == n2)?1:0;
-			cc_index = __ctsvc_phone_number_has_country_code(&number2[p], len2-p);
-			if (0 < cc_index && STRING_EQUAL == strncmp(&number1[index1], &number2[p], cc_index))
+			/*
+			 * + IP CC XXXXXXXX, + CC XXXXXXXX	(ex. +001 82  11 1234 5678, +82 10 1234 5678)
+			 */
+			int p = (CTSVC_PLUS_CC_ONLY == n2) ? 1 : 0;
+			cc_index = _numutil_has_country_code(&number2[p], len2-p);
+			if (0 < cc_index
+					&& STRING_EQUAL == strncmp(&number1[index1], &number2[p], cc_index)) {
 				return true;
-		}
-		else if ((CTSVC_PLUS_IP_CC == n2 || CTSVC_IP_CC == n2)
+			}
+		} else if ((CTSVC_PLUS_IP_CC == n2 || CTSVC_IP_CC == n2)
 				&& (CTSVC_PLUS_CC_ONLY == n1 || CTSVC_CC_ONLY == n1)) {
-			int p = (CTSVC_PLUS_CC_ONLY == n1)?1:0;
-			cc_index = __ctsvc_phone_number_has_country_code(&number1[p], len1-p);
-			if (0 < cc_index && STRING_EQUAL == strncmp(&number2[index2], &number1[p], cc_index))
+			int p = (CTSVC_PLUS_CC_ONLY == n1) ? 1 : 0;
+			cc_index = _numutil_has_country_code(&number1[p], len1-p);
+			if (0 < cc_index
+					&& STRING_EQUAL == strncmp(&number2[index2], &number1[p], cc_index)) {
 				return true;
-		}
-		/*
-		 * + CC XXXXXXXX, + IP CC XXXXXXXX  (ex. +001 82  10 1234 5678, +82 10 1234 5678)
-		 */
-		else if ((CTSVC_PLUS_IP_ONLY == n1 || CTSVC_IP_ONLY == n1)
+			}
+		} else if ((CTSVC_PLUS_IP_ONLY == n1 || CTSVC_IP_ONLY == n1)
 				&& CTSVC_PLUS_ONLY == n2) {
+			/*
+			 * + CC XXXXXXXX, + IP CC XXXXXXXX	(ex. +001 82  10 1234 5678, +82 10 1234 5678)
+			 */
 			return true;
-		}
-		else if ((CTSVC_PLUS_IP_ONLY == n2 || CTSVC_IP_ONLY == n2)
+		} else if ((CTSVC_PLUS_IP_ONLY == n2 || CTSVC_IP_ONLY == n2)
 				&& CTSVC_PLUS_ONLY == n1) {
 			return true;
 		}
@@ -1095,8 +1091,8 @@ static bool __ctsvc_number_compare(const char *number1, const char *number2)
 }
 
 /* When querying _NUMBER_COMPARE_, this function will be called. */
-void ctsvc_db_phone_number_equal_callback(sqlite3_context * context,
-		int argc, sqlite3_value ** argv)
+void ctsvc_db_phone_number_equal_callback(sqlite3_context  *context,
+		int argc, sqlite3_value **argv)
 {
 #ifdef _CONTACTS_IPC_SERVER
 	char *number1;
@@ -1104,14 +1100,14 @@ void ctsvc_db_phone_number_equal_callback(sqlite3_context * context,
 
 	if (argc < 4) {
 		sqlite3_result_int(context, 0);
-		CTS_ERR("argc invalid");
+		ERR("argc invalid");
 		return;
 	}
 
 	number1 = (char*)sqlite3_value_text(argv[0]);
 	number2 = (char*)sqlite3_value_text(argv[1]);
 
-	sqlite3_result_int(context, __ctsvc_number_compare(number1, number2));
+	sqlite3_result_int(context, _numutil_number_compare(number1, number2));
 	return;
 #endif
 }

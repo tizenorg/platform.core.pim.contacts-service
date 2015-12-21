@@ -1,7 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@
 int ctsvc_phone_log_reset_statistics()
 {
 	char query[CTS_SQL_MIN_LEN] = {0};
-	snprintf(query, sizeof(query),"DELETE FROM "CTS_TABLE_PHONELOG_STAT);
+	snprintf(query, sizeof(query), "DELETE FROM "CTS_TABLE_PHONELOG_STAT);
 	return ctsvc_query_exec(query);
 }
 
@@ -50,7 +50,7 @@ int ctsvc_phone_log_delete(contacts_phone_log_delete_e op, ...)
 	char *number = NULL;
 	va_list args;
 
-	switch(op) {
+	switch (op) {
 	case CONTACTS_PHONE_LOG_DELETE_BY_ADDRESS:
 		va_start(args, op);
 		number = va_arg(args, char *);
@@ -65,7 +65,7 @@ int ctsvc_phone_log_delete(contacts_phone_log_delete_e op, ...)
 		snprintf(query, sizeof(query),
 				"DELETE FROM "CTS_TABLE_PHONELOGS" "
 				"WHERE data1 = %d AND %d <= log_type AND log_type <= %d",
-						extra_data1, CONTACTS_PLOG_TYPE_MMS_INCOMMING, CONTACTS_PLOG_TYPE_MMS_BLOCKED);
+				extra_data1, CONTACTS_PLOG_TYPE_MMS_INCOMMING, CONTACTS_PLOG_TYPE_MMS_BLOCKED);
 		break;
 	case CONTACTS_PHONE_LOG_DELETE_BY_EMAIL_EXTRA_DATA1:
 		va_start(args, op);
@@ -74,10 +74,10 @@ int ctsvc_phone_log_delete(contacts_phone_log_delete_e op, ...)
 		snprintf(query, sizeof(query),
 				"DELETE FROM "CTS_TABLE_PHONELOGS" "
 				"WHERE data1 = %d AND %d <= log_type AND log_type <= %d",
-						extra_data1, CONTACTS_PLOG_TYPE_EMAIL_RECEIVED, CONTACTS_PLOG_TYPE_EMAIL_SENT);
+				extra_data1, CONTACTS_PLOG_TYPE_EMAIL_RECEIVED, CONTACTS_PLOG_TYPE_EMAIL_SENT);
 		break;
 	default:
-		CTS_ERR("Invalid parameter : the operation is not proper (op : %d)", op);
+		ERR("Invalid parameter : the operation is not proper (op : %d)", op);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	ret = ctsvc_begin_trans();
@@ -85,7 +85,7 @@ int ctsvc_phone_log_delete(contacts_phone_log_delete_e op, ...)
 
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_query_exec() Fail(%d)", ret);
+		ERR("ctsvc_query_exec() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
@@ -94,8 +94,8 @@ int ctsvc_phone_log_delete(contacts_phone_log_delete_e op, ...)
 	return ret;
 }
 
-void ctsvc_db_phone_log_delete_callback(sqlite3_context * context,
-		int argc, sqlite3_value ** argv)
+void ctsvc_db_phone_log_delete_callback(sqlite3_context  *context,
+		int argc, sqlite3_value **argv)
 {
 #ifdef _CONTACTS_IPC_SERVER
 	int phone_log_id;
@@ -126,10 +126,10 @@ static int __ctsvc_db_phone_log_find_person_id(char *number, char *normal_num, c
 	if (normal_num) {
 		ret = snprintf(query, sizeof(query),
 				"SELECT person_id, data1 FROM "CTS_TABLE_CONTACTS", "CTS_TABLE_DATA" "
-					"ON "CTS_TABLE_CONTACTS".contact_id = "CTS_TABLE_DATA".contact_id "
-						"AND datatype = %d AND is_my_profile = 0 AND deleted = 0 "
-						"WHERE data4 = ? AND _NUMBER_COMPARE_(data5, ?, NULL, NULL)",
-					CTSVC_DATA_NUMBER);
+				"ON "CTS_TABLE_CONTACTS".contact_id = "CTS_TABLE_DATA".contact_id "
+				"AND datatype = %d AND is_my_profile = 0 AND deleted = 0 "
+				"WHERE data4 = ? AND _NUMBER_COMPARE_(data5, ?, NULL, NULL)",
+				CTSVC_DATA_NUMBER);
 		bind_text = g_slist_append(bind_text, strdup(minmatch));
 		bind_text = g_slist_append(bind_text, strdup(normal_num));
 	}
@@ -142,9 +142,9 @@ static int __ctsvc_db_phone_log_find_person_id(char *number, char *normal_num, c
 
 		ret = ctsvc_query_prepare(query, &stmt);
 		if (stmt == NULL) {
-			CTS_ERR("ctsvc_query_prepare fail(%d)", ret);
+			ERR("ctsvc_query_prepare fail(%d)", ret);
 			if (bind_text) {
-				for (cursor=bind_text;cursor;cursor=cursor->next)
+				for (cursor = bind_text; cursor; cursor = cursor->next)
 					free(cursor->data);
 				g_slist_free(bind_text);
 			}
@@ -152,7 +152,7 @@ static int __ctsvc_db_phone_log_find_person_id(char *number, char *normal_num, c
 		}
 
 		if (bind_text) {
-			for (cursor=bind_text,i=1;cursor;cursor=cursor->next,i++) {
+			for (cursor = bind_text, i = 1; cursor; cursor = cursor->next, i++) {
 				const char *text = cursor->data;
 				if (text && *text)
 					ctsvc_stmt_bind_text(stmt, i, text);
@@ -179,7 +179,7 @@ static int __ctsvc_db_phone_log_find_person_id(char *number, char *normal_num, c
 	}
 
 	if (bind_text) {
-		for (cursor=bind_text;cursor;cursor=cursor->next)
+		for (cursor = bind_text; cursor; cursor = cursor->next)
 			free(cursor->data);
 		g_slist_free(bind_text);
 	}
@@ -200,12 +200,12 @@ int ctsvc_db_phone_log_update_person_id(const char *number, int old_person_id, i
 	int i = 0;
 
 	RETVM_IF(old_person_id <= 0 && NULL == number, CONTACTS_ERROR_INVALID_PARAMETER,
-				"Invalid parameter : old person_id (%d), numberis NULL", old_person_id);
+			"Invalid parameter : old person_id (%d), numberis NULL", old_person_id);
 
 	len = snprintf(query, sizeof(query),
-					"SELECT id, number, normal_num, minmatch FROM "CTS_TABLE_PHONELOGS" "
-										"WHERE log_type <= %d ",
-					CONTACTS_PLOG_TYPE_EMAIL_RECEIVED);
+			"SELECT id, number, normal_num, minmatch FROM "CTS_TABLE_PHONELOGS" "
+			"WHERE log_type <= %d ",
+			CONTACTS_PLOG_TYPE_EMAIL_RECEIVED);
 
 	if (number && *number) {
 		char clean_num[strlen(number)+1];
@@ -221,18 +221,18 @@ int ctsvc_db_phone_log_update_person_id(const char *number, int old_person_id, i
 				ret = ctsvc_get_minmatch_number(normal_num, minmatch, sizeof(minmatch), ctsvc_get_phonenumber_min_match_digit());
 				if (CONTACTS_ERROR_NONE == ret) {
 					len += snprintf(query+len, sizeof(query)-len,
-						"OR (minmatch = ? AND _NUMBER_COMPARE_(normal_num, ?, NULL, NULL))) ");
+							"OR (minmatch = ? AND _NUMBER_COMPARE_(normal_num, ?, NULL, NULL))) ");
 					bind_text = g_slist_append(bind_text, strdup(minmatch));
 					bind_text = g_slist_append(bind_text, strdup(normal_num));
-				}
-				else
+				} else {
 					len += snprintf(query+len, sizeof(query)-len, ") ");
-			}
-			else
+				}
+			} else {
 				len += snprintf(query+len, sizeof(query)-len, ") ");
-		}
-		else
+			}
+		} else {
 			len += snprintf(query+len, sizeof(query)-len, ") ");
+		}
 	}
 
 	if (0 < old_person_id)
@@ -242,9 +242,9 @@ int ctsvc_db_phone_log_update_person_id(const char *number, int old_person_id, i
 
 	ret = ctsvc_query_prepare(query, &get_log);
 	if (get_log == NULL) {
-		CTS_ERR("ctsvc_query_prepare fail(%d)", ret);
+		ERR("ctsvc_query_prepare() Fail(%d)", ret);
 		if (bind_text) {
-			for (cursor=bind_text;cursor;cursor=cursor->next)
+			for (cursor = bind_text; cursor; cursor = cursor->next)
 				free(cursor->data);
 			g_slist_free(bind_text);
 		}
@@ -252,21 +252,22 @@ int ctsvc_db_phone_log_update_person_id(const char *number, int old_person_id, i
 	}
 
 	if (bind_text) {
-		for (cursor=bind_text,i=1;cursor;cursor=cursor->next,i++) {
+		for (cursor = bind_text, i = 1; cursor; cursor = cursor->next, i++) {
 			const char *text = cursor->data;
 			if (text && *text)
 				ctsvc_stmt_bind_text(get_log, i, text);
 		}
 	}
 
-	snprintf(query, sizeof(query), "UPDATE "CTS_TABLE_PHONELOGS" SET person_id=?, number_type = ? WHERE id = ?");
+	snprintf(query, sizeof(query),
+			"UPDATE "CTS_TABLE_PHONELOGS" SET person_id=?, number_type = ? WHERE id = ?");
 	ret = ctsvc_query_prepare(query, &update_log);
 	if (update_log == NULL) {
-		CTS_ERR("ctsvc_query_prepare fail(%d)", ret);
+		ERR("ctsvc_query_prepare() Fail(%d)", ret);
 		ctsvc_stmt_finalize(get_log);
 
 		if (bind_text) {
-			for (cursor=bind_text;cursor;cursor=cursor->next)
+			for (cursor = bind_text; cursor; cursor = cursor->next)
 				free(cursor->data);
 			g_slist_free(bind_text);
 		}
@@ -277,7 +278,7 @@ int ctsvc_db_phone_log_update_person_id(const char *number, int old_person_id, i
 		int phonelog_id;
 		int new_person_id = -1;
 		int temp_id;
-		int number_type= -1;
+		int number_type = -1;
 		char *address;
 		char *normal_address;
 		char *minmatch_address;
@@ -291,35 +292,30 @@ int ctsvc_db_phone_log_update_person_id(const char *number, int old_person_id, i
 		if (number && old_person_id <= 0 && 0 < candidate_person_id) {
 			__ctsvc_db_phone_log_find_person_id(address, normal_address, minmatch_address, candidate_person_id, &number_type);
 			new_person_id = candidate_person_id;
-		}
-		/* CASE : phonelog insert without person_id */
-		else if (number && old_person_id <= 0) {
+		} else if (number && old_person_id <= 0) {
+			/* CASE : phonelog insert without person_id */
 			/* address == number */
 			new_person_id = __ctsvc_db_phone_log_find_person_id(address, normal_address, minmatch_address, -1, &number_type);
 			if (new_person_id <= 0) continue;
-		}
-		/* CASE : number update/delete (contact update/delete) => find new_person_id by address */
-		/* CASE : phonelog insert with person_id */
-		else if (number && 0 < old_person_id) {
+		} else if (number && 0 < old_person_id) {
+			/* CASE : number update/delete (contact update/delete) => find new_person_id by address */
+			/* CASE : phonelog insert with person_id */
 			/* address == number */
 			/* although new_person_id and old_person_id are same, update phonelog for setting number_type */
 			new_person_id = __ctsvc_db_phone_log_find_person_id(address, normal_address, minmatch_address, old_person_id, &number_type);
-		}
-		/* CASE : person link => deleted person_id -> new person_id (base_person_id) */
-		else if (NULL == number && 0 < old_person_id && 0 < candidate_person_id && person_link) {
+		} else if (NULL == number && 0 < old_person_id && 0 < candidate_person_id && person_link) {
+			/* CASE : person link => deleted person_id -> new person_id (base_person_id) */
 			new_person_id = candidate_person_id;
-		}
-		/* CASE : person unlink => check person_id of the address, */
-		/* if person_id is not old_person_id then change person_id to new_person_id */
-		else if (NULL == number && 0 < old_person_id && 0 < candidate_person_id) {
+		} else if (NULL == number && 0 < old_person_id && 0 < candidate_person_id) {
+			/* CASE : person unlink => check person_id of the address, */
+			/* if person_id is not old_person_id then change person_id to new_person_id */
 			temp_id = __ctsvc_db_phone_log_find_person_id(address, normal_address, minmatch_address, candidate_person_id, &number_type);
 			if (0 < temp_id && temp_id == old_person_id)
 				continue;
 			else if (0 < temp_id && temp_id != old_person_id)
 				new_person_id = temp_id;
-		}
-		/* CASE : person delete => find new_person_id by address */
-		else if (NULL == number && 0 < old_person_id) {
+		} else if (NULL == number && 0 < old_person_id) {
+			/* CASE : person delete => find new_person_id by address */
 			new_person_id = __ctsvc_db_phone_log_find_person_id(address, normal_address, minmatch_address, candidate_person_id, &number_type);
 		}
 		/* Already check this case as above : RETVM_IF(old_person_id <= 0 && NULL == number, ... */
@@ -340,7 +336,7 @@ int ctsvc_db_phone_log_update_person_id(const char *number, int old_person_id, i
 	ctsvc_stmt_finalize(update_log);
 
 	if (bind_text) {
-		for (cursor=bind_text;cursor;cursor=cursor->next)
+		for (cursor = bind_text; cursor; cursor = cursor->next)
 			free(cursor->data);
 		g_slist_free(bind_text);
 	}

@@ -75,13 +75,13 @@ bool ctsvc_ipc_is_busy()
 
 	pims_ipc_h ipc = _ctsvc_get_ipc_handle();
 	if (NULL == ipc) {
-		CTS_ERR("_ctsvc_get_ipc_handle() return NULL");
+		ERR("_ctsvc_get_ipc_handle() return NULL");
 		return false;
 	}
 
 	ret = pims_ipc_is_call_in_progress(ipc);
 	if (ret)
-		CTS_ERR("global ipc channel is busy.");
+		ERR("global ipc channel is busy.");
 
 	return ret;
 }
@@ -89,15 +89,16 @@ bool ctsvc_ipc_is_busy()
 static int _ctsvc_ipc_create(pims_ipc_h *p_ipc)
 {
 	char sock_file[CTSVC_PATH_MAX_LEN] = {0};
-	snprintf(sock_file, sizeof(sock_file), CTSVC_SOCK_PATH"/.%s", getuid(), CTSVC_IPC_SERVICE);
+
+	snprintf(sock_file, sizeof(sock_file), CTSVC_SOCK_PATH"/.%s", getuid(),
+			CTSVC_IPC_SERVICE);
 	pims_ipc_h ipc = pims_ipc_create(sock_file);
 	if (NULL == ipc) {
 		if (errno == EACCES) {
-			CTS_ERR("pims_ipc_create() Failed(%d)", CONTACTS_ERROR_PERMISSION_DENIED);
+			ERR("pims_ipc_create() Fail(%d)", CONTACTS_ERROR_PERMISSION_DENIED);
 			return CONTACTS_ERROR_PERMISSION_DENIED;
-		}
-		else {
-			CTS_ERR("pims_ipc_create() Failed(%d)", CONTACTS_ERROR_IPC_NOT_AVALIABLE);
+		} else {
+			ERR("pims_ipc_create() Fail(%d)", CONTACTS_ERROR_IPC_NOT_AVALIABLE);
 			return CONTACTS_ERROR_IPC_NOT_AVALIABLE;
 		}
 	}
@@ -131,20 +132,22 @@ static int _ctsvc_ipc_connect(contacts_h contact, pims_ipc_h ipc)
 	/* Access control : put cookie to indata */
 	indata = pims_ipc_data_create(0);
 	if (indata == NULL) {
-		CTS_ERR("pims_ipc_data_create() return NULL");
+		ERR("pims_ipc_data_create() return NULL");
 		return CONTACTS_ERROR_OUT_OF_MEMORY;
 	}
 
 	ret = ctsvc_ipc_marshal_handle(contact, indata);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_ipc_marshal_handle Fail(%d)", ret);
+		ERR("ctsvc_ipc_marshal_handle() Fail(%d)", ret);
 		pims_ipc_data_destroy(indata);
 		return ret;
 	}
 
 	/* ipc call */
-	if (pims_ipc_call(ipc, CTSVC_IPC_MODULE, CTSVC_IPC_SERVER_CONNECT, indata, &outdata) != 0) {
-		CTS_ERR("[GLOBAL_IPC_CHANNEL] pims_ipc_call failed");
+	ret = pims_ipc_call(ipc, CTSVC_IPC_MODULE, CTSVC_IPC_SERVER_CONNECT, indata,
+			&outdata);
+	if (0 != ret) {
+		ERR("pims_ipc_call() Fail(%d)", ret);
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
 	}
@@ -153,7 +156,8 @@ static int _ctsvc_ipc_connect(contacts_h contact, pims_ipc_h ipc)
 	if (outdata) {
 		ctsvc_ipc_unmarshal_int(outdata, &ret);
 		pims_ipc_data_destroy(outdata);
-		RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_ipc_server_connect return(%d)", ret);
+		if (CONTACTS_ERROR_NONE != ret)
+			ERR("ctsvc_ipc_unmarshal_int() return(%d)", ret);
 	}
 	return ret;
 }
@@ -171,16 +175,17 @@ int ctsvc_ipc_connect(contacts_h contact, unsigned int handle_id)
 
 	snprintf(ipc_key, sizeof(ipc_key), "%u", handle_id);
 
-	if (NULL == _ctsvc_ipc_table)
-		_ctsvc_ipc_table = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, _ctsvc_ipc_data_free);
-	else
+	if (NULL == _ctsvc_ipc_table) {
+		_ctsvc_ipc_table = g_hash_table_new_full(g_str_hash, g_str_equal, g_free,
+				_ctsvc_ipc_data_free);
+	} else {
 		ipc_data = g_hash_table_lookup(_ctsvc_ipc_table, ipc_key);
+	}
 
 	if (NULL == ipc_data) {
 		ipc_data = calloc(1, sizeof(struct ctsvc_ipc_s));
-		if (NULL == ipc_data)
-		{
-			CTS_ERR("calloc() Fail");
+		if (NULL == ipc_data) {
+			ERR("calloc() Fail");
 			return CONTACTS_ERROR_OUT_OF_MEMORY;
 		}
 		ret = _ctsvc_ipc_create(&(ipc_data->ipc));
@@ -214,37 +219,39 @@ int ctsvc_ipc_disconnect(contacts_h contact, unsigned int handle_id, int connect
 
 	indata = pims_ipc_data_create(0);
 	if (indata == NULL) {
-		CTS_ERR("ipc data created fail!");
+		ERR("pims_ipc_data_create() Fail");
 		return CONTACTS_ERROR_OUT_OF_MEMORY;
 	}
 
 	ret = ctsvc_ipc_marshal_handle(contact, indata);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_ipc_marshal_handle() Fail(%d)", ret);
+		ERR("ctsvc_ipc_marshal_handle() Fail(%d)", ret);
 		pims_ipc_data_destroy(indata);
 		return ret;
 	}
-	if (pims_ipc_call(ipc_data->ipc, CTSVC_IPC_MODULE, CTSVC_IPC_SERVER_DISCONNECT, indata, &outdata) != 0) {
+
+	ret = pims_ipc_call(ipc_data->ipc, CTSVC_IPC_MODULE, CTSVC_IPC_SERVER_DISCONNECT,
+			indata, &outdata);
+	if (0 != ret) {
 		pims_ipc_data_destroy(indata);
-		CTS_ERR("[GLOBAL_IPC_CHANNEL] pims_ipc_call failed");
+		ERR("pims_ipc_call() Fail(%d)", ret);
 		return CONTACTS_ERROR_IPC;
 	}
+	pims_ipc_data_destroy(indata);
 
 	if (outdata) {
 		ctsvc_ipc_unmarshal_int(outdata, &ret);
 		pims_ipc_data_destroy(outdata);
 
 		if (ret != CONTACTS_ERROR_NONE) {
-			CTS_ERR("[GLOBAL_IPC_CHANNEL] pims_ipc didn't destroyed!!!(%d)", ret);
+			ERR("ctsvc_ipc_unmarshal_int() Fail(%d)", ret);
 			return ret;
 		}
 
-		if (1 == connection_count) {
+		if (1 == connection_count)
 			g_hash_table_remove(_ctsvc_ipc_table, ipc_key);
-		}
-	}
-	else {
-		CTS_ERR("pims_ipc_call out data is NULL");
+	} else {
+		ERR("pims_ipc_call out data is NULL");
 		return CONTACTS_ERROR_IPC;
 	}
 
@@ -263,7 +270,8 @@ static void __ctsvc_ipc_unlock(void)
 		ctsvc_mutex_unlock(CTS_MUTEX_PIMS_IPC_CALL);
 }
 
-int ctsvc_ipc_call(char *module, char *function, pims_ipc_h data_in, pims_ipc_data_h *data_out)
+int ctsvc_ipc_call(char *module, char *function, pims_ipc_h data_in,
+		pims_ipc_data_h *data_out)
 {
 	pims_ipc_h ipc_handle;
 
@@ -285,14 +293,14 @@ int ctsvc_ipc_call(char *module, char *function, pims_ipc_h data_in, pims_ipc_da
 void ctsvc_client_ipc_set_change_version(contacts_h contact, int version)
 {
 	RETM_IF(NULL == contact, "contact is NULL");
-	ctsvc_base_s *base = (ctsvc_base_s *)contact;
+	ctsvc_base_s *base = (ctsvc_base_s*)contact;
 	base->version = version;
 }
 
 int ctsvc_client_ipc_get_change_version(contacts_h contact)
 {
 	RETVM_IF(NULL == contact, -1, "contact is NULL");
-	ctsvc_base_s *base = (ctsvc_base_s *)contact;
+	ctsvc_base_s *base = (ctsvc_base_s*)contact;
 	return base->version;
 }
 
@@ -307,19 +315,21 @@ int ctsvc_ipc_client_check_permission(int permission, bool *result)
 
 	indata = pims_ipc_data_create(0);
 	if (indata == NULL) {
-		CTS_ERR("ipc data created fail !");
+		ERR("pims_ipc_data_create() Fail");
 		return CONTACTS_ERROR_OUT_OF_MEMORY;
 	}
 
 	ret = ctsvc_ipc_marshal_int(permission, indata);
 	if (ret != CONTACTS_ERROR_NONE) {
-		CTS_ERR("marshal fail");
+		ERR("ctsvc_ipc_marshal_int() Fail(%d)", ret);
 		pims_ipc_data_destroy(indata);
 		return ret;
 	}
 
-	if (ctsvc_ipc_call(CTSVC_IPC_MODULE, CTSVC_IPC_SERVER_CHECK_PERMISSION, indata, &outdata) != 0) {
-		CTS_ERR("ctsvc_ipc_call Fail");
+	ret = ctsvc_ipc_call(CTSVC_IPC_MODULE, CTSVC_IPC_SERVER_CHECK_PERMISSION, indata,
+			&outdata);
+	if (0 != ret) {
+		ERR("ctsvc_ipc_call() Fail(%d)", ret);
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
 	}
@@ -328,14 +338,14 @@ int ctsvc_ipc_client_check_permission(int permission, bool *result)
 
 	if (outdata) {
 		if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(outdata, &ret)) {
-			CTS_ERR("ctsvc_ipc_unmarshal_int() Fail");
+			ERR("ctsvc_ipc_unmarshal_int() Fail");
 			pims_ipc_data_destroy(outdata);
 			return CONTACTS_ERROR_IPC;
 		}
 
 		if (CONTACTS_ERROR_NONE == ret && result) {
 			if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_bool(outdata, result)) {
-				CTS_ERR("ctsvc_ipc_unmarshal_bool() Fail");
+				ERR("ctsvc_ipc_unmarshal_bool() Fail");
 				pims_ipc_data_destroy(outdata);
 				return CONTACTS_ERROR_IPC;
 			}
@@ -366,22 +376,25 @@ void ctsvc_ipc_set_disconnected(bool is_disconnected)
 int ctsvc_ipc_get_disconnected()
 {
 	pthread_mutex_lock(&_ctsvc_mutex_disconnected);
-	CTS_DBG("_ctsvc_ipc_disconnected=%d", _ctsvc_ipc_disconnected);
+	DBG("_ctsvc_ipc_disconnected=%d", _ctsvc_ipc_disconnected);
 	pthread_mutex_unlock(&_ctsvc_mutex_disconnected);
 	return _ctsvc_ipc_disconnected;
 }
 
-static void _ctsvc_ipc_recovery_foreach_cb(gpointer key, gpointer value, gpointer user_data)
+static void _ctsvc_ipc_recovery_foreach_cb(gpointer key, gpointer value,
+		gpointer user_data)
 {
 	GList *c;
 	struct ctsvc_ipc_s *ipc_data = value;
 
 	ctsvc_ipc_unset_disconnected_cb(ipc_data->ipc);
+
 	int ret = _ctsvc_ipc_create(&(ipc_data->ipc));
 	RETM_IF(CONTACTS_ERROR_NONE != ret, "_ctsvc_ipc_create() Fail(%d)", ret);
+
 	ctsvc_ipc_set_disconnected_cb(ipc_data->ipc, _ctsvc_ipc_disconnected_cb, NULL);
 
-	for (c=ipc_data->list_handle;c;c=c->next) {
+	for (c = ipc_data->list_handle; c; c = c->next) {
 		contacts_h contact = c->data;
 		ret = _ctsvc_ipc_connect(contact, ipc_data->ipc);
 		WARN_IF(CONTACTS_ERROR_NONE != ret, "_ctsvc_ipc_connect() Fail(%d)", ret);
@@ -393,5 +406,4 @@ void ctsvc_ipc_recovery()
 	CTS_FN_CALL;
 	g_hash_table_foreach(_ctsvc_ipc_table, _ctsvc_ipc_recovery_foreach_cb, NULL);
 }
-
 

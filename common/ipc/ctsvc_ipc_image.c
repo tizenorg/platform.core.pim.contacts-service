@@ -1,7 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@
 #include "ctsvc_ipc_marshal.h"
 #include "contacts_record.h"
 
-static int __ctsvc_ipc_unmarshal_image(pims_ipc_data_h ipc_data, const char* view_uri, contacts_record_h record);
+static int __ctsvc_ipc_unmarshal_image(pims_ipc_data_h ipc_data, const char *view_uri, contacts_record_h record);
 static int __ctsvc_ipc_marshal_image(const contacts_record_h record, pims_ipc_data_h ipc_data);
 
 ctsvc_ipc_marshal_record_plugin_cb_s _ctsvc_ipc_record_image_plugin_cb = {
@@ -30,12 +30,12 @@ ctsvc_ipc_marshal_record_plugin_cb_s _ctsvc_ipc_record_image_plugin_cb = {
 };
 
 
-static int __ctsvc_ipc_unmarshal_image(pims_ipc_data_h ipc_data, const char* view_uri, contacts_record_h record)
+static int __ctsvc_ipc_unmarshal_image(pims_ipc_data_h ipc_data, const char *view_uri, contacts_record_h record)
 {
-	RETV_IF(ipc_data==NULL,CONTACTS_ERROR_NO_DATA);
-	RETV_IF(record==NULL,CONTACTS_ERROR_NO_DATA);
+	RETV_IF(NULL == ipc_data, CONTACTS_ERROR_NO_DATA);
+	RETV_IF(NULL == record, CONTACTS_ERROR_NO_DATA);
 
-	ctsvc_image_s* image_p = (ctsvc_image_s*) record;
+	ctsvc_image_s *image_p = (ctsvc_image_s*) record;
 
 	do {
 		if (ctsvc_ipc_unmarshal_int(ipc_data, &image_p->id) != CONTACTS_ERROR_NONE) break;
@@ -48,28 +48,28 @@ static int __ctsvc_ipc_unmarshal_image(pims_ipc_data_h ipc_data, const char* vie
 		return CONTACTS_ERROR_NONE;
 	} while (0);
 
-	CTS_ERR("_ctsvc_ipc_unmarshal fail");
+	ERR("__ctsvc_ipc_unmarshal_image() Fail");
 	return CONTACTS_ERROR_INVALID_PARAMETER;
 }
 
 static int __ctsvc_ipc_marshal_image(const contacts_record_h record, pims_ipc_data_h ipc_data)
 {
-	ctsvc_image_s* image_p = (ctsvc_image_s*)record;
-	RETV_IF(ipc_data==NULL,CONTACTS_ERROR_NO_DATA);
-	RETV_IF(image_p==NULL,CONTACTS_ERROR_NO_DATA);
+	ctsvc_image_s *image_p = (ctsvc_image_s*)record;
+	RETV_IF(NULL == ipc_data, CONTACTS_ERROR_NO_DATA);
+	RETV_IF(NULL == image_p, CONTACTS_ERROR_NO_DATA);
 
 	do {
-		if (ctsvc_ipc_marshal_int((image_p->id),ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_int((image_p->contact_id),ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_int((image_p->type),ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_string((image_p->label),ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_string((image_p->path),ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_bool((image_p->is_default),ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_int((image_p->id), ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_int((image_p->contact_id), ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_int((image_p->type), ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_string((image_p->label), ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_string((image_p->path), ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_bool((image_p->is_default), ipc_data) != CONTACTS_ERROR_NONE) break;
 
 		return CONTACTS_ERROR_NONE;
 	} while (0);
 
-	CTS_ERR("_ctsvc_ipc_marshal fail");
+	ERR("_ctsvc_ipc_marshal() Fail");
 	return CONTACTS_ERROR_INVALID_PARAMETER;
 }
 

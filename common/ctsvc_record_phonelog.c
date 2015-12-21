@@ -1,11 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
- *
- * Contact: Dohyung Jin <dh.jin@samsung.com>
- *                 Jongwon Lee <gogosing.lee@samsung.com>
- *                 Donghee Ye <donghee.ye@samsung.com>
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,10 +27,10 @@ static int __ctsvc_phonelog_create(contacts_record_h *out_record);
 static int __ctsvc_phonelog_destroy(contacts_record_h record, bool delete_child);
 static int __ctsvc_phonelog_clone(contacts_record_h record, contacts_record_h *out_record);
 static int __ctsvc_phonelog_get_int(contacts_record_h record, unsigned int property_id, int *out);
-static int __ctsvc_phonelog_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
-static int __ctsvc_phonelog_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
+static int __ctsvc_phonelog_get_str(contacts_record_h record, unsigned int property_id, char **out_str);
+static int __ctsvc_phonelog_get_str_p(contacts_record_h record, unsigned int property_id, char **out_str);
 static int __ctsvc_phonelog_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty);
-static int __ctsvc_phonelog_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty);
+static int __ctsvc_phonelog_set_str(contacts_record_h record, unsigned int property_id, const char *str, bool *is_dirty);
 
 ctsvc_record_plugin_cb_s phonelog_plugin_cbs = {
 	.create = __ctsvc_phonelog_create,
@@ -62,9 +58,8 @@ static int __ctsvc_phonelog_create(contacts_record_h *out_record)
 {
 	ctsvc_phonelog_s *phonelog;
 
-	phonelog = (ctsvc_phonelog_s*)calloc(1, sizeof(ctsvc_phonelog_s));
-	RETVM_IF(NULL == phonelog, CONTACTS_ERROR_OUT_OF_MEMORY,
-			"Out of memory : calloc is Fail");
+	phonelog = calloc(1, sizeof(ctsvc_phonelog_s));
+	RETVM_IF(NULL == phonelog, CONTACTS_ERROR_OUT_OF_MEMORY, "calloc() Fail");
 
 	*out_record = (contacts_record_h)phonelog;
 
@@ -73,7 +68,7 @@ static int __ctsvc_phonelog_create(contacts_record_h *out_record)
 
 static int __ctsvc_phonelog_destroy(contacts_record_h record, bool delete_child)
 {
-	ctsvc_phonelog_s* phonelog = (ctsvc_phonelog_s*)record;
+	ctsvc_phonelog_s *phonelog = (ctsvc_phonelog_s*)record;
 	phonelog->base.plugin_cbs = NULL; /* help to find double destroy bug (refer to the contacts_record_destroy) */
 	free(phonelog->base.properties_flags);
 
@@ -86,13 +81,13 @@ static int __ctsvc_phonelog_destroy(contacts_record_h record, bool delete_child)
 
 static int __ctsvc_phonelog_clone(contacts_record_h record, contacts_record_h *out_record)
 {
-    ctsvc_phonelog_s *out_data = NULL;
-    ctsvc_phonelog_s *src_data = NULL;
+	ctsvc_phonelog_s *out_data = NULL;
+	ctsvc_phonelog_s *src_data = NULL;
 
-    src_data = (ctsvc_phonelog_s*)record;
-    out_data = calloc(1, sizeof(ctsvc_phonelog_s));
-    RETVM_IF(NULL == out_data, CONTACTS_ERROR_OUT_OF_MEMORY,
-			 "Out of memeory : calloc(ctsvc_phonelog_s) Fail(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
+	src_data = (ctsvc_phonelog_s*)record;
+	out_data = calloc(1, sizeof(ctsvc_phonelog_s));
+	RETVM_IF(NULL == out_data, CONTACTS_ERROR_OUT_OF_MEMORY,
+			"Out of memeory : calloc(ctsvc_phonelog_s) Fail(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
 
 	out_data->id = src_data->id;
 	out_data->address = SAFE_STRDUP(src_data->address);
@@ -105,7 +100,7 @@ static int __ctsvc_phonelog_clone(contacts_record_h record, contacts_record_h *o
 
 	int ret = ctsvc_record_copy_base(&(out_data->base), &(src_data->base));
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_record_copy_base() Fail");
+		ERR("ctsvc_record_copy_base() Fail");
 		__ctsvc_phonelog_destroy((contacts_record_h)out_data, true);
 		return ret;
 	}
@@ -116,9 +111,9 @@ static int __ctsvc_phonelog_clone(contacts_record_h record, contacts_record_h *o
 
 static int __ctsvc_phonelog_get_int(contacts_record_h record, unsigned int property_id, int *out)
 {
-	ctsvc_phonelog_s* phonelog = (ctsvc_phonelog_s*)record;
+	ctsvc_phonelog_s *phonelog = (ctsvc_phonelog_s*)record;
 
-	switch(property_id) {
+	switch (property_id) {
 	case CTSVC_PROPERTY_PHONELOG_ID:
 		*out = phonelog->id;
 		break;
@@ -138,45 +133,45 @@ static int __ctsvc_phonelog_get_int(contacts_record_h record, unsigned int prope
 		*out = phonelog->sim_slot_no;
 		break;
 	default:
-		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(phonelog)", property_id);
+		ERR("Invalid parameter : property_id(%d) is not supported in value(phonelog)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_phonelog_get_str_real(contacts_record_h record, unsigned int property_id, char** out_str, bool copy)
+static int __ctsvc_phonelog_get_str_real(contacts_record_h record, unsigned int property_id, char **out_str, bool copy)
 {
-	ctsvc_phonelog_s* phonelog = (ctsvc_phonelog_s*)record;
+	ctsvc_phonelog_s *phonelog = (ctsvc_phonelog_s*)record;
 
-	switch(property_id) {
+	switch (property_id) {
 	case CTSVC_PROPERTY_PHONELOG_ADDRESS:
 		*out_str = GET_STR(copy, phonelog->address);
 		break;
 	case CTSVC_PROPERTY_PHONELOG_EXTRA_DATA2:
 		*out_str = GET_STR(copy, phonelog->extra_data2);
 		break;
-	default :
-		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(phonelog)", property_id);
+	default:
+		ERR("Invalid parameter : property_id(%d) is not supported in value(phonelog)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_phonelog_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str)
+static int __ctsvc_phonelog_get_str_p(contacts_record_h record, unsigned int property_id, char **out_str)
 {
 	return __ctsvc_phonelog_get_str_real(record, property_id, out_str, false);
 }
 
-static int __ctsvc_phonelog_get_str(contacts_record_h record, unsigned int property_id, char** out_str)
+static int __ctsvc_phonelog_get_str(contacts_record_h record, unsigned int property_id, char **out_str)
 {
 	return __ctsvc_phonelog_get_str_real(record, property_id, out_str, true);
 }
 
 static int __ctsvc_phonelog_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty)
 {
-	ctsvc_phonelog_s* phonelog = (ctsvc_phonelog_s*)record;
+	ctsvc_phonelog_s *phonelog = (ctsvc_phonelog_s*)record;
 
-	switch(property_id) {
+	switch (property_id) {
 	case CTSVC_PROPERTY_PHONELOG_ID:
 		CHECK_DIRTY_VAL(phonelog->id, value, is_dirty);
 		phonelog->id = value;
@@ -200,12 +195,11 @@ static int __ctsvc_phonelog_set_int(contacts_record_h record, unsigned int prope
 					&& value <= CONTACTS_PLOG_TYPE_MMS_BLOCKED)
 				|| (CONTACTS_PLOG_TYPE_EMAIL_RECEIVED <= value
 					&& value <= CONTACTS_PLOG_TYPE_EMAIL_SENT)
-			) {
+		   ) {
 			CHECK_DIRTY_VAL(phonelog->log_type, value, is_dirty);
 			phonelog->log_type = value;
-		}
-		else {
-			CTS_ERR("Invalid parameter : log type is in invalid range (%d)", value);
+		} else {
+			ERR("Invalid parameter : log type is in invalid range (%d)", value);
 			return CONTACTS_ERROR_INVALID_PARAMETER;
 		}
 		break;
@@ -217,25 +211,25 @@ static int __ctsvc_phonelog_set_int(contacts_record_h record, unsigned int prope
 		break;
 	case CTSVC_PROPERTY_PHONELOG_SIM_SLOT_NO:
 		RETVM_IF(0 < phonelog->id, CONTACTS_ERROR_INVALID_PARAMETER,
-			"Invalid parameter : property_id(%d) is a read-only value (phonelog)", property_id);
+				"Invalid parameter : property_id(%d) is a read-only value (phonelog)", property_id);
 		CHECK_DIRTY_VAL(phonelog->sim_slot_no, value, is_dirty);
 		phonelog->sim_slot_no = value;
 		break;
 	default:
-		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(phonelog)", property_id);
+		ERR("Invalid parameter : property_id(%d) is not supported in value(phonelog)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_phonelog_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty)
+static int __ctsvc_phonelog_set_str(contacts_record_h record, unsigned int property_id, const char *str, bool *is_dirty)
 {
-	ctsvc_phonelog_s* phonelog = (ctsvc_phonelog_s*)record;
+	ctsvc_phonelog_s *phonelog = (ctsvc_phonelog_s*)record;
 
-	switch(property_id) {
+	switch (property_id) {
 	case CTSVC_PROPERTY_PHONELOG_ADDRESS:
 		RETVM_IF(0 < phonelog->id, CONTACTS_ERROR_INVALID_PARAMETER,
-			"Invalid parameter : property_id(%d) is a read-only value (phonelog)", property_id);
+				"Invalid parameter : property_id(%d) is a read-only value (phonelog)", property_id);
 		CHECK_DIRTY_STR(phonelog->address, str, is_dirty);
 		FREEandSTRDUP(phonelog->address, str);
 		break;
@@ -243,8 +237,8 @@ static int __ctsvc_phonelog_set_str(contacts_record_h record, unsigned int prope
 		CHECK_DIRTY_STR(phonelog->extra_data2, str, is_dirty);
 		FREEandSTRDUP(phonelog->extra_data2, str);
 		break;
-	default :
-		CTS_ERR("Invalid parameter : property_id(%d) is not supported in value(phonelog)", property_id);
+	default:
+		ERR("Invalid parameter : property_id(%d) is not supported in value(phonelog)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;

@@ -1,11 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
- *
- * Contact: Dohyung Jin <dh.jin@samsung.com>
- *                 Jongwon Lee <gogosing.lee@samsung.com>
- *                 Donghee Ye <donghee.ye@samsung.com>
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,14 +24,14 @@
 typedef enum {
 	QUERY_SORTKEY,
 	QUERY_PROJECTION,
-}query_property_type_e;
+} query_property_type_e;
 
 static bool __ctsvc_query_property_check(const property_info_s *properties,
 		int count, query_property_type_e property_type, unsigned int property_id)
 {
 	int i;
 
-	for (i=0;i<count;i++) {
+	for (i = 0; i < count; i++) {
 		property_info_s *p = (property_info_s*)&(properties[i]);
 		if (property_id == p->property_id) {
 			if (property_type == QUERY_PROJECTION) {
@@ -43,15 +39,15 @@ static bool __ctsvc_query_property_check(const property_info_s *properties,
 					return true;
 				else
 					return false;
-			}
-			else
+			} else {
 				return true;
+			}
 		}
 	}
 	return false;
 }
 
-API int contacts_query_create(const char* view_uri, contacts_query_h* out_query)
+API int contacts_query_create(const char *view_uri, contacts_query_h *out_query)
 {
 	ctsvc_query_s *query;
 
@@ -60,11 +56,11 @@ API int contacts_query_create(const char* view_uri, contacts_query_h* out_query)
 
 	RETV_IF(NULL == view_uri || NULL == out_query, CONTACTS_ERROR_INVALID_PARAMETER);
 
-	query = (ctsvc_query_s *)calloc(1, sizeof(ctsvc_query_s));
+	query = calloc(1, sizeof(ctsvc_query_s));
 	RETV_IF(NULL == query, CONTACTS_ERROR_OUT_OF_MEMORY);
 
 	query->view_uri = strdup(view_uri);
-	query->properties = (property_info_s *)ctsvc_view_get_all_property_infos(view_uri, &query->property_count);
+	query->properties = (property_info_s*)ctsvc_view_get_all_property_infos(view_uri, &query->property_count);
 	*out_query = (contacts_query_h)query;
 
 	return CONTACTS_ERROR_NONE;
@@ -77,19 +73,19 @@ API int contacts_query_set_projection(contacts_query_h query, unsigned int prope
 	bool find;
 
 	RETV_IF(NULL == query, CONTACTS_ERROR_INVALID_PARAMETER);
-	query_s = (ctsvc_query_s *)query;
+	query_s = (ctsvc_query_s*)query;
 
-	for (i=0;i<count;i++) {
+	for (i = 0; i < count; i++) {
 		find = __ctsvc_query_property_check(query_s->properties, query_s->property_count, QUERY_PROJECTION, property_ids[i]);
 		RETVM_IF(false == find, CONTACTS_ERROR_INVALID_PARAMETER,
-					"Invalid parameter : property_id(%d) is not supported on view_uri(%s)", property_ids[i], query_s->view_uri);
+				"Invalid parameter : property_id(%d) is not supported on view_uri(%s)", property_ids[i], query_s->view_uri);
 	}
 	if (query_s->projection)
 		free(query_s->projection);
 
 	query_s->projection = calloc(count, sizeof(unsigned int));
 	if (NULL == query_s->projection) {
-		CTS_ERR("calloc() Fail");
+		ERR("calloc() Fail");
 		return CONTACTS_ERROR_OUT_OF_MEMORY;
 	}
 	memcpy(query_s->projection, property_ids, sizeof(unsigned int) * count);
@@ -105,7 +101,7 @@ API int contacts_query_set_filter(contacts_query_h query, contacts_filter_h filt
 	contacts_filter_h new_filter;
 
 	RETV_IF(NULL == query || NULL == filter, CONTACTS_ERROR_INVALID_PARAMETER);
-	s_query = (ctsvc_query_s *)query;
+	s_query = (ctsvc_query_s*)query;
 
 	ret = ctsvc_filter_clone(filter, &new_filter);
 	RETVM_IF(ret != CONTACTS_ERROR_NONE, ret, "ctsvc_filter_clone Fail(%d)", ret);
@@ -120,11 +116,11 @@ API int contacts_query_set_sort(contacts_query_h query, unsigned int property_id
 	bool find = false;
 
 	RETV_IF(NULL == query, CONTACTS_ERROR_INVALID_PARAMETER);
-	query_s = (ctsvc_query_s *)query;
+	query_s = (ctsvc_query_s*)query;
 
 	find = __ctsvc_query_property_check(query_s->properties, query_s->property_count, QUERY_SORTKEY, property_id);
 	RETVM_IF(false == find, CONTACTS_ERROR_INVALID_PARAMETER,
-				"Invalid parameter : property_id(%d) is not supported on view_uri(%s)", property_id, query_s->view_uri);
+			"Invalid parameter : property_id(%d) is not supported on view_uri(%s)", property_id, query_s->view_uri);
 	query_s->sort_property_id = property_id;
 	query_s->sort_asc = asc;
 
@@ -135,7 +131,7 @@ API int contacts_query_destroy(contacts_query_h query)
 {
 	ctsvc_query_s *s_query;
 	RETV_IF(NULL == query, CONTACTS_ERROR_INVALID_PARAMETER);
-	s_query = (ctsvc_query_s *)query;
+	s_query = (ctsvc_query_s*)query;
 
 	if (s_query->filter)
 		contacts_filter_destroy((contacts_filter_h)s_query->filter);
@@ -152,7 +148,7 @@ API int contacts_query_set_distinct(contacts_query_h query, bool set)
 	ctsvc_query_s *query_s;
 
 	RETV_IF(NULL == query, CONTACTS_ERROR_INVALID_PARAMETER);
-	query_s = (ctsvc_query_s *)query;
+	query_s = (ctsvc_query_s*)query;
 	query_s->distinct = set;
 
 	return CONTACTS_ERROR_NONE;

@@ -1,7 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,10 +35,10 @@
  * Whenever deleting group, this function will be called
  * in order to deleting group image file
  */
-void ctsvc_db_group_delete_callback(sqlite3_context *context, int argc, sqlite3_value ** argv)
+void ctsvc_db_group_delete_callback(sqlite3_context *context, int argc, sqlite3_value **argv)
 {
 	int ret;
-	const unsigned char* path;
+	const unsigned char *path;
 
 	if (1 < argc) {
 		sqlite3_result_null(context);
@@ -50,9 +50,8 @@ void ctsvc_db_group_delete_callback(sqlite3_context *context, int argc, sqlite3_
 		char full_path[CTSVC_IMG_FULL_PATH_SIZE_MAX] = {0};
 		snprintf(full_path, sizeof(full_path), "%s/%s", CTS_GROUP_IMAGE_LOCATION, path);
 		ret = unlink(full_path);
-		if (ret < 0) {
-			CTS_WARN("unlink Failed(%d)", errno);
-		}
+		if (ret < 0)
+			WARN("unlink() Fail(%d)", errno);
 	}
 
 	return;
@@ -114,8 +113,7 @@ int ctsvc_db_group_name_sort_callback(void *context, int str1_len, const void *s
 	default:
 		if (CTSVC_SORT_NUMBER >= str2_sort_type) {
 			ret = 1;
-		}
-		else {
+		} else {
 			if (str1_sort_type != str2_sort_type) {
 				if (str1_sort_type == prim_sort)
 					ret = -1;
@@ -123,8 +121,7 @@ int ctsvc_db_group_name_sort_callback(void *context, int str1_len, const void *s
 					ret = 1;
 				else
 					ret = _ctsvc_db_group_name_collation_str(str_src1, str_src2);
-			}
-			else {
+			} else {
 				ret = _ctsvc_db_group_name_collation_str(str_src1, str_src2);
 			}
 		}

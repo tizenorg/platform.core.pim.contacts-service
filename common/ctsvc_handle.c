@@ -24,9 +24,8 @@ int ctsvc_handle_create(contacts_h *contact)
 {
 	RETV_IF(NULL == contact, CONTACTS_ERROR_INVALID_PARAMETER);
 	ctsvc_base_s *base = calloc(1, sizeof(ctsvc_base_s));
-	if (NULL == base)
-	{
-		CTS_ERR("calloc() Fail");
+	if (NULL == base) {
+		ERR("calloc() Fail");
 		return CONTACTS_ERROR_OUT_OF_MEMORY;
 	}
 	*contact = (contacts_h)base;
@@ -36,7 +35,7 @@ int ctsvc_handle_create(contacts_h *contact)
 int ctsvc_handle_destroy(contacts_h contact)
 {
 	RETV_IF(NULL == contact, CONTACTS_ERROR_INVALID_PARAMETER);
-	ctsvc_base_s *base = (ctsvc_base_s *)contact;
+	ctsvc_base_s *base = (ctsvc_base_s*)contact;
 	free(base);
 	base = NULL;
 	return CONTACTS_ERROR_NONE;
@@ -47,7 +46,7 @@ int ctsvc_handle_clone(contacts_h contact, contacts_h *pcontact)
 	RETV_IF(NULL == contact, CONTACTS_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == pcontact, CONTACTS_ERROR_INVALID_PARAMETER);
 
-	ctsvc_base_s *base = (ctsvc_base_s *)contact;
+	ctsvc_base_s *base = (ctsvc_base_s*)contact;
 	ctsvc_base_s *clone = calloc(1, sizeof(ctsvc_base_s));
 	clone->connection_count = base->connection_count;
 	clone->version = base->version;
@@ -66,13 +65,14 @@ int ctsvc_handle_compare(contacts_h contact1, contacts_h contact2)
 	else if (NULL == contact2)
 		return 1;
 
-	ctsvc_base_s *base1 = (ctsvc_base_s *)contact1;
-	ctsvc_base_s *base2 = (ctsvc_base_s *)contact2;
+	ctsvc_base_s *base1 = (ctsvc_base_s*)contact1;
+	ctsvc_base_s *base2 = (ctsvc_base_s*)contact2;
 
 	if ((base1->connection_count == base2->connection_count) &&
-		(base1->version == base2->version))
+			(base1->version == base2->version)) {
 		return 0;
-	else
+	} else {
 		return 1;
+	}
 }
 

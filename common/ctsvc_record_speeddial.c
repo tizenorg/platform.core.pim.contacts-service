@@ -1,11 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
- *
- * Contact: Dohyung Jin <dh.jin@samsung.com>
- *                 Jongwon Lee <gogosing.lee@samsung.com>
- *                 Donghee Ye <donghee.ye@samsung.com>
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,14 +22,14 @@
 #include "ctsvc_record.h"
 #include "ctsvc_view.h"
 
-static int __ctsvc_speeddial_create(contacts_record_h* out_record);
+static int __ctsvc_speeddial_create(contacts_record_h *out_record);
 static int __ctsvc_speeddial_destroy(contacts_record_h record, bool delete_child);
 static int __ctsvc_speeddial_clone(contacts_record_h record, contacts_record_h *out_record);
 static int __ctsvc_speeddial_get_int(contacts_record_h record, unsigned int property_id, int *out);
-static int __ctsvc_speeddial_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
-static int __ctsvc_speeddial_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
+static int __ctsvc_speeddial_get_str(contacts_record_h record, unsigned int property_id, char **out_str);
+static int __ctsvc_speeddial_get_str_p(contacts_record_h record, unsigned int property_id, char **out_str);
 static int __ctsvc_speeddial_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty);
-static int __ctsvc_speeddial_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty);
+static int __ctsvc_speeddial_set_str(contacts_record_h record, unsigned int property_id, const char *str, bool *is_dirty);
 
 
 ctsvc_record_plugin_cb_s speeddial_plugin_cbs = {
@@ -58,12 +54,11 @@ ctsvc_record_plugin_cb_s speeddial_plugin_cbs = {
 	.clone_child_record_list = NULL,
 };
 
-static int __ctsvc_speeddial_create(contacts_record_h* out_record)
+static int __ctsvc_speeddial_create(contacts_record_h *out_record)
 {
 	ctsvc_speeddial_s *speeddial;
-	speeddial = (ctsvc_speeddial_s*)calloc(1, sizeof(ctsvc_speeddial_s));
-	RETVM_IF(NULL == speeddial, CONTACTS_ERROR_OUT_OF_MEMORY,
-			"Out of memory : calloc is Fail");
+	speeddial = calloc(1, sizeof(ctsvc_speeddial_s));
+	RETVM_IF(NULL == speeddial, CONTACTS_ERROR_OUT_OF_MEMORY, "calloc() Fail");
 
 	*out_record = (contacts_record_h)speeddial;
 	return CONTACTS_ERROR_NONE;
@@ -71,7 +66,7 @@ static int __ctsvc_speeddial_create(contacts_record_h* out_record)
 
 static int __ctsvc_speeddial_destroy(contacts_record_h record, bool delete_child)
 {
-	ctsvc_speeddial_s* speeddial = (ctsvc_speeddial_s*)record;
+	ctsvc_speeddial_s *speeddial = (ctsvc_speeddial_s*)record;
 	speeddial->base.plugin_cbs = NULL; /* help to find double destroy bug (refer to the contacts_record_destroy) */
 	free(speeddial->base.properties_flags);
 
@@ -86,13 +81,13 @@ static int __ctsvc_speeddial_destroy(contacts_record_h record, bool delete_child
 
 static int __ctsvc_speeddial_clone(contacts_record_h record, contacts_record_h *out_record)
 {
-    ctsvc_speeddial_s *out_data = NULL;
-    ctsvc_speeddial_s *src_data = NULL;
+	ctsvc_speeddial_s *out_data = NULL;
+	ctsvc_speeddial_s *src_data = NULL;
 
-    src_data = (ctsvc_speeddial_s*)record;
-    out_data = calloc(1, sizeof(ctsvc_speeddial_s));
-    RETVM_IF(NULL == out_data, CONTACTS_ERROR_OUT_OF_MEMORY,
-			 "Out of memeory : calloc(ctsvc_speeddial_s) Fail(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
+	src_data = (ctsvc_speeddial_s*)record;
+	out_data = calloc(1, sizeof(ctsvc_speeddial_s));
+	RETVM_IF(NULL == out_data, CONTACTS_ERROR_OUT_OF_MEMORY,
+			"Out of memeory : calloc(ctsvc_speeddial_s) Fail(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
 
 	out_data->id = src_data->id;
 	out_data->dial_number = src_data->dial_number;
@@ -106,7 +101,7 @@ static int __ctsvc_speeddial_clone(contacts_record_h record, contacts_record_h *
 
 	int ret = ctsvc_record_copy_base(&(out_data->base), &(src_data->base));
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_record_copy_base() Fail");
+		ERR("ctsvc_record_copy_base() Fail");
 		__ctsvc_speeddial_destroy((contacts_record_h)out_data, true);
 		return ret;
 	}
@@ -119,7 +114,7 @@ static int __ctsvc_speeddial_get_int(contacts_record_h record, unsigned int prop
 {
 	ctsvc_speeddial_s *speeddial = (ctsvc_speeddial_s*)record;
 
-	switch(property_id) {
+	switch (property_id) {
 	case CTSVC_PROPERTY_SPEEDDIAL_DIAL_NUMBER:
 		*out = speeddial->dial_number;
 		break;
@@ -133,17 +128,17 @@ static int __ctsvc_speeddial_get_int(contacts_record_h record, unsigned int prop
 		*out = speeddial->person_id;
 		break;
 	default:
-		CTS_ERR("This field(%d) is not supported in value(speeddial)", property_id);
+		ERR("This field(%d) is not supported in value(speeddial)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_speeddial_get_str_real(contacts_record_h record, unsigned int property_id, char** out_str, bool copy)
+static int __ctsvc_speeddial_get_str_real(contacts_record_h record, unsigned int property_id, char **out_str, bool copy)
 {
 	ctsvc_speeddial_s *speeddial = (ctsvc_speeddial_s*)record;
 
-	switch(property_id) {
+	switch (property_id) {
 	case CTSVC_PROPERTY_SPEEDDIAL_DISPLAY_NAME:
 		*out_str = GET_STR(copy, speeddial->display_name);
 		break;
@@ -156,19 +151,19 @@ static int __ctsvc_speeddial_get_str_real(contacts_record_h record, unsigned int
 	case CTSVC_PROPERTY_SPEEDDIAL_NUMBER_LABEL:
 		*out_str = GET_STR(copy, speeddial->label);
 		break;
-	default :
-		CTS_ERR("This field(%d) is not supported in value(speeddial)", property_id);
+	default:
+		ERR("This field(%d) is not supported in value(speeddial)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_speeddial_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str)
+static int __ctsvc_speeddial_get_str_p(contacts_record_h record, unsigned int property_id, char **out_str)
 {
 	return __ctsvc_speeddial_get_str_real(record, property_id, out_str, false);
 }
 
-static int __ctsvc_speeddial_get_str(contacts_record_h record, unsigned int property_id, char** out_str)
+static int __ctsvc_speeddial_get_str(contacts_record_h record, unsigned int property_id, char **out_str)
 {
 	return __ctsvc_speeddial_get_str_real(record, property_id, out_str, true);
 }
@@ -177,7 +172,7 @@ static int __ctsvc_speeddial_set_int(contacts_record_h record, unsigned int prop
 {
 	ctsvc_speeddial_s *speeddial = (ctsvc_speeddial_s*)record;
 
-	switch(property_id) {
+	switch (property_id) {
 	case CTSVC_PROPERTY_SPEEDDIAL_NUMBER_TYPE:
 		CHECK_DIRTY_VAL(speeddial->number_type, value, is_dirty);
 		speeddial->number_type = value;
@@ -197,17 +192,17 @@ static int __ctsvc_speeddial_set_int(contacts_record_h record, unsigned int prop
 		speeddial->number_id = value;
 		break;
 	default:
-		CTS_ERR("This field(%d) is not supported in value(speeddial)", property_id);
+		ERR("This field(%d) is not supported in value(speeddial)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_speeddial_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty)
+static int __ctsvc_speeddial_set_str(contacts_record_h record, unsigned int property_id, const char *str, bool *is_dirty)
 {
 	ctsvc_speeddial_s *speeddial = (ctsvc_speeddial_s*)record;
 
-	switch(property_id) {
+	switch (property_id) {
 	case CTSVC_PROPERTY_SPEEDDIAL_DISPLAY_NAME:
 		CHECK_DIRTY_STR(speeddial->display_name, str, is_dirty);
 		FREEandSTRDUP(speeddial->display_name, str);
@@ -224,8 +219,8 @@ static int __ctsvc_speeddial_set_str(contacts_record_h record, unsigned int prop
 		CHECK_DIRTY_STR(speeddial->label, str, is_dirty);
 		FREEandSTRDUP(speeddial->label, str);
 		break;
-	default :
-		CTS_ERR("This field(%d) is not supported in value(speeddial)", property_id);
+	default:
+		ERR("This field(%d) is not supported in value(speeddial)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 	return CONTACTS_ERROR_NONE;

@@ -1,9 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
- *
- * Contact: Youngjae Shin <yj99.shin@samsung.com>
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,15 +34,14 @@
 #include "ctsvc_client_ipc.h"
 #endif
 
-typedef struct
-{
+typedef struct {
 	contacts_h contact;
 	int wd;
 	char *view_uri;
 	contacts_db_changed_cb cb;
 	void *cb_data;
 	bool blocked;
-}noti_info;
+} noti_info;
 
 struct socket_init_noti_info {
 	int wd;
@@ -64,7 +61,7 @@ static inline void __ctsvc_inotify_handle_callback(GSList *noti_list, int wd, ui
 	noti_info *noti;
 	GSList *it = NULL;
 
-	for (it = noti_list;it;it=it->next) {
+	for (it = noti_list; it; it = it->next) {
 		noti = (noti_info *)it->data;
 
 		if (noti->wd == wd) {
@@ -77,7 +74,7 @@ static inline void __ctsvc_inotify_handle_callback(GSList *noti_list, int wd, ui
 			}
 #endif
 			if ((mask & IN_CLOSE_WRITE) && noti->cb) {
-				CTS_DBG("%s", noti->view_uri);
+				DBG("%s", noti->view_uri);
 				noti->cb(noti->view_uri, noti->cb_data);
 			}
 		}
@@ -86,7 +83,6 @@ static inline void __ctsvc_inotify_handle_callback(GSList *noti_list, int wd, ui
 
 static void _ctsvc_inotify_socket_init_noti_table_foreach_cb(gpointer key, gpointer value, gpointer user_data)
 {
-	GList *c;
 	struct socket_init_noti_info *noti_info = value;
 
 	int wd = GPOINTER_TO_INT(user_data);
@@ -111,7 +107,7 @@ static gboolean __ctsvc_inotify_gio_cb(GIOChannel *src, GIOCondition cond, gpoin
 				__ctsvc_inotify_handle_callback(__noti_list, ie.wd, ie.mask);
 
 			while (0 != ie.len) {
-				ret = read(fd, name, (ie.len<sizeof(name))?ie.len:sizeof(name));
+				ret = read(fd, name, (ie.len < sizeof(name)) ? ie.len : sizeof(name));
 				if (-1 == ret) {
 					if (EINTR == errno)
 						continue;
@@ -123,8 +119,7 @@ static gboolean __ctsvc_inotify_gio_cb(GIOChannel *src, GIOCondition cond, gpoin
 				else
 					ie.len -= ret;
 			}
-		}
-		else {
+		} else {
 			while (ret < sizeof(ie)) {
 				int read_size;
 				read_size = read(fd, name, sizeof(ie)-ret);
@@ -179,7 +174,7 @@ int ctsvc_inotify_init(void)
 
 	__inoti_handler = __ctsvc_inotify_attach_handler(__inoti_fd);
 	if (__inoti_handler <= 0) {
-		CTS_ERR("__ctsvc_inotify_attach_handler() Fail");
+		ERR("__ctsvc_inotify_attach_handler() Fail");
 		close(__inoti_fd);
 		__inoti_fd = -1;
 		__inoti_handler = 0;
@@ -209,7 +204,7 @@ static inline int __ctsvc_inotify_watch(int fd, const char *notipath)
 static inline const char* __ctsvc_noti_get_file_path(const char *view_uri)
 {
 	ctsvc_record_type_e match = ctsvc_view_get_record_type(view_uri);
-	switch((int)match) {
+	switch ((int)match) {
 	case CTSVC_RECORD_ADDRESSBOOK:
 		return CTSVC_NOTI_ADDRESSBOOK_CHANGED;
 	case CTSVC_RECORD_GROUP:
@@ -263,7 +258,7 @@ static inline const char* __ctsvc_noti_get_file_path(const char *view_uri)
 		return CTSVC_NOTI_SDN_CHANGED;
 	case CTSVC_RECORD_RESULT:
 	default:
-		CTS_ERR("Invalid parameter : The type(%s) is not supported", view_uri);
+		ERR("Invalid parameter : The type(%s) is not supported", view_uri);
 		return NULL;
 	}
 	return NULL;
@@ -282,7 +277,7 @@ int ctsvc_inotify_subscribe_ipc_ready(contacts_h contact, void (*cb)(void *), vo
 	if (NULL == noti_info) {
 		int wd = __ctsvc_inotify_get_wd(__inoti_fd, noti_path);
 		if (-1 == wd) {
-			CTS_ERR("__ctsvc_inotify_get_wd() Failed(noti_path=%s, errno : %d)", noti_path, errno);
+			ERR("__ctsvc_inotify_get_wd() Fail(noti_path=%s, errno : %d)", noti_path, errno);
 			if (errno == EACCES)
 				return CONTACTS_ERROR_PERMISSION_DENIED;
 			return CONTACTS_ERROR_SYSTEM;
@@ -290,13 +285,13 @@ int ctsvc_inotify_subscribe_ipc_ready(contacts_h contact, void (*cb)(void *), vo
 
 		int ret = __ctsvc_inotify_watch(__inoti_fd, noti_path);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("__ctsvc_inotify_watch() Failed");
+			ERR("__ctsvc_inotify_watch() Fail");
 			return ret;
 		}
 
 		noti_info = calloc(1, sizeof(struct socket_init_noti_info));
 		if (NULL == noti_info) {
-			CTS_ERR("calloc() return NULL");
+			ERR("calloc() return NULL");
 			return ret;
 		}
 
@@ -317,14 +312,17 @@ int ctsvc_inotify_unsubscribe_ipc_ready(contacts_h contact)
 	struct socket_init_noti_info *noti_info = NULL;
 
 	noti_info = g_hash_table_lookup(_ctsvc_socket_init_noti_table, noti_path);
-	RETVM_IF(NULL == noti_info, CONTACTS_ERROR_INVALID_PARAMETER, "g_hash_table_lookup() return NULL");
+	if (NULL == noti_info) {
+		ERR("g_hash_table_lookup() return NULL");
+		return CONTACTS_ERROR_INVALID_PARAMETER;
+	}
 
 	if (1 == noti_info->subscribe_count) {
 		int wd = noti_info->wd;
 		inotify_rm_watch(__inoti_fd, wd);
-		g_hash_table_remove(_ctsvc_socket_init_noti_table, noti_path); // free noti_info automatically
-	}
-	else {
+		/* free noti_info automatically */
+		g_hash_table_remove(_ctsvc_socket_init_noti_table, noti_path);
+	} else {
 		noti_info->subscribe_count--;
 	}
 
@@ -333,14 +331,14 @@ int ctsvc_inotify_unsubscribe_ipc_ready(contacts_h contact)
 
 
 int ctsvc_inotify_subscribe(contacts_h contact, const char *view_uri,
-			void *cb, void *data)
+		void *cb, void *data)
 {
 	int ret, wd;
 	noti_info *noti, *same_noti = NULL;
 	GSList *it;
 	const char *path;
 
-	RETV_IF(NULL==cb, CONTACTS_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == cb, CONTACTS_ERROR_INVALID_PARAMETER);
 	RETVM_IF(__inoti_fd < 0, CONTACTS_ERROR_SYSTEM,
 			"__inoti_fd(%d) is invalid", __inoti_fd);
 
@@ -350,27 +348,29 @@ int ctsvc_inotify_subscribe(contacts_h contact, const char *view_uri,
 
 	wd = __ctsvc_inotify_get_wd(__inoti_fd, path);
 	if (-1 == wd) {
-		CTS_ERR("__ctsvc_inotify_get_wd() Fail(errno : %d)", errno);
+		ERR("__ctsvc_inotify_get_wd() Fail(errno : %d)", errno);
 		if (errno == EACCES)
 			return CONTACTS_ERROR_PERMISSION_DENIED;
 		return CONTACTS_ERROR_SYSTEM;
 	}
 
-	for (it=__noti_list;it;it=it->next) {
+	for (it = __noti_list; it; it = it->next) {
 		if (it->data) {
 			same_noti = it->data;
-			if (same_noti->wd == wd && same_noti->cb == cb &&
-					STRING_EQUAL == strcmp(same_noti->view_uri, view_uri) && same_noti->cb_data == data &&
-					0 == ctsvc_handle_compare(contact, same_noti->contact))
+			if (same_noti->wd == wd && same_noti->cb == cb
+					&& STRING_EQUAL == strcmp(same_noti->view_uri, view_uri)
+					&& same_noti->cb_data == data
+					&& 0 == ctsvc_handle_compare(contact, same_noti->contact)) {
 				break;
-			else
+			} else {
 				same_noti = NULL;
+			}
 		}
 	}
 
 	if (same_noti) {
 		__ctsvc_inotify_watch(__inoti_fd, path);
-		CTS_ERR("The same callback(%s) is already exist", view_uri);
+		ERR("The same callback(%s) is already exist", view_uri);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 
@@ -406,8 +406,8 @@ static inline int __ctsvc_del_noti(GSList **noti_list, contacts_h contact, int w
 		noti_info *noti = it->data;
 		if (noti && wd == noti->wd) {
 			if (cb == noti->cb && user_data == noti->cb_data
-				&& STRING_EQUAL == strcmp(noti->view_uri, view_uri)
-				&& 0 == ctsvc_handle_compare(contact, noti->contact)) {
+					&& STRING_EQUAL == strcmp(noti->view_uri, view_uri)
+					&& 0 == ctsvc_handle_compare(contact, noti->contact)) {
 				it = it->next;
 				result = g_slist_remove(result, noti);
 				ctsvc_handle_destroy(noti->contact);
@@ -415,8 +415,7 @@ static inline int __ctsvc_del_noti(GSList **noti_list, contacts_h contact, int w
 				free(noti);
 				del_cnt++;
 				continue;
-			}
-			else {
+			} else {
 				remain_cnt++;
 			}
 		}
@@ -434,7 +433,7 @@ int ctsvc_inotify_unsubscribe(contacts_h contact, const char *view_uri, void *cb
 	int ret, wd;
 	const char *path;
 
-	RETV_IF(NULL==cb, CONTACTS_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == cb, CONTACTS_ERROR_INVALID_PARAMETER);
 	RETVM_IF(__inoti_fd < 0, CONTACTS_ERROR_SYSTEM,
 			"System : __inoti_fd(%d) is invalid", __inoti_fd);
 
@@ -444,7 +443,7 @@ int ctsvc_inotify_unsubscribe(contacts_h contact, const char *view_uri, void *cb
 
 	wd = __ctsvc_inotify_get_wd(__inoti_fd, path);
 	if (-1 == wd) {
-		CTS_ERR("__ctsvc_inotify_get_wd() Fail(errno : %d)", errno);
+		ERR("__ctsvc_inotify_get_wd() Fail(errno : %d)", errno);
 		if (errno == EACCES)
 			return CONTACTS_ERROR_PERMISSION_DENIED;
 		return CONTACTS_ERROR_SYSTEM;
@@ -476,12 +475,11 @@ static inline gboolean __ctsvc_inotify_detach_handler(guint id)
 void ctsvc_inotify_close(void)
 {
 	if (1 < __ctsvc_inoti_ref) {
-		CTS_DBG("inotify ref count : %d", __ctsvc_inoti_ref);
+		DBG("inotify ref count : %d", __ctsvc_inoti_ref);
 		__ctsvc_inoti_ref--;
 		return;
-	}
-	else if (__ctsvc_inoti_ref < 1) {
-		CTS_DBG("Please call connection API. inotify ref count : %d", __ctsvc_inoti_ref);
+	} else if (__ctsvc_inoti_ref < 1) {
+		DBG("Please call connection API. inotify ref count : %d", __ctsvc_inoti_ref);
 		return;
 	}
 

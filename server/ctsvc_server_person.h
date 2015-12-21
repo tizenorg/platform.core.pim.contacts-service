@@ -1,7 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,9 +24,9 @@
 
 int ctsvc_person_do_garbage_collection(void);
 int ctsvc_person_aggregate(int person_id);
-void ctsvc_db_person_delete_callback(sqlite3_context * context, int argc, sqlite3_value ** argv);
+void ctsvc_db_person_delete_callback(sqlite3_context  *context, int argc, sqlite3_value **argv);
 int ctsvc_person_link_person(int base_person_id, int person_id);
-int ctsvc_person_unlink_contact(int person_id, int contact_id, int* out_person_id );
+int ctsvc_person_unlink_contact(int person_id, int contact_id, int *out_person_id );
 int ctsvc_person_reset_usage(int person_id, contacts_usage_type_e type);
 int ctsvc_person_set_favorite_order(int person_id, int front_person_id, int back_person_id);
 int ctsvc_person_set_default_property(contacts_person_property_e property, int person_id, int id);

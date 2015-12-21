@@ -1,13 +1,11 @@
-# Package Information for pkg-config
-
-prefix=@PREFIX@
-exec_prefix=@EXEC_PREFIX@
-libdir=@LIBDIR@
-includedir=@INCLUDEDIR@
+prefix=@CMAKE_INSTALL_PREFIX@
+exec_prefix=${prefix}/bin
+libdir=@LIB_INSTALL_DIR@
+includedir=@DEST_INCLUDE_DIR@
 
 Name: @TARGET@
 Description: @PROJECT_NAME@ library
 Version: @FULLVER@
-Requires: glib-2.0 @PC_REQUIRED@
+Requires:
 Libs: -L${libdir} -l@CLIENT@
 Cflags: -I${includedir}

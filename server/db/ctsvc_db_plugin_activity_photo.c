@@ -1,7 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,11 +30,11 @@
 #include "ctsvc_list.h"
 
 static int __ctsvc_db_activity_photo_insert_record(contacts_record_h record, int *id);
-static int __ctsvc_db_activity_photo_get_record(int id, contacts_record_h* out_record);
+static int __ctsvc_db_activity_photo_get_record(int id, contacts_record_h *out_record);
 static int __ctsvc_db_activity_photo_update_record(contacts_record_h record);
 static int __ctsvc_db_activity_photo_delete_record(int id);
-static int __ctsvc_db_activity_photo_get_all_records(int offset, int limit, contacts_list_h* out_list);
-static int __ctsvc_db_activity_photo_get_records_with_query(contacts_query_h query, int offset, int limit, contacts_list_h* out_list);
+static int __ctsvc_db_activity_photo_get_all_records(int offset, int limit, contacts_list_h *out_list);
+static int __ctsvc_db_activity_photo_get_records_with_query(contacts_query_h query, int offset, int limit, contacts_list_h *out_list);
 
 ctsvc_db_plugin_info_s ctsvc_db_plugin_activity_photo = {
 	.is_query_only = false,
@@ -58,14 +58,14 @@ static int __ctsvc_db_activity_photo_insert_record(contacts_record_h record, int
 	int ret;
 	int addressbook_id;
 	char query[CTS_SQL_MAX_LEN] = {0};
-	ctsvc_activity_photo_s *activity_photo = (ctsvc_activity_photo_s *)record;
+	ctsvc_activity_photo_s *activity_photo = (ctsvc_activity_photo_s*)record;
 
 	RETVM_IF(NULL == activity_photo->photo_url, CONTACTS_ERROR_INVALID_PARAMETER,
 			"Invalid parameter : photo_url is NULL");
 
 	ret = ctsvc_begin_trans();
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB error : ctsvc_begin_trans() Fail(%d)", ret);
+		ERR("ctsvc_begin_trans() Fail(%d)", ret);
 		return ret;
 	}
 
@@ -76,35 +76,34 @@ static int __ctsvc_db_activity_photo_insert_record(contacts_record_h record, int
 	if (CONTACTS_ERROR_NONE != ret) {
 		ctsvc_end_trans(false);
 		if (CONTACTS_ERROR_NO_DATA == ret) {
-			CTS_ERR("No data : activity_id (%d) is not exist", activity_photo->activity_id);
+			ERR("No data : activity_id (%d) is not exist", activity_photo->activity_id);
 			return CONTACTS_ERROR_INVALID_PARAMETER;
-		}
-		else {
-			CTS_ERR("ctsvc_query_get_first_int_result Fail(%d)", ret);
+		} else {
+			ERR("ctsvc_query_get_first_int_result() Fail(%d)", ret);
 			return ret;
 		}
 	}
 
 	if (false == ctsvc_have_ab_write_permission(addressbook_id)) {
-		CTS_ERR("Does not have permission to insert this activity_photo record : addresbook_id(%d)", addressbook_id);
+		ERR("Does not have permission to insert this activity_photo record : addresbook_id(%d)", addressbook_id);
 		ctsvc_end_trans(false);
 		return CONTACTS_ERROR_PERMISSION_DENIED;
 	}
 
 	ret = ctsvc_db_activity_photo_insert(record, activity_photo->activity_id, id);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB error : ctsvc_db_activity_photo_insert() Fail(%d)", ret);
+		ERR("ctsvc_db_activity_photo_insert() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
 
 	ret = ctsvc_end_trans(true);
-	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "DB error : ctsvc_end_trans() Fail(%d)", ret);
+	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "ctsvc_end_trans() Fail(%d)", ret);
 
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_db_activity_photo_get_record(int id, contacts_record_h* out_record)
+static int __ctsvc_db_activity_photo_get_record(int id, contacts_record_h *out_record)
 {
 	int ret;
 	cts_stmt stmt = NULL;
@@ -120,11 +119,11 @@ static int __ctsvc_db_activity_photo_get_record(int id, contacts_record_h* out_r
 			id);
 
 	ret = ctsvc_query_prepare(query, &stmt);
-	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
+	RETVM_IF(NULL == stmt, ret, "ctsvc_query_prepare() Fail(%d)", ret);
 
 	ret = ctsvc_stmt_step(stmt);
 	if (1 /*CTS_TRUE*/ != ret) {
-		CTS_ERR("ctsvc_stmt_step() Fail(%d)", ret);
+		ERR("ctsvc_stmt_step() Fail(%d)", ret);
 		ctsvc_stmt_finalize(stmt);
 		if (CONTACTS_ERROR_NONE == ret)
 			return CONTACTS_ERROR_NO_DATA;
@@ -144,13 +143,13 @@ static int __ctsvc_db_activity_photo_update_record(contacts_record_h record)
 	int ret;
 	int addressbook_id;
 	char query[CTS_SQL_MAX_LEN] = {0};
-	ctsvc_activity_photo_s *activity_photo = (ctsvc_activity_photo_s *)record;
+	ctsvc_activity_photo_s *activity_photo = (ctsvc_activity_photo_s*)record;
 
 	RETVM_IF(NULL == activity_photo->photo_url, CONTACTS_ERROR_INVALID_PARAMETER, "photo_url is empty");
 
 	ret = ctsvc_begin_trans();
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB error : ctsvc_begin_trans() Fail(%d)", ret);
+		ERR("ctsvc_begin_trans() Fail(%d)", ret);
 		return ret;
 	}
 
@@ -161,26 +160,26 @@ static int __ctsvc_db_activity_photo_update_record(contacts_record_h record)
 
 	ret = ctsvc_query_get_first_int_result(query, &addressbook_id);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("No data : activity_id (%d) is not exist", activity_photo->activity_id);
+		ERR("No data : activity_id (%d) is not exist", activity_photo->activity_id);
 		ctsvc_end_trans(false);
 		return ret;
 	}
 
 	if (false == ctsvc_have_ab_write_permission(addressbook_id)) {
-		CTS_ERR("Does not have permission to update this activity_photo record : addresbook_id(%d)", addressbook_id);
+		ERR("Does not have permission to update this activity_photo record : addresbook_id(%d)", addressbook_id);
 		ctsvc_end_trans(false);
 		return CONTACTS_ERROR_PERMISSION_DENIED;
 	}
 
 	ret = ctsvc_db_activity_photo_update(record);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("Update record Fail(%d)", ret);
+		ERR("Update record Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
 
 	ret = ctsvc_end_trans(true);
-	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "DB error : ctsvc_end_trans() Fail(%d)", ret);
+	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "ctsvc_end_trans() Fail(%d)", ret);
 
 	return CONTACTS_ERROR_NONE;
 }
@@ -193,7 +192,7 @@ static int __ctsvc_db_activity_photo_delete_record(int id)
 
 	ret = ctsvc_begin_trans();
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB error : ctsvc_begin_trans() Fail(%d)", ret);
+		ERR("ctsvc_begin_trans() Fail(%d)", ret);
 		return ret;
 	}
 
@@ -204,31 +203,31 @@ static int __ctsvc_db_activity_photo_delete_record(int id)
 
 	ret = ctsvc_query_get_first_int_result(query, &addressbook_id);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("No data : id (%d) is not exist", id);
+		ERR("No data : id (%d) is not exist", id);
 		ctsvc_end_trans(false);
 		return ret;
 	}
 
 	if (false == ctsvc_have_ab_write_permission(addressbook_id)) {
-		CTS_ERR("Does not have permission to delete this activity_photo record : addresbook_id(%d)", addressbook_id);
+		ERR("Does not have permission to delete this activity_photo record : addresbook_id(%d)", addressbook_id);
 		ctsvc_end_trans(false);
 		return CONTACTS_ERROR_PERMISSION_DENIED;
 	}
 
 	ret = ctsvc_db_activity_photo_delete(id);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("DB error : ctsvc_db_activity_photo_delete() Fail(%d)", ret);
+		ERR("ctsvc_db_activity_photo_delete() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
 
 	ret = ctsvc_end_trans(true);
-	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "DB error : ctsvc_end_trans() Fail(%d)", ret);
+	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "ctsvc_end_trans() Fail(%d)", ret);
 
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_db_activity_photo_get_all_records(int offset, int limit, contacts_list_h* out_list)
+static int __ctsvc_db_activity_photo_get_all_records(int offset, int limit, contacts_list_h *out_list)
 {
 	int len;
 	int ret;
@@ -239,8 +238,8 @@ static int __ctsvc_db_activity_photo_get_all_records(int offset, int limit, cont
 
 	len = snprintf(query, sizeof(query),
 			"SELECT P.id, P.activity_id, P.photo_url, P.sort_index "
-				"FROM "CTSVC_DB_VIEW_CONTACT" C, "CTSVC_DB_VIEW_ACTIVITY" A, "CTSVC_DB_VIEW_ACTIVITY_PHOTOS" P "
-				"ON C.contact_id = A.contact_id AND A.id = P.activity_id ");
+			"FROM "CTSVC_DB_VIEW_CONTACT" C, "CTSVC_DB_VIEW_ACTIVITY" A, "CTSVC_DB_VIEW_ACTIVITY_PHOTOS" P "
+			"ON C.contact_id = A.contact_id AND A.id = P.activity_id ");
 
 	if (0 != limit) {
 		len += snprintf(query+len, sizeof(query)-len, " LIMIT %d", limit);
@@ -249,12 +248,12 @@ static int __ctsvc_db_activity_photo_get_all_records(int offset, int limit, cont
 	}
 
 	ret = ctsvc_query_prepare(query, &stmt);
-	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
+	RETVM_IF(NULL == stmt, ret, "ctsvc_query_prepare() Fail(%d)", ret);
 
 	contacts_list_create(&list);
 	while ((ret = ctsvc_stmt_step(stmt))) {
 		if (1 /*CTS_TRUE */ != ret) {
-			CTS_ERR("DB : ctsvc_stmt_step fail(%d)", ret);
+			ERR("DB : ctsvc_stmt_step fail(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
 			contacts_list_destroy(list, true);
 			return ret;
@@ -270,7 +269,7 @@ static int __ctsvc_db_activity_photo_get_all_records(int offset, int limit, cont
 }
 
 static int __ctsvc_db_activity_photo_get_records_with_query(contacts_query_h query, int offset,
-		int limit, contacts_list_h* out_list)
+		int limit, contacts_list_h *out_list)
 {
 	int ret;
 	int i;
@@ -281,7 +280,7 @@ static int __ctsvc_db_activity_photo_get_records_with_query(contacts_query_h que
 	ctsvc_activity_photo_s *activity_photo;
 
 	RETV_IF(NULL == query, CONTACTS_ERROR_INVALID_PARAMETER);
-	s_query = (ctsvc_query_s *)query;
+	s_query = (ctsvc_query_s*)query;
 
 	ret = ctsvc_db_make_get_records_query_stmt(s_query, offset, limit, &stmt);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_db_make_get_records_query_stmt fail(%d)", ret);
@@ -290,7 +289,7 @@ static int __ctsvc_db_activity_photo_get_records_with_query(contacts_query_h que
 	while ((ret = ctsvc_stmt_step(stmt))) {
 		contacts_record_h record;
 		if (1 /*CTS_TRUE */ != ret) {
-			CTS_ERR("DB error : ctsvc_stmt_step() Fail(%d)", ret);
+			ERR("ctsvc_stmt_step() Fail(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
 			contacts_list_destroy(list, true);
 			return ret;
@@ -298,18 +297,18 @@ static int __ctsvc_db_activity_photo_get_records_with_query(contacts_query_h que
 
 		contacts_record_create(_contacts_activity_photo._uri, &record);
 		activity_photo = (ctsvc_activity_photo_s*)record;
-		if (0 == s_query->projection_count)
+		if (0 == s_query->projection_count) {
 			field_count = s_query->property_count;
-		else {
+		} else {
 			field_count = s_query->projection_count;
 			ret = ctsvc_record_set_projection_flags(record, s_query->projection,
 					s_query->projection_count, s_query->property_count);
 
 			if (CONTACTS_ERROR_NONE != ret)
-				ASSERT_NOT_REACHED("To set projection is Fail.\n");
+				ASSERT_NOT_REACHED("To set projection is Fail\n");
 		}
 
-		for (i=0;i<field_count;i++) {
+		for (i = 0; i < field_count; i++) {
 			char *temp;
 			int property_id;
 			if (0 == s_query->projection_count)
@@ -317,12 +316,12 @@ static int __ctsvc_db_activity_photo_get_records_with_query(contacts_query_h que
 			else
 				property_id = s_query->projection[i];
 
-			switch(property_id) {
+			switch (property_id) {
 			case CTSVC_PROPERTY_ACTIVITY_PHOTO_ID:
 				activity_photo->id = ctsvc_stmt_get_int(stmt, i);
 				break;
 			case CTSVC_PROPERTY_ACTIVITY_PHOTO_ACTIVITY_ID:
-				activity_photo->activity_id= ctsvc_stmt_get_int(stmt, i);
+				activity_photo->activity_id = ctsvc_stmt_get_int(stmt, i);
 				break;
 			case CTSVC_PROPERTY_ACTIVITY_PHOTO_URL:
 				temp = ctsvc_stmt_get_text(stmt, i);
@@ -330,7 +329,7 @@ static int __ctsvc_db_activity_photo_get_records_with_query(contacts_query_h que
 				activity_photo->photo_url = SAFE_STRDUP(temp);
 				break;
 			case CTSVC_PROPERTY_ACTIVITY_PHOTO_SORT_INDEX:
-				activity_photo->sort_index= ctsvc_stmt_get_int(stmt, i);
+				activity_photo->sort_index = ctsvc_stmt_get_int(stmt, i);
 				break;
 			default:
 				break;

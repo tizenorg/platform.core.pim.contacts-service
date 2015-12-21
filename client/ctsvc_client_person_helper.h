@@ -23,7 +23,7 @@
 #include "contacts_types.h"
 
 int ctsvc_client_person_link_person(contacts_h contact, int base_person_id, int person_id);
-int ctsvc_client_person_unlink_contact(contacts_h contact, int person_id, int contact_id, int* unlinked_person_id);
+int ctsvc_client_person_unlink_contact(contacts_h contact, int person_id, int contact_id, int *unlinked_person_id);
 int ctsvc_client_person_reset_usage(contacts_h contact, int person_id, contacts_usage_type_e type);
 int ctsvc_client_person_set_favorite_order(contacts_h contact, int person_id, int previous_person_id, int next_person_id);
 int ctsvc_client_person_set_default_property(contacts_h contact, contacts_person_property_e property, int person_id, int id);

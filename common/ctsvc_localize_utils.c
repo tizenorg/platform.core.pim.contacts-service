@@ -1,7 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,8 +51,7 @@ int ctsvc_check_language(UChar *word)
 
 	if (u_isdigit(word[0])) {
 		type = CTSVC_LANG_NUMBER;
-	}
-	else if (u_isalpha(word[0])) {
+	} else if (u_isalpha(word[0])) {
 		/*
 		 * refer to the uchar.h
 		 * #define U_GC_L_MASK  (U_GC_LU_MASK|U_GC_LL_MASK|U_GC_LT_MASK|U_GC_LM_MASK|U_GC_LO_MASK)
@@ -64,10 +63,10 @@ int ctsvc_check_language(UChar *word)
 		 */
 
 		UBlockCode code = ublock_getCode(word[0]);
-		CTS_VERBOSE("Character unicode block is %d", code);
+		DBG("Character unicode block is %d", code);
 
 		switch (code) {
-		/* english */
+			/* english */
 		case UBLOCK_BASIC_LATIN:          /* =1, [0000] */
 		case UBLOCK_LATIN_1_SUPPLEMENT:   /* =2, [0080] */
 		case UBLOCK_LATIN_EXTENDED_A:     /* =3, [0100] */
@@ -102,7 +101,7 @@ int ctsvc_check_language(UChar *word)
 			/* type = CTSVC_LANG_ICELANDIC; */ /* is, Iceland - Icelandic */
 			break;
 
-		/* korean */
+			/* korean */
 		case UBLOCK_HANGUL_JAMO:                /* =30, [1100] */
 		case UBLOCK_HANGUL_COMPATIBILITY_JAMO:  /* =65, [3130] */
 		case UBLOCK_HANGUL_SYLLABLES:           /* =74, [AC00] */
@@ -111,7 +110,7 @@ int ctsvc_check_language(UChar *word)
 			type = CTSVC_LANG_KOREAN;
 			break;
 
-		/* chainese */
+			/* chainese */
 		case UBLOCK_CJK_RADICALS_SUPPLEMENT:                 /* =58, [2E80] */
 		case UBLOCK_CJK_SYMBOLS_AND_PUNCTUATION:             /* =61, [3000] */
 		case UBLOCK_ENCLOSED_CJK_LETTERS_AND_MONTHS:         /* =68, [3200] */
@@ -121,14 +120,14 @@ int ctsvc_check_language(UChar *word)
 		case UBLOCK_CJK_UNIFIED_IDEOGRAPHS:                  /* =71, [4E00] */
 		case UBLOCK_CJK_COMPATIBILITY_IDEOGRAPHS:            /* =79, [F900] */
 		case UBLOCK_CJK_COMPATIBILITY_FORMS:                 /* =83, [FE30] */
-		case UBLOCK_CJK_UNIFIED_IDEOGRAPHS_EXTENSION_B :     /* =94, [20000] */
+		case UBLOCK_CJK_UNIFIED_IDEOGRAPHS_EXTENSION_B:     /* =94, [20000] */
 		case UBLOCK_CJK_COMPATIBILITY_IDEOGRAPHS_SUPPLEMENT: /* =95, [2F800] */
 		case UBLOCK_CJK_UNIFIED_IDEOGRAPHS_EXTENSION_C:      /* =197, [2A700] */
 		case UBLOCK_CJK_UNIFIED_IDEOGRAPHS_EXTENSION_D:      /* =209, [2B740] */
 			type = CTSVC_LANG_CHINESE;
 			break;
 
-		/* japanese */
+			/* japanese */
 		case UBLOCK_HIRAGANA:                      /* =62, [3040] */
 		case UBLOCK_KATAKANA:                      /* =63, [30A0] */
 		case UBLOCK_KATAKANA_PHONETIC_EXTENSIONS:  /* =107, [31F0] */
@@ -171,9 +170,8 @@ int ctsvc_check_language(UChar *word)
 			type = CTSVC_LANG_TURKISH;
 			break;
 		case UBLOCK_HALFWIDTH_AND_FULLWIDTH_FORMS: /* =87, [FF00]  hangul : FFA0 ~ FFDC */
-		{
 			if (CTSVC_COMPARE_BETWEEN((UChar)0xFF21, word[0], (UChar)0xFF3A)
-				|| CTSVC_COMPARE_BETWEEN((UChar)0xFF41, word[0], (UChar)0xFF5A))
+					|| CTSVC_COMPARE_BETWEEN((UChar)0xFF41, word[0], (UChar)0xFF5A))
 				type = CTSVC_LANG_ENGLISH;
 			else if (CTSVC_COMPARE_BETWEEN((UChar)0xFF10, word[0], (UChar)0xFF19))
 				type = CTSVC_LANG_NUMBER;
@@ -184,16 +182,14 @@ int ctsvc_check_language(UChar *word)
 			else
 				type = CTSVC_LANG_OTHERS;
 			break;
-		}
 		default:
 			type = CTSVC_LANG_OTHERS;
-			break;
 		}
-	}
-	else
+	} else {
 		type = CTSVC_LANG_OTHERS;
+	}
 
-	CTS_VERBOSE("language type = %d", type);
+	DBG("language type = %d", type);
 	return type;
 }
 
@@ -208,15 +204,15 @@ int ctsvc_check_language_type(const char *src)
 
 	if (src && src[0]) {
 		length = ctsvc_check_utf8(src[0]);
-		RETVM_IF(length <= 0, CONTACTS_ERROR_INTERNAL, "check_utf8 Fail");
+		RETVM_IF(length <= 0, CONTACTS_ERROR_INTERNAL, "check_utf8() Fail");
 
 		strncpy(temp, src, length);
 
-		CTS_VERBOSE("temp(%s) src(%s) length(%d)", temp, src, length);
+		DBG("temp(%s) src(%s) length(%d)", temp, src, length);
 
 		u_strFromUTF8(tmp_result, array_sizeof(tmp_result), NULL, temp, -1, &status);
-			RETVM_IF(U_FAILURE(status), CONTACTS_ERROR_SYSTEM,
-					"u_strFromUTF8() Fail(%s)", u_errorName(status));
+		RETVM_IF(U_FAILURE(status), CONTACTS_ERROR_SYSTEM,
+				"u_strFromUTF8() Fail(%s)", u_errorName(status));
 
 		u_strToUpper(tmp_result, array_sizeof(tmp_result), tmp_result, -1, NULL, &status);
 		RETVM_IF(U_FAILURE(status), CONTACTS_ERROR_SYSTEM,
@@ -227,7 +223,7 @@ int ctsvc_check_language_type(const char *src)
 		RETVM_IF(U_FAILURE(status), CONTACTS_ERROR_SYSTEM,
 				"unorm_normalize(%s) Fail(%s)", src, u_errorName(status));
 
-		CTS_VERBOSE("0x%x%x", (0xFF00 & (tmp_result[0])) >> 8,  (0xFF & (tmp_result[0])));
+		DBG("0x%x%x", (0xFF00 & (tmp_result[0])) >> 8,  (0xFF & (tmp_result[0])));
 
 		return ctsvc_check_language(result);
 	}

@@ -1,7 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ int ctsvc_db_messenger_get_value_from_stmt(cts_stmt stmt, contacts_record_h *rec
 	char *temp;
 	ctsvc_messenger_s *messenger;
 
-	ret = contacts_record_create(_contacts_messenger._uri, (contacts_record_h *)&messenger);
+	ret = contacts_record_create(_contacts_messenger._uri, (contacts_record_h*)&messenger);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "contacts_record_create Fail(%d)", ret);
 
 	messenger->id = ctsvc_stmt_get_int(stmt, start_count++);
@@ -53,38 +53,38 @@ int ctsvc_db_messenger_insert(contacts_record_h record, int contact_id, bool is_
 {
 	int ret;
 	cts_stmt stmt = NULL;
-	ctsvc_messenger_s *messenger =(ctsvc_messenger_s*)record;
+	ctsvc_messenger_s *messenger = (ctsvc_messenger_s*)record;
 	char query[CTS_SQL_MAX_LEN] = {0};
 
 	RETV_IF(NULL == messenger->im_id, CONTACTS_ERROR_NONE);
 	RETVM_IF(contact_id <= 0, CONTACTS_ERROR_INVALID_PARAMETER,
-				"Invalid parameter : contact_id(%d) is mandatory field to insert messenger record ", messenger->contact_id);
+			"Invalid parameter : contact_id(%d) is mandatory field to insert messenger record ", messenger->contact_id);
 	RETVM_IF(0 < messenger->id, CONTACTS_ERROR_INVALID_PARAMETER,
-				"Invalid parameter : id(%d), This record is already inserted", messenger->id);
+			"Invalid parameter : id(%d), This record is already inserted", messenger->id);
 
 	snprintf(query, sizeof(query),
-		"INSERT INTO "CTS_TABLE_DATA"(contact_id, is_my_profile, datatype, data1, data2, data3) "
-					"VALUES(%d, %d, %d, %d, ?, ?)",
+			"INSERT INTO "CTS_TABLE_DATA"(contact_id, is_my_profile, datatype, data1, data2, data3) "
+			"VALUES(%d, %d, %d, %d, ?, ?)",
 			contact_id, is_my_profile, CTSVC_DATA_MESSENGER, messenger->type);
 
 	ret = ctsvc_query_prepare(query, &stmt);
-	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
+	RETVM_IF(NULL == stmt, ret, "ctsvc_query_prepare() Fail(%d)", ret);
 
 	if (messenger->label)
 		sqlite3_bind_text(stmt, 1, messenger->label,
-			strlen(messenger->label), SQLITE_STATIC);
+				strlen(messenger->label), SQLITE_STATIC);
 	if (messenger->im_id)
 		sqlite3_bind_text(stmt, 2, messenger->im_id,
 				strlen(messenger->im_id), SQLITE_STATIC);
 
 	ret = ctsvc_stmt_step(stmt);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_stmt_step() Fail(%d)", ret);
+		ERR("ctsvc_stmt_step() Fail(%d)", ret);
 		ctsvc_stmt_finalize(stmt);
 		return ret;
 	}
 
-	//messenger->id = ctsvc_db_get_last_insert_id();
+	/* messenger->id = ctsvc_db_get_last_insert_id(); */
 	if (id)
 		*id = ctsvc_db_get_last_insert_id();
 	ctsvc_stmt_finalize(stmt);
@@ -99,7 +99,7 @@ int ctsvc_db_messenger_update(contacts_record_h record, bool is_my_profile)
 {
 	int id;
 	int ret = CONTACTS_ERROR_NONE;
-	char* set = NULL;
+	char *set = NULL;
 	GSList *bind_text = NULL;
 	GSList *cursor = NULL;
 	ctsvc_messenger_s *messenger = (ctsvc_messenger_s*)record;
@@ -120,11 +120,14 @@ int ctsvc_db_messenger_update(contacts_record_h record, bool is_my_profile)
 			ctsvc_set_messenger_noti();
 	} while (0);
 
-	CTSVC_RECORD_RESET_PROPERTY_FLAGS((ctsvc_record_s *)record);
-	CONTACTS_FREE(set);
+	CTSVC_RECORD_RESET_PROPERTY_FLAGS((ctsvc_record_s*)record);
+	free(set);
+
 	if (bind_text) {
-		for (cursor=bind_text;cursor;cursor=cursor->next)
-			CONTACTS_FREE(cursor->data);
+		for (cursor = bind_text; cursor; cursor = cursor->next) {
+			free(cursor->data);
+			cursor->data = NULL;
+		}
 		g_slist_free(bind_text);
 	}
 

@@ -1,7 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,6 @@ int ctsvc_db_image_insert(contacts_record_h record, int contact_id, bool is_my_p
 int ctsvc_db_image_update(contacts_record_h record, int contact_id, bool is_my_profile);
 int ctsvc_db_image_delete(int id, bool is_my_profile);
 int ctsvc_db_image_get_value_from_stmt(cts_stmt stmt, contacts_record_h *record, int start_count);
-void ctsvc_db_image_delete_callback(sqlite3_context *context, int argc, sqlite3_value ** argv);
+void ctsvc_db_image_delete_callback(sqlite3_context *context, int argc, sqlite3_value **argv);
 
 #endif /* __CTSVC_DB_PLUGIN_RELATIONSHIP_HELPER_H__ */

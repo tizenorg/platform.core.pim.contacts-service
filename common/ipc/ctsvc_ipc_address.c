@@ -1,7 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@
 #include "ctsvc_ipc_marshal.h"
 #include "contacts_record.h"
 
-static int __ctsvc_ipc_unmarshal_address(pims_ipc_data_h ipc_data, const char* view_uri, contacts_record_h record);
+static int __ctsvc_ipc_unmarshal_address(pims_ipc_data_h ipc_data, const char *view_uri, contacts_record_h record);
 static int __ctsvc_ipc_marshal_address(const contacts_record_h record, pims_ipc_data_h ipc_data);
 
 ctsvc_ipc_marshal_record_plugin_cb_s _ctsvc_ipc_record_address_plugin_cb = {
@@ -30,12 +30,12 @@ ctsvc_ipc_marshal_record_plugin_cb_s _ctsvc_ipc_record_address_plugin_cb = {
 };
 
 
-static int __ctsvc_ipc_unmarshal_address(pims_ipc_data_h ipc_data, const char* view_uri, contacts_record_h record)
+static int __ctsvc_ipc_unmarshal_address(pims_ipc_data_h ipc_data, const char *view_uri, contacts_record_h record)
 {
-	RETV_IF(ipc_data==NULL,CONTACTS_ERROR_NO_DATA);
-	RETV_IF(record==NULL,CONTACTS_ERROR_NO_DATA);
+	RETV_IF(NULL == ipc_data, CONTACTS_ERROR_NO_DATA);
+	RETV_IF(NULL == record, CONTACTS_ERROR_NO_DATA);
 
-	ctsvc_address_s* address_p = (ctsvc_address_s*) record;
+	ctsvc_address_s *address_p = (ctsvc_address_s*)record;
 
 	do {
 		if (ctsvc_ipc_unmarshal_bool(ipc_data, &address_p->is_default) != CONTACTS_ERROR_NONE) break;
@@ -54,35 +54,35 @@ static int __ctsvc_ipc_unmarshal_address(pims_ipc_data_h ipc_data, const char* v
 		return CONTACTS_ERROR_NONE;
 	} while (0);
 
-	CTS_ERR("_ctsvc_ipc_unmarshal fail");
+	ERR("__ctsvc_ipc_unmarshal_address() Fail");
 
 	return CONTACTS_ERROR_INVALID_PARAMETER;
 }
 
 static int __ctsvc_ipc_marshal_address(const contacts_record_h record, pims_ipc_data_h ipc_data)
 {
-	ctsvc_address_s* address_p = (ctsvc_address_s*)record;
-	RETV_IF(ipc_data==NULL,CONTACTS_ERROR_NO_DATA);
-	RETV_IF(address_p==NULL,CONTACTS_ERROR_NO_DATA);
+	ctsvc_address_s *address_p = (ctsvc_address_s*)record;
+	RETV_IF(NULL == ipc_data, CONTACTS_ERROR_NO_DATA);
+	RETV_IF(NULL == address_p, CONTACTS_ERROR_NO_DATA);
 
 	do {
-		if (ctsvc_ipc_marshal_bool((address_p->is_default),ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_int((address_p->id),ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_int((address_p->contact_id),ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_int((address_p->type),ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_string((address_p->label),ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_string((address_p->pobox),ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_string((address_p->postalcode),ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_string((address_p->region),ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_string((address_p->locality),ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_string((address_p->street),ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_string((address_p->extended),ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_string((address_p->country),ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_bool((address_p->is_default), ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_int((address_p->id), ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_int((address_p->contact_id), ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_int((address_p->type), ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_string((address_p->label), ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_string((address_p->pobox), ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_string((address_p->postalcode), ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_string((address_p->region), ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_string((address_p->locality), ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_string((address_p->street), ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_string((address_p->extended), ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_string((address_p->country), ipc_data) != CONTACTS_ERROR_NONE) break;
 
 		return CONTACTS_ERROR_NONE;
 	} while (0);
 
-	CTS_ERR("_ctsvc_ipc_marshal fail");
+	ERR("_ctsvc_ipc_marshal() Fail");
 
 	return CONTACTS_ERROR_INVALID_PARAMETER;
 }
