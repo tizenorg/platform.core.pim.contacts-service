@@ -19,6 +19,7 @@
 
 #ifndef __CTSVC_CLIENT_HANDLE_H__
 #define __CTSVC_CLIENT_HANDLE_H__
+
 #include "contacts_types.h"
 
 int ctsvc_client_handle_get_p(contacts_h *p_contact);

@@ -3,8 +3,6 @@ INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/server)
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/server/db)
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/common)
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/common/ipc)
-LINK_DIRECTORIES(${CMAKE_BINARY_DIR})
-LINK_DIRECTORIES(${CMAKE_SOURCE_DIR}/server)
 
 SET(DAEMON contacts-service-ipcd)
 
@@ -148,37 +146,20 @@ SET(SRCS ${SRCS}
 )
 ENDIF(ENABLE_LOG_FEATURE)
 
+pkg_check_modules(daemon_pkgs REQUIRED glib-2.0 pims-ipc sqlite3 tapi capi-media-image-util
+	accounts-svc libexif libsmack cynara-client cynara-session cynara-creds-socket capi-system-info
+	phonenumber-utils vconf db-util libtzplatform-config icu-uc)
+INCLUDE_DIRECTORIES(${daemon_pkgs_INCLUDE_DIRS})
+LINK_DIRECTORIES(${daemon_pkgs_LIBRARY_DIRS})
 
-INCLUDE(FindPkgConfig)
-pkg_check_modules(ctsvc_server_pkgs REQUIRED
-	sqlite3
-	tapi
-	capi-media-image-util
-	accounts-svc
-	libexif
-	libsmack
-	cynara-client
-	cynara-session
-	cynara-creds-socket
-	capi-system-info
-	phonenumber-utils
-)
-
-FOREACH(flag ${ctsvc_server_pkgs_CFLAGS})
-	SET(EXTRA_CFLAGS "${EXTRA_CFLAGS} ${flag}")
-ENDFOREACH(flag)
-
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${EXTRA_CFLAGS} -fPIE")
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${EXTRA_CFLAGS} -Wall -g -fPIC -std=c++0x -fPIE")
-SET(CMAKE_EXE_LINKER_FLAGS "-Wl,--as-needed -pie")
-SET(ctsvc_server_pkgs_LDFLAGS "${pkgs_LDFLAGS} ${ctsvc_server_pkgs_LDFLAGS}")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIE")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS} -std=c++0x")
+SET(CMAKE_EXE_LINKER_FLAGS "-Wl,--hash-style=both -pie")
 
 ADD_DEFINITIONS("-D_CONTACTS_IPC_SERVER")
-ADD_DEFINITIONS("-DPREFIX=\"${PREFIX}\"")
 
 #cmake_policy(SET CMP0002 OLD)
 ADD_EXECUTABLE(${DAEMON} ${SRCS})
-SET_TARGET_PROPERTIES(${DAEMON} PROPERTIES COMPILE_FLAGS ${EXTRA_CFLAGS})
-TARGET_LINK_LIBRARIES(${DAEMON} ${ctsvc_server_pkgs_LDFLAGS})
+TARGET_LINK_LIBRARIES(${DAEMON} ${daemon_pkgs_LIBRARIES})
 
-INSTALL(TARGETS ${DAEMON} DESTINATION bin)
+INSTALL(TARGETS ${DAEMON} DESTINATION ${BIN_INSTALL_DIR})

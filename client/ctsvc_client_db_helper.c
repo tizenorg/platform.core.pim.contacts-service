@@ -3,10 +3,6 @@
  *
  * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
- * Contact: Dohyung Jin <dh.jin@samsung.com>
- *                 Jongwon Lee <gogosing.lee@samsung.com>
- *                 Donghee Ye <donghee.ye@samsung.com>
- *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -48,13 +44,13 @@ int ctsvc_client_db_insert_record(contacts_h contact, contacts_record_h record, 
 	if (id)
 		*id = 0;
 
-	RETVM_IF(NULL == contact, CONTACTS_ERROR_INVALID_PARAMETER, "contact is NULL");
-	RETVM_IF(record==NULL,CONTACTS_ERROR_INVALID_PARAMETER,"record is NULL");
+	RETV_IF(NULL == contact, CONTACTS_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == record, CONTACTS_ERROR_INVALID_PARAMETER);
 
 	/* make indata */
 	indata = pims_ipc_data_create(0);
 	if (indata == NULL) {
-		CTS_ERR("ipc data created fail!");
+		CTS_ERR("pims_ipc_data_create() Fail");
 		ret = CONTACTS_ERROR_OUT_OF_MEMORY;
 		return ret;
 	}
@@ -65,16 +61,16 @@ int ctsvc_client_db_insert_record(contacts_h contact, contacts_record_h record, 
 		return ret;
 	}
 
-	ret = ctsvc_ipc_marshal_record(record,indata);
+	ret = ctsvc_ipc_marshal_record(record, indata);
 	if (ret != CONTACTS_ERROR_NONE) {
-		CTS_ERR("marshal fail");
+		CTS_ERR("ctsvc_ipc_marshal_record() Fail(%d)", ret);
 		pims_ipc_data_destroy(indata);
 		return ret;
 	}
 
 	/* ipc call */
 	if (ctsvc_ipc_call(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_INSERT_RECORD, indata, &outdata) != 0) {
-		CTS_ERR("ctsvc_ipc_call failed");
+		CTS_ERR("ctsvc_ipc_call() Fail");
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
 	}
@@ -111,22 +107,22 @@ int ctsvc_client_db_insert_record(contacts_h contact, contacts_record_h record, 
 	return ret;
 }
 
-int ctsvc_client_db_get_record(contacts_h contact, const char* view_uri, int id, contacts_record_h* out_record)
+int ctsvc_client_db_get_record(contacts_h contact, const char *view_uri, int id, contacts_record_h *out_record)
 {
 	int ret = CONTACTS_ERROR_NONE;
 	pims_ipc_data_h indata = NULL;
 	pims_ipc_data_h outdata = NULL;
 
-	RETVM_IF(NULL == contact, CONTACTS_ERROR_INVALID_PARAMETER, "contact is NULL");
-	RETVM_IF(view_uri==NULL,CONTACTS_ERROR_INVALID_PARAMETER,"view_uri is NULL");
-	RETVM_IF(id<0,CONTACTS_ERROR_INVALID_PARAMETER,"id<0");
-	RETVM_IF(out_record==NULL,CONTACTS_ERROR_INVALID_PARAMETER,"record is NULL");
+	RETV_IF(NULL == contact, CONTACTS_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == view_uri, CONTACTS_ERROR_INVALID_PARAMETER);
+	RETVM_IF(id < 0, CONTACTS_ERROR_INVALID_PARAMETER, "id < 0");
+	RETV_IF(NULL == out_record, CONTACTS_ERROR_INVALID_PARAMETER);
 	*out_record = NULL;
 
 	/* make indata */
 	indata = pims_ipc_data_create(0);
 	if (indata == NULL) {
-		CTS_ERR("ipc data created fail!");
+		CTS_ERR("pims_ipc_data_create() Fail");
 		ret = CONTACTS_ERROR_OUT_OF_MEMORY;
 		return ret;
 	}
@@ -138,22 +134,22 @@ int ctsvc_client_db_get_record(contacts_h contact, const char* view_uri, int id,
 		return ret;
 	}
 
-	ret = ctsvc_ipc_marshal_string(view_uri,indata);
+	ret = ctsvc_ipc_marshal_string(view_uri, indata);
 	if (ret != CONTACTS_ERROR_NONE) {
-		CTS_ERR("marshal fail");
+		CTS_ERR("ctsvc_ipc_marshal_string() Fail(%d)", ret);
 		pims_ipc_data_destroy(indata);
 		return ret;
 	}
-	ret = ctsvc_ipc_marshal_int(id,indata);
+	ret = ctsvc_ipc_marshal_int(id, indata);
 	if (ret != CONTACTS_ERROR_NONE) {
-		CTS_ERR("marshal fail");
+		CTS_ERR("ctsvc_ipc_marshal_int() Fail(%d)", ret);
 		pims_ipc_data_destroy(indata);
 		return ret;
 	}
 
 	/* ipc call */
 	if (ctsvc_ipc_call(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_GET_RECORD, indata, &outdata) != 0) {
-		CTS_ERR("ctsvc_ipc_call failed");
+		CTS_ERR("ctsvc_ipc_call() Fail");
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
 	}
@@ -184,13 +180,13 @@ int ctsvc_client_db_update_record(contacts_h contact, contacts_record_h record)
 	pims_ipc_data_h indata = NULL;
 	pims_ipc_data_h outdata = NULL;
 
-	RETVM_IF(NULL == contact, CONTACTS_ERROR_INVALID_PARAMETER, "contact is NULL");
-	RETVM_IF(record==NULL,CONTACTS_ERROR_INVALID_PARAMETER,"record is NULL");
+	RETV_IF(NULL == contact, CONTACTS_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == record, CONTACTS_ERROR_INVALID_PARAMETER);
 
 	/* make indata */
 	indata = pims_ipc_data_create(0);
 	if (indata == NULL) {
-		CTS_ERR("ipc data created fail!");
+		CTS_ERR("pims_ipc_data_create() Fail");
 		ret = CONTACTS_ERROR_OUT_OF_MEMORY;
 		return ret;
 	}
@@ -202,16 +198,16 @@ int ctsvc_client_db_update_record(contacts_h contact, contacts_record_h record)
 		return ret;
 	}
 
-	ret = ctsvc_ipc_marshal_record(record,indata);
+	ret = ctsvc_ipc_marshal_record(record, indata);
 	if (ret != CONTACTS_ERROR_NONE) {
-		CTS_ERR("marshal fail");
+		CTS_ERR("ctsvc_ipc_marshal_record() Fail(%d)", ret);
 		pims_ipc_data_destroy(indata);
 		return ret;
 	}
 
 	/* ipc call */
 	if (ctsvc_ipc_call(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_UPDATE_RECORD, indata, &outdata) != 0) {
-		CTS_ERR("ctsvc_ipc_call failed");
+		CTS_ERR("ctsvc_ipc_call() Fail");
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
 	}
@@ -225,7 +221,7 @@ int ctsvc_client_db_update_record(contacts_h contact, contacts_record_h record)
 			return CONTACTS_ERROR_IPC;
 		}
 		if (CONTACTS_ERROR_NONE == ret) {
-			CTSVC_RECORD_RESET_PROPERTY_FLAGS((ctsvc_record_s *)record);
+			CTSVC_RECORD_RESET_PROPERTY_FLAGS((ctsvc_record_s*)record);
 			int transaction_ver = 0;
 			if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(outdata, &transaction_ver)) {
 				CTS_ERR("ctsvc_ipc_unmarshal_int() Fail");
@@ -239,19 +235,19 @@ int ctsvc_client_db_update_record(contacts_h contact, contacts_record_h record)
 	return ret;
 }
 
-int ctsvc_client_db_delete_record(contacts_h contact, const char* view_uri, int id)
+int ctsvc_client_db_delete_record(contacts_h contact, const char *view_uri, int id)
 {
 	int ret = CONTACTS_ERROR_NONE;
 	pims_ipc_data_h indata = NULL;
 	pims_ipc_data_h outdata = NULL;
 
-	RETVM_IF(view_uri==NULL,CONTACTS_ERROR_INVALID_PARAMETER,"view_uri is NULL");
-	RETVM_IF(id<=0,CONTACTS_ERROR_INVALID_PARAMETER,"id <= 0");
+	RETV_IF(NULL == view_uri, CONTACTS_ERROR_INVALID_PARAMETER);
+	RETVM_IF(id <= 0, CONTACTS_ERROR_INVALID_PARAMETER, "id <= 0");
 
 	/* make indata */
 	indata = pims_ipc_data_create(0);
 	if (indata == NULL) {
-		CTS_ERR("ipc data created fail!");
+		CTS_ERR("pims_ipc_data_create() Fail");
 		ret = CONTACTS_ERROR_OUT_OF_MEMORY;
 		return ret;
 	}
@@ -263,22 +259,22 @@ int ctsvc_client_db_delete_record(contacts_h contact, const char* view_uri, int 
 		return ret;
 	}
 
-	ret = ctsvc_ipc_marshal_string(view_uri,indata);
+	ret = ctsvc_ipc_marshal_string(view_uri, indata);
 	if (ret != CONTACTS_ERROR_NONE) {
-		CTS_ERR("marshal fail");
+		CTS_ERR("ctsvc_ipc_marshal_string() Fail(%d)", ret);
 		pims_ipc_data_destroy(indata);
 		return ret;
 	}
-	ret = ctsvc_ipc_marshal_int(id,indata);
+	ret = ctsvc_ipc_marshal_int(id, indata);
 	if (ret != CONTACTS_ERROR_NONE) {
-		CTS_ERR("marshal fail");
+		CTS_ERR("ctsvc_ipc_marshal_int() Fail(%d)", ret);
 		pims_ipc_data_destroy(indata);
 		return ret;
 	}
 
 	/* ipc call */
 	if (ctsvc_ipc_call(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_DELETE_RECORD, indata, &outdata) != 0) {
-		CTS_ERR("ctsvc_ipc_call failed");
+		CTS_ERR("ctsvc_ipc_call() Fail");
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
 	}
@@ -313,13 +309,13 @@ int ctsvc_client_db_replace_record(contacts_h contact, contacts_record_h record,
 	pims_ipc_data_h indata = NULL;
 	pims_ipc_data_h outdata = NULL;
 
-	RETVM_IF(NULL == contact,CONTACTS_ERROR_INVALID_PARAMETER, "contact is NULL");
-	RETVM_IF(NULL == record, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter : record is NULL");
+	RETV_IF(NULL == contact, CONTACTS_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == record, CONTACTS_ERROR_INVALID_PARAMETER);
 
 	/* make indata */
 	indata = pims_ipc_data_create(0);
 	if (indata == NULL) {
-		CTS_ERR("ipc data created fail!");
+		CTS_ERR("pims_ipc_data_create() Fail");
 		ret = CONTACTS_ERROR_OUT_OF_MEMORY;
 		return ret;
 	}
@@ -333,13 +329,13 @@ int ctsvc_client_db_replace_record(contacts_h contact, contacts_record_h record,
 
 	ret = ctsvc_ipc_marshal_record(record, indata);
 	if (ret != CONTACTS_ERROR_NONE) {
-		CTS_ERR("marshal fail");
+		CTS_ERR("ctsvc_ipc_marshal_record() Fail(%d)", ret);
 		pims_ipc_data_destroy(indata);
 		return ret;
 	}
 	ret = ctsvc_ipc_marshal_int(id, indata);
 	if (ret != CONTACTS_ERROR_NONE) {
-		CTS_ERR("marshal fail");
+		CTS_ERR("ctsvc_ipc_marshal_int() Fail(%d)", ret);
 		pims_ipc_data_destroy(indata);
 		return ret;
 	}
@@ -347,7 +343,7 @@ int ctsvc_client_db_replace_record(contacts_h contact, contacts_record_h record,
 	/* ipc call */
 	if (ctsvc_ipc_call(CTSVC_IPC_DB_MODULE,
 				CTSVC_IPC_SERVER_DB_REPLACE_RECORD, indata, &outdata) != 0) {
-		CTS_ERR("ctsvc_ipc_call failed");
+		CTS_ERR("ctsvc_ipc_call() Fail");
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
 	}
@@ -375,21 +371,21 @@ int ctsvc_client_db_replace_record(contacts_h contact, contacts_record_h record,
 	return ret;
 }
 
-int ctsvc_client_db_get_all_records(contacts_h contact, const char* view_uri, int offset, int limit, contacts_list_h* out_list)
+int ctsvc_client_db_get_all_records(contacts_h contact, const char *view_uri, int offset, int limit, contacts_list_h *out_list)
 {
 	int ret = CONTACTS_ERROR_NONE;
 	pims_ipc_data_h indata = NULL;
 	pims_ipc_data_h outdata = NULL;
 
-	RETVM_IF(NULL == contact, CONTACTS_ERROR_INVALID_PARAMETER, "contact is NULL");
-	RETVM_IF(NULL == out_list,CONTACTS_ERROR_INVALID_PARAMETER,"list is NULL");
+	RETV_IF(NULL == contact, CONTACTS_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == out_list, CONTACTS_ERROR_INVALID_PARAMETER);
 	*out_list = NULL;
-	RETVM_IF(view_uri==NULL,CONTACTS_ERROR_INVALID_PARAMETER,"view_uri is NULL");
+	RETV_IF(NULL == view_uri, CONTACTS_ERROR_INVALID_PARAMETER);
 
 	/* make indata */
 	indata = pims_ipc_data_create(0);
 	if (indata == NULL) {
-		CTS_ERR("ipc data created fail!");
+		CTS_ERR("pims_ipc_data_create() Fail");
 		ret = CONTACTS_ERROR_OUT_OF_MEMORY;
 		return ret;
 	}
@@ -401,28 +397,28 @@ int ctsvc_client_db_get_all_records(contacts_h contact, const char* view_uri, in
 		return ret;
 	}
 
-	ret = ctsvc_ipc_marshal_string(view_uri,indata);
+	ret = ctsvc_ipc_marshal_string(view_uri, indata);
 	if (ret != CONTACTS_ERROR_NONE) {
-		CTS_ERR("marshal fail");
+		CTS_ERR("ctsvc_ipc_marshal_string() Fail(%d)", ret);
 		pims_ipc_data_destroy(indata);
 		return ret;
 	}
-	ret = ctsvc_ipc_marshal_int(offset,indata);
+	ret = ctsvc_ipc_marshal_int(offset, indata);
 	if (ret != CONTACTS_ERROR_NONE) {
-		CTS_ERR("marshal fail");
+		CTS_ERR("ctsvc_ipc_marshal_int() Fail(%d)", ret);
 		pims_ipc_data_destroy(indata);
 		return ret;
 	}
-	ret = ctsvc_ipc_marshal_int(limit,indata);
+	ret = ctsvc_ipc_marshal_int(limit, indata);
 	if (ret != CONTACTS_ERROR_NONE) {
-		CTS_ERR("marshal fail");
+		CTS_ERR("ctsvc_ipc_marshal_int() Fail(%d)", ret);
 		pims_ipc_data_destroy(indata);
 		return ret;
 	}
 
 	/* ipc call */
 	if (ctsvc_ipc_call(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_GET_ALL_RECORDS, indata, &outdata) != 0) {
-		CTS_ERR("ctsvc_ipc_call failed");
+		CTS_ERR("ctsvc_ipc_call() Fail");
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
 	}
@@ -448,21 +444,21 @@ int ctsvc_client_db_get_all_records(contacts_h contact, const char* view_uri, in
 	return ret;
 }
 
-int ctsvc_client_db_get_records_with_query(contacts_h contact, contacts_query_h query, int offset, int limit, contacts_list_h* out_list)
+int ctsvc_client_db_get_records_with_query(contacts_h contact, contacts_query_h query, int offset, int limit, contacts_list_h *out_list)
 {
 	int ret = CONTACTS_ERROR_NONE;
 	pims_ipc_data_h indata = NULL;
 	pims_ipc_data_h outdata = NULL;
 
-	RETVM_IF(NULL == contact, CONTACTS_ERROR_INVALID_PARAMETER, "contact is NULL");
-	RETVM_IF(NULL == out_list,CONTACTS_ERROR_INVALID_PARAMETER,"list is NULL");
+	RETV_IF(NULL == contact, CONTACTS_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == out_list, CONTACTS_ERROR_INVALID_PARAMETER);
 	*out_list = NULL;
-	RETVM_IF(NULL == query,CONTACTS_ERROR_INVALID_PARAMETER,"query is NULL");
+	RETV_IF(NULL == query, CONTACTS_ERROR_INVALID_PARAMETER);
 
 	/* make indata */
 	indata = pims_ipc_data_create(0);
 	if (indata == NULL) {
-		CTS_ERR("ipc data created fail!");
+		CTS_ERR("pims_ipc_data_create() Fail");
 		ret = CONTACTS_ERROR_OUT_OF_MEMORY;
 		return ret;
 	}
@@ -474,28 +470,28 @@ int ctsvc_client_db_get_records_with_query(contacts_h contact, contacts_query_h 
 		return ret;
 	}
 
-	ret = ctsvc_ipc_marshal_query(query,indata);
+	ret = ctsvc_ipc_marshal_query(query, indata);
 	if (ret != CONTACTS_ERROR_NONE) {
-		CTS_ERR("marshal fail");
+		CTS_ERR("ctsvc_ipc_marshal_query() Fail(%d)", ret);
 		pims_ipc_data_destroy(indata);
 		return ret;
 	}
 
-	ret = ctsvc_ipc_marshal_int(offset,indata);
+	ret = ctsvc_ipc_marshal_int(offset, indata);
 	if (ret != CONTACTS_ERROR_NONE) {
-		CTS_ERR("marshal fail");
+		CTS_ERR("ctsvc_ipc_marshal_int() Fail(%d)", ret);
 		pims_ipc_data_destroy(indata);
 		return ret;
 	}
-	ret = ctsvc_ipc_marshal_int(limit,indata);
+	ret = ctsvc_ipc_marshal_int(limit, indata);
 	if (ret != CONTACTS_ERROR_NONE) {
-		CTS_ERR("marshal fail");
+		CTS_ERR("ctsvc_ipc_marshal_int() Fail(%d)", ret);
 		return ret;
 	}
 
 	/* ipc call */
 	if (ctsvc_ipc_call(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_GET_RECORDS_WITH_QUERY, indata, &outdata) != 0) {
-		CTS_ERR("ctsvc_ipc_call failed");
+		CTS_ERR("ctsvc_ipc_call() Fail");
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
 	}
@@ -524,21 +520,21 @@ int ctsvc_client_db_get_records_with_query(contacts_h contact, contacts_query_h 
 }
 
 
-int ctsvc_client_db_get_count(contacts_h contact, const char* view_uri, int *out_count)
+int ctsvc_client_db_get_count(contacts_h contact, const char *view_uri, int *out_count)
 {
 	int ret = CONTACTS_ERROR_NONE;
 	pims_ipc_data_h indata = NULL;
 	pims_ipc_data_h outdata = NULL;
 
-	RETVM_IF(NULL == contact, CONTACTS_ERROR_INVALID_PARAMETER, "contact is NULL");
-	RETVM_IF(view_uri==NULL,CONTACTS_ERROR_INVALID_PARAMETER,"view_uri is NULL");
-	RETVM_IF(out_count==NULL,CONTACTS_ERROR_INVALID_PARAMETER,"count pointer is NULL");
+	RETV_IF(NULL == contact, CONTACTS_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == view_uri, CONTACTS_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == out_count, CONTACTS_ERROR_INVALID_PARAMETER);
 	*out_count = 0;
 
 	/* make indata */
 	indata = pims_ipc_data_create(0);
 	if (indata == NULL) {
-		CTS_ERR("ipc data created fail!");
+		CTS_ERR("pims_ipc_data_create() Fail");
 		ret = CONTACTS_ERROR_OUT_OF_MEMORY;
 		return ret;
 	}
@@ -550,16 +546,16 @@ int ctsvc_client_db_get_count(contacts_h contact, const char* view_uri, int *out
 		return ret;
 	}
 
-	ret = ctsvc_ipc_marshal_string(view_uri,indata);
+	ret = ctsvc_ipc_marshal_string(view_uri, indata);
 	if (ret != CONTACTS_ERROR_NONE) {
-		CTS_ERR("marshal fail");
+		CTS_ERR("ctsvc_ipc_marshal_string() Fail(%d)", ret);
 		pims_ipc_data_destroy(indata);
 		return ret;
 	}
 
 	/* ipc call */
 	if (ctsvc_ipc_call(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_GET_COUNT, indata, &outdata) != 0) {
-		CTS_ERR("ctsvc_ipc_call failed");
+		CTS_ERR("ctsvc_ipc_call() Fail");
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
 	}
@@ -593,15 +589,15 @@ int ctsvc_client_db_get_count_with_query(contacts_h contact, contacts_query_h qu
 	pims_ipc_data_h indata = NULL;
 	pims_ipc_data_h outdata = NULL;
 
-	RETVM_IF(NULL == contact, CONTACTS_ERROR_INVALID_PARAMETER, "contact is NULL");
-	RETVM_IF(NULL == query,CONTACTS_ERROR_INVALID_PARAMETER,"record is NULL");
-	RETVM_IF(out_count==NULL,CONTACTS_ERROR_INVALID_PARAMETER,"count pointer is NULL");
+	RETV_IF(NULL == contact, CONTACTS_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == query, CONTACTS_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == out_count, CONTACTS_ERROR_INVALID_PARAMETER);
 	*out_count = 0;
 
 	/* make indata */
 	indata = pims_ipc_data_create(0);
 	if (indata == NULL) {
-		CTS_ERR("ipc data created fail!");
+		CTS_ERR("pims_ipc_data_create() Fail");
 		ret = CONTACTS_ERROR_OUT_OF_MEMORY;
 		return ret;
 	}
@@ -612,16 +608,16 @@ int ctsvc_client_db_get_count_with_query(contacts_h contact, contacts_query_h qu
 		return ret;
 	}
 
-	ret = ctsvc_ipc_marshal_query(query,indata);
+	ret = ctsvc_ipc_marshal_query(query, indata);
 	if (ret != CONTACTS_ERROR_NONE) {
-		CTS_ERR("marshal fail");
+		CTS_ERR("ctsvc_ipc_marshal_query() Fail(%d)", ret);
 		pims_ipc_data_destroy(indata);
 		return ret;
 	}
 
 	/* ipc call */
 	if (ctsvc_ipc_call(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_GET_COUNT_WITH_QUERY, indata, &outdata) != 0) {
-		CTS_ERR("ctsvc_ipc_call failed");
+		CTS_ERR("ctsvc_ipc_call() Fail");
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
 	}
@@ -659,12 +655,12 @@ int ctsvc_client_db_insert_records(contacts_h contact, contacts_list_h list, int
 	if (count)
 		*count = 0;
 
-	RETVM_IF(NULL == contact, CONTACTS_ERROR_INVALID_PARAMETER, "contact is NULL");
-	RETVM_IF(list==NULL,CONTACTS_ERROR_INVALID_PARAMETER, "list is NULL");
+	RETV_IF(NULL == contact, CONTACTS_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == list, CONTACTS_ERROR_INVALID_PARAMETER);
 
 	indata = pims_ipc_data_create(0);
 	if (indata == NULL) {
-		CTS_ERR("ipc data created fail!");
+		CTS_ERR("pims_ipc_data_create() Fail");
 		ret = CONTACTS_ERROR_OUT_OF_MEMORY;
 		return ret;
 	}
@@ -675,16 +671,16 @@ int ctsvc_client_db_insert_records(contacts_h contact, contacts_list_h list, int
 		return ret;
 	}
 
-	ret = ctsvc_ipc_marshal_list(list,indata);
+	ret = ctsvc_ipc_marshal_list(list, indata);
 	if (ret != CONTACTS_ERROR_NONE) {
-		CTS_ERR("marshal fail");
+		CTS_ERR("ctsvc_ipc_marshal_list() Fail(%d)", ret);
 		pims_ipc_data_destroy(indata);
 		return ret;
 	}
 
 	if (ctsvc_ipc_call(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_INSERT_RECORDS,
 				indata, &outdata) != 0) {
-		CTS_ERR("ctsvc_ipc_call failed");
+		CTS_ERR("ctsvc_ipc_call() Fail");
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
 	}
@@ -724,7 +720,7 @@ int ctsvc_client_db_insert_records(contacts_h contact, contacts_list_h list, int
 					return CONTACTS_ERROR_OUT_OF_MEMORY;
 				}
 
-				for (i=0;i<c;i++) {
+				for (i = 0; i < c; i++) {
 					if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(outdata, &(id[i]))) {
 						CTS_ERR("ctsvc_ipc_unmarshal_int() Fail");
 						pims_ipc_data_destroy(outdata);
@@ -748,12 +744,12 @@ int ctsvc_client_db_update_records(contacts_h contact, contacts_list_h list)
 	pims_ipc_data_h indata = NULL;
 	pims_ipc_data_h outdata = NULL;
 
-	RETVM_IF(NULL == contact, CONTACTS_ERROR_INVALID_PARAMETER, "contct is NULL");
-	RETVM_IF(NULL == list, CONTACTS_ERROR_INVALID_PARAMETER, "list is NULL");
+	RETV_IF(NULL == contact, CONTACTS_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == list, CONTACTS_ERROR_INVALID_PARAMETER);
 
 	indata = pims_ipc_data_create(0);
 	if (indata == NULL) {
-		CTS_ERR("ipc data created fail!");
+		CTS_ERR("pims_ipc_data_create() Fail");
 		ret = CONTACTS_ERROR_OUT_OF_MEMORY;
 		return ret;
 	}
@@ -765,16 +761,16 @@ int ctsvc_client_db_update_records(contacts_h contact, contacts_list_h list)
 		return ret;
 	}
 
-	ret = ctsvc_ipc_marshal_list(list,indata);
+	ret = ctsvc_ipc_marshal_list(list, indata);
 	if (ret != CONTACTS_ERROR_NONE) {
-		CTS_ERR("marshal fail");
+		CTS_ERR("ctsvc_ipc_marshal_list() Fail(%d)", ret);
 		pims_ipc_data_destroy(indata);
 		return ret;
 	}
 
 	if (ctsvc_ipc_call(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_UPDATE_RECORDS,
 				indata, &outdata) != 0) {
-		CTS_ERR("ctsvc_ipc_call failed");
+		CTS_ERR("ctsvc_ipc_call() Fail");
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
 	}
@@ -804,19 +800,19 @@ int ctsvc_client_db_update_records(contacts_h contact, contacts_list_h list)
 	return ret;
 }
 
-int ctsvc_client_db_delete_records(contacts_h contact, const char* view_uri, int ids[], int count)
+int ctsvc_client_db_delete_records(contacts_h contact, const char *view_uri, int ids[], int count)
 {
 	int i;
 	int ret = CONTACTS_ERROR_NONE;
 	pims_ipc_data_h indata = NULL;
 	pims_ipc_data_h outdata = NULL;
 
-	RETVM_IF(NULL == contact, CONTACTS_ERROR_INVALID_PARAMETER, "contact is NULL");
-	RETVM_IF(view_uri == NULL, CONTACTS_ERROR_INVALID_PARAMETER, "view_uri is NULL");
+	RETV_IF(NULL == contact, CONTACTS_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == view_uri, CONTACTS_ERROR_INVALID_PARAMETER);
 
 	indata = pims_ipc_data_create(0);
 	if (indata == NULL) {
-		CTS_ERR("ipc data created fail!");
+		CTS_ERR("pims_ipc_data_create() Fail");
 		ret = CONTACTS_ERROR_OUT_OF_MEMORY;
 		return ret;
 	}
@@ -828,24 +824,24 @@ int ctsvc_client_db_delete_records(contacts_h contact, const char* view_uri, int
 		return ret;
 	}
 
-	ret = ctsvc_ipc_marshal_string(view_uri,indata);
+	ret = ctsvc_ipc_marshal_string(view_uri, indata);
 	if (ret != CONTACTS_ERROR_NONE) {
-		CTS_ERR("marshal fail");
+		CTS_ERR("ctsvc_ipc_marshal_string() Fail(%d)", ret);
 		pims_ipc_data_destroy(indata);
 		return ret;
 	}
 
-	ret = ctsvc_ipc_marshal_int(count,indata);
+	ret = ctsvc_ipc_marshal_int(count, indata);
 	if (ret != CONTACTS_ERROR_NONE) {
-		CTS_ERR("marshal fail");
+		CTS_ERR("ctsvc_ipc_marshal_int() Fail(%d)", ret);
 		pims_ipc_data_destroy(indata);
 		return ret;
 	}
 
-	for (i=0;i<count;i++) {
-		ret = ctsvc_ipc_marshal_int(ids[i],indata);
+	for (i = 0; i < count; i++) {
+		ret = ctsvc_ipc_marshal_int(ids[i], indata);
 		if (ret != CONTACTS_ERROR_NONE) {
-			CTS_ERR("marshal fail");
+			CTS_ERR("ctsvc_ipc_marshal_int() Fail(%d)", ret);
 			pims_ipc_data_destroy(indata);
 			return ret;
 		}
@@ -853,7 +849,7 @@ int ctsvc_client_db_delete_records(contacts_h contact, const char* view_uri, int
 
 	if (ctsvc_ipc_call(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_DELETE_RECORDS,
 				indata, &outdata) != 0) {
-		CTS_ERR("ctsvc_ipc_call failed");
+		CTS_ERR("ctsvc_ipc_call() Fail");
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
 	}
@@ -890,15 +886,15 @@ int ctsvc_client_db_replace_records(contacts_h contact, contacts_list_h list, in
 	pims_ipc_data_h indata = NULL;
 	pims_ipc_data_h outdata = NULL;
 
-	RETVM_IF(NULL == contact,CONTACTS_ERROR_INVALID_PARAMETER, "contact is NULL");
-	RETVM_IF(NULL == list,CONTACTS_ERROR_INVALID_PARAMETER, "list is NULL");
-	RETVM_IF(NULL == ids, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter");
-	RETVM_IF(0 == count, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter");
+	RETV_IF(NULL == contact, CONTACTS_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == list, CONTACTS_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == ids, CONTACTS_ERROR_INVALID_PARAMETER);
+	RETV_IF(0 == count, CONTACTS_ERROR_INVALID_PARAMETER);
 
 	/* make indata */
 	indata = pims_ipc_data_create(0);
 	if (indata == NULL) {
-		CTS_ERR("ipc data created fail!");
+		CTS_ERR("pims_ipc_data_create() Fail");
 		ret = CONTACTS_ERROR_OUT_OF_MEMORY;
 		return ret;
 	}
@@ -912,22 +908,22 @@ int ctsvc_client_db_replace_records(contacts_h contact, contacts_list_h list, in
 
 	ret = ctsvc_ipc_marshal_list(list, indata);
 	if (ret != CONTACTS_ERROR_NONE) {
-		CTS_ERR("marshal fail");
+		CTS_ERR("ctsvc_ipc_marshal_list() Fail(%d)", ret);
 		pims_ipc_data_destroy(indata);
 		return ret;
 	}
 
 	ret = ctsvc_ipc_marshal_int(count, indata);
 	if (ret != CONTACTS_ERROR_NONE) {
-		CTS_ERR("marshal fail");
+		CTS_ERR("ctsvc_ipc_marshal_int() Fail(%d)", ret);
 		pims_ipc_data_destroy(indata);
 		return ret;
 	}
 
-	for (i=0;i<count;i++) {
+	for (i = 0; i < count; i++) {
 		ret = ctsvc_ipc_marshal_int(ids[i], indata);
 		if (ret != CONTACTS_ERROR_NONE) {
-			CTS_ERR("marshal fail");
+			CTS_ERR("ctsvc_ipc_marshal_int() Fail(%d)", ret);
 			pims_ipc_data_destroy(indata);
 			return ret;
 		}
@@ -935,7 +931,7 @@ int ctsvc_client_db_replace_records(contacts_h contact, contacts_list_h list, in
 
 	if (ctsvc_ipc_call(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_REPLACE_RECORDS,
 				indata, &outdata) != 0) {
-		CTS_ERR("ctsvc_ipc_call failed");
+		CTS_ERR("ctsvc_ipc_call() Fail");
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
 	}
@@ -963,22 +959,23 @@ int ctsvc_client_db_replace_records(contacts_h contact, contacts_list_h list, in
 	return ret;
 }
 
-int ctsvc_client_db_get_changes_by_version(contacts_h contact, const char* view_uri, int addressbook_id, int contacts_db_version, contacts_list_h* record_list, int* current_contacts_db_version)
+int ctsvc_client_db_get_changes_by_version(contacts_h contact, const char *view_uri, int addressbook_id, int contacts_db_version, contacts_list_h *record_list, int *current_contacts_db_version)
 {
 	int ret = CONTACTS_ERROR_NONE;
 	pims_ipc_data_h indata = NULL;
 	pims_ipc_data_h outdata = NULL;
 
-	RETVM_IF(NULL == contact, CONTACTS_ERROR_INVALID_PARAMETER, "contact is NULL");
-	RETVM_IF(record_list==NULL,CONTACTS_ERROR_INVALID_PARAMETER,"record_list is NULL");
+	RETV_IF(NULL == contact, CONTACTS_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == record_list, CONTACTS_ERROR_INVALID_PARAMETER);
+
 	*record_list = NULL;
-	RETVM_IF(view_uri==NULL,CONTACTS_ERROR_INVALID_PARAMETER,"view_uri is NULL");
-	RETVM_IF(current_contacts_db_version==NULL,CONTACTS_ERROR_INVALID_PARAMETER,"current_contacts_db_version is NULL");
+	RETV_IF(NULL == view_uri, CONTACTS_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == current_contacts_db_version, CONTACTS_ERROR_INVALID_PARAMETER);
 
 	/* make indata */
 	indata = pims_ipc_data_create(0);
 	if (indata == NULL) {
-		CTS_ERR("ipc data created fail!");
+		CTS_ERR("pims_ipc_data_create() Fail");
 		ret = CONTACTS_ERROR_OUT_OF_MEMORY;
 		return ret;
 	}
@@ -990,28 +987,28 @@ int ctsvc_client_db_get_changes_by_version(contacts_h contact, const char* view_
 		return ret;
 	}
 
-	ret = ctsvc_ipc_marshal_string(view_uri,indata);
+	ret = ctsvc_ipc_marshal_string(view_uri, indata);
 	if (ret != CONTACTS_ERROR_NONE) {
-		CTS_ERR("marshal fail");
+		CTS_ERR("ctsvc_ipc_marshal_string() Fail(%d)", ret);
 		pims_ipc_data_destroy(indata);
 		return ret;
 	}
-	ret = ctsvc_ipc_marshal_int(addressbook_id,indata);
+	ret = ctsvc_ipc_marshal_int(addressbook_id, indata);
 	if (ret != CONTACTS_ERROR_NONE) {
-		CTS_ERR("marshal fail");
+		CTS_ERR("ctsvc_ipc_marshal_int() Fail(%d)", ret);
 		pims_ipc_data_destroy(indata);
 		return ret;
 	}
-	ret = ctsvc_ipc_marshal_int(contacts_db_version,indata);
+	ret = ctsvc_ipc_marshal_int(contacts_db_version, indata);
 	if (ret != CONTACTS_ERROR_NONE) {
-		CTS_ERR("marshal fail");
+		CTS_ERR("ctsvc_ipc_marshal_int() Fail(%d)", ret);
 		pims_ipc_data_destroy(indata);
 		return ret;
 	}
 
 	/* ipc call */
 	if (ctsvc_ipc_call(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_CHANGES_BY_VERSION, indata, &outdata) != 0) {
-		CTS_ERR("ctsvc_ipc_call failed");
+		CTS_ERR("ctsvc_ipc_call() Fail");
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
 	}
@@ -1043,20 +1040,21 @@ int ctsvc_client_db_get_changes_by_version(contacts_h contact, const char* view_
 	return ret;
 }
 
-int ctsvc_client_db_get_current_version(contacts_h contact, int* contacts_db_version)
+int ctsvc_client_db_get_current_version(contacts_h contact, int *contacts_db_version)
 {
 	int ret = CONTACTS_ERROR_NONE;
 	pims_ipc_data_h indata = NULL;
 	pims_ipc_data_h outdata = NULL;
 
-	RETVM_IF(NULL == contact, CONTACTS_ERROR_INVALID_PARAMETER, "contact is null");
-	RETVM_IF(contacts_db_version==NULL,CONTACTS_ERROR_INVALID_PARAMETER,"contacts_db_version is null");
+	RETV_IF(NULL == contact, CONTACTS_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == contacts_db_version, CONTACTS_ERROR_INVALID_PARAMETER);
+
 	*contacts_db_version = 0;
 
 	/* make indata */
 	indata = pims_ipc_data_create(0);
 	if (indata == NULL) {
-		CTS_ERR("ipc data created fail!");
+		CTS_ERR("pims_ipc_data_create() Fail");
 		ret = CONTACTS_ERROR_OUT_OF_MEMORY;
 		return ret;
 	}
@@ -1070,7 +1068,7 @@ int ctsvc_client_db_get_current_version(contacts_h contact, int* contacts_db_ver
 
 	/* ipc call */
 	if (ctsvc_ipc_call(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_GET_CURRENT_VERSION, indata, &outdata) != 0) {
-		CTS_ERR("ctsvc_ipc_call failed");
+		CTS_ERR("ctsvc_ipc_call() Fail");
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
 	}
@@ -1097,15 +1095,15 @@ int ctsvc_client_db_get_current_version(contacts_h contact, int* contacts_db_ver
 	return ret;
 }
 
-int ctsvc_client_db_search_records(contacts_h contact, const char* view_uri, const char *keyword,
-		int offset, int limit, contacts_list_h* out_list)
+int ctsvc_client_db_search_records(contacts_h contact, const char *view_uri, const char *keyword,
+		int offset, int limit, contacts_list_h *out_list)
 {
 	int ret = CONTACTS_ERROR_NONE;
 	pims_ipc_data_h indata = NULL;
 	pims_ipc_data_h outdata = NULL;
 
-	RETVM_IF(NULL == contact, CONTACTS_ERROR_INVALID_PARAMETER, "contact is NULL");
-	RETVM_IF(out_list == NULL, CONTACTS_ERROR_INVALID_PARAMETER, "list is NULL");
+	RETV_IF(NULL == contact, CONTACTS_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == out_list, CONTACTS_ERROR_INVALID_PARAMETER);
 	*out_list = NULL;
 
 	/* make indata */
@@ -1121,34 +1119,34 @@ int ctsvc_client_db_search_records(contacts_h contact, const char* view_uri, con
 		pims_ipc_data_destroy(indata);
 		return ret;
 	}
-	ret = ctsvc_ipc_marshal_string(view_uri,indata);
+	ret = ctsvc_ipc_marshal_string(view_uri, indata);
 	if (ret != CONTACTS_ERROR_NONE) {
-		CTS_ERR("marshal fail");
+		CTS_ERR("ctsvc_ipc_marshal_string() Fail(%d)", ret);
 		pims_ipc_data_destroy(indata);
 		return ret;
 	}
-	ret = ctsvc_ipc_marshal_string(keyword,indata);
+	ret = ctsvc_ipc_marshal_string(keyword, indata);
 	if (ret != CONTACTS_ERROR_NONE) {
-		CTS_ERR("marshal fail");
+		CTS_ERR("ctsvc_ipc_marshal_string() Fail(%d)", ret);
 		pims_ipc_data_destroy(indata);
 		return ret;
 	}
-	ret = ctsvc_ipc_marshal_int(offset,indata);
+	ret = ctsvc_ipc_marshal_int(offset, indata);
 	if (ret != CONTACTS_ERROR_NONE) {
-		CTS_ERR("marshal fail");
+		CTS_ERR("ctsvc_ipc_marshal_int() Fail(%d)", ret);
 		pims_ipc_data_destroy(indata);
 		return ret;
 	}
-	ret = ctsvc_ipc_marshal_int(limit,indata);
+	ret = ctsvc_ipc_marshal_int(limit, indata);
 	if (ret != CONTACTS_ERROR_NONE) {
-		CTS_ERR("marshal fail");
+		CTS_ERR("ctsvc_ipc_marshal_int() Fail(%d)", ret);
 		pims_ipc_data_destroy(indata);
 		return ret;
 	}
 
 	/* ipc call */
 	if (ctsvc_ipc_call(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_SEARCH_RECORDS, indata, &outdata) != 0) {
-		CTS_ERR("ctsvc_ipc_call failed");
+		CTS_ERR("ctsvc_ipc_call() Fail");
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
 	}
@@ -1176,16 +1174,16 @@ int ctsvc_client_db_search_records(contacts_h contact, const char* view_uri, con
 	return ret;
 }
 
-int ctsvc_client_db_search_records_with_range(contacts_h contact, const char* view_uri, const char *keyword,
-		int offset, int limit, int range, contacts_list_h* out_list)
+int ctsvc_client_db_search_records_with_range(contacts_h contact, const char *view_uri, const char *keyword,
+		int offset, int limit, int range, contacts_list_h *out_list)
 {
 	int ret = CONTACTS_ERROR_NONE;
 	pims_ipc_data_h indata = NULL;
 	pims_ipc_data_h outdata = NULL;
 
-	RETVM_IF(contact == NULL, CONTACTS_ERROR_INVALID_PARAMETER, "contact is NULL");
-	RETVM_IF(out_list == NULL, CONTACTS_ERROR_INVALID_PARAMETER, "list is NULL");
-	RETVM_IF(range == 0, CONTACTS_ERROR_INVALID_PARAMETER, "range is 0");
+	RETV_IF(NULL == contact, CONTACTS_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == out_list, CONTACTS_ERROR_INVALID_PARAMETER);
+	RETV_IF(0 == range, CONTACTS_ERROR_INVALID_PARAMETER);
 	*out_list = NULL;
 
 	indata = pims_ipc_data_create(0);
@@ -1232,7 +1230,7 @@ int ctsvc_client_db_search_records_with_range(contacts_h contact, const char* vi
 	}
 
 	if (0 != ctsvc_ipc_call(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_SEARCH_RECORDS_WITH_RANGE, indata, &outdata)) {
-		CTS_ERR("ctsvc_ipc_call failed");
+		CTS_ERR("ctsvc_ipc_call() Fail");
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
 	}
@@ -1259,13 +1257,13 @@ int ctsvc_client_db_search_records_with_range(contacts_h contact, const char* vi
 }
 
 int ctsvc_client_db_search_records_with_query(contacts_h contact, contacts_query_h query, const char *keyword,
-		int offset, int limit, contacts_list_h* out_list)
+		int offset, int limit, contacts_list_h *out_list)
 {
 	int ret = CONTACTS_ERROR_NONE;
 	pims_ipc_data_h indata = NULL;
 	pims_ipc_data_h outdata = NULL;
 
-	RETVM_IF(NULL == contact, CONTACTS_ERROR_INVALID_PARAMETER, "contact is NULL");
+	RETV_IF(NULL == contact, CONTACTS_ERROR_INVALID_PARAMETER);
 	RETVM_IF(NULL == out_list, CONTACTS_ERROR_INVALID_PARAMETER, "list is NULL");
 	RETVM_IF(NULL == query, CONTACTS_ERROR_INVALID_PARAMETER, "query is NULL");
 	*out_list = NULL;
@@ -1283,33 +1281,33 @@ int ctsvc_client_db_search_records_with_query(contacts_h contact, contacts_query
 		pims_ipc_data_destroy(indata);
 		return ret;
 	}
-	ret = ctsvc_ipc_marshal_query(query,indata);
+	ret = ctsvc_ipc_marshal_query(query, indata);
 	if (ret != CONTACTS_ERROR_NONE) {
-		CTS_ERR("marshal fail");
+		CTS_ERR("ctsvc_ipc_marshal_query() Fail(%d)", ret);
 		pims_ipc_data_destroy(indata);
 		return ret;
 	}
-	ret = ctsvc_ipc_marshal_string(keyword,indata);
+	ret = ctsvc_ipc_marshal_string(keyword, indata);
 	if (ret != CONTACTS_ERROR_NONE) {
-		CTS_ERR("marshal fail");
+		CTS_ERR("ctsvc_ipc_marshal_string() Fail(%d)", ret);
 		pims_ipc_data_destroy(indata);
 		return ret;
 	}
-	ret = ctsvc_ipc_marshal_int(offset,indata);
+	ret = ctsvc_ipc_marshal_int(offset, indata);
 	if (ret != CONTACTS_ERROR_NONE) {
-		CTS_ERR("marshal fail");
+		CTS_ERR("ctsvc_ipc_marshal_int() Fail(%d)", ret);
 		return ret;
 	}
-	ret = ctsvc_ipc_marshal_int(limit,indata);
+	ret = ctsvc_ipc_marshal_int(limit, indata);
 	if (ret != CONTACTS_ERROR_NONE) {
-		CTS_ERR("marshal fail");
+		CTS_ERR("ctsvc_ipc_marshal_int() Fail(%d)", ret);
 		pims_ipc_data_destroy(indata);
 		return ret;
 	}
 
 	/* ipc call */
 	if (ctsvc_ipc_call(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_SEARCH_RECORDS_WITH_QUERY, indata, &outdata) != 0) {
-		CTS_ERR("ctsvc_ipc_call failed");
+		CTS_ERR("ctsvc_ipc_call() Fail");
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
 	}
@@ -1337,19 +1335,19 @@ int ctsvc_client_db_search_records_with_query(contacts_h contact, contacts_query
 	return ret;
 }
 
-int ctsvc_client_db_get_last_change_version(contacts_h contact, int* last_version)
+int ctsvc_client_db_get_last_change_version(contacts_h contact, int *last_version)
 {
 	int ret = CONTACTS_ERROR_NONE;
 	bool result = false;
 
-	RETVM_IF(NULL == last_version, CONTACTS_ERROR_INVALID_PARAMETER, "Invalid parameter");
+	RETV_IF(NULL == last_version, CONTACTS_ERROR_INVALID_PARAMETER);
 	*last_version = 0;
 
 	ret = ctsvc_ipc_client_check_permission(CTSVC_PERMISSION_CONTACT_READ, &result);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_ipc_client_check_permission fail (%d)", ret);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_ipc_client_check_permission Fail(%d)", ret);
 	if (result == false) {
 		ret = ctsvc_ipc_client_check_permission(CTSVC_PERMISSION_PHONELOG_READ, &result);
-		RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_ipc_client_check_permission fail (%d)", ret);
+		RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_ipc_client_check_permission Fail(%d)", ret);
 		RETVM_IF(result == false, CONTACTS_ERROR_PERMISSION_DENIED, "Permission denied");
 	}
 
@@ -1357,11 +1355,10 @@ int ctsvc_client_db_get_last_change_version(contacts_h contact, int* last_versio
 	return ret;
 }
 
-typedef struct
-{
+typedef struct {
 	contacts_db_status_changed_cb cb;
 	void *user_data;
-}status_callback_info_s;
+} status_callback_info_s;
 
 static GSList *__status_change_subscribe_list = NULL;
 
@@ -1372,7 +1369,8 @@ static void __ctsvc_client_db_free_cb_info(status_callback_info_s *cb_info)
 	free(cb_info);
 }
 
-static void __ctsvc_db_status_subscriber_callback(pims_ipc_h ipc, pims_ipc_data_h data, void *user_data)
+static void __ctsvc_db_status_subscriber_callback(pims_ipc_h ipc, pims_ipc_data_h data,
+		void *user_data)
 {
 	int ret;
 	int status = -1;
@@ -1383,7 +1381,7 @@ static void __ctsvc_db_status_subscriber_callback(pims_ipc_h ipc, pims_ipc_data_
 		WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_ipc_unmarshal_int() Fail(%d)", ret);
 	}
 
-	for (l = __status_change_subscribe_list;l;l=l->next) {
+	for (l = __status_change_subscribe_list; l; l = l->next) {
 		status_callback_info_s *cb_info = l->data;
 		/* TODO: Fixme - check zone_name */
 		if (cb_info->cb)
@@ -1397,8 +1395,8 @@ int ctsvc_client_db_get_status(contacts_h contact, contacts_db_status_e *status)
 	pims_ipc_data_h outdata = NULL;
 	pims_ipc_data_h indata = NULL;
 
-	RETVM_IF(NULL == contact, CONTACTS_ERROR_INVALID_PARAMETER, "contact is NULL");
-	RETVM_IF(status == NULL, CONTACTS_ERROR_INVALID_PARAMETER,"The out param is NULL");
+	RETV_IF(NULL == contact, CONTACTS_ERROR_INVALID_PARAMETER);
+	RETVM_IF(status == NULL, CONTACTS_ERROR_INVALID_PARAMETER, "The out param is NULL");
 	*status = 0;
 
 	/* make indata */
@@ -1418,7 +1416,7 @@ int ctsvc_client_db_get_status(contacts_h contact, contacts_db_status_e *status)
 
 	if (ctsvc_ipc_call(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_GET_STATUS, indata, &outdata) != 0) {
 		pims_ipc_data_destroy(indata);
-		CTS_ERR("ctsvc_ipc_call failed");
+		CTS_ERR("ctsvc_ipc_call() Fail");
 		return CONTACTS_ERROR_IPC;
 	}
 	pims_ipc_data_destroy(indata);
@@ -1430,7 +1428,7 @@ int ctsvc_client_db_get_status(contacts_h contact, contacts_db_status_e *status)
 			return CONTACTS_ERROR_IPC;
 		}
 		if (CONTACTS_ERROR_NONE == ret) {
-			if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(outdata, (int *)status)) {
+			if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(outdata, (int*)status)) {
 				CTS_ERR("ctsvc_ipc_unmarshal_int() Fail");
 				pims_ipc_data_destroy(outdata);
 				return CONTACTS_ERROR_IPC;
@@ -1443,12 +1441,12 @@ int ctsvc_client_db_get_status(contacts_h contact, contacts_db_status_e *status)
 }
 
 int ctsvc_client_db_add_status_changed_cb(contacts_h contact,
-		contacts_db_status_changed_cb cb, void* user_data)
+		contacts_db_status_changed_cb cb, void *user_data)
 {
 	int ret;
 	status_callback_info_s *cb_info = NULL;
 
-	RETVM_IF(NULL == contact, CONTACTS_ERROR_INVALID_PARAMETER, "contact is NULL");
+	RETV_IF(NULL == contact, CONTACTS_ERROR_INVALID_PARAMETER);
 	RETVM_IF(NULL == cb, CONTACTS_ERROR_INVALID_PARAMETER,
 			"Invalid parameter : callback is null");
 
@@ -1483,12 +1481,12 @@ int ctsvc_client_db_add_status_changed_cb(contacts_h contact,
 }
 
 int ctsvc_client_db_remove_status_changed_cb(contacts_h contact,
-	contacts_db_status_changed_cb cb, void* user_data)
+		contacts_db_status_changed_cb cb, void *user_data)
 {
 	int ret;
 	GSList *l;
 
-	RETVM_IF(NULL == contact, CONTACTS_ERROR_INVALID_PARAMETER, "contact is NULL");
+	RETV_IF(NULL == contact, CONTACTS_ERROR_INVALID_PARAMETER);
 	RETVM_IF(NULL == cb, CONTACTS_ERROR_INVALID_PARAMETER,
 			"Invalid parameter : callback is null");
 
@@ -1499,7 +1497,7 @@ int ctsvc_client_db_remove_status_changed_cb(contacts_h contact,
 	}
 
 	ctsvc_mutex_lock(CTS_MUTEX_PIMS_IPC_PUBSUB);
-	for (l = __status_change_subscribe_list;l;l=l->next) {
+	for (l = __status_change_subscribe_list; l; l = l->next) {
 		status_callback_info_s *cb_info = l->data;
 		if (cb == cb_info->cb && user_data == cb_info->user_data) {
 			__status_change_subscribe_list = g_slist_remove(__status_change_subscribe_list, cb_info);

@@ -1,11 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
- *
- * Contact: Dohyung Jin <dh.jin@samsung.com>
- *                 Jongwon Lee <gogosing.lee@samsung.com>
- *                 Donghee Ye <donghee.ye@samsung.com>
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +24,7 @@
 #include "ctsvc_struct.h"
 
 typedef int (*ctsvc_db_insert_record_cb)(contacts_record_h record, int *id);
-typedef int (*ctsvc_db_get_record_cb)(int id, contacts_record_h* out_record);
+typedef int (*ctsvc_db_get_record_cb)(int id, contacts_record_h *out_record);
 typedef int (*ctsvc_db_update_record_cb)(contacts_record_h record);
 typedef int (*ctsvc_db_delete_record_cb)(int id);
 typedef int (*ctsvc_db_replace_record_cb)(contacts_record_h record, int id);
@@ -38,8 +34,8 @@ typedef int (*ctsvc_db_update_records_cb)(const contacts_list_h in_list);
 typedef int (*ctsvc_db_delete_records_cb)(int ids[], int count);
 typedef int (*ctsvc_db_replace_records_cb)(const contacts_list_h in_list, int ids[], int count);
 
-typedef int (*ctsvc_db_get_all_records_cb)(int offset, int limit, contacts_list_h* out_list);
-typedef int (*ctsvc_db_get_records_with_query_cb)(contacts_query_h query, int offset, int limit, contacts_list_h* out_list);
+typedef int (*ctsvc_db_get_all_records_cb)(int offset, int limit, contacts_list_h *out_list);
+typedef int (*ctsvc_db_get_records_with_query_cb)(contacts_query_h query, int offset, int limit, contacts_list_h *out_list);
 typedef int (*ctsvc_db_get_count_cb)(int *out_count);
 typedef int (*ctsvc_db_get_count_with_query_cb)(contacts_query_h query, int *out_count);
 

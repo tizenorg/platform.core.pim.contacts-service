@@ -1,7 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@
 #include "ctsvc_db_sqlite.h"
 #include <tzplatform_config.h>
 
-void ctsvc_db_group_delete_callback(sqlite3_context *context, int argc, sqlite3_value ** argv);
+void ctsvc_db_group_delete_callback(sqlite3_context *context, int argc, sqlite3_value **argv);
 int ctsvc_db_group_name_sort_callback(void *context, int str1_len, const void *str1, int str2_len, const void *str2);
 
 #endif /* __CTSVC_DB_PLUGIN_GROUP_HELPER_H__ */

@@ -1,11 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
- *
- * Contact: Dohyung Jin <dh.jin@samsung.com>
- *                 Jongwon Lee <gogosing.lee@samsung.com>
- *                 Donghee Ye <donghee.ye@samsung.com>
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +27,7 @@
 
 /* for use current contacts-svc-helper daemon */
 /* Message type */
-enum{
+enum {
 	CTSVC_SOCKET_MSG_TYPE_REQUEST_RETURN_VALUE,
 	CTSVC_SOCKET_MSG_TYPE_REQUEST_IMPORT_SIM,
 	CTSVC_SOCKET_MSG_TYPE_REQUEST_SIM_INIT_COMPLETE,
@@ -44,10 +40,10 @@ typedef struct{
 	int val;
 	int attach_num;
 	int attach_sizes[CTSVC_SOCKET_MSG_REQUEST_MAX_ATTACH];
-}ctsvc_socket_msg_s;
+} ctsvc_socket_msg_s;
 
 int ctsvc_request_sim_import(int sim_slot_no);
-int ctsvc_request_sim_get_initialization_status(int sim_slot_no, bool* completed);
+int ctsvc_request_sim_get_initialization_status(int sim_slot_no, bool *completed);
 int ctsvc_socket_init(void);
 void ctsvc_socket_final(void);
 

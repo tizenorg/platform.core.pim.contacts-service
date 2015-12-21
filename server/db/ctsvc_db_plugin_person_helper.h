@@ -1,7 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ int ctsvc_db_update_person(contacts_record_h contact);
 int ctsvc_db_person_create_record_from_stmt(cts_stmt stmt, contacts_record_h *record);
 int ctsvc_db_person_create_record_from_stmt_with_query(cts_stmt stmt, contacts_query_h query, contacts_record_h *record);
 int ctsvc_db_person_create_record_from_stmt_with_projection(cts_stmt stmt, unsigned int *projection, int projection_count, contacts_record_h *record);
-void ctsvc_db_normalize_str_callback(sqlite3_context * context,	int argc, sqlite3_value ** argv);
+void ctsvc_db_normalize_str_callback(sqlite3_context  *context,	int argc, sqlite3_value **argv);
 int ctsvc_db_person_set_favorite(int person_id, bool set, bool propagate);
 
 #endif /* __CTSVC_DB_PLUGIN_PERSON_HELPER_H__ */

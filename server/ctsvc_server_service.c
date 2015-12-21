@@ -1,11 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
- *
- * Contact: Dohyung Jin <dh.jin@samsung.com>
- *                 Jongwon Lee <gogosing.lee@samsung.com>
- *                 Donghee Ye <donghee.ye@samsung.com>
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,9 +50,9 @@ int ctsvc_connect()
 		ctsvc_db_plugin_init();
 		ctsvc_view_uri_init();
 		ctsvc_register_vconf();
-	}
-	else
+	} else {
 		CTS_DBG("System : Contacts service has been already connected");
+	}
 
 	ctsvc_connection++;
 
@@ -81,8 +77,7 @@ int ctsvc_disconnect()
 
 	if (1 == thread_connection) {
 		ctsvc_db_deinit();
-	}
-	else if (thread_connection <= 0) {
+	} else if (thread_connection <= 0) {
 		CTS_DBG("System : please call contacts_connect_on_thread(), thread_connection count is (%d)", thread_connection);
 		ctsvc_mutex_unlock(CTS_MUTEX_CONNECTION);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
@@ -95,10 +90,9 @@ int ctsvc_disconnect()
 		ctsvc_view_uri_deinit();
 		ctsvc_db_plugin_deinit();
 		ctsvc_deinit_tapi_handle_for_cc();
-	}
-	else if (1 < ctsvc_connection)
+	} else if (1 < ctsvc_connection) {
 		CTS_DBG("System : connection count is %d", ctsvc_connection);
-	else {
+	} else {
 		CTS_DBG("System : please call contacts_connect(), connection count is (%d)", ctsvc_connection);
 		ctsvc_mutex_unlock(CTS_MUTEX_CONNECTION);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
@@ -117,9 +111,8 @@ int ctsvc_contacts_internal_disconnect()
 		ctsvc_db_deinit();
 		thread_connection--;
 
-		if (1 <= ctsvc_connection) {
+		if (1 <= ctsvc_connection)
 			ctsvc_connection--;
-		}
 	}
 
 	ctsvc_mutex_unlock(CTS_MUTEX_CONNECTION);

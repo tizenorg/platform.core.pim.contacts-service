@@ -1,7 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@
 #include "ctsvc_ipc_marshal.h"
 #include "ctsvc_view.h"
 
-static int __ctsvc_ipc_unmarshal_my_profile(pims_ipc_data_h ipc_data, const char* view_uri, contacts_record_h record);
+static int __ctsvc_ipc_unmarshal_my_profile(pims_ipc_data_h ipc_data, const char *view_uri, contacts_record_h record);
 static int __ctsvc_ipc_marshal_my_profile(const contacts_record_h record, pims_ipc_data_h ipc_data);
 
 ctsvc_ipc_marshal_record_plugin_cb_s _ctsvc_ipc_record_my_profile_plugin_cb = {
@@ -29,12 +29,12 @@ ctsvc_ipc_marshal_record_plugin_cb_s _ctsvc_ipc_record_my_profile_plugin_cb = {
 	.marshal_record = __ctsvc_ipc_marshal_my_profile
 };
 
-static int __ctsvc_ipc_unmarshal_my_profile(pims_ipc_data_h ipc_data, const char* view_uri, contacts_record_h record)
+static int __ctsvc_ipc_unmarshal_my_profile(pims_ipc_data_h ipc_data, const char *view_uri, contacts_record_h record)
 {
-	RETV_IF(ipc_data==NULL,CONTACTS_ERROR_NO_DATA);
-	RETV_IF(record==NULL,CONTACTS_ERROR_NO_DATA);
+	RETV_IF(NULL == ipc_data, CONTACTS_ERROR_NO_DATA);
+	RETV_IF(NULL == record, CONTACTS_ERROR_NO_DATA);
 
-	ctsvc_my_profile_s* pmy_profile = (ctsvc_my_profile_s*) record;
+	ctsvc_my_profile_s *pmy_profile = (ctsvc_my_profile_s*) record;
 
 	do {
 		if (ctsvc_ipc_unmarshal_int(ipc_data, &pmy_profile->id) != CONTACTS_ERROR_NONE) break;
@@ -63,24 +63,24 @@ static int __ctsvc_ipc_unmarshal_my_profile(pims_ipc_data_h ipc_data, const char
 		return CONTACTS_ERROR_NONE;
 	} while (0);
 
-	CTS_ERR("_ctsvc_ipc_unmarshal fail");
+	CTS_ERR("__ctsvc_ipc_unmarshal_my_profile() Fail");
 	return CONTACTS_ERROR_INVALID_PARAMETER;
 }
 
 static int __ctsvc_ipc_marshal_my_profile(const contacts_record_h record, pims_ipc_data_h ipc_data)
 {
-	ctsvc_my_profile_s* pcontact = (ctsvc_my_profile_s*)record;
-	RETV_IF(ipc_data==NULL,CONTACTS_ERROR_NO_DATA);
-	RETV_IF(pcontact==NULL,CONTACTS_ERROR_NO_DATA);
+	ctsvc_my_profile_s *pcontact = (ctsvc_my_profile_s*)record;
+	RETV_IF(NULL == ipc_data, CONTACTS_ERROR_NO_DATA);
+	RETV_IF(NULL == pcontact, CONTACTS_ERROR_NO_DATA);
 
 	do {
-		if (ctsvc_ipc_marshal_int((pcontact->id),ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_int((pcontact->changed_time),ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_int((pcontact->addressbook_id),ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_string((pcontact->display_name),ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_string((pcontact->reverse_display_name),ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_string((pcontact->uid),ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_string((pcontact->image_thumbnail_path),ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_int((pcontact->id), ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_int((pcontact->changed_time), ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_int((pcontact->addressbook_id), ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_string((pcontact->display_name), ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_string((pcontact->reverse_display_name), ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_string((pcontact->uid), ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_string((pcontact->image_thumbnail_path), ipc_data) != CONTACTS_ERROR_NONE) break;
 
 		if (ctsvc_ipc_marshal_list((contacts_list_h)pcontact->name, ipc_data) != CONTACTS_ERROR_NONE) break;
 		if (ctsvc_ipc_marshal_list((contacts_list_h)pcontact->note, ipc_data) != CONTACTS_ERROR_NONE) break;
@@ -100,7 +100,7 @@ static int __ctsvc_ipc_marshal_my_profile(const contacts_record_h record, pims_i
 		return CONTACTS_ERROR_NONE;
 	} while (0);
 
-	CTS_ERR("_ctsvc_ipc_marshal fail");
+	CTS_ERR("_ctsvc_ipc_marshal() Fail");
 	return CONTACTS_ERROR_INVALID_PARAMETER;
 }
 

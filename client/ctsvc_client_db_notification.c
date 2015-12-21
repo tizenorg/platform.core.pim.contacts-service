@@ -23,7 +23,7 @@
 #include "ctsvc_client_handle.h"
 #include "ctsvc_client_ipc.h"
 
-static int _ctsvc_db_view_check_read_permission(const char* view_uri)
+static int _client_noti_check_read_permission(const char *view_uri)
 {
 	int ret;
 	bool result = false;
@@ -53,60 +53,76 @@ static int _ctsvc_db_view_check_read_permission(const char* view_uri)
 			|| STRING_EQUAL == strncmp(view_uri, CTSVC_VIEW_URI_SPEEDDIAL, strlen(CTSVC_VIEW_URI_SPEEDDIAL))
 			|| STRING_EQUAL == strncmp(view_uri, CTSVC_VIEW_URI_SDN, strlen(CTSVC_VIEW_URI_SDN))
 			|| STRING_EQUAL == strncmp(view_uri, CTSVC_VIEW_URI_GROUP_RELATION, strlen(CTSVC_VIEW_URI_GROUP_RELATION))) {
-		ret = ctsvc_ipc_client_check_permission(CTSVC_PERMISSION_CONTACT_READ, &result);
-		RETVM_IF(ret != CONTACTS_ERROR_NONE, ret, "ctsvc_ipc_client_check_permission() Fail(%d)", ret);
-		RETVM_IF(result == false, CONTACTS_ERROR_PERMISSION_DENIED, "Permission denied (contact read)");
-	}
-	else if (STRING_EQUAL == strncmp(view_uri, CTSVC_VIEW_URI_PHONELOG, strlen(CTSVC_VIEW_URI_PHONELOG))) {
-		ret = ctsvc_ipc_client_check_permission(CTSVC_PERMISSION_PHONELOG_READ, &result);
-		RETVM_IF(ret != CONTACTS_ERROR_NONE, ret, "ctsvc_ipc_client_check_permission() Fail(%d)", ret);
-		RETVM_IF(result == false, CONTACTS_ERROR_PERMISSION_DENIED, "Permission denied (phonelog read)");
-	}
+				ret = ctsvc_ipc_client_check_permission(CTSVC_PERMISSION_CONTACT_READ, &result);
+				if (CONTACTS_ERROR_NONE != ret) {
+					CTS_ERR("ctsvc_ipc_client_check_permission() Fail(%d)", ret);
+					return ret;
+				}
+
+				RETVM_IF(result == false, CONTACTS_ERROR_PERMISSION_DENIED,
+						"Permission denied(contact read)");
+			} else if (STRING_EQUAL == strncmp(view_uri, CTSVC_VIEW_URI_PHONELOG, strlen(CTSVC_VIEW_URI_PHONELOG))) {
+				ret = ctsvc_ipc_client_check_permission(CTSVC_PERMISSION_PHONELOG_READ, &result);
+				if (CONTACTS_ERROR_NONE != ret) {
+					CTS_ERR("ctsvc_ipc_client_check_permission() Fail(%d)", ret);
+					return ret;
+				}
+
+				RETVM_IF(result == false, CONTACTS_ERROR_PERMISSION_DENIED,
+						"Permission denied(phonelog read)");
+			}
 
 	return CONTACTS_ERROR_NONE;
 }
 
-API int contacts_db_add_changed_cb(const char* view_uri, contacts_db_changed_cb cb,
-		void* user_data)
+API int contacts_db_add_changed_cb(const char *view_uri, contacts_db_changed_cb cb,
+		void *user_data)
 {
 	int ret;
 	contacts_h contact = NULL;
 
-	RETVM_IF(NULL == view_uri, CONTACTS_ERROR_INVALID_PARAMETER,
-			"Invalid parameter : view_uri is null");
-	RETVM_IF(NULL == cb, CONTACTS_ERROR_INVALID_PARAMETER,
-			"Invalid parameter : callback is null");
+	RETV_IF(NULL == view_uri, CONTACTS_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == cb, CONTACTS_ERROR_INVALID_PARAMETER);
 
-	ret = _ctsvc_db_view_check_read_permission(view_uri);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "_ctsvc_db_view_check_read_permission() Fail(%d)", ret);
+	ret = _client_noti_check_read_permission(view_uri);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret,
+			"_client_noti_check_read_permission() Fail(%d)", ret);
 
 	ret = ctsvc_client_handle_get_p(&contact);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_client_handle_get_p() Fail(%d)", ret);
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("ctsvc_client_handle_get_p() Fail(%d)", ret);
+		return ret;
+	}
 
 	ret = ctsvc_inotify_subscribe(contact, view_uri, cb, user_data);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret,
-			"ctsvc_inotify_subscribe(%s) Fail(%d)", view_uri, ret);
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("ctsvc_inotify_subscribe(%s) Fail(%d)", view_uri, ret);
+		return ret;
+	}
 
 	return CONTACTS_ERROR_NONE;
 }
 
-API int contacts_db_remove_changed_cb(const char* view_uri, contacts_db_changed_cb cb,
-		void* user_data)
+API int contacts_db_remove_changed_cb(const char *view_uri, contacts_db_changed_cb cb,
+		void *user_data)
 {
 	int ret;
 	contacts_h contact = NULL;
 
-	RETVM_IF(NULL == view_uri, CONTACTS_ERROR_INVALID_PARAMETER,
-			"Invalid parameter : view_uri is null");
-	RETVM_IF(NULL == cb, CONTACTS_ERROR_INVALID_PARAMETER,
-			"Invalid parameter : callback is null");
+	RETV_IF(NULL == view_uri, CONTACTS_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == cb, CONTACTS_ERROR_INVALID_PARAMETER);
 
 	ret = ctsvc_client_handle_get_p(&contact);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_client_handle_get_p() Fail(%d)", ret);
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("ctsvc_client_handle_get_p() Fail(%d)", ret);
+		return ret;
+	}
 
 	ret = ctsvc_inotify_unsubscribe(contact, view_uri, cb, user_data);
-	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret,
-			"ctsvc_inotify_unsubscribe(%s) Fail(%d)", view_uri, ret);
+	if (CONTACTS_ERROR_NONE != ret) {
+		CTS_ERR("ctsvc_inotify_unsubscribe(%s) Fail(%d)", view_uri, ret);
+		return ret;
+	}
 
 	return CONTACTS_ERROR_NONE;
 }

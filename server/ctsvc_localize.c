@@ -1,7 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@
 
 int ctsvc_get_sort_type_from_language(int language)
 {
-	switch(language) {
+	switch (language) {
 	case CTSVC_LANG_CHINESE:
 		return CTSVC_SORT_CJK;
 	case CTSVC_LANG_JAPANESE:
@@ -126,7 +126,7 @@ int ctsvc_get_name_sort_type(const char *src)
 void ctsvc_extra_normalize(UChar *word, int32_t word_size)
 {
 	int i;
-	for (i=0;i<word_size;i++) {
+	for (i = 0; i < word_size; i++) {
 		/* FF00 ~ FF60, FFE0~FFE6 : fullwidth -> halfwidth */
 		if (CTSVC_COMPARE_BETWEEN((UChar)0xFF00, word[i], (UChar)0xFF60)) {
 			int unicode_value1 = 0;
@@ -134,8 +134,7 @@ void ctsvc_extra_normalize(UChar *word, int32_t word_size)
 			unicode_value1 = 0x0;
 			unicode_value2 = (0xFF & word[i]) + 0x20;
 			word[i] = unicode_value1 << 8 | unicode_value2;
-		}
-		else if (ctsvc_is_hangul(word[i])) {
+		} else if (ctsvc_is_hangul(word[i])) {
 			ctsvc_hangul_compatibility2jamo(&word[i]);
 		}
 	}
@@ -144,16 +143,15 @@ void ctsvc_extra_normalize(UChar *word, int32_t word_size)
 void ctsvc_extra_index_normalize(UChar *word, int32_t word_size)
 {
 	int i;
-	for (i=0;i<word_size;i++) {
-		// FF00 ~ FF60, FFE0~FFE6 : fullwidth -> halfwidth
+	for (i = 0; i < word_size; i++) {
+		/* FF00 ~ FF60, FFE0~FFE6 : fullwidth -> halfwidth */
 		if (CTSVC_COMPARE_BETWEEN((UChar)0xFF00, word[i], (UChar)0xFF60)) {
 			int unicode_value1 = 0;
 			int unicode_value2 = 0;
 			unicode_value1 = 0x0;
 			unicode_value2 = (0xFF & word[i]) + 0x20;
 			word[i] = unicode_value1 << 8 | unicode_value2;
-		}
-		else if (ctsvc_is_hangul(word[i])) {
+		} else if (ctsvc_is_hangul(word[i])) {
 			ctsvc_hangul_jamo2compatibility(&word[i]);
 		}
 	}
@@ -163,7 +161,7 @@ const char *ctsvc_get_language_locale(int lang)
 {
 	char *langset = ctsvc_get_langset();
 
-	switch(lang) {
+	switch (lang) {
 	case CTSVC_LANG_AZERBAIJAN: /* az, Azerbaijan */
 		return "az";
 	case CTSVC_LANG_ARABIC: /* ar, Bahrain - Arabic */
@@ -197,15 +195,13 @@ const char *ctsvc_get_language_locale(int lang)
 	case CTSVC_LANG_GALICIAN: /* gl, Spain - Galician */
 		return "gl";
 	case CTSVC_LANG_HINDI: /* hi, India - Hindi, Marathi, Nepali */
-		if (STRING_EQUAL == strncmp(langset, "hi", strlen("hi"))) {
+		if (STRING_EQUAL == strncmp(langset, "hi", strlen("hi")))
 			return "hi";
-		}
-		else if (STRING_EQUAL == strncmp(langset, "mr", strlen("mr"))) {
+		else if (STRING_EQUAL == strncmp(langset, "mr", strlen("mr")))
 			return "mr";
-		}
-		else if (STRING_EQUAL == strncmp(langset, "ne", strlen("ne"))) {
+		else if (STRING_EQUAL == strncmp(langset, "ne", strlen("ne")))
 			return "ne";
-		}
+
 		return "hi";
 	case CTSVC_LANG_CROATIAN: /* hr, Bosnia and Herzegovina - Croatian */
 		return "hr";
@@ -260,50 +256,49 @@ const char *ctsvc_get_language_locale(int lang)
 	case CTSVC_LANG_THAI: /* th_TH, Thai */
 		return "th";
 	case CTSVC_LANG_BENGALI: /* as, bn */
-		if (STRING_EQUAL == strncmp(langset, "as", strlen("as"))) {
+		if (STRING_EQUAL == strncmp(langset, "as", strlen("as")))
 			return "as";
-		}
 		return "bn";
 	case CTSVC_LANG_PUNJABI: /* pa, India */
-			return "pa";
+		return "pa";
 	case CTSVC_LANG_MALAYALAM:
-			return "ml";
+		return "ml";
 	case CTSVC_LANG_TELUGU:
-			return "te";
+		return "te";
 	case CTSVC_LANG_TAMIL:
-			return "ta";
+		return "ta";
 	case CTSVC_LANG_ORIYA:
-			return "or";
+		return "or";
 	case CTSVC_LANG_SINHALA:
-			return "si";
+		return "si";
 	case CTSVC_LANG_GUJARATI:
-			return "gu";
+		return "gu";
 	case CTSVC_LANG_KANNADA:
-			return "kn";
+		return "kn";
 	case CTSVC_LANG_LAO:
-			return "lo";
+		return "lo";
 	case CTSVC_LANG_HEBREW:
-			return "he";
+		return "he";
 	case CTSVC_LANG_VIETNAMESE:
-			return "vi";
+		return "vi";
 	case CTSVC_LANG_PERSIAN:
-			return "fa";
+		return "fa";
 	case CTSVC_LANG_UZBEK:
-			return "uz";
+		return "uz";
 	case CTSVC_LANG_URDU:
-			return "ur";
+		return "ur";
 	case CTSVC_LANG_ALBANIAN:
-			return "sq";
+		return "sq";
 	case CTSVC_LANG_BURMESE:
-			return "my";
+		return "my";
 	case CTSVC_LANG_MALAY:
-			return "ms";
+		return "ms";
 	case CTSVC_LANG_KHMER:
-			return "km";
+		return "km";
 	case CTSVC_LANG_INDONESIAN:
-			return "id";
+		return "id";
 	case CTSVC_LANG_TAGALOG:
-			return "tl";
+		return "tl";
 	}
 
 	return "";

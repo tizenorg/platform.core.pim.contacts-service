@@ -1,7 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,10 +71,11 @@ static inline bool is_japanese(UChar src)
 	if (CTSVC_COMPARE_BETWEEN(CTSVC_JAPANESE_KATAKANA_START, src, CTSVC_JAPANESE_KATAKANA_END)
 			|| CTSVC_COMPARE_BETWEEN(CTSVC_JAPANESE_KATAKANA_PHONETIC_EXTENSIONS_START, src, CTSVC_JAPANESE_KATAKANA_PHONETIC_EXTENSIONS_END)
 			|| CTSVC_COMPARE_BETWEEN(CTSVC_JAPANESE_HALFWIDTH_AND_FULLWIDTH_FORMS_START, src, CTSVC_JAPANESE_HALFWIDTH_AND_FULLWIDTH_FORMS_END)
-			|| CTSVC_COMPARE_BETWEEN(CTSVC_JAPANESE_HIRAGANA_START, src, CTSVC_JAPANESE_HIRAGANA_END))
+			|| CTSVC_COMPARE_BETWEEN(CTSVC_JAPANESE_HIRAGANA_START, src, CTSVC_JAPANESE_HIRAGANA_END)) {
 		return true;
-	else
+	} else {
 		return false;
+	}
 }
 
 
@@ -96,36 +97,30 @@ int ctsvc_convert_japanese_to_hiragana_unicode(UChar *src, UChar *dest, int dest
 					|| (unicode_value2 == 0xF2 || unicode_value2 == 0xF3)) {
 				unicode_value2 -= 0x60;
 				dest[j] = unicode_value1 << 8 | unicode_value2;
-			}
-			else {
+			} else {
 				dest[j] = src[i];
 			}
-		}
-		else if (CTSVC_COMPARE_BETWEEN(CTSVC_JAPANESE_HALFWIDTH_AND_FULLWIDTH_FORMS_START,
-							src[i], CTSVC_JAPANESE_HALFWIDTH_AND_FULLWIDTH_FORMS_END)) {
+		} else if (CTSVC_COMPARE_BETWEEN(CTSVC_JAPANESE_HALFWIDTH_AND_FULLWIDTH_FORMS_START,
+					src[i], CTSVC_JAPANESE_HALFWIDTH_AND_FULLWIDTH_FORMS_END)) {
 			unicode_value1 = 0x30;
 			if (i+1 < len && (0xFF & (src[i+1])) == 0x9E
 					&& 0x76 <= unicode_value2 && unicode_value2 <= 0x89) {
 				unicode_value2 = japanese_halfwidth_katakana_sonant_to_hiragana[unicode_value2 - 0x76];
 				dest[j] = unicode_value1 << 8 | unicode_value2;
 				i++;
-			}
-			else if (i+1 < len && (0xFF & (src[i])) == 0x9F
+			} else if (i+1 < len && (0xFF & (src[i])) == 0x9F
 					&& 0x8a <= unicode_value2 && unicode_value2 <= 0x8e) {
 				unicode_value2 = japanese_halfwidth_katakana_half_dullness_to_hiragana[unicode_value2 - 0x8a];
 				dest[j] = unicode_value1 << 8 | unicode_value2;
 				i++;
-			}
-			else if (0x66 <= unicode_value2 && unicode_value2 <= 0x9d) {
+			} else if (0x66 <= unicode_value2 && unicode_value2 <= 0x9d) {
 				unicode_value2 = japanese_halfwidth_katakana_to_hiragana[unicode_value2 - 0x66];
 				dest[j] = unicode_value1 << 8 | unicode_value2;
-			}
-			else {
+			} else {
 				dest[j] = src[i];
 			}
-		}
-		else if (CTSVC_COMPARE_BETWEEN(CTSVC_ASCII_HALFWIDTH_AND_FULLWIDTH_FORMS_START,
-							src[i], CTSVC_ASCII_HALFWIDTH_AND_FULLWIDTH_FORMS_END)) {
+		} else if (CTSVC_COMPARE_BETWEEN(CTSVC_ASCII_HALFWIDTH_AND_FULLWIDTH_FORMS_START,
+					src[i], CTSVC_ASCII_HALFWIDTH_AND_FULLWIDTH_FORMS_END)) {
 			unicode_value1 = 0x00;
 			unicode_value2 = unicode_value2 - 0x20;
 			dest[j] = unicode_value1 << 8 | unicode_value2;
@@ -149,19 +144,19 @@ int ctsvc_convert_japanese_to_hiragana(const char *src, char **dest)
 
 	u_strFromUTF8(NULL, 0, &size, src, strlen(src), &status);
 	if (U_FAILURE(status) && status != U_BUFFER_OVERFLOW_ERROR) {
-		CTS_ERR("u_strFromUTF8 to get the dest length Failed(%s)", u_errorName(status));
+		CTS_ERR("u_strFromUTF8 to get the dest length Fail(%s)", u_errorName(status));
 		return CONTACTS_ERROR_SYSTEM;
 	}
 	status = U_ZERO_ERROR;
 	tmp_result = calloc(1, sizeof(UChar) * (size + 1));
 	if (NULL == tmp_result) {
-		CTS_ERR("calloc Fail");
+		CTS_ERR("calloc() Fail");
 		return CONTACTS_ERROR_OUT_OF_MEMORY;
 	}
 
 	u_strFromUTF8(tmp_result, size + 1, NULL, src, -1, &status);
 	if (U_FAILURE(status)) {
-		CTS_ERR("u_strFromUTF8 Failed(%s)", u_errorName(status));
+		CTS_ERR("u_strFromUTF8 Fail(%s)", u_errorName(status));
 		free(tmp_result);
 		return CONTACTS_ERROR_SYSTEM;
 	}
@@ -176,7 +171,7 @@ int ctsvc_convert_japanese_to_hiragana(const char *src, char **dest)
 	ctsvc_convert_japanese_to_hiragana_unicode(tmp_result, result, size + 1);
 	u_strToUTF8(NULL, 0, &size, result, -1, &status);
 	if (U_FAILURE(status) && status != U_BUFFER_OVERFLOW_ERROR) {
-		CTS_ERR("u_strToUTF8 to get the dest length Failed(%s)", u_errorName(status));
+		CTS_ERR("u_strToUTF8 to get the dest length Fail(%s)", u_errorName(status));
 		free(tmp_result);
 		free(result);
 		return CONTACTS_ERROR_SYSTEM;
@@ -193,7 +188,7 @@ int ctsvc_convert_japanese_to_hiragana(const char *src, char **dest)
 
 	u_strToUTF8(*dest, size + 1, &size, result, -1, &status);
 	if (U_FAILURE(status)) {
-		CTS_ERR("u_strToUTF8 Failed(%s)", u_errorName(status));
+		CTS_ERR("u_strToUTF8 Fail(%s)", u_errorName(status));
 		free(tmp_result);
 		free(result);
 		free(*dest);

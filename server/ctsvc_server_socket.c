@@ -1,7 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,9 @@ struct client_info {
 	char *uid;
 	char *client_session;
 };
-static GHashTable *_client_info_table = NULL; // key : socket_fd, value : struct client_info*
+
+/* key : socket_fd, value : struct client_info* */
+static GHashTable *_client_info_table = NULL;
 
 static inline int __ctsvc_server_socket_safe_write(int fd, char *buf, int buf_size)
 {
@@ -143,8 +145,7 @@ static void __ctsvc_server_socket_import_sim(GIOChannel *src, int size)
 		receiver[len] = '\0';
 		CTS_DBG("sim_id %d", atoi(receiver));
 		ret = ctsvc_server_sim_import_contact(src, atoi(receiver));
-	}
-	else {
+	} else {
 		ret = ctsvc_server_sim_import_contact(src, 0);
 	}
 
@@ -177,8 +178,7 @@ static void __ctsvc_server_socket_get_sim_init_status(GIOChannel *src, int size)
 		receiver[len] = '\0';
 		CTS_DBG("sim_id : %d", atoi(receiver));
 		ret = ctsvc_server_socket_get_sim_init_status(src, atoi(receiver));
-	}
-	else {
+	} else {
 		ret = ctsvc_server_socket_get_sim_init_status(src, 0);
 	}
 
@@ -450,9 +450,9 @@ int ctsvc_server_socket_init(void)
 	RETVM_IF(-1 == sockfd, CONTACTS_ERROR_SYSTEM, "socket() Fail(errno = %d)", errno);
 
 	ret = bind(sockfd, (struct sockaddr *)&addr, sizeof(addr));
-	if (-1 == ret){
+	if (-1 == ret) {
 		close(sockfd);
-		CTS_ERR("bind() Failed(errno = %d)", errno);
+		CTS_ERR("bind() Fail(errno = %d)", errno);
 		return CONTACTS_ERROR_SYSTEM;
 	}
 

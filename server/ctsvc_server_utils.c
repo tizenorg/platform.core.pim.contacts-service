@@ -1,7 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ bool ctsvc_server_have_telephony_feature(void)
 inline int ctsvc_server_set_default_sort(int sort)
 {
 	int ret = vconf_set_int(ctsvc_get_default_sort_vconfkey(), sort);
-	RETVM_IF(ret<0, CONTACTS_ERROR_SYSTEM, "vconf_set_int() Fail(%d)", ret);
+	RETVM_IF(ret < 0, CONTACTS_ERROR_SYSTEM, "vconf_set_int() Fail(%d)", ret);
 	ctsvc_set_sort_memory(sort);
 	return CONTACTS_ERROR_NONE;
 }
@@ -69,8 +69,7 @@ static void __ctsvc_server_change_language_cb(keynode_t *key, void *data)
 	char *langset = NULL;
 
 	new_langset = vconf_keynode_get_str(key);
-	if (NULL == new_langset)
-	{
+	if (NULL == new_langset) {
 		CTS_ERR("vconf_keynode_get_str() Fail");
 		return;
 	}
@@ -82,13 +81,12 @@ static void __ctsvc_server_change_language_cb(keynode_t *key, void *data)
 	if (STRING_EQUAL != strcmp(langset, new_langset)) {
 		bool sort_name_update = false;
 		old_primary_sort = ctsvc_get_primary_sort();
-		if (old_primary_sort < 0) {
-			RETM_IF(ret<0, "ctsvc_get_primary_sort() Fail(%d)", ret);
-		}
+		if (old_primary_sort < 0)
+			RETM_IF(ret < 0, "ctsvc_get_primary_sort() Fail(%d)", ret);
+
 		old_secondary_sort = ctsvc_get_secondary_sort();
-		if (old_secondary_sort < 0) {
-			RETM_IF(ret<0, "ctsvc_get_secondary_sort() Fail(%d)", ret);
-		}
+		if (old_secondary_sort < 0)
+			RETM_IF(ret < 0, "ctsvc_get_secondary_sort() Fail(%d)", ret);
 
 		if (STRING_EQUAL == strncmp(langset, "zh", strlen("zh")) ||
 				STRING_EQUAL == strncmp(langset, "ko", strlen("ko")) ||
@@ -109,10 +107,9 @@ static void __ctsvc_server_change_language_cb(keynode_t *key, void *data)
 		new_secondary_sort = CTSVC_SORT_WESTERN;
 
 		if (sort_name_update) {
-		   ctsvc_server_set_default_sort(new_primary_sort);
+			ctsvc_server_set_default_sort(new_primary_sort);
 			ctsvc_server_update_sort_name();
-		}
-		else {
+		} else {
 			if (new_primary_sort != old_primary_sort)
 				ret = ctsvc_server_update_sort(old_primary_sort, old_secondary_sort, new_primary_sort, new_secondary_sort);
 
@@ -128,7 +125,7 @@ void ctsvc_server_final_configuration(void)
 	int ret = -1;
 
 	ret = vconf_ignore_key_changed(VCONFKEY_LANGSET, __ctsvc_server_change_language_cb);
-	RETM_IF(ret<0,"vconf_ignore_key_changed(%s) Fail(%d)", VCONFKEY_LANGSET, ret);
+	RETM_IF(ret < 0, "vconf_ignore_key_changed(%s) Fail(%d)", VCONFKEY_LANGSET, ret);
 
 	ctsvc_server_sim_final();
 }
@@ -146,7 +143,7 @@ int ctsvc_server_init_configuration(void)
 
 	ret = vconf_get_int(ctsvc_get_default_sort_vconfkey(), &sort_type);
 	if (ret < 0 || sort_type == CTSVC_SORT_OTHERS) {
-		CTS_ERR("vconf_get_int(%s) Fail(%d)", ctsvc_get_default_sort_vconfkey(),ret);
+		CTS_ERR("vconf_get_int(%s) Fail(%d)", ctsvc_get_default_sort_vconfkey(), ret);
 		sort_type = ctsvc_get_sort_type_from_language(system_language);
 		if (sort_type == CTSVC_SORT_OTHERS)
 			sort_type = CTSVC_SORT_WESTERN;
@@ -155,11 +152,11 @@ int ctsvc_server_init_configuration(void)
 
 	ret = vconf_notify_key_changed(VCONFKEY_LANGSET,
 			__ctsvc_server_change_language_cb, NULL);
-	RETVM_IF(ret<0, CONTACTS_ERROR_SYSTEM, "vconf_notify_key_changed(%s) Fail(%d)",
+	RETVM_IF(ret < 0, CONTACTS_ERROR_SYSTEM, "vconf_notify_key_changed(%s) Fail(%d)",
 			VCONFKEY_LANGSET, ret);
 
 	ret = ctsvc_server_sim_init();
-	RETVM_IF(ret !=CONTACTS_ERROR_NONE, ret, "ctsvc_server_sim_init Fail(%d)", ret);
+	RETVM_IF(ret != CONTACTS_ERROR_NONE, ret, "ctsvc_server_sim_init Fail(%d)", ret);
 
 	return CONTACTS_ERROR_NONE;
 }

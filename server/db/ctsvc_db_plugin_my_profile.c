@@ -1,7 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,12 +43,12 @@
 #define CTSVC_MY_PROFILE_DISPLAY_NAME_MAX_LEN 1024
 
 static int __ctsvc_db_my_profile_insert_record(contacts_record_h record, int *id);
-static int __ctsvc_db_my_profile_get_record(int id, contacts_record_h* out_record);
+static int __ctsvc_db_my_profile_get_record(int id, contacts_record_h *out_record);
 static int __ctsvc_db_my_profile_update_record(contacts_record_h record);
 static int __ctsvc_db_my_profile_delete_record(int id);
 
-static int __ctsvc_db_my_profile_get_all_records(int offset, int limit, contacts_list_h* out_list);
-static int __ctsvc_db_my_profile_get_records_with_query(contacts_query_h query, int offset, int limit, contacts_list_h* out_list);
+static int __ctsvc_db_my_profile_get_all_records(int offset, int limit, contacts_list_h *out_list);
+static int __ctsvc_db_my_profile_get_records_with_query(contacts_query_h query, int offset, int limit, contacts_list_h *out_list);
 
 ctsvc_db_plugin_info_s ctsvc_db_plugin_my_profile = {
 	.is_query_only = false,
@@ -78,11 +78,11 @@ static int __ctsvc_db_get_my_profile_base_info(int id, ctsvc_my_profile_s *my_pr
 
 	snprintf(query, sizeof(query),
 			"SELECT my_profile_id, addressbook_id, changed_time, %s, image_thumbnail_path, uid "
-				"FROM "CTS_TABLE_MY_PROFILES" WHERE my_profile_id = %d AND deleted = 0",
-				ctsvc_get_display_column(), id);
+			"FROM "CTS_TABLE_MY_PROFILES" WHERE my_profile_id = %d AND deleted = 0",
+			ctsvc_get_display_column(), id);
 
 	ret = ctsvc_query_prepare(query, &stmt);
-	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
+	RETVM_IF(NULL == stmt, ret, "ctsvc_query_prepare() Fail(%d)", ret);
 
 	ret = ctsvc_stmt_step(stmt);
 	if (1 /*CTS_TRUE*/ != ret) {
@@ -120,12 +120,12 @@ static int __ctsvc_db_my_profile_get_data(int id, ctsvc_my_profile_s *my_profile
 	char query[CTS_SQL_MAX_LEN] = {0};
 
 	snprintf(query, sizeof(query),
-				"SELECT datatype, id, contact_id, is_default, data1, data2, "
-					"data3, data4, data5, data6, data7, data8, data9, data10, data11, data12 "
-					"FROM "CTS_TABLE_DATA" WHERE contact_id = %d AND is_my_profile = 1", id);
+			"SELECT datatype, id, contact_id, is_default, data1, data2, "
+			"data3, data4, data5, data6, data7, data8, data9, data10, data11, data12 "
+			"FROM "CTS_TABLE_DATA" WHERE contact_id = %d AND is_my_profile = 1", id);
 
 	ret = ctsvc_query_prepare(query, &stmt);
-	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
+	RETVM_IF(NULL == stmt, ret, "ctsvc_query_prepare() Fail(%d)", ret);
 
 	ret = ctsvc_stmt_step(stmt);
 	if (1 /*CTS_TRUE */!= ret) {
@@ -192,7 +192,7 @@ static int __ctsvc_db_my_profile_get_data(int id, ctsvc_my_profile_s *my_profile
 
 }
 
-static int __ctsvc_db_my_profile_get_record(int id, contacts_record_h* out_record)
+static int __ctsvc_db_my_profile_get_record(int id, contacts_record_h *out_record)
 {
 	int ret;
 	contacts_record_h record;
@@ -202,7 +202,7 @@ static int __ctsvc_db_my_profile_get_record(int id, contacts_record_h* out_recor
 	*out_record = NULL;
 
 	contacts_record_create(_contacts_my_profile._uri, &record);
-	my_profile = (ctsvc_my_profile_s *)record;
+	my_profile = (ctsvc_my_profile_s*)record;
 	ret = __ctsvc_db_get_my_profile_base_info(id, my_profile);
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("cts_get_main_contacts_info(ALL) Fail(%d)", ret);
@@ -230,13 +230,13 @@ static int __ctsvc_db_my_profile_delete_record(int id)
 	char query[CTS_SQL_MAX_LEN] = {0};
 
 	ret = ctsvc_begin_trans();
-	RETVM_IF(ret, ret, "DB error : ctsvc_begin_trans() Fail(%d)", ret);
+	RETVM_IF(ret, ret, "ctsvc_begin_trans() Fail(%d)", ret);
 
 	snprintf(query, sizeof(query),
-		"SELECT addressbook_id FROM "CTSVC_DB_VIEW_MY_PROFILE" WHERE my_profile_id = %d", id);
+			"SELECT addressbook_id FROM "CTSVC_DB_VIEW_MY_PROFILE" WHERE my_profile_id = %d", id);
 	ret  = ctsvc_query_get_first_int_result(query, &addressbook_id);
 	if (CONTACTS_ERROR_NONE != ret) {
-		CTS_ERR("ctsvc_query_get_first_int_result Fail(%d)", ret);
+		CTS_ERR("ctsvc_query_get_first_int_result() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
 	}
@@ -248,7 +248,7 @@ static int __ctsvc_db_my_profile_delete_record(int id)
 	}
 
 	snprintf(query, sizeof(query), "UPDATE "CTS_TABLE_MY_PROFILES" "
-					"SET deleted = 1, changed_ver = %d WHERE my_profile_id = %d", ctsvc_get_next_ver(), id);
+			"SET deleted = 1, changed_ver = %d WHERE my_profile_id = %d", ctsvc_get_next_ver(), id);
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("ctsvc_query_exec() Fail(%d)", ret);
@@ -260,11 +260,11 @@ static int __ctsvc_db_my_profile_delete_record(int id)
 
 	ret = ctsvc_end_trans(true);
 	if (ret < CONTACTS_ERROR_NONE) {
-		CTS_ERR("DB error : ctsvc_end_trans() Fail(%d)", ret);
+		CTS_ERR("ctsvc_end_trans() Fail(%d)", ret);
 		return ret;
-	}
-	else
+	} else {
 		return CONTACTS_ERROR_NONE;
+	}
 }
 
 static inline int __ctsvc_my_profile_update_data(ctsvc_my_profile_s *my_profile)
@@ -406,11 +406,13 @@ static void __ctsvc_make_my_profile_display_name(ctsvc_my_profile_s *my_profile)
 	free(my_profile->reverse_display_name);
 	my_profile->reverse_display_name = NULL;
 
-	if (0 < my_profile->name->count && my_profile->name->records && my_profile->name->records->data) {
-		name = (ctsvc_name_s *)my_profile->name->records->data;
+	if (0 < my_profile->name->count && my_profile->name->records
+			&& my_profile->name->records->data) {
+		name = (ctsvc_name_s*)my_profile->name->records->data;
 	}
 
-	if (name && (name->first || name->last  || name->prefix || name->addition || name->suffix)) {
+	if (name && (name->first || name->last  || name->prefix || name->addition
+				|| name->suffix)) {
 		char *display = NULL;
 		int len, display_len;
 		int reverse_lang_type = -1;
@@ -426,9 +428,9 @@ static void __ctsvc_make_my_profile_display_name(ctsvc_my_profile_s *my_profile)
 		 *    But, if there is only prefix, reverse sort_name is prefix
 		 */
 		temp_display_len = SAFE_STRLEN(name->first)
-						+ SAFE_STRLEN(name->addition)
-						+ SAFE_STRLEN(name->last)
-						+ SAFE_STRLEN(name->suffix);
+			+ SAFE_STRLEN(name->addition)
+			+ SAFE_STRLEN(name->last)
+			+ SAFE_STRLEN(name->suffix);
 		if (0 < temp_display_len) {
 			temp_display_len += 7;
 			temp_display = calloc(1, temp_display_len);
@@ -436,33 +438,30 @@ static void __ctsvc_make_my_profile_display_name(ctsvc_my_profile_s *my_profile)
 				CTS_ERR("calloc() Fail");
 				return;
 			}
-			len=0;
+			len = 0;
 
 			if (name->last) {
-				len += snprintf(temp_display + len, temp_display_len - len, "%s", name->last);
+				len += snprintf(temp_display + len, temp_display_len - len, "%s",
+						name->last);
 
-				if (reverse_lang_type < 0) {
+				if (reverse_lang_type < 0)
 					reverse_lang_type = ctsvc_check_language_type(temp_display);
-				}
 
 				if (reverse_lang_type != CTSVC_LANG_KOREAN &&
-					reverse_lang_type != CTSVC_LANG_CHINESE &&
-					reverse_lang_type != CTSVC_LANG_JAPANESE) {
+						reverse_lang_type != CTSVC_LANG_CHINESE &&
+						reverse_lang_type != CTSVC_LANG_JAPANESE) {
 					if (name->first || name->addition)
 						len += snprintf(temp_display + len, temp_display_len - len, ",");
 				}
 			}
 
 			if (reverse_lang_type < 0) {
-				if (*temp_display) {
+				if (*temp_display)
 					reverse_lang_type = ctsvc_check_language_type(temp_display);
-				}
-				else if (name->first) {
+				else if (name->first)
 					reverse_lang_type = ctsvc_check_language_type(name->first);
-				}
-				else if (name->addition) {
+				else if (name->addition)
 					reverse_lang_type = ctsvc_check_language_type(name->addition);
-				}
 			}
 
 			if (reverse_lang_type == CTSVC_LANG_JAPANESE) {
@@ -478,13 +477,11 @@ static void __ctsvc_make_my_profile_display_name(ctsvc_my_profile_s *my_profile)
 						len += snprintf(temp_display + len, temp_display_len - len, " ");
 					len += snprintf(temp_display + len, temp_display_len - len, "%s", name->first);
 				}
-			}
-			else {
+			} else {
 				if (name->first) {
 					if (*temp_display) {
-						if (reverse_lang_type < 0) {
+						if (reverse_lang_type < 0)
 							reverse_lang_type = ctsvc_check_language_type(temp_display);
-						}
 
 						if (reverse_lang_type != CTSVC_LANG_KOREAN &&
 								reverse_lang_type != CTSVC_LANG_CHINESE)
@@ -495,9 +492,8 @@ static void __ctsvc_make_my_profile_display_name(ctsvc_my_profile_s *my_profile)
 
 				if (name->addition) {
 					if (*temp_display) {
-						if (reverse_lang_type < 0) {
+						if (reverse_lang_type < 0)
 							reverse_lang_type = ctsvc_check_language_type(temp_display);
-						}
 
 						if (reverse_lang_type != CTSVC_LANG_KOREAN &&
 								reverse_lang_type != CTSVC_LANG_CHINESE)
@@ -509,15 +505,15 @@ static void __ctsvc_make_my_profile_display_name(ctsvc_my_profile_s *my_profile)
 
 			if (name->suffix) {
 				if (*temp_display) {
-					if (reverse_lang_type < 0) {
+					if (reverse_lang_type < 0)
 						reverse_lang_type = ctsvc_check_language_type(temp_display);
-					}
 
-					if (reverse_lang_type == CTSVC_LANG_JAPANESE)
+					if (reverse_lang_type == CTSVC_LANG_JAPANESE) {
 						len += snprintf(temp_display + len, temp_display_len - len, " ");
-					else if (reverse_lang_type != CTSVC_LANG_KOREAN &&
-									reverse_lang_type != CTSVC_LANG_CHINESE)
+					} else if (reverse_lang_type != CTSVC_LANG_KOREAN &&
+							reverse_lang_type != CTSVC_LANG_CHINESE) {
 						len += snprintf(temp_display + len, temp_display_len - len, ", ");
+					}
 				}
 				len += snprintf(temp_display + len, temp_display_len - len, "%s", name->suffix);
 			}
@@ -534,11 +530,9 @@ static void __ctsvc_make_my_profile_display_name(ctsvc_my_profile_s *my_profile)
 			snprintf(display, display_len, "%s %s", name->prefix, temp_display);
 			my_profile->reverse_display_name = display;
 			free(temp_display);
-		}
-		else if (temp_display) {
+		} else if (temp_display) {
 			my_profile->reverse_display_name = temp_display;
-		}
-		else if (name->prefix) {
+		} else if (name->prefix) {
 			my_profile->reverse_display_name = strdup(name->prefix);
 		}
 
@@ -551,15 +545,15 @@ static void __ctsvc_make_my_profile_display_name(ctsvc_my_profile_s *my_profile)
 		 *    But, if there is only prefix, sort_name is prefix
 		 */
 		if (reverse_lang_type == CTSVC_LANG_KOREAN ||
-			reverse_lang_type == CTSVC_LANG_CHINESE)
+				reverse_lang_type == CTSVC_LANG_CHINESE) {
 			my_profile->display_name = SAFE_STRDUP(my_profile->reverse_display_name);
-		else {
+		} else {
 			int lang_type = -1;
 			temp_display = NULL;
 			temp_display_len = SAFE_STRLEN(name->first)
-								+ SAFE_STRLEN(name->addition)
-								+ SAFE_STRLEN(name->last)
-								+ SAFE_STRLEN(name->suffix);
+				+ SAFE_STRLEN(name->addition)
+				+ SAFE_STRLEN(name->last)
+				+ SAFE_STRLEN(name->suffix);
 			if (0 < temp_display_len) {
 				temp_display_len += 6;
 				/* make reverse_temp_display_name */
@@ -611,36 +605,35 @@ static void __ctsvc_make_my_profile_display_name(ctsvc_my_profile_s *my_profile)
 				snprintf(display, display_len, "%s %s", name->prefix, temp_display);
 				my_profile->display_name = display;
 				free(temp_display);
-			}
-			else if (temp_display) {
+			} else if (temp_display) {
 				my_profile->display_name = temp_display;
-			}
-			else if (name->prefix) {
+			} else if (name->prefix) {
 				my_profile->display_name = strdup(name->prefix);
 			}
 		}
 
-		ctsvc_record_set_property_flag((ctsvc_record_s *)my_profile, _contacts_my_profile.display_name, CTSVC_PROPERTY_FLAG_DIRTY);
-	}
-	else {
+		ctsvc_record_set_property_flag((ctsvc_record_s*)my_profile,
+				_contacts_my_profile.display_name, CTSVC_PROPERTY_FLAG_DIRTY);
+	} else {
 		GList *cur;
 		if (my_profile->company && my_profile->company->records) {
-			for (cur=my_profile->company->records;cur;cur=cur->next) {
-				ctsvc_company_s *company = (ctsvc_company_s *)cur->data;
+			for (cur = my_profile->company->records; cur; cur = cur->next) {
+				ctsvc_company_s *company = (ctsvc_company_s*)cur->data;
 				if (company && company->name) {
-					ctsvc_record_set_property_flag((ctsvc_record_s *)my_profile, _contacts_my_profile.display_name, CTSVC_PROPERTY_FLAG_DIRTY);
+					ctsvc_record_set_property_flag((ctsvc_record_s*)my_profile,
+							_contacts_my_profile.display_name, CTSVC_PROPERTY_FLAG_DIRTY);
 					my_profile->display_name = SAFE_STRDUP(company->name);
 					break;
 				}
 			}
 		}
 
-		if (false == ctsvc_record_check_property_flag((ctsvc_record_s *)my_profile, _contacts_my_profile.display_name, CTSVC_PROPERTY_FLAG_DIRTY) &&
+		if (false == ctsvc_record_check_property_flag((ctsvc_record_s*)my_profile, _contacts_my_profile.display_name, CTSVC_PROPERTY_FLAG_DIRTY) &&
 				my_profile->nicknames && my_profile->nicknames->records) {
-			for (cur=my_profile->nicknames->records;cur;cur=cur->next) {
-				ctsvc_nickname_s *nickname = (ctsvc_nickname_s *)cur->data;
+			for (cur = my_profile->nicknames->records; cur; cur = cur->next) {
+				ctsvc_nickname_s *nickname = (ctsvc_nickname_s*)cur->data;
 				if (nickname && nickname->nickname) {
-					ctsvc_record_set_property_flag((ctsvc_record_s *)my_profile, _contacts_my_profile.display_name, CTSVC_PROPERTY_FLAG_DIRTY);
+					ctsvc_record_set_property_flag((ctsvc_record_s*)my_profile, _contacts_my_profile.display_name, CTSVC_PROPERTY_FLAG_DIRTY);
 					free(my_profile->display_name);
 					my_profile->display_name = SAFE_STRDUP(nickname->nickname);
 					break;
@@ -648,12 +641,12 @@ static void __ctsvc_make_my_profile_display_name(ctsvc_my_profile_s *my_profile)
 			}
 		}
 
-		if (false == ctsvc_record_check_property_flag((ctsvc_record_s *)my_profile, _contacts_my_profile.display_name, CTSVC_PROPERTY_FLAG_DIRTY) &&
+		if (false == ctsvc_record_check_property_flag((ctsvc_record_s*)my_profile, _contacts_my_profile.display_name, CTSVC_PROPERTY_FLAG_DIRTY) &&
 				my_profile->numbers && my_profile->numbers->records) {
-			for (cur=my_profile->numbers->records;cur;cur=cur->next) {
-				ctsvc_number_s *number = (ctsvc_number_s *)cur->data;
+			for (cur = my_profile->numbers->records; cur; cur = cur->next) {
+				ctsvc_number_s *number = (ctsvc_number_s*)cur->data;
 				if (number && number->number) {
-					ctsvc_record_set_property_flag((ctsvc_record_s *)my_profile, _contacts_my_profile.display_name, CTSVC_PROPERTY_FLAG_DIRTY);
+					ctsvc_record_set_property_flag((ctsvc_record_s*)my_profile, _contacts_my_profile.display_name, CTSVC_PROPERTY_FLAG_DIRTY);
 					free(my_profile->display_name);
 					my_profile->display_name = SAFE_STRDUP(number->number);
 					break;
@@ -661,12 +654,12 @@ static void __ctsvc_make_my_profile_display_name(ctsvc_my_profile_s *my_profile)
 			}
 		}
 
-		if (false == ctsvc_record_check_property_flag((ctsvc_record_s *)my_profile, _contacts_my_profile.display_name, CTSVC_PROPERTY_FLAG_DIRTY) &&
+		if (false == ctsvc_record_check_property_flag((ctsvc_record_s*)my_profile, _contacts_my_profile.display_name, CTSVC_PROPERTY_FLAG_DIRTY) &&
 				my_profile->emails && my_profile->emails->records) {
-			for (cur=my_profile->emails->records;cur;cur=cur->next) {
-				ctsvc_email_s *email = (ctsvc_email_s *)cur->data;
+			for (cur = my_profile->emails->records; cur; cur = cur->next) {
+				ctsvc_email_s *email = (ctsvc_email_s*)cur->data;
 				if (email && email->email_addr) {
-					ctsvc_record_set_property_flag((ctsvc_record_s *)my_profile, _contacts_my_profile.display_name, CTSVC_PROPERTY_FLAG_DIRTY);
+					ctsvc_record_set_property_flag((ctsvc_record_s*)my_profile, _contacts_my_profile.display_name, CTSVC_PROPERTY_FLAG_DIRTY);
 					free(my_profile->display_name);
 					my_profile->display_name = SAFE_STRDUP(email->email_addr);
 					break;
@@ -674,12 +667,11 @@ static void __ctsvc_make_my_profile_display_name(ctsvc_my_profile_s *my_profile)
 			}
 		}
 
-		if (ctsvc_record_check_property_flag((ctsvc_record_s *)my_profile, _contacts_my_profile.display_name, CTSVC_PROPERTY_FLAG_DIRTY)) {
+		if (ctsvc_record_check_property_flag((ctsvc_record_s*)my_profile, _contacts_my_profile.display_name, CTSVC_PROPERTY_FLAG_DIRTY)) {
 			my_profile->reverse_display_name = SAFE_STRDUP(my_profile->display_name);
-		}
-		else {
+		} else {
 			/* Update as NULL */
-			ctsvc_record_set_property_flag((ctsvc_record_s *)my_profile, _contacts_my_profile.display_name, CTSVC_PROPERTY_FLAG_DIRTY);
+			ctsvc_record_set_property_flag((ctsvc_record_s*)my_profile, _contacts_my_profile.display_name, CTSVC_PROPERTY_FLAG_DIRTY);
 		}
 	}
 	return;
@@ -700,7 +692,7 @@ static int __ctsvc_db_my_profile_update_record(contacts_record_h record)
 	RETVM_IF(ret, ret, "ctsvc_begin_trans() Fail(%d)", ret);
 
 	snprintf(query, sizeof(query),
-		"SELECT my_profile_id FROM "CTSVC_DB_VIEW_MY_PROFILE" WHERE my_profile_id = %d", my_profile->id);
+			"SELECT my_profile_id FROM "CTSVC_DB_VIEW_MY_PROFILE" WHERE my_profile_id = %d", my_profile->id);
 	ret = ctsvc_query_get_first_int_result(query, &id);
 	if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("The index(%d) is Invalid. %d Record(s) is(are) found", my_profile->id, ret);
@@ -709,8 +701,8 @@ static int __ctsvc_db_my_profile_update_record(contacts_record_h record)
 	}
 
 	if (false == ctsvc_have_ab_write_permission(my_profile->addressbook_id)) {
-		CTS_ERR("ctsvc_have_ab_write_permission fail : does not have permission(addressbook_id : %d)",
-					my_profile->addressbook_id);
+		CTS_ERR("ctsvc_have_ab_write_permission Fail: does not have permission(addressbook_id : %d)",
+				my_profile->addressbook_id);
 		ctsvc_end_trans(false);
 		return CONTACTS_ERROR_PERMISSION_DENIED;
 	}
@@ -750,18 +742,17 @@ static int __ctsvc_db_my_profile_update_record(contacts_record_h record)
 			if ((NULL == my_profile->image_thumbnail_path && image->path) ||
 					(my_profile->image_thumbnail_path && NULL == image->path) ||
 					(my_profile->image_thumbnail_path && image->path && STRING_EQUAL != strcmp(my_profile->image_thumbnail_path, image->path))) {
-				ctsvc_record_set_property_flag((ctsvc_record_s *)my_profile, _contacts_my_profile.image_thumbnail_path, CTSVC_PROPERTY_FLAG_DIRTY);
+				ctsvc_record_set_property_flag((ctsvc_record_s*)my_profile, _contacts_my_profile.image_thumbnail_path, CTSVC_PROPERTY_FLAG_DIRTY);
 
 				if (ctsvc_contact_check_image_location(image->path))
 					my_profile->image_thumbnail_path = SAFE_STRDUP(image->path + strlen(CTSVC_CONTACT_IMG_FULL_LOCATION) + 1);
 				else
 					my_profile->image_thumbnail_path = SAFE_STRDUP(image->path);
 			}
-		}
-		else if (my_profile->image_thumbnail_path) {
+		} else if (my_profile->image_thumbnail_path) {
 			free(my_profile->image_thumbnail_path);
 			my_profile->image_thumbnail_path = NULL;
-			ctsvc_record_set_property_flag((ctsvc_record_s *)my_profile, _contacts_my_profile.image_thumbnail_path, CTSVC_PROPERTY_FLAG_DIRTY);
+			ctsvc_record_set_property_flag((ctsvc_record_s*)my_profile, _contacts_my_profile.image_thumbnail_path, CTSVC_PROPERTY_FLAG_DIRTY);
 		}
 	}
 
@@ -781,7 +772,7 @@ static int __ctsvc_db_my_profile_update_record(contacts_record_h record)
 			len = snprintf(query_set, sizeof(query_set), "%s, ", set);
 		len += snprintf(query_set+len, sizeof(query_set)-len, " changed_ver=%d, changed_time=%d", version, (int)time(NULL));
 
-		if (ctsvc_record_check_property_flag((ctsvc_record_s *)my_profile, _contacts_my_profile.display_name, CTSVC_PROPERTY_FLAG_DIRTY)) {
+		if (ctsvc_record_check_property_flag((ctsvc_record_s*)my_profile, _contacts_my_profile.display_name, CTSVC_PROPERTY_FLAG_DIRTY)) {
 			len += snprintf(query_set+len, sizeof(query_set)-len,
 					", display_name=?, reverse_display_name=?");
 			bind_text = g_slist_append(bind_text, strdup(SAFE_STR(my_profile->display_name)));
@@ -792,13 +783,13 @@ static int __ctsvc_db_my_profile_update_record(contacts_record_h record)
 
 		ret = ctsvc_query_prepare(query, &stmt);
 		if (NULL == stmt) {
-			CTS_ERR("DB error : ctsvc_query_prepare() Fail(%d)", ret);
+			CTS_ERR("ctsvc_query_prepare() Fail(%d)", ret);
 			break;
 		}
 
 		if (bind_text) {
 			int i = 0;
-			for (cursor=bind_text,i=1;cursor;cursor=cursor->next,i++) {
+			for (cursor = bind_text, i = 1; cursor; cursor = cursor->next, i++) {
 				const char *text = cursor->data;
 				if (*text)
 					ctsvc_stmt_bind_text(stmt, i, text);
@@ -814,10 +805,10 @@ static int __ctsvc_db_my_profile_update_record(contacts_record_h record)
 		ctsvc_stmt_finalize(stmt);
 	} while (0);
 
-	CTSVC_RECORD_RESET_PROPERTY_FLAGS((ctsvc_record_s *)record);
+	CTSVC_RECORD_RESET_PROPERTY_FLAGS((ctsvc_record_s*)record);
 	CONTACTS_FREE(set);
 	if (bind_text) {
-		for (cursor=bind_text;cursor;cursor=cursor->next)
+		for (cursor = bind_text; cursor; cursor = cursor->next)
 			CONTACTS_FREE(cursor->data);
 		g_slist_free(bind_text);
 	}
@@ -825,12 +816,12 @@ static int __ctsvc_db_my_profile_update_record(contacts_record_h record)
 	ctsvc_set_my_profile_noti();
 
 	ret = ctsvc_end_trans(true);
-	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "DB error : ctsvc_end_trans() Fail(%d)", ret);
+	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "ctsvc_end_trans() Fail(%d)", ret);
 
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_db_my_profile_get_all_records(int offset, int limit, contacts_list_h* out_list)
+static int __ctsvc_db_my_profile_get_all_records(int offset, int limit, contacts_list_h *out_list)
 {
 	int ret;
 	int len;
@@ -849,13 +840,13 @@ static int __ctsvc_db_my_profile_get_all_records(int offset, int limit, contacts
 	}
 
 	ret = ctsvc_query_prepare(query, &stmt);
-	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
+	RETVM_IF(NULL == stmt, ret, "ctsvc_query_prepare() Fail(%d)", ret);
 
 	contacts_list_create(&list);
 	while ((ret = ctsvc_stmt_step(stmt))) {
 		contacts_record_h record;
 		if (1 != ret) {
-			CTS_ERR("DB error : ctsvc_stmt_step() Fail(%d)", ret);
+			CTS_ERR("ctsvc_stmt_step() Fail(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
 			contacts_list_destroy(list, true);
 			return ret;
@@ -863,7 +854,7 @@ static int __ctsvc_db_my_profile_get_all_records(int offset, int limit, contacts
 		my_profile_id = ctsvc_stmt_get_int(stmt, 0);
 		ret = ctsvc_db_get_record(_contacts_my_profile._uri, my_profile_id, &record);
 		if (CONTACTS_ERROR_NONE != ret) {
-			CTS_ERR("DB error : contacts_db_get_record() Fail(%d)", ret);
+			CTS_ERR("contacts_db_get_record() Fail(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
 			contacts_list_destroy(list, true);
 			return ret;
@@ -877,7 +868,7 @@ static int __ctsvc_db_my_profile_get_all_records(int offset, int limit, contacts
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_db_my_profile_get_records_with_query(contacts_query_h query, int offset, int limit, contacts_list_h* out_list)
+static int __ctsvc_db_my_profile_get_records_with_query(contacts_query_h query, int offset, int limit, contacts_list_h *out_list)
 {
 	int ret;
 	int i;
@@ -891,17 +882,16 @@ static int __ctsvc_db_my_profile_get_records_with_query(contacts_query_h query, 
 	int my_profile_id = 0;
 
 	RETV_IF(NULL == query, CONTACTS_ERROR_INVALID_PARAMETER);
-	s_query = (ctsvc_query_s *)query;
+	s_query = (ctsvc_query_s*)query;
 
 	if (s_query->projection) {
-		for (i=0;i<s_query->projection_count;i++) {
+		for (i = 0; i < s_query->projection_count; i++) {
 			if (s_query->projection[i] == CTSVC_PROPERTY_MY_PROFILE_ID) {
 				had_my_profile_id = true;
 				break;
 			}
 		}
-	}
-	else {
+	} else {
 		s_query->projection_count = 0;
 		had_my_profile_id = true;
 	}
@@ -923,7 +913,7 @@ static int __ctsvc_db_my_profile_get_records_with_query(contacts_query_h query, 
 	while ((ret = ctsvc_stmt_step(stmt))) {
 		contacts_record_h record;
 		if (1 != ret) {
-			CTS_ERR("DB error : ctsvc_stmt_step() Fail(%d)", ret);
+			CTS_ERR("ctsvc_stmt_step() Fail(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
 			contacts_list_destroy(list, true);
 			return ret;
@@ -931,9 +921,9 @@ static int __ctsvc_db_my_profile_get_records_with_query(contacts_query_h query, 
 
 		contacts_record_create(_contacts_my_profile._uri, &record);
 		my_profile = (ctsvc_my_profile_s*)record;
-		if (0 == s_query->projection_count)
+		if (0 == s_query->projection_count) {
 			field_count = s_query->property_count;
-		else {
+		} else {
 			field_count = s_query->projection_count;
 			ret = ctsvc_record_set_projection_flags(record, s_query->projection,
 					s_query->projection_count, s_query->property_count);
@@ -942,7 +932,7 @@ static int __ctsvc_db_my_profile_get_records_with_query(contacts_query_h query, 
 				ASSERT_NOT_REACHED("To set projection is Fail.\n");
 		}
 
-		for (i=0;i<field_count;i++) {
+		for (i = 0; i < field_count; i++) {
 			char *temp;
 			int property_id;
 			if (0 == s_query->projection_count)
@@ -950,7 +940,7 @@ static int __ctsvc_db_my_profile_get_records_with_query(contacts_query_h query, 
 			else
 				property_id = s_query->projection[i];
 
-			switch(property_id) {
+			switch (property_id) {
 			case CTSVC_PROPERTY_MY_PROFILE_ID:
 				my_profile_id = ctsvc_stmt_get_int(stmt, i);
 				if (had_my_profile_id)
@@ -1147,18 +1137,18 @@ static int __ctsvc_db_my_profile_insert_record(contacts_record_h record, int *id
 
 	/* These check should be done in client side */
 	RETVM_IF(NULL == my_profile, CONTACTS_ERROR_INVALID_PARAMETER,
-					"Invalid parameter : my_profile is NULL");
+			"Invalid parameter : my_profile is NULL");
 	RETVM_IF(my_profile->addressbook_id < 0, CONTACTS_ERROR_INVALID_PARAMETER,
-				"Invalid parameter : addressbook_id(%d) is mandatory field to insert my_profile record ", my_profile->addressbook_id);
+			"Invalid parameter : addressbook_id(%d) is mandatory field to insert my_profile record ", my_profile->addressbook_id);
 	RETVM_IF(0 < my_profile->id, CONTACTS_ERROR_INVALID_PARAMETER,
-				"Invalid parameter : id(%d), This record is already inserted", my_profile->id);
+			"Invalid parameter : id(%d), This record is already inserted", my_profile->id);
 
 	ret = ctsvc_begin_trans();
 	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "ctsvc_begin_trans() Fail(%d)", ret);
 
 	if (false == ctsvc_have_ab_write_permission(my_profile->addressbook_id)) {
-		CTS_ERR("ctsvc_have_ab_write_permission fail : does not have permission(addressbook_id : %d)",
-					my_profile->addressbook_id);
+		CTS_ERR("ctsvc_have_ab_write_permission Fail: does not have permission(addressbook_id : %d)",
+				my_profile->addressbook_id);
 		ctsvc_end_trans(false);
 		return CONTACTS_ERROR_PERMISSION_DENIED;
 	}
@@ -1217,7 +1207,7 @@ static int __ctsvc_db_my_profile_insert_record(contacts_record_h record, int *id
 	version = ctsvc_get_next_ver();
 
 	snprintf(query, sizeof(query),
-		"INSERT INTO "CTS_TABLE_MY_PROFILES"(my_profile_id, addressbook_id, "
+			"INSERT INTO "CTS_TABLE_MY_PROFILES"(my_profile_id, addressbook_id, "
 			"created_ver, changed_ver, changed_time, "
 			"display_name, reverse_display_name, uid, image_thumbnail_path) "
 			"VALUES(%d, %d, %d, %d, %d, ?, ?, ?, ?)",

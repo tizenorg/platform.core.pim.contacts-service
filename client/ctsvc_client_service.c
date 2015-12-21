@@ -3,9 +3,6 @@
  *
  * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
- * Contact: Dohyung Jin <dh.jin@samsung.com>
- *                 Jongwon Lee <gogosing.lee@samsung.com>
- *                 Donghee Ye <donghee.ye@samsung.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,15 +34,13 @@ API int contacts_connect_with_flags(unsigned int flags)
 	ret = ctsvc_client_handle_get_p_with_id(id, &contact);
 	if (CONTACTS_ERROR_NO_DATA == ret) {
 		ret = ctsvc_client_handle_create(id, &contact);
-		if (CONTACTS_ERROR_NONE != ret)
-		{
+		if (CONTACTS_ERROR_NONE != ret) {
 			CTS_ERR("ctsvc_client_handle_create() Fail(%d)", ret);
 			if (CONTACTS_ERROR_INVALID_PARAMETER == ret)
 				return CONTACTS_ERROR_INTERNAL;
 			return ret;
 		}
-	}
-	else if (CONTACTS_ERROR_NONE != ret) {
+	} else if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("ctsvc_client_handle_get_p_with_id() Fail(%d)", ret);
 		return ret;
 	}
@@ -68,15 +63,13 @@ API int contacts_connect(void)
 	ret = ctsvc_client_handle_get_p_with_id(id, &contact);
 	if (CONTACTS_ERROR_NO_DATA == ret) {
 		ret = ctsvc_client_handle_create(id, &contact);
-		if (CONTACTS_ERROR_NONE != ret)
-		{
+		if (CONTACTS_ERROR_NONE != ret) {
 			CTS_ERR("ctsvc_client_handle_create() Fail(%d)", ret);
 			if (CONTACTS_ERROR_INVALID_PARAMETER == ret)
 				return CONTACTS_ERROR_INTERNAL;
 			return ret;
 		}
-	}
-	else if (CONTACTS_ERROR_NONE != ret) {
+	} else if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("ctsvc_client_handle_get_p_with_id() Fail(%d)", ret);
 		return ret;
 	}
@@ -117,15 +110,13 @@ API int contacts_connect_on_thread(void)
 	ret = ctsvc_client_handle_get_p_with_id(id, &contact);
 	if (CONTACTS_ERROR_NO_DATA == ret) {
 		ret = ctsvc_client_handle_create(id, &contact);
-		if (CONTACTS_ERROR_NONE != ret)
-		{
+		if (CONTACTS_ERROR_NONE != ret) {
 			CTS_ERR("ctsvc_client_handle_create() Fail(%d)", ret);
 			if (CONTACTS_ERROR_INVALID_PARAMETER == ret)
 				return CONTACTS_ERROR_INTERNAL;
 			return ret;
 		}
-	}
-	else if (CONTACTS_ERROR_NONE != ret) {
+	} else if (CONTACTS_ERROR_NONE != ret) {
 		CTS_ERR("ctsvc_client_handle_get_p_with_id() Fail(%d)", ret);
 		return ret;
 	}

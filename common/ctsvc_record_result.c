@@ -1,7 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,15 +27,15 @@
 #include "ctsvc_server_sim.h"
 #endif /* _CONTACTS_IPC_SERVER */
 
-static int __ctsvc_result_create(contacts_record_h* out_record);
+static int __ctsvc_result_create(contacts_record_h *out_record);
 static int __ctsvc_result_destroy(contacts_record_h record, bool delete_child);
 static int __ctsvc_result_clone(contacts_record_h record, contacts_record_h *out_record);
-static int __ctsvc_result_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str);
-static int __ctsvc_result_get_str(contacts_record_h record, unsigned int property_id, char** out_str);
-static int __ctsvc_result_get_int(contacts_record_h record, unsigned int property_id, int* out_value);
-static int __ctsvc_result_get_bool(contacts_record_h record, unsigned int property_id, bool* out_value);
-static int __ctsvc_result_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty );
-static int __ctsvc_result_set_bool(contacts_record_h record, unsigned int property_id, bool value, bool *is_dirty );
+static int __ctsvc_result_get_str_p(contacts_record_h record, unsigned int property_id, char **out_str);
+static int __ctsvc_result_get_str(contacts_record_h record, unsigned int property_id, char **out_str);
+static int __ctsvc_result_get_int(contacts_record_h record, unsigned int property_id, int *out_value);
+static int __ctsvc_result_get_bool(contacts_record_h record, unsigned int property_id, bool *out_value);
+static int __ctsvc_result_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty);
+static int __ctsvc_result_set_bool(contacts_record_h record, unsigned int property_id, bool value, bool *is_dirty);
 static int __ctsvc_result_set_str(contacts_record_h record, unsigned int property_id, const char *str, bool *is_dirty);
 
 ctsvc_record_plugin_cb_s result_plugin_cbs = {
@@ -60,12 +60,11 @@ ctsvc_record_plugin_cb_s result_plugin_cbs = {
 	.clone_child_record_list = NULL,
 };
 
-static int __ctsvc_result_create(contacts_record_h* out_record)
+static int __ctsvc_result_create(contacts_record_h *out_record)
 {
 	ctsvc_result_s *result;
-	result = (ctsvc_result_s*)calloc(1, sizeof(ctsvc_result_s));
-	RETVM_IF(NULL == result, CONTACTS_ERROR_OUT_OF_MEMORY,
-			"Out of memory : calloc is Fail");
+	result = calloc(1, sizeof(ctsvc_result_s));
+	RETVM_IF(NULL == result, CONTACTS_ERROR_OUT_OF_MEMORY, "calloc() Fail");
 
 	*out_record = (contacts_record_h)result;
 	return CONTACTS_ERROR_NONE;
@@ -74,9 +73,9 @@ static int __ctsvc_result_create(contacts_record_h* out_record)
 static int __ctsvc_result_destroy(contacts_record_h record, bool delete_child)
 {
 	GSList *cursor;
-	ctsvc_result_s* result = (ctsvc_result_s*)record;
+	ctsvc_result_s *result = (ctsvc_result_s*)record;
 
-	for (cursor = result->values;cursor;cursor=cursor->next) {
+	for (cursor = result->values; cursor; cursor = cursor->next) {
 		ctsvc_result_value_s *data = cursor->data;
 		if (data->type == CTSVC_VIEW_DATA_TYPE_STR)
 			free(data->value.s);
@@ -93,16 +92,16 @@ static int __ctsvc_result_destroy(contacts_record_h record, bool delete_child)
 
 static int __ctsvc_result_clone(contacts_record_h record, contacts_record_h *out_record)
 {
-    ctsvc_result_s *out_data = NULL;
-    ctsvc_result_s *src_data = NULL;
-    GSList *cursor;
+	ctsvc_result_s *out_data = NULL;
+	ctsvc_result_s *src_data = NULL;
+	GSList *cursor;
 
-    src_data = (ctsvc_result_s*)record;
-    out_data = calloc(1, sizeof(ctsvc_result_s));
-    RETVM_IF(NULL == out_data, CONTACTS_ERROR_OUT_OF_MEMORY,
-			 "Out of memeory : calloc(ctsvc_result_s) Fail(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
+	src_data = (ctsvc_result_s*)record;
+	out_data = calloc(1, sizeof(ctsvc_result_s));
+	RETVM_IF(NULL == out_data, CONTACTS_ERROR_OUT_OF_MEMORY,
+			"Out of memeory : calloc(ctsvc_result_s) Fail(%d)", CONTACTS_ERROR_OUT_OF_MEMORY);
 
-	for (cursor=src_data->values;cursor;cursor=cursor->next) {
+	for (cursor = src_data->values; cursor; cursor = cursor->next) {
 		ctsvc_result_value_s *src = cursor->data;
 		ctsvc_result_value_s *dest = calloc(1, sizeof(ctsvc_result_value_s));
 		if (NULL == dest) {
@@ -113,7 +112,7 @@ static int __ctsvc_result_clone(contacts_record_h record, contacts_record_h *out
 
 		dest->property_id = src->property_id;
 		dest->type = src->type;
-		switch(src->type) {
+		switch (src->type) {
 		case CTSVC_VIEW_DATA_TYPE_BOOL:
 			dest->value.b = src->value.b;
 			break;
@@ -148,9 +147,9 @@ static int __ctsvc_result_clone(contacts_record_h record, contacts_record_h *out
 }
 
 static int __ctsvc_result_get_str_real(contacts_record_h record, unsigned int property_id,
-		char** out_str, bool copy)
+		char **out_str, bool copy)
 {
-	ctsvc_result_s* result = (ctsvc_result_s *)record;
+	ctsvc_result_s *result = (ctsvc_result_s*)record;
 
 	GSList *cursor;
 
@@ -159,7 +158,7 @@ static int __ctsvc_result_get_str_real(contacts_record_h record, unsigned int pr
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 
-	for (cursor = result->values;cursor;cursor=cursor->next) {
+	for (cursor = result->values; cursor; cursor = cursor->next) {
 		ctsvc_result_value_s *data = cursor->data;
 		if (data->property_id == property_id) {
 			*out_str = GET_STR(copy, data->value.s);
@@ -170,19 +169,19 @@ static int __ctsvc_result_get_str_real(contacts_record_h record, unsigned int pr
 	return CONTACTS_ERROR_NO_DATA;
 }
 
-static int __ctsvc_result_get_str_p(contacts_record_h record, unsigned int property_id, char** out_str)
+static int __ctsvc_result_get_str_p(contacts_record_h record, unsigned int property_id, char **out_str)
 {
 	return __ctsvc_result_get_str_real(record, property_id, out_str, false);
 }
 
-static int __ctsvc_result_get_str(contacts_record_h record, unsigned int property_id, char** out_str)
+static int __ctsvc_result_get_str(contacts_record_h record, unsigned int property_id, char **out_str)
 {
 	return __ctsvc_result_get_str_real(record, property_id, out_str, true);
 }
 
-static int __ctsvc_result_get_int(contacts_record_h record, unsigned int property_id, int* out_value)
+static int __ctsvc_result_get_int(contacts_record_h record, unsigned int property_id, int *out_value)
 {
-	ctsvc_result_s* result = (ctsvc_result_s *)record;
+	ctsvc_result_s *result = (ctsvc_result_s*)record;
 
 	GSList *cursor;
 
@@ -191,7 +190,7 @@ static int __ctsvc_result_get_int(contacts_record_h record, unsigned int propert
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 
-	for (cursor = result->values;cursor;cursor=cursor->next) {
+	for (cursor = result->values; cursor; cursor = cursor->next) {
 		ctsvc_result_value_s *data = cursor->data;
 		if (data->property_id == property_id) {
 			*out_value = data->value.i;
@@ -204,7 +203,7 @@ static int __ctsvc_result_get_int(contacts_record_h record, unsigned int propert
 
 static int __ctsvc_result_set_int(contacts_record_h record, unsigned int property_id, int value, bool *is_dirty)
 {
-	ctsvc_result_s* result = (ctsvc_result_s *)record;
+	ctsvc_result_s *result = (ctsvc_result_s*)record;
 	GSList *cursor;
 	ctsvc_result_value_s *data;
 
@@ -213,15 +212,14 @@ static int __ctsvc_result_set_int(contacts_record_h record, unsigned int propert
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 
-	for (cursor = result->values;cursor;cursor=cursor->next) {
+	for (cursor = result->values; cursor; cursor = cursor->next) {
 		data = cursor->data;
 		if (data->property_id == property_id) {
 #ifdef _CONTACTS_IPC_SERVER
 			if (property_id == CTSVC_PROPERTY_PHONELOG_SIM_SLOT_NO) {
 				CHECK_DIRTY_VAL(data->value.i, value, is_dirty);
 				data->value.i = ctsvc_server_sim_get_sim_slot_no_by_info_id(value);
-			}
-			else
+			} else
 #endif /* _CONTACTS_IPC_SERVER */
 			{
 				CHECK_DIRTY_VAL(data->value.i, value, is_dirty);
@@ -242,8 +240,7 @@ static int __ctsvc_result_set_int(contacts_record_h record, unsigned int propert
 	if (property_id == CTSVC_PROPERTY_PHONELOG_SIM_SLOT_NO) {
 		CHECK_DIRTY_VAL(data->value.i, value, is_dirty);
 		data->value.i = ctsvc_server_sim_get_sim_slot_no_by_info_id(value);
-	}
-	else
+	} else
 #endif /* _CONTACTS_IPC_SERVER */
 	{
 		CHECK_DIRTY_VAL(data->value.i, value, is_dirty);
@@ -255,20 +252,19 @@ static int __ctsvc_result_set_int(contacts_record_h record, unsigned int propert
 
 static int __ctsvc_result_set_bool(contacts_record_h record, unsigned int property_id, bool value, bool *is_dirty)
 {
-	ctsvc_result_s* result = (ctsvc_result_s *)record;
+	ctsvc_result_s *result = (ctsvc_result_s*)record;
 	GSList *cursor;
 	ctsvc_result_value_s *data;
 
 	/* TODO: check the value type of property_id is int */
-	for(cursor = result->values;cursor;cursor=cursor->next){
+	for (cursor = result->values; cursor; cursor = cursor->next) {
 		data = cursor->data;
 		if (data->property_id == property_id) {
 			if (data->type == CTSVC_VIEW_DATA_TYPE_BOOL) {
 				CHECK_DIRTY_VAL(data->value.b, value, is_dirty);
 				data->value.b = value;
 				return CONTACTS_ERROR_NONE;
-			}
-			else {
+			} else {
 				CTS_ERR("use another get_type API, (type : %d)", data->type);
 				return CONTACTS_ERROR_INVALID_PARAMETER;
 			}
@@ -290,7 +286,7 @@ static int __ctsvc_result_set_bool(contacts_record_h record, unsigned int proper
 
 static int __ctsvc_result_set_str(contacts_record_h record, unsigned int property_id, const char *str, bool *is_dirty)
 {
-	ctsvc_result_s* result = (ctsvc_result_s *)record;
+	ctsvc_result_s *result = (ctsvc_result_s*)record;
 	GSList *cursor;
 	ctsvc_result_value_s *data;
 	char *full_path = NULL;
@@ -301,7 +297,7 @@ static int __ctsvc_result_set_str(contacts_record_h record, unsigned int propert
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 
-	for (cursor = result->values;cursor;cursor=cursor->next) {
+	for (cursor = result->values; cursor; cursor = cursor->next) {
 		data = cursor->data;
 		if (data->property_id == property_id) {
 			switch (property_id) {
@@ -362,18 +358,17 @@ static int __ctsvc_result_set_str(contacts_record_h record, unsigned int propert
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_result_get_bool(contacts_record_h record, unsigned int property_id, bool* out_value)
+static int __ctsvc_result_get_bool(contacts_record_h record, unsigned int property_id, bool *out_value)
 {
-	ctsvc_result_s* result = (ctsvc_result_s *)record;
+	ctsvc_result_s *result = (ctsvc_result_s*)record;
 	GSList *cursor;
-	for (cursor = result->values;cursor;cursor=cursor->next) {
+	for (cursor = result->values; cursor; cursor = cursor->next) {
 		ctsvc_result_value_s *data = cursor->data;
 		if (data->property_id == property_id) {
 			if (data->type == CTSVC_VIEW_DATA_TYPE_BOOL) {
 				*out_value = data->value.b;
 				return CONTACTS_ERROR_NONE;
-			}
-			else {
+			} else {
 				CTS_ERR("use another get_type API, (type : %d)", data->type);
 				return CONTACTS_ERROR_INVALID_PARAMETER;
 			}

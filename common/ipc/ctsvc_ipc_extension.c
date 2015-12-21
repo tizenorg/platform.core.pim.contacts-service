@@ -1,7 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2010 - 2012 Samsung Electronics Co., Ltd. All rights reserved.
+ * Copyright (c) 2010 - 2015 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@
 #include "ctsvc_ipc_marshal.h"
 #include "contacts_record.h"
 
-static int __ctsvc_ipc_unmarshal_extension(pims_ipc_data_h ipc_data, const char* view_uri, contacts_record_h record);
+static int __ctsvc_ipc_unmarshal_extension(pims_ipc_data_h ipc_data, const char *view_uri, contacts_record_h record);
 static int __ctsvc_ipc_marshal_extension(const contacts_record_h record, pims_ipc_data_h ipc_data);
 
 ctsvc_ipc_marshal_record_plugin_cb_s _ctsvc_ipc_record_extension_plugin_cb = {
@@ -30,12 +30,12 @@ ctsvc_ipc_marshal_record_plugin_cb_s _ctsvc_ipc_record_extension_plugin_cb = {
 };
 
 
-static int __ctsvc_ipc_unmarshal_extension(pims_ipc_data_h ipc_data, const char* view_uri, contacts_record_h record)
+static int __ctsvc_ipc_unmarshal_extension(pims_ipc_data_h ipc_data, const char *view_uri, contacts_record_h record)
 {
-	RETV_IF(ipc_data==NULL,CONTACTS_ERROR_NO_DATA);
-	RETV_IF(record==NULL,CONTACTS_ERROR_NO_DATA);
+	RETV_IF(NULL == ipc_data, CONTACTS_ERROR_NO_DATA);
+	RETV_IF(NULL == record, CONTACTS_ERROR_NO_DATA);
 
-	ctsvc_extension_s* extend_p = (ctsvc_extension_s*) record;
+	ctsvc_extension_s *extend_p = (ctsvc_extension_s*) record;
 
 	do {
 		if (ctsvc_ipc_unmarshal_int(ipc_data, &extend_p->id) != CONTACTS_ERROR_NONE) break;
@@ -57,37 +57,37 @@ static int __ctsvc_ipc_unmarshal_extension(pims_ipc_data_h ipc_data, const char*
 
 	} while (0);
 
-	CTS_ERR("_ctsvc_ipc_unmarshal fail");
+	CTS_ERR("__ctsvc_ipc_unmarshal_extension() Fail");
 	return CONTACTS_ERROR_INVALID_PARAMETER;
 }
 
 static int __ctsvc_ipc_marshal_extension(const contacts_record_h record, pims_ipc_data_h ipc_data)
 {
-	ctsvc_extension_s* extend_p = (ctsvc_extension_s*)record;
-	RETV_IF(ipc_data==NULL,CONTACTS_ERROR_NO_DATA);
-	RETV_IF(extend_p==NULL,CONTACTS_ERROR_NO_DATA);
+	ctsvc_extension_s *extend_p = (ctsvc_extension_s*)record;
+	RETV_IF(NULL == ipc_data, CONTACTS_ERROR_NO_DATA);
+	RETV_IF(extend_p == NULL, CONTACTS_ERROR_NO_DATA);
 
 	do {
-		if (ctsvc_ipc_marshal_int((extend_p->id),ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_int((extend_p->contact_id),ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_int((extend_p->data1),ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_string((extend_p->data2),ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_string((extend_p->data3),ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_string((extend_p->data4),ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_string((extend_p->data5),ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_string((extend_p->data6),ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_string((extend_p->data7),ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_string((extend_p->data8),ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_string((extend_p->data9),ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_string((extend_p->data10),ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_string((extend_p->data11),ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_string((extend_p->data12),ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_int((extend_p->id), ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_int((extend_p->contact_id), ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_int((extend_p->data1), ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_string((extend_p->data2), ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_string((extend_p->data3), ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_string((extend_p->data4), ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_string((extend_p->data5), ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_string((extend_p->data6), ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_string((extend_p->data7), ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_string((extend_p->data8), ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_string((extend_p->data9), ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_string((extend_p->data10), ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_string((extend_p->data11), ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_string((extend_p->data12), ipc_data) != CONTACTS_ERROR_NONE) break;
 
 		return CONTACTS_ERROR_NONE;
 
 	} while (0);
 
-	CTS_ERR("_ctsvc_ipc_marshal fail");
+	CTS_ERR("_ctsvc_ipc_marshal() Fail");
 	return CONTACTS_ERROR_INVALID_PARAMETER;
 }
 
