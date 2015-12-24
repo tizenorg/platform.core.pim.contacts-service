@@ -191,7 +191,7 @@ static int __ctsvc_phonelog_set_int(contacts_record_h record, unsigned int prope
 	case CTSVC_PROPERTY_PHONELOG_LOG_TYPE:
 		if ((CONTACTS_PLOG_TYPE_NONE <= value
 					&& value <= CONTACTS_PLOG_TYPE_VIDEO_BLOCKED)
-				|| (CONTACTS_PLOG_TYPE_MMS_INCOMMING <= value
+				|| (CONTACTS_PLOG_TYPE_MMS_INCOMING <= value
 					&& value <= CONTACTS_PLOG_TYPE_MMS_BLOCKED)
 				|| (CONTACTS_PLOG_TYPE_EMAIL_RECEIVED <= value
 					&& value <= CONTACTS_PLOG_TYPE_EMAIL_SENT)
