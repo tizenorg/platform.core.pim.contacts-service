@@ -65,7 +65,7 @@ int ctsvc_phone_log_delete(contacts_phone_log_delete_e op, ...)
 		snprintf(query, sizeof(query),
 				"DELETE FROM "CTS_TABLE_PHONELOGS" "
 				"WHERE data1 = %d AND %d <= log_type AND log_type <= %d",
-				extra_data1, CONTACTS_PLOG_TYPE_MMS_INCOMMING, CONTACTS_PLOG_TYPE_MMS_BLOCKED);
+				extra_data1, CONTACTS_PLOG_TYPE_MMS_INCOMING, CONTACTS_PLOG_TYPE_MMS_BLOCKED);
 		break;
 	case CONTACTS_PHONE_LOG_DELETE_BY_EMAIL_EXTRA_DATA1:
 		va_start(args, op);
