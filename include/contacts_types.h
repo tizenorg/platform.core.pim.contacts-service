@@ -188,22 +188,22 @@ typedef enum {
  */
 typedef enum {
     CONTACTS_PLOG_TYPE_NONE,                        /**< None */
-    CONTACTS_PLOG_TYPE_VOICE_INCOMMING = 1,         /**< Incoming call */
+    CONTACTS_PLOG_TYPE_VOICE_INCOMING = 1,         /**< Incoming call */
     CONTACTS_PLOG_TYPE_VOICE_OUTGOING = 2,          /**< Outgoing call */
-    CONTACTS_PLOG_TYPE_VIDEO_INCOMMING = 3,         /**< Incoming video call */
+    CONTACTS_PLOG_TYPE_VIDEO_INCOMING = 3,         /**< Incoming video call */
     CONTACTS_PLOG_TYPE_VIDEO_OUTGOING = 4,          /**< Outgoing video call */
-    CONTACTS_PLOG_TYPE_VOICE_INCOMMING_UNSEEN = 5,  /**< Not confirmed missed call */
-    CONTACTS_PLOG_TYPE_VOICE_INCOMMING_SEEN = 6,    /**< Confirmed missed call */
-    CONTACTS_PLOG_TYPE_VIDEO_INCOMMING_UNSEEN = 7,  /**< Not confirmed missed video call */
-    CONTACTS_PLOG_TYPE_VIDEO_INCOMMING_SEEN = 8,    /**< Confirmed missed video call */
+    CONTACTS_PLOG_TYPE_VOICE_INCOMING_UNSEEN = 5,  /**< Not confirmed missed call */
+    CONTACTS_PLOG_TYPE_VOICE_INCOMING_SEEN = 6,    /**< Confirmed missed call */
+    CONTACTS_PLOG_TYPE_VIDEO_INCOMING_UNSEEN = 7,  /**< Not confirmed missed video call */
+    CONTACTS_PLOG_TYPE_VIDEO_INCOMING_SEEN = 8,    /**< Confirmed missed video call */
     CONTACTS_PLOG_TYPE_VOICE_REJECT = 9,            /**< Rejected call */
     CONTACTS_PLOG_TYPE_VIDEO_REJECT = 10,           /**< Rejected video call */
     CONTACTS_PLOG_TYPE_VOICE_BLOCKED = 11,          /**< Blocked call */
     CONTACTS_PLOG_TYPE_VIDEO_BLOCKED = 12,          /**< Blocked video call */
 
-    CONTACTS_PLOG_TYPE_MMS_INCOMMING = 101,         /**< Incoming MMS */
+    CONTACTS_PLOG_TYPE_MMS_INCOMING = 101,         /**< Incoming MMS */
     CONTACTS_PLOG_TYPE_MMS_OUTGOING = 102,          /**< Outgoing MMS */
-    CONTACTS_PLOG_TYPE_SMS_INCOMMING = 103,         /**< Incoming SMS */
+    CONTACTS_PLOG_TYPE_SMS_INCOMING = 103,         /**< Incoming SMS */
     CONTACTS_PLOG_TYPE_SMS_OUTGOING = 104,          /**< Outgoing SMS */
     CONTACTS_PLOG_TYPE_SMS_BLOCKED = 105,           /**< Blocked SMS */
     CONTACTS_PLOG_TYPE_MMS_BLOCKED = 106,           /**< Blocked MMS */
@@ -259,10 +259,12 @@ typedef enum {
     CONTACTS_USAGE_STAT_TYPE_OUTGOING_CALL, /**< Outgoing call */
     CONTACTS_USAGE_STAT_TYPE_OUTGOING_MSG,   /**< Outgoing message */
     CONTACTS_USAGE_STAT_TYPE_OUTGOING_EMAIL, /**< Outgoing email (Since 3.0) */
-    CONTACTS_USAGE_STAT_TYPE_INCOMMING_CALL, /**< Incomming call (Since 3.0) */
-    CONTACTS_USAGE_STAT_TYPE_INCOMMING_MSG,  /**< Incomming message (Since 3.0) */
-    CONTACTS_USAGE_STAT_TYPE_INCOMMING_EMAIL,/**< Incomming email (Since 3.0) */
-    CONTACTS_USAGE_STAT_TYPE_MISSED_CALL     /**< Missed call (Since 3.0) */
+    CONTACTS_USAGE_STAT_TYPE_INCOMING_CALL, /**< Incoming call (Since 3.0) */
+    CONTACTS_USAGE_STAT_TYPE_INCOMING_MSG,  /**< Incoming message (Since 3.0) */
+    CONTACTS_USAGE_STAT_TYPE_INCOMING_EMAIL,/**< Incoming email (Since 3.0) */
+    CONTACTS_USAGE_STAT_TYPE_MISSED_CALL,     /**< Missed call (Since 3.0) */
+    CONTACTS_USAGE_STAT_TYPE_REJECTED_CALL, /**< Rejected call (Since 3.0) */
+    CONTACTS_USAGE_STAT_TYPE_BLOCKED_CALL /**< Blocked call (Since 3.0) */
 }contacts_usage_type_e;
 
 /**
