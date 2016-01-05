@@ -35,7 +35,6 @@
 #endif
 
 typedef struct {
-	contacts_h contact;
 	int wd;
 	char *view_uri;
 	contacts_db_changed_cb cb;
@@ -264,7 +263,7 @@ static inline const char* __ctsvc_noti_get_file_path(const char *view_uri)
 	return NULL;
 }
 
-int ctsvc_inotify_subscribe_ipc_ready(contacts_h contact, void (*cb)(void *), void *user_data)
+int ctsvc_inotify_subscribe_ipc_ready(void (*cb)(void *), void *user_data)
 {
 	const char *noti_path = CTSVC_NOTI_IPC_READY;
 	struct socket_init_noti_info *noti_info = NULL;
@@ -304,7 +303,7 @@ int ctsvc_inotify_subscribe_ipc_ready(contacts_h contact, void (*cb)(void *), vo
 	return CONTACTS_ERROR_NONE;
 }
 
-int ctsvc_inotify_unsubscribe_ipc_ready(contacts_h contact)
+int ctsvc_inotify_unsubscribe_ipc_ready()
 {
 	const char *noti_path = CTSVC_NOTI_IPC_READY;
 	struct socket_init_noti_info *noti_info = NULL;
@@ -330,8 +329,7 @@ int ctsvc_inotify_unsubscribe_ipc_ready(contacts_h contact)
 }
 
 
-int ctsvc_inotify_subscribe(contacts_h contact, const char *view_uri,
-		void *cb, void *data)
+int ctsvc_inotify_subscribe(const char *view_uri, void *cb, void *data)
 {
 	int ret, wd;
 	noti_info *noti, *same_noti = NULL;
@@ -359,8 +357,7 @@ int ctsvc_inotify_subscribe(contacts_h contact, const char *view_uri,
 			same_noti = it->data;
 			if (same_noti->wd == wd && same_noti->cb == cb
 					&& STRING_EQUAL == strcmp(same_noti->view_uri, view_uri)
-					&& same_noti->cb_data == data
-					&& 0 == ctsvc_handle_compare(contact, same_noti->contact)) {
+					&& same_noti->cb_data == data) {
 				break;
 			} else {
 				same_noti = NULL;
@@ -384,7 +381,6 @@ int ctsvc_inotify_subscribe(contacts_h contact, const char *view_uri,
 	noti->view_uri = strdup(view_uri);
 	noti->cb_data = data;
 	noti->cb = cb;
-	ctsvc_handle_clone(contact, &(noti->contact));
 	noti->blocked = false;
 
 	__noti_list = g_slist_append(__noti_list, noti);
@@ -392,8 +388,7 @@ int ctsvc_inotify_subscribe(contacts_h contact, const char *view_uri,
 	return CONTACTS_ERROR_NONE;
 }
 
-static inline int __ctsvc_del_noti(GSList **noti_list, contacts_h contact, int wd,
-		const char *view_uri, void *cb, void *user_data)
+static inline int __ctsvc_del_noti(GSList **noti_list, int wd, const char *view_uri, void *cb, void *user_data)
 {
 	int del_cnt, remain_cnt;
 	GSList *it, *result;
@@ -406,11 +401,9 @@ static inline int __ctsvc_del_noti(GSList **noti_list, contacts_h contact, int w
 		noti_info *noti = it->data;
 		if (noti && wd == noti->wd) {
 			if (cb == noti->cb && user_data == noti->cb_data
-					&& STRING_EQUAL == strcmp(noti->view_uri, view_uri)
-					&& 0 == ctsvc_handle_compare(contact, noti->contact)) {
+					&& STRING_EQUAL == strcmp(noti->view_uri, view_uri)) {
 				it = it->next;
 				result = g_slist_remove(result, noti);
-				ctsvc_handle_destroy(noti->contact);
 				free(noti->view_uri);
 				free(noti);
 				del_cnt++;
@@ -421,14 +414,14 @@ static inline int __ctsvc_del_noti(GSList **noti_list, contacts_h contact, int w
 		}
 		it = it->next;
 	}
-	RETVM_IF(del_cnt == 0, CONTACTS_ERROR_NO_DATA, "No Data: nothing deleted");
+	RETVM_IF(del_cnt == 0, CONTACTS_ERROR_NO_DATA, "No Data: nothing deleted, remain_cnt : %d", remain_cnt);
 
 	*noti_list = result;
 
 	return remain_cnt;
 }
 
-int ctsvc_inotify_unsubscribe(contacts_h contact, const char *view_uri, void *cb, void *user_data)
+int ctsvc_inotify_unsubscribe(const char *view_uri, void *cb, void *user_data)
 {
 	int ret, wd;
 	const char *path;
@@ -449,7 +442,7 @@ int ctsvc_inotify_unsubscribe(contacts_h contact, const char *view_uri, void *cb
 		return CONTACTS_ERROR_SYSTEM;
 	}
 
-	ret = __ctsvc_del_noti(&__noti_list, contact, wd, view_uri, cb, user_data);
+	ret = __ctsvc_del_noti(&__noti_list, wd, view_uri, cb, user_data);
 	WARN_IF(ret < CONTACTS_ERROR_NONE, "__ctsvc_del_noti() Fail(%d)", ret);
 
 	if (0 == ret)
@@ -462,7 +455,6 @@ static void __clear_nslot_list(gpointer data, gpointer user_data)
 {
 	noti_info *noti = (noti_info *)data;
 
-	ctsvc_handle_destroy(noti->contact);
 	free(noti->view_uri);
 	free(noti);
 }

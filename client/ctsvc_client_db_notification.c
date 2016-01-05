@@ -79,7 +79,6 @@ API int contacts_db_add_changed_cb(const char *view_uri, contacts_db_changed_cb 
 		void *user_data)
 {
 	int ret;
-	contacts_h contact = NULL;
 
 	RETV_IF(NULL == view_uri, CONTACTS_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == cb, CONTACTS_ERROR_INVALID_PARAMETER);
@@ -88,13 +87,7 @@ API int contacts_db_add_changed_cb(const char *view_uri, contacts_db_changed_cb 
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret,
 			"_client_noti_check_read_permission() Fail(%d)", ret);
 
-	ret = ctsvc_client_handle_get_p(&contact);
-	if (CONTACTS_ERROR_NONE != ret) {
-		ERR("ctsvc_client_handle_get_p() Fail(%d)", ret);
-		return ret;
-	}
-
-	ret = ctsvc_inotify_subscribe(contact, view_uri, cb, user_data);
+	ret = ctsvc_inotify_subscribe(view_uri, cb, user_data);
 	if (CONTACTS_ERROR_NONE != ret) {
 		ERR("ctsvc_inotify_subscribe(%s) Fail(%d)", view_uri, ret);
 		return ret;
@@ -107,18 +100,11 @@ API int contacts_db_remove_changed_cb(const char *view_uri, contacts_db_changed_
 		void *user_data)
 {
 	int ret;
-	contacts_h contact = NULL;
 
 	RETV_IF(NULL == view_uri, CONTACTS_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == cb, CONTACTS_ERROR_INVALID_PARAMETER);
 
-	ret = ctsvc_client_handle_get_p(&contact);
-	if (CONTACTS_ERROR_NONE != ret) {
-		ERR("ctsvc_client_handle_get_p() Fail(%d)", ret);
-		return ret;
-	}
-
-	ret = ctsvc_inotify_unsubscribe(contact, view_uri, cb, user_data);
+	ret = ctsvc_inotify_unsubscribe(view_uri, cb, user_data);
 	if (CONTACTS_ERROR_NONE != ret) {
 		ERR("ctsvc_inotify_unsubscribe(%s) Fail(%d)", view_uri, ret);
 		return ret;
