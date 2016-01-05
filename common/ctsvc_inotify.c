@@ -359,8 +359,7 @@ int ctsvc_inotify_subscribe(contacts_h contact, const char *view_uri,
 			same_noti = it->data;
 			if (same_noti->wd == wd && same_noti->cb == cb
 					&& STRING_EQUAL == strcmp(same_noti->view_uri, view_uri)
-					&& same_noti->cb_data == data
-					&& 0 == ctsvc_handle_compare(contact, same_noti->contact)) {
+					&& same_noti->cb_data == data) {
 				break;
 			} else {
 				same_noti = NULL;
@@ -406,8 +405,7 @@ static inline int __ctsvc_del_noti(GSList **noti_list, contacts_h contact, int w
 		noti_info *noti = it->data;
 		if (noti && wd == noti->wd) {
 			if (cb == noti->cb && user_data == noti->cb_data
-					&& STRING_EQUAL == strcmp(noti->view_uri, view_uri)
-					&& 0 == ctsvc_handle_compare(contact, noti->contact)) {
+					&& STRING_EQUAL == strcmp(noti->view_uri, view_uri)) {
 				it = it->next;
 				result = g_slist_remove(result, noti);
 				ctsvc_handle_destroy(noti->contact);
@@ -421,7 +419,7 @@ static inline int __ctsvc_del_noti(GSList **noti_list, contacts_h contact, int w
 		}
 		it = it->next;
 	}
-	RETVM_IF(del_cnt == 0, CONTACTS_ERROR_NO_DATA, "No Data: nothing deleted");
+	RETVM_IF(del_cnt == 0, CONTACTS_ERROR_NO_DATA, "No Data: nothing deleted, remain_cnt : %d", remain_cnt);
 
 	*noti_list = result;
 

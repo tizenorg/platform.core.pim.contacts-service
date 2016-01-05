@@ -55,24 +55,3 @@ int ctsvc_handle_clone(contacts_h contact, contacts_h *pcontact)
 
 	return CONTACTS_ERROR_NONE;
 }
-
-int ctsvc_handle_compare(contacts_h contact1, contacts_h contact2)
-{
-	if (NULL == contact1 && NULL == contact2)
-		return 0;
-	else if (NULL == contact1)
-		return 1;
-	else if (NULL == contact2)
-		return 1;
-
-	ctsvc_base_s *base1 = (ctsvc_base_s*)contact1;
-	ctsvc_base_s *base2 = (ctsvc_base_s*)contact2;
-
-	if ((base1->connection_count == base2->connection_count) &&
-			(base1->version == base2->version)) {
-		return 0;
-	} else {
-		return 1;
-	}
-}
-
