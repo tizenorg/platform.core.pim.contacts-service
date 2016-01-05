@@ -138,6 +138,8 @@ API int contacts_query_destroy(contacts_query_h query)
 
 	free(s_query->projection);
 	free(s_query->view_uri);
+	free(s_query->snippet.start_match);
+	free(s_query->snippet.end_match);
 	free(s_query);
 
 	return CONTACTS_ERROR_NONE;
@@ -149,8 +151,24 @@ API int contacts_query_set_distinct(contacts_query_h query, bool set)
 
 	RETV_IF(NULL == query, CONTACTS_ERROR_INVALID_PARAMETER);
 	query_s = (ctsvc_query_s*)query;
-	query_s->distinct = set;
+	query_s->is_distinct = set;
 
 	return CONTACTS_ERROR_NONE;
 }
 
+API int contacts_query_set_snippet(contacts_query_h query, bool set, const char *start_match, const char *end_match)
+{
+	ctsvc_query_s *query_s;
+	RETV_IF(NULL == query, CONTACTS_ERROR_INVALID_PARAMETER);
+
+	query_s = (ctsvc_query_s *)query;
+	query_s->snippet.is_snippet = set;
+	if (true == set) {
+		if (start_match && '\0' != *start_match)
+			query_s->snippet.start_match = strdup(start_match);
+		if (end_match && '\0' != *end_match)
+			query_s->snippet.end_match = strdup(end_match);
+	}
+
+	return CONTACTS_ERROR_NONE;
+}

@@ -1,0 +1,16 @@
+<manifest>
+	<define>
+		<domain name="test-contacts" />
+		<request>
+			<smack request="test-contacts" type="rw" />
+			<smack request="device::app_logging" type="w" />
+			<smack request="device::sys_logging" type="w" />
+		</request>
+	</define>
+	<assign>
+		<filesystem path="/usr/share/license/test-contacts" label="_" />
+	</assign>
+	<request>
+		<domain name="test-contacts" />
+	</request>
+</manifest>

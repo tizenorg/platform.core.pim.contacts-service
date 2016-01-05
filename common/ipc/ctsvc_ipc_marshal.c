@@ -817,7 +817,7 @@ int ctsvc_ipc_unmarshal_query(const pims_ipc_data_h ipc_data, contacts_query_h *
 		return CONTACTS_ERROR_IPC;
 	}
 
-	if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_bool(ipc_data, &(query->distinct))) {
+	if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_bool(ipc_data, &(query->is_distinct))) {
 		ERR("ctsvc_ipc_unmarshal_bool() Fail");
 		contacts_query_destroy(*out_query);
 		*out_query = NULL;
@@ -882,7 +882,7 @@ int ctsvc_ipc_marshal_query(const contacts_query_h query, pims_ipc_data_h ipc_da
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 
-	if (CONTACTS_ERROR_NONE != ctsvc_ipc_marshal_bool(que->distinct, ipc_data)) {
+	if (CONTACTS_ERROR_NONE != ctsvc_ipc_marshal_bool(que->is_distinct, ipc_data)) {
 		ERR("ctsvc_ipc_marshal_bool() Fail");
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}

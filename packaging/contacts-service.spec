@@ -8,6 +8,7 @@ Source0:    %{name}-%{version}.tar.gz
 Source1:    %{name}.service
 Source2:    %{name}.socket
 Source1001: %{name}.manifest
+Source1002: %{name}-test.manifest
 BuildRequires: cmake
 BuildRequires: pkgconfig(db-util)
 BuildRequires: pkgconfig(vconf)
@@ -35,7 +36,7 @@ Requires(postun): /sbin/ldconfig
 Contacts Service Library
 
 %package -n contacts-service2
-Summary:	New Contacts service library
+Summary:   New Contacts service library
 
 %description -n contacts-service2
 New Contact Serivce 2 Client Library
@@ -49,10 +50,20 @@ Requires: %{name}2 = %{version}-%{release}
 %description -n contacts-service2-devel
 New Contacts Service Library (devel) files
 
+%package -n contacts-service-test
+Summary:   New Contacts service(test)
+Group:    Social & Content/Development
+Requires: %{name}2 = %{version}-%{release}
+
+%description -n contacts-service-test
+Tizen Contacts-service Test Programs
+
+
 %prep
 %setup -q
 chmod g-w %_sourcedir/*
 cp %{SOURCE1001} ./%{name}.manifest
+cp %{SOURCE1001} ./%{name}-test.manifest
 
 
 %build
@@ -93,12 +104,17 @@ ln -s ../contacts-service.socket %{buildroot}%{_unitdir_user}/sockets.target.wan
 %{_unitdir_user}/contacts-service.socket
 %license LICENSE.APLv2
 
-
 %files -n contacts-service2-devel
 %defattr(-,root,root,-)
 %{_libdir}/libcontacts-service2.so
 %{_libdir}/pkgconfig/contacts-service2.pc
 %{_includedir}/contacts-svc/contacts.h
 %{_includedir}/contacts-svc/contacts_*.h
+%license LICENSE.APLv2
+
+%files -n contacts-service-test
+%manifest %{name}-test.manifest
+%defattr(-,root,root,-)
+%{_bindir}/test-*
 %license LICENSE.APLv2
 

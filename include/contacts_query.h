@@ -155,6 +155,9 @@ int contacts_query_set_filter(contacts_query_h query, contacts_filter_h filter);
  */
 int contacts_query_set_sort(contacts_query_h query, unsigned int property_id, bool is_ascending);
 
+int contacts_query_set_snippet(contacts_query_h query, bool set,
+		const char *start_match, const char *end_match);
+
 /**
  * @}
  */

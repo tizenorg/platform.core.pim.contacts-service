@@ -81,6 +81,9 @@ static int __ctsvc_person_destroy(contacts_record_h record, bool delete_child)
 	free(person->image_thumbnail_path);
 	free(person->status);
 	free(person->addressbook_ids);
+	free(person->snippet.text);
+	free(person->snippet.start_match);
+	free(person->snippet.end_match);
 	free(person);
 
 	return CONTACTS_ERROR_NONE;

@@ -84,7 +84,9 @@ static int __ctsvc_result_destroy(contacts_record_h record, bool delete_child)
 	g_slist_free(result->values);
 	result->base.plugin_cbs = NULL; /* help to find double destroy bug (refer to the contacts_record_destroy) */
 	free(result->base.properties_flags);
-
+	free(result->snippet.text);
+	free(result->snippet.start_match);
+	free(result->snippet.end_match);
 	free(result);
 
 	return CONTACTS_ERROR_NONE;
@@ -146,6 +148,46 @@ static int __ctsvc_result_clone(contacts_record_h record, contacts_record_h *out
 	return CONTACTS_ERROR_NONE;
 }
 
+static bool _ctsvc_result_is_snippet(contacts_record_h record, char **out_text,
+		char **out_start_match, char **out_end_match)
+{
+	bool ret = false;
+	char *text = NULL;
+
+	int type = ctsvc_view_get_record_type(((ctsvc_record_s *)record)->view_uri);
+	switch (type) {
+	case CTSVC_RECORD_PERSON:
+		if (false == ((ctsvc_person_s *)record)->snippet.is_snippet)
+			break;
+		text = ((ctsvc_person_s *)record)->snippet.text;
+		if (NULL == text || '\0' == *text)
+			break;
+		*out_text = text;
+		if (out_start_match)
+			*out_start_match = ((ctsvc_person_s *)record)->snippet.start_match;
+		if (out_end_match)
+			*out_end_match = ((ctsvc_person_s *)record)->snippet.end_match;
+		ret = true;
+		break;
+	case CTSVC_RECORD_RESULT:
+		if (false == ((ctsvc_result_s *)record)->snippet.is_snippet)
+			break;
+		text = ((ctsvc_result_s *)record)->snippet.text;
+		if (NULL == text || '\0' == *text)
+			break;
+		*out_text = text;
+		if (out_start_match)
+			*out_start_match = ((ctsvc_result_s *)record)->snippet.start_match;
+		if (out_end_match)
+			*out_end_match = ((ctsvc_result_s *)record)->snippet.end_match;
+		ret = true;
+		break;
+	default:
+		break;
+	}
+	return ret;
+}
+
 static int __ctsvc_result_get_str_real(contacts_record_h record, unsigned int property_id,
 		char **out_str, bool copy)
 {
@@ -158,12 +200,54 @@ static int __ctsvc_result_get_str_real(contacts_record_h record, unsigned int pr
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 
+	char *text = NULL;
+	char *start_match = NULL;
+	char *end_match = NULL;
+	bool is_checked = false;
+	bool is_snippet = false;
+	int len_start_match = 0;
+	int len_end_match = 0;
 	for (cursor = result->values; cursor; cursor = cursor->next) {
 		ctsvc_result_value_s *data = cursor->data;
-		if (data->property_id == property_id) {
-			*out_str = GET_STR(copy, data->value.s);
-			return CONTACTS_ERROR_NONE;
+		if (data->property_id != property_id)
+			continue;
+
+		if (false == is_checked) {
+			is_checked = true;
+			is_snippet = _ctsvc_result_is_snippet(record, &text, &start_match, &end_match);
+			if (NULL == text || '\0' == *text)
+				is_snippet = false;
+			if (NULL == start_match || '\0' == *start_match)
+				start_match = strdup("[");
+			len_start_match = strlen(start_match);
+			if (NULL == end_match || '\0' == *end_match)
+				end_match = strdup("]");
+			len_end_match = strlen(end_match);
 		}
+
+		do {
+			if (false == is_snippet)
+				break;
+
+			char *pos_start = NULL;
+			pos_start = strstr(data->value.s, text);
+			if (NULL == pos_start)
+				break;
+
+			int len_value = strlen(data->value.s);
+			int len_offset = len_value - strlen(pos_start);
+			int len_total = len_value + strlen(text) + len_start_match + len_end_match + 1;
+
+			char *new_str = calloc(len_total, sizeof(char));
+			snprintf(new_str, len_offset, "%s", data->value.s);
+			snprintf(new_str + len_offset, len_total - len_offset, "%s%s%s%s",
+					start_match, text, end_match, data->value.s + len_offset);
+			free(data->value.s);
+			data->value.s = new_str;
+		} while (0);
+
+		*out_str = GET_STR(copy, data->value.s);
+		return CONTACTS_ERROR_NONE;
 	}
 
 	return CONTACTS_ERROR_NO_DATA;

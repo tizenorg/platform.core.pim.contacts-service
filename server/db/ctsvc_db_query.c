@@ -120,6 +120,41 @@ static const char * __ctsvc_db_get_property_field_name(const property_info_s *pr
 	return NULL;
 }
 
+static int _ctsvc_query_set_snippet(contacts_record_h record, ctsvc_query_s *que, const char *keyword)
+{
+	int type = ctsvc_view_get_record_type(que->view_uri);
+
+	if (NULL == keyword || '\0' == *keyword)
+		return CONTACTS_ERROR_NONE;
+
+	switch (type) {
+	case CTSVC_RECORD_PERSON:
+		((ctsvc_person_s *)record)->snippet.is_snippet = que->snippet.is_snippet;
+		if (false == que->snippet.is_snippet)
+			break;
+		((ctsvc_person_s *)record)->snippet.text = strdup(keyword);
+		if (que->snippet.start_match && '\0' != *que->snippet.start_match)
+			((ctsvc_person_s *)record)->snippet.start_match = strdup(que->snippet.start_match);
+		if (que->snippet.end_match && '\0' != *que->snippet.end_match)
+			((ctsvc_person_s *)record)->snippet.end_match = strdup(que->snippet.end_match);
+		break;
+	case CTSVC_RECORD_RESULT:
+		((ctsvc_result_s *)record)->snippet.is_snippet = que->snippet.is_snippet;
+		if (false == que->snippet.is_snippet)
+			break;
+		((ctsvc_result_s *)record)->snippet.text = strdup(keyword);
+		if (que->snippet.start_match && '\0' != *que->snippet.start_match)
+			((ctsvc_result_s *)record)->snippet.start_match = strdup(que->snippet.start_match);
+		if (que->snippet.end_match && '\0' != *que->snippet.end_match)
+			((ctsvc_result_s *)record)->snippet.end_match = strdup(que->snippet.end_match);
+		break;
+	default:
+		ERR("not supported type(%d)", type);
+		break;
+	}
+	return CONTACTS_ERROR_NONE;
+}
+
 /*
  * return data type of the property
  * bool / int / long long int / char string / double / child record
@@ -1110,7 +1145,7 @@ int ctsvc_db_make_get_records_query_stmt(ctsvc_query_s *s_query, int offset, int
 	}
 
 	len = 0;
-	if (s_query->distinct)
+	if (s_query->is_distinct)
 		temp_len = SAFE_SNPRINTF(&query, &query_size, len, "SELECT DISTINCT ");
 	else
 		temp_len = SAFE_SNPRINTF(&query, &query_size, len, "SELECT ");
@@ -2429,7 +2464,6 @@ static int __ctsvc_db_search_records_exec(const char *view_uri,
 				}
 			}
 		}
-
 		ctsvc_list_prepend(list, record);
 	}
 
@@ -2532,7 +2566,7 @@ static inline int __ctsvc_db_search_records_with_query_exec(ctsvc_query_s *s_que
 
 	len = 0;
 
-	if (s_query->distinct)
+	if (s_query->is_distinct)
 		temp_len = SAFE_SNPRINTF(&query, &query_size, len, "SELECT DISTINCT ");
 	else
 		temp_len = SAFE_SNPRINTF(&query, &query_size, len, "SELECT ");
@@ -2789,6 +2823,7 @@ static inline int __ctsvc_db_search_records_with_query_exec(ctsvc_query_s *s_que
 					ERR("unknown type (%d)", type);
 			}
 		}
+		_ctsvc_query_set_snippet(record, s_query, keyword);
 		ctsvc_list_prepend(list, record);
 	}
 	ctsvc_stmt_finalize(stmt);
@@ -3051,7 +3086,7 @@ static int __db_get_count_with_query_exec(ctsvc_query_s *s_query, const char *pr
 	}
 
 	len = 0;
-	if (s_query->distinct) {
+	if (s_query->is_distinct) {
 		temp_len = SAFE_SNPRINTF(&query, &query_size, len,
 				"SELECT COUNT(*) FROM (SELECT DISTINCT ");
 	} else {
