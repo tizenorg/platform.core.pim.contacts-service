@@ -60,7 +60,6 @@ GCond __ctsvc_server_bg_delete_cond;
 GMutex __ctsvc_server_bg_delete_mutex;
 
 account_subscribe_h account = NULL;
-contacts_h bg_contact;
 
 static int __ctsvc_server_bg_contact_delete_step1(__ctsvc_delete_data_s *data)
 {
@@ -478,11 +477,11 @@ static bool __ctsvc_server_account_delete_cb(const char *event_type, int account
 void ctsvc_server_bg_add_cb()
 {
 	int ret;
-	ctsvc_handle_create(&bg_contact);
-	ret = ctsvc_inotify_subscribe(bg_contact, _contacts_address_book._uri, __ctsvc_server_addressbook_deleted_cb, NULL);
+
+	ret = ctsvc_inotify_subscribe(_contacts_address_book._uri, __ctsvc_server_addressbook_deleted_cb, NULL);
 	DBG("call ctsvc_inotify_subscribe (_contacts_address_book)  : return (%d)", ret);
 
-	ret = ctsvc_inotify_subscribe(bg_contact, _contacts_contact._uri, __ctsvc_server_contact_deleted_cb, NULL);
+	ret = ctsvc_inotify_subscribe(_contacts_contact._uri, __ctsvc_server_contact_deleted_cb, NULL);
 	DBG("call ctsvc_inotify_subscribe (_contacts_contact): return (%d)", ret);
 
 	ret = account_subscribe_create(&account);
@@ -499,9 +498,9 @@ void ctsvc_server_bg_remove_cb()
 {
 	int ret;
 
-	ret = ctsvc_inotify_unsubscribe(bg_contact, _contacts_address_book._uri, __ctsvc_server_addressbook_deleted_cb, NULL);
+	ret = ctsvc_inotify_unsubscribe(_contacts_address_book._uri, __ctsvc_server_addressbook_deleted_cb, NULL);
 	ERR("call ctsvc_inotify_unsubscribe (_contacts_address_book): return (%d)", ret);
-	ret = ctsvc_inotify_unsubscribe(bg_contact, _contacts_contact._uri, __ctsvc_server_contact_deleted_cb, NULL);
+	ret = ctsvc_inotify_unsubscribe(_contacts_contact._uri, __ctsvc_server_contact_deleted_cb, NULL);
 	ERR("call ctsvc_inotify_unsubscribe (_contacts_contact) : return (%d)", ret);
 
 	if (account) {

@@ -121,7 +121,7 @@ int ctsvc_client_connect(contacts_h contact)
 	}
 
 	if (1 == base->connection_count)
-		ctsvc_inotify_subscribe_ipc_ready(contact, _ctsvc_ipc_initialized_cb, NULL);
+		ctsvc_inotify_subscribe_ipc_ready(_ctsvc_ipc_initialized_cb, NULL);
 
 	_ctsvc_connection++;
 	ctsvc_mutex_unlock(CTS_MUTEX_CONNECTION);
@@ -145,7 +145,7 @@ int ctsvc_client_disconnect(contacts_h contact)
 			ERR("ctsvc_ipc_disconnect() Fail(%d)", ret);
 			return ret;
 		}
-		ctsvc_inotify_unsubscribe_ipc_ready(contact);
+		ctsvc_inotify_unsubscribe_ipc_ready();
 	}
 	base->connection_count--;
 
@@ -214,7 +214,7 @@ int ctsvc_client_connect_on_thread(contacts_h contact)
 	}
 
 	if (1 == base->connection_count)
-		ctsvc_inotify_subscribe_ipc_ready(contact, _ctsvc_ipc_initialized_cb, NULL);
+		ctsvc_inotify_subscribe_ipc_ready(_ctsvc_ipc_initialized_cb, NULL);
 
 	_ctsvc_connection_on_thread++;
 
@@ -239,7 +239,7 @@ int ctsvc_client_disconnect_on_thread(contacts_h contact)
 			ctsvc_mutex_unlock(CTS_MUTEX_CONNECTION);
 			return ret;
 		}
-		ctsvc_inotify_unsubscribe_ipc_ready(contact);
+		ctsvc_inotify_unsubscribe_ipc_ready();
 	}
 	base->connection_count--;
 
