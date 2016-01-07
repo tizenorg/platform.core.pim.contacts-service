@@ -45,8 +45,7 @@ int ctsvc_client_activity_delete_by_contact_id(contacts_h contact, int contact_i
 	indata = pims_ipc_data_create(0);
 	if (indata == NULL) {
 		ERR("pims_ipc_data_create() Fail");
-		ret = CONTACTS_ERROR_OUT_OF_MEMORY;
-		return ret;
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
 	}
 
 	ret = ctsvc_ipc_marshal_handle(contact, indata);
@@ -111,8 +110,7 @@ int ctsvc_client_activity_delete_by_account_id(contacts_h contact, int account_i
 	indata = pims_ipc_data_create(0);
 	if (indata == NULL) {
 		ERR("pims_ipc_data_create() Fail");
-		ret = CONTACTS_ERROR_OUT_OF_MEMORY;
-		return ret;
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
 	}
 
 	ret = ctsvc_ipc_marshal_handle(contact, indata);
