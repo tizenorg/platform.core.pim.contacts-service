@@ -44,8 +44,7 @@ int ctsvc_client_group_add_contact(contacts_h contact, int group_id, int contact
 	indata = pims_ipc_data_create(0);
 	if (indata == NULL) {
 		ERR("pims_ipc_data_create() Fail");
-		ret = CONTACTS_ERROR_OUT_OF_MEMORY;
-		return ret;
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
 	}
 
 	ret = ctsvc_ipc_marshal_handle(contact, indata);
@@ -114,9 +113,9 @@ int ctsvc_client_group_remove_contact(contacts_h contact, int group_id, int cont
 	indata = pims_ipc_data_create(0);
 	if (indata == NULL) {
 		ERR("pims_ipc_data_create() Fail");
-		ret = CONTACTS_ERROR_OUT_OF_MEMORY;
-		return ret;
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
 	}
+
 	ret = ctsvc_ipc_marshal_handle(contact, indata);
 	if (CONTACTS_ERROR_NONE != ret) {
 		ERR("ctsvc_ipc_marshal_handle() Fail(%d)", ret);
@@ -184,9 +183,9 @@ int ctsvc_client_group_set_group_order(contacts_h contact, int group_id, int pre
 	indata = pims_ipc_data_create(0);
 	if (indata == NULL) {
 		ERR("pims_ipc_data_create() Fail");
-		ret = CONTACTS_ERROR_OUT_OF_MEMORY;
-		return ret;
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
 	}
+
 	ret = ctsvc_ipc_marshal_handle(contact, indata);
 	if (CONTACTS_ERROR_NONE != ret) {
 		ERR("ctsvc_ipc_marshal_handle() Fail(%d)", ret);
