@@ -28,5 +28,5 @@ int ctsvc_client_person_reset_usage(contacts_h contact, int person_id, contacts_
 int ctsvc_client_person_set_favorite_order(contacts_h contact, int person_id, int previous_person_id, int next_person_id);
 int ctsvc_client_person_set_default_property(contacts_h contact, contacts_person_property_e property, int person_id, int id);
 int ctsvc_client_person_get_default_property(contacts_h contact, contacts_person_property_e property, int person_id, int *id);
-
+int ctsvc_client_person_search_aggregable(contacts_h contact, int person_id, contacts_list_h *out_list);
 #endif /* __CTSVC_CLIENT_PERSON_HELPER_H__ */
