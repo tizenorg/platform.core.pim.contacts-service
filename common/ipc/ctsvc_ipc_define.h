@@ -74,6 +74,7 @@
 #define CTSVC_IPC_SERVER_PERSON_SET_FAVORITE_ORDER       "person_set_favorite_order"
 #define CTSVC_IPC_SERVER_PERSON_SET_DEFAULT_PROPERTY      "person_set_default_property"
 #define CTSVC_IPC_SERVER_PERSON_GET_DEFAULT_PROPERTY      "person_get_default_property"
+#define CTSVC_IPC_SERVER_PERSON_SEARCH_AGGREGABLE	"person_search_aggregable"
 
 #define CTSVC_IPC_SERVER_PHONELOG_RESET_STATISTICS    "phonelog_reset_statistics"
 #define CTSVC_IPC_SERVER_PHONELOG_DELETE    "phonelog_delete"
