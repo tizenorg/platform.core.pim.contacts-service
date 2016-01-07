@@ -235,6 +235,37 @@ int contacts_person_get_default_property(contacts_person_property_e property, in
         int *id);
 
 /**
+ * @brief Gets aggregation suggestions.
+ *
+ * @since_tizen 3.0
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/contact.read
+
+ * @remarks You must release @a record_list using contacts_list_destroy().
+ * @remarks This may take a long time. if you need to use it in bulk, make sure the user experience is acceptable  while running it.
+ *
+ * @param[in]   person_id               The person ID
+ * @param[in]   limit           The number to limit results(value 0 is used for get all records)
+ * @param[out]  record_list             The list of person records
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
+ * @retval  #CONTACTS_ERROR_NONE                Successful
+ * @retval  #CONTACTS_ERROR_OUT_OF_MEMORY       Out of memory
+ * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ * @retval  #CONTACTS_ERROR_FILE_NO_SPACE       FS Full
+ * @retval  #CONTACTS_ERROR_NO_DATA             Requested data does not exist
+ * @retval  #CONTACTS_ERROR_PERMISSION_DENIED   Permission denied. This application does not have the privilege to call this method.
+ * @retval  #CONTACTS_ERROR_DB                  Database operation failure
+ * @retval  #CONTACTS_ERROR_IPC                 IPC error
+ *
+ * @pre     contacts_connect() should be called to open a connection to the contacts service.
+ *
+ * @see  contacts_connect()
+ */
+int contacts_person_get_aggregation_suggestions(int person_id, int limit, contacts_list_h *record_list);
+/**
  * @}
  */
 

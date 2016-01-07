@@ -790,6 +790,81 @@ DATA_FREE:
 	return;
 }
 
+void ctsvc_ipc_person_get_aggregation_suggestions(pims_ipc_h ipc, pims_ipc_data_h indata,
+		pims_ipc_data_h *outdata, void *userdata)
+{
+	int ret = CONTACTS_ERROR_NONE;
+	int person_id = 0;
+	int limit = 0;
+	contacts_list_h list = NULL;
+	contacts_h contact = NULL;
+
+	if (indata) {
+		ret = ctsvc_ipc_unmarshal_handle(indata, &contact);
+		if (CONTACTS_ERROR_NONE != ret) {
+			ERR("ctsvc_ipc_unmarshal_handle Fail(%d)", ret);
+			goto ERROR_RETURN;
+		}
+		ret = ctsvc_ipc_unmarshal_int(indata, &person_id);
+		if (ret != CONTACTS_ERROR_NONE) {
+			ERR("ctsvc_ipc_unmarshal_int() Fail(%d)", ret);
+			goto ERROR_RETURN;
+		}
+		ret = ctsvc_ipc_unmarshal_int(indata, &limit);
+		if (ret != CONTACTS_ERROR_NONE) {
+			ERR("ctsvc_ipc_unmarshal_int() Fail(%d)", ret);
+			goto ERROR_RETURN;
+		}
+	}
+	else {
+		ERR("ctsvc_ipc_person_get_aggregation_suggestions() Fail");
+		goto ERROR_RETURN;
+	}
+
+	if (!ctsvc_have_permission(ipc, CTSVC_PERMISSION_CONTACT_READ)) {
+		ret = CONTACTS_ERROR_PERMISSION_DENIED;
+		goto ERROR_RETURN;
+	}
+
+	ret = ctsvc_person_get_aggregation_suggestions(person_id, limit, &list);
+
+ERROR_RETURN:
+
+	if (outdata) {
+		*outdata = pims_ipc_data_create(0);
+		if (NULL == *outdata) {
+			ERR("pims_ipc_data_create() Fail");
+			goto DATA_FREE;
+		}
+		if (CONTACTS_ERROR_NONE != ctsvc_ipc_marshal_int(ret, *outdata)) {
+			pims_ipc_data_destroy(*outdata);
+			*outdata = NULL;
+			ERR("ctsvc_ipc_marshal_int() Fail");
+			goto DATA_FREE;
+		}
+
+		if (CONTACTS_ERROR_NO_DATA == ret) {
+			DBG("no data");
+		}
+		else if (CONTACTS_ERROR_NONE == ret) {
+			ret = ctsvc_ipc_marshal_list(list, *outdata);
+
+			if (ret != CONTACTS_ERROR_NONE) {
+				ERR("ctsvc_ipc_marshal_list() Fail(%d)", ret);
+				goto DATA_FREE;
+			}
+		}
+	}
+	else {
+		ERR("outdata is NULL");
+	}
+DATA_FREE:
+	ctsvc_handle_destroy(contact);
+	contacts_list_destroy(list,true);
+	ctsvc_server_start_timeout();
+	return;
+}
+
 #ifdef ENABLE_LOG_FEATURE
 void ctsvc_ipc_phone_log_reset_statistics(pims_ipc_h ipc, pims_ipc_data_h indata, pims_ipc_data_h *outdata, void *userdata)
 {

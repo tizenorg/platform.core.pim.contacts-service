@@ -51,9 +51,9 @@ int ctsvc_client_db_insert_record(contacts_h contact, contacts_record_h record, 
 	indata = pims_ipc_data_create(0);
 	if (indata == NULL) {
 		ERR("pims_ipc_data_create() Fail");
-		ret = CONTACTS_ERROR_OUT_OF_MEMORY;
-		return ret;
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
 	}
+
 	ret = ctsvc_ipc_marshal_handle(contact, indata);
 	if (ret != CONTACTS_ERROR_NONE) {
 		ERR("ctsvc_ipc_marshal_handle() Fail(%d)", ret);
@@ -123,8 +123,7 @@ int ctsvc_client_db_get_record(contacts_h contact, const char *view_uri, int id,
 	indata = pims_ipc_data_create(0);
 	if (indata == NULL) {
 		ERR("pims_ipc_data_create() Fail");
-		ret = CONTACTS_ERROR_OUT_OF_MEMORY;
-		return ret;
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
 	}
 
 	ret = ctsvc_ipc_marshal_handle(contact, indata);
@@ -187,8 +186,7 @@ int ctsvc_client_db_update_record(contacts_h contact, contacts_record_h record)
 	indata = pims_ipc_data_create(0);
 	if (indata == NULL) {
 		ERR("pims_ipc_data_create() Fail");
-		ret = CONTACTS_ERROR_OUT_OF_MEMORY;
-		return ret;
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
 	}
 
 	ret = ctsvc_ipc_marshal_handle(contact, indata);
@@ -248,8 +246,7 @@ int ctsvc_client_db_delete_record(contacts_h contact, const char *view_uri, int 
 	indata = pims_ipc_data_create(0);
 	if (indata == NULL) {
 		ERR("pims_ipc_data_create() Fail");
-		ret = CONTACTS_ERROR_OUT_OF_MEMORY;
-		return ret;
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
 	}
 
 	ret = ctsvc_ipc_marshal_handle(contact, indata);
@@ -316,8 +313,7 @@ int ctsvc_client_db_replace_record(contacts_h contact, contacts_record_h record,
 	indata = pims_ipc_data_create(0);
 	if (indata == NULL) {
 		ERR("pims_ipc_data_create() Fail");
-		ret = CONTACTS_ERROR_OUT_OF_MEMORY;
-		return ret;
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
 	}
 
 	ret = ctsvc_ipc_marshal_handle(contact, indata);
@@ -386,8 +382,7 @@ int ctsvc_client_db_get_all_records(contacts_h contact, const char *view_uri, in
 	indata = pims_ipc_data_create(0);
 	if (indata == NULL) {
 		ERR("pims_ipc_data_create() Fail");
-		ret = CONTACTS_ERROR_OUT_OF_MEMORY;
-		return ret;
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
 	}
 
 	ret = ctsvc_ipc_marshal_handle(contact, indata);
@@ -459,8 +454,7 @@ int ctsvc_client_db_get_records_with_query(contacts_h contact, contacts_query_h 
 	indata = pims_ipc_data_create(0);
 	if (indata == NULL) {
 		ERR("pims_ipc_data_create() Fail");
-		ret = CONTACTS_ERROR_OUT_OF_MEMORY;
-		return ret;
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
 	}
 
 	ret = ctsvc_ipc_marshal_handle(contact, indata);
@@ -535,8 +529,7 @@ int ctsvc_client_db_get_count(contacts_h contact, const char *view_uri, int *out
 	indata = pims_ipc_data_create(0);
 	if (indata == NULL) {
 		ERR("pims_ipc_data_create() Fail");
-		ret = CONTACTS_ERROR_OUT_OF_MEMORY;
-		return ret;
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
 	}
 
 	ret = ctsvc_ipc_marshal_handle(contact, indata);
@@ -598,9 +591,9 @@ int ctsvc_client_db_get_count_with_query(contacts_h contact, contacts_query_h qu
 	indata = pims_ipc_data_create(0);
 	if (indata == NULL) {
 		ERR("pims_ipc_data_create() Fail");
-		ret = CONTACTS_ERROR_OUT_OF_MEMORY;
-		return ret;
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
 	}
+
 	ret = ctsvc_ipc_marshal_handle(contact, indata);
 	if (CONTACTS_ERROR_NONE != ret) {
 		ERR("ctsvc_ipc_marshal_handle() Fail(%d)", ret);
@@ -661,9 +654,9 @@ int ctsvc_client_db_insert_records(contacts_h contact, contacts_list_h list, int
 	indata = pims_ipc_data_create(0);
 	if (indata == NULL) {
 		ERR("pims_ipc_data_create() Fail");
-		ret = CONTACTS_ERROR_OUT_OF_MEMORY;
-		return ret;
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
 	}
+
 	ret = ctsvc_ipc_marshal_handle(contact, indata);
 	if (CONTACTS_ERROR_NONE != ret) {
 		ERR("ctsvc_ipc_marshal_handle() Fail(%d)", ret);
@@ -750,8 +743,7 @@ int ctsvc_client_db_update_records(contacts_h contact, contacts_list_h list)
 	indata = pims_ipc_data_create(0);
 	if (indata == NULL) {
 		ERR("pims_ipc_data_create() Fail");
-		ret = CONTACTS_ERROR_OUT_OF_MEMORY;
-		return ret;
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
 	}
 
 	ret = ctsvc_ipc_marshal_handle(contact, indata);
@@ -813,8 +805,7 @@ int ctsvc_client_db_delete_records(contacts_h contact, const char *view_uri, int
 	indata = pims_ipc_data_create(0);
 	if (indata == NULL) {
 		ERR("pims_ipc_data_create() Fail");
-		ret = CONTACTS_ERROR_OUT_OF_MEMORY;
-		return ret;
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
 	}
 
 	ret = ctsvc_ipc_marshal_handle(contact, indata);
@@ -895,8 +886,7 @@ int ctsvc_client_db_replace_records(contacts_h contact, contacts_list_h list, in
 	indata = pims_ipc_data_create(0);
 	if (indata == NULL) {
 		ERR("pims_ipc_data_create() Fail");
-		ret = CONTACTS_ERROR_OUT_OF_MEMORY;
-		return ret;
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
 	}
 
 	ret = ctsvc_ipc_marshal_handle(contact, indata);
@@ -976,8 +966,7 @@ int ctsvc_client_db_get_changes_by_version(contacts_h contact, const char *view_
 	indata = pims_ipc_data_create(0);
 	if (indata == NULL) {
 		ERR("pims_ipc_data_create() Fail");
-		ret = CONTACTS_ERROR_OUT_OF_MEMORY;
-		return ret;
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
 	}
 
 	ret = ctsvc_ipc_marshal_handle(contact, indata);
@@ -1055,8 +1044,7 @@ int ctsvc_client_db_get_current_version(contacts_h contact, int *contacts_db_ver
 	indata = pims_ipc_data_create(0);
 	if (indata == NULL) {
 		ERR("pims_ipc_data_create() Fail");
-		ret = CONTACTS_ERROR_OUT_OF_MEMORY;
-		return ret;
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
 	}
 
 	ret = ctsvc_ipc_marshal_handle(contact, indata);
@@ -1110,9 +1098,9 @@ int ctsvc_client_db_search_records(contacts_h contact, const char *view_uri, con
 	indata = pims_ipc_data_create(0);
 	if (indata == NULL) {
 		ERR("pims_ipc_data_create() Fail");
-		ret = CONTACTS_ERROR_OUT_OF_MEMORY;
-		return ret;
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
 	}
+
 	ret = ctsvc_ipc_marshal_handle(contact, indata);
 	if (CONTACTS_ERROR_NONE != ret) {
 		ERR("ctsvc_ipc_marshal_handle() Fail(%d)", ret);
@@ -1272,9 +1260,9 @@ int ctsvc_client_db_search_records_with_query(contacts_h contact, contacts_query
 	indata = pims_ipc_data_create(0);
 	if (indata == NULL) {
 		ERR("pims_ipc_data_create() Fail");
-		ret = CONTACTS_ERROR_OUT_OF_MEMORY;
-		return ret;
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
 	}
+
 	ret = ctsvc_ipc_marshal_handle(contact, indata);
 	if (CONTACTS_ERROR_NONE != ret) {
 		ERR("ctsvc_ipc_marshal_handle() Fail(%d)", ret);
@@ -1403,8 +1391,7 @@ int ctsvc_client_db_get_status(contacts_h contact, contacts_db_status_e *status)
 	indata = pims_ipc_data_create(0);
 	if (indata == NULL) {
 		ERR("pims_ipc_data_create() Fail");
-		ret = CONTACTS_ERROR_OUT_OF_MEMORY;
-		return ret;
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
 	}
 
 	ret = ctsvc_ipc_marshal_handle(contact, indata);
