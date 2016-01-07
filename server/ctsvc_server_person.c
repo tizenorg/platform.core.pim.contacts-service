@@ -28,6 +28,10 @@
 #include "ctsvc_db_plugin_contact_helper.h"
 #include "ctsvc_db_access_control.h"
 #include "ctsvc_notify.h"
+#include "ctsvc_number_utils.h"
+#include "ctsvc_server_setting.h"
+#include "ctsvc_list.h"
+#include "ctsvc_localize.h"
 
 #ifdef ENABLE_LOG_FEATURE
 #include "ctsvc_server_phonelog.h"
@@ -36,6 +40,8 @@
 #ifdef _CONTACTS_IPC_SERVER
 #include "ctsvc_server_change_subject.h"
 #endif
+
+#define CTSVC_COMP_NAME_LEN 4
 
 enum {
 	CTSVC_GET_PERSON_DEFAULT_NUMBER_VALUE,
@@ -1475,6 +1481,347 @@ int ctsvc_person_get_default_property(contacts_person_property_e property, int p
 		RETVM_IF(ret != CONTACTS_ERROR_NONE, ret, "ctsvc_query_get_first_int_result() Fail(%d)", ret);
 		*id = result;
 	}
+
+	return ret;
+}
+
+static void __ctsvc_make_condition_names(contacts_record_h record, char **cond_names,
+		int *size, int *len)
+{
+	ctsvc_contact_s *contact = (ctsvc_contact_s*)record;
+	char comp_name[CTSVC_COMP_NAME_LEN] = {0};
+	char *name = NULL;
+
+	switch (contact->display_name_language) {
+	case CTSVC_SORT_KOREAN:
+		name = contact->display_name;
+		break;
+
+	default:
+		name = contact->reverse_display_name;
+		break;
+	}
+
+	if (name && CTSVC_COMP_NAME_LEN <= strlen(name)) {
+		if (*len)
+			*len += SAFE_SNPRINTF(cond_names, size, *len, " OR ");
+
+		if (name == contact->display_name)
+			*len += SAFE_SNPRINTF(cond_names, size, *len, "display_name");
+		else
+			*len += SAFE_SNPRINTF(cond_names, size, *len, "reverse_display_name");
+
+		*len += SAFE_SNPRINTF(cond_names, size, *len, " LIKE '");
+
+		if (CTSVC_SORT_KOREAN == contact->display_name_language) { /*compare first name*/
+			*len += SAFE_SNPRINTF(cond_names, size, *len, "%");
+			strncpy(comp_name, name + (strlen(name) -CTSVC_COMP_NAME_LEN), CTSVC_COMP_NAME_LEN);
+			*len += SAFE_SNPRINTF(cond_names, size, *len, comp_name);
+		} else {
+			strncpy(comp_name, name, CTSVC_COMP_NAME_LEN);
+			*len += SAFE_SNPRINTF(cond_names, size, *len, comp_name);
+			*len += SAFE_SNPRINTF(cond_names, size, *len, "%");
+		}
+		*len += SAFE_SNPRINTF(cond_names, size, *len, "'");
+	}
+
+	DBG("cond_names : %s", *cond_names);
+}
+
+
+static void __ctsvc_make_condition_emails(contacts_record_h record, char **cond_emails,
+		int *size, int *len)
+{
+	GList *cursor = NULL;
+	ctsvc_contact_s *contact = (ctsvc_contact_s*)record;
+	ctsvc_email_s *email_data;
+	int local_part_len = 0;
+	char local_part[256] = {0};
+
+	if (NULL == contact->emails) {
+		DBG("NULL == contact->emails");
+		return;
+	}
+
+	for (cursor = contact->emails->records; cursor; cursor = cursor->next) {
+		email_data = cursor->data;
+		if (email_data && email_data->email_addr && email_data->email_addr[0]) {
+			local_part_len = strcspn(email_data->email_addr, "@");
+			if (local_part_len <= 0 || strlen(email_data->email_addr) <= local_part_len)
+				continue;
+
+			if (*len)
+				*len += SAFE_SNPRINTF(cond_emails, size, *len, " OR ");
+
+			*len += SAFE_SNPRINTF(cond_emails, size, *len, "D.data3 LIKE '");
+			strncpy(local_part, email_data->email_addr, local_part_len + 1);
+			*len += SAFE_SNPRINTF(cond_emails, size, *len, local_part);
+			*len += SAFE_SNPRINTF(cond_emails, size, *len, "%'");
+		}
+	}
+	DBG("cond_emails : %s", *cond_emails);
+}
+
+static void __ctsvc_make_condition_numbers(contacts_record_h record, char **cond_numbers,
+		int *size, int *len)
+{
+	int ret = CONTACTS_ERROR_NONE;
+	GList *cursor = NULL;
+	ctsvc_contact_s *contact = (ctsvc_contact_s*)record;
+	ctsvc_number_s *number_data;
+
+	if (NULL == contact->numbers) {
+		DBG("NULL == contact->numbers");
+		return;
+	}
+
+	for (cursor = contact->numbers->records; cursor; cursor = cursor->next) {
+		number_data = cursor->data;
+		if (number_data && number_data->number && number_data->number[0]) {
+			int number_len = SAFE_STRLEN(number_data->number);
+			char clean_num[number_len + 1];
+			ret = ctsvc_clean_number(number_data->number, clean_num, sizeof(clean_num), true);
+			if (ret <= 0)
+				continue;
+
+			char normal_num[sizeof(clean_num) + 20];
+			ret = ctsvc_normalize_number(clean_num, normal_num, sizeof(normal_num), true);
+			char minmatch[sizeof(normal_num) + 1];
+			if (ret <= 0)
+				continue;
+
+			ret = ctsvc_get_minmatch_number(normal_num, minmatch, sizeof(minmatch),
+				ctsvc_get_phonenumber_min_match_digit());
+
+			if (CONTACTS_ERROR_NONE != ret)
+				continue;
+
+			if (*len)
+				*len += SAFE_SNPRINTF(cond_numbers, size, *len, ", ");
+
+			*len += SAFE_SNPRINTF(cond_numbers, size, *len, "'");
+			*len += SAFE_SNPRINTF(cond_numbers, size, *len, minmatch);
+			*len += SAFE_SNPRINTF(cond_numbers, size, *len, "'");
+		}
+	}
+	DBG("cond_numbers : %s", *cond_numbers);
+}
+
+static int __ctsvc_find_aggregable_person(int person_id, GSList *contact_ids, contacts_list_h *out_list)
+{
+	int ret = CONTACTS_ERROR_NONE;
+	GSList *cursor = NULL;
+	char *query = NULL;
+	char *sub_query = NULL;
+	char *cond_numbers = NULL;
+	char *cond_emails = NULL;
+	char *cond_names = NULL;
+	int cond_numbers_size = CTS_SQL_MIN_LEN;
+	int cond_emails_size = CTS_SQL_MIN_LEN;
+	int cond_names_size = CTS_SQL_MIN_LEN;
+	int cond_numbers_len = 0;
+	int cond_emails_len = 0;
+	int cond_names_len = 0;
+	int query_size = 0;
+	int sub_query_size = 0;
+	int sub_query_len = 0;
+
+	contacts_list_h list = NULL;
+	cts_stmt stmt = NULL;
+
+	RETV_IF(NULL == out_list, CONTACTS_ERROR_INVALID_PARAMETER);
+
+	cond_numbers = calloc(1, CTS_SQL_MIN_LEN);
+	if (NULL == cond_numbers) {
+		ERR("calloc() Fail");
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
+	}
+
+	cond_emails = calloc(1, CTS_SQL_MIN_LEN);
+	if (NULL == cond_emails) {
+		ERR("calloc() Fail");
+		free(cond_numbers);
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
+	}
+
+	cond_names = calloc(1, CTS_SQL_MIN_LEN);
+	if (NULL == cond_names) {
+		ERR("calloc() Fail");
+		free(cond_numbers);
+		free(cond_emails);
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
+	}
+
+	for (cursor = contact_ids; cursor; cursor = cursor->next) {
+		contacts_record_h record = NULL;
+
+		int contact_id = GPOINTER_TO_INT(cursor->data);
+		ret = ctsvc_db_contact_get(contact_id, &record);
+		if (CONTACTS_ERROR_NONE != ret) {
+			WARN("ctsvc_db_contact_get() Fail(%d), contact_id = %d", ret, contact_id);
+			continue;
+		}
+
+		__ctsvc_make_condition_numbers(record, &cond_numbers, &cond_numbers_size, &cond_numbers_len);
+		__ctsvc_make_condition_emails(record, &cond_emails, &cond_emails_size, &cond_emails_len);
+		__ctsvc_make_condition_names(record, &cond_names, &cond_names_size, &cond_names_len);
+
+		contacts_record_destroy(record, true);
+	}
+
+	sub_query_size = CTS_SQL_MIN_LEN + cond_numbers_len + cond_emails_len + cond_names_len;
+	sub_query = calloc(1, sub_query_size);
+	if (NULL == sub_query) {
+		ERR("calloc() Fail");
+		free(cond_numbers);
+		free(cond_emails);
+		free(cond_names);
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
+	}
+
+	if (cond_numbers_len) {
+		sub_query_len += snprintf(sub_query, sub_query_size,
+					"SELECT C.person_id FROM "CTS_TABLE_CONTACTS" C, "CTS_TABLE_DATA" D "
+					"ON C.contact_id=D.contact_id AND D.datatype=%d AND C.deleted = 0 "
+					"AND C.person_id <> %d AND D.is_my_profile = 0 "
+					"WHERE D.data4 IN (%s)",
+					CTSVC_DATA_NUMBER, person_id, cond_numbers);
+	}
+
+	if (cond_emails_len) {
+		if (sub_query_len)
+			sub_query_len +=
+					snprintf(sub_query + sub_query_len, sub_query_size -sub_query_len, " UNION ");
+
+		sub_query_len += snprintf(sub_query + sub_query_len, sub_query_size -sub_query_len,
+					"SELECT C.person_id FROM "CTS_TABLE_CONTACTS" C, "CTS_TABLE_DATA" D "
+					"ON C.contact_id=D.contact_id AND D.datatype=%d AND C.deleted = 0 "
+					"AND C.person_id <> %d AND D.is_my_profile = 0 "
+					"WHERE %s",
+					CTSVC_DATA_EMAIL, person_id, cond_emails);
+	}
+
+	if (cond_names_len) {
+		if (sub_query_len)
+			sub_query_len +=
+					snprintf(sub_query + sub_query_len, sub_query_size -sub_query_len, " UNION ");
+
+		sub_query_len += snprintf(sub_query + sub_query_len, sub_query_size -sub_query_len,
+					"SELECT person_id FROM "CTS_TABLE_CONTACTS" "
+					"WHERE person_id <> %d AND (%s)",
+					person_id, cond_names);
+	}
+
+	free(cond_numbers);
+	free(cond_emails);
+	free(cond_names);
+
+	DBG("sub_query : %s", sub_query);
+
+	query_size = CTS_SQL_MIN_LEN + sub_query_len;
+	query = calloc(1, query_size);
+	if (NULL == query) {
+		ERR("calloc() Fail");
+		free(sub_query);
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
+	}
+
+	snprintf(query, query_size,
+			"SELECT DISTINCT persons.person_id, "
+			"%s, "
+			"_NORMALIZE_INDEX_(%s), "
+			"name_contact_id, "
+			"persons.image_thumbnail_path, "
+			"persons.ringtone_path, "
+			"persons.vibration, "
+			"persons.message_alert, "
+			"status, "
+			"link_count, "
+			"addressbook_ids, "
+			"persons.has_phonenumber, "
+			"persons.has_email, "
+			"EXISTS(SELECT person_id FROM "CTS_TABLE_FAVORITES" WHERE person_id=persons.person_id) is_favorite "
+			"FROM "CTS_TABLE_PERSONS" "
+			"LEFT JOIN "CTS_TABLE_CONTACTS" "
+			"ON (name_contact_id = contacts.contact_id AND contacts.deleted = 0) "
+			"WHERE persons.person_id IN (%s)",
+			ctsvc_get_display_column(), ctsvc_get_sort_name_column(), sub_query);
+
+	free(sub_query);
+
+	ret = ctsvc_query_prepare(query, &stmt);
+	free(query);
+	if (NULL == stmt) {
+		ERR("ctsvc_query_prepare fail(%d)", ret);
+		return ret;
+	}
+
+	contacts_list_create(&list);
+	while ((ret = ctsvc_stmt_step(stmt))) {
+		contacts_record_h record;
+		if (1 != ret) {
+			ERR("ctsvc_stmt_step() Fail(%d)", ret);
+			ctsvc_stmt_finalize(stmt);
+			contacts_list_destroy(list, true);
+			return ret;
+		}
+		ret = ctsvc_db_person_create_record_from_stmt(stmt, &record);
+		if (CONTACTS_ERROR_NONE != ret) {
+			ERR("ctsvc_db_person_create_record_from_stmt() Fail(%d)", ret);
+			ctsvc_stmt_finalize(stmt);
+			contacts_list_destroy(list, true);
+			return ret;
+		}
+
+		ctsvc_list_prepend(list, record);
+	}
+	ctsvc_stmt_finalize(stmt);
+	ctsvc_list_reverse(list);
+
+	*out_list = list;
+	return CONTACTS_ERROR_NONE;
+}
+
+
+int ctsvc_person_search_aggregable(int person_id, contacts_list_h *out_list)
+{
+	int ret = CONTACTS_ERROR_NONE;
+	cts_stmt stmt;
+	char query[CTS_SQL_MIN_LEN] = {0};
+	GSList *contact_ids = NULL;
+
+	RETV_IF(person_id <= 0, CONTACTS_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == out_list, CONTACTS_ERROR_INVALID_PARAMETER);
+
+	snprintf(query, sizeof(query),
+			"SELECT contact_id FROM "CTS_TABLE_CONTACTS" "
+			"WHERE deleted = 0 AND person_id = %d", person_id);
+
+	ret = ctsvc_query_prepare(query, &stmt);
+	RETVM_IF(NULL == stmt, ret, "ctsvc_query_prepare() Fail(%d)", ret);
+
+	while ((ret = ctsvc_stmt_step(stmt))) {
+		int contact_id = 0;
+
+		if (1 != ret) {
+			ERR("ctsvc_stmt_step() Fail(%d)", ret);
+			ctsvc_stmt_finalize(stmt);
+			return ret;
+		}
+		contact_id = ctsvc_stmt_get_int(stmt, 0);
+
+		contact_ids = g_slist_append(contact_ids, GINT_TO_POINTER(contact_id));
+	}
+	ctsvc_stmt_finalize(stmt);
+
+	if (NULL == contact_ids) {
+		ERR("Fail to get contacts by person_id");
+		return CONTACTS_ERROR_DB;
+	}
+
+	ret =  __ctsvc_find_aggregable_person(person_id, contact_ids, out_list);
+
+	g_slist_free(contact_ids);
 
 	return ret;
 }
