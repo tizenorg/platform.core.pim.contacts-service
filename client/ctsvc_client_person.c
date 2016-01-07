@@ -106,3 +106,15 @@ API int contacts_person_get_default_property(contacts_person_property_e property
 	return ret;
 }
 
+API int contacts_person_get_aggregation_suggestions(int person_id, int limit, contacts_list_h *out_list)
+{
+	int ret;
+	contacts_h contact = NULL;
+
+	ret = ctsvc_client_handle_get_p(&contact);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_client_handle_get_p() Fail(%d)", ret);
+
+	ret = ctsvc_client_person_get_aggregation_suggestions(contact, person_id, limit, out_list);
+
+	return ret;
+}

@@ -48,8 +48,7 @@ int ctsvc_client_phone_log_reset_statistics(contacts_h contact)
 	indata = pims_ipc_data_create(0);
 	if (indata == NULL) {
 		ERR("pims_ipc_data_create() Fail");
-		ret = CONTACTS_ERROR_OUT_OF_MEMORY;
-		return ret;
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
 	}
 
 	ret = ctsvc_ipc_marshal_handle(contact, indata);
@@ -112,9 +111,7 @@ int ctsvc_client_phone_log_delete(contacts_h contact, contacts_phone_log_delete_
 	indata = pims_ipc_data_create(0);
 	if (indata == NULL) {
 		ERR("pims_ipc_data_create() Fail");
-		ret = CONTACTS_ERROR_OUT_OF_MEMORY;
-		pims_ipc_data_destroy(indata);
-		return ret;
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
 	}
 
 	ret = ctsvc_ipc_marshal_handle(contact, indata);
