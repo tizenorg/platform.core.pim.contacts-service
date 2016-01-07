@@ -49,10 +49,20 @@ Requires: %{name}2 = %{version}-%{release}
 %description -n contacts-service2-devel
 New Contacts Service Library (devel) files
 
+%package -n contacts-service2-test
+Summary:  New Contacts Service(test)
+Group:    Social & Content/Testing
+Requires: %{name}2 = %{version}-%{release}
+
+%description -n contacts-service2-test
+New Contacts Service Test Program
+
+
 %prep
 %setup -q
 chmod g-w %_sourcedir/*
 cp %{SOURCE1001} ./%{name}.manifest
+cp %{SOURCE1001} ./%{name}-test.manifest
 
 
 %build
@@ -79,6 +89,8 @@ install -m 0644 %SOURCE2 %{buildroot}%{_unitdir_user}/contacts-service.socket
 ln -s ../contacts-service.socket %{buildroot}%{_unitdir_user}/sockets.target.wants/contacts-service.socket
 
 %post -n contacts-service2 -p /sbin/ldconfig
+%post -n contacts-service2-test
+chsmack -e "User" /usr/bin/contacts-service-test
 
 %postun -n contacts-service2 -p /sbin/ldconfig
 
@@ -100,5 +112,12 @@ ln -s ../contacts-service.socket %{buildroot}%{_unitdir_user}/sockets.target.wan
 %{_libdir}/pkgconfig/contacts-service2.pc
 %{_includedir}/contacts-svc/contacts.h
 %{_includedir}/contacts-svc/contacts_*.h
+%license LICENSE.APLv2
+
+
+%files -n contacts-service2-test
+%manifest %{name}-test.manifest
+%defattr(-,root,root,-)
+%{_bindir}/contacts-service-test
 %license LICENSE.APLv2
 
