@@ -100,6 +100,7 @@ static int __server_main(void)
 		if (pims_ipc_svc_register(CTSVC_IPC_PERSON_MODULE, CTSVC_IPC_SERVER_PERSON_SET_FAVORITE_ORDER, ctsvc_ipc_person_set_favorite_order, NULL) != 0) break;
 		if (pims_ipc_svc_register(CTSVC_IPC_PERSON_MODULE, CTSVC_IPC_SERVER_PERSON_SET_DEFAULT_PROPERTY, ctsvc_ipc_person_set_default_property, NULL) != 0) break;
 		if (pims_ipc_svc_register(CTSVC_IPC_PERSON_MODULE, CTSVC_IPC_SERVER_PERSON_GET_DEFAULT_PROPERTY, ctsvc_ipc_person_get_default_property, NULL) != 0) break;
+		if (pims_ipc_svc_register(CTSVC_IPC_PERSON_MODULE, CTSVC_IPC_SERVER_PERSON_SEARCH_AGGREGABLE, ctsvc_ipc_person_search_aggregable, NULL) != 0) break;
 
 #ifdef ENABLE_LOG_FEATURE
 		if (pims_ipc_svc_register(CTSVC_IPC_PHONELOG_MODULE, CTSVC_IPC_SERVER_PHONELOG_RESET_STATISTICS, ctsvc_ipc_phone_log_reset_statistics, NULL) != 0) break;
