@@ -637,26 +637,22 @@ int ctsvc_ipc_unmarshal_record_common(const pims_ipc_data_h ipc_data, ctsvc_reco
 
 int ctsvc_ipc_marshal_string(const char *bufchar, pims_ipc_data_h ipc_data)
 {
-	int ret = CONTACTS_ERROR_NONE;
-
 	RETV_IF(NULL == ipc_data, CONTACTS_ERROR_INVALID_PARAMETER);
 
 	if (bufchar) {
 		int length = strlen(bufchar);
 		if (pims_ipc_data_put(ipc_data, (void*)&length, sizeof(int)) != 0)
-			ret = CONTACTS_ERROR_OUT_OF_MEMORY;
+			return CONTACTS_ERROR_OUT_OF_MEMORY;
 
-		if (pims_ipc_data_put(ipc_data, (void*)bufchar, length+1) != 0) {
-			ret = CONTACTS_ERROR_OUT_OF_MEMORY;
-			return ret;
-		}
+		if (pims_ipc_data_put(ipc_data, (void*)bufchar, length+1) != 0)
+			return CONTACTS_ERROR_OUT_OF_MEMORY;
 	} else {
 		int length = -1;
 
 		if (pims_ipc_data_put(ipc_data, (void*)&length, sizeof(int)) != 0)
-			ret = CONTACTS_ERROR_OUT_OF_MEMORY;
+			return CONTACTS_ERROR_OUT_OF_MEMORY;
 	}
-	return ret;
+	return CONTACTS_ERROR_NONE;
 }
 
 int ctsvc_ipc_marshal_int(const int in, pims_ipc_data_h ipc_data)
