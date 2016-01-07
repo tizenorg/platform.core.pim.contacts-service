@@ -1479,3 +1479,12 @@ int ctsvc_person_get_default_property(contacts_person_property_e property, int p
 	return ret;
 }
 
+int ctsvc_person_search_aggregable(int person_id, contacts_list_h *out_list)
+{
+	int ret = CONTACTS_ERROR_NONE;
+
+	// TODO: find aggregable person
+
+	return ret;
+}
+
