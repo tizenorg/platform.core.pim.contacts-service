@@ -42,7 +42,12 @@ SET(SRCS
 	${CMAKE_SOURCE_DIR}/common/ctsvc_filter.c
 	${CMAKE_SOURCE_DIR}/common/ctsvc_inotify.c
 	${CMAKE_SOURCE_DIR}/common/ctsvc_list.c
+	${CMAKE_SOURCE_DIR}/common/ctsvc_localize.c
 	${CMAKE_SOURCE_DIR}/common/ctsvc_localize_utils.c
+	${CMAKE_SOURCE_DIR}/common/ctsvc_localize_jp.c
+	${CMAKE_SOURCE_DIR}/common/ctsvc_localize_kor.c
+	${CMAKE_SOURCE_DIR}/common/ctsvc_localize_ch.c
+	${CMAKE_SOURCE_DIR}/common/ctsvc_normalize.c
 	${CMAKE_SOURCE_DIR}/common/ctsvc_mutex.c
 	${CMAKE_SOURCE_DIR}/common/ctsvc_query.c
 	${CMAKE_SOURCE_DIR}/common/ctsvc_record.c
@@ -112,11 +117,6 @@ SET(SRCS
 	db/ctsvc_db_sqlite.c
 	db/ctsvc_db_utils.c
 
-	ctsvc_localize_jp.c
-	ctsvc_localize_kor.c
-	ctsvc_localize_ch.c
-	ctsvc_localize.c
-	ctsvc_normalize.c
 	ctsvc_number_utils.c
 
 	ctsvc_notification.c
