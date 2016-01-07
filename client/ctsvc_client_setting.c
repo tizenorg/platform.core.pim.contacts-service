@@ -124,8 +124,7 @@ API int contacts_setting_set_name_display_order(
 	indata = pims_ipc_data_create(0);
 	if (indata == NULL) {
 		ERR("pims_ipc_data_create() Fail");
-		ret = CONTACTS_ERROR_OUT_OF_MEMORY;
-		return ret;
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
 	}
 
 	ret = ctsvc_ipc_marshal_int(name_display_order, indata);
@@ -170,8 +169,7 @@ API int contacts_setting_set_name_sorting_order(
 	indata = pims_ipc_data_create(0);
 	if (indata == NULL) {
 		ERR("pims_ipc_data_create() Fail");
-		ret = CONTACTS_ERROR_OUT_OF_MEMORY;
-		return ret;
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
 	}
 
 	ret = ctsvc_ipc_marshal_int(name_sorint_order, indata);
