@@ -31,5 +31,5 @@ int ctsvc_person_reset_usage(int person_id, contacts_usage_type_e type);
 int ctsvc_person_set_favorite_order(int person_id, int front_person_id, int back_person_id);
 int ctsvc_person_set_default_property(contacts_person_property_e property, int person_id, int id);
 int ctsvc_person_get_default_property(contacts_person_property_e property, int person_id, int *id);
-
+int ctsvc_person_get_aggregation_suggestions(int person_id, contacts_list_h *out_list );
 #endif /* __CTSVC_SERVER_PERSON_H__ */
