@@ -902,9 +902,9 @@ const property_info_s __property_extension[] = {
 const property_info_s __property_sip[] = {
 	{CTSVC_PROPERTY_SIP_ID,             CTSVC_SEARCH_PROPERTY_ALL,	"id"},
 	{CTSVC_PROPERTY_SIP_CONTACT_ID,     CTSVC_SEARCH_PROPERTY_ALL,	"contact_id"},
-	{CTSVC_PROPERTY_SIP_ADDRESS,        CTSVC_SEARCH_PROPERTY_ALL,	"data1"},
-	{CTSVC_PROPERTY_SIP_TYPE,			CTSVC_SEARCH_PROPERTY_ALL,	"data2"},
-	{CTSVC_PROPERTY_SIP_LABEL,          CTSVC_SEARCH_PROPERTY_ALL,	"data3"},
+	{CTSVC_PROPERTY_SIP_ADDRESS,        CTSVC_SEARCH_PROPERTY_ALL,	"address"},
+	{CTSVC_PROPERTY_SIP_TYPE,			CTSVC_SEARCH_PROPERTY_ALL,	"type"},
+	{CTSVC_PROPERTY_SIP_LABEL,          CTSVC_SEARCH_PROPERTY_ALL,	"label"},
 };
 
 const property_info_s __property_contact[] = {
