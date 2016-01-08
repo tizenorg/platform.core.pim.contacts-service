@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2016 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the License);
  * you may not use this file except in compliance with the License.
@@ -21,30 +21,64 @@
 
 #include "test_main.h"
 #include "test_debug.h"
+#include "test_base.h"
 #include "test_query.h"
+#include "test_snippet.h"
+
+typedef int (*func)(int argc, char **argv);
 
 void _print_errors(void)
 {
-	DEBUG("CONTACTS_ERROR_NONE               (%d)", CONTACTS_ERROR_NONE              );
-	DEBUG("CONTACTS_ERROR_OUT_OF_MEMORY      (%d)", CONTACTS_ERROR_OUT_OF_MEMORY     );
-	DEBUG("CONTACTS_ERROR_INVALID_PARAMETER  (%d)", CONTACTS_ERROR_INVALID_PARAMETER );
-	DEBUG("CONTACTS_ERROR_FILE_NO_SPACE      (%d)", CONTACTS_ERROR_FILE_NO_SPACE     );
-	DEBUG("CONTACTS_ERROR_PERMISSION_DENIED  (%d)", CONTACTS_ERROR_PERMISSION_DENIED );
-	DEBUG("CONTACTS_ERROR_NOT_SUPPORTED      (%d)", CONTACTS_ERROR_NOT_SUPPORTED     );
-	DEBUG("CONTACTS_ERROR_NO_DATA            (%d)", CONTACTS_ERROR_NO_DATA	         );
-	DEBUG("CONTACTS_ERROR_DB_LOCKED          (%d)", CONTACTS_ERROR_DB_LOCKED         );
-	DEBUG("CONTACTS_ERROR_DB                 (%d)", CONTACTS_ERROR_DB                );
-	DEBUG("CONTACTS_ERROR_IPC_NOT_AVALIABLE  (%d)", CONTACTS_ERROR_IPC_NOT_AVALIABLE );
-	DEBUG("CONTACTS_ERROR_IPC                (%d)", CONTACTS_ERROR_IPC               );
-	DEBUG("CONTACTS_ERROR_SYSTEM             (%d)", CONTACTS_ERROR_SYSTEM            );
-	DEBUG("CONTACTS_ERROR_INTERNAL           (%d)", CONTACTS_ERROR_INTERNAL			 );
+	DBG("CONTACTS_ERROR_NONE               (%d)", CONTACTS_ERROR_NONE              );
+	DBG("CONTACTS_ERROR_OUT_OF_MEMORY      (%d)", CONTACTS_ERROR_OUT_OF_MEMORY     );
+	DBG("CONTACTS_ERROR_INVALID_PARAMETER  (%d)", CONTACTS_ERROR_INVALID_PARAMETER );
+	DBG("CONTACTS_ERROR_FILE_NO_SPACE      (%d)", CONTACTS_ERROR_FILE_NO_SPACE     );
+	DBG("CONTACTS_ERROR_PERMISSION_DENIED  (%d)", CONTACTS_ERROR_PERMISSION_DENIED );
+	DBG("CONTACTS_ERROR_NOT_SUPPORTED      (%d)", CONTACTS_ERROR_NOT_SUPPORTED     );
+	DBG("CONTACTS_ERROR_NO_DATA            (%d)", CONTACTS_ERROR_NO_DATA	       );
+	DBG("CONTACTS_ERROR_DB_LOCKED          (%d)", CONTACTS_ERROR_DB_LOCKED         );
+	DBG("CONTACTS_ERROR_DB                 (%d)", CONTACTS_ERROR_DB                );
+	DBG("CONTACTS_ERROR_IPC_NOT_AVALIABLE  (%d)", CONTACTS_ERROR_IPC_NOT_AVALIABLE );
+	DBG("CONTACTS_ERROR_IPC                (%d)", CONTACTS_ERROR_IPC               );
+	DBG("CONTACTS_ERROR_SYSTEM             (%d)", CONTACTS_ERROR_SYSTEM            );
+	DBG("CONTACTS_ERROR_INTERNAL           (%d)", CONTACTS_ERROR_INTERNAL          );
 }
 
+const func _func[] = { _print_errors,
+	test_base_insert_contact,
+	test_query_person_get_all_person_contact,
+	test_snippet_with_query_person_contact,
+	};
+
+
+/*
+ * with no argument, all cases are tested.
+ * only specific case could be tested with 2nd argument.
+ * ex> to test all cases,
+ *   # /usr/bin/contacts-service-test
+ *   to test 4th case,
+ *   # /usr/bin/contacts-service-test 4
+ */
 int main(int argc, char **argv)
 {
 	ENTER();
-	_print_errors();
-	test_query_person_contact(argv +1);
 
+	int select = -1;
+	if (1 < argc)
+		select = atoi(argv[1]);
+	DBG("select(%d)", select);
+
+	int i = 0;
+	int count = sizeof(_func) / sizeof(_func[1]);
+	for (i = 0; i < count; i++) {
+		if (-1 < select && select != i)
+			continue;
+
+		DBG(">>>>>>>>>>>>>>>>>>>> test case %04d", i);
+		if (_func[i](argc, argv) < 0)
+			break;
+		if (-1 < select)
+			break;
+	}
 	return 0;
 }
