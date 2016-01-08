@@ -41,7 +41,7 @@ int ctsvc_db_sip_insert(contacts_record_h record, int contact_id, bool is_my_pro
 				"Invalid parameter : id(%d), This record is already inserted", sip->id);
 
 	snprintf(query, sizeof(query),
-		"INSERT INTO "CTS_TABLE_DATA"(contact_id, is_my_profile, datatype, data1, data2, data3) "
+		"INSERT INTO "CTS_TABLE_DATA"(contact_id, is_my_profile, datatype, address, type, label) "
 									"VALUES(%d, %d, %d, ?, %d, ?)",
 			contact_id, is_my_profile, CTSVC_DATA_SIP, sip->type);
 	ret = ctsvc_query_prepare(query, &stmt);

@@ -123,7 +123,7 @@ static int __ctsvc_db_sip_get_record(int id, contacts_record_h* out_record)
 	*out_record = NULL;
 
 	snprintf(query, sizeof(query),
-			"SELECT id, data.contact_id, is_default, data1, data2, data3 "
+			"SELECT id, data.contact_id, is_default, address, type, label "
 				"FROM "CTS_TABLE_DATA", "CTSVC_DB_VIEW_CONTACT" "
 				"ON "CTS_TABLE_DATA".contact_id = "CTSVC_DB_VIEW_CONTACT".contact_id "
 				"WHERE id = %d AND datatype = %d ",
@@ -280,7 +280,7 @@ static int __ctsvc_db_sip_get_all_records(int offset, int limit, contacts_list_h
 	char query[CTS_SQL_MAX_LEN] = {0};
 
 	len = snprintf(query, sizeof(query),
-			"SELECT id, data.contact_id, is_default, data1, data2, data3 "
+			"SELECT id, data.contact_id, is_default, address, type, label "
 				"FROM "CTS_TABLE_DATA", "CTSVC_DB_VIEW_CONTACT" "
 				"ON "CTS_TABLE_DATA".contact_id = "CTSVC_DB_VIEW_CONTACT".contact_id "
 				"WHERE datatype = %d AND is_my_profile=0 ",
