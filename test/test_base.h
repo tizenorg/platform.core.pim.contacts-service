@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-#ifndef __TEST_MAIN_H__
-#define __TEST_MAIN_H__
+#ifndef __TEST_BASE_H__
+#define __TEST_BASE_H__
 
-#endif /* __TEST_MAIN_H__ */
+int test_base_insert_contact(char *first_name, char *last_name, char *number, int *out_id);
+int test_base_delete_contact_with_id(int id);
+int test_base_delete_contact(int argc, char **argv);
+
+#endif /* __TEST_BASE_H__ */

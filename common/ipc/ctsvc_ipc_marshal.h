@@ -63,6 +63,7 @@ int ctsvc_ipc_marshal_bool(const bool in, pims_ipc_data_h ipc_data);
 int ctsvc_ipc_marshal_int(const int in, pims_ipc_data_h ipc_data);
 int ctsvc_ipc_marshal_unsigned_int(const unsigned int in, pims_ipc_data_h ipc_data);
 int ctsvc_ipc_marshal_record_common(const ctsvc_record_s *common, pims_ipc_data_h ipc_data);
+int ctsvc_ipc_marshal_snippet(ctsvc_snippet_s *snippet, const pims_ipc_data_h ipc_data);
 
 /*
  * filter, query
@@ -75,5 +76,6 @@ int ctsvc_ipc_marshal_query(const contacts_query_h query, pims_ipc_data_h ipc_da
 int ctsvc_ipc_unmarshal_list(const pims_ipc_data_h ipc_data, contacts_list_h *list);
 int ctsvc_ipc_unmarshal_child_list(const pims_ipc_data_h ipc_data, contacts_list_h *list);
 int ctsvc_ipc_marshal_list(const contacts_list_h list, pims_ipc_data_h ipc_data);
+int ctsvc_ipc_unmarshal_snippet(const pims_ipc_data_h ipc_data, ctsvc_snippet_s *snippet);
 
 #endif /* __ctsvc_ipc_marshal__ */
