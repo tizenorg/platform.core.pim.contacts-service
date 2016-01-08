@@ -22,6 +22,7 @@
 #include "ctsvc_record.h"
 #include "ctsvc_view.h"
 #include "ctsvc_notify.h"
+#include "ctsvc_snippet.h"
 
 #ifdef _CONTACTS_IPC_SERVER
 #include "ctsvc_server_sim.h"
@@ -84,7 +85,7 @@ static int __ctsvc_result_destroy(contacts_record_h record, bool delete_child)
 	g_slist_free(result->values);
 	result->base.plugin_cbs = NULL; /* help to find double destroy bug (refer to the contacts_record_destroy) */
 	free(result->base.properties_flags);
-
+	ctsvc_snippet_free(&result->snippet);
 	free(result);
 
 	return CONTACTS_ERROR_NONE;
@@ -158,12 +159,33 @@ static int __ctsvc_result_get_str_real(contacts_record_h record, unsigned int pr
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 
+	char *text = NULL;
+	char *start_match = NULL;
+	char *end_match = NULL;
+	bool is_checked = false;
+	bool is_snippet = false;
+	int len_start_match = 0;
+	int len_end_match = 0;
 	for (cursor = result->values; cursor; cursor = cursor->next) {
 		ctsvc_result_value_s *data = cursor->data;
-		if (data->property_id == property_id) {
-			*out_str = GET_STR(copy, data->value.s);
-			return CONTACTS_ERROR_NONE;
+		if (data->property_id != property_id)
+			continue;
+
+		if (false == is_checked) {
+			is_checked = true;
+			is_snippet = ctsvc_snippet_is_snippet(record, &text, &start_match, &end_match);
+			if (true == is_snippet) {
+				len_start_match = ctsvc_snippet_set_start_match(start_match);
+				len_end_match = ctsvc_snippet_set_end_match(end_match);
+			}
 		}
+
+		if (true == is_snippet)
+			data->value.s = ctsvc_snippet_mod_string(data->value.s, text, start_match,
+					end_match, len_start_match, len_end_match);
+
+		*out_str = GET_STR(copy, data->value.s);
+		return CONTACTS_ERROR_NONE;
 	}
 
 	return CONTACTS_ERROR_NO_DATA;

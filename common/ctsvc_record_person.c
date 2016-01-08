@@ -21,6 +21,7 @@
 #include "ctsvc_internal.h"
 #include "ctsvc_record.h"
 #include "ctsvc_view.h"
+#include "ctsvc_snippet.h"
 
 static int __ctsvc_person_create(contacts_record_h *out_record);
 static int __ctsvc_person_destroy(contacts_record_h record, bool delete_child);
@@ -81,6 +82,7 @@ static int __ctsvc_person_destroy(contacts_record_h record, bool delete_child)
 	free(person->image_thumbnail_path);
 	free(person->status);
 	free(person->addressbook_ids);
+	ctsvc_snippet_free(&person->snippet);
 	free(person);
 
 	return CONTACTS_ERROR_NONE;
@@ -142,12 +144,91 @@ static int __ctsvc_person_get_int(contacts_record_h record, unsigned int propert
 	return CONTACTS_ERROR_NONE;
 }
 
+static bool _ctsvc_result_is_snippet(contacts_record_h record, char **out_text,
+		char **out_start_match, char **out_end_match)
+{
+	bool ret = false;
+	char *text = NULL;
+
+	int type = ctsvc_view_get_record_type(((ctsvc_record_s *)record)->view_uri);
+	switch (type) {
+	case CTSVC_RECORD_PERSON:
+		if (false == ((ctsvc_person_s *)record)->snippet.is_snippet)
+			break;
+		text = ((ctsvc_person_s *)record)->snippet.text;
+		if (NULL == text || '\0' == *text)
+			break;
+		*out_text = text;
+		if (out_start_match)
+			*out_start_match = ((ctsvc_person_s *)record)->snippet.start_match;
+		if (out_end_match)
+			*out_end_match = ((ctsvc_person_s *)record)->snippet.end_match;
+		ret = true;
+		break;
+	case CTSVC_RECORD_RESULT:
+		if (false == ((ctsvc_result_s *)record)->snippet.is_snippet)
+			break;
+		text = ((ctsvc_result_s *)record)->snippet.text;
+		if (NULL == text || '\0' == *text)
+			break;
+		*out_text = text;
+		if (out_start_match)
+			*out_start_match = ((ctsvc_result_s *)record)->snippet.start_match;
+		if (out_end_match)
+			*out_end_match = ((ctsvc_result_s *)record)->snippet.end_match;
+		ret = true;
+		break;
+	default:
+		break;
+	}
+	return ret;
+}
+
+static char *_get_snippet_string(char *origin_string, const char *text,
+		char *start_match, char *end_match, int len_start_match, int len_end_match)
+{
+	char *pos_start = NULL;
+	pos_start = strstr(origin_string, text);
+	if (NULL == pos_start) {
+		ERR("strstr() Fail");
+		return origin_string;
+	}
+
+	int len_value = strlen(origin_string);
+	int len_offset = len_value - strlen(pos_start);
+	int len_total = len_value + strlen(text) + len_start_match + len_end_match + 1;
+
+	char *new_string = calloc(len_total, sizeof(char));
+	snprintf(new_string, len_offset, "%s", origin_string);
+	snprintf(new_string + len_offset, len_total - len_offset, "%s%s%s%s",
+			start_match, text, end_match, origin_string + len_offset);
+	free(origin_string);
+	return new_string;
+}
+
 static int __ctsvc_person_get_str_real(contacts_record_h record, unsigned int property_id,
 		char **out_str, bool copy)
 {
 	ctsvc_person_s *person = (ctsvc_person_s*)record;
+
+	char *text = NULL;
+	char *start_match = NULL;
+	char *end_match = NULL;
+	bool is_snippet = false;
+	int len_start_match = 0;
+	int len_end_match = 0;
+
 	switch (property_id) {
 	case CTSVC_PROPERTY_PERSON_DISPLAY_NAME:
+		is_snippet = ctsvc_snippet_is_snippet(record, &text, &start_match, &end_match);
+
+		if (true == is_snippet) {
+			len_start_match = ctsvc_snippet_set_start_match(start_match);
+			len_end_match = ctsvc_snippet_set_end_match(end_match);
+			person->display_name = ctsvc_snippet_mod_string(person->display_name, text,
+					start_match, end_match, len_start_match, len_end_match);
+		}
+
 		*out_str = GET_STR(copy, person->display_name);
 		break;
 	case CTSVC_PROPERTY_PERSON_RINGTONE:

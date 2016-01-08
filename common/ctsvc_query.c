@@ -20,6 +20,7 @@
 #include "contacts.h"
 #include "ctsvc_internal.h"
 #include "ctsvc_filter.h"
+#include "ctsvc_snippet.h"
 
 typedef enum {
 	QUERY_SORTKEY,
@@ -138,6 +139,7 @@ API int contacts_query_destroy(contacts_query_h query)
 
 	free(s_query->projection);
 	free(s_query->view_uri);
+	ctsvc_snippet_free(&s_query->snippet);
 	free(s_query);
 
 	return CONTACTS_ERROR_NONE;
@@ -154,3 +156,17 @@ API int contacts_query_set_distinct(contacts_query_h query, bool set)
 	return CONTACTS_ERROR_NONE;
 }
 
+API int contacts_query_set_snippet(contacts_query_h query, bool set, const char *start_match, const char *end_match)
+{
+	ctsvc_query_s *query_s;
+	RETV_IF(NULL == query, CONTACTS_ERROR_INVALID_PARAMETER);
+
+	query_s = (ctsvc_query_s *)query;
+	query_s->snippet.is_snippet = set;
+	if (true == set) {
+		query_s->snippet.start_match = ctsvc_snippet_set_start_match(start_match);
+		query_s->snippet.end_match = ctsvc_snippet_set_end_match(end_match);
+	}
+
+	return CONTACTS_ERROR_NONE;
+}
