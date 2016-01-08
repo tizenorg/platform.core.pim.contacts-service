@@ -84,6 +84,7 @@ SET(SRCS
 	${CMAKE_SOURCE_DIR}/common/ctsvc_sim.c
 	${CMAKE_SOURCE_DIR}/common/ipc/ctsvc_ipc_speeddial.c
 	${CMAKE_SOURCE_DIR}/common/ctsvc_record_speeddial.c
+	${CMAKE_SOURCE_DIR}/common/ctsvc_snippet.c
 )
 
 IF(ENABLE_LOG_FEATURE)
