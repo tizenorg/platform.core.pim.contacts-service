@@ -133,6 +133,7 @@ static int __ctsvc_ipc_unmarshal_result(pims_ipc_data_h ipc_data, const char *vi
 		}
 		result_p->values = g_slist_append(result_p->values, value_data);
 	}
+	ctsvc_ipc_unmarshal_snippet(ipc_data, &result_p->snippet);
 
 	return CONTACTS_ERROR_NONE;
 }
@@ -165,6 +166,7 @@ static int __ctsvc_ipc_marshal_result(const contacts_record_h record,
 			}
 			cursor = g_slist_next(cursor);
 		}
+		ctsvc_ipc_marshal_snippet(&result_p->snippet, ipc_data);
 	} else {
 		if (ctsvc_ipc_marshal_int(0, ipc_data) != CONTACTS_ERROR_NONE) {
 			ERR("ctsvc_ipc_marshal() Fail");

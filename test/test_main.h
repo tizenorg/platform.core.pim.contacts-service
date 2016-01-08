@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2016 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the License);
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,5 @@
 
 #ifndef __TEST_MAIN_H__
 #define __TEST_MAIN_H__
-
-#define IF_CONDITION if (input == 0 || input == index++)
-#define COND_PARAM(x) (input && param) ? param : x
 
 #endif /* __TEST_MAIN_H__ */

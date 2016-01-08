@@ -3,8 +3,6 @@ INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/client)
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/common)
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/common/ipc)
 
-SET(CLIENT contacts-service2)
-
 SET(SRCS
 	ctsvc_client_activity.c
 	ctsvc_client_db.c
@@ -84,6 +82,7 @@ SET(SRCS
 	${CMAKE_SOURCE_DIR}/common/ctsvc_sim.c
 	${CMAKE_SOURCE_DIR}/common/ipc/ctsvc_ipc_speeddial.c
 	${CMAKE_SOURCE_DIR}/common/ctsvc_record_speeddial.c
+	${CMAKE_SOURCE_DIR}/common/ctsvc_snippet.c
 )
 
 IF(ENABLE_LOG_FEATURE)

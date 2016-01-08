@@ -179,6 +179,13 @@ typedef struct {
 } ctsvc_record_plugin_cb_s;
 
 typedef struct {
+	bool is_snippet;
+	char *text;
+	char *start_match;
+	char *end_match;
+} ctsvc_snippet_s;
+
+typedef struct {
 	int r_type;
 	const ctsvc_record_plugin_cb_s *plugin_cbs;
 	const char *view_uri;
@@ -223,6 +230,7 @@ typedef struct {
 	property_info_s *properties;
 	unsigned int property_count;
 	bool distinct;
+	ctsvc_snippet_s snippet;
 } ctsvc_query_s;
 
 typedef struct {
@@ -270,6 +278,7 @@ typedef struct {
 	char *status;
 	int link_count;
 	char *addressbook_ids;
+	ctsvc_snippet_s snippet;
 } ctsvc_person_s;
 
 typedef struct {
@@ -628,6 +637,7 @@ typedef struct {
 typedef struct {
 	ctsvc_record_s base;
 	GSList *values;
+	ctsvc_snippet_s snippet;
 } ctsvc_result_s;
 
 typedef struct {
