@@ -156,6 +156,30 @@ int contacts_query_set_filter(contacts_query_h query, contacts_filter_h filter);
 int contacts_query_set_sort(contacts_query_h query, unsigned int property_id, bool is_ascending);
 
 /**
+ * @brief Sets a snippet for query.
+ *
+ * @since_tizen 3.0
+ *
+ * @@remarks This API works only with contacts_db_search_records_with_query().
+ *
+ * @param[in]   query           The query handle
+ * @param[in]   start_match     The text which is inserted before the search keyword.
+ *                              if NULL, default start match is '['
+ * @param[in]   end_match       The text which is inserted after the search keyword.
+ *                              if NULL, default end match is ']'
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
+ * @retval  #CONTACTS_ERROR_NONE                Successful
+ * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ *
+ * @see contacts_db_search_records_with_query()
+ */
+int contacts_query_set_snippet(contacts_query_h query, const char *start_match,
+		const char *end_match);
+
+/**
  * @}
  */
 

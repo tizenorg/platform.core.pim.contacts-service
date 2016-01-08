@@ -12,7 +12,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
 #include <stdio.h>
@@ -23,36 +22,31 @@
 #include "test_main.h"
 #include "test_debug.h"
 
-int test_query_person_get_all_person_contact(int argc, char **argv)
+int test_base_insert_contact(int argc, char **argv)
 {
-	int limit = -1;
-	int offset = -1;
+	char *first_name = argc > 2 ? argv[0] : "Default first";
+	char *last_name = argc > 3 ? argv[0] : "Default last";
 
 	contacts_connect();
 
-	contacts_list_h list = NULL;
-	contacts_db_get_all_records(_contacts_person_contact._uri, limit, offset, &list);
+	int name_id = 0;
+	contacts_record_h name = NULL;
+	contacts_record_create(_contacts_name._uri, &name);
+	contacts_record_set_str(name, _contacts_name.first, first_name);
+	contacts_record_set_str(name, _contacts_name.last, last_name);
+	DBG("name_id(%d)", name_id);
 
-	int count = 0;
-	contacts_list_get_count(list, &count);
-	DBG("count(%d)", count);
-
-	contacts_list_first(list);
-	contacts_record_h record = NULL;
-	while (CONTACTS_ERROR_NONE == contacts_list_get_current_record_p(list, &record)) {
-		char *name = NULL;
-		contacts_record_get_str_p(record,
-				_contacts_person_contact.display_name, &name);
-		char *name_index = NULL;
-		contacts_record_get_str_p(record,
-				_contacts_person_contact.display_name_index, &name_index);
-
-		DBG("name_index[%s] name[%s]", name_index, name);
-		contacts_list_next(list);
-	}
+	int contact_id = 0;
+	contacts_record_h contact = NULL;
+	contacts_record_create(_contacts_contact._uri, &contact);
+	contacts_record_add_child_record(contact, _contacts_contact.name, name);
+	contacts_db_insert_record(contact, &contact_id);
+	contacts_record_destroy(contact, true);
+	DBG("contact_id(%d)", contact_id);
 
 	contacts_disconnect();
 
 	return 0;
-}
 
+
+}
