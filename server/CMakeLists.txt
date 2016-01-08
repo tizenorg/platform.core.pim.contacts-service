@@ -4,8 +4,6 @@ INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/server/db)
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/common)
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/common/ipc)
 
-SET(DAEMON contacts-service-ipcd)
-
 SET(SRCS
 	${CMAKE_SOURCE_DIR}/common/ipc/ctsvc_ipc_marshal.c
 	${CMAKE_SOURCE_DIR}/common/ipc/ctsvc_ipc_addressbook.c
@@ -64,6 +62,7 @@ SET(SRCS
 	${CMAKE_SOURCE_DIR}/common/ctsvc_record_speeddial.c
 	${CMAKE_SOURCE_DIR}/common/ctsvc_record_sdn.c
 	${CMAKE_SOURCE_DIR}/common/ctsvc_handle.c
+	${CMAKE_SOURCE_DIR}/common/ctsvc_snippet.c
 
 	db/ctsvc_db_access_control.c
 	db/ctsvc_db_init.c
