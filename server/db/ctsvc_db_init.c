@@ -910,9 +910,9 @@ static int __ctsvc_db_create_views()
 		"CREATE VIEW IF NOT EXISTS "CTSVC_DB_VIEW_SIP" AS "
 			"SELECT id, "
 					"data.contact_id, "
-					"data1 address, "
-					"data2 type, "
-					"data3 label "
+					"data1, "
+					"data2, "
+					"data3"
 			"FROM "CTS_TABLE_DATA", "CTSVC_DB_VIEW_CONTACT" "
 			"ON "CTS_TABLE_DATA".contact_id = "CTSVC_DB_VIEW_CONTACT".contact_id "
 			"WHERE datatype = %d AND is_my_profile = 0 ",
