@@ -32,7 +32,7 @@
 #endif
 #define API __attribute__ ((visibility("default")))
 
-/*#define CONTACTS_DEBUGGING */
+#define CONTACTS_DEBUGGING
 /*#define CONTACTS_TIMECHECK */
 
 #define LOG_TAG "CONTACTS_SERVICE"
