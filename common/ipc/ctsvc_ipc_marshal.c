@@ -495,6 +495,36 @@ int ctsvc_ipc_marshal_record(const contacts_record_h record, pims_ipc_data_h ipc
 	return ret;
 }
 
+int ctsvc_ipc_unmarshal_snippet(const pims_ipc_data_h ipc_data, ctsvc_snippet_s *snippet)
+{
+	int ret = 0;
+	ret = ctsvc_ipc_unmarshal_bool(ipc_data, &snippet->is_snippet);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_ipc_unmarshal_bool() Fail(%d)", ret);
+	ret = ctsvc_ipc_unmarshal_string(ipc_data, &snippet->text);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_ipc_unmarshal_string() Fail(%d)", ret);
+	ret = ctsvc_ipc_unmarshal_string(ipc_data, &snippet->start_match);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_ipc_unmarshal_string() Fail(%d)", ret);
+	ret = ctsvc_ipc_unmarshal_string(ipc_data, &snippet->end_match);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_ipc_unmarshal_string() Fail(%d)", ret);
+
+	return ret;
+}
+
+int ctsvc_ipc_marshal_snippet(ctsvc_snippet_s *snippet, const pims_ipc_data_h ipc_data)
+{
+	int ret = 0;
+	ret = ctsvc_ipc_marshal_bool(snippet->is_snippet, ipc_data);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_ipc_marshal_bool() Fail(%d)", ret);
+	ret = ctsvc_ipc_marshal_string(snippet->text, ipc_data);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_ipc_marshal_string() Fail(%d)", ret);
+	ret = ctsvc_ipc_marshal_string(snippet->start_match, ipc_data);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_ipc_marshal_string() Fail(%d)", ret);
+	ret = ctsvc_ipc_marshal_string(snippet->end_match, ipc_data);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_ipc_marshal_string() Fail(%d)", ret);
+
+	return ret;
+}
+
 int ctsvc_ipc_unmarshal_string(const pims_ipc_data_h ipc_data, char **ppbufchar)
 {
 	int ret = CONTACTS_ERROR_NONE;
@@ -827,6 +857,8 @@ int ctsvc_ipc_unmarshal_query(const pims_ipc_data_h ipc_data, contacts_query_h *
 		return CONTACTS_ERROR_IPC;
 	}
 
+	ctsvc_ipc_unmarshal_snippet(ipc_data, &(query->snippet));
+
 	return CONTACTS_ERROR_NONE;
 }
 
@@ -889,6 +921,9 @@ int ctsvc_ipc_marshal_query(const contacts_query_h query, pims_ipc_data_h ipc_da
 		ERR("ctsvc_ipc_marshal_bool() Fail");
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
+
+	ctsvc_ipc_marshal_snippet(&que->snippet, ipc_data);
+	//properties // property_count
 
 	return CONTACTS_ERROR_NONE;
 }

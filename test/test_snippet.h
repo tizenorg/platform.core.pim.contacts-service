@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#ifndef __TEST_MAIN_H__
-#define __TEST_MAIN_H__
-
-#endif /* __TEST_MAIN_H__ */
+int test_snippet_with_query_person_contact(int argc, char **argv);
+int test_snippet_with_query_person(int argc, char **argv);
+int test_snippet_with_query_person_number(char **argv);
+int test_snippet_with_query_person_email(char **argv);
