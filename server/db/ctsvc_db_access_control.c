@@ -29,12 +29,18 @@
 #include "ctsvc_mutex.h"
 #include "ctsvc_server_service.h"
 
+enum {
+	CTSVC_PERMISSION_SMACK,
+	CTSVC_PERMISSION_BOOK_WRIABLE,
+	CTSVC_PERMISSION_BOOK_READONLY,
+};
+
 typedef struct {
 	unsigned int thread_id;
 	pims_ipc_h ipc;
 	char *smack;
-	int *write_list;
-	int write_list_count;
+	int *writable_book_ids; /* ids has count * 2: (id, type) */
+	int writable_book_count;
 } ctsvc_permission_info_s;
 
 static GList *__thread_list = NULL;
@@ -97,7 +103,6 @@ static void __ctsvc_set_permission_info(ctsvc_permission_info_s *info)
 {
 	int ret;
 	int count;
-	int write_index;
 	cts_stmt stmt;
 	char query[CTS_SQL_MAX_LEN] = {0};
 	bool smack_enabled = false;
@@ -108,9 +113,9 @@ static void __ctsvc_set_permission_info(ctsvc_permission_info_s *info)
 		INFO("SAMCK disabled");
 
 	/* white listing : core module */
-	free(info->write_list);
-	info->write_list = NULL;
-	info->write_list_count = 0;
+	free(info->writable_book_ids);
+	info->writable_book_ids = NULL;
+	info->writable_book_count = 0;
 
 	/* don't have write permission */
 	if (!ctsvc_have_permission(info->ipc, CTSVC_PERMISSION_CONTACT_WRITE))
@@ -123,9 +128,9 @@ static void __ctsvc_set_permission_info(ctsvc_permission_info_s *info)
 		ERR(" ctsvc_query_get_first_int_result() Fail(%d)", ret);
 		return;
 	}
-	info->write_list = calloc(count, sizeof(int));
-	RETM_IF(NULL == info->write_list, "calloc() Fail");
-	info->write_list_count = 0;
+	info->writable_book_ids = calloc(count * 2, sizeof(int));
+	RETM_IF(NULL == info->writable_book_ids, "calloc() Fail");
+	info->writable_book_count = 0;
 
 	snprintf(query, sizeof(query),
 			"SELECT addressbook_id, mode, smack_label FROM "CTS_TABLE_ADDRESSBOOKS);
@@ -135,7 +140,7 @@ static void __ctsvc_set_permission_info(ctsvc_permission_info_s *info)
 		return;
 	}
 
-	write_index = 0;
+	int i = 0;
 	while ((ret = ctsvc_stmt_step(stmt))) {
 		int id;
 		int mode;
@@ -151,20 +156,29 @@ static void __ctsvc_set_permission_info(ctsvc_permission_info_s *info)
 		mode = ctsvc_stmt_get_int(stmt, 1);
 		temp = ctsvc_stmt_get_text(stmt, 2);
 
-		if (!smack_enabled) /* smack disabled */
-			info->write_list[write_index++] = id;
-		else if (NULL == info->ipc) /* contacts-service daemon */
-			info->write_list[write_index++] = id;
-		else if (info->smack && temp && STRING_EQUAL == strcmp(temp, info->smack))/* owner */
-			info->write_list[write_index++] = id;
-		else if (CONTACTS_ADDRESS_BOOK_MODE_NONE == mode)
-			info->write_list[write_index++] = id;
+		if (!smack_enabled) { /* smack disabled */
+			info->writable_book_ids[i++] = id;
+			info->writable_book_ids[i++] = CTSVC_PERMISSION_SMACK;
+		} else if (NULL == info->ipc) { /* contacts-service daemon */
+			info->writable_book_ids[i++] = id;
+			info->writable_book_ids[i++] = CTSVC_PERMISSION_SMACK;
+		} else if (info->smack && temp && STRING_EQUAL == strcmp(temp, info->smack)) { /* owner */
+			info->writable_book_ids[i++] = id;
+			info->writable_book_ids[i++] = CTSVC_PERMISSION_SMACK;
+		} else if (CONTACTS_ADDRESS_BOOK_MODE_NONE == mode) {
+			info->writable_book_ids[i++] = id;
+			info->writable_book_ids[i++] = CTSVC_PERMISSION_BOOK_WRIABLE;
+		} else if (CONTACTS_ADDRESS_BOOK_MODE_READONLY == mode) {
+			info->writable_book_ids[i++] = id;
+			info->writable_book_ids[i++] = CTSVC_PERMISSION_BOOK_READONLY;
+		} else {
+		}
 	}
-	info->write_list_count = write_index;
+	info->writable_book_count = i;
 	ctsvc_stmt_finalize(stmt);
 }
 
-void ctsvc_unset_client_access_info()
+void ctsvc_unset_client_access_info(void)
 {
 	ctsvc_permission_info_s *find = NULL;
 
@@ -172,7 +186,7 @@ void ctsvc_unset_client_access_info()
 	find = __ctsvc_find_access_info(pthread_self());
 	if (find) {
 		free(find->smack);
-		free(find->write_list);
+		free(find->writable_book_ids);
 		__thread_list = g_list_remove(__thread_list, find);
 		free(find);
 	}
@@ -192,7 +206,7 @@ static void __ctsvc_client_disconnected_cb(pims_ipc_h ipc, void *user_data)
 	if (info) {
 		INFO("Thread(0x%x), info(%p)", info->thread_id, info);
 		free(info->smack);
-		free(info->write_list);
+		free(info->writable_book_ids);
 		__thread_list = g_list_remove(__thread_list, info);
 		free(info);
 	}
@@ -282,7 +296,7 @@ bool ctsvc_have_permission(pims_ipc_h ipc, int permission)
 	return true;
 }
 
-bool ctsvc_have_ab_write_permission(int addressbook_id)
+bool ctsvc_have_ab_write_permission(int addressbook_id, bool allow_readonly)
 {
 	int i;
 	unsigned int thread_id;
@@ -301,14 +315,18 @@ bool ctsvc_have_ab_write_permission(int addressbook_id)
 		return false;
 	}
 
-	if (NULL == find->write_list) {
+	if (NULL == find->writable_book_ids) {
 		ctsvc_mutex_unlock(CTS_MUTEX_ACCESS_CONTROL);
 		ERR("there is no write access info");
 		return false;
 	}
 
-	for (i = 0; i < find->write_list_count; i++) {
-		if (addressbook_id == find->write_list[i]) {
+	for (i = 0; i < find->writable_book_count; i += 2) {
+		if (addressbook_id == find->writable_book_ids[i]) {
+			if(CTSVC_PERMISSION_BOOK_READONLY == find->writable_book_ids[i + 1]) {
+				if (false == allow_readonly)
+					continue;
+			}
 			ctsvc_mutex_unlock(CTS_MUTEX_ACCESS_CONTROL);
 			return true;
 		}
@@ -329,31 +347,43 @@ int ctsvc_get_write_permitted_addressbook_ids(int **addressbook_ids, int *count)
 	ctsvc_mutex_lock(CTS_MUTEX_ACCESS_CONTROL);
 	thread_id = (unsigned int)pthread_self();
 	find = __ctsvc_find_access_info(thread_id);
-	if (find) {
-		if (find->write_list && 0 < find->write_list_count) {
-			int size = find->write_list_count * sizeof(int);
-			int *list = calloc(1, size);
-			if (NULL == list) {
-				ERR("Thread(0x%x), calloc() Fail", thread_id);
-				ctsvc_mutex_unlock(CTS_MUTEX_ACCESS_CONTROL);
-				return CONTACTS_ERROR_OUT_OF_MEMORY;
-			}
-
-			memcpy(list, find->write_list, size);
-			*count = find->write_list_count;
-			*addressbook_ids = list;
-			ctsvc_mutex_unlock(CTS_MUTEX_ACCESS_CONTROL);
-			return CONTACTS_ERROR_NONE;
-		}
+	if (NULL == find) {
+		ERR("__ctsvc_find_access_info() Fail");
 		ctsvc_mutex_unlock(CTS_MUTEX_ACCESS_CONTROL);
 		return CONTACTS_ERROR_PERMISSION_DENIED;
 	}
 
+	if (NULL == find->writable_book_ids || find->writable_book_count <= 0) {
+		ERR("No permission info");
+		ctsvc_mutex_unlock(CTS_MUTEX_ACCESS_CONTROL);
+		return CONTACTS_ERROR_PERMISSION_DENIED;
+	}
+
+	/* writable_book_count has double size of book count */
+	int book_count = find->writable_book_count / 2;
+	int *book_ids = calloc(book_count, sizeof(int));
+	if (NULL == book_ids) {
+		ERR("Thread(0x%x), calloc() Fail", thread_id);
+		ctsvc_mutex_unlock(CTS_MUTEX_ACCESS_CONTROL);
+		return CONTACTS_ERROR_OUT_OF_MEMORY;
+	}
+	int i, j;
+	for (i = 0, j = 0; i < book_count; i++, j += 2) {
+		if (CTSVC_PERMISSION_BOOK_READONLY == find->writable_book_ids[j + 1]) {
+			i--;
+			continue;
+		}
+		book_ids[i] = find->writable_book_ids[j];
+	}
+
+	*count = book_count;
+	*addressbook_ids = book_ids;
+
 	ctsvc_mutex_unlock(CTS_MUTEX_ACCESS_CONTROL);
-	return CONTACTS_ERROR_INTERNAL;
+	return CONTACTS_ERROR_NONE;
 }
 
-char* ctsvc_get_client_smack_label()
+char* ctsvc_get_client_smack_label(void)
 {
 	ctsvc_permission_info_s *find = NULL;
 	char *smack = NULL;
