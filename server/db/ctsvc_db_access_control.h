@@ -38,7 +38,7 @@ void ctsvc_reset_all_client_access_info(void);
 char* ctsvc_get_client_smack_label(void);
 
 int ctsvc_get_write_permitted_addressbook_ids(int **addressbook_ids, int *count);
-bool ctsvc_have_ab_write_permission(int addressbook_id);
+bool ctsvc_have_ab_write_permission(int addressbook_id, bool allow_readonly);
 int ctsvc_is_owner(int addressbook_id);
 
 

@@ -63,8 +63,8 @@ static int __ctsvc_db_address_insert_record(contacts_record_h record, int *id)
 		}
 	}
 
-	if (false == ctsvc_have_ab_write_permission(addressbook_id)) {
-		ERR("Does not have permission to update this address record : addresbook_id(%d)", addressbook_id);
+	if (false == ctsvc_have_ab_write_permission(addressbook_id, false)) {
+		ERR("No permission in this addresbook_id(%d)", addressbook_id);
 		ctsvc_end_trans(false);
 		return CONTACTS_ERROR_PERMISSION_DENIED;
 	}
@@ -117,8 +117,8 @@ static int __ctsvc_db_address_update_record(contacts_record_h record)
 		return ret;
 	}
 
-	if (false == ctsvc_have_ab_write_permission(addressbook_id)) {
-		ERR("Does not have permission to update this address record : addresbook_id(%d)", addressbook_id);
+	if (false == ctsvc_have_ab_write_permission(addressbook_id, false)) {
+		ERR("No permission in this addresbook_id(%d)", addressbook_id);
 		ctsvc_end_trans(false);
 		return CONTACTS_ERROR_PERMISSION_DENIED;
 	}
@@ -180,8 +180,9 @@ static int __ctsvc_db_address_delete_record(int id)
 	addressbook_id = ctsvc_stmt_get_int(stmt, 1);
 	ctsvc_stmt_finalize(stmt);
 
-	if (false == ctsvc_have_ab_write_permission(addressbook_id)) {
-		ERR("Does not have permission to delete this address record : addresbook_id(%d)", addressbook_id);
+	if (false == ctsvc_have_ab_write_permission(addressbook_id, false)) {
+		ERR("No permission in this addresbook_id(%d)", addressbook_id);
+		ctsvc_end_trans(false);
 		return CONTACTS_ERROR_PERMISSION_DENIED;
 	}
 
