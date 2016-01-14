@@ -261,8 +261,8 @@ int ctsvc_db_contact_delete(int contact_id)
 	ctsvc_stmt_finalize(stmt);
 	stmt = NULL;
 
-	if (false == ctsvc_have_ab_write_permission(addressbook_id)) {
-		ERR("Does not have permission to delete this contact");
+	if (false == ctsvc_have_ab_write_permission(addressbook_id, false)) {
+		ERR("ctsvc_have_ab_write_permission(%d) Fail", addressbook_id);
 		ctsvc_end_trans(false);
 		return CONTACTS_ERROR_PERMISSION_DENIED;
 	}
