@@ -101,8 +101,8 @@ static int __ctsvc_db_company_insert_record(contacts_record_h record, int *id)
 		}
 	}
 
-	if (false == ctsvc_have_ab_write_permission(addressbook_id)) {
-		ERR("Does not have permission to update this company record : addresbook_id(%d)", addressbook_id);
+	if (false == ctsvc_have_ab_write_permission(addressbook_id, false)) {
+		ERR("ctsvc_have_ab_write_permission(%d) Fail", addressbook_id);
 		ctsvc_end_trans(false);
 		return CONTACTS_ERROR_PERMISSION_DENIED;
 	}
@@ -160,8 +160,8 @@ static int __ctsvc_db_company_update_record(contacts_record_h record)
 		return ret;
 	}
 
-	if (false == ctsvc_have_ab_write_permission(addressbook_id)) {
-		ERR("Does not have permission to update this company record : addresbook_id(%d)", addressbook_id);
+	if (false == ctsvc_have_ab_write_permission(addressbook_id, false)) {
+		ERR("ctsvc_have_ab_write_permission(%d) Fail", addressbook_id);
 		ctsvc_end_trans(false);
 		return CONTACTS_ERROR_PERMISSION_DENIED;
 	}
@@ -231,8 +231,8 @@ static int __ctsvc_db_company_delete_record(int id)
 	addressbook_id = ctsvc_stmt_get_int(stmt, 1);
 	ctsvc_stmt_finalize(stmt);
 
-	if (false == ctsvc_have_ab_write_permission(addressbook_id)) {
-		ERR("Does not have permission to delete this company record : addresbook_id(%d)", addressbook_id);
+	if (false == ctsvc_have_ab_write_permission(addressbook_id, false)) {
+		ERR("ctsvc_have_ab_write_permission(%d) Fail", addressbook_id);
 		ctsvc_end_trans(false);
 		return CONTACTS_ERROR_PERMISSION_DENIED;
 	}
