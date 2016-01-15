@@ -99,7 +99,7 @@
  * // add number
  * contacts_record_h number = NULL;
  * contacts_record_create(_contacts_number._uri, &number);
- * contacts_record_set_str(name, _contacts_number.number, “1234”);
+ * contacts_record_set_str(number, _contacts_number.number, “1234”);
  * contacts_record_add_child_record(contact, _contacts_contact.number, number);
  *
  * // insert to database
