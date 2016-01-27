@@ -264,7 +264,8 @@ typedef enum {
     CONTACTS_USAGE_STAT_TYPE_INCOMING_EMAIL,/**< Incoming email (Since 3.0) */
     CONTACTS_USAGE_STAT_TYPE_MISSED_CALL,     /**< Missed call (Since 3.0) */
     CONTACTS_USAGE_STAT_TYPE_REJECTED_CALL, /**< Rejected call (Since 3.0) */
-    CONTACTS_USAGE_STAT_TYPE_BLOCKED_CALL /**< Blocked call (Since 3.0) */
+    CONTACTS_USAGE_STAT_TYPE_BLOCKED_CALL, /**< Blocked call (Since 3.0) */
+    CONTACTS_USAGE_STAT_TYPE_BLOCKED_MSG /**< Blocked message (Since 3.0) */
 }contacts_usage_type_e;
 
 /**
