@@ -385,8 +385,14 @@ static int __ctsvc_db_phonelog_increase_used_count(ctsvc_phonelog_s *phonelog)
 	case CONTACTS_PLOG_TYPE_VIDEO_BLOCKED:
 		type = CONTACTS_USAGE_STAT_TYPE_BLOCKED_CALL;
 		break;
+
+	case CONTACTS_PLOG_TYPE_SMS_BLOCKED:
+	case CONTACTS_PLOG_TYPE_MMS_BLOCKED:
+		type = CONTACTS_USAGE_STAT_TYPE_BLOCKED_MSG;
+		break;
+
 	default:
-		return CONTACTS_ERROR_NONE;
+		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 
 	snprintf(query, sizeof(query),
