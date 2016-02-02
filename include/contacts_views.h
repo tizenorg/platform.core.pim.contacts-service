@@ -1706,7 +1706,7 @@ _CONTACTS_END_READ_ONLY_VIEW(_contacts_phone_log_stat)
  * <tr><td>string</td><td>_uri</td><td>read only</td><td> Identifier of this contacts sip view </td></tr>
  * <tr><td>integer</td><td> id </td><td>read only</td><td> DB record ID of the sip </td></tr>
  * <tr><td>integer</td><td> contact_id </td><td>read, write once</td><td> Contact ID that the sip belongs to </td></tr>
- * <tr><td>string/td><td> address </td><td>read, write</td><td> SIP address </td></tr>
+ * <tr><td>string</td><td> address </td><td>read, write</td><td> SIP address </td></tr>
  * <tr><td>integer</td><td> type </td><td>read, write</td><td> sip type, refer to the @ref contacts_sip_type_e </td></tr>
  * <tr><td>string</td><td> label </td><td>read, write</td><td> Custom sip type label, when the sip type is #CONTACTS_SIP_TYPE_CUSTOM </td></tr>
  * </table>
