@@ -113,7 +113,8 @@ void ctsvc_db_phone_log_delete_callback(sqlite3_context  *context,
 #endif
 }
 
-static int __ctsvc_db_phone_log_find_person_id(char *number, char *normal_num, char *minmatch, int person_id, int *find_number_type)
+static int __ctsvc_db_phone_log_find_person_id(char *number, char *normal_num,
+			char *minmatch, int person_id, int *find_number_type)
 {
 	int ret;
 	int find_person_id = -1;
@@ -187,7 +188,8 @@ static int __ctsvc_db_phone_log_find_person_id(char *number, char *normal_num, c
 	return find_person_id;
 }
 
-int ctsvc_db_phone_log_update_person_id(const char *number, int old_person_id, int candidate_person_id, bool person_link)
+int ctsvc_db_phone_log_update_person_id(const char *number, int old_person_id,
+		int candidate_person_id, bool person_link)
 {
 	CTS_FN_CALL;
 	int ret;
@@ -218,7 +220,8 @@ int ctsvc_db_phone_log_update_person_id(const char *number, int old_person_id, i
 			ret = ctsvc_normalize_number(clean_num, normal_num, sizeof(normal_num), true);
 			if (0 < ret) {
 				char minmatch[sizeof(normal_num)+1];
-				ret = ctsvc_get_minmatch_number(normal_num, minmatch, sizeof(minmatch), ctsvc_get_phonenumber_min_match_digit());
+				ret = ctsvc_get_minmatch_number(normal_num, minmatch, sizeof(minmatch),
+						ctsvc_get_phonenumber_min_match_digit());
 				if (CONTACTS_ERROR_NONE == ret) {
 					len += snprintf(query+len, sizeof(query)-len,
 							"OR (minmatch = ? AND _NUMBER_COMPARE_(normal_num, ?, NULL, NULL))) ");
@@ -290,26 +293,30 @@ int ctsvc_db_phone_log_update_person_id(const char *number, int old_person_id, i
 
 		/* CASE : number is inserted (contact insert/update) => update person_id of phone logs from NULL */
 		if (number && old_person_id <= 0 && 0 < candidate_person_id) {
-			__ctsvc_db_phone_log_find_person_id(address, normal_address, minmatch_address, candidate_person_id, &number_type);
+			__ctsvc_db_phone_log_find_person_id(address, normal_address,
+					minmatch_address, candidate_person_id, &number_type);
 			new_person_id = candidate_person_id;
 		} else if (number && old_person_id <= 0) {
 			/* CASE : phonelog insert without person_id */
 			/* address == number */
-			new_person_id = __ctsvc_db_phone_log_find_person_id(address, normal_address, minmatch_address, -1, &number_type);
+			new_person_id = __ctsvc_db_phone_log_find_person_id(address, normal_address,
+					minmatch_address, -1, &number_type);
 			if (new_person_id <= 0) continue;
 		} else if (number && 0 < old_person_id) {
 			/* CASE : number update/delete (contact update/delete) => find new_person_id by address */
 			/* CASE : phonelog insert with person_id */
 			/* address == number */
 			/* although new_person_id and old_person_id are same, update phonelog for setting number_type */
-			new_person_id = __ctsvc_db_phone_log_find_person_id(address, normal_address, minmatch_address, old_person_id, &number_type);
+			new_person_id = __ctsvc_db_phone_log_find_person_id(address, normal_address,
+					minmatch_address, old_person_id, &number_type);
 		} else if (NULL == number && 0 < old_person_id && 0 < candidate_person_id && person_link) {
 			/* CASE : person link => deleted person_id -> new person_id (base_person_id) */
 			new_person_id = candidate_person_id;
 		} else if (NULL == number && 0 < old_person_id && 0 < candidate_person_id) {
 			/* CASE : person unlink => check person_id of the address, */
 			/* if person_id is not old_person_id then change person_id to new_person_id */
-			temp_id = __ctsvc_db_phone_log_find_person_id(address, normal_address, minmatch_address, candidate_person_id, &number_type);
+			temp_id = __ctsvc_db_phone_log_find_person_id(address, normal_address,
+					minmatch_address, candidate_person_id, &number_type);
 			if (0 < temp_id && temp_id == old_person_id)
 				continue;
 			else if (0 < temp_id && temp_id != old_person_id)
@@ -323,6 +330,8 @@ int ctsvc_db_phone_log_update_person_id(const char *number, int old_person_id, i
 		 * else
 		 *  continue;
 		 */
+
+		ctsvc_set_phonelog_noti();
 
 		if (0 < new_person_id)
 			ctsvc_stmt_bind_int(update_log, 1, new_person_id);
