@@ -150,7 +150,8 @@ static inline int __ctsvc_db_create_int_condition(ctsvc_composite_filter_s *com_
 			"property id(%d)", filter->property_id);
 
 #ifdef _CONTACTS_IPC_SERVER
-	if (filter->property_id == CTSVC_PROPERTY_PHONELOG_SIM_SLOT_NO) {
+	if (CTSVC_PROPERTY_PHONELOG_SIM_SLOT_NO == filter->property_id ||
+			CTSVC_PROPERTY_PHONELOG_STAT_SIM_SLOT_NO == filter->property_id) {
 		/* get real sim info id by SIM slot number 0/1 */
 		int sim_info_id = ctsvc_server_sim_get_info_id_by_sim_slot_no(filter->value.i);
 		if (0 < sim_info_id) {
