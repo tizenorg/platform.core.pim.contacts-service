@@ -20,7 +20,7 @@
 
 --PRAGMA journal_mode = PERSIST;
 --PRAGMA journal_mode = TRUNCATE;
-PRAGMA user_version = 102;
+PRAGMA user_version = 103;
 
 CREATE TABLE persons
 (
@@ -331,11 +331,12 @@ CREATE TABLE phonelog_stat
 (
 	log_type			INTEGER PRIMARY KEY,
 	log_count			INTEGER
+	sim_id			INTEGER,
 );
 
 CREATE TRIGGER trg_phonelogs_insert AFTER INSERT ON phonelogs
 	BEGIN
-		INSERT OR REPLACE INTO phonelog_stat values(new.log_type, coalesce((SELECT log_count+1 FROM phonelog_stat WHERE log_type=new.log_type), 1));
+		INSERT OR REPLACE INTO phonelog_stat values(new.log_type, coalesce((SELECT log_count+1 FROM phonelog_stat WHERE log_type=new.log_type AND sim_id=new.sim_id), 1), new.sim_id);
 	END;
 
 CREATE TABLE contact_stat
