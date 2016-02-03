@@ -216,7 +216,8 @@ static int __ctsvc_result_set_int(contacts_record_h record, unsigned int propert
 		data = cursor->data;
 		if (data->property_id == property_id) {
 #ifdef _CONTACTS_IPC_SERVER
-			if (property_id == CTSVC_PROPERTY_PHONELOG_SIM_SLOT_NO) {
+			if (property_id == CTSVC_PROPERTY_PHONELOG_SIM_SLOT_NO
+					|| property_id == CTSVC_PROPERTY_PHONELOG_STAT_SIM_SLOT_NO) {
 				CHECK_DIRTY_VAL(data->value.i, value, is_dirty);
 				data->value.i = ctsvc_server_sim_get_sim_slot_no_by_info_id(value);
 			} else
@@ -237,7 +238,8 @@ static int __ctsvc_result_set_int(contacts_record_h record, unsigned int propert
 	data->property_id = property_id;
 	data->type = CTSVC_VIEW_DATA_TYPE_INT;
 #ifdef _CONTACTS_IPC_SERVER
-	if (property_id == CTSVC_PROPERTY_PHONELOG_SIM_SLOT_NO) {
+	if (property_id == CTSVC_PROPERTY_PHONELOG_SIM_SLOT_NO
+			|| property_id == CTSVC_PROPERTY_PHONELOG_STAT_SIM_SLOT_NO) {
 		CHECK_DIRTY_VAL(data->value.i, value, is_dirty);
 		data->value.i = ctsvc_server_sim_get_sim_slot_no_by_info_id(value);
 	} else

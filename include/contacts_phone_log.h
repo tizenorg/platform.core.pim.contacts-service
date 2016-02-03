@@ -80,6 +80,31 @@ extern "C"
  */
 int contacts_phone_log_reset_statistics(void);
 
+/**
+ * @brief   Resets the phone log's count by sim slot no.
+ *
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/callhistory.write
+ *
+ * @param[in]   sim_slot_no       It is related to the SIM slot number. sim_slot_no 0 means first SIM, sim_slot_no 1 means second SIM
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
+ * @retval  #CONTACTS_ERROR_NONE                Successful
+ * @retval  #CONTACTS_ERROR_OUT_OF_MEMORY       Out of memory
+ * @retval  #CONTACTS_ERROR_FILE_NO_SPACE       FS Full
+ * @retval  #CONTACTS_ERROR_DB                  Database operation failure
+ * @retval  #CONTACTS_ERROR_IPC                 IPC error
+ * @retval  #CONTACTS_ERROR_PERMISSION_DENIED   Permission denied. This application does not have the privilege to call this method.
+ * @retval  #CONTACTS_ERROR_NOT_SUPPORTED       Not supported
+ *
+ * @pre     contacts_connect() should be called to open a connection to the contacts service.
+ *
+ * @see  contacts_connect()
+ */
+int contacts_phone_log_reset_statistics_by_sim(int sim_slot_no);
 
 /**
  * @}
