@@ -39,6 +39,7 @@ void ctsvc_ipc_person_get_aggregation_suggestions(pims_ipc_h ipc, pims_ipc_data_
 
 #ifdef ENABLE_LOG_FEATURE
 void ctsvc_ipc_phone_log_reset_statistics(pims_ipc_h ipc, pims_ipc_data_h indata, pims_ipc_data_h *outdata, void *userdata);
+void ctsvc_ipc_phone_log_reset_statistics_by_sim(pims_ipc_h ipc, pims_ipc_data_h indata, pims_ipc_data_h *outdata, void *userdata);
 void ctsvc_ipc_phone_log_delete(pims_ipc_h ipc, pims_ipc_data_h indata, pims_ipc_data_h *outdata, void *userdata);
 #endif /* ENABLE_LOG_FEATURE */
 
