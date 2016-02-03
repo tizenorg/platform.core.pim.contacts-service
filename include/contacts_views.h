@@ -291,7 +291,7 @@ _CONTACTS_END_READ_ONLY_VIEW(_contacts_simple_contact)
  * <tr><td>record</td><td>relationship</td><td>read, write</td><td> _contacts_relationship child record (multiple)</td></tr>
  * <tr><td>record</td><td>image</td><td>read, write</td><td> _contacts_image child record (multiple)</td></tr>
  * <tr><td>record</td><td>group_relation</td><td>read, write</td><td> _contacts_group_relation child record (multiple)</td></tr>
- * <tr><td>record</td><td>sip</td><td>read, write</td><td> _contacts_sip child record (multiple) </td></tr>
+ * <tr><td>record</td><td>sip</td><td>read, write</td><td> _contacts_sip child record (multiple) (Since 3.0)</td></tr>
  * </table>
  */
 _CONTACTS_BEGIN_VIEW()
@@ -358,7 +358,7 @@ _CONTACTS_END_VIEW(_contacts_contact)
  * <tr><td>record</td><td>profile</td><td>read, write</td><td> _contacts_profile child record (multiple) </td></tr>
  * <tr><td>record</td><td>relationship</td><td>read, write</td><td> _contacts_relationship child record (multiple) </td></tr>
  * <tr><td>record</td><td>image</td><td>read, write</td><td> _contacts_image child record (multiple) </td></tr>
- * <tr><td>record</td><td>sip</td><td>read, write</td><td> _contacts_sip child record (multiple) </td></tr>
+ * <tr><td>record</td><td>sip</td><td>read, write</td><td> _contacts_sip child record (multiple) (Since 3.0) </td></tr>
  * </table>
  */
 _CONTACTS_BEGIN_VIEW()
@@ -1686,16 +1686,18 @@ _CONTACTS_END_READ_ONLY_VIEW(_contacts_contact_activity)
  * <tr><td>string</td><td>_uri</td><td> Identifier of this log stat view </td></tr>
  * <tr><td>integer</td><td> log_count </td><td>Log count (projection) </td></tr>
  * <tr><td>integer</td><td> log_type </td><td> Log type, see the @ref contacts_phone_log_type_e </td></tr>
+ * <tr><td>integer</td><td> sim_slot_no </td><td>It is related to the SIM slot number. sim_slot_no 0 means first SIM card, sim_slot_no 1 means second SIM. It is same with handle index of telephony handle list. Refer to the telephony_init() (Since 3.0)</td></tr>
  * </table>
  */
 _CONTACTS_BEGIN_READ_ONLY_VIEW()
     _CONTACTS_PROPERTY_PROJECTION_INT(log_count)
     _CONTACTS_PROPERTY_INT(log_type)
+    _CONTACTS_PROPERTY_INT(sim_slot_no)   /*(Since 3.0)*/
 _CONTACTS_END_READ_ONLY_VIEW(_contacts_phone_log_stat)
 
 /**
  * @addtogroup CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE View/Property
- * @section CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_sip _contacts_sip view
+ * @section CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_sip _contacts_sip view (Since 3.0)
  * <table>
  * <tr>
  *    <th>Type</th>

@@ -34,7 +34,7 @@
  * You have to update user version schema.sql
  *			PRAGMA user_version = 100;
  */
-#define CTSVC_SCHEMA_VERSION 102
+#define CTSVC_SCHEMA_VERSION 103
 
 #ifdef ENABLE_LOG_FEATURE
 static int __ctsvc_server_find_person_id_of_phonelog(sqlite3 *__db, char *normal_num,
@@ -415,6 +415,44 @@ int ctsvc_server_db_update(void)
 		__ctsvc_server_number_info_update(__db);
 
 		old_version = 102;
+	}
+
+	if (old_version <= 102) {
+		ret = sqlite3_exec(__db, "DROP TABLE phonelog_stat", NULL, 0, &errmsg);
+		if (SQLITE_OK != ret) {
+			ERR("drop phonelog_stat Fail(%d) : %s", ret, errmsg);
+			sqlite3_free(errmsg);
+		}
+
+		ret = sqlite3_exec(__db, "CREATE TABLE "CTS_TABLE_PHONELOG_STAT" "
+				"(log_type INTEGER, "
+				"log_count INTEGER, "
+				"sim_id INTEGER)"
+				, NULL, 0, &errmsg);
+		if (SQLITE_OK != ret) {
+			ERR("create phonelog_stat Fail(%d) : %s", ret, errmsg);
+			sqlite3_free(errmsg);
+		}
+
+		ret = sqlite3_exec(__db, "DROP trigger trg_phonelogs_insert", NULL, 0, &errmsg);
+		if (SQLITE_OK != ret) {
+			ERR("drop trigger trg_phonelogs_insert Fail(%d) : %s", ret, errmsg);
+			sqlite3_free(errmsg);
+		}
+
+		ret = sqlite3_exec(__db,
+				"CREATE TRIGGER trg_phonelogs_insert AFTER INSERT ON phonelogs "
+				" BEGIN "
+				"	UPDATE phonelog_stat SET log_count = log_count+1 WHERE log_type=new.log_type AND sim_id=new.sim_id; "
+				"      INSERT INTO phonelog_stat SELECT new.log_type, 1, new.sim_id WHERE NOT EXISTS (SELECT * FROM phonelog_stat WHERE log_type=new.log_type AND sim_id=new.sim_id); "
+				" END;",
+				NULL, 0, &errmsg);
+		if (SQLITE_OK != ret) {
+			ERR("create trigger trg_phonelogs_insert Fail(%d) : %s", ret, errmsg);
+			sqlite3_free(errmsg);
+		}
+
+		old_version = 103;
 	}
 
 	snprintf(query, sizeof(query),

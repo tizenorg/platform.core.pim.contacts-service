@@ -92,6 +92,77 @@ int ctsvc_client_phone_log_reset_statistics(contacts_h contact)
 
 }
 
+int ctsvc_client_phone_log_reset_statistics_by_sim(contacts_h contact,
+		int sim_slot_no)
+{
+#ifndef ENABLE_LOG_FEATURE
+	return CONTACTS_ERROR_NOT_SUPPORTED;
+#endif /* ENABLE_LOG_FEATURE */
+
+	int ret = CONTACTS_ERROR_NONE;
+
+	pims_ipc_data_h indata = NULL;
+	pims_ipc_data_h outdata = NULL;
+
+	RETV_IF(NULL == contact, CONTACTS_ERROR_INVALID_PARAMETER);
+	RETV_IF(sim_slot_no < 0, CONTACTS_ERROR_INVALID_PARAMETER);
+
+	/* make indata */
+	indata = pims_ipc_data_create(0);
+	if (indata == NULL) {
+		ERR("pims_ipc_data_create() Fail");
+		ret = CONTACTS_ERROR_OUT_OF_MEMORY;
+		return ret;
+	}
+
+	ret = ctsvc_ipc_marshal_handle(contact, indata);
+	if (CONTACTS_ERROR_NONE != ret) {
+		ERR("ctsvc_ipc_marshal_handle() Fail(%d)", ret);
+		pims_ipc_data_destroy(indata);
+		return ret;
+	}
+
+	ret = ctsvc_ipc_marshal_int(sim_slot_no, indata);
+	if (CONTACTS_ERROR_NONE != ret) {
+		ERR("ctsvc_ipc_marshal_int() Fail(%d)", ret);
+		pims_ipc_data_destroy(indata);
+		return ret;
+	}
+
+	/* ipc call */
+	if (ctsvc_ipc_call(CTSVC_IPC_PHONELOG_MODULE,
+			CTSVC_IPC_SERVER_PHONELOG_RESET_STATISTICS_BY_SIM,
+			indata, &outdata) != 0) {
+		ERR("ctsvc_ipc_call() Fail");
+		pims_ipc_data_destroy(indata);
+		return CONTACTS_ERROR_IPC;
+	}
+
+	pims_ipc_data_destroy(indata);
+
+	if (outdata) {
+		if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(outdata, &ret)) {
+			ERR("ctsvc_ipc_unmarshal_int() Fail");
+			pims_ipc_data_destroy(outdata);
+			return CONTACTS_ERROR_IPC;
+		}
+
+		if (CONTACTS_ERROR_NONE == ret) {
+			int transaction_ver = 0;
+			if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(outdata, &transaction_ver)) {
+				ERR("ctsvc_ipc_unmarshal_int() Fail");
+				pims_ipc_data_destroy(outdata);
+				return CONTACTS_ERROR_IPC;
+			}
+			ctsvc_client_ipc_set_change_version(contact, transaction_ver);
+		}
+
+		pims_ipc_data_destroy(outdata);
+	}
+
+	return ret;
+}
+
 int ctsvc_client_phone_log_delete(contacts_h contact, contacts_phone_log_delete_e op,
 		va_list args)
 {

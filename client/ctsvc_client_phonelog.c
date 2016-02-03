@@ -38,6 +38,20 @@ API int contacts_phone_log_reset_statistics(void)
 	return ret;
 }
 
+API int contacts_phone_log_reset_statistics_by_sim(int sim_slot_no)
+{
+	int ret;
+	contacts_h contact = NULL;
+
+	ret = ctsvc_client_handle_get_p(&contact);
+	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_client_handle_get_p() Fail(%d)", ret);
+
+	ret = ctsvc_client_phone_log_reset_statistics_by_sim(contact, sim_slot_no);
+
+	return ret;
+}
+
+
 API int contacts_phone_log_delete(contacts_phone_log_delete_e op, ...)
 {
 	int ret;
