@@ -186,8 +186,10 @@ API int contacts_filter_add_int(contacts_filter_h filter, unsigned int property_
 	int ret;
 
 	RETV_IF(NULL == filter, CONTACTS_ERROR_INVALID_PARAMETER);
-	RETVM_IF(property_id == CTSVC_PROPERTY_PHONELOG_SIM_SLOT_NO
-			&& (CONTACTS_MATCH_GREATER_THAN <= match && match <= CONTACTS_MATCH_LESS_THAN_OR_EQUAL),
+	RETVM_IF((CTSVC_PROPERTY_PHONELOG_SIM_SLOT_NO == property_id
+					|| CTSVC_PROPERTY_PHONELOG_STAT_SIM_SLOT_NO == property_id)
+			&& (CONTACTS_MATCH_GREATER_THAN <= match
+					&& match <= CONTACTS_MATCH_LESS_THAN_OR_EQUAL),
 			CONTACTS_ERROR_INVALID_PARAMETER, "Not support this condition");
 
 	com_filter = (ctsvc_composite_filter_s*)filter;

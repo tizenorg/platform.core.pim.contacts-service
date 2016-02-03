@@ -77,6 +77,7 @@
 #define CTSVC_IPC_SERVER_PERSON_GET_AGGREGATION_SUGGESTIONS	"person_get_aggregation_suggestions"
 
 #define CTSVC_IPC_SERVER_PHONELOG_RESET_STATISTICS    "phonelog_reset_statistics"
+#define CTSVC_IPC_SERVER_PHONELOG_RESET_STATISTICS_BY_SIM "phonelog_reset_statistics_by_sim"
 #define CTSVC_IPC_SERVER_PHONELOG_DELETE    "phonelog_delete"
 
 #define CTSVC_IPC_SERVER_SETTING_GET_NAME_DISPLAY_ORDER "setting_get_name_display_order"
