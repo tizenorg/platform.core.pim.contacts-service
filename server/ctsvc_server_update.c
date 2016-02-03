@@ -34,7 +34,7 @@
  * You have to update user version schema.sql
  *			PRAGMA user_version = 100;
  */
-#define CTSVC_SCHEMA_VERSION 102
+#define CTSVC_SCHEMA_VERSION 103
 
 #ifdef ENABLE_LOG_FEATURE
 static int __ctsvc_server_find_person_id_of_phonelog(sqlite3 *__db, char *normal_num,
@@ -343,13 +343,13 @@ int ctsvc_server_db_update(void)
 			sqlite3_free(errmsg);
 		}
 
-		ret = sqlite3_exec(__db, "ALTER TABLE "CTS_TABLE_PHONELOGS" ADD COLUMN sim_id TEXT", NULL, 0, &errmsg);
+		ret = sqlite3_exec(__db, "ALTER TABLE "CTS_TABLE_PHONELOGS" ADD COLUMN sim_id INTEGER", NULL, 0, &errmsg);
 		if (SQLITE_OK != ret) {
 			ERR("add phonelogs.sim_id Fail(%d) : %s", ret, errmsg);
 			sqlite3_free(errmsg);
 		}
 
-		ret = sqlite3_exec(__db, "ALTER TABLE "CTS_TABLE_PHONELOGS" ADD COLUMN number_type TEXT", NULL, 0, &errmsg);
+		ret = sqlite3_exec(__db, "ALTER TABLE "CTS_TABLE_PHONELOGS" ADD COLUMN number_type INTEGER", NULL, 0, &errmsg);
 		if (SQLITE_OK != ret) {
 			ERR("add phonelogs.number_type Fail(%d) : %s", ret, errmsg);
 			sqlite3_free(errmsg);
@@ -358,7 +358,7 @@ int ctsvc_server_db_update(void)
 		/* update phonelog, data number value */
 		__ctsvc_server_number_info_update(__db);
 
-		ret = sqlite3_exec(__db, "ALTER TABLE "CTS_TABLE_SDN" ADD COLUMN sim_slot_no TEXT", NULL, 0, &errmsg);
+		ret = sqlite3_exec(__db, "ALTER TABLE "CTS_TABLE_SDN" ADD COLUMN sim_slot_no INTEGER", NULL, 0, &errmsg);
 		if (SQLITE_OK != ret) {
 			ERR("add sdn.sim_id Fail(%d) : %s", ret, errmsg);
 			sqlite3_free(errmsg);
@@ -366,12 +366,12 @@ int ctsvc_server_db_update(void)
 
 		ret = sqlite3_exec(__db, "ALTER TABLE "CTS_TABLE_ADDRESSBOOKS" ADD COLUMN smack_label TEXT", NULL, 0, &errmsg);
 		if (SQLITE_OK != ret) {
-			ERR("add sdn.sim_id Fail(%d) : %s", ret, errmsg);
+			ERR("add addressbooks.smack_label Fail(%d) : %s", ret, errmsg);
 			sqlite3_free(errmsg);
 		}
-		ret = sqlite3_exec(__db, "UPDATE "CTS_TABLE_ADDRESSBOOKS" SET='org.tizen.contact' WHERE addressbook_id = 0", NULL, 0, &errmsg);
+		ret = sqlite3_exec(__db, "UPDATE "CTS_TABLE_ADDRESSBOOKS" SET smack_label='org.tizen.contact' WHERE addressbook_id = 0", NULL, 0, &errmsg);
 		if (SQLITE_OK != ret) {
-			ERR("add sdn.sim_id Fail(%d) : %s", ret, errmsg);
+			ERR("update addressbooks Fail(%d) : %s", ret, errmsg);
 			sqlite3_free(errmsg);
 		}
 
@@ -407,14 +407,95 @@ int ctsvc_server_db_update(void)
 			sqlite3_free(errmsg);
 		}
 
-		old_version = 101;
+		old_version = 102;
 	}
 
-	if (old_version <= 101) {
+	/* When updating to 101 version, some columns in CTS_TABLE_PHONELOGS and CTS_TABLE_SDN were added with wrong datatype */
+	if (101 == old_version) {
+		ret = sqlite3_exec(__db, "ALTER TABLE "CTS_TABLE_PHONELOGS" RENAME TO temp_phonelogs", NULL, 0, &errmsg);
+		if (SQLITE_OK != ret) {
+			ERR("rename to temp_phonelogs Fail(%d) : %s", ret, errmsg);
+			sqlite3_free(errmsg);
+		}
+
+		ret = sqlite3_exec(__db, "CREATE TABLE "CTS_TABLE_PHONELOGS" "
+				"(id INTEGER PRIMARY KEY AUTOINCREMENT, "
+				"number TEXT, "
+				"number_type	INTEGER, "
+				"normal_num TEXT, "
+				"clean_num TEXT, "
+				"minmatch TEXT, "
+				"sim_id INTEGER, "
+				"person_id INTEGER, "
+				"log_type INTEGER, "
+				"log_time INTEGER, "
+				"data1 INTEGER, "
+				"data2 TEXT)"
+				, NULL, 0, &errmsg);
+		if (SQLITE_OK != ret) {
+			ERR("create phonelogs Fail(%d) : %s", ret, errmsg);
+			sqlite3_free(errmsg);
+		}
+
+		ret = sqlite3_exec(__db, "INSERT INTO "CTS_TABLE_PHONELOGS" "
+			"(id, number, normal_num, clean_num, minmatch, person_id, log_type, log_time, data1, data2) "
+			"SELECT id, number, normal_num, clean_num, minmatch, person_id, log_type, log_time, data1, data2 "
+			"FROM temp_phonelogs", NULL, 0, &errmsg);
+		if (SQLITE_OK != ret) {
+			ERR("insert to phonelogs from temp_phonelogs Fail(%d) : %s", ret, errmsg);
+			sqlite3_free(errmsg);
+		}
+
+		ret = sqlite3_exec(__db, "DROP TABLE temp_phonelogs", NULL, 0, &errmsg);
+		if (SQLITE_OK != ret) {
+			ERR("drop temp_phonelogs Fail(%d) : %s", ret, errmsg);
+			sqlite3_free(errmsg);
+		}
+
+		ret = sqlite3_exec(__db, "ALTER TABLE "CTS_TABLE_SDN" RENAME TO temp_sdn", NULL, 0, &errmsg);
+		if (SQLITE_OK != ret) {
+			ERR("rename to temp_sdn Fail(%d) : %s", ret, errmsg);
+			sqlite3_free(errmsg);
+		}
+
+		ret = sqlite3_exec(__db, "CREATE TABLE "CTS_TABLE_SDN" "
+				"(id INTEGER PRIMARY KEY AUTOINCREMENT, "
+				"name TEXT, "
+				"number TEXT, "
+				"sim_slot_no INTEGER)"
+				, NULL, 0, &errmsg);
+		if (SQLITE_OK != ret) {
+			ERR("create sdn Fail(%d) : %s", ret, errmsg);
+			sqlite3_free(errmsg);
+		}
+
+		ret = sqlite3_exec(__db, "INSERT INTO "CTS_TABLE_SDN" (id, name, number) "
+			"SELECT id, name, number FROM temp_sdn", NULL, 0, &errmsg);
+		if (SQLITE_OK != ret) {
+			ERR("insert to sdn from temp_sdn Fail(%d) : %s", ret, errmsg);
+			sqlite3_free(errmsg);
+		}
+
+		ret = sqlite3_exec(__db, "DROP TABLE temp_sdn", NULL, 0, &errmsg);
+		if (SQLITE_OK != ret) {
+			ERR("drop temp_sdn Fail(%d) : %s", ret, errmsg);
+			sqlite3_free(errmsg);
+		}
+
+		ret = sqlite3_exec(__db, "UPDATE "CTS_TABLE_ADDRESSBOOKS" SET smack_label='org.tizen.contact' WHERE addressbook_id = 0", NULL, 0, &errmsg);
+		if (SQLITE_OK != ret) {
+			ERR("update addressbooks Fail(%d) : %s", ret, errmsg);
+			sqlite3_free(errmsg);
+		}
+
+		old_version = 102;
+	}
+
+	if (old_version <= 102) {
 		/* update phonelog, data number value */
 		__ctsvc_server_number_info_update(__db);
 
-		old_version = 102;
+		old_version = 103;
 	}
 
 	snprintf(query, sizeof(query),
