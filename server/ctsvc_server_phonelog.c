@@ -42,6 +42,22 @@ int ctsvc_phone_log_reset_statistics()
 	return ctsvc_query_exec(query);
 }
 
+int ctsvc_phone_log_reset_statistics_by_sim(int sim_slot_no)
+{
+	char query[CTS_SQL_MIN_LEN] = {0};
+	int sim_info_id;
+
+	sim_info_id = ctsvc_server_sim_get_info_id_by_sim_slot_no(sim_slot_no);
+	if (sim_info_id <= 0) {
+		ERR("ctsvc_server_sim_get_info_id_by_sim_slot_no() Fail(%d)", sim_info_id);
+		return CONTACTS_ERROR_NO_DATA;
+	}
+
+	snprintf(query, sizeof(query), "DELETE FROM "CTS_TABLE_PHONELOG_STAT
+			" WHERE sim_id = %d", sim_info_id);
+	return ctsvc_query_exec(query);
+}
+
 int ctsvc_phone_log_delete(contacts_phone_log_delete_e op, ...)
 {
 	int ret;

@@ -866,7 +866,8 @@ DATA_FREE:
 }
 
 #ifdef ENABLE_LOG_FEATURE
-void ctsvc_ipc_phone_log_reset_statistics(pims_ipc_h ipc, pims_ipc_data_h indata, pims_ipc_data_h *outdata, void *userdata)
+void ctsvc_ipc_phone_log_reset_statistics(pims_ipc_h ipc,
+		pims_ipc_data_h indata, pims_ipc_data_h *outdata, void *userdata)
 {
 	int ret;
 	contacts_h contact = NULL;
@@ -916,6 +917,66 @@ DATA_FREE:
 	ctsvc_server_start_timeout();
 	return;
 }
+
+void ctsvc_ipc_phone_log_reset_statistics_by_sim(pims_ipc_h ipc,
+		pims_ipc_data_h indata, pims_ipc_data_h *outdata, void *userdata)
+{
+	int ret;
+	int sim_slot_no;
+	contacts_h contact = NULL;
+
+	if (indata) {
+		ret = ctsvc_ipc_unmarshal_handle(indata, &contact);
+		if (CONTACTS_ERROR_NONE != ret) {
+			ERR("ctsvc_ipc_unmarshal_handle Fail(%d)", ret);
+			goto ERROR_RETURN;
+		}
+
+		ret = ctsvc_ipc_unmarshal_int(indata, &sim_slot_no);
+		if (CONTACTS_ERROR_NONE != ret) {
+			ERR("ctsvc_ipc_unmarshal_int() Fail(%d)", ret);
+			goto ERROR_RETURN;
+		}
+	}
+
+	if (!ctsvc_have_permission(ipc, CTSVC_PERMISSION_PHONELOG_WRITE)) {
+		ret = CONTACTS_ERROR_PERMISSION_DENIED;
+		goto ERROR_RETURN;
+	}
+
+	ret = ctsvc_phone_log_reset_statistics_by_sim(sim_slot_no);
+
+ERROR_RETURN:
+	if (outdata) {
+		*outdata = pims_ipc_data_create(0);
+		if (NULL == *outdata) {
+			ERR("pims_ipc_data_create() Fail");
+			goto DATA_FREE;
+		}
+		if (CONTACTS_ERROR_NONE != ctsvc_ipc_marshal_int(ret, *outdata)) {
+			pims_ipc_data_destroy(*outdata);
+			*outdata = NULL;
+			ERR("ctsvc_ipc_marshal_int() Fail");
+			goto DATA_FREE;
+		}
+		if (CONTACTS_ERROR_NONE == ret) {
+			int transaction_ver = ctsvc_get_transaction_ver();
+			if (CONTACTS_ERROR_NONE != ctsvc_ipc_marshal_int(transaction_ver, *outdata)) {
+				pims_ipc_data_destroy(*outdata);
+				*outdata = NULL;
+				ERR("ctsvc_ipc_marshal_int() Fail");
+				goto DATA_FREE;
+			}
+		}
+	} else {
+		ERR("outdata is NULL");
+	}
+DATA_FREE:
+	ctsvc_handle_destroy(contact);
+	ctsvc_server_start_timeout();
+	return;
+}
+
 
 void ctsvc_ipc_phone_log_delete(pims_ipc_h ipc, pims_ipc_data_h indata,
 		pims_ipc_data_h *outdata, void *userdata)
