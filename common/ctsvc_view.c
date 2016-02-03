@@ -660,6 +660,7 @@ API const _contacts_phone_log_stat_property_ids _contacts_phone_log_stat = {
 	._uri		= CTSVC_VIEW_URI_READ_ONLY_PHONELOG_STAT,
 	.log_count	= CTSVC_PROPERTY_PHONELOG_STAT_LOG_COUNT,
 	.log_type	= CTSVC_PROPERTY_PHONELOG_STAT_LOG_TYPE,
+	.sim_slot_no = CTSVC_PROPERTY_PHONELOG_STAT_SIM_SLOT_NO,
 };
 #endif /* ENABLE_LOG_FEATURE */
 
@@ -1239,6 +1240,7 @@ const property_info_s __property_contact_activity[] = {   /* _contacts_contact_a
 const property_info_s __property_phonelog_stat[] = {   /* _contacts_phone_log_stat */
 	{CTSVC_PROPERTY_PHONELOG_STAT_LOG_COUNT,		CTSVC_SEARCH_PROPERTY_PROJECTION,	"log_count"},
 	{CTSVC_PROPERTY_PHONELOG_STAT_LOG_TYPE,			CTSVC_SEARCH_PROPERTY_ALL,	"log_type"},
+	{CTSVC_PROPERTY_PHONELOG_STAT_SIM_SLOT_NO, 		CTSVC_SEARCH_PROPERTY_ALL,	"sim_id"},
 };
 #endif
 
