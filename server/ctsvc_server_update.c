@@ -34,7 +34,7 @@
  * You have to update user version schema.sql
  *			PRAGMA user_version = 100;
  */
-#define CTSVC_SCHEMA_VERSION 102
+#define CTSVC_SCHEMA_VERSION 103
 
 #ifdef ENABLE_LOG_FEATURE
 static int __ctsvc_server_find_person_id_of_phonelog(sqlite3 *__db, char *normal_num,
@@ -415,6 +415,16 @@ int ctsvc_server_db_update(void)
 		__ctsvc_server_number_info_update(__db);
 
 		old_version = 102;
+	}
+
+	if (old_version <= 102) {
+		ret = sqlite3_exec(__db, "ALTER TABLE "CTS_TABLE_PHONELOG_STAT" ADD COLUMN sim_id INTEGER", NULL, 0, &errmsg);
+		if (SQLITE_OK != ret) {
+			ERR("add phonelog_stat.sim_id Fail(%d) : %s", ret, errmsg);
+			sqlite3_free(errmsg);
+		}
+
+		old_version = 103;
 	}
 
 	snprintf(query, sizeof(query),
