@@ -103,6 +103,7 @@ static int __server_main(void)
 
 #ifdef ENABLE_LOG_FEATURE
 		if (pims_ipc_svc_register(CTSVC_IPC_PHONELOG_MODULE, CTSVC_IPC_SERVER_PHONELOG_RESET_STATISTICS, ctsvc_ipc_phone_log_reset_statistics, NULL) != 0) break;
+		if (pims_ipc_svc_register(CTSVC_IPC_PHONELOG_MODULE, CTSVC_IPC_SERVER_PHONELOG_RESET_STATISTICS_BY_SIM, ctsvc_ipc_phone_log_reset_statistics_by_sim, NULL) != 0) break;
 		if (pims_ipc_svc_register(CTSVC_IPC_PHONELOG_MODULE, CTSVC_IPC_SERVER_PHONELOG_DELETE, ctsvc_ipc_phone_log_delete, NULL) != 0) break;
 #endif /* ENABLE_LOG_FEATURE */
 

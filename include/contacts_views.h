@@ -1686,11 +1686,13 @@ _CONTACTS_END_READ_ONLY_VIEW(_contacts_contact_activity)
  * <tr><td>string</td><td>_uri</td><td> Identifier of this log stat view </td></tr>
  * <tr><td>integer</td><td> log_count </td><td>Log count (projection) </td></tr>
  * <tr><td>integer</td><td> log_type </td><td> Log type, see the @ref contacts_phone_log_type_e </td></tr>
+ * <tr><td>integer</td><td> sim_slot_no </td><td>It is related to the SIM slot number. sim_slot_no 0 means first SIM card, sim_slot_no 1 means second SIM. It is same with handle index of telephony handle list. Refer to the telephony_init() </td></tr>
  * </table>
  */
 _CONTACTS_BEGIN_READ_ONLY_VIEW()
     _CONTACTS_PROPERTY_PROJECTION_INT(log_count)
     _CONTACTS_PROPERTY_INT(log_type)
+    _CONTACTS_PROPERTY_INT(sim_slot_no)
 _CONTACTS_END_READ_ONLY_VIEW(_contacts_phone_log_stat)
 
 /**
