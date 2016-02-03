@@ -24,6 +24,7 @@
 #include "contacts_phone_log_internal.h"
 
 int ctsvc_phone_log_reset_statistics();
+int ctsvc_phone_log_reset_statistics_by_sim(int sim_slot_no);
 int ctsvc_phone_log_delete(contacts_phone_log_delete_e op, ...);
 void ctsvc_db_phone_log_delete_callback(sqlite3_context  *context,
 		int argc, sqlite3_value **argv);
