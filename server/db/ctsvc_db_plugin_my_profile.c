@@ -220,8 +220,8 @@ static int __ctsvc_db_my_profile_delete_record(int id)
 		return ret;
 	}
 
-	if (false == ctsvc_have_ab_write_permission(addressbook_id)) {
-		ERR("Does not have permission to delete this contact");
+	if (false == ctsvc_have_ab_write_permission(addressbook_id, false)) {
+		ERR("No permission in this addresbook_id(%d)", addressbook_id);
 		ctsvc_end_trans(false);
 		return CONTACTS_ERROR_PERMISSION_DENIED;
 	}
@@ -679,9 +679,8 @@ static int __ctsvc_db_my_profile_update_record(contacts_record_h record)
 		return ret;
 	}
 
-	if (false == ctsvc_have_ab_write_permission(my_profile->addressbook_id)) {
-		ERR("ctsvc_have_ab_write_permission Fail: does not have permission(addressbook_id : %d)",
-				my_profile->addressbook_id);
+	if (false == ctsvc_have_ab_write_permission(my_profile->addressbook_id, false)) {
+		ERR("No permission in this addresbook_id(%d)", my_profile->addressbook_id);
 		ctsvc_end_trans(false);
 		return CONTACTS_ERROR_PERMISSION_DENIED;
 	}
@@ -1127,9 +1126,8 @@ static int __ctsvc_db_my_profile_insert_record(contacts_record_h record, int *id
 	ret = ctsvc_begin_trans();
 	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "ctsvc_begin_trans() Fail(%d)", ret);
 
-	if (false == ctsvc_have_ab_write_permission(my_profile->addressbook_id)) {
-		ERR("ctsvc_have_ab_write_permission Fail: does not have permission(addressbook_id : %d)",
-				my_profile->addressbook_id);
+	if (false == ctsvc_have_ab_write_permission(my_profile->addressbook_id, false)) {
+		ERR("No permission in this addresbook_id(%d)", my_profile->addressbook_id);
 		ctsvc_end_trans(false);
 		return CONTACTS_ERROR_PERMISSION_DENIED;
 	}

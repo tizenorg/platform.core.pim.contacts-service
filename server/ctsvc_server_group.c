@@ -118,8 +118,8 @@ int ctsvc_group_add_contact(int group_id, int contact_id)
 		return ret;
 	}
 
-	if (false == ctsvc_have_ab_write_permission(addressbook_id)) {
-		ERR("Does not have permission to get this group record : addresbook_id(%d)", addressbook_id);
+	if (false == ctsvc_have_ab_write_permission(addressbook_id, true)) {
+		ERR("No permission in this addresbook_id(%d)", addressbook_id);
 		ctsvc_end_trans(false);
 		return CONTACTS_ERROR_PERMISSION_DENIED;
 	}
@@ -215,8 +215,8 @@ int ctsvc_group_remove_contact(int group_id, int contact_id)
 		return ret;
 	}
 
-	if (false == ctsvc_have_ab_write_permission(addressbook_id)) {
-		ERR("Does not have permission to get this group record : addresbook_id(%d)", addressbook_id);
+	if (false == ctsvc_have_ab_write_permission(addressbook_id, true)) {
+		ERR("No permission in this addresbook_id(%d)", addressbook_id);
 		ctsvc_end_trans(false);
 		return CONTACTS_ERROR_PERMISSION_DENIED;
 	}
@@ -273,8 +273,8 @@ int ctsvc_group_set_group_order(int group_id, int previous_group_id, int next_gr
 		return ret;
 	}
 
-	if (false == ctsvc_have_ab_write_permission(addressbook_id)) {
-		ERR("Does not have permission to get this group record : addresbook_id(%d)", addressbook_id);
+	if (false == ctsvc_have_ab_write_permission(addressbook_id, true)) {
+		ERR("No permission in this addresbook_id(%d)", addressbook_id);
 		return CONTACTS_ERROR_PERMISSION_DENIED;
 	}
 
