@@ -66,6 +66,11 @@ cp %{SOURCE1001} ./%{name}-test.manifest
 
 
 %build
+
+export CFLAGS="$(echo $CFLAGS | sed 's/-Wl,--as-needed//g')"
+export CXXFLAGS="$(echo $CXXFLAGS | sed 's/-Wl,--as-needed//g')"
+export FFLAGS="$(echo $FFLAGS | sed 's/-Wl,--as-needed//g')"
+
 export CFLAGS="$CFLAGS -DTIZEN_ENGINEER_MODE"
 export CXXFLAGS="$CXXFLAGS -DTIZEN_ENGINEER_MODE"
 export FFLAGS="$FFLAGS -DTIZEN_ENGINEER_MODE"
