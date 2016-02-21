@@ -1,3 +1,18 @@
+/*
+ * Copyright (c) 2016 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the License);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -7,11 +22,11 @@
 #include "test_main.h"
 #include "test_debug.h"
 
-int test_query_person_contact(char **argv)
+int test_query_person_contact(int argc, char **argv)
 {
 	char *keyword = NULL;
 	keyword = argv[0];
-	DEBUG("keyword[%s]", keyword);
+	DBG("keyword[%s]", keyword);
 
 	int limit = -1;
 	int offset = -1;
@@ -23,7 +38,7 @@ int test_query_person_contact(char **argv)
 
 	int count = 0;
 	contacts_list_get_count(list, &count);
-	DEBUG("count(%d)", count);
+	DBG("count(%d)", count);
 
 	contacts_list_first(list);
 	contacts_record_h record = NULL;
@@ -35,8 +50,8 @@ int test_query_person_contact(char **argv)
 		contacts_record_get_str_p(record,
 				_contacts_person_contact.display_name_index, &name_index);
 
-		DEBUG("-------------------------------------------");
-		DEBUG("name_index[%s] name[%s]", name_index, name);
+		DBG("-------------------------------------------");
+		DBG("name_index[%s] name[%s]", name_index, name);
 		contacts_list_next(list);
 	}
 
@@ -45,11 +60,11 @@ int test_query_person_contact(char **argv)
 	return 0;
 }
 
-int test_query_with_query_person_contact(char **argv)
+int test_query_with_query_person_contact(int argc, char **argv)
 {
 	char *keyword = NULL;
 	keyword = argv[0];
-	DEBUG("keyword[%s]", keyword);
+	DBG("keyword[%s]", keyword);
 
 	int limit = -1;
 	int offset = -1;
@@ -74,7 +89,7 @@ int test_query_with_query_person_contact(char **argv)
 
 	int count = 0;
 	contacts_list_get_count(list, &count);
-	DEBUG("count(%d)", count);
+	DBG("count(%d)", count);
 
 	contacts_list_first(list);
 	contacts_record_h record = NULL;
@@ -86,8 +101,8 @@ int test_query_with_query_person_contact(char **argv)
 		contacts_record_get_str_p(record,
 				_contacts_person_contact.display_name_index, &name_index);
 
-		DEBUG("-------------------------------------------");
-		DEBUG("name_index[%s] name[%s]", name_index, name);
+		DBG("-------------------------------------------");
+		DBG("name_index[%s] name[%s]", name_index, name);
 		contacts_list_next(list);
 	}
 
@@ -96,11 +111,11 @@ int test_query_with_query_person_contact(char **argv)
 	return 0;
 }
 
-int test_query_person_number(char **argv)
+int test_query_person_number(int argc, char **argv)
 {
 	char *keyword = NULL;
 	keyword = argv[0];
-	DEBUG("keyword[%s]", keyword);
+	DBG("keyword[%s]", keyword);
 
 	int limit = -1;
 	int offset = -1;
@@ -112,7 +127,7 @@ int test_query_person_number(char **argv)
 
 	int count = 0;
 	contacts_list_get_count(list, &count);
-	DEBUG("count(%d)", count);
+	DBG("count(%d)", count);
 
 	contacts_list_first(list);
 	contacts_record_h record = NULL;
@@ -130,8 +145,8 @@ int test_query_person_number(char **argv)
 		contacts_record_get_str_p(record,
 				_contacts_person_number.normalized_number, &normalized_number);
 
-		DEBUG("-------------------------------------------");
-		DEBUG("name_index[%s] name[%s] number[%s] normalized_number[%s]",
+		DBG("-------------------------------------------");
+		DBG("name_index[%s] name[%s] number[%s] normalized_number[%s]",
 				name_index, name, number, normalized_number);
 		contacts_list_next(list);
 	}
@@ -141,11 +156,11 @@ int test_query_person_number(char **argv)
 	return 0;
 }
 
-int test_query_with_query_person_number(char **argv)
+int test_query_with_query_person_number(int argc, char **argv)
 {
 	char *keyword = NULL;
 	keyword = argv[0];
-	DEBUG("keyword[%s]", keyword);
+	DBG("keyword[%s]", keyword);
 
 	int limit = -1;
 	int offset = -1;
@@ -170,7 +185,7 @@ int test_query_with_query_person_number(char **argv)
 
 	int count = 0;
 	contacts_list_get_count(list, &count);
-	DEBUG("count(%d)", count);
+	DBG("count(%d)", count);
 
 	contacts_list_first(list);
 	contacts_record_h record = NULL;
@@ -188,8 +203,8 @@ int test_query_with_query_person_number(char **argv)
 		contacts_record_get_str_p(record,
 				_contacts_person_number.normalized_number, &normalized_number);
 
-		DEBUG("-------------------------------------------");
-		DEBUG("name_index[%s] name[%s] number[%s] normalized_number[%s]",
+		DBG("-------------------------------------------");
+		DBG("name_index[%s] name[%s] number[%s] normalized_number[%s]",
 				name_index, name, number, normalized_number);
 		contacts_list_next(list);
 	}
@@ -199,11 +214,11 @@ int test_query_with_query_person_number(char **argv)
 	return 0;
 }
 
-int test_query_person_email(char **argv)
+int test_query_person_email(int argc, char **argv)
 {
 	char *keyword = NULL;
 	keyword = argv[0];
-	DEBUG("keyword[%s]", keyword);
+	DBG("keyword[%s]", keyword);
 
 	int limit = -1;
 	int offset = -1;
@@ -215,7 +230,7 @@ int test_query_person_email(char **argv)
 
 	int count = 0;
 	contacts_list_get_count(list, &count);
-	DEBUG("count(%d)", count);
+	DBG("count(%d)", count);
 
 	contacts_list_first(list);
 	contacts_record_h record = NULL;
@@ -230,8 +245,8 @@ int test_query_person_email(char **argv)
 		contacts_record_get_str_p(record,
 				_contacts_person_email.email, &email);
 
-		DEBUG("-------------------------------------------");
-		DEBUG("name_index[%s] name[%s] email[%s]", name_index, name, email);
+		DBG("-------------------------------------------");
+		DBG("name_index[%s] name[%s] email[%s]", name_index, name, email);
 		contacts_list_next(list);
 	}
 
@@ -239,11 +254,12 @@ int test_query_person_email(char **argv)
 
 	return 0;
 }
-int test_query_with_query_person_email(char **argv)
+
+int test_query_with_query_person_email(int argc, char **argv)
 {
 	char *keyword = NULL;
 	keyword = argv[0];
-	DEBUG("keyword[%s]", keyword);
+	DBG("keyword[%s]", keyword);
 
 	int limit = -1;
 	int offset = -1;
@@ -268,7 +284,7 @@ int test_query_with_query_person_email(char **argv)
 
 	int count = 0;
 	contacts_list_get_count(list, &count);
-	DEBUG("count(%d)", count);
+	DBG("count(%d)", count);
 
 	contacts_list_first(list);
 	contacts_record_h record = NULL;
@@ -283,8 +299,8 @@ int test_query_with_query_person_email(char **argv)
 		contacts_record_get_str_p(record,
 				_contacts_person_email.email, &email);
 
-		DEBUG("-------------------------------------------");
-		DEBUG("name_index[%s] name[%s] email[%s]", name_index, name, email);
+		DBG("-------------------------------------------");
+		DBG("name_index[%s] name[%s] email[%s]", name_index, name, email);
 		contacts_list_next(list);
 	}
 
@@ -292,3 +308,29 @@ int test_query_with_query_person_email(char **argv)
 
 	return 0;
 }
+
+static const func _func[] = {
+	test_query_person_contact,
+	test_query_with_query_person_contact,
+	test_query_person_number,
+	test_query_with_query_person_number,
+	test_query_person_email,
+	test_query_with_query_person_email,
+};
+
+int test_query(int argc, char **argv)
+{
+	ENTER();
+
+	if (true == test_main_is_selected(argc, argv, 2, _func))
+		return 0;
+
+	int i = 0;
+	int count = sizeof(_func) / sizeof(func);
+	for (i = 0; i < count; i++) {
+		if (_func[i](argc, argv) < 0)
+			break;
+	}
+	return 0;
+}
+

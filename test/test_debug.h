@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2016 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the License);
  * you may not use this file except in compliance with the License.
@@ -34,13 +34,13 @@
 #define COLOR_PURPLE      "\033[0;35m"
 #define COLOR_CYAN        "\033[0;36m"
 #define COLOR_LIGHTBLUE   "\033[0;37m"
-#define COLOR_END		  "\033[0;m"
+#define COLOR_END         "\033[0;m"
 
-#define DEBUG(fmt, args...)   LOGD(COLOR_CYAN fmt COLOR_END, ##args)
-#define VERBOSE(fmt, args...) LOGD(COLOR_BROWN fmt COLOR_END, ##args)
-#define WARNING(fmt, args...) LOGD(COLOR_PURPLE fmt COLOR_END, ##args)
-#define ERROR(fmt, args...)   LOGE(COLOR_RED" * Critical * " fmt COLOR_END, ##args)
-#define ENTER()               LOGD(COLOR_GREEN" BEGIN >>>> "COLOR_END)
-#define LEAVE()               LOGD(COLOR_GREEN" END <<<< "COLOR_END)
+#define DBG(fmt, args...)  LOGD(COLOR_CYAN" [TEST] "COLOR_END fmt, ##args)
+#define VERB(fmt, args...) LOGD(COLOR_BROWN" [TEST] "COLOR_END fmt, ##args)
+#define WARN(fmt, args...) LOGD(COLOR_PURPLE fmt COLOR_END, ##args)
+#define ERR(fmt, args...)  LOGE(COLOR_RED" [TEST] "COLOR_END fmt, ##args)
+#define ENTER()            LOGD(COLOR_GREEN" BEGIN >>>> "COLOR_END)
+#define LEAVE()            LOGD(COLOR_GREEN" END <<<< "COLOR_END)
 
 #endif /* __TEST_DEBUG_H__ */
