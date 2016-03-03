@@ -84,6 +84,7 @@ SET(SRCS
 	${CMAKE_SOURCE_DIR}/common/ctsvc_sim.c
 	${CMAKE_SOURCE_DIR}/common/ipc/ctsvc_ipc_speeddial.c
 	${CMAKE_SOURCE_DIR}/common/ctsvc_record_speeddial.c
+	${CMAKE_SOURCE_DIR}/common/ctsvc_image_util.c
 )
 
 IF(ENABLE_LOG_FEATURE)
@@ -94,7 +95,8 @@ SET(SRCS ${SRCS}
 )
 ENDIF(ENABLE_LOG_FEATURE)
 
-pkg_check_modules(client_pkgs REQUIRED glib-2.0 pims-ipc capi-base-common dlog libtzplatform-config)
+pkg_check_modules(client_pkgs REQUIRED glib-2.0 pims-ipc capi-base-common dlog libtzplatform-config
+	capi-media-image-util)
 INCLUDE_DIRECTORIES(${client_pkgs_INCLUDE_DIRS})
 LINK_DIRECTORIES(${client_pkgs_LIBRARY_DIRS})
 

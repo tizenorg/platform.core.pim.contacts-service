@@ -140,7 +140,6 @@ static void __ctsvc_set_permission_info(ctsvc_permission_info_s *info)
 		return;
 	}
 
-	int i = 0;
 	while ((ret = ctsvc_stmt_step(stmt))) {
 		int id;
 		int mode;

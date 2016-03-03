@@ -184,6 +184,40 @@ int contacts_vcard_make_from_person(contacts_record_h person, char **vcard_strea
 int contacts_vcard_get_entity_count(const char *vcard_file_path, int *count);
 
 /**
+ * @brief Sets the limit size of width and hight of image to append in a vCard file.
+ *
+ * @since_tizen 3.0
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/contact.write
+ *
+ * @param[in]   limit_size             limit size of width and hight of photo to append in a vCard file
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
+ * @retval  #CONTACTS_ERROR_NONE                Successful
+ * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ */
+int contacts_vcard_set_limit_size_of_photo(unsigned int limit_size);
+
+/**
+ * @brief Gets the limit size of width and hight of image to append in a vCard file.
+ *
+ * @since_tizen 3.0
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/contact.read
+ *
+ * @param[out]   limit_size             limit size of width and hight of photo to append in a vCard file
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
+ * @retval  #CONTACTS_ERROR_NONE                Successful
+ * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ */
+int contacts_vcard_get_limit_size_of_photo(unsigned int *limit_size);
+
+/**
  * @}
  */
 
