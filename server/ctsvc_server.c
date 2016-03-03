@@ -162,7 +162,7 @@ int ctsvc_server_get_timeout_sec(void)
 
 void ctsvc_create_file_set_permission(const char *file, mode_t mode)
 {
-	int fd, ret;
+	int fd;
 	fd = creat(file, mode);
 	if (0 <= fd) {
 		close(fd);

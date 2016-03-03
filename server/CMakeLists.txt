@@ -64,6 +64,7 @@ SET(SRCS
 	${CMAKE_SOURCE_DIR}/common/ctsvc_record_speeddial.c
 	${CMAKE_SOURCE_DIR}/common/ctsvc_record_sdn.c
 	${CMAKE_SOURCE_DIR}/common/ctsvc_handle.c
+	${CMAKE_SOURCE_DIR}/common/ctsvc_image_util.c
 
 	db/ctsvc_db_access_control.c
 	db/ctsvc_db_init.c
