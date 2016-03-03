@@ -184,6 +184,49 @@ int contacts_vcard_make_from_person(contacts_record_h person, char **vcard_strea
 int contacts_vcard_get_entity_count(const char *vcard_file_path, int *count);
 
 /**
+ * @brief Gets the limit size of width and height of photos to append in vCard streams.
+ *
+ * @since_tizen 3.0
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/contact.read
+ *
+ * @param[out]   limit_size             The limit size of width and height of photos to append in vCard streams. It's in pixels.
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
+ * @retval  #CONTACTS_ERROR_NONE                Successful
+ * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ * @retval  #CONTACTS_ERROR_PERMISSION_DENIED   Permission denied. This application does not have the privilege to call this method.
+ */
+int contacts_vcard_get_limit_size_of_photo(unsigned int *limit_size);
+
+/**
+ * @brief Sets the limit size of width and height of photos to append to vCard streams.
+ *
+ * @details This function can be used for getting reduced vCard stream. \n
+ *           When making vCard stream by using contacts_vcard_make_from_person(), contacts_vcard_make_from_my_profile(), contacts_vcard_make_from_contact(), \n
+ *           if width or height of the photo to append is bigger than the limit size, it is reduced to the limit size while maintaining original aspect ratio, \n
+ *           so that vCard stream size can be reduced
+ *
+ * @since_tizen 3.0
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/contact.write
+ *
+ * @remarks The limit_size should be bigger than or equal to 8 and smaller than 1080.
+ *
+ * @param[in]   limit_size             The limit size of width and height of photos to append in vCard streams. It's in pixels.
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
+ * @retval  #CONTACTS_ERROR_NONE                Successful
+ * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ * @retval  #CONTACTS_ERROR_PERMISSION_DENIED   Permission denied. This application does not have the privilege to call this method.
+ */
+int contacts_vcard_set_limit_size_of_photo(unsigned int limit_size);
+
+/**
  * @}
  */
 
