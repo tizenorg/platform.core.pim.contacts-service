@@ -36,6 +36,7 @@
 #include "ctsvc_list.h"
 #include "ctsvc_localize_utils.h"
 #include "ctsvc_notify.h"
+#include "ctsvc_image_util.h"
 
 #define DEFAULT_ADDRESS_BOOK_ID 0
 
@@ -137,6 +138,8 @@ enum {
 
 static const char *content_name[CTSVC_VCARD_VALUE_MAX] = {0};
 const char *CTSVC_CRLF = "\r\n";
+
+static int limit_size_of_photo = 96; //CTSVC_IMAGE_MAX_SIZE;
 
 static void __ctsvc_vcard_initial(void)
 {
@@ -1447,14 +1450,130 @@ static inline int __ctsvc_vcard_append_relationships(ctsvc_list_s *relationship_
 	return len;
 }
 
+typedef struct {
+	const char *src;
+	unsigned char **image;
+	unsigned int *image_size;
+	int ret;
+} vcard_image_info;
+
+static bool _ctsvc_vcard_image_util_supported_jpeg_colorspace_cb(
+		image_util_colorspace_e colorspace, void *user_data)
+{
+	int width = 0;
+	int height = 0;
+	int mimetype = 0;
+	uint64_t size = 0;
+	void *buffer = NULL;
+	void *buffer_temp = NULL;
+	int ret;
+	vcard_image_info *info = user_data;
+
+	ret = ctsvc_image_util_get_mimetype(colorspace, &mimetype);
+	if (CONTACTS_ERROR_NONE != ret) {
+		info->ret = CONTACTS_ERROR_SYSTEM;
+		return true;
+	}
+
+	ret = image_util_decode_jpeg(info->src, colorspace, (unsigned char **)&buffer,
+			&width, &height, (unsigned int *)&size);
+	if (IMAGE_UTIL_ERROR_NONE != ret) {
+		info->ret = CONTACTS_ERROR_SYSTEM;
+		return true;
+	}
+
+	if (limit_size_of_photo < width || limit_size_of_photo < height) { /* need resize */
+		int resized_width;
+		int resized_height;
+		media_format_h fmt;
+		media_packet_h packet;
+
+		/* set resize */
+		if (width > height) {
+			resized_width = limit_size_of_photo;
+			resized_height = height * limit_size_of_photo / width;
+		} else {
+			resized_height = limit_size_of_photo;
+			resized_width = width * limit_size_of_photo / height;
+		}
+
+		if (resized_height % 8)
+			resized_height -= (8 - (resized_height % 8));
+
+		if (resized_width % 8)
+			resized_width -= (8 - (resized_width % 8));
+
+		fmt = ctsvc_image_util_create_media_format(mimetype, width, height);
+		if (NULL == fmt) {
+			ERR("_ctsvc_image_create_media_format() Fail");
+			info->ret = CONTACTS_ERROR_SYSTEM;
+			free(buffer);
+			return false;
+		}
+
+		packet = ctsvc_image_util_create_media_packet(fmt, buffer, (unsigned int)size);
+		if (NULL == packet) {
+			ERR("_ctsvc_image_create_media_packet() Fail");
+			media_format_unref(fmt);
+			info->ret = CONTACTS_ERROR_SYSTEM;
+			free(buffer);
+			return false;
+		}
+
+		ret = ctsvc_image_util_resize(packet, resized_width, resized_height, &buffer_temp,
+				&size);
+
+		media_packet_destroy(packet);
+		media_format_unref(fmt);
+
+		if (CONTACTS_ERROR_NONE != ret) {
+			free(buffer);
+			info->ret = CONTACTS_ERROR_SYSTEM;
+			return false;
+		}
+		free(buffer);
+		buffer = buffer_temp;
+
+		width = resized_width;
+		height = resized_height;
+	}
+
+	ret = image_util_encode_jpeg_to_memory(buffer, width, height, colorspace,
+			CTSVC_IMAGE_ENCODE_QUALITY, info->image, info->image_size);
+	free(buffer);
+	if (IMAGE_UTIL_ERROR_NONE != ret) {
+		ERR("image_util_encode_jpeg_to_memory", ret);
+		info->ret = CONTACTS_ERROR_SYSTEM;
+		return false;
+	}
+
+	info->ret = CONTACTS_ERROR_NONE;
+	return false;
+}
+
+static inline int __ctsvc_vcard_check_and_resize_photo(const char *src,
+		unsigned char **image, unsigned int *image_size)
+{
+	int ret;
+	vcard_image_info info = {.src = src, .image = image, .image_size = image_size, ret = CONTACTS_ERROR_SYSTEM};
+
+	ret = image_util_foreach_supported_jpeg_colorspace(
+			_ctsvc_vcard_image_util_supported_jpeg_colorspace_cb, &info);
+
+	if (IMAGE_UTIL_ERROR_NONE != ret)
+		return CONTACTS_ERROR_SYSTEM;
+
+	return info.ret;
+}
+
 static inline int __ctsvc_vcard_put_photo(ctsvc_list_s *image_list, char **buf, int *buf_size, int len)
 {
 	int ret = 0, fd, type;
-	gsize read_len;
+	unsigned int read_len;
 	char *suffix;
 	gchar *buf_image;
-	guchar image[CTSVC_VCARD_PHOTO_MAX_SIZE] = {0};
-
+	unsigned char *image = NULL;
+	unsigned int img_buf_size = 0;
 	GList *cursor;
 	ctsvc_image_s *data;
 
@@ -1462,26 +1581,49 @@ static inline int __ctsvc_vcard_put_photo(ctsvc_list_s *image_list, char **buf, 
 		data = cursor->data;
 		if (NULL == data->path) continue;
 
+		if (limit_size_of_photo < CTSVC_IMAGE_MAX_SIZE) {
+			/*if needed, resizing photo*/
+			ret = __ctsvc_vcard_check_and_resize_photo(data->path, &image, &read_len);
+			if (CONTACTS_ERROR_NONE != ret) {
+				ERR("__ctsvc_vcard_check_and_resize_photo() Fail(%d)", ret);
+				return CONTACTS_ERROR_SYSTEM;
+			}
+		} else {
+			fd = open(data->path, O_RDONLY);
+			if (fd < 0) {
+				ERR("System : Open Fail(%d)", errno);
+				return CONTACTS_ERROR_SYSTEM;
+			}
+
+			img_buf_size = CTSVC_VCARD_PHOTO_MAX_SIZE * sizeof(unsigned char);
+			image = calloc(1, img_buf_size);
+			if (NULL == image) {
+				ERR("calloc() Fail");
+				return CONTACTS_ERROR_OUT_OF_MEMORY;
+			}
+			read_len = 0;
+			while ((ret = read(fd, image+read_len, img_buf_size-read_len))) {
+				if (-1 == ret) {
+					if (EINTR == errno)
+						continue;
+					else
+						break;
+				}
+				read_len += ret;
+			}
+			close(fd);
+			if (ret < 0) {
+				ERR("System : read() Fail(%d)", errno);
+				free(image);
+				return CONTACTS_ERROR_SYSTEM;
+			}
+		}
+
 		suffix = strrchr(data->path, '.');
 		type = __ctsvc_vcard_get_image_type(suffix);
 
-		fd = open(data->path, O_RDONLY);
-		RETVM_IF(fd < 0, CONTACTS_ERROR_SYSTEM, "System : Open Fail(%d)", errno);
-
-		read_len = 0;
-		while ((ret = read(fd, image+read_len, sizeof(image)-read_len))) {
-			if (-1 == ret) {
-				if (EINTR == errno)
-					continue;
-				else
-					break;
-			}
-			read_len += ret;
-		}
-		close(fd);
-		RETVM_IF(ret < 0, CONTACTS_ERROR_SYSTEM, "System : read() Fail(%d)", errno);
-
 		buf_image = g_base64_encode(image, read_len);
+		free(image);
 
 		if (buf_image) {
 			CTSVC_VCARD_APPEND_STR(buf, buf_size, len, content_name[CTSVC_VCARD_VALUE_PHOTO]);
@@ -4418,4 +4560,20 @@ API int contacts_vcard_get_entity_count(const char *vcard_file_name, int *count)
 
 	return CONTACTS_ERROR_NONE;
 }
+
+API int contacts_vcard_set_limit_size_of_photo(unsigned int limit_size)
+{
+	RETV_IF(CTSVC_IMAGE_MAX_SIZE < limit_size, CONTACTS_ERROR_INVALID_PARAMETER);
+	RETV_IF(limit_size <= 0, CONTACTS_ERROR_INVALID_PARAMETER);
+	limit_size_of_photo = limit_size;
+	return CONTACTS_ERROR_NONE;
+}
+
+API int contacts_vcard_get_limit_size_of_photo(unsigned int *limit_size)
+{
+	RETV_IF(NULL == limit_size, CONTACTS_ERROR_INVALID_PARAMETER);
+	*limit_size = limit_size_of_photo;
+	return CONTACTS_ERROR_NONE;
+}
+
 
