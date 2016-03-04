@@ -94,7 +94,7 @@ SET(SRCS ${SRCS}
 )
 ENDIF(ENABLE_LOG_FEATURE)
 
-pkg_check_modules(client_pkgs REQUIRED glib-2.0 pims-ipc capi-base-common dlog libtzplatform-config)
+pkg_check_modules(client_pkgs REQUIRED glib-2.0 pims-ipc capi-base-common dlog libtzplatform-config icu-uc)
 INCLUDE_DIRECTORIES(${client_pkgs_INCLUDE_DIRS})
 LINK_DIRECTORIES(${client_pkgs_LIBRARY_DIRS})
 
