@@ -2560,12 +2560,13 @@ static inline int __ctsvc_vcard_get_nickname(ctsvc_list_s *nickname_list, char *
 	int ret = CONTACTS_ERROR_NONE;
 	char *temp;
 	char *start;
+	char *last;
 	const char *separator = ",";
 
 	start = __ctsvc_get_content_value(val);
 	RETV_IF(NULL == start, CONTACTS_ERROR_NO_DATA);
 
-	temp = strtok(start, separator);
+	temp = strtok_r(start, separator, &last);
 	while (temp) {
 		if ('\0' == *temp) continue;
 
@@ -2585,7 +2586,7 @@ static inline int __ctsvc_vcard_get_nickname(ctsvc_list_s *nickname_list, char *
 		contacts_record_set_str(nickname, _contacts_nickname.name, __ctsvc_vcard_remove_escape_char(start));
 		contacts_list_add((contacts_list_h)nickname_list, nickname);
 
-		temp = strtok(NULL, separator);
+		temp = strtok_r(NULL, separator, &last);
 	}
 
 	return CONTACTS_ERROR_NONE;
