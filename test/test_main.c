@@ -22,7 +22,7 @@
 #include "test_main.h"
 #include "test_debug.h"
 
-void _print_errors(int argc, char **argv)
+int _print_errors(int argc, char **argv)
 {
 	DBG("CONTACTS_ERROR_NONE               (%d)", CONTACTS_ERROR_NONE              );
 	DBG("CONTACTS_ERROR_OUT_OF_MEMORY      (%d)", CONTACTS_ERROR_OUT_OF_MEMORY     );
@@ -37,6 +37,8 @@ void _print_errors(int argc, char **argv)
 	DBG("CONTACTS_ERROR_IPC                (%d)", CONTACTS_ERROR_IPC               );
 	DBG("CONTACTS_ERROR_SYSTEM             (%d)", CONTACTS_ERROR_SYSTEM            );
 	DBG("CONTACTS_ERROR_INTERNAL           (%d)", CONTACTS_ERROR_INTERNAL		   );
+
+	return 0;
 }
 
 static const func _func[] = {
