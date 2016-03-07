@@ -18,6 +18,6 @@
 #define __TEST_MAIN_H__
 
 typedef int (*func)(int argc, char **argv);
-bool test_main_is_selected(int argc, char **argv, int step, const func _func[]);
+bool test_main_is_selected(int argc, char **argv, int step, const func test_func[], int count);
 
 #endif /* __TEST_MAIN_H__ */

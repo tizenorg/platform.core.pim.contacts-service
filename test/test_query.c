@@ -322,11 +322,11 @@ int test_query(int argc, char **argv)
 {
 	ENTER();
 
-	if (true == test_main_is_selected(argc, argv, 2, _func))
+	int count = sizeof(_func) / sizeof(func);
+	if (true == test_main_is_selected(argc, argv, 2, _func, count))
 		return 0;
 
 	int i = 0;
-	int count = sizeof(_func) / sizeof(func);
 	for (i = 0; i < count; i++) {
 		if (_func[i](argc, argv) < 0)
 			break;

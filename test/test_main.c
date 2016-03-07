@@ -45,14 +45,18 @@ static const func _func[] = {
 	_print_errors,
 };
 
-bool test_main_is_selected(int argc, char **argv, int depth, const func _func[])
+bool test_main_is_selected(int argc, char **argv, int depth, const func test_func[], int count)
 {
 	if (argc <= depth) {
 		return false;
 	}
 
 	int select = atoi(argv[depth]);
-	_func[select](argc, argv);
+
+	if (0 <= select && select < count)
+		test_func[select](argc, argv);
+	else
+		ERR("no test func (%d)", select);
 
 	return true;
 }
@@ -74,11 +78,12 @@ int main(int argc, char **argv)
 	ENTER();
 
 	DBG("argc(%d)", argc);
-	if (true == test_main_is_selected(argc, argv, 1, _func))
+
+	int count = sizeof(_func) / sizeof(func);
+	if (true == test_main_is_selected(argc, argv, 1, _func, count))
 		return 0;
 
 	int i = 0;
-	int count = sizeof(_func) / sizeof(func);
 	for (i = 0; i < count; i++) {
 		if (_func[i](argc, argv) < 0)
 			break;
