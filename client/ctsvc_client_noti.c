@@ -81,7 +81,8 @@ int _cnoti_recover_for_change_subscription()
 	subscribe_info_s *info = NULL;
 
 	for (it = __db_change_subscribe_list; it; it = it->next) {
-		if (NULL == it->data) continue;
+		if (NULL == it->data)
+			continue;
 
 		info = it->data;
 		if (info->view_uri) {
@@ -139,7 +140,10 @@ int ctsvc_ipc_recover_for_change_subscription()
 	}
 
 	pims_ipc_destroy_for_subscribe(__ipc);
-	__ipc = pims_ipc_create_for_subscribe(CTSVC_IPC_SOCKET_PATH_FOR_CHANGE_SUBSCRIPTION);
+	char sock_file[CTSVC_PATH_MAX_LEN] = {0};
+	snprintf(sock_file, sizeof(sock_file), CTSVC_SOCK_PATH"/.%s_for_subscribe",
+			getuid(), CTSVC_IPC_SERVICE);
+	__ipc = pims_ipc_create_for_subscribe(sock_file);
 	if (NULL == __ipc) {
 		ERR("pims_ipc_create_for_subscribe() Fail");
 		ctsvc_mutex_unlock(CTS_MUTEX_PIMS_IPC_PUBSUB);
