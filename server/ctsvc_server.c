@@ -124,7 +124,6 @@ static int __server_main(void)
 			break;
 		}
 		ctsvc_set_client_access_info(NULL, NULL);
-
 		ctsvc_server_bg_add_cb();
 		ctsvc_server_bg_delete_start();
 
@@ -132,25 +131,17 @@ static int __server_main(void)
 		DBG("%d", ret);
 
 		main_loop = g_main_loop_new(NULL, FALSE);
-
 		pims_ipc_svc_run_main_loop(main_loop);
 
 		ctsvc_server_final_configuration();
-
 		ctsvc_server_bg_remove_cb();
-
 		ctsvc_unset_client_access_info();
-
-		ret = ctsvc_disconnect();
-		if (CONTACTS_ERROR_NONE != ret)
-			DBG("%d", ret);
+		ctsvc_disconnect();
 
 		pims_ipc_svc_deinit_for_publish();
-
 		pims_ipc_svc_deinit();
 
 		return 0;
-
 	} while (0);
 
 	ERR("pims_ipc_svc_register error");
@@ -169,19 +160,13 @@ int ctsvc_server_get_timeout_sec(void)
 	return ctsvc_timeout_sec;
 }
 
-#define CTSVC_SECURITY_FILE_GROUP 6005
 void ctsvc_create_file_set_permission(const char *file, mode_t mode)
 {
 	int fd, ret;
 	fd = creat(file, mode);
 	if (0 <= fd) {
-		ret = fchown(fd, -1, CTSVC_SECURITY_FILE_GROUP);
-		if (-1 == ret)
-			ERR("fchown() Fail");
-
 		close(fd);
 	}
-
 }
 
 void ctsvc_create_rep_set_permission(const char *directory, mode_t mode)
@@ -248,8 +233,7 @@ int main(int argc, char *argv[])
 	ctsvc_server_db_update();
 
 	ctsvc_server_load_feature_list();
-	ret = ctsvc_server_socket_init();
-	DBG("%d", ret);
+	ctsvc_server_socket_init();
 
 	__server_main();
 

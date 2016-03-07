@@ -85,7 +85,6 @@ rm -rf %{buildroot}
 
 mkdir -p %{buildroot}%{_unitdir_user}/default.target.wants
 install -m 0644 %SOURCE1 %{buildroot}%{_unitdir_user}/contacts-service.service
-ln -s ../contacts-service.service %{buildroot}%{_unitdir_user}/default.target.wants/contacts-service.service
 
 mkdir -p %{buildroot}%{_unitdir_user}/sockets.target.wants
 install -m 0644 %SOURCE2 %{buildroot}%{_unitdir_user}/contacts-service.socket
@@ -103,7 +102,6 @@ chsmack -e "User" /usr/bin/contacts-service-test
 %{_libdir}/libcontacts-service2.so.*
 %{_bindir}/contacts-service-ipcd*
 %{_unitdir_user}/contacts-service.service
-%{_unitdir_user}/default.target.wants/contacts-service.service
 %{_unitdir_user}/sockets.target.wants/contacts-service.socket
 %{_unitdir_user}/contacts-service.socket
 %license LICENSE.APLv2
