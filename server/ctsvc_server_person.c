@@ -1773,6 +1773,7 @@ int ctsvc_person_get_aggregation_suggestions(int person_id, int limit, contacts_
 
 	if (0 == sub_len) {
 		*out_list = NULL;
+		free(sub_query);
 		WARN("no numbers, emails, names for query");
 		return CONTACTS_ERROR_NO_DATA;
 	}

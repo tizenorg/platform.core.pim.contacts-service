@@ -52,7 +52,11 @@ bool test_main_is_selected(int argc, char **argv, int depth, const func _func[])
 	}
 
 	int select = atoi(argv[depth]);
-	_func[select](argc, argv);
+
+	if (select < (sizeof(_func) / sizeof(func)))
+		_func[select](argc, argv);
+	else
+		ERR("no func (%d)", select);
 
 	return true;
 }
