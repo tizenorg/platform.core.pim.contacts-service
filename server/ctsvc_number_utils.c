@@ -808,7 +808,8 @@ int ctsvc_clean_number(const char *src, char *dest, int dest_size, bool replace_
 	pos = 0;
 	while (src[s_pos] != 0) {
 		int char_len;
-		if (dest_size - 2 < pos) break;
+		if (dest_size - 2 < pos)
+			break;
 
 		char_len = ctsvc_check_utf8(src[s_pos]);
 		if (char_len <= 0)
@@ -816,30 +817,30 @@ int ctsvc_clean_number(const char *src, char *dest, int dest_size, bool replace_
 
 		if (char_len == 3) {
 			/* fullwidth -> halfwidth */
-			if (src[s_pos] == 0xef) {
-				if (src[s_pos+1] == 0xbc) {
-					if (0x90 <= src[s_pos+2] && src[s_pos+2] <= 0x99) /* ef bc 90 : '0' ~ ef bc 99 : '9' */
-						temp[pos++] = src[s_pos+2] - 0x60;
-					else if (0xa1 <= src[s_pos+2] && src[s_pos+2] <= 0xba) /* ef bc a1 : 'A' ~ ef bc ba : 'Z' */
-						temp[pos++] = src[s_pos+2] - 0x60;
-					else if (0x8b == src[s_pos+2])   /* ef bc 8b : '+' */
-						temp[pos++] = '+';
-					else if (0x8a == src[s_pos+2])   /* ef bc 8a : '*' */
-						temp[pos++] = '*';
-					else if (0x83 == src[s_pos+2])   /* ef bc 83 : '#' */
-						temp[pos++] = '#';
-					else if (0x8c == src[s_pos+2])   /* ef bc 8c : ',' */
-						temp[pos++] = ',';
-					else if (0x9b == src[s_pos+2])   /* ef bc 9b : ';' */
-						temp[pos++] = ';';
-				} else if (src[s_pos+1] == 0xbd
-						&& (0x81 <= src[s_pos+2] && src[s_pos+2] <= 0x9a)) {
-					/* ef bd 81 : 'a' ~ ef bd 9a : 'z' */
-					temp[pos++] = src[s_pos+2] - 0x40;
-				}
-			} else {
+			if (src[s_pos] != 0xef) {
 				s_pos += char_len;
 				continue;
+			}
+
+			if (src[s_pos+1] == 0xbc) {
+				if (0x90 <= src[s_pos+2] && src[s_pos+2] <= 0x99) /* ef bc 90 : '0' ~ ef bc 99 : '9' */
+					temp[pos++] = src[s_pos+2] - 0x60;
+				else if (0xa1 <= src[s_pos+2] && src[s_pos+2] <= 0xba) /* ef bc a1 : 'A' ~ ef bc ba : 'Z' */
+					temp[pos++] = src[s_pos+2] - 0x60;
+				else if (0x8b == src[s_pos+2])   /* ef bc 8b : '+' */
+					temp[pos++] = '+';
+				else if (0x8a == src[s_pos+2])   /* ef bc 8a : '*' */
+					temp[pos++] = '*';
+				else if (0x83 == src[s_pos+2])   /* ef bc 83 : '#' */
+					temp[pos++] = '#';
+				else if (0x8c == src[s_pos+2])   /* ef bc 8c : ',' */
+					temp[pos++] = ',';
+				else if (0x9b == src[s_pos+2])   /* ef bc 9b : ';' */
+					temp[pos++] = ';';
+			} else if (src[s_pos+1] == 0xbd) {
+				if (0x81 <= src[s_pos+2] && src[s_pos+2] <= 0x9a) {
+					temp[pos++] = src[s_pos+2] - 0x40; /* ef bd 81 : 'a' ~ ef bd 9a : 'z' */
+				}
 			}
 		} else if (char_len == 1) {
 			if (0x41 <= src[s_pos] && src[s_pos] <= 0x5a)        /* 'A' ~ 'Z' */
@@ -965,20 +966,18 @@ static bool _numutil_is_phonenumber_fullwidth(const char *keyword)
 		if (char_len != UTF8_FULLWIDTH_LENGTH || str_len-i < UTF8_FULLWIDTH_LENGTH)
 			return false;
 
-		if (keyword[i] == 0xef) {
-			if (keyword[i+1] == 0xbc) {
-				if (0x90 <= keyword[i+2] && keyword[i+2] <= 0x99) /* ef bc 90 : '0' ~ ef bc 99 : '9' */
-					continue;
-				else if (0x8b == keyword[i+2])   /* ef bc 8b : '+' */
-					continue;
-				else
-					return false;
-			} else {
-				return false;
-			}
-		} else {
+		if (keyword[i] != 0xef)
 			return false;
-		}
+
+		if (keyword[i+1] == 0xbc)
+			return false;
+
+		if (0x90 <= keyword[i+2] && keyword[i+2] <= 0x99) /* ef bc 90 : '0' ~ ef bc 99 : '9' */
+			continue;
+		else if (0x8b == keyword[i+2])   /* ef bc 8b : '+' */
+			continue;
+		else
+			return false;
 	}
 	return true;
 }
