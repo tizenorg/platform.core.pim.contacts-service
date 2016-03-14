@@ -30,7 +30,14 @@ int ctsvc_db_person_create_record_from_stmt(cts_stmt stmt, contacts_record_h *re
 int ctsvc_db_person_create_record_from_stmt_with_query(cts_stmt stmt,
 		contacts_query_h query, contacts_record_h *record);
 int ctsvc_db_person_create_record_from_stmt_with_projection(cts_stmt stmt,
-		unsigned int *projection, int projection_count, contacts_record_h *record);
+		unsigned int *projection,
+		int projection_count,
+		bool is_snippet,
+		const char *keyword,
+		const char *start_match,
+		const char *end_match,
+		int token_number,
+		contacts_record_h *record);
 void ctsvc_db_normalize_str_callback(sqlite3_context  *context,	int argc,
 		sqlite3_value **argv);
 int ctsvc_db_person_set_favorite(int person_id, bool set, bool propagate);
