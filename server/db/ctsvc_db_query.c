@@ -36,6 +36,7 @@
 #include "ctsvc_localize_utils.h"
 #include "ctsvc_server_setting.h"
 #include "ctsvc_notify.h"
+#include "ctsvc_utils_string.h"
 
 #include "ctsvc_db_access_control.h"
 #include "ctsvc_db_plugin_person_helper.h"
@@ -343,6 +344,377 @@ static int __db_add_str_matching_rule(const char *field_name, int match,
 	return len;
 }
 
+static char* __ctsvc_db_make_search_keyword(const char *keyword)
+{
+	int size;
+	if (keyword == NULL)
+		return NULL;
+
+	size = strlen(keyword);
+	if (strstr(keyword, " ")) {
+		int i = 0;
+		int j = 0;
+		char search_keyword[size * 2+1];
+		for (i = 0; i < size; i++) {
+			if (0 < j && keyword[i] == ' ') {
+				if (search_keyword[j-1] != ' ')
+					search_keyword[j++] = '*';
+			}
+			search_keyword[j++] = keyword[i];
+		}
+		if (0 < j && search_keyword[j-1] != ' ')
+			search_keyword[j++] = '*';
+		search_keyword[j] = '\0';
+		return strdup(search_keyword);
+	} else {
+		char search_keyword[size+2];
+		snprintf(search_keyword, sizeof(search_keyword), "%s*", keyword);
+		return strdup(search_keyword);
+	}
+}
+
+static char *_get_search_query_for_name(const char *keyword)
+{
+	int ret = 0;
+	char *half_keyword = NULL;
+	int keyword_size = 0;
+	bool use_replaced_keyword = true;
+
+	ret = ctsvc_get_halfwidth_string(keyword, &half_keyword, &keyword_size);
+	if (CONTACTS_ERROR_NONE != ret) {
+		ERR("UChar converting error : ctsvc_get_halfwidth_string() Fail");
+		half_keyword = (char*)keyword;
+		use_replaced_keyword = false;
+	}
+
+	char *search_keyword = NULL;
+	search_keyword = __ctsvc_db_make_search_keyword(half_keyword);
+
+	char *normalized_name = NULL;
+	int lang = CTSVC_LANG_OTHERS;
+	lang = ctsvc_normalize_str(half_keyword, &normalized_name);
+	char *hiragana = NULL;
+	char *search_hiragana = NULL;
+
+	if (CTSVC_LANG_JAPANESE == lang) {
+		ctsvc_convert_japanese_to_hiragana(half_keyword, &hiragana);
+		search_hiragana = __ctsvc_db_make_search_keyword(hiragana);
+	}
+
+	int len_keyword = strlen(half_keyword);
+	int len_chosung= 0;
+	char *chosung = NULL;
+	char *korean_pattern = NULL;
+	char *search_chosung = NULL;
+	char *search_normalized = NULL;
+
+	char *mod_keyword = NULL;
+	switch (lang) {
+	case CTSVC_LANG_KOREAN: /* search with chosung */
+		/*
+		 * If try to find '홍길동' by 'ㄱ동'
+		 * search by 'ㄱㄷ' in search_index table
+		 * intersect
+		 * search by '*ㄱ*동*' in name_lookup table
+		 */
+		chosung = calloc(len_keyword * 5, sizeof(char));
+		len_chosung = ctsvc_get_chosung(half_keyword, chosung, len_keyword * 5);
+		mod_keyword = __ctsvc_db_make_search_keyword(0 < len_chosung? chosung : half_keyword);
+		break;
+	case CTSVC_LANG_JAPANESE:
+		mod_keyword = search_hiragana;
+		break;
+	default:
+		if (CONTACTS_ERROR_NONE <= lang) { /* normalized string search */
+			search_normalized = __ctsvc_db_make_search_keyword(normalized_name);
+			mod_keyword = search_normalized;
+		} else {  /* original keyword search */
+			mod_keyword = search_keyword;
+		}
+		break;
+	}
+
+	int temp_len = 0;
+	int query_size = CTS_SQL_MAX_LEN;
+	char *query = calloc(query_size, sizeof(char));
+	int len = 0;
+
+	temp_len = SAFE_SNPRINTF(&query, &query_size, len, " SELECT contact_id "
+			"FROM "CTS_TABLE_SEARCH_INDEX" WHERE "CTS_TABLE_SEARCH_INDEX" "
+			"MATCH 'name:");
+	if (0 <= temp_len)
+		len += temp_len;
+	temp_len = SAFE_SNPRINTF(&query, &query_size, len, mod_keyword);
+	if (0 <= temp_len)
+		len += temp_len;
+	temp_len = SAFE_SNPRINTF(&query, &query_size, len, " '");
+	if (0 <= temp_len)
+		len += temp_len;
+
+
+	switch (lang) {
+	case CTSVC_LANG_KOREAN:
+		DBG("korean");
+		korean_pattern = calloc(len_keyword *5, sizeof(char));
+		ctsvc_get_korean_search_pattern(half_keyword, korean_pattern, len_keyword * 5);
+		temp_len = SAFE_SNPRINTF(&query, &query_size, len, " INTERSECT SELECT "
+				"contact_id FROM "CTS_TABLE_NAME_LOOKUP" WHERE name GLOB '*");
+		if (0 <= temp_len)
+			len += temp_len;
+
+		temp_len = SAFE_SNPRINTF(&query, &query_size, len, korean_pattern);
+		if (0 <= temp_len)
+			len += temp_len;
+
+		temp_len = SAFE_SNPRINTF(&query, &query_size, len, "*' ");
+		if (0 <= temp_len)
+			len += temp_len;
+
+		free(chosung);
+		free(korean_pattern);
+		free(search_chosung);
+		break;
+	case CTSVC_LANG_JAPANESE:
+		break;
+	default:
+		DBG("default");
+		free(search_normalized);
+		break;
+	}
+
+	int i, j = 0;
+	char temp_str[len_keyword * 2 + 1];
+	for (i = 0; i < len_keyword; i++) {
+		if (half_keyword[i] == '\'' || half_keyword[i] == '_' ||
+				half_keyword[i] == '%' || half_keyword[i] == '\\') {
+			temp_str[j++] = CTSVC_DB_ESCAPE_CHAR;
+		}
+		temp_str[j++] = half_keyword[i];
+	}
+	temp_str[j] = '\0';
+	temp_len = SAFE_SNPRINTF(&query, &query_size, len, " UNION SELECT contact_id "
+			" FROM "CTS_TABLE_NAME_LOOKUP" WHERE name LIKE '%%");
+	if (0 <= temp_len)
+		len += temp_len;
+
+	temp_len = SAFE_SNPRINTF(&query, &query_size, len, temp_str);
+	if (0 <= temp_len)
+		len += temp_len;
+
+	/* CTSVC_DB_ESCAPE_CHAR */
+	temp_len = SAFE_SNPRINTF(&query, &query_size, len, "%%' ESCAPE '\\' ");
+	if (0 <= temp_len)
+		len += temp_len;
+
+	free(normalized_name);
+	free(hiragana);
+	free(search_hiragana);
+	free(search_keyword);
+
+	if (use_replaced_keyword)
+		free(half_keyword);
+
+	DBG("[%s]", query);
+	return strdup(query);
+}
+
+static char *_get_search_query_for_number(const char *keyword)
+{
+	int ret = 0;
+	char *half_keyword = NULL;
+	int keyword_size = 0;
+	bool use_replaced_keyword = true;
+
+	ret = ctsvc_get_halfwidth_string(keyword, &half_keyword, &keyword_size);
+	if (CONTACTS_ERROR_NONE != ret) {
+		ERR("UChar converting error : ctsvc_get_halfwidth_string() Fail");
+		half_keyword = (char*)keyword;
+		use_replaced_keyword = false;
+	}
+
+	char *search_keyword = NULL;
+	search_keyword = __ctsvc_db_make_search_keyword(half_keyword);
+
+	char *normalized_name = NULL;
+	int lang = CTSVC_LANG_OTHERS;
+	lang = ctsvc_normalize_str(half_keyword, &normalized_name);
+	char *hiragana = NULL;
+	char *search_hiragana = NULL;
+
+	if (CTSVC_LANG_JAPANESE == lang) {
+		ctsvc_convert_japanese_to_hiragana(half_keyword, &hiragana);
+		search_hiragana = __ctsvc_db_make_search_keyword(hiragana);
+	}
+
+	char *mod_keyword = NULL;
+	switch (lang) {
+	case CTSVC_LANG_JAPANESE:
+		mod_keyword = search_hiragana;
+		break;
+	default:
+		mod_keyword = search_keyword;
+		break;
+	}
+
+	int temp_len = 0;
+	int query_size = CTS_SQL_MAX_LEN;
+	char *query = calloc(query_size, sizeof(char));
+	int len = 0;
+
+	mod_keyword = search_hiragana ? search_hiragana : search_keyword;
+	temp_len = SAFE_SNPRINTF(&query, &query_size, len, "SELECT contact_id "
+			"FROM "CTS_TABLE_SEARCH_INDEX" WHERE "CTS_TABLE_SEARCH_INDEX" "
+			"MATCH 'number:");
+	if (0 <= temp_len)
+		len += temp_len;
+
+	temp_len = SAFE_SNPRINTF(&query, &query_size, len, mod_keyword);
+	if (0 <= temp_len)
+		len += temp_len;
+
+	temp_len = SAFE_SNPRINTF(&query, &query_size, len, " '");
+	if (0 <= temp_len)
+		len += temp_len;
+
+	free(hiragana);
+	free(search_hiragana);
+	free(search_keyword);
+
+
+
+	do {
+		int len_keyword = strlen(half_keyword);
+		char *clean_number = calloc(len_keyword + 1, sizeof(char));
+		int err = ctsvc_clean_number(half_keyword, clean_number, len_keyword + 1, false);
+		if (err <= 0) {
+			ERR("ctsvc_clean_number() Fail(%d)", err);
+			free(clean_number);
+			break;
+		}
+
+		temp_len = SAFE_SNPRINTF(&query, &query_size, len, " UNION SELECT contact_id "
+				"FROM "CTS_TABLE_PHONE_LOOKUP" WHERE number LIKE '%%");
+		if (0 <= temp_len)
+			len += temp_len;
+
+		temp_len = SAFE_SNPRINTF(&query, &query_size, len, clean_number);
+		if (0 <= temp_len)
+			len += temp_len;
+
+		temp_len = SAFE_SNPRINTF(&query, &query_size, len, "%%' ");
+		if (0 <= temp_len)
+			len += temp_len;
+
+		const char *cc = ctsvc_get_network_cc(false);
+		if (cc && cc[0] == '7' && clean_number[0] == '8') {   /* Russia */
+			char normal_num[strlen(clean_number)+1+5];   /* for cc */
+			int ret;
+			ret = ctsvc_normalize_number(clean_number, normal_num, sizeof(normal_num), false);
+			if (ret <= 0) {
+				free(clean_number);
+				break;
+			}
+			temp_len = SAFE_SNPRINTF(&query, &query_size, len, "OR number LIKE '%%");
+			if (0 <= temp_len)
+				len += temp_len;
+
+			temp_len = SAFE_SNPRINTF(&query, &query_size, len, normal_num);
+			if (0 <= temp_len)
+				len += temp_len;
+
+			temp_len = SAFE_SNPRINTF(&query, &query_size, len, "%%' ");
+			if (0 <= temp_len)
+				len += temp_len;
+		}
+		free(clean_number);
+	} while (0);
+
+	if (use_replaced_keyword)
+		free(half_keyword);
+
+	DBG("[%s]", query);
+	return strdup(query);
+}
+
+static char *_get_search_query_for_data(const char *keyword)
+{
+	int ret = 0;
+	char *half_keyword = NULL;
+	int keyword_size = 0;
+	bool use_replaced_keyword = true;
+
+	ret = ctsvc_get_halfwidth_string(keyword, &half_keyword, &keyword_size);
+	if (CONTACTS_ERROR_NONE != ret) {
+		ERR("UChar converting error : ctsvc_get_halfwidth_string() Fail");
+		half_keyword = (char*)keyword;
+		use_replaced_keyword = false;
+	}
+
+	char *search_keyword = NULL;
+	search_keyword = __ctsvc_db_make_search_keyword(half_keyword);
+
+	char *normalized_name = NULL;
+	int lang = CTSVC_LANG_OTHERS;
+	lang = ctsvc_normalize_str(half_keyword, &normalized_name);
+	char *hiragana = NULL;
+	char *search_hiragana = NULL;
+
+	if (CTSVC_LANG_JAPANESE == lang) {
+		ctsvc_convert_japanese_to_hiragana(half_keyword, &hiragana);
+		search_hiragana = __ctsvc_db_make_search_keyword(hiragana);
+	}
+
+	int tmp_len = 0;
+	char *tmp_keyword = NULL;
+	int i;
+
+	char *mod_keyword = NULL;
+	switch (lang) {
+	case CTSVC_LANG_JAPANESE:
+		mod_keyword = search_hiragana;
+		break;
+	default:
+		/* replace '-' -> '_' because FTS does not support search '-' */
+		tmp_len = strlen(search_keyword);
+		tmp_keyword = calloc(tmp_len + 1, sizeof(char));
+		for (i = 0; i < tmp_len; i++)
+			tmp_keyword[i] = ('-' == search_keyword[i]) ? '_' : search_keyword[i];
+		tmp_keyword[i] = '\0';
+		mod_keyword = tmp_keyword;
+		break;
+	}
+
+
+	int temp_len = 0;
+	int query_size = CTS_SQL_MAX_LEN;
+	char *query = calloc(query_size, sizeof(char));
+	int len = 0;
+
+	temp_len = SAFE_SNPRINTF(&query, &query_size, len, " SELECT contact_id "
+			"FROM "CTS_TABLE_SEARCH_INDEX" WHERE "CTS_TABLE_SEARCH_INDEX" "
+			"MATCH 'data:");
+	if (0 <= temp_len)
+		len += temp_len;
+
+	temp_len = SAFE_SNPRINTF(&query, &query_size, len, mod_keyword);
+	if (0 <= temp_len)
+		len += temp_len;
+
+	temp_len = SAFE_SNPRINTF(&query, &query_size, len, " '");
+	if (0 <= temp_len)
+		len += temp_len;
+
+	free(hiragana);
+	free(search_hiragana);
+	free(search_keyword);
+	free(tmp_keyword);
+
+	if (use_replaced_keyword)
+		free(half_keyword);
+
+	DBG("[%s]", query);
+	return strdup(query);
+}
 
 static inline void __db_create_str_condtion_number(
 		ctsvc_composite_filter_s *com_filter,
@@ -984,7 +1356,8 @@ static int __db_create_projection(const char *view_uri,
 		const property_info_s *properties, int ids_count,
 		unsigned int *projections,
 		int pro_count,
-		char **projection)
+		char **projection,
+		bool is_snippet)
 {
 	bool first;
 	int i;
@@ -992,6 +1365,8 @@ static int __db_create_projection(const char *view_uri,
 	const char *field_name = NULL;
 	char out_projection[CTS_SQL_MAX_LEN] = {0};
 	char temp[CTS_SQL_MAX_LEN] = {0};
+	bool is_data1 = false;
+	bool is_data2 = false;
 
 	len = 0;
 	first = true;
@@ -1001,6 +1376,16 @@ static int __db_create_projection(const char *view_uri,
 				snprintf(temp, sizeof(temp), "_NORMALIZE_INDEX_(%s)",
 						ctsvc_get_sort_name_column());
 				field_name = temp;
+			} else if (projections[i] == CTSVC_PROPERTY_PERSON_EXTRA_DATA1) {
+				snprintf(temp, sizeof(temp), "temp_data.datatype");
+				field_name = temp;
+				is_data1 = true;
+			} else if (projections[i] == CTSVC_PROPERTY_PERSON_EXTRA_DATA2) {
+				snprintf(temp, sizeof(temp), "(CASE "
+						"WHEN datatype=1 THEN (datatype || '@' || display_name) "
+						"ELSE (datatype || '@' || temp_data._data) END)");
+				field_name = temp;
+				is_data2 = true;
 			} else {
 				field_name = __ctsvc_db_get_property_field_name(properties, ids_count,
 						QUERY_PROJECTION, projections[i]);
@@ -1029,6 +1414,18 @@ static int __db_create_projection(const char *view_uri,
 				snprintf(temp, sizeof(temp), "_NORMALIZE_INDEX_(%s)",
 						ctsvc_get_sort_name_column());
 				field_name = temp;
+			} else if (true == is_snippet &&
+					properties[i].property_id == CTSVC_PROPERTY_PERSON_EXTRA_DATA1) {
+				snprintf(temp, sizeof(temp), "temp_data.datatype");
+				field_name = temp;
+				is_data1 = true;
+			} else if (true == is_snippet &&
+					properties[i].property_id == CTSVC_PROPERTY_PERSON_EXTRA_DATA2) {
+				snprintf(temp, sizeof(temp), "(CASE "
+						"WHEN datatype=1 THEN (datatype || '@' || display_name) "
+						"ELSE (datatype || '@' || temp_data._data) END)");
+				field_name = temp;
+				is_data2 = true;
 			} else {
 				field_name = ctsvc_get_display_column();
 			}
@@ -1043,6 +1440,21 @@ static int __db_create_projection(const char *view_uri,
 			}
 		}
 	}
+
+	/* check extra data */
+	if (true == is_data1 || true == is_data2) {
+		snprintf(temp, sizeof(temp), "MIN(temp_data._priority) ");
+		field_name = temp;
+		if (first) {
+			len += snprintf(out_projection+len, sizeof(out_projection)-len, "%s",
+					field_name);
+			first = false;
+		} else {
+			len += snprintf(out_projection+len, sizeof(out_projection)-len, ", %s",
+					field_name);
+		}
+	}
+DBG("[%s]", out_projection);
 
 	*projection = strdup(out_projection);
 	return CONTACTS_ERROR_NONE;
@@ -1093,10 +1505,8 @@ int ctsvc_db_make_get_records_query_stmt(ctsvc_query_s *s_query, int offset, int
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "Invalid view uri(%s)", s_query->view_uri);
 
 	ret = __db_create_projection(s_query->view_uri, s_query->properties,
-			s_query->property_count,
-			s_query->projection,
-			s_query->projection_count,
-			&projection);
+			s_query->property_count, s_query->projection, s_query->projection_count,
+			&projection, false);
 	if (CONTACTS_ERROR_NONE != ret) {
 		ERR("__db_create_projection() Fail(%d)", ret);
 		return ret;
@@ -1394,7 +1804,7 @@ static int __ctsvc_db_get_all_records(const char *view_uri, int offset, int limi
 	char *projection;
 
 	const property_info_s *p = ctsvc_view_get_all_property_infos(view_uri, &count);
-	ret = __db_create_projection(view_uri, p, count, NULL, 0, &projection);
+	ret = __db_create_projection(view_uri, p, count, NULL, 0, &projection, false);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "__db_create_projection Fail(%d)", ret);
 
 	ret = __ctsvc_db_get_all_records_exec(view_uri, p, count, projection, offset, limit, out_list);
@@ -1403,49 +1813,34 @@ static int __ctsvc_db_get_all_records(const char *view_uri, int offset, int limi
 	return ret;
 }
 
-static inline bool __ctsvc_db_view_can_keyword_search(const char *view_uri)
+static bool __ctsvc_db_view_can_keyword_search(const char *view_uri, int *out_enum_uri)
 {
 	RETV_IF(NULL == view_uri, false);
+	RETV_IF(NULL == out_enum_uri, false);
 
-	if (STRING_EQUAL == strcmp(view_uri, CTSVC_VIEW_URI_PERSON)
-			|| STRING_EQUAL == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_CONTACT)
-			|| STRING_EQUAL == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_NUMBER)
-			|| STRING_EQUAL == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_EMAIL)
-			|| STRING_EQUAL == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP)
-			|| STRING_EQUAL == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP_ASSIGNED)
-			|| STRING_EQUAL == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP_NOT_ASSIGNED)) {
-		return true;
-	}
-	return false;
-}
+	int enum_uri = -1;
 
-static char* __ctsvc_db_make_search_keyword(const char *keyword)
-{
-	int size;
-	if (keyword == NULL)
-		return NULL;
-
-	size = strlen(keyword);
-	if (strstr(keyword, " ")) {
-		int i = 0;
-		int j = 0;
-		char search_keyword[size * 2+1];
-		for (i = 0; i < size; i++) {
-			if (0 < j && keyword[i] == ' ') {
-				if (search_keyword[j-1] != ' ')
-					search_keyword[j++] = '*';
-			}
-			search_keyword[j++] = keyword[i];
-		}
-		if (0 < j && search_keyword[j-1] != ' ')
-			search_keyword[j++] = '*';
-		search_keyword[j] = '\0';
-		return strdup(search_keyword);
+	if (STRING_EQUAL == strcmp(view_uri, CTSVC_VIEW_URI_PERSON)) {
+		enum_uri = CTSVC_ENUM_URI_PERSON;
+	} else if (STRING_EQUAL == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_CONTACT)) {
+		enum_uri = CTSVC_ENUM_URI_READ_ONLY_PERSON_CONTACT;
+	} else if (STRING_EQUAL == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_NUMBER)) {
+		enum_uri = CTSVC_ENUM_URI_READ_ONLY_PERSON_NUMBER;
+	} else if (STRING_EQUAL == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_EMAIL)) {
+		enum_uri = CTSVC_ENUM_URI_READ_ONLY_PERSON_EMAIL;
+	} else if (STRING_EQUAL == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP)) {
+		enum_uri = CTSVC_ENUM_URI_READ_ONLY_PERSON_GROUP;
+	} else if (STRING_EQUAL == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP_ASSIGNED)) {
+		enum_uri = CTSVC_ENUM_URI_READ_ONLY_PERSON_GROUP_ASSIGNED;
+	} else if (STRING_EQUAL == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP_NOT_ASSIGNED)) {
+		enum_uri = CTSVC_ENUM_URI_READ_ONLY_PERSON_GROUP_NOT_ASSIGNED;
 	} else {
-		char search_keyword[size+2];
-		snprintf(search_keyword, sizeof(search_keyword), "%s*", keyword);
-		return strdup(search_keyword);
+		ERR("Invalid uri[%s]", view_uri);
 	}
+
+	*out_enum_uri = enum_uri;
+
+	return (-1 == enum_uri) ? false : true;
 }
 
 /*
@@ -1660,11 +2055,11 @@ static int __db_append_search_query(const char *keyword, char **query, int *quer
 				break;
 			}
 			if (need_union) {
-				temp_len = SAFE_SNPRINTF(query, query_size, len, " UNION");
+				temp_len = SAFE_SNPRINTF(query, query_size, len, " UNION ");
 				if (0 <= temp_len)
 					len += temp_len;
 			}
-			temp_len = SAFE_SNPRINTF(query, query_size, len, " SELECT contact_id "
+			temp_len = SAFE_SNPRINTF(query, query_size, len, "SELECT contact_id "
 					"FROM "CTS_TABLE_SEARCH_INDEX" WHERE "CTS_TABLE_SEARCH_INDEX" "
 					"MATCH 'data:");
 			if (0 <= temp_len)
@@ -1714,11 +2109,11 @@ static int __db_append_search_query(const char *keyword, char **query, int *quer
 				break;
 			}
 			if (need_union) {
-				temp_len = SAFE_SNPRINTF(query, query_size, len, " UNION");
+				temp_len = SAFE_SNPRINTF(query, query_size, len, " UNION ");
 				if (0 <= temp_len)
 					len += temp_len;
 			}
-			temp_len = SAFE_SNPRINTF(query, query_size, len, " SELECT contact_id "
+			temp_len = SAFE_SNPRINTF(query, query_size, len, "SELECT contact_id "
 					"FROM "CTS_TABLE_SEARCH_INDEX" WHERE "CTS_TABLE_SEARCH_INDEX" "
 					"MATCH 'name:");
 			if (0 <= temp_len)
@@ -1770,8 +2165,8 @@ static int __db_append_search_query(const char *keyword, char **query, int *quer
 				temp_str[j++] = half_keyword[i];
 			}
 			temp_str[j] = '\0';
-			temp_len = SAFE_SNPRINTF(query, query_size, len, " UNION SELECT contact_id"
-					" FROM "CTS_TABLE_NAME_LOOKUP" WHERE name LIKE '");
+			temp_len = SAFE_SNPRINTF(query, query_size, len, " UNION SELECT contact_id "
+					"FROM "CTS_TABLE_NAME_LOOKUP" WHERE name LIKE '");
 			if (0 <= temp_len)
 				len += temp_len;
 
@@ -1960,6 +2355,7 @@ static int __ctsvc_db_search_records_append_sort(const char *view_uri,
 }
 
 static int __ctsvc_db_search_records_exec(const char *view_uri,
+		int enum_uri,
 		const property_info_s *properties,
 		int ids_count,
 		const char *projection,
@@ -1967,6 +2363,10 @@ static int __ctsvc_db_search_records_exec(const char *view_uri,
 		int offset,
 		int limit,
 		int range,
+		bool is_snippet,
+		const char *start_match,
+		const char *end_match,
+		int token_number,
 		contacts_list_h *out_list)
 {
 	char *query = NULL;
@@ -1998,45 +2398,56 @@ static int __ctsvc_db_search_records_exec(const char *view_uri,
 	if (STRING_EQUAL == strcmp(keyword, "+"))
 		range &= ~CONTACTS_SEARCH_RANGE_NUMBER;
 
-	if (STRING_EQUAL == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_CONTACT)
-			|| STRING_EQUAL == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP)
-			|| STRING_EQUAL == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP_ASSIGNED)
-			|| STRING_EQUAL == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP_NOT_ASSIGNED)) {
+	if (0 == range) {
+		ERR("No range");
+		contacts_list_create(&list);
+		*out_list = list;
+		free(query);
+		return CONTACTS_ERROR_NONE;
+	}
+
+	switch (enum_uri) {
+	case CTSVC_ENUM_URI_READ_ONLY_PERSON_CONTACT:
+	case CTSVC_ENUM_URI_READ_ONLY_PERSON_GROUP:
+	case CTSVC_ENUM_URI_READ_ONLY_PERSON_GROUP_ASSIGNED:
+	case CTSVC_ENUM_URI_READ_ONLY_PERSON_GROUP_NOT_ASSIGNED:
+
 		if (range & CONTACTS_SEARCH_RANGE_EMAIL) {
 			free(query);
 			return CONTACTS_ERROR_INVALID_PARAMETER;
 		}
 
 		temp_len = SAFE_SNPRINTF(&query, &query_size, len, "SELECT ");
-		if (0 <= temp_len) len += temp_len;
+		if (0 <= temp_len)
+			len += temp_len;
 		temp_len = SAFE_SNPRINTF(&query, &query_size, len, projection);
-		if (0 <= temp_len) len += temp_len;
+		if (0 <= temp_len)
+			len += temp_len;
 		temp_len = SAFE_SNPRINTF(&query, &query_size, len, " FROM ");
-		if (0 <= temp_len) len += temp_len;
+		if (0 <= temp_len)
+			len += temp_len;
 		temp_len = SAFE_SNPRINTF(&query, &query_size, len, table);
-		if (0 <= temp_len) len += temp_len;
-		temp_len = SAFE_SNPRINTF(&query, &query_size, len, " WHERE contact_id IN ");
-		if (0 <= temp_len) len += temp_len;
+		if (0 <= temp_len)
+			len += temp_len;
+		temp_len = SAFE_SNPRINTF(&query, &query_size, len, " as temp_contacts");
+		if (0 <= temp_len)
+			len += temp_len;
+		break;
 
-		temp_len = __db_append_search_query(keyword, &query, &query_size, len, range);
-		if (0 <= temp_len) len = temp_len;
-	} else if (STRING_EQUAL == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_NUMBER)) {
-		bool need_or = false;
+	case CTSVC_ENUM_URI_READ_ONLY_PERSON_NUMBER:
 		if (range & CONTACTS_SEARCH_RANGE_DATA || range & CONTACTS_SEARCH_RANGE_EMAIL) {
+			ERR("Invalid range");
 			free(query);
 			return CONTACTS_ERROR_INVALID_PARAMETER;
 		}
+		bool need_or = false;
 		temp_len = SAFE_SNPRINTF(&query, &query_size, len, "SELECT ");
 		if (0 <= temp_len) len += temp_len;
 		temp_len = SAFE_SNPRINTF(&query, &query_size, len, projection);
 		if (0 <= temp_len) len += temp_len;
-		temp_len = SAFE_SNPRINTF(&query, &query_size, len, " FROM (");
-		if (0 <= temp_len) len += temp_len;
-		temp_len = SAFE_SNPRINTF(&query, &query_size, len, " SELECT * FROM ");
+		temp_len = SAFE_SNPRINTF(&query, &query_size, len, " FROM (SELECT * FROM ");
 		if (0 <= temp_len) len += temp_len;
 		temp_len = SAFE_SNPRINTF(&query, &query_size, len, table);
-		if (0 <= temp_len) len += temp_len;
-		temp_len = SAFE_SNPRINTF(&query, &query_size, len, " WHERE ");
 		if (0 <= temp_len) len += temp_len;
 
 		if ((range & CONTACTS_SEARCH_RANGE_NUMBER) && ctsvc_is_phonenumber(keyword)) {
@@ -2047,12 +2458,15 @@ static int __ctsvc_db_search_records_exec(const char *view_uri,
 			 * If contact has 010 1234 5678 (normalized number is +cc 10 1234 5678),
 			 *	then the contact should be searched by keyword +cc 10 1234 5678
 			 */
+			temp_len = SAFE_SNPRINTF(&query, &query_size, len, " WHERE ");
+			if (0 <= temp_len)
+				len += temp_len;
+
 			ret = ctsvc_clean_number(keyword, clean_num, sizeof(clean_num), false);
 			if (0 < ret) {
 				const char *cc = ctsvc_get_network_cc(false);
 
-				temp_len = SAFE_SNPRINTF(&query, &query_size, len,
-						"(normalized_number LIKE '%%");
+				temp_len = SAFE_SNPRINTF(&query, &query_size, len, "(normalized_number LIKE '%%");
 				if (0 <= temp_len)
 					len += temp_len;
 
@@ -2070,8 +2484,7 @@ static int __ctsvc_db_search_records_exec(const char *view_uri,
 				if (0 <= temp_len)
 					len += temp_len;
 
-				temp_len = SAFE_SNPRINTF(&query, &query_size, len,
-						"%%' OR cleaned_number LIKE '%%");
+				temp_len = SAFE_SNPRINTF(&query, &query_size, len, "%%' OR cleaned_number LIKE '%%");
 				if (0 <= temp_len)
 					len += temp_len;
 
@@ -2091,7 +2504,7 @@ static int __ctsvc_db_search_records_exec(const char *view_uri,
 					return CONTACTS_ERROR_OUT_OF_MEMORY;
 				}
 
-				temp_len = SAFE_SNPRINTF(&query, &query_size, len, " SELECT * FROM ");
+				temp_len = SAFE_SNPRINTF(&query, &query_size, len, "(SELECT * FROM ");
 				if (0 <= temp_len)
 					len += temp_len;
 
@@ -2107,7 +2520,7 @@ static int __ctsvc_db_search_records_exec(const char *view_uri,
 				if (0 <= temp_len)
 					len += temp_len;
 
-				temp_len = SAFE_SNPRINTF(&query, &query_size, len, "%%' ESCAPE '\\'");
+				temp_len = SAFE_SNPRINTF(&query, &query_size, len, "%%' ESCAPE '\\')");
 				if (0 <= temp_len)
 					len += temp_len;
 				free(temp_keyword);
@@ -2118,13 +2531,14 @@ static int __ctsvc_db_search_records_exec(const char *view_uri,
 		if (range & CONTACTS_SEARCH_RANGE_NAME) {
 			if (need_or) {
 				temp_len = SAFE_SNPRINTF(&query, &query_size, len, " OR ");
-				if (0 <= temp_len) len += temp_len;
+			} else {
+				temp_len = SAFE_SNPRINTF(&query, &query_size, len, " WHERE ");
 			}
-			snprintf(temp_query, sizeof(temp_query),
-					"person_id IN (SELECT person_id "
-					"FROM "CTS_TABLE_CONTACTS" WHERE deleted = 0 AND  contact_id ");
+			if (0 <= temp_len)
+				len += temp_len;
 
-			temp_len = SAFE_SNPRINTF(&query, &query_size, len, temp_query);
+			temp_len = SAFE_SNPRINTF(&query, &query_size, len, "person_id IN (SELECT "
+					"person_id FROM "CTS_TABLE_CONTACTS" WHERE deleted = 0 AND contact_id IN");
 			if (0 <= temp_len)
 				len += temp_len;
 
@@ -2133,10 +2547,6 @@ static int __ctsvc_db_search_records_exec(const char *view_uri,
 			 * FTS can support to serach with multiple words
 			 * If contact display_name is 'abc def', then the contact should be searched by 'def'
 			 */
-			temp_len = SAFE_SNPRINTF(&query, &query_size, len, " IN ");
-			if (0 <= temp_len)
-				len += temp_len;
-
 			temp_len = __db_append_search_query(keyword, &query, &query_size, len,
 					CONTACTS_SEARCH_RANGE_NAME);
 			if (0 <= temp_len)
@@ -2147,11 +2557,12 @@ static int __ctsvc_db_search_records_exec(const char *view_uri,
 				len += temp_len;
 		}
 
-		temp_len = SAFE_SNPRINTF(&query, &query_size, len, ") ");
+		temp_len = SAFE_SNPRINTF(&query, &query_size, len, ") as temp_contacts");
 		if (0 <= temp_len)
 			len += temp_len;
-	} else if (STRING_EQUAL == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_EMAIL)) {
-		bool need_or = false;
+		break;
+
+	case CTSVC_ENUM_URI_READ_ONLY_PERSON_EMAIL:
 		if (range & CONTACTS_SEARCH_RANGE_NUMBER || range & CONTACTS_SEARCH_RANGE_DATA) {
 			free(query);
 			return CONTACTS_ERROR_INVALID_PARAMETER;
@@ -2207,13 +2618,11 @@ static int __ctsvc_db_search_records_exec(const char *view_uri,
 				if (0 <= temp_len)
 					len += temp_len;
 			}
-
-			snprintf(temp_query, sizeof(temp_query),
-					"person_id IN (SELECT person_id "
-					"FROM "CTS_TABLE_CONTACTS" WHERE deleted = 0 AND  contact_id ");
+			snprintf(temp_query, sizeof(temp_query), "person_id IN (SELECT person_id "
+					"FROM "CTS_TABLE_CONTACTS" WHERE deleted = 0 AND contact_id ");
 			temp_len = SAFE_SNPRINTF(&query, &query_size, len, temp_query);
-			if (0 <= temp_len) len += temp_len;
-
+			if (0 <= temp_len)
+				len += temp_len;
 			temp_len = SAFE_SNPRINTF(&query, &query_size, len, " IN ");
 			if (0 <= temp_len)
 				len += temp_len;
@@ -2227,19 +2636,171 @@ static int __ctsvc_db_search_records_exec(const char *view_uri,
 		}
 
 		temp_len = SAFE_SNPRINTF(&query, &query_size, len, ") ");
-		if (0 <= temp_len) len += temp_len;
-	} else {   /* CTSVC_VIEW_URI_PERSON */
+		if (0 <= temp_len)
+			len += temp_len;
+		break;
+
+	case CTSVC_ENUM_URI_PERSON:
 		if (range & CONTACTS_SEARCH_RANGE_EMAIL) {
 			free(query);
 			return CONTACTS_ERROR_INVALID_PARAMETER;
 		}
+		temp_len = SAFE_SNPRINTF(&query, &query_size, len, "SELECT ");
+		if (0 <= temp_len)
+			len += temp_len;
 
-		snprintf(temp_query, sizeof(temp_query), "SELECT %s FROM %s, "
-				"(SELECT person_id person_id_in_contact, addressbook_id "
-				"FROM "CTS_TABLE_CONTACTS " "
-				"WHERE deleted = 0 AND contact_id IN ",
-				projection, table);
-		temp_len = SAFE_SNPRINTF(&query, &query_size, len, temp_query);
+		temp_len = SAFE_SNPRINTF(&query, &query_size, len, projection);
+		if (0 <= temp_len)
+			len += temp_len;
+
+		temp_len = SAFE_SNPRINTF(&query, &query_size, len, " FROM ");
+		if (0 <= temp_len)
+			len += temp_len;
+
+		temp_len = SAFE_SNPRINTF(&query, &query_size, len, table);
+		if (0 <= temp_len)
+			len += temp_len;
+	}
+
+	if (true == is_snippet) {
+		bool need_union = false;
+		char cond_data[CTS_SQL_MAX_LEN] = {0};
+		char clean_number[SAFE_STRLEN(keyword) + 1];
+		ctsvc_clean_number(keyword, clean_number, sizeof(clean_number), false);
+		temp_len = SAFE_SNPRINTF(&query, &query_size, len, ", (SELECT contact_id temp_contact_id, "
+				"datatype, _priority, _data FROM (");
+		if (0 <= temp_len)
+			len += temp_len;
+
+		if (range & CONTACTS_SEARCH_RANGE_NAME) {
+			temp_len = SAFE_SNPRINTF(&query, &query_size, len, "SELECT contact_id, "
+					"datatype, 1 as _priority, 'a' as _data FROM "CTS_TABLE_DATA" "
+					"WHERE contact_id IN (");
+			if (0 <= temp_len)
+				len += temp_len;
+
+			char *query_name = _get_search_query_for_name(keyword);
+			temp_len = SAFE_SNPRINTF(&query, &query_size, len, query_name);
+			if (0 <= temp_len)
+				len += temp_len;
+			free(query_name);
+
+			/* datatype=1 NAME */
+			temp_len = SAFE_SNPRINTF(&query, &query_size, len, ") AND datatype=1 ");
+			if (0 <= temp_len)
+				len += temp_len;
+
+			need_union = true;
+		}
+		if (range & CONTACTS_SEARCH_RANGE_NUMBER) {
+			if (true == need_union) {
+				temp_len = SAFE_SNPRINTF(&query, &query_size, len, " UNION ");
+				if (0 <= temp_len)
+					len += temp_len;
+			}
+			temp_len = SAFE_SNPRINTF(&query, &query_size, len, "SELECT contact_id, "
+					"datatype, 2 as _priority, data3 as _data FROM "CTS_TABLE_DATA" "
+					"WHERE contact_id IN (");
+			if (0 <= temp_len)
+				len += temp_len;
+
+			char *query_number = _get_search_query_for_number(keyword);
+			temp_len = SAFE_SNPRINTF(&query, &query_size, len, query_number);
+			if (0 <= temp_len)
+				len += temp_len;
+			free(query_number);
+
+			/* datatype=8 NUMBER */
+			temp_len = SAFE_SNPRINTF(&query, &query_size, len, ") AND datatype=8 ");
+			if (0 <= temp_len)
+				len += temp_len;
+
+			need_union = true;
+		}
+		if (range & CONTACTS_SEARCH_RANGE_DATA) {
+			if (true == need_union) {
+				temp_len = SAFE_SNPRINTF(&query, &query_size, len, " UNION ");
+				if (0 <= temp_len)
+					len += temp_len;
+			}
+			snprintf(cond_data, sizeof(cond_data), "SELECT contact_id, datatype, "
+					"(CASE "
+					"WHEN datatype=%d THEN 5 " /* POSTAL       */
+					"WHEN datatype=%d THEN 8 " /* MESSENGER    */
+					"WHEN datatype=%d THEN 4 " /* COMPANY      */
+					"WHEN datatype=%d THEN 3 " /* NICKNAME     */
+					"WHEN datatype=%d THEN 6 " /* EMAIL        */
+					"WHEN datatype=%d THEN 9 " /* RELATIONSHIP */
+					"WHEN datatype=%d THEN 7 " /* NOTE         */
+					"END) as _priority, "
+					"(CASE "
+					"WHEN datatype=%d THEN (COALESCE(data5||' ','')||"
+					"COALESCE(data6||' ','')||COALESCE(data7||' ','')||"
+					"COALESCE(data8||' ','')||COALESCE(data9,'')) " /* POSTAL       */
+					"WHEN datatype=%d THEN data3 " /* MESSENGER    */
+					"WHEN datatype=%d THEN (COALESCE(data3||' ','')||"
+					"COALESCE(data4||' ','')||COALESCE(data5||' ','')||"
+					"COALESCE(data6||' ','')||COALESCE(data7||' ','')||"
+					"COALESCE(data8||' ','')||COALESCE(data9||' ','')||"
+					"COALESCE(data10||' ','')||COALESCE(data11||' ','')) " /* COMPANY      */
+					"WHEN datatype=%d THEN data3 " /* NICKNAME     */
+					"WHEN datatype=%d THEN data3 " /* EMAIL        */
+					"WHEN datatype=%d THEN data3 " /* RELATIONSHIP */
+					"WHEN datatype=%d THEN data3 " /* NOTE         */
+					"END) as _data FROM "CTS_TABLE_DATA" WHERE contact_id IN (",
+				CTSVC_DATA_POSTAL, CTSVC_DATA_MESSENGER, CTSVC_DATA_COMPANY,
+				CTSVC_DATA_NICKNAME, CTSVC_DATA_EMAIL, CTSVC_DATA_RELATIONSHIP,
+				CTSVC_DATA_NOTE, CTSVC_DATA_POSTAL, CTSVC_DATA_MESSENGER,
+				CTSVC_DATA_COMPANY, CTSVC_DATA_NICKNAME, CTSVC_DATA_EMAIL,
+				CTSVC_DATA_RELATIONSHIP, CTSVC_DATA_NOTE);
+			temp_len = SAFE_SNPRINTF(&query, &query_size, len, cond_data);
+			if (0 <= temp_len)
+				len += temp_len;
+
+			char *query_data = _get_search_query_for_data(keyword);
+			temp_len = SAFE_SNPRINTF(&query, &query_size, len, query_data);
+			if (0 <= temp_len)
+				len += temp_len;
+			free(query_data);
+
+			temp_len = SAFE_SNPRINTF(&query, &query_size, len, ") AND _data IS NOT NULL "
+					"AND _data LIKE ('%%' || '");
+			if (0 <= temp_len)
+				len += temp_len;
+			temp_len = SAFE_SNPRINTF(&query, &query_size, len, keyword);
+			if (0 <= temp_len)
+				len += temp_len;
+			temp_len = SAFE_SNPRINTF(&query, &query_size, len, "' || '%%') ");
+			if (0 <= temp_len)
+				len += temp_len;
+		}
+		temp_len = SAFE_SNPRINTF(&query, &query_size, len, ")) as temp_data ON "
+				"temp_data.temp_contact_id = temp_contacts.contact_id ");
+		if (0 <= temp_len)
+			len += temp_len;
+	}
+
+	switch (enum_uri) {
+	case CTSVC_ENUM_URI_READ_ONLY_PERSON_CONTACT:
+	case CTSVC_ENUM_URI_READ_ONLY_PERSON_GROUP:
+	case CTSVC_ENUM_URI_READ_ONLY_PERSON_GROUP_ASSIGNED:
+	case CTSVC_ENUM_URI_READ_ONLY_PERSON_GROUP_NOT_ASSIGNED:
+		temp_len = SAFE_SNPRINTF(&query, &query_size, len, " WHERE temp_contacts.contact_id IN ");
+		if (0 <= temp_len)
+			len += temp_len;
+		temp_len = __db_append_search_query(keyword, &query, &query_size, len, range);
+		if (0 <= temp_len)
+			len = temp_len;
+		break;
+
+	case CTSVC_ENUM_URI_READ_ONLY_PERSON_NUMBER:
+		break;
+	case CTSVC_ENUM_URI_READ_ONLY_PERSON_EMAIL:
+		break;
+	case CTSVC_ENUM_URI_PERSON:
+		temp_len = SAFE_SNPRINTF(&query, &query_size, len, ", (SELECT contact_id, person_id "
+				"person_id_in_contact, addressbook_id FROM "CTS_TABLE_CONTACTS" "
+				"WHERE deleted = 0 AND contact_id IN ");
 		if (0 <= temp_len)
 			len += temp_len;
 
@@ -2260,10 +2821,17 @@ static int __ctsvc_db_search_records_exec(const char *view_uri,
 				".person_id = temp_contacts.person_id_in_contact");
 		if (0 <= temp_len)
 			len += temp_len;
+		break;
 	}
 
 	if (__ctsvc_db_view_has_display_name(view_uri, properties, ids_count))
 		sortkey = ctsvc_get_sort_column();
+
+	if (true == is_snippet) {
+		temp_len = SAFE_SNPRINTF(&query, &query_size, len, " GROUP BY temp_data.temp_contact_id");
+		if (0 <= temp_len)
+			len += temp_len;
+	}
 
 	if (sortkey) {
 		len = __ctsvc_db_search_records_append_sort(view_uri, sortkey, keyword, len,
@@ -2312,8 +2880,8 @@ static int __ctsvc_db_search_records_exec(const char *view_uri,
 			for (i = 0; i < ids_count; i++)
 				project[i] = properties[i].property_id;
 
-			int ret = ctsvc_db_person_create_record_from_stmt_with_projection(stmt,
-					project, ids_count, &record);
+			int ret = ctsvc_db_person_create_record_from_stmt_with_projection(stmt, project,
+					ids_count, is_snippet, keyword, start_match, end_match, token_number, &record);
 
 			free(project);
 
@@ -2324,23 +2892,35 @@ static int __ctsvc_db_search_records_exec(const char *view_uri,
 
 			for (i = 0; i < ids_count; i++) {
 				type = (properties[i].property_id & CTSVC_VIEW_DATA_TYPE_MASK);
-				if (type == CTSVC_VIEW_DATA_TYPE_INT) {
+				char *temp = NULL;
+				switch (type) {
+				case CTSVC_VIEW_DATA_TYPE_INT:
 					ctsvc_record_set_int(record, properties[i].property_id,
 							ctsvc_stmt_get_int(stmt, i));
-				} else if (type == CTSVC_VIEW_DATA_TYPE_STR) {
-					ctsvc_record_set_str(record, properties[i].property_id,
-							ctsvc_stmt_get_text(stmt, i));
-				} else if (type == CTSVC_VIEW_DATA_TYPE_BOOL) {
+					break;
+				case CTSVC_VIEW_DATA_TYPE_STR:
+					temp = ctsvc_stmt_get_text(stmt, i);
+					if (CTSVC_PROPERTY_PERSON_EXTRA_DATA2 == properties[i].property_id) {
+						temp = ctsvc_utils_get_modified_str(temp, is_snippet, keyword,
+								start_match, end_match, token_number);
+					}
+					ctsvc_record_set_str(record, properties[i].property_id, temp);
+					break;
+				case CTSVC_VIEW_DATA_TYPE_BOOL:
 					ctsvc_record_set_bool(record, properties[i].property_id,
 							(ctsvc_stmt_get_int(stmt, i) ? true : false));
-				} else if (type == CTSVC_VIEW_DATA_TYPE_LLI) {
+					break;
+				case CTSVC_VIEW_DATA_TYPE_LLI:
 					ctsvc_record_set_lli(record, properties[i].property_id,
 							ctsvc_stmt_get_int64(stmt, i));
-				} else if (type == CTSVC_VIEW_DATA_TYPE_DOUBLE) {
+					break;
+				case CTSVC_VIEW_DATA_TYPE_DOUBLE:
 					ctsvc_record_set_double(record, properties[i].property_id,
 							ctsvc_stmt_get_dbl(stmt, i));
-				} else {
+					break;
+				default:
 					ERR("unknown type (%d)", type);
+					break;
 				}
 			}
 		}
@@ -2354,68 +2934,90 @@ static int __ctsvc_db_search_records_exec(const char *view_uri,
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_db_search_records(const char *view_uri, const char *keyword,
-		int offset, int limit, contacts_list_h *out_list)
+static int __ctsvc_db_search_records(const char *view_uri,
+		const char *keyword,
+		int offset,
+		int limit,
+		bool is_snippet,
+		const char *start_match,
+		const char *end_match,
+		int token_number,
+		contacts_list_h *out_list)
 {
 	int ret;
 	unsigned int count;
 	char *projection;
 	const property_info_s *p;
 	bool can_keyword_search = false;
+	int enum_uri = 0;
 	int range = CONTACTS_SEARCH_RANGE_NAME | CONTACTS_SEARCH_RANGE_NUMBER | CONTACTS_SEARCH_RANGE_DATA;
 
 	RETV_IF(NULL == keyword, CONTACTS_ERROR_INVALID_PARAMETER);
 
-	can_keyword_search = __ctsvc_db_view_can_keyword_search(view_uri);
+	can_keyword_search = __ctsvc_db_view_can_keyword_search(view_uri, &enum_uri);
 	RETVM_IF(false == can_keyword_search, CONTACTS_ERROR_INVALID_PARAMETER,
 			"can not keyword search");
 
 	p = ctsvc_view_get_all_property_infos(view_uri, &count);
-	ret = __db_create_projection(view_uri, p, count, NULL, 0, &projection);
+	ret = __db_create_projection(view_uri, p, count, NULL, 0, &projection, is_snippet);
 	if (CONTACTS_ERROR_NONE != ret) {
 		ERR("__db_create_projection() Fail(%d)", ret);
 		return ret;
 	}
 
-	ret = __ctsvc_db_search_records_exec(view_uri, p, count, projection, keyword, offset,
-			limit, range, out_list);
+	ret = __ctsvc_db_search_records_exec(view_uri, enum_uri, p, count, projection,
+			keyword, offset, limit, range, is_snippet, start_match, end_match, token_number, out_list);
 	free(projection);
 
 	return ret;
 }
 
-static int __ctsvc_db_search_records_with_range(const char *view_uri, const char *keyword,
-		int offset, int limit, int range, contacts_list_h *out_list)
+static int __ctsvc_db_search_records_with_range(const char *view_uri,
+		const char *keyword,
+		int offset,
+		int limit,
+		int range,
+		bool is_snippet,
+		const char *start_match,
+		const char *end_match,
+		int token_number,
+		contacts_list_h *out_list)
 {
 	int ret;
 	unsigned int count;
 	char *projection;
 	const property_info_s *p;
 	bool can_keyword_search = false;
+	int eunm_uri = 0;
 
 	RETV_IF(NULL == keyword, CONTACTS_ERROR_INVALID_PARAMETER);
 
-	can_keyword_search = __ctsvc_db_view_can_keyword_search(view_uri);
+	can_keyword_search = __ctsvc_db_view_can_keyword_search(view_uri, &eunm_uri);
 	RETV_IF(false == can_keyword_search, CONTACTS_ERROR_INVALID_PARAMETER);
 
 	p = ctsvc_view_get_all_property_infos(view_uri, &count);
-	ret = __db_create_projection(view_uri, p, count, NULL, 0, &projection);
+	ret = __db_create_projection(view_uri, p, count, NULL, 0, &projection, is_snippet);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "__db_create_projection() Fail(%d)", ret);
 
-	ret = __ctsvc_db_search_records_exec(view_uri, p, count, projection, keyword, offset,
-			limit, range, out_list);
+	ret = __ctsvc_db_search_records_exec(view_uri, eunm_uri, p, count, projection,
+			keyword, offset, limit, range, is_snippet, start_match, end_match, token_number, out_list);
 	free(projection);
 
 	return ret;
 }
 
 static inline int __ctsvc_db_search_records_with_query_exec(ctsvc_query_s *s_query,
+		int enum_uri,
 		const char *projection,
 		const char *condition,
 		GSList *bind,
 		const char *keyword,
 		int offset,
 		int limit,
+		bool is_snippet,
+		const char *start_match,
+		const char *end_match,
+		int token_number,
 		contacts_list_h *out_list)
 {
 	char *query = NULL;
@@ -2447,62 +3049,180 @@ static inline int __ctsvc_db_search_records_with_query_exec(ctsvc_query_s *s_que
 
 	len = 0;
 
-	if (s_query->distinct)
-		temp_len = SAFE_SNPRINTF(&query, &query_size, len, "SELECT DISTINCT ");
-	else
-		temp_len = SAFE_SNPRINTF(&query, &query_size, len, "SELECT ");
-	if (0 <= temp_len) len += temp_len;
+	temp_len = SAFE_SNPRINTF(&query, &query_size, len, "SELECT ");
+	if (0 <= temp_len)
+		len += temp_len;
+
+	if (s_query->distinct) {
+		temp_len = SAFE_SNPRINTF(&query, &query_size, len, "DISTINCT ");
+		if (0 <= temp_len)
+			len += temp_len;
+	}
 	temp_len = SAFE_SNPRINTF(&query, &query_size, len, projection);
-	if (0 <= temp_len) len += temp_len;
+	if (0 <= temp_len)
+		len += temp_len;
 	temp_len = SAFE_SNPRINTF(&query, &query_size, len, " FROM ");
-	if (0 <= temp_len) len += temp_len;
+	if (0 <= temp_len)
+		len += temp_len;
+	temp_len = SAFE_SNPRINTF(&query, &query_size, len, table);
+	if (0 <= temp_len)
+		len += temp_len;
 
-	if (STRING_EQUAL == strcmp(s_query->view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_CONTACT)
-			|| STRING_EQUAL == strcmp(s_query->view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP)
-			|| STRING_EQUAL == strcmp(s_query->view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP_ASSIGNED)
-			|| STRING_EQUAL == strcmp(s_query->view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP_NOT_ASSIGNED)) {
-		temp_len = SAFE_SNPRINTF(&query, &query_size, len, table);
+	switch (enum_uri) {
+	case CTSVC_ENUM_URI_READ_ONLY_PERSON_CONTACT:
+	case CTSVC_ENUM_URI_READ_ONLY_PERSON_GROUP:
+	case CTSVC_ENUM_URI_READ_ONLY_PERSON_GROUP_ASSIGNED:
+	case CTSVC_ENUM_URI_READ_ONLY_PERSON_GROUP_NOT_ASSIGNED:
+		temp_len = SAFE_SNPRINTF(&query, &query_size, len, " temp_contacts ");
+		if (0 <= temp_len)
+			len += temp_len;
+		break;
+
+	case CTSVC_ENUM_URI_PERSON:
+		break;
+
+	case CTSVC_ENUM_URI_READ_ONLY_PERSON_NUMBER:
+	case CTSVC_ENUM_URI_READ_ONLY_PERSON_EMAIL:
+	default:
+		free(query);
+		return CONTACTS_ERROR_INVALID_PARAMETER;
+	}
+
+	if (true == is_snippet) {
+		bool need_union = false;
+		char cond_data[CTS_SQL_MAX_LEN] = {0};
+		char clean_number[SAFE_STRLEN(keyword) + 1];
+		ctsvc_clean_number(keyword, clean_number, sizeof(clean_number), false);
+		temp_len = SAFE_SNPRINTF(&query, &query_size, len, ", (SELECT contact_id temp_contact_id, "
+				"datatype, _priority, _data FROM (");
 		if (0 <= temp_len)
 			len += temp_len;
 
-		temp_len = SAFE_SNPRINTF(&query, &query_size, len, " WHERE person_id IN ");
+		if (range & CONTACTS_SEARCH_RANGE_NAME) {
+			temp_len = SAFE_SNPRINTF(&query, &query_size, len, "SELECT contact_id, "
+					"datatype, 1 as _priority, 'a' as _data FROM "CTS_TABLE_DATA" "
+					"WHERE contact_id IN (");
+			if (0 <= temp_len)
+				len += temp_len;
+
+			char *query_name = _get_search_query_for_name(keyword);
+			temp_len = SAFE_SNPRINTF(&query, &query_size, len, query_name);
+			if (0 <= temp_len)
+				len += temp_len;
+			free(query_name);
+
+			/* datatype=1 NAME */
+			temp_len = SAFE_SNPRINTF(&query, &query_size, len, ") AND datatype=1 ");
+			if (0 <= temp_len)
+				len += temp_len;
+
+			need_union = true;
+		}
+		if (range & CONTACTS_SEARCH_RANGE_NUMBER) {
+			if (true == need_union) {
+				temp_len = SAFE_SNPRINTF(&query, &query_size, len, " UNION ");
+				if (0 <= temp_len)
+					len += temp_len;
+			}
+			temp_len = SAFE_SNPRINTF(&query, &query_size, len, "SELECT contact_id, "
+					"datatype, 2 as _priority, data3 as _data FROM "CTS_TABLE_DATA" "
+					"WHERE contact_id IN (");
+			if (0 <= temp_len)
+				len += temp_len;
+
+			char *query_number = _get_search_query_for_number(keyword);
+			temp_len = SAFE_SNPRINTF(&query, &query_size, len, query_number);
+			if (0 <= temp_len)
+				len += temp_len;
+			free(query_number);
+
+			/* datatype=8 NUMBER */
+			temp_len = SAFE_SNPRINTF(&query, &query_size, len, ") AND datatype=8 ");
+			if (0 <= temp_len)
+				len += temp_len;
+
+			need_union = true;
+		}
+		if (range & CONTACTS_SEARCH_RANGE_DATA) {
+			if (true == need_union) {
+				temp_len = SAFE_SNPRINTF(&query, &query_size, len, " UNION ");
+				if (0 <= temp_len)
+					len += temp_len;
+			}
+			snprintf(cond_data, sizeof(cond_data), "SELECT contact_id, datatype, "
+					"(CASE "
+					"WHEN datatype=%d THEN 5 " /* POSTAL       */
+					"WHEN datatype=%d THEN 8 " /* MESSENGER    */
+					"WHEN datatype=%d THEN 4 " /* COMPANY      */
+					"WHEN datatype=%d THEN 3 " /* NICKNAME     */
+					"WHEN datatype=%d THEN 6 " /* EMAIL        */
+					"WHEN datatype=%d THEN 9 " /* RELATIONSHIP */
+					"WHEN datatype=%d THEN 7 " /* NOTE         */
+					"END) as _priority, "
+					"(CASE "
+					"WHEN datatype=%d THEN (COALESCE(data5||' ','')||"
+					"COALESCE(data6||' ','')||COALESCE(data7||' ','')||"
+					"COALESCE(data8||' ','')||COALESCE(data9,'')) " /* POSTAL       */
+					"WHEN datatype=%d THEN data3 " /* MESSENGER    */
+					"WHEN datatype=%d THEN (COALESCE(data3||' ','')||"
+					"COALESCE(data4||' ','')||COALESCE(data5||' ','')||"
+					"COALESCE(data6||' ','')||COALESCE(data7||' ','')||"
+					"COALESCE(data8||' ','')||COALESCE(data9||' ','')||"
+					"COALESCE(data10||' ','')||COALESCE(data11||' ','')) " /* COMPANY      */
+					"WHEN datatype=%d THEN data3 " /* NICKNAME     */
+					"WHEN datatype=%d THEN data3 " /* EMAIL        */
+					"WHEN datatype=%d THEN data3 " /* RELATIONSHIP */
+					"WHEN datatype=%d THEN data3 " /* NOTE         */
+					"END) as _data FROM "CTS_TABLE_DATA" WHERE contact_id IN (",
+				CTSVC_DATA_POSTAL, CTSVC_DATA_MESSENGER, CTSVC_DATA_COMPANY,
+				CTSVC_DATA_NICKNAME, CTSVC_DATA_EMAIL, CTSVC_DATA_RELATIONSHIP,
+				CTSVC_DATA_NOTE, CTSVC_DATA_POSTAL, CTSVC_DATA_MESSENGER,
+				CTSVC_DATA_COMPANY, CTSVC_DATA_NICKNAME, CTSVC_DATA_EMAIL,
+				CTSVC_DATA_RELATIONSHIP, CTSVC_DATA_NOTE);
+			temp_len = SAFE_SNPRINTF(&query, &query_size, len, cond_data);
+			if (0 <= temp_len)
+				len += temp_len;
+
+			char *query_data = _get_search_query_for_data(keyword);
+			temp_len = SAFE_SNPRINTF(&query, &query_size, len, query_data);
+			if (0 <= temp_len)
+				len += temp_len;
+			free(query_data);
+
+			temp_len = SAFE_SNPRINTF(&query, &query_size, len, ") AND _data IS NOT NULL "
+					"AND _data LIKE ('%%' || '");
+			if (0 <= temp_len)
+				len += temp_len;
+			temp_len = SAFE_SNPRINTF(&query, &query_size, len, keyword);
+			if (0 <= temp_len)
+				len += temp_len;
+			temp_len = SAFE_SNPRINTF(&query, &query_size, len, "' || '%%') ");
+			if (0 <= temp_len)
+				len += temp_len;
+		}
+		temp_len = SAFE_SNPRINTF(&query, &query_size, len, ")) as temp_data ON "
+				"temp_data.temp_contact_id = temp_contacts.contact_id ");
 		if (0 <= temp_len)
 			len += temp_len;
+	}
 
-		temp_len = SAFE_SNPRINTF(&query, &query_size, len, " ( SELECT person_id FROM ");
-		if (0 <= temp_len)
-			len += temp_len;
-
-		temp_len = SAFE_SNPRINTF(&query, &query_size, len, CTS_TABLE_CONTACTS);
-		if (0 <= temp_len)
-			len += temp_len;
-
-		temp_len = SAFE_SNPRINTF(&query, &query_size, len,
-				" WHERE deleted = 0 AND contact_id IN ");
+	switch (enum_uri) {
+	case CTSVC_ENUM_URI_READ_ONLY_PERSON_CONTACT:
+	case CTSVC_ENUM_URI_READ_ONLY_PERSON_GROUP:
+	case CTSVC_ENUM_URI_READ_ONLY_PERSON_GROUP_ASSIGNED:
+	case CTSVC_ENUM_URI_READ_ONLY_PERSON_GROUP_NOT_ASSIGNED:
+		temp_len = SAFE_SNPRINTF(&query, &query_size, len, " WHERE temp_contacts.person_id IN (SELECT "
+				"person_id FROM "CTS_TABLE_CONTACTS" WHERE deleted = 0 AND temp_contacts.contact_id IN ");
 		if (0 <= temp_len)
 			len += temp_len;
 
 		person_contact_query = true;
-	} else if (STRING_EQUAL == strcmp(s_query->view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_NUMBER)
-			|| STRING_EQUAL == strcmp(s_query->view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_EMAIL)) {
-		free(query);
-		return CONTACTS_ERROR_INVALID_PARAMETER;
-	} else {   /* CTSVC_VIEW_URI_PERSON */
-		temp_len = SAFE_SNPRINTF(&query, &query_size, len, table);
-		if (0 <= temp_len)
-			len += temp_len;
+		break;
 
-		temp_len = SAFE_SNPRINTF(&query, &query_size, len, ", "
-				"(SELECT contact_id, person_id person_id_in_contact, addressbook_id FROM ");
-		if (0 <= temp_len)
-			len += temp_len;
-
-		temp_len = SAFE_SNPRINTF(&query, &query_size, len, CTS_TABLE_CONTACTS);
-		if (0 <= temp_len)
-			len += temp_len;
-
-		temp_len = SAFE_SNPRINTF(&query, &query_size, len,
-				" WHERE deleted = 0) temp_contacts ON ");
+	case CTSVC_ENUM_URI_PERSON:
+		temp_len = SAFE_SNPRINTF(&query, &query_size, len, ", (SELECT contact_id, "
+				"person_id person_id_in_contact, addressbook_id FROM "CTS_TABLE_CONTACTS" "
+				"WHERE deleted = 0) temp_contacts ON ");
 		if (0 <= temp_len)
 			len += temp_len;
 
@@ -2514,6 +3234,12 @@ static inline int __ctsvc_db_search_records_with_query_exec(ctsvc_query_s *s_que
 				".person_id = temp_contacts.person_id_in_contact WHERE temp_contacts.contact_id IN ");
 		if (0 <= temp_len)
 			len += temp_len;
+		break;
+
+	case CTSVC_ENUM_URI_READ_ONLY_PERSON_NUMBER:
+	case CTSVC_ENUM_URI_READ_ONLY_PERSON_EMAIL:
+	default:
+		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
 
 	temp_len = __db_append_search_query(keyword, &query, &query_size, len, range);
@@ -2521,17 +3247,15 @@ static inline int __ctsvc_db_search_records_with_query_exec(ctsvc_query_s *s_que
 		len = temp_len;
 
 	if (person_contact_query) {
-		temp_len = SAFE_SNPRINTF(&query, &query_size, len, " ) ");
+		temp_len = SAFE_SNPRINTF(&query, &query_size, len, ") ");
 		if (0 <= temp_len)
 			len += temp_len;
 	}
 
 	if (condition && *condition) {
 		if (person_contact_query) {
-			temp_len = SAFE_SNPRINTF(&query, &query_size, len, " AND contact_id IN (");
-			if (0 <= temp_len)
-				len += temp_len;
-			temp_len = SAFE_SNPRINTF(&query, &query_size, len, " SELECT contact_id FROM ");
+			temp_len = SAFE_SNPRINTF(&query, &query_size, len, " AND contact_id IN "
+					"(SELECT contact_id FROM ");
 			if (0 <= temp_len)
 				len += temp_len;
 			temp_len = SAFE_SNPRINTF(&query, &query_size, len, table);
@@ -2549,6 +3273,12 @@ static inline int __ctsvc_db_search_records_with_query_exec(ctsvc_query_s *s_que
 		if (0 <= temp_len)
 			len += temp_len;
 		temp_len = SAFE_SNPRINTF(&query, &query_size, len, ")");
+		if (0 <= temp_len)
+			len += temp_len;
+	}
+
+	if (true == is_snippet) {
+		temp_len = SAFE_SNPRINTF(&query, &query_size, len, " GROUP BY temp_data.temp_contact_id");
 		if (0 <= temp_len)
 			len += temp_len;
 	}
@@ -2631,8 +3361,12 @@ static inline int __ctsvc_db_search_records_with_query_exec(ctsvc_query_s *s_que
 	} while (0);
 
 	ret = ctsvc_query_prepare(query, &stmt);
+	if (NULL == stmt) {
+		ERR("ctsvc_query_prepare() Fail(%d)[%s]", ret, query);
+		free(query);
+		return ret;
+	}
 	free(query);
-	RETVM_IF(NULL == stmt, ret, "ctsvc_query_prepare() Fail(%d)", ret);
 
 	i = 1;
 	len = g_slist_length(bind);
@@ -2667,7 +3401,7 @@ static inline int __ctsvc_db_search_records_with_query_exec(ctsvc_query_s *s_que
 			}
 
 			ret = ctsvc_db_person_create_record_from_stmt_with_projection(stmt, project,
-					ids_count, &record);
+					ids_count, is_snippet, keyword, start_match, end_match, token_number, &record);
 			if (CONTACTS_ERROR_NONE != ret)
 				ERR("ctsvc_db_person_create_record_from_stmt_with_projection() Fail(%d)", ret);
 
@@ -2696,18 +3430,33 @@ static inline int __ctsvc_db_search_records_with_query_exec(ctsvc_query_s *s_que
 
 				type = __ctsvc_db_get_property_type(s_query->properties,
 						s_query->property_count, property_id);
-				if (type == CTSVC_VIEW_DATA_TYPE_INT)
+
+				char *temp = NULL;
+				switch (type) {
+				case CTSVC_VIEW_DATA_TYPE_INT:
 					ctsvc_record_set_int(record, property_id, ctsvc_stmt_get_int(stmt, i));
-				else if (type == CTSVC_VIEW_DATA_TYPE_STR)
-					ctsvc_record_set_str(record, property_id, ctsvc_stmt_get_text(stmt, i));
-				else if (type == CTSVC_VIEW_DATA_TYPE_BOOL)
+					break;
+				case CTSVC_VIEW_DATA_TYPE_STR:
+					temp = ctsvc_stmt_get_text(stmt, i);
+					if (CTSVC_PROPERTY_PERSON_EXTRA_DATA2 == property_id) {
+						temp = ctsvc_utils_get_modified_str(temp, is_snippet, keyword,
+								start_match, end_match, token_number);
+					}
+					ctsvc_record_set_str(record, property_id, temp);
+					break;
+				case CTSVC_VIEW_DATA_TYPE_BOOL:
 					ctsvc_record_set_bool(record, property_id, (ctsvc_stmt_get_int(stmt, i) ? true : false));
-				else if (type == CTSVC_VIEW_DATA_TYPE_LLI)
+					break;
+				case CTSVC_VIEW_DATA_TYPE_LLI:
 					ctsvc_record_set_lli(record, property_id, ctsvc_stmt_get_int64(stmt, i));
-				else if (type == CTSVC_VIEW_DATA_TYPE_DOUBLE)
+					break;
+				case CTSVC_VIEW_DATA_TYPE_DOUBLE:
 					ctsvc_record_set_double(record, property_id, ctsvc_stmt_get_dbl(stmt, i));
-				else
+					break;
+				default:
 					ERR("unknown type (%d)", type);
+					break;
+				}
 			}
 		}
 		ctsvc_list_prepend(list, record);
@@ -2719,8 +3468,15 @@ static inline int __ctsvc_db_search_records_with_query_exec(ctsvc_query_s *s_que
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_db_search_records_with_query(contacts_query_h query, const char *keyword,
-		int offset, int limit, contacts_list_h *out_list)
+static int __ctsvc_db_search_records_with_query(contacts_query_h query,
+		const char *keyword,
+		int offset,
+		int limit,
+		bool is_snippet,
+		const char *start_match,
+		const char *end_match,
+		int token_number,
+		contacts_list_h *out_list)
 {
 	int ret;
 	char *condition = NULL;
@@ -2729,18 +3485,17 @@ static int __ctsvc_db_search_records_with_query(contacts_query_h query, const ch
 	GSList *bind_text = NULL;
 	GSList *cursor = NULL;
 	bool can_keyword_search;
+	int enum_uri = 0;
 
 	RETV_IF(NULL == query, CONTACTS_ERROR_INVALID_PARAMETER);
 	RETV_IF(NULL == keyword, CONTACTS_ERROR_INVALID_PARAMETER);
 
-	can_keyword_search = __ctsvc_db_view_can_keyword_search(s_query->view_uri);
+	can_keyword_search = __ctsvc_db_view_can_keyword_search(s_query->view_uri, &enum_uri);
 	RETV_IF(false == can_keyword_search, CONTACTS_ERROR_INVALID_PARAMETER);
 
 	ret = __db_create_projection(s_query->view_uri, s_query->properties,
-			s_query->property_count,
-			s_query->projection,
-			s_query->projection_count,
-			&projection);
+			s_query->property_count, s_query->projection, s_query->projection_count,
+			&projection, is_snippet);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "__db_create_projection Fail(%d)", ret);
 
 	if (s_query->filter) {
@@ -2753,8 +3508,8 @@ static int __ctsvc_db_search_records_with_query(contacts_query_h query, const ch
 		}
 	}
 
-	ret = __ctsvc_db_search_records_with_query_exec(s_query, projection, condition,
-			bind_text, keyword, offset, limit, out_list);
+	ret = __ctsvc_db_search_records_with_query_exec(s_query, enum_uri, projection, condition,
+			bind_text, keyword, offset, limit, is_snippet, start_match, end_match, token_number, out_list);
 	if (CONTACTS_ERROR_NONE != ret) {
 		ERR("__ctsvc_db_search_records_with_query_exec Fail(%d)", ret);
 		for (cursor = bind_text; cursor; cursor = cursor->next)
@@ -2940,7 +3695,7 @@ static int __ctsvc_db_get_count(const char *view_uri, int *out_count)
 	char *projection;
 
 	const property_info_s *p = ctsvc_view_get_all_property_infos(view_uri, &count);
-	ret = __db_create_projection(view_uri, p, count, NULL, 0, &projection);
+	ret = __db_create_projection(view_uri, p, count, NULL, 0, &projection, false);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "__db_create_projection Fail(%d)", ret);
 
 	__ctsvc_db_get_count_exec(view_uri, p, count, projection, out_count);
@@ -3064,10 +3819,8 @@ static int __ctsvc_db_get_count_with_query(contacts_query_h query, int *out_coun
 	}
 
 	ret = __db_create_projection(s_query->view_uri, s_query->properties,
-			s_query->property_count,
-			s_query->projection,
-			s_query->projection_count,
-			&projection);
+			s_query->property_count, s_query->projection, s_query->projection_count,
+			&projection, false);
 	if (CONTACTS_ERROR_NONE != ret) {
 		ERR("__db_create_projection() Fail(%d)", ret);
 		for (cursor = bind_text; cursor; cursor = cursor->next)
@@ -3524,7 +4277,8 @@ int ctsvc_db_search_records(const char *view_uri, const char *keyword,
 	*out_list = NULL;
 	RETV_IF(NULL == view_uri, CONTACTS_ERROR_INVALID_PARAMETER);
 
-	return __ctsvc_db_search_records(view_uri, keyword, offset, limit, out_list);
+	return __ctsvc_db_search_records(view_uri, keyword, offset, limit, false, NULL,
+			NULL, -1, out_list);
 }
 
 int ctsvc_db_search_records_with_range(const char *view_uri, const char *keyword,
@@ -3536,7 +4290,7 @@ int ctsvc_db_search_records_with_range(const char *view_uri, const char *keyword
 	RETV_IF(NULL == view_uri, CONTACTS_ERROR_INVALID_PARAMETER);
 
 	return __ctsvc_db_search_records_with_range(view_uri, keyword, offset, limit, range,
-			out_list);
+			false, NULL, NULL, -1, out_list);
 }
 
 int ctsvc_db_search_records_with_query(contacts_query_h query, const char *keyword,
@@ -3546,7 +4300,60 @@ int ctsvc_db_search_records_with_query(contacts_query_h query, const char *keywo
 	*out_list = NULL;
 	RETV_IF(NULL == query, CONTACTS_ERROR_INVALID_PARAMETER);
 
-	return __ctsvc_db_search_records_with_query(query, keyword, offset, limit, out_list);
+	return __ctsvc_db_search_records_with_query(query, keyword, offset, limit, false,
+			NULL, NULL, -1, out_list);
+}
+
+int ctsvc_db_search_records_for_snippet(const char *view_uri, const char *keyword,
+		int offset,
+		int limit,
+		const char *start_match,
+		const char *end_match,
+		int token_number,
+		contacts_list_h *out_list)
+{
+	RETV_IF(NULL == out_list, CONTACTS_ERROR_INVALID_PARAMETER);
+	*out_list = NULL;
+	RETV_IF(NULL == view_uri, CONTACTS_ERROR_INVALID_PARAMETER);
+
+	return __ctsvc_db_search_records(view_uri, keyword, offset, limit, true, start_match,
+			end_match, token_number, out_list);
+}
+
+int ctsvc_db_search_records_with_range_for_snippet(const char *view_uri,
+		const char *keyword,
+		int offset,
+		int limit,
+		int range,
+		const char *start_match,
+		const char *end_match,
+		int token_number,
+		contacts_list_h *out_list)
+{
+	RETV_IF(NULL == out_list, CONTACTS_ERROR_INVALID_PARAMETER);
+	*out_list = NULL;
+	RETV_IF(range == 0, CONTACTS_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == view_uri, CONTACTS_ERROR_INVALID_PARAMETER);
+
+	return __ctsvc_db_search_records_with_range(view_uri, keyword, offset, limit, range,
+			true, start_match, end_match, token_number, out_list);
+}
+
+int ctsvc_db_search_records_with_query_for_snippet(contacts_query_h query,
+		const char *keyword,
+		int offset,
+		int limit,
+		const char *start_match,
+		const char *end_match,
+		int token_number,
+		contacts_list_h *out_list)
+{
+	RETV_IF(NULL == out_list, CONTACTS_ERROR_INVALID_PARAMETER);
+	*out_list = NULL;
+	RETV_IF(NULL == query, CONTACTS_ERROR_INVALID_PARAMETER);
+
+	return __ctsvc_db_search_records_with_query(query, keyword, offset, limit, true,
+			start_match, end_match, token_number, out_list);
 }
 
 int ctsvc_db_get_count(const char *view_uri, int *out_count)

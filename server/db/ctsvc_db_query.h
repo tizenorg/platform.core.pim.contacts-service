@@ -44,6 +44,31 @@ int ctsvc_db_search_records_with_range(const char *view_uri, const char *keyword
 		int offset, int limit, int range, contacts_list_h *out_list);
 int ctsvc_db_search_records_with_query(contacts_query_h query, const char *keyword,
 		int offset, int limit, contacts_list_h *out_list);
+int ctsvc_db_search_records_for_snippet(const char *view_uri,
+		const char *keyword,
+		int offset,
+		int limit,
+		const char *start_match,
+		const char *end_match,
+		int token_number,
+		contacts_list_h *out_list);
+int ctsvc_db_search_records_with_range_for_snippet(const char *view_uri,
+		const char *keyword,
+		int offset,
+		int limit,
+		int range,
+		const char *start_match,
+		const char *end_match,
+		int token_number,
+		contacts_list_h *out_list);
+int ctsvc_db_search_records_with_query_for_snippet(contacts_query_h query,
+		const char *keyword,
+		int offset,
+		int limit,
+		const char *start_match,
+		const char *end_match,
+		int token_number,
+		contacts_list_h *out_list);
 int ctsvc_db_get_status(contacts_db_status_e *status);
 int ctsvc_db_insert_records_with_vcard(const char *vcard_stream, int **record_id_array,
 		int *count);
