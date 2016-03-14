@@ -81,6 +81,7 @@ static int __ctsvc_person_destroy(contacts_record_h record, bool delete_child)
 	free(person->image_thumbnail_path);
 	free(person->status);
 	free(person->addressbook_ids);
+	free(person->extra_data2);
 	free(person);
 
 	return CONTACTS_ERROR_NONE;
@@ -109,6 +110,8 @@ static int __ctsvc_person_clone(contacts_record_h record, contacts_record_h *out
 	out_data->vibration = SAFE_STRDUP(src_data->vibration);
 	out_data->message_alert = SAFE_STRDUP(src_data->message_alert);
 	out_data->status = SAFE_STRDUP(src_data->status);
+	out_data->extra_data1 = src_data->extra_data1;
+	out_data->extra_data2 = SAFE_STRDUP(src_data->extra_data2);
 
 	int ret = ctsvc_record_copy_base(&(out_data->base), &(src_data->base));
 	if (CONTACTS_ERROR_NONE != ret) {
@@ -134,6 +137,9 @@ static int __ctsvc_person_get_int(contacts_record_h record, unsigned int propert
 		break;
 	case CTSVC_PROPERTY_PERSON_LINK_COUNT:
 		*out = person->link_count;
+		break;
+	case CTSVC_PROPERTY_PERSON_EXTRA_DATA1:
+		*out = person->extra_data1;
 		break;
 	default:
 		ERR("This field(%d) is not supported in value(person)", property_id);
@@ -170,6 +176,9 @@ static int __ctsvc_person_get_str_real(contacts_record_h record, unsigned int pr
 		break;
 	case CTSVC_PROPERTY_PERSON_ADDRESSBOOK_IDS:
 		*out_str = GET_STR(copy, person->addressbook_ids);
+		break;
+	case CTSVC_PROPERTY_PERSON_EXTRA_DATA2:
+		*out_str = GET_STR(copy, person->extra_data2);
 		break;
 	default:
 		ERR("This field(%d) is not supported in value(person)", property_id);
@@ -229,6 +238,10 @@ static int __ctsvc_person_set_int(contacts_record_h record, unsigned int propert
 		CHECK_DIRTY_VAL(person->link_count, value, is_dirty);
 		person->link_count = value;
 		break;
+	case CTSVC_PROPERTY_PERSON_EXTRA_DATA1:
+		CHECK_DIRTY_VAL(person->extra_data1, value, is_dirty);
+		person->extra_data1 = value;
+		break;
 	default:
 		ERR("This field(0x%0x) is not supported in value(person)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
@@ -265,6 +278,10 @@ static int __ctsvc_person_set_str(contacts_record_h record, unsigned int propert
 	case CTSVC_PROPERTY_PERSON_MESSAGE_ALERT:
 		CHECK_DIRTY_STR(person->message_alert, str, is_dirty);
 		FREEandSTRDUP(person->message_alert, str);
+		break;
+	case CTSVC_PROPERTY_PERSON_EXTRA_DATA2:
+		CHECK_DIRTY_STR(person->extra_data2, str, is_dirty);
+		FREEandSTRDUP(person->extra_data2, str);
 		break;
 	default:
 		ERR("This field(%d) is not supported in value(person)", property_id);
