@@ -186,6 +186,8 @@ _CONTACTS_END_VIEW(_contacts_group)
  * <tr><td>string</td><td> addressbook_ids </td><td>read only</td><td> Addressbook IDs that the person belongs to (projection) </td></tr>
  * <tr><td>boolean</td><td> has_phonenumber </td><td>read only</td><td> The person has phone number or not </td></tr>
  * <tr><td>boolean</td><td> has_email </td><td>read only</td><td> The person has email or not </td></tr>
+ * <tr><td>integer</td><td> extra_data1 </td><td>read only</td><td> kerword matched data type </td></tr>
+ * <tr><td>string</td><td> extra_data2 </td><td>read only</td><td> keyword matched data string </td></tr>
  * </table>
  */
 _CONTACTS_BEGIN_VIEW()
@@ -204,6 +206,8 @@ _CONTACTS_BEGIN_VIEW()
     _CONTACTS_PROPERTY_BOOL(has_phonenumber)      /* read only */
     _CONTACTS_PROPERTY_BOOL(has_email)            /* read only */
     _CONTACTS_PROPERTY_STR(message_alert)         /* read, write */
+	_CONTACTS_PROPERTY_INT(extra_data1)           /* read only */
+	_CONTACTS_PROPERTY_STR(extra_data2)           /* read only */
 _CONTACTS_END_VIEW(_contacts_person)
 
 /**
@@ -626,6 +630,8 @@ _CONTACTS_BEGIN_VIEW()
     _CONTACTS_PROPERTY_INT(group_id)          /* read, write once */
     _CONTACTS_PROPERTY_INT(contact_id)        /* read, write once */
     _CONTACTS_PROPERTY_STR(name)              /* read only */
+	_CONTACTS_PROPERTY_INT(extra_data1)           /* read only */
+	_CONTACTS_PROPERTY_STR(extra_data2)           /* read only */
 _CONTACTS_END_VIEW(_contacts_group_relation)
 
 /**
@@ -1175,6 +1181,8 @@ _CONTACTS_BEGIN_READ_ONLY_VIEW()
     _CONTACTS_PROPERTY_STR(address_book_name)
     _CONTACTS_PROPERTY_INT(address_book_mode)
     _CONTACTS_PROPERTY_PROJECTION_STR(message_alert)
+	_CONTACTS_PROPERTY_INT(extra_data1)           /* read only */
+	_CONTACTS_PROPERTY_STR(extra_data2)           /* read only */
 _CONTACTS_END_READ_ONLY_VIEW(_contacts_person_contact)
 
 /**
@@ -1229,6 +1237,8 @@ _CONTACTS_BEGIN_READ_ONLY_VIEW()
     _CONTACTS_PROPERTY_FILTER_STR(normalized_number)
     _CONTACTS_PROPERTY_PROJECTION_STR(message_alert)
     _CONTACTS_PROPERTY_FILTER_STR(cleaned_number)
+	_CONTACTS_PROPERTY_INT(extra_data1)           /* read only */
+	_CONTACTS_PROPERTY_STR(extra_data2)           /* read only */
 _CONTACTS_END_READ_ONLY_VIEW(_contacts_person_number)
 
 /**
@@ -1276,6 +1286,8 @@ _CONTACTS_BEGIN_READ_ONLY_VIEW()
     _CONTACTS_PROPERTY_BOOL(is_primary_default)
     _CONTACTS_PROPERTY_STR(email)
     _CONTACTS_PROPERTY_PROJECTION_STR(message_alert)
+	_CONTACTS_PROPERTY_INT(extra_data1)           /* read only */
+	_CONTACTS_PROPERTY_STR(extra_data2)           /* read only */
 _CONTACTS_END_READ_ONLY_VIEW(_contacts_person_email)
 
 /**
@@ -1329,6 +1341,8 @@ _CONTACTS_BEGIN_READ_ONLY_VIEW()
     _CONTACTS_PROPERTY_INT(address_book_mode)
     _CONTACTS_PROPERTY_PROJECTION_INT(contact_id)
     _CONTACTS_PROPERTY_PROJECTION_STR(message_alert)
+	_CONTACTS_PROPERTY_INT(extra_data1)           /* read only */
+	_CONTACTS_PROPERTY_STR(extra_data2)           /* read only */
 _CONTACTS_END_READ_ONLY_VIEW(_contacts_person_grouprel)
 
 /**
@@ -1380,6 +1394,8 @@ _CONTACTS_BEGIN_READ_ONLY_VIEW()
     _CONTACTS_PROPERTY_INT(address_book_mode)
     _CONTACTS_PROPERTY_PROJECTION_INT(contact_id)
     _CONTACTS_PROPERTY_PROJECTION_STR(message_alert)
+	_CONTACTS_PROPERTY_INT(extra_data1)           /* read only */
+	_CONTACTS_PROPERTY_STR(extra_data2)           /* read only */
 _CONTACTS_END_READ_ONLY_VIEW(_contacts_person_group_assigned)
 
 /**
@@ -1429,6 +1445,8 @@ _CONTACTS_BEGIN_READ_ONLY_VIEW()
     _CONTACTS_PROPERTY_INT(address_book_mode)
     _CONTACTS_PROPERTY_PROJECTION_INT(contact_id)
     _CONTACTS_PROPERTY_PROJECTION_STR(message_alert)
+	_CONTACTS_PROPERTY_INT(extra_data1)           /* read only */
+	_CONTACTS_PROPERTY_STR(extra_data2)           /* read only */
 _CONTACTS_END_READ_ONLY_VIEW(_contacts_person_group_not_assigned)
 
 /**
