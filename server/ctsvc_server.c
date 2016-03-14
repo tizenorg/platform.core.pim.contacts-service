@@ -63,55 +63,182 @@ static int __server_main(void)
 		 * These functions will be called when requesting from client module depends on module name and function name (pims_ipc_call, ctsvc_ipc_call)
 		 * pims_ipc_svc_register(MODULE_NAME, FUNCTION_NAME ...);
 		 */
-		if (pims_ipc_svc_register(CTSVC_IPC_MODULE, CTSVC_IPC_SERVER_CONNECT, ctsvc_ipc_server_connect, NULL) != 0) break;
-		if (pims_ipc_svc_register(CTSVC_IPC_MODULE, CTSVC_IPC_SERVER_DISCONNECT, ctsvc_ipc_server_disconnect, NULL) != 0) break;
-		if (pims_ipc_svc_register(CTSVC_IPC_MODULE, CTSVC_IPC_SERVER_CHECK_PERMISSION, ctsvc_ipc_server_check_permission, NULL) != 0) break;
-
-		if (pims_ipc_svc_register(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_INSERT_RECORD, ctsvc_ipc_server_db_insert_record, NULL) != 0) break;
-		if (pims_ipc_svc_register(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_GET_RECORD, ctsvc_ipc_server_db_get_record, NULL) != 0) break;
-		if (pims_ipc_svc_register(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_UPDATE_RECORD, ctsvc_ipc_server_db_update_record, NULL) != 0) break;
-		if (pims_ipc_svc_register(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_DELETE_RECORD, ctsvc_ipc_server_db_delete_record, NULL) != 0) break;
-		if (pims_ipc_svc_register(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_REPLACE_RECORD, ctsvc_ipc_server_db_replace_record, NULL) != 0) break;
-		if (pims_ipc_svc_register(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_GET_ALL_RECORDS, ctsvc_ipc_server_db_get_all_records, NULL) != 0) break;
-		if (pims_ipc_svc_register(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_GET_RECORDS_WITH_QUERY, ctsvc_ipc_server_db_get_records_with_query, NULL) != 0) break;
-		if (pims_ipc_svc_register(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_GET_COUNT, ctsvc_ipc_server_db_get_count, NULL) != 0) break;
-		if (pims_ipc_svc_register(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_GET_COUNT_WITH_QUERY, ctsvc_ipc_server_db_get_count_with_query, NULL) != 0) break;
-		if (pims_ipc_svc_register(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_INSERT_RECORDS, ctsvc_ipc_server_db_insert_records, NULL) != 0) break;
-		if (pims_ipc_svc_register(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_UPDATE_RECORDS, ctsvc_ipc_server_db_update_records, NULL) != 0) break;
-		if (pims_ipc_svc_register(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_DELETE_RECORDS, ctsvc_ipc_server_db_delete_records, NULL) != 0) break;
-		if (pims_ipc_svc_register(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_REPLACE_RECORDS, ctsvc_ipc_server_db_replace_records, NULL) != 0) break;
-		if (pims_ipc_svc_register(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_CHANGES_BY_VERSION, ctsvc_ipc_server_db_get_changes_by_version, NULL) != 0) break;
-		if (pims_ipc_svc_register(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_GET_CURRENT_VERSION, ctsvc_ipc_server_db_get_current_version, NULL) != 0) break;
-		if (pims_ipc_svc_register(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_SEARCH_RECORDS, ctsvc_ipc_server_db_search_records, NULL) != 0) break;
-		if (pims_ipc_svc_register(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_SEARCH_RECORDS_WITH_RANGE, ctsvc_ipc_server_db_search_records_with_range, NULL) != 0) break;
-		if (pims_ipc_svc_register(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_SEARCH_RECORDS_WITH_QUERY, ctsvc_ipc_server_db_search_records_with_query, NULL) != 0) break;
-		if (pims_ipc_svc_register(CTSVC_IPC_DB_MODULE, CTSVC_IPC_SERVER_DB_GET_STATUS, ctsvc_ipc_server_db_get_status, NULL) != 0) break;
-
-		if (pims_ipc_svc_register(CTSVC_IPC_ACTIVITY_MODULE, CTSVC_IPC_SERVER_ACTIVITY_DELETE_BY_CONTACT_ID, ctsvc_ipc_activity_delete_by_contact_id, NULL) != 0) break;
-		if (pims_ipc_svc_register(CTSVC_IPC_ACTIVITY_MODULE, CTSVC_IPC_SERVER_ACTIVITY_DELETE_BY_ACCOUNT_ID, ctsvc_ipc_activity_delete_by_account_id, NULL) != 0) break;
-
-		if (pims_ipc_svc_register(CTSVC_IPC_GROUP_MODULE, CTSVC_IPC_SERVER_GROUP_ADD_CONTACT, ctsvc_ipc_group_add_contact, NULL) != 0) break;
-		if (pims_ipc_svc_register(CTSVC_IPC_GROUP_MODULE, CTSVC_IPC_SERVER_GROUP_REMOVE_CONTACT, ctsvc_ipc_group_remove_contact, NULL) != 0) break;
-		if (pims_ipc_svc_register(CTSVC_IPC_GROUP_MODULE, CTSVC_IPC_SERVER_GROUP_SET_GROUP_ORDER, ctsvc_ipc_group_set_group_order, NULL) != 0) break;
-
-		if (pims_ipc_svc_register(CTSVC_IPC_PERSON_MODULE, CTSVC_IPC_SERVER_PERSON_LINK_PERSON, ctsvc_ipc_person_link_person, NULL) != 0) break;
-		if (pims_ipc_svc_register(CTSVC_IPC_PERSON_MODULE, CTSVC_IPC_SERVER_PERSON_UNLINK_CONTACT, ctsvc_ipc_person_unlink_contact, NULL) != 0) break;
-		if (pims_ipc_svc_register(CTSVC_IPC_PERSON_MODULE, CTSVC_IPC_SERVER_PERSON_RESET_USAGE, ctsvc_ipc_person_reset_usage, NULL) != 0) break;
-		if (pims_ipc_svc_register(CTSVC_IPC_PERSON_MODULE, CTSVC_IPC_SERVER_PERSON_SET_FAVORITE_ORDER, ctsvc_ipc_person_set_favorite_order, NULL) != 0) break;
-		if (pims_ipc_svc_register(CTSVC_IPC_PERSON_MODULE, CTSVC_IPC_SERVER_PERSON_SET_DEFAULT_PROPERTY, ctsvc_ipc_person_set_default_property, NULL) != 0) break;
-		if (pims_ipc_svc_register(CTSVC_IPC_PERSON_MODULE, CTSVC_IPC_SERVER_PERSON_GET_DEFAULT_PROPERTY, ctsvc_ipc_person_get_default_property, NULL) != 0) break;
-		if (pims_ipc_svc_register(CTSVC_IPC_PERSON_MODULE, CTSVC_IPC_SERVER_PERSON_GET_AGGREGATION_SUGGESTIONS, ctsvc_ipc_person_get_aggregation_suggestions, NULL) != 0) break;
-
+		if (pims_ipc_svc_register(CTSVC_IPC_MODULE,
+					CTSVC_IPC_SERVER_CONNECT,
+					ctsvc_ipc_server_connect, NULL) != 0)
+			break;
+		if (pims_ipc_svc_register(CTSVC_IPC_MODULE,
+					CTSVC_IPC_SERVER_DISCONNECT,
+					ctsvc_ipc_server_disconnect, NULL) != 0)
+			break;
+		if (pims_ipc_svc_register(CTSVC_IPC_MODULE,
+					CTSVC_IPC_SERVER_CHECK_PERMISSION,
+					ctsvc_ipc_server_check_permission, NULL) != 0)
+			break;
+		if (pims_ipc_svc_register(CTSVC_IPC_DB_MODULE,
+					CTSVC_IPC_SERVER_DB_INSERT_RECORD,
+					ctsvc_ipc_server_db_insert_record, NULL) != 0)
+			break;
+		if (pims_ipc_svc_register(CTSVC_IPC_DB_MODULE,
+					CTSVC_IPC_SERVER_DB_GET_RECORD,
+					ctsvc_ipc_server_db_get_record, NULL) != 0)
+			break;
+		if (pims_ipc_svc_register(CTSVC_IPC_DB_MODULE,
+					CTSVC_IPC_SERVER_DB_UPDATE_RECORD,
+					ctsvc_ipc_server_db_update_record, NULL) != 0)
+			break;
+		if (pims_ipc_svc_register(CTSVC_IPC_DB_MODULE,
+					CTSVC_IPC_SERVER_DB_DELETE_RECORD,
+					ctsvc_ipc_server_db_delete_record, NULL) != 0)
+			break;
+		if (pims_ipc_svc_register(CTSVC_IPC_DB_MODULE,
+					CTSVC_IPC_SERVER_DB_REPLACE_RECORD,
+					ctsvc_ipc_server_db_replace_record, NULL) != 0)
+			break;
+		if (pims_ipc_svc_register(CTSVC_IPC_DB_MODULE,
+					CTSVC_IPC_SERVER_DB_GET_ALL_RECORDS,
+					ctsvc_ipc_server_db_get_all_records, NULL) != 0)
+			break;
+		if (pims_ipc_svc_register(CTSVC_IPC_DB_MODULE,
+					CTSVC_IPC_SERVER_DB_GET_RECORDS_WITH_QUERY,
+					ctsvc_ipc_server_db_get_records_with_query, NULL) != 0)
+			break;
+		if (pims_ipc_svc_register(CTSVC_IPC_DB_MODULE,
+					CTSVC_IPC_SERVER_DB_GET_COUNT,
+					ctsvc_ipc_server_db_get_count, NULL) != 0)
+			break;
+		if (pims_ipc_svc_register(CTSVC_IPC_DB_MODULE,
+					CTSVC_IPC_SERVER_DB_GET_COUNT_WITH_QUERY,
+					ctsvc_ipc_server_db_get_count_with_query, NULL) != 0)
+			break;
+		if (pims_ipc_svc_register(CTSVC_IPC_DB_MODULE,
+					CTSVC_IPC_SERVER_DB_INSERT_RECORDS,
+					ctsvc_ipc_server_db_insert_records, NULL) != 0)
+			break;
+		if (pims_ipc_svc_register(CTSVC_IPC_DB_MODULE,
+					CTSVC_IPC_SERVER_DB_UPDATE_RECORDS,
+					ctsvc_ipc_server_db_update_records, NULL) != 0)
+			break;
+		if (pims_ipc_svc_register(CTSVC_IPC_DB_MODULE,
+					CTSVC_IPC_SERVER_DB_DELETE_RECORDS,
+					ctsvc_ipc_server_db_delete_records, NULL) != 0)
+			break;
+		if (pims_ipc_svc_register(CTSVC_IPC_DB_MODULE,
+					CTSVC_IPC_SERVER_DB_REPLACE_RECORDS,
+					ctsvc_ipc_server_db_replace_records, NULL) != 0)
+			break;
+		if (pims_ipc_svc_register(CTSVC_IPC_DB_MODULE,
+					CTSVC_IPC_SERVER_DB_CHANGES_BY_VERSION,
+					ctsvc_ipc_server_db_get_changes_by_version, NULL) != 0)
+			break;
+		if (pims_ipc_svc_register(CTSVC_IPC_DB_MODULE,
+					CTSVC_IPC_SERVER_DB_GET_CURRENT_VERSION,
+					ctsvc_ipc_server_db_get_current_version, NULL) != 0)
+			break;
+		if (pims_ipc_svc_register(CTSVC_IPC_DB_MODULE,
+					CTSVC_IPC_SERVER_DB_SEARCH_RECORDS,
+					ctsvc_ipc_server_db_search_records, NULL) != 0)
+			break;
+		if (pims_ipc_svc_register(CTSVC_IPC_DB_MODULE,
+					CTSVC_IPC_SERVER_DB_SEARCH_RECORDS_WITH_RANGE,
+					ctsvc_ipc_server_db_search_records_with_range, NULL) != 0)
+			break;
+		if (pims_ipc_svc_register(CTSVC_IPC_DB_MODULE,
+					CTSVC_IPC_SERVER_DB_SEARCH_RECORDS_WITH_QUERY,
+					ctsvc_ipc_server_db_search_records_with_query, NULL) != 0)
+			break;
+		if (pims_ipc_svc_register(CTSVC_IPC_DB_MODULE,
+					CTSVC_IPC_SERVER_DB_SEARCH_RECORDS_FOR_SNIPPET,
+					ctsvc_ipc_server_db_search_records_for_snippet, NULL) != 0)
+			break;
+		if (pims_ipc_svc_register(CTSVC_IPC_DB_MODULE,
+					CTSVC_IPC_SERVER_DB_SEARCH_RECORDS_WITH_RANGE_FOR_SNIPPET,
+					ctsvc_ipc_server_db_search_records_with_range_for_snippet, NULL) != 0)
+			break;
+		if (pims_ipc_svc_register(CTSVC_IPC_DB_MODULE,
+					CTSVC_IPC_SERVER_DB_SEARCH_RECORDS_WITH_QUERY_FOR_SNIPPET,
+					ctsvc_ipc_server_db_search_records_with_query_for_snippet, NULL) != 0)
+			break;
+		if (pims_ipc_svc_register(CTSVC_IPC_DB_MODULE,
+					CTSVC_IPC_SERVER_DB_GET_STATUS,
+					ctsvc_ipc_server_db_get_status, NULL) != 0)
+			break;
+		if (pims_ipc_svc_register(CTSVC_IPC_ACTIVITY_MODULE,
+					CTSVC_IPC_SERVER_ACTIVITY_DELETE_BY_CONTACT_ID,
+					ctsvc_ipc_activity_delete_by_contact_id, NULL) != 0)
+			break;
+		if (pims_ipc_svc_register(CTSVC_IPC_ACTIVITY_MODULE,
+					CTSVC_IPC_SERVER_ACTIVITY_DELETE_BY_ACCOUNT_ID,
+					ctsvc_ipc_activity_delete_by_account_id, NULL) != 0)
+			break;
+		if (pims_ipc_svc_register(CTSVC_IPC_GROUP_MODULE,
+					CTSVC_IPC_SERVER_GROUP_ADD_CONTACT,
+					ctsvc_ipc_group_add_contact, NULL) != 0)
+			break;
+		if (pims_ipc_svc_register(CTSVC_IPC_GROUP_MODULE,
+					CTSVC_IPC_SERVER_GROUP_REMOVE_CONTACT,
+					ctsvc_ipc_group_remove_contact, NULL) != 0)
+			break;
+		if (pims_ipc_svc_register(CTSVC_IPC_GROUP_MODULE,
+					CTSVC_IPC_SERVER_GROUP_SET_GROUP_ORDER,
+					ctsvc_ipc_group_set_group_order, NULL) != 0)
+			break;
+		if (pims_ipc_svc_register(CTSVC_IPC_PERSON_MODULE,
+					CTSVC_IPC_SERVER_PERSON_LINK_PERSON,
+					ctsvc_ipc_person_link_person, NULL) != 0)
+			break;
+		if (pims_ipc_svc_register(CTSVC_IPC_PERSON_MODULE,
+					CTSVC_IPC_SERVER_PERSON_UNLINK_CONTACT,
+					ctsvc_ipc_person_unlink_contact, NULL) != 0)
+			break;
+		if (pims_ipc_svc_register(CTSVC_IPC_PERSON_MODULE,
+					CTSVC_IPC_SERVER_PERSON_RESET_USAGE,
+					ctsvc_ipc_person_reset_usage, NULL) != 0)
+			break;
+		if (pims_ipc_svc_register(CTSVC_IPC_PERSON_MODULE,
+					CTSVC_IPC_SERVER_PERSON_SET_FAVORITE_ORDER,
+					ctsvc_ipc_person_set_favorite_order, NULL) != 0)
+			break;
+		if (pims_ipc_svc_register(CTSVC_IPC_PERSON_MODULE,
+					CTSVC_IPC_SERVER_PERSON_SET_DEFAULT_PROPERTY,
+					ctsvc_ipc_person_set_default_property, NULL) != 0)
+			break;
+		if (pims_ipc_svc_register(CTSVC_IPC_PERSON_MODULE,
+					CTSVC_IPC_SERVER_PERSON_GET_DEFAULT_PROPERTY,
+					ctsvc_ipc_person_get_default_property, NULL) != 0)
+			break;
+		if (pims_ipc_svc_register(CTSVC_IPC_PERSON_MODULE,
+					CTSVC_IPC_SERVER_PERSON_GET_AGGREGATION_SUGGESTIONS,
+					ctsvc_ipc_person_get_aggregation_suggestions, NULL) != 0)
+			break;
 #ifdef ENABLE_LOG_FEATURE
-		if (pims_ipc_svc_register(CTSVC_IPC_PHONELOG_MODULE, CTSVC_IPC_SERVER_PHONELOG_RESET_STATISTICS, ctsvc_ipc_phone_log_reset_statistics, NULL) != 0) break;
+		if (pims_ipc_svc_register(CTSVC_IPC_PHONELOG_MODULE,
+					CTSVC_IPC_SERVER_PHONELOG_RESET_STATISTICS,
+					ctsvc_ipc_phone_log_reset_statistics, NULL) != 0)
+			break;
 		if (pims_ipc_svc_register(CTSVC_IPC_PHONELOG_MODULE, CTSVC_IPC_SERVER_PHONELOG_RESET_STATISTICS_BY_SIM, ctsvc_ipc_phone_log_reset_statistics_by_sim, NULL) != 0) break;
-		if (pims_ipc_svc_register(CTSVC_IPC_PHONELOG_MODULE, CTSVC_IPC_SERVER_PHONELOG_DELETE, ctsvc_ipc_phone_log_delete, NULL) != 0) break;
-#endif /* ENABLE_LOG_FEATURE */
 
-		if (pims_ipc_svc_register(CTSVC_IPC_SETTING_MODULE, CTSVC_IPC_SERVER_SETTING_GET_NAME_DISPLAY_ORDER, ctsvc_ipc_setting_get_name_display_order, NULL) != 0) break;
-		if (pims_ipc_svc_register(CTSVC_IPC_SETTING_MODULE, CTSVC_IPC_SERVER_SETTING_SET_NAME_DISPLAY_ORDER, ctsvc_ipc_setting_set_name_display_order, NULL) != 0) break;
-		if (pims_ipc_svc_register(CTSVC_IPC_SETTING_MODULE, CTSVC_IPC_SERVER_SETTING_GET_NAME_SORTING_ORDER, ctsvc_ipc_setting_get_name_sorting_order, NULL) != 0) break;
-		if (pims_ipc_svc_register(CTSVC_IPC_SETTING_MODULE, CTSVC_IPC_SERVER_SETTING_SET_NAME_SORTING_ORDER, ctsvc_ipc_setting_set_name_sorting_order, NULL) != 0) break;
+		if (pims_ipc_svc_register(CTSVC_IPC_PHONELOG_MODULE,
+					CTSVC_IPC_SERVER_PHONELOG_DELETE,
+					ctsvc_ipc_phone_log_delete, NULL) != 0)
+			break;
+#endif /* ENABLE_LOG_FEATURE */
+		if (pims_ipc_svc_register(CTSVC_IPC_SETTING_MODULE,
+					CTSVC_IPC_SERVER_SETTING_GET_NAME_DISPLAY_ORDER,
+					ctsvc_ipc_setting_get_name_display_order, NULL) != 0)
+			break;
+		if (pims_ipc_svc_register(CTSVC_IPC_SETTING_MODULE,
+					CTSVC_IPC_SERVER_SETTING_SET_NAME_DISPLAY_ORDER,
+					ctsvc_ipc_setting_set_name_display_order, NULL) != 0)
+			break;
+		if (pims_ipc_svc_register(CTSVC_IPC_SETTING_MODULE,
+					CTSVC_IPC_SERVER_SETTING_GET_NAME_SORTING_ORDER,
+					ctsvc_ipc_setting_get_name_sorting_order, NULL) != 0)
+			break;
+		if (pims_ipc_svc_register(CTSVC_IPC_SETTING_MODULE,
+					CTSVC_IPC_SERVER_SETTING_SET_NAME_SORTING_ORDER,
+					ctsvc_ipc_setting_set_name_sorting_order, NULL) != 0)
+			break;
 
 		snprintf(sock_file, sizeof(sock_file), CTSVC_SOCK_PATH"/.%s_for_subscribe",
 				getuid(), CTSVC_IPC_SERVICE);
@@ -162,7 +289,7 @@ int ctsvc_server_get_timeout_sec(void)
 
 void ctsvc_create_file_set_permission(const char *file, mode_t mode)
 {
-	int fd, ret;
+	int fd;
 	fd = creat(file, mode);
 	if (0 <= fd) {
 		close(fd);

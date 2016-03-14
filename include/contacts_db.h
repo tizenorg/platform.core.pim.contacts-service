@@ -779,6 +779,18 @@ int contacts_db_search_records_with_query(contacts_query_h query, const char *ke
  */
 int contacts_db_search_records_with_range(const char *view_uri, const char *keyword, int offset, int limit, int range, contacts_list_h *record_list);
 
+
+int contacts_db_search_records_for_snippet(const char *view_uri,
+		const char *keyword, int offset, int limit, const char *start_match,
+		const char *end_match, contacts_list_h *record_list);
+int contacts_db_search_records_with_range_for_snippet(const char *view_uri,
+		const char *keyword, int offset, int limit, int range, const char *start_match,
+		const char *end_match, contacts_list_h *record_list);
+int contacts_db_search_records_with_query_for_snippet(contacts_query_h query,
+		const char *keyword, int offset, int limit, const char *start_match,
+		const char *end_match, contacts_list_h *record_list);
+
+
 /**
  * @brief Gets the number of records in a specific view.
  *
