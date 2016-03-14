@@ -292,6 +292,7 @@ int ctsvc_db_contact_delete(int contact_id)
 
 	snprintf(query, sizeof(query), "SELECT link_count FROM "CTS_TABLE_PERSONS" WHERE person_id = %d", person_id);
 	ret = ctsvc_query_get_first_int_result(query, &link_count);
+	DBG(" %s", query);
 	WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_query_get_first_int_result() Fail(%d)", ret);
 	/*
 	 * set dirty bit to person by trigger

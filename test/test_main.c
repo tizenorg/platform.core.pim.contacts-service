@@ -21,6 +21,7 @@
 
 #include "test_main.h"
 #include "test_debug.h"
+#include "test_query.h"
 
 int _print_errors(int argc, char **argv)
 {
@@ -43,6 +44,7 @@ int _print_errors(int argc, char **argv)
 
 static const func _func[] = {
 	_print_errors,
+	test_query,
 };
 
 bool test_main_is_selected(int argc, char **argv, int depth, const func test_func[], int count)

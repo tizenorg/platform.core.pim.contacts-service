@@ -1,7 +1,7 @@
 /*
  * Contacts Service
  *
- * Copyright (c) 2015 Samsung Electronics Co., Ltd. All rights reserved.
+ * Copyright (c) 2010 - 2016 Samsung Electronics Co., Ltd. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,16 @@
  * limitations under the License.
  *
  */
-#ifndef __CTSVC_CLIENT_PHONELOG_HELPER_H__
-#define __CTSVC_CLIENT_PHONELOG_HELPER_H__
 
-#include "contacts_types.h"
-#include "contacts_phone_log_internal.h"
+#ifndef __CTSVC_UTILS_STRING_H__
+#define __CTSVC_UTILS_STRING_H__
 
-int ctsvc_client_phone_log_reset_statistics(contacts_h contact);
-int ctsvc_client_phone_log_reset_statistics_by_sim(contacts_h contact, int sim_slot_no);
-int ctsvc_client_phone_log_delete(contacts_h contact, contacts_phone_log_delete_e op, va_list args);
+#include "ctsvc_struct.h"
+#include "ctsvc_record.h"
 
+int ctsvc_utils_string_strstr(const char *haystack, const char *needle, int *len);
+char *ctsvc_utils_get_modified_str(char *temp, bool is_snippet, const char *keyword,
+		const char *start_match, const char *end_match);
 
-#endif /* __CTSVC_CLIENT_PHONELOG_HELPER_H__ */
+#endif /*  __CTSVC_UTILS_STRING_H__ */
+
