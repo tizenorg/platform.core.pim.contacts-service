@@ -780,6 +780,126 @@ int contacts_db_search_records_with_query(contacts_query_h query, const char *ke
 int contacts_db_search_records_with_range(const char *view_uri, const char *keyword, int offset, int limit, int range, contacts_list_h *record_list);
 
 /**
+ * @brief Finds records based on given query and keyword.
+ *
+ * @since_tizen 3.0
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/contact.read
+ *
+ * @remarks You must release @a record_list using contacts_list_destroy(). \n
+ * This API works only for @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_person, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_person_contact, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_person_grouprel, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_person_group_assigned \n
+ * and @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_person_group_not_assigned
+ *
+ * @param[in]   query           The query handle to filter
+ * @param[in]   keyword         The keyword
+ * @param[in]   offset          The index from which to get results
+ * @param[in]   limit           The number to limit results(value 0 used for get all records)
+ * @param[in]   start_match     The text which is inserted into the fragment before the keyword(If NULL, default is "[")
+ * @param[in]   end_match       The text which is inserted into the fragment after the keyword(If NULL, default is "]")
+ * @param[out]  record_list     The record list
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
+ * @retval  #CONTACTS_ERROR_NONE                Successful
+ * @retval  #CONTACTS_ERROR_OUT_OF_MEMORY       Out of memory
+ * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ * @retval  #CONTACTS_ERROR_FILE_NO_SPACE       FS Full
+ * @retval  #CONTACTS_ERROR_PERMISSION_DENIED   Permission denied. This application does not have the privilege to call this method.
+ * @retval  #CONTACTS_ERROR_NOT_SUPPORTED       Not supported
+ * @retval  #CONTACTS_ERROR_DB                  Database operation failure
+ * @retval  #CONTACTS_ERROR_IPC                 IPC error
+ *
+ * @pre    contacts_connect() should be called to open a connection to the contacts service.
+ *
+ * @see contacts_connect()
+ * @see contacts_list_destroy()
+ */
+int contacts_db_search_records_for_snippet(const char *view_uri, const char *keyword, int offset, int limit, const char *start_match, const char *end_match, contacts_list_h *record_list);
+
+/**
+ * @brief Finds records based on a keyword and range.
+ *
+ * @since_tizen 3.0
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/contact.read
+ *
+ * @remarks You must release @a record_list using contacts_list_destroy(). \n
+ * This API works only for @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_person, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_person_contact, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_person_grouprel, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_person_group_assigned, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_person_group_not_assigned. These views can search records with range @ref CONTACTS_SEARCH_RANGE_NAME, @ref CONTACTS_SEARCH_RANGE_NUMBER, @ref CONTACTS_SEARCH_RANGE_DATA. \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_person_number can search records with @ref CONTACTS_SEARCH_RANGE_NAME and @ref CONTACTS_SEARCH_RANGE_NUMBER.\n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_person_email can search records with @ref CONTACTS_SEARCH_RANGE_NAME and @ref CONTACTS_SEARCH_RANGE_EMAIL. \n
+ *
+ * @param[in]   view_uri        The view URI
+ * @param[in]   keyword         The keyword
+ * @param[in]   offset          The index from which to get results
+ * @param[in]   limit           The number to limit results(value 0 is used for get all records)
+ * @param[in]   range           The search range
+ * @param[in]   start_match     The text which is inserted into the fragment before the keyword(If NULL, default is "[")
+ * @param[in]   end_match       The text which is inserted into the fragment after the keyword(If NULL, default is "]")
+ * @param[out]  record_list     The record list
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
+ * @retval  #CONTACTS_ERROR_NONE                Successful
+ * @retval  #CONTACTS_ERROR_OUT_OF_MEMORY       Out of memory
+ * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ * @retval  #CONTACTS_ERROR_PERMISSION_DENIED   Permission denied. This application does not have the privilege to call this method.
+ * @retval  #CONTACTS_ERROR_NOT_SUPPORTED       Not supported
+ * @retval  #CONTACTS_ERROR_DB                  Database operation failure
+ * @retval  #CONTACTS_ERROR_IPC                 IPC error
+ *
+ * @pre    contacts_connect() should be called to open a connection to the contacts service.
+ *
+ * @see contacts_connect()
+ * @see contacts_list_destroy()
+ */
+int contacts_db_search_records_with_range_for_snippet(const char *view_uri, const char *keyword, int offset, int limit, int range, const char *start_match, const char *end_match, contacts_list_h *record_list);
+
+/**
+ * @brief Finds records based on given query and keyword.
+ *
+ * @since_tizen 3.0
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/contact.read
+ *
+ * @remarks You must release @a record_list using contacts_list_destroy(). \n
+ * This API works only for @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_person, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_person_contact, \n
+ * @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_person_grouprel, @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_person_group_assigned \n
+ * and @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_person_group_not_assigned
+ *
+ * @param[in]   query           The query handle to filter
+ * @param[in]   keyword         The keyword
+ * @param[in]   offset          The index from which to get results
+ * @param[in]   limit           The number to limit results(value 0 used for get all records)
+ * @param[in]   start_match     The text which is inserted into the fragment before the keyword(If NULL, default is "[")
+ * @param[in]   end_match       The text which is inserted into the fragment after the keyword(If NULL, default is "]")
+ * @param[out]  record_list     The record list
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
+ * @retval  #CONTACTS_ERROR_NONE                Successful
+ * @retval  #CONTACTS_ERROR_OUT_OF_MEMORY       Out of memory
+ * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ * @retval  #CONTACTS_ERROR_FILE_NO_SPACE       FS Full
+ * @retval  #CONTACTS_ERROR_PERMISSION_DENIED   Permission denied. This application does not have the privilege to call this method.
+ * @retval  #CONTACTS_ERROR_NOT_SUPPORTED       Not supported
+ * @retval  #CONTACTS_ERROR_DB                  Database operation failure
+ * @retval  #CONTACTS_ERROR_IPC                 IPC error
+ *
+ * @pre    contacts_connect() should be called to open a connection to the contacts service.
+ *
+ * @see contacts_connect()
+ * @see contacts_list_destroy()
+ */
+
+int contacts_db_search_records_with_query_for_snippet(contacts_query_h query, const char *keyword, int offset, int limit, const char *start_match, const char *end_match, contacts_list_h *record_list);
+
+/**
  * @brief Gets the number of records in a specific view.
  *
  * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif

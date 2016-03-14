@@ -40,6 +40,31 @@ int ctsvc_client_db_get_current_version(contacts_h contact, int *ctsvc_client_db
 int ctsvc_client_db_search_records(contacts_h contact, const char *view_uri, const char *keyword, int offset, int limit, contacts_list_h *out_list);
 int ctsvc_client_db_search_records_with_range(contacts_h contact, const char *view_uri, const char *keyword, int offset, int limit, int range, contacts_list_h *out_list);
 int ctsvc_client_db_search_records_with_query(contacts_h contact, contacts_query_h query, const char *keyword, int offset, int limit, contacts_list_h *out_list);
+int ctsvc_client_db_search_records_for_snippet(contacts_h contact,
+		const char *view_uri,
+		const char *keyword,
+		int offset,
+		int limit,
+		const char *start_match,
+		const char *end_match,
+		contacts_list_h *out_list);
+int ctsvc_client_db_search_records_with_range_for_snippet(contacts_h contact,
+		const char *view_uri,
+		const char *keyword,
+		int offset,
+		int limit,
+		int range,
+		const char *start_match,
+		const char *end_match,
+		contacts_list_h *out_list);
+int ctsvc_client_db_search_records_with_query_for_snippet(contacts_h contact,
+		contacts_query_h query,
+		const char *keyword,
+		int offset,
+		int limit,
+		const char *start_match,
+		const char *end_match,
+		contacts_list_h *out_list);
 int ctsvc_client_db_get_last_change_version(contacts_h contact, int *last_version);
 int ctsvc_client_db_get_status(contacts_h contact, contacts_db_status_e *status);
 int ctsvc_client_db_add_status_changed_cb(contacts_h contact, contacts_db_status_changed_cb cb, void *user_data);
