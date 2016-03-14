@@ -64,7 +64,7 @@ int ctsvc_db_nickname_insert(contacts_record_h record, int contact_id, bool is_m
 	snprintf(query, sizeof(query),
 			"INSERT INTO "CTS_TABLE_DATA"(contact_id, is_my_profile, datatype, data1, data2, data3) "
 			"VALUES(%d, %d, %d, %d, ?, ?)",
-			contact_id, is_my_profile, CTSVC_DATA_NICKNAME, nickname->type);
+			contact_id, is_my_profile, CONTACTS_DATA_TYPE_NICKNAME, nickname->type);
 
 	ret = ctsvc_query_prepare(query, &stmt);
 	RETVM_IF(NULL == stmt, ret, "ctsvc_query_prepare() Fail(%d)", ret);
@@ -135,7 +135,7 @@ int ctsvc_db_nickname_delete(int id, bool is_my_profile)
 	char query[CTS_SQL_MIN_LEN] = {0};
 
 	snprintf(query, sizeof(query), "DELETE FROM "CTS_TABLE_DATA" WHERE id = %d AND datatype = %d",
-			id, CTSVC_DATA_NICKNAME);
+			id, CONTACTS_DATA_TYPE_NICKNAME);
 
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_query_exec() Fail(%d)", ret);

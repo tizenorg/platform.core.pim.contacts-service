@@ -43,7 +43,7 @@ int ctsvc_db_sip_insert(contacts_record_h record, int contact_id, bool is_my_pro
 	snprintf(query, sizeof(query),
 		"INSERT INTO "CTS_TABLE_DATA"(contact_id, is_my_profile, datatype, data1, data2, data3) "
 									"VALUES(%d, %d, %d, ?, %d, ?)",
-			contact_id, is_my_profile, CTSVC_DATA_SIP, sip->type);
+			contact_id, is_my_profile, CONTACTS_DATA_TYPE_SIP, sip->type);
 	ret = ctsvc_query_prepare(query, &stmt);
 	RETVM_IF(NULL == stmt, ret, "DB error : ctsvc_query_prepare() Fail(%d)", ret);
 
@@ -136,7 +136,7 @@ int ctsvc_db_sip_delete(int id, bool is_my_profile)
 	char query[CTS_SQL_MIN_LEN] = {0};
 
 	snprintf(query, sizeof(query), "DELETE FROM "CTS_TABLE_DATA" WHERE id = %d AND datatype = %d",
-			id, CTSVC_DATA_SIP);
+			id, CONTACTS_DATA_TYPE_SIP);
 
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_query_exec() Fail(%d)", ret);

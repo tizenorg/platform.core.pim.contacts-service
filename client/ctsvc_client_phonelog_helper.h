@@ -26,5 +26,5 @@ int ctsvc_client_phone_log_reset_statistics(contacts_h contact);
 int ctsvc_client_phone_log_reset_statistics_by_sim(contacts_h contact, int sim_slot_no);
 int ctsvc_client_phone_log_delete(contacts_h contact, contacts_phone_log_delete_e op, va_list args);
 
-
 #endif /* __CTSVC_CLIENT_PHONELOG_HELPER_H__ */
+
