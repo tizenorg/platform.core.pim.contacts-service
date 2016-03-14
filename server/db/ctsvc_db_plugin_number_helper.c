@@ -41,7 +41,7 @@ static int __ctsvc_db_number_reset_default(int number_id, int contact_id)
 
 	snprintf(query, sizeof(query),
 			"UPDATE "CTS_TABLE_DATA" SET is_default = 0, is_primary_default = 0 WHERE id != %d AND contact_id = %d AND datatype = %d",
-			number_id, contact_id, CTSVC_DATA_NUMBER);
+			number_id, contact_id, CONTACTS_DATA_TYPE_NUMBER);
 	ret = ctsvc_query_exec(query);
 	WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_query_exec() Fail(%d)", ret);
 	return ret;
@@ -64,7 +64,7 @@ int ctsvc_db_number_insert(contacts_record_h record, int contact_id, bool is_my_
 	snprintf(query, sizeof(query),
 			"INSERT INTO "CTS_TABLE_DATA"(contact_id, is_my_profile, datatype, is_default, data1, data2, data3, data4, data5, data6) "
 			"VALUES(%d, %d, %d, %d, %d, ?, ?, ?, ?, ?)",
-			contact_id, is_my_profile, CTSVC_DATA_NUMBER, number->is_default, number->type);
+			contact_id, is_my_profile, CONTACTS_DATA_TYPE_NUMBER, number->is_default, number->type);
 
 	ret = ctsvc_query_prepare(query, &stmt);
 	RETVM_IF(NULL == stmt, ret, "ctsvc_query_prepare() Fail(%d)", ret);
@@ -314,7 +314,7 @@ int ctsvc_db_number_delete(int id, bool is_my_profile)
 #endif /* ENABLE_LOG_FEATURE */
 
 	snprintf(query, sizeof(query), "DELETE FROM "CTS_TABLE_DATA" WHERE id = %d AND datatype = %d",
-			id, CTSVC_DATA_NUMBER);
+			id, CONTACTS_DATA_TYPE_NUMBER);
 
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {

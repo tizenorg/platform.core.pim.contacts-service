@@ -59,6 +59,8 @@ API const _contacts_person_property_ids _contacts_person = {
 	.addressbook_ids		= CTSVC_PROPERTY_PERSON_ADDRESSBOOK_IDS,
 	.has_phonenumber		= CTSVC_PROPERTY_PERSON_HAS_PHONENUMBER,
 	.has_email				= CTSVC_PROPERTY_PERSON_HAS_EMAIL,
+	.snippet_type			= CTSVC_PROPERTY_PERSON_SNIPPET_TYPE,
+	.snippet_string			= CTSVC_PROPERTY_PERSON_SNIPPET_STRING
 };
 
 API const _contacts_contact_property_ids _contacts_contact = {
@@ -93,7 +95,7 @@ API const _contacts_contact_property_ids _contacts_contact = {
 	.image					= CTSVC_PROPERTY_CONTACT_IMAGE,
 	.group_relation			= CTSVC_PROPERTY_CONTACT_GROUP_RELATION,
 	.extension				= CTSVC_PROPERTY_CONTACT_EXTENSION,
-	.sip					= CTSVC_PROPERTY_CONTACT_SIP,
+	.sip					= CTSVC_PROPERTY_CONTACT_SIP
 };
 
 API const _contacts_my_profile_property_ids _contacts_my_profile = {
@@ -118,7 +120,7 @@ API const _contacts_my_profile_property_ids _contacts_my_profile = {
 	.relationship			= CTSVC_PROPERTY_MY_PROFILE_RELATIONSHIP,
 	.image					= CTSVC_PROPERTY_MY_PROFILE_IMAGE,
 	.extension				= CTSVC_PROPERTY_MY_PROFILE_EXTENSION,
-	.sip					= CTSVC_PROPERTY_MY_PROFILE_SIP,
+	.sip					= CTSVC_PROPERTY_MY_PROFILE_SIP
 };
 
 API const _contacts_simple_contact_property_ids _contacts_simple_contact = {
@@ -135,8 +137,8 @@ API const _contacts_simple_contact_property_ids _contacts_simple_contact = {
 	.has_email				= CTSVC_PROPERTY_CONTACT_HAS_EMAIL,
 	.uid					= CTSVC_PROPERTY_CONTACT_UID,
 	.vibration				= CTSVC_PROPERTY_CONTACT_VIBRATION,
-	.message_alert		= CTSVC_PROPERTY_CONTACT_MESSAGE_ALERT,
-	.changed_time			= CTSVC_PROPERTY_CONTACT_CHANGED_TIME,
+	.message_alert          = CTSVC_PROPERTY_CONTACT_MESSAGE_ALERT,
+	.changed_time			= CTSVC_PROPERTY_CONTACT_CHANGED_TIME
 };
 
 API const _contacts_name_property_ids _contacts_name = {
@@ -431,7 +433,9 @@ API const _contacts_person_contact_property_ids _contacts_person_contact = {
 	.contact_id				= CTSVC_PROPERTY_CONTACT_ID,
 	.address_book_id		= CTSVC_PROPERTY_CONTACT_ADDRESSBOOK_ID,
 	.address_book_name		= CTSVC_PROPERTY_ADDRESSBOOK_NAME,
-	.address_book_mode		= CTSVC_PROPERTY_ADDRESSBOOK_MODE
+	.address_book_mode		= CTSVC_PROPERTY_ADDRESSBOOK_MODE,
+	.snippet_type			= CTSVC_PROPERTY_PERSON_SNIPPET_TYPE,
+	.snippet_string			= CTSVC_PROPERTY_PERSON_SNIPPET_STRING
 };
 
 API const _contacts_person_number_property_ids _contacts_person_number = {
@@ -454,7 +458,9 @@ API const _contacts_person_number_property_ids _contacts_person_number = {
 	.number				= CTSVC_PROPERTY_NUMBER_NUMBER,
 	.number_filter		= CTSVC_PROPERTY_NUMBER_NUMBER_FILTER,
 	.normalized_number = CTSVC_PROPERTY_NUMBER_NORMALIZED_NUMBER,
-	.cleaned_number = CTSVC_PROPERTY_NUMBER_CLEANED_NUMBER
+	.cleaned_number = CTSVC_PROPERTY_NUMBER_CLEANED_NUMBER,
+	.snippet_type			= CTSVC_PROPERTY_PERSON_SNIPPET_TYPE,
+	.snippet_string			= CTSVC_PROPERTY_PERSON_SNIPPET_STRING
 };
 
 API const _contacts_person_email_property_ids _contacts_person_email = {
@@ -474,7 +480,9 @@ API const _contacts_person_email_property_ids _contacts_person_email = {
 	.type				= CTSVC_PROPERTY_EMAIL_TYPE,
 	.label				= CTSVC_PROPERTY_EMAIL_LABEL,
 	.is_primary_default	= CTSVC_PROPERTY_DATA_IS_PRIMARY_DEFAULT,
-	.email				= CTSVC_PROPERTY_EMAIL_EMAIL
+	.email				= CTSVC_PROPERTY_EMAIL_EMAIL,
+	.snippet_type		= CTSVC_PROPERTY_PERSON_SNIPPET_TYPE,
+	.snippet_string		= CTSVC_PROPERTY_PERSON_SNIPPET_STRING
 };
 
 API const _contacts_person_usage_property_ids _contacts_person_usage = {
@@ -514,7 +522,9 @@ API const _contacts_person_grouprel_property_ids _contacts_person_grouprel = {
 	.group_id		= CTSVC_PROPERTY_GROUP_RELATION_GROUP_ID,
 	.address_book_name		= CTSVC_PROPERTY_ADDRESSBOOK_NAME,
 	.address_book_mode		= CTSVC_PROPERTY_ADDRESSBOOK_MODE,
-	.contact_id				= CTSVC_PROPERTY_GROUP_RELATION_CONTACT_ID
+	.contact_id				= CTSVC_PROPERTY_GROUP_RELATION_CONTACT_ID,
+	.snippet_type			= CTSVC_PROPERTY_PERSON_SNIPPET_TYPE,
+	.snippet_string			= CTSVC_PROPERTY_PERSON_SNIPPET_STRING
 };
 
 API const _contacts_person_group_not_assigned_property_ids _contacts_person_group_not_assigned = {
@@ -535,7 +545,9 @@ API const _contacts_person_group_not_assigned_property_ids _contacts_person_grou
 	.linked_address_book_ids	= CTSVC_PROPERTY_PERSON_ADDRESSBOOK_IDS,
 	.contact_id				= CTSVC_PROPERTY_CONTACT_ID,
 	.address_book_id			= CTSVC_PROPERTY_CONTACT_ADDRESSBOOK_ID,
-	.address_book_mode		= CTSVC_PROPERTY_ADDRESSBOOK_MODE
+	.address_book_mode		= CTSVC_PROPERTY_ADDRESSBOOK_MODE,
+	.snippet_type			= CTSVC_PROPERTY_PERSON_SNIPPET_TYPE,
+	.snippet_string			= CTSVC_PROPERTY_PERSON_SNIPPET_STRING
 };
 
 API const _contacts_person_group_assigned_property_ids _contacts_person_group_assigned = {
@@ -557,7 +569,9 @@ API const _contacts_person_group_assigned_property_ids _contacts_person_group_as
 	.address_book_id		= CTSVC_PROPERTY_CONTACT_ADDRESSBOOK_ID,
 	.group_id				= CTSVC_PROPERTY_GROUP_RELATION_GROUP_ID,
 	.address_book_mode		= CTSVC_PROPERTY_ADDRESSBOOK_MODE,
-	.contact_id				= CTSVC_PROPERTY_GROUP_RELATION_CONTACT_ID
+	.contact_id				= CTSVC_PROPERTY_GROUP_RELATION_CONTACT_ID,
+	.snippet_type			= CTSVC_PROPERTY_PERSON_SNIPPET_TYPE,
+	.snippet_string			= CTSVC_PROPERTY_PERSON_SNIPPET_STRING
 };
 
 #ifdef ENABLE_LOG_FEATURE
@@ -706,6 +720,8 @@ const property_info_s __property_person[] = {
 	{CTSVC_PROPERTY_PERSON_ADDRESSBOOK_IDS,	CTSVC_SEARCH_PROPERTY_PROJECTION,	"addressbook_ids"},
 	{CTSVC_PROPERTY_PERSON_HAS_PHONENUMBER,	CTSVC_SEARCH_PROPERTY_ALL,	"has_phonenumber"},
 	{CTSVC_PROPERTY_PERSON_HAS_EMAIL,		CTSVC_SEARCH_PROPERTY_ALL,	"has_email"},
+	{CTSVC_PROPERTY_PERSON_SNIPPET_TYPE,     CTSVC_SEARCH_PROPERTY_ALL,  NULL}, /* data type */
+	{CTSVC_PROPERTY_PERSON_SNIPPET_STRING,     CTSVC_SEARCH_PROPERTY_ALL,  NULL}, /* data string */
 };
 
 const property_info_s __property_simple_contact[] = {
@@ -1018,6 +1034,8 @@ const property_info_s __property_person_contact[] = {   /* _contacts_person_cont
 	/* addressbook */
 	{CTSVC_PROPERTY_ADDRESSBOOK_NAME,				CTSVC_SEARCH_PROPERTY_ALL,	"addressbook_name"},
 	{CTSVC_PROPERTY_ADDRESSBOOK_MODE,				CTSVC_SEARCH_PROPERTY_ALL,	"addressbook_mode"},
+	{CTSVC_PROPERTY_PERSON_SNIPPET_TYPE,     CTSVC_SEARCH_PROPERTY_ALL,  NULL}, /* data type */
+	{CTSVC_PROPERTY_PERSON_SNIPPET_STRING,     CTSVC_SEARCH_PROPERTY_ALL,  NULL}, /* data string */
 };
 
 const property_info_s __property_person_number[] = {   /* _contacts_person_number */
@@ -1041,6 +1059,8 @@ const property_info_s __property_person_number[] = {   /* _contacts_person_numbe
 	{CTSVC_PROPERTY_NUMBER_NUMBER_FILTER,			CTSVC_SEARCH_PROPERTY_FILTER,	"minmatch"},
 	{CTSVC_PROPERTY_NUMBER_NORMALIZED_NUMBER,	CTSVC_SEARCH_PROPERTY_FILTER,	"normalized_number"},
 	{CTSVC_PROPERTY_NUMBER_CLEANED_NUMBER,	CTSVC_SEARCH_PROPERTY_FILTER,	"cleaned_number"},
+	{CTSVC_PROPERTY_PERSON_SNIPPET_TYPE,     CTSVC_SEARCH_PROPERTY_ALL,  NULL}, /* data type */
+	{CTSVC_PROPERTY_PERSON_SNIPPET_STRING,     CTSVC_SEARCH_PROPERTY_ALL,  NULL}, /* data string */
 };
 
 const property_info_s __property_person_email[] = {   /* _contacts_person_email */
@@ -1061,6 +1081,8 @@ const property_info_s __property_person_email[] = {   /* _contacts_person_email 
 	{CTSVC_PROPERTY_EMAIL_LABEL,					CTSVC_SEARCH_PROPERTY_PROJECTION,	"label"},
 	{CTSVC_PROPERTY_DATA_IS_PRIMARY_DEFAULT,		CTSVC_SEARCH_PROPERTY_ALL,	"is_primary_default"},
 	{CTSVC_PROPERTY_EMAIL_EMAIL,					CTSVC_SEARCH_PROPERTY_ALL,	"email"},
+	{CTSVC_PROPERTY_PERSON_SNIPPET_TYPE,     CTSVC_SEARCH_PROPERTY_ALL,  NULL}, /* data type */
+	{CTSVC_PROPERTY_PERSON_SNIPPET_STRING,     CTSVC_SEARCH_PROPERTY_ALL,  NULL}, /* data string */
 };
 
 const property_info_s __property_person_grouprel[] = {   /* _contacts_person_grouprel */
@@ -1086,6 +1108,8 @@ const property_info_s __property_person_grouprel[] = {   /* _contacts_person_gro
 	/* addressbook */
 	{CTSVC_PROPERTY_ADDRESSBOOK_NAME,				CTSVC_SEARCH_PROPERTY_ALL,	"addressbook_name"},
 	{CTSVC_PROPERTY_ADDRESSBOOK_MODE,				CTSVC_SEARCH_PROPERTY_ALL,	"addressbook_mode"},
+	{CTSVC_PROPERTY_PERSON_SNIPPET_TYPE,     CTSVC_SEARCH_PROPERTY_ALL,  NULL}, /* data type */
+	{CTSVC_PROPERTY_PERSON_SNIPPET_STRING,     CTSVC_SEARCH_PROPERTY_ALL,  NULL}, /* data string */
 };
 
 const property_info_s __property_person_group_assigned[] = {   /* _contacts_person_group_assigned */
@@ -1110,6 +1134,8 @@ const property_info_s __property_person_group_assigned[] = {   /* _contacts_pers
 	{CTSVC_PROPERTY_GROUP_RELATION_CONTACT_ID,			CTSVC_SEARCH_PROPERTY_PROJECTION,	"contact_id"},
 	/* addressbook */
 	{CTSVC_PROPERTY_ADDRESSBOOK_MODE,				CTSVC_SEARCH_PROPERTY_ALL,	"addressbook_mode"},
+	{CTSVC_PROPERTY_PERSON_SNIPPET_TYPE,     CTSVC_SEARCH_PROPERTY_ALL,  NULL}, /* data type */
+	{CTSVC_PROPERTY_PERSON_SNIPPET_STRING,     CTSVC_SEARCH_PROPERTY_ALL,  NULL}, /* data string */
 };
 
 const property_info_s __property_person_group_not_assigned[] = {   /* _contacts_person_group_not_assigned */
@@ -1132,6 +1158,8 @@ const property_info_s __property_person_group_not_assigned[] = {   /* _contacts_
 	{CTSVC_PROPERTY_CONTACT_ID,							CTSVC_SEARCH_PROPERTY_PROJECTION,	"contact_id"},
 	/* addressbook */
 	{CTSVC_PROPERTY_ADDRESSBOOK_MODE,				CTSVC_SEARCH_PROPERTY_ALL,	"addressbook_mode"},
+	{CTSVC_PROPERTY_PERSON_SNIPPET_TYPE,             CTSVC_SEARCH_PROPERTY_ALL,  NULL}, /* data type */
+	{CTSVC_PROPERTY_PERSON_SNIPPET_STRING,             CTSVC_SEARCH_PROPERTY_ALL,  NULL}, /* data string */
 };
 
 #ifdef ENABLE_LOG_FEATURE
@@ -1217,6 +1245,8 @@ const property_info_s __property_contact_grouprel[] = {   /* _contacts_contact_g
 	/* group relation */
 	{CTSVC_PROPERTY_GROUP_RELATION_GROUP_ID,		CTSVC_SEARCH_PROPERTY_ALL,	"group_id"},
 	{CTSVC_PROPERTY_GROUP_RELATION_GROUP_NAME,		CTSVC_SEARCH_PROPERTY_PROJECTION,	"group_name"},
+	{CTSVC_PROPERTY_PERSON_SNIPPET_TYPE,     CTSVC_SEARCH_PROPERTY_ALL,  NULL}, /* data type */
+	{CTSVC_PROPERTY_PERSON_SNIPPET_STRING,     CTSVC_SEARCH_PROPERTY_ALL,  NULL}, /* data string */
 };
 
 const property_info_s __property_contact_activity[] = {   /* _contacts_contact_activity */

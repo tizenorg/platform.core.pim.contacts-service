@@ -105,7 +105,7 @@ static int __ctsvc_db_event_get_record(int id, contacts_record_h *out_record)
 			"FROM "CTS_TABLE_DATA", "CTSVC_DB_VIEW_CONTACT" "
 			"ON "CTS_TABLE_DATA".contact_id = "CTSVC_DB_VIEW_CONTACT".contact_id "
 			"WHERE id = %d AND datatype = %d ",
-			id, CTSVC_DATA_EVENT);
+			id, CONTACTS_DATA_TYPE_EVENT);
 
 	ret = ctsvc_query_prepare(query, &stmt);
 	RETVM_IF(NULL == stmt, ret, "ctsvc_query_prepare() Fail(%d)", ret);
@@ -262,7 +262,7 @@ static int __ctsvc_db_event_get_all_records(int offset, int limit, contacts_list
 			"FROM "CTS_TABLE_DATA", "CTSVC_DB_VIEW_CONTACT" "
 			"ON "CTS_TABLE_DATA".contact_id = "CTSVC_DB_VIEW_CONTACT".contact_id "
 			"WHERE datatype = %d AND is_my_profile=0 ",
-			CTSVC_DATA_EVENT);
+			CONTACTS_DATA_TYPE_EVENT);
 
 	if (0 != limit) {
 		len += snprintf(query+len, sizeof(query)-len, " LIMIT %d", limit);

@@ -113,49 +113,49 @@ static int __ctsvc_db_my_profile_get_data(int id, ctsvc_my_profile_s *my_profile
 	do {
 		datatype = ctsvc_stmt_get_int(stmt, 0);
 		switch (datatype) {
-		case CTSVC_DATA_NAME:
+		case CONTACTS_DATA_TYPE_NAME:
 			ctsvc_get_data_info_name(stmt, (contacts_list_h)my_profile->name);
 			break;
-		case CTSVC_DATA_EVENT:
+		case CONTACTS_DATA_TYPE_EVENT:
 			ctsvc_get_data_info_event(stmt, (contacts_list_h)my_profile->events);
 			break;
-		case CTSVC_DATA_MESSENGER:
+		case CONTACTS_DATA_TYPE_MESSENGER:
 			ctsvc_get_data_info_messenger(stmt, (contacts_list_h)my_profile->messengers);
 			break;
-		case CTSVC_DATA_POSTAL:
+		case CONTACTS_DATA_TYPE_POSTAL:
 			ctsvc_get_data_info_address(stmt, (contacts_list_h)my_profile->postal_addrs);
 			break;
-		case CTSVC_DATA_URL:
+		case CONTACTS_DATA_TYPE_URL:
 			ctsvc_get_data_info_url(stmt, (contacts_list_h)my_profile->urls);
 			break;
-		case CTSVC_DATA_NICKNAME:
+		case CONTACTS_DATA_TYPE_NICKNAME:
 			ctsvc_get_data_info_nickname(stmt, (contacts_list_h)my_profile->nicknames);
 			break;
-		case CTSVC_DATA_NUMBER:
+		case CONTACTS_DATA_TYPE_NUMBER:
 			ctsvc_get_data_info_number(stmt, (contacts_list_h)my_profile->numbers);
 			break;
-		case CTSVC_DATA_EMAIL:
+		case CONTACTS_DATA_TYPE_EMAIL:
 			ctsvc_get_data_info_email(stmt, (contacts_list_h)my_profile->emails);
 			break;
-		case CTSVC_DATA_PROFILE:
+		case CONTACTS_DATA_TYPE_PROFILE:
 			ctsvc_get_data_info_profile(stmt, (contacts_list_h)my_profile->profiles);
 			break;
-		case CTSVC_DATA_RELATIONSHIP:
+		case CONTACTS_DATA_TYPE_RELATIONSHIP:
 			ctsvc_get_data_info_relationship(stmt, (contacts_list_h)my_profile->relationships);
 			break;
-		case CTSVC_DATA_IMAGE:
+		case CONTACTS_DATA_TYPE_IMAGE:
 			ctsvc_get_data_info_image(stmt, (contacts_list_h)my_profile->images);
 			break;
-		case CTSVC_DATA_COMPANY:
+		case CONTACTS_DATA_TYPE_COMPANY:
 			ctsvc_get_data_info_company(stmt, (contacts_list_h)my_profile->company);
 			break;
-		case CTSVC_DATA_NOTE:
+		case CONTACTS_DATA_TYPE_NOTE:
 			ctsvc_get_data_info_note(stmt, (contacts_list_h)my_profile->note);
 			break;
-		case CTSVC_DATA_EXTENSION:
+		case CONTACTS_DATA_TYPE_EXTENSION:
 			ctsvc_get_data_info_extension(stmt, (contacts_list_h)my_profile->extensions);
 			break;
-		case CTSVC_DATA_SIP:
+		case CONTACTS_DATA_TYPE_SIP:
 			ctsvc_get_data_info_sip(stmt, (contacts_list_h)my_profile->sips);
 			break;
 		default:

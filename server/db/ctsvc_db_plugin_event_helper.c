@@ -43,7 +43,7 @@ int ctsvc_db_event_insert(contacts_record_h record, int contact_id, bool is_my_p
 	snprintf(query, sizeof(query),
 			"INSERT INTO "CTS_TABLE_DATA"(contact_id, is_my_profile, datatype, data1, data2, data3, data4, data5) "
 			"VALUES(%d, %d, %d, %d, ?, ?, ?, %d)",
-			contact_id, is_my_profile, CTSVC_DATA_EVENT, event->type, event->is_leap_month);
+			contact_id, is_my_profile, CONTACTS_DATA_TYPE_EVENT, event->type, event->is_leap_month);
 	ret = ctsvc_query_prepare(query, &stmt);
 	RETVM_IF(NULL == stmt, ret, "ctsvc_query_prepare() Fail(%d)", ret);
 
@@ -141,7 +141,7 @@ int ctsvc_db_event_delete(int id, bool is_my_profile)
 	char query[CTS_SQL_MIN_LEN] = {0};
 
 	snprintf(query, sizeof(query), "DELETE FROM "CTS_TABLE_DATA" WHERE id = %d AND datatype = %d",
-			id, CTSVC_DATA_EVENT);
+			id, CONTACTS_DATA_TYPE_EVENT);
 
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_query_exec() Fail(%d)", ret);

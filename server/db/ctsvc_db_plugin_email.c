@@ -40,7 +40,7 @@ static int __ctsvc_db_email_get_person_default_email(int person_id)
 	snprintf(query, sizeof(query),
 			"SELECT id FROM "CTSVC_DB_VIEW_CONTACT" c, "CTS_TABLE_DATA" d "
 			"WHERE c.person_id = %d AND d.datatype = %d AND c.contact_id = d.contact_id AND d.is_default = 1",
-			person_id, CTSVC_DATA_EMAIL);
+			person_id, CONTACTS_DATA_TYPE_EMAIL);
 	ret = ctsvc_query_get_first_int_result(query, &default_email_id);
 	if (CONTACTS_ERROR_NONE != ret)
 		return 0;
@@ -82,7 +82,7 @@ static int __ctsvc_db_email_get_default_email_id(int contact_id)
 	char query[CTS_SQL_MAX_LEN] = {0};
 	snprintf(query, sizeof(query),
 			"SELECT id FROM "CTS_TABLE_DATA" WHERE datatype=%d AND contact_id=%d AND is_default=1",
-			CTSVC_DATA_EMAIL, contact_id);
+			CONTACTS_DATA_TYPE_EMAIL, contact_id);
 	ret = ctsvc_query_get_first_int_result(query, &email_id);
 	if (CONTACTS_ERROR_NONE != ret)
 		return 0;
@@ -96,7 +96,7 @@ static int __ctsvc_db_email_get_primary_default_email_id(int contact_id)
 	char query[CTS_SQL_MAX_LEN] = {0};
 	snprintf(query, sizeof(query),
 			"SELECT id FROM "CTS_TABLE_DATA" WHERE datatype=%d AND contact_id=%d AND is_primary_default=1",
-			CTSVC_DATA_EMAIL, contact_id);
+			CONTACTS_DATA_TYPE_EMAIL, contact_id);
 	ret = ctsvc_query_get_first_int_result(query, &email_id);
 	if (CONTACTS_ERROR_NONE != ret)
 		return 0;
@@ -112,7 +112,7 @@ static int __ctsvc_db_email_get_primary_default_contact_id(int person_id)
 	snprintf(query, sizeof(query),
 			"SELECT c.contact_id FROM "CTS_TABLE_CONTACTS" c, "CTS_TABLE_DATA" d "
 			"WHERE c.person_id = %d AND d.datatype = %d AND c.contact_id = d.contact_id AND d.is_primary_default = 1",
-			person_id, CTSVC_DATA_EMAIL);
+			person_id, CONTACTS_DATA_TYPE_EMAIL);
 	ret = ctsvc_query_get_first_int_result(query, &default_contact_id);
 	if (CONTACTS_ERROR_NONE != ret)
 		return 0;
@@ -239,7 +239,7 @@ static int __ctsvc_db_email_get_record(int id, contacts_record_h *out_record)
 			"FROM "CTS_TABLE_DATA", "CTSVC_DB_VIEW_CONTACT" "
 			"ON "CTS_TABLE_DATA".contact_id = "CTSVC_DB_VIEW_CONTACT".contact_id "
 			"WHERE id = %d AND datatype = %d ",
-			id, CTSVC_DATA_EMAIL);
+			id, CONTACTS_DATA_TYPE_EMAIL);
 
 	ret = ctsvc_query_prepare(query, &stmt);
 	RETVM_IF(NULL == stmt, ret, "ctsvc_query_prepare() Fail(%d)", ret);
@@ -402,7 +402,7 @@ static int __ctsvc_db_email_delete_record(int id)
 
 	snprintf(query, sizeof(query),
 			"SELECT id FROM "CTS_TABLE_DATA" WHERE datatype = %d AND contact_id = %d AND is_my_profile = 0 limit 1",
-			CTSVC_DATA_EMAIL, contact_id);
+			CONTACTS_DATA_TYPE_EMAIL, contact_id);
 	ret = ctsvc_query_get_first_int_result(query, &email_id);
 	if (0 < ret)
 		has_email = true;
@@ -456,7 +456,7 @@ static int __ctsvc_db_email_get_all_records(int offset, int limit, contacts_list
 			"FROM "CTS_TABLE_DATA", "CTSVC_DB_VIEW_CONTACT" "
 			"ON "CTS_TABLE_DATA".contact_id = "CTSVC_DB_VIEW_CONTACT".contact_id "
 			"WHERE datatype = %d AND is_my_profile=0 ",
-			CTSVC_DATA_EMAIL);
+			CONTACTS_DATA_TYPE_EMAIL);
 
 	if (0 != limit) {
 		len += snprintf(query+len, sizeof(query)-len, " LIMIT %d", limit);
