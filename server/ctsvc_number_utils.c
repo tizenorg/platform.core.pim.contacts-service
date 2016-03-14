@@ -838,9 +838,8 @@ int ctsvc_clean_number(const char *src, char *dest, int dest_size, bool replace_
 				else if (0x9b == src[s_pos+2])   /* ef bc 9b : ';' */
 					temp[pos++] = ';';
 			} else if (src[s_pos+1] == 0xbd) {
-				if (0x81 <= src[s_pos+2] && src[s_pos+2] <= 0x9a) {
+				if (0x81 <= src[s_pos+2] && src[s_pos+2] <= 0x9a)
 					temp[pos++] = src[s_pos+2] - 0x40; /* ef bd 81 : 'a' ~ ef bd 9a : 'z' */
-				}
 			}
 		} else if (char_len == 1) {
 			if (0x41 <= src[s_pos] && src[s_pos] <= 0x5a)        /* 'A' ~ 'Z' */
