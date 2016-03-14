@@ -38,7 +38,7 @@ static int __ctsvc_db_image_get_default_image_id(int contact_id)
 	char query[CTS_SQL_MAX_LEN] = {0};
 	snprintf(query, sizeof(query),
 			"SELECT id FROM "CTS_TABLE_DATA" WHERE datatype=%d AND contact_id=%d AND is_default=1",
-			CTSVC_DATA_IMAGE, contact_id);
+			CONTACTS_DATA_TYPE_IMAGE, contact_id);
 	ret = ctsvc_query_get_first_int_result(query, &image_id);
 	if (CONTACTS_ERROR_NONE != ret)
 		return 0;
@@ -81,7 +81,7 @@ static int __ctsvc_db_image_get_primary_default_image_id(int person_id)
 	snprintf(query, sizeof(query),
 			"SELECT id FROM "CTS_TABLE_CONTACTS" c, "CTS_TABLE_DATA" d "
 			"WHERE c.person_id = %d AND d.datatype = %d AND c.contact_id = d.contact_id AND d.is_default = 1",
-			person_id, CTSVC_DATA_IMAGE);
+			person_id, CONTACTS_DATA_TYPE_IMAGE);
 	ret = ctsvc_query_get_first_int_result(query, &default_image_id);
 	if (CONTACTS_ERROR_NONE != ret)
 		return 0;
@@ -97,7 +97,7 @@ static int __ctsvc_db_image_get_primary_default_contact_id(int person_id)
 	snprintf(query, sizeof(query),
 			"SELECT c.contact_id FROM "CTS_TABLE_CONTACTS" c, "CTS_TABLE_DATA" d "
 			"WHERE c.person_id = %d AND d.datatype = %d AND c.contact_id = d.contact_id AND d.is_primary_default = 1",
-			person_id, CTSVC_DATA_IMAGE);
+			person_id, CONTACTS_DATA_TYPE_IMAGE);
 	ret = ctsvc_query_get_first_int_result(query, &default_contact_id);
 	if (CONTACTS_ERROR_NONE != ret)
 		return 0;
@@ -265,7 +265,7 @@ static int __ctsvc_db_image_get_record(int id, contacts_record_h *out_record)
 			"FROM "CTS_TABLE_DATA", "CTSVC_DB_VIEW_CONTACT" "
 			"ON "CTS_TABLE_DATA".contact_id = "CTSVC_DB_VIEW_CONTACT".contact_id "
 			"WHERE id = %d AND datatype = %d ",
-			id, CTSVC_DATA_IMAGE);
+			id, CONTACTS_DATA_TYPE_IMAGE);
 
 	ret = ctsvc_query_prepare(query, &stmt);
 	RETVM_IF(NULL == stmt, ret, "ctsvc_query_prepare() Fail(%d)", ret);
@@ -481,7 +481,7 @@ static int __ctsvc_db_image_delete_record(int id)
 	if (is_default) {
 		snprintf(query, sizeof(query),
 				"SELECT id FROM "CTS_TABLE_DATA" WHERE datatype = %d AND contact_id = %d AND is_my_profile = 0 limit 1",
-				CTSVC_DATA_IMAGE, contact_id);
+				CONTACTS_DATA_TYPE_IMAGE, contact_id);
 		ret = ctsvc_query_get_first_int_result(query, &image_id);
 
 		if (image_id) {
@@ -525,7 +525,7 @@ static int __ctsvc_db_image_get_all_records(int offset, int limit, contacts_list
 			"FROM "CTS_TABLE_DATA", "CTSVC_DB_VIEW_CONTACT" "
 			"ON "CTS_TABLE_DATA".contact_id = "CTSVC_DB_VIEW_CONTACT".contact_id "
 			"WHERE datatype = %d AND is_my_profile=0 ",
-			CTSVC_DATA_IMAGE);
+			CONTACTS_DATA_TYPE_IMAGE);
 
 	if (0 != limit) {
 		len += snprintf(query+len, sizeof(query)-len, " LIMIT %d", limit);

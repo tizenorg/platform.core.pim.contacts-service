@@ -72,6 +72,30 @@ _CONTACTS_HANDLE(contacts_h)
  */
 
 /**
+ * @brief Enumeration for contacts data type.
+ *
+ * @since_tizen 3.0
+ *
+ */
+typedef enum {
+	CONTACTS_DATA_TYPE_NAME = 1,
+	CONTACTS_DATA_TYPE_POSTAL = 2,
+	CONTACTS_DATA_TYPE_MESSENGER = 3,
+	CONTACTS_DATA_TYPE_URL = 4,
+	CONTACTS_DATA_TYPE_EVENT = 5,
+	CONTACTS_DATA_TYPE_COMPANY = 6,
+	CONTACTS_DATA_TYPE_NICKNAME = 7,
+	CONTACTS_DATA_TYPE_NUMBER = 8,
+	CONTACTS_DATA_TYPE_EMAIL = 9,
+	CONTACTS_DATA_TYPE_PROFILE = 10,
+	CONTACTS_DATA_TYPE_RELATIONSHIP = 11,
+	CONTACTS_DATA_TYPE_NOTE = 12,
+	CONTACTS_DATA_TYPE_IMAGE = 13,
+	CONTACTS_DATA_TYPE_SIP = 14,
+	CONTACTS_DATA_TYPE_EXTENSION = 100
+} contacts_data_type_e;
+
+/**
  * @brief Enumeration for contacts number type.
  *
  * @details The number can be made with a set of values by specifying one or more values.

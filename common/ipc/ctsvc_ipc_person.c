@@ -59,6 +59,10 @@ static int __ctsvc_ipc_unmarshal_person(pims_ipc_data_h ipc_data, const char *vi
 			break;
 		if (ctsvc_ipc_unmarshal_string(ipc_data, &person_p->addressbook_ids) != CONTACTS_ERROR_NONE)
 			break;
+		if (ctsvc_ipc_unmarshal_int(ipc_data, &person_p->snippet_type) != CONTACTS_ERROR_NONE)
+			break;
+		if (ctsvc_ipc_unmarshal_string(ipc_data, &person_p->snippet_string) != CONTACTS_ERROR_NONE)
+			break;
 
 		return CONTACTS_ERROR_NONE;
 	} while (0);
@@ -104,6 +108,10 @@ static int __ctsvc_ipc_marshal_person(const contacts_record_h record,
 		if (ctsvc_ipc_marshal_int((person_p->link_count), ipc_data) != CONTACTS_ERROR_NONE)
 			break;
 		if (ctsvc_ipc_marshal_string((person_p->addressbook_ids), ipc_data) != CONTACTS_ERROR_NONE)
+			break;
+		if (ctsvc_ipc_marshal_int((person_p->snippet_type), ipc_data) != CONTACTS_ERROR_NONE)
+			break;
+		if (ctsvc_ipc_marshal_string((person_p->snippet_string), ipc_data) != CONTACTS_ERROR_NONE)
 			break;
 
 		return CONTACTS_ERROR_NONE;
