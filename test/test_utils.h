@@ -14,4 +14,9 @@
  * limitations under the License.
  */
 
-int test_query(int argc, char **argv);
+#ifndef __TEST_UTILS_H__
+#define __TEST_UTILS_H__
+
+void test_utils_cleanup(void);
+
+#endif /* __TEST_UTILS_H__ */
