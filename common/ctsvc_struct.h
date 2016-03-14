@@ -60,24 +60,6 @@
 	} while (0)
 
 enum {
-	CTSVC_DATA_NAME = 1,
-	CTSVC_DATA_POSTAL = 2,
-	CTSVC_DATA_MESSENGER = 3,
-	CTSVC_DATA_URL = 4,
-	CTSVC_DATA_EVENT = 5,
-	CTSVC_DATA_COMPANY = 6,
-	CTSVC_DATA_NICKNAME = 7,
-	CTSVC_DATA_NUMBER = 8,
-	CTSVC_DATA_EMAIL = 9,
-	CTSVC_DATA_PROFILE = 10,
-	CTSVC_DATA_RELATIONSHIP = 11,
-	CTSVC_DATA_NOTE = 12,
-	CTSVC_DATA_IMAGE = 13,
-	CTSVC_DATA_SIP = 14,
-	CTSVC_DATA_EXTENSION = 100
-};
-
-enum {
 	CTSVC_PERMISSION_CONTACT_NONE = 0x0,
 	CTSVC_PERMISSION_CONTACT_READ = 0x1,
 	CTSVC_PERMISSION_CONTACT_WRITE = 0x2,
@@ -270,6 +252,8 @@ typedef struct {
 	char *status;
 	int link_count;
 	char *addressbook_ids;
+	int snippet_type;
+	char *snippet_string;
 } ctsvc_person_s;
 
 typedef struct {

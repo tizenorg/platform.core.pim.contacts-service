@@ -16,6 +16,7 @@
  * limitations under the License.
  *
  */
+
 #include "contacts.h"
 #include "ctsvc_internal.h"
 #include "ctsvc_db_schema.h"
@@ -31,12 +32,21 @@
 #include "ctsvc_record.h"
 #include "ctsvc_notification.h"
 #include "ctsvc_notify.h"
+#include "ctsvc_utils_string.h"
 
 #ifdef _CONTACTS_IPC_SERVER
 #include "ctsvc_server_change_subject.h"
 #endif
 
-int ctsvc_db_person_create_record_from_stmt_with_projection(cts_stmt stmt, unsigned int *projection, int projection_count, contacts_record_h *record)
+int ctsvc_db_person_create_record_from_stmt_with_projection(cts_stmt stmt,
+		unsigned int *projection,
+		int projection_count,
+		bool is_snippet,
+		const char *keyword,
+		const char *start_match,
+		const char *end_match,
+		int token_number,
+		contacts_record_h *record)
 {
 	ctsvc_person_s *person;
 	char full_path[CTSVC_IMG_FULL_PATH_SIZE_MAX] = {0};
@@ -118,6 +128,17 @@ int ctsvc_db_person_create_record_from_stmt_with_projection(cts_stmt stmt, unsig
 				value++; /* fix warning */
 			}
 			break;
+		case CTSVC_PROPERTY_PERSON_SNIPPET_TYPE:
+			person->snippet_type = ctsvc_stmt_get_int(stmt, i);
+			break;
+		case CTSVC_PROPERTY_PERSON_SNIPPET_STRING:
+			temp = ctsvc_stmt_get_text(stmt, i);
+			free(person->snippet_string);
+			person->snippet_string = ctsvc_utils_get_modified_str(temp, is_snippet,
+					keyword, start_match, end_match, token_number);
+			if (NULL == person->snippet_string)
+				person->snippet_string = SAFE_STRDUP(temp);
+			break;
 		default:
 			ASSERT_NOT_REACHED("property_id(0x%0x) is not supported in value(person)", property_id);
 			return CONTACTS_ERROR_INVALID_PARAMETER;
@@ -144,13 +165,15 @@ int ctsvc_db_person_create_record_from_stmt_with_query(cts_stmt stmt, contacts_q
 			projection[i] = s_query->properties[i].property_id;
 
 		int ret = ctsvc_db_person_create_record_from_stmt_with_projection(stmt,
-				projection, s_query->property_count, record);
+				projection, s_query->property_count, false, NULL, NULL, NULL, -1, record);
 
 		free(projection);
 
 		return ret;
 	} else {
-		return ctsvc_db_person_create_record_from_stmt_with_projection(stmt, s_query->projection, s_query->projection_count, record);
+		return ctsvc_db_person_create_record_from_stmt_with_projection(stmt,
+				s_query->projection, s_query->projection_count, false, NULL, NULL, NULL,
+				-1, record);
 	}
 
 }
@@ -402,7 +425,7 @@ static inline int __ctsvc_db_update_person_default(int person_id, int datatype)
 		}
 		ctsvc_stmt_finalize(stmt);
 
-		if (CTSVC_DATA_IMAGE == datatype) {
+		if (CONTACTS_DATA_TYPE_IMAGE == datatype) {
 			if (image_thumbnail_path) {
 				snprintf(query, sizeof(query),
 						"UPDATE "CTS_TABLE_PERSONS" SET image_thumbnail_path=? WHERE person_id=%d", person_id);
@@ -454,7 +477,7 @@ static int __ctsvc_get_thumbnail_contact_id(int person_id)
 			"SELECT D.contact_id FROM "CTS_TABLE_CONTACTS" C, "CTS_TABLE_DATA" D "
 			"ON C.contact_id = D.contact_id AND C.deleted = 0 "
 			"WHERE C.person_id=%d AND D.datatype=%d AND is_primary_default=1 AND D.is_my_profile = 0",
-			person_id, CTSVC_DATA_IMAGE);
+			person_id, CONTACTS_DATA_TYPE_IMAGE);
 	ret = ctsvc_query_get_first_int_result(query, &contact_id);
 	RETV_IF(CONTACTS_ERROR_NONE != ret, -1);
 	return contact_id;
@@ -474,9 +497,9 @@ int ctsvc_db_update_person(contacts_record_h record)
 	ret = ctsvc_begin_trans();
 	RETVM_IF(ret, ret, "ctsvc_begin_trans() Fail(%d)", ret);
 
-	__ctsvc_db_update_person_default(contact->person_id, CTSVC_DATA_NUMBER);
-	__ctsvc_db_update_person_default(contact->person_id, CTSVC_DATA_EMAIL);
-	__ctsvc_db_update_person_default(contact->person_id, CTSVC_DATA_IMAGE);
+	__ctsvc_db_update_person_default(contact->person_id, CONTACTS_DATA_TYPE_NUMBER);
+	__ctsvc_db_update_person_default(contact->person_id, CONTACTS_DATA_TYPE_EMAIL);
+	__ctsvc_db_update_person_default(contact->person_id, CONTACTS_DATA_TYPE_IMAGE);
 
 	has_phonenumber = __ctsvc_get_has_column(contact->person_id, "has_phonenumber");
 	has_email = __ctsvc_get_has_column(contact->person_id, "has_email");

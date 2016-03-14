@@ -99,7 +99,7 @@ int ctsvc_db_company_insert(contacts_record_h record, int contact_id, bool is_my
 				"INSERT INTO "CTS_TABLE_DATA"(id, contact_id, is_my_profile, datatype, is_default, data1, data2, data3, data4, "
 				"data5, data6, data7, data8, data9, data10, data11, data12) "
 				"VALUES(%d, %d, %d, %d, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-				company_id, contact_id, is_my_profile, CTSVC_DATA_COMPANY);
+				company_id, contact_id, is_my_profile, CONTACTS_DATA_TYPE_COMPANY);
 
 		ret = ctsvc_query_prepare(query, &stmt);
 		RETVM_IF(NULL == stmt, ret, "ctsvc_query_prepare() Fail(%d)", ret);
@@ -297,7 +297,7 @@ int ctsvc_db_company_delete(int id, bool is_my_profile)
 	char query[CTS_SQL_MIN_LEN] = {0};
 
 	snprintf(query, sizeof(query), "DELETE FROM "CTS_TABLE_DATA" WHERE id = %d AND datatype = %d",
-			id, CTSVC_DATA_COMPANY);
+			id, CONTACTS_DATA_TYPE_COMPANY);
 
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_query_exec() Fail(%d)", ret);
