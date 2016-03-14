@@ -1557,6 +1557,376 @@ DATA_FREE:
 	return;
 }
 
+void ctsvc_ipc_server_db_search_records_for_snippet(pims_ipc_h ipc,
+		pims_ipc_data_h indata, pims_ipc_data_h *outdata, void *userdata)
+{
+	int ret = CONTACTS_ERROR_NONE;
+	char *view_uri = NULL;
+	char *keyword = NULL;
+	int offset = 0;
+	int limit = 0;
+	contacts_list_h list = NULL;
+	contacts_h contact = NULL;
+	char *start_match = NULL;
+	char *end_match = NULL;
+	int token_number = 0;
+
+	if (indata) {
+		ret = ctsvc_ipc_unmarshal_handle(indata, &contact);
+		if (CONTACTS_ERROR_NONE != ret) {
+			ERR("ctsvc_ipc_unmarshal_handle() Fail(%d)", ret);
+			goto ERROR_RETURN;
+		}
+		ret = ctsvc_ipc_unmarshal_string(indata, &view_uri);
+		if (ret != CONTACTS_ERROR_NONE) {
+			ERR("ctsvc_ipc_unmarshal_record() Fail(%d)", ret);
+			goto ERROR_RETURN;
+		}
+		ret = ctsvc_ipc_unmarshal_string(indata, &keyword);
+		if (ret != CONTACTS_ERROR_NONE) {
+			ERR("ctsvc_ipc_unmarshal_record() Fail(%d)", ret);
+			goto ERROR_RETURN;
+		}
+		ret = ctsvc_ipc_unmarshal_int(indata, &offset);
+		if (ret != CONTACTS_ERROR_NONE) {
+			ERR("ctsvc_ipc_unmarshal_int() Fail(%d)", ret);
+			goto ERROR_RETURN;
+		}
+		ret = ctsvc_ipc_unmarshal_int(indata, &limit);
+		if (ret != CONTACTS_ERROR_NONE) {
+			ERR("ctsvc_ipc_unmarshal_int() Fail(%d)", ret);
+			goto ERROR_RETURN;
+		}
+		ret = ctsvc_ipc_unmarshal_string(indata, &start_match);
+		if (ret != CONTACTS_ERROR_NONE) {
+			ERR("ctsvc_ipc_unmarshal_record() Fail");
+			goto ERROR_RETURN;
+		}
+		ret = ctsvc_ipc_unmarshal_string(indata, &end_match);
+		if (ret != CONTACTS_ERROR_NONE) {
+			ERR("ctsvc_ipc_unmarshal_record() Fail");
+			goto ERROR_RETURN;
+		}
+		ret = ctsvc_ipc_unmarshal_int(indata, &token_number);
+		if (ret != CONTACTS_ERROR_NONE) {
+			ERR("ctsvc_ipc_unmarshal_int() Fail(%d)", ret);
+			goto ERROR_RETURN;
+		}
+	} else {
+		ERR("ctsvc_ipc_server_db_insert_record() Fail");
+		goto ERROR_RETURN;
+	}
+
+	if (!ctsvc_have_permission(ipc, ctsvc_required_read_permission(view_uri))) {
+		ret = CONTACTS_ERROR_PERMISSION_DENIED;
+		goto ERROR_RETURN;
+	}
+
+	ret = ctsvc_db_search_records_for_snippet(view_uri, keyword, offset, limit,
+			start_match, end_match, token_number, &list);
+
+	if (outdata) {
+		*outdata = pims_ipc_data_create(0);
+		if (NULL == *outdata) {
+			ERR("pims_ipc_data_create() Fail");
+			goto DATA_FREE;
+		}
+		if (CONTACTS_ERROR_NONE != ctsvc_ipc_marshal_int(ret, *outdata)) {
+			pims_ipc_data_destroy(*outdata);
+			*outdata = NULL;
+			ERR("ctsvc_ipc_marshal_int() Fail");
+			goto DATA_FREE;
+		}
+
+		if (CONTACTS_ERROR_NO_DATA == ret) {
+			DBG("no data");
+		} else if (CONTACTS_ERROR_NONE == ret) {
+			ret = ctsvc_ipc_marshal_list(list, *outdata);
+
+			if (ret != CONTACTS_ERROR_NONE) {
+				ERR("ctsvc_ipc_unmarshal_int() Fail");
+				goto DATA_FREE;
+			}
+		}
+	} else {
+		ERR("outdata is NULL");
+	}
+	goto DATA_FREE;
+
+ERROR_RETURN:
+	if (outdata) {
+		*outdata = pims_ipc_data_create(0);
+		if (NULL == *outdata) {
+			ERR("pims_ipc_data_create() Fail");
+			goto DATA_FREE;
+		}
+		if (CONTACTS_ERROR_NONE != ctsvc_ipc_marshal_int(ret, *outdata)) {
+			pims_ipc_data_destroy(*outdata);
+			*outdata = NULL;
+			ERR("ctsvc_ipc_marshal_int() Fail");
+			goto DATA_FREE;
+		}
+	} else {
+		ERR("outdata is NULL");
+	}
+DATA_FREE:
+	ctsvc_handle_destroy(contact);
+	contacts_list_destroy(list, true);
+	free(view_uri);
+	free(keyword);
+	ctsvc_server_start_timeout();
+	return;
+}
+
+void ctsvc_ipc_server_db_search_records_with_range_for_snippet(pims_ipc_h ipc,
+		pims_ipc_data_h indata, pims_ipc_data_h *outdata, void *userdata)
+{
+	int ret = CONTACTS_ERROR_NONE;
+	char *view_uri = NULL;
+	char *keyword = NULL;
+	int offset = 0;
+	int limit = 0;
+	int range = 0;
+	contacts_list_h list = NULL;
+	contacts_h contact = NULL;
+	char *start_match = NULL;
+	char *end_match = NULL;
+	int token_number = 0;
+
+	if (indata) {
+		ret = ctsvc_ipc_unmarshal_handle(indata, &contact);
+		if (CONTACTS_ERROR_NONE != ret) {
+			ERR("ctsvc_ipc_unmarshal_handle() Fail(%d)", ret);
+			goto ERROR_RETURN;
+		}
+		ret = ctsvc_ipc_unmarshal_string(indata, &view_uri);
+		if (ret != CONTACTS_ERROR_NONE) {
+			ERR("ctsvc_ipc_unmarshal_record() Fail");
+			goto ERROR_RETURN;
+		}
+		ret = ctsvc_ipc_unmarshal_string(indata, &keyword);
+		if (ret != CONTACTS_ERROR_NONE) {
+			ERR("ctsvc_ipc_unmarshal_record() Fail");
+			goto ERROR_RETURN;
+		}
+		ret = ctsvc_ipc_unmarshal_int(indata, &offset);
+		if (ret != CONTACTS_ERROR_NONE) {
+			ERR("ctsvc_ipc_unmarshal_int() Fail");
+			goto ERROR_RETURN;
+		}
+		ret = ctsvc_ipc_unmarshal_int(indata, &limit);
+		if (ret != CONTACTS_ERROR_NONE) {
+			ERR("ctsvc_ipc_unmarshal_int() Fail");
+			goto ERROR_RETURN;
+		}
+		ret = ctsvc_ipc_unmarshal_int(indata, &range);
+		if (ret != CONTACTS_ERROR_NONE) {
+			ERR("ctsvc_ipc_unmarshal_int() Fail");
+			goto ERROR_RETURN;
+		}
+		ret = ctsvc_ipc_unmarshal_string(indata, &start_match);
+		if (ret != CONTACTS_ERROR_NONE) {
+			ERR("ctsvc_ipc_unmarshal_record() Fail");
+			goto ERROR_RETURN;
+		}
+		ret = ctsvc_ipc_unmarshal_string(indata, &end_match);
+		if (ret != CONTACTS_ERROR_NONE) {
+			ERR("ctsvc_ipc_unmarshal_record() Fail");
+			goto ERROR_RETURN;
+		}
+		ret = ctsvc_ipc_unmarshal_int(indata, &token_number);
+		if (ret != CONTACTS_ERROR_NONE) {
+			ERR("ctsvc_ipc_unmarshal_int() Fail(%d)", ret);
+			goto ERROR_RETURN;
+		}
+	} else {
+		ERR("ctsvc_ipc_server_db_insert_record() Fail");
+		goto ERROR_RETURN;
+	}
+
+	if (!ctsvc_have_permission(ipc, ctsvc_required_read_permission(view_uri))) {
+		ret = CONTACTS_ERROR_PERMISSION_DENIED;
+		goto ERROR_RETURN;
+	}
+
+	ret = ctsvc_db_search_records_with_range_for_snippet(view_uri, keyword, offset,
+			limit, range, start_match, end_match, token_number, &list);
+
+	if (outdata) {
+		*outdata = pims_ipc_data_create(0);
+		if (NULL == *outdata) {
+			ERR("pims_ipc_data_create() Fail");
+			goto DATA_FREE;
+		}
+		if (CONTACTS_ERROR_NONE != ctsvc_ipc_marshal_int(ret, *outdata)) {
+			pims_ipc_data_destroy(*outdata);
+			*outdata = NULL;
+			ERR("ctsvc_ipc_marshal_int() Fail");
+			goto DATA_FREE;
+		}
+
+		if (CONTACTS_ERROR_NO_DATA == ret) {
+			DBG("no data");
+		} else if (CONTACTS_ERROR_NONE == ret) {
+			ret = ctsvc_ipc_marshal_list(list, *outdata);
+
+			if (ret != CONTACTS_ERROR_NONE) {
+				ERR("ctsvc_ipc_unmarshal_int() Fail");
+				goto DATA_FREE;
+			}
+		}
+	} else {
+		ERR("outdata is NULL");
+	}
+	goto DATA_FREE;
+
+ERROR_RETURN:
+	if (outdata) {
+		*outdata = pims_ipc_data_create(0);
+		if (NULL == *outdata) {
+			ERR("pims_ipc_data_create() Fail");
+			goto DATA_FREE;
+		}
+		if (CONTACTS_ERROR_NONE != ctsvc_ipc_marshal_int(ret, *outdata)) {
+			pims_ipc_data_destroy(*outdata);
+			*outdata = NULL;
+			ERR("ctsvc_ipc_marshal_int() Fail");
+			goto DATA_FREE;
+		}
+	} else {
+		ERR("outdata is NULL");
+	}
+
+DATA_FREE:
+	ctsvc_handle_destroy(contact);
+	contacts_list_destroy(list, true);
+	free(view_uri);
+	free(keyword);
+	ctsvc_server_start_timeout();
+	return;
+}
+
+void ctsvc_ipc_server_db_search_records_with_query_for_snippet(pims_ipc_h ipc,
+		pims_ipc_data_h indata, pims_ipc_data_h *outdata, void *userdata)
+{
+	int ret = CONTACTS_ERROR_NONE;
+	contacts_query_h query = NULL;
+	char *keyword = NULL;
+	int offset = 0;
+	int limit = 0;
+	contacts_list_h list = NULL;
+	contacts_h contact = NULL;
+	char *start_match = NULL;
+	char *end_match = NULL;
+	int token_number = 0;
+
+	if (indata) {
+		ret = ctsvc_ipc_unmarshal_handle(indata, &contact);
+		if (CONTACTS_ERROR_NONE != ret) {
+			ERR("ctsvc_ipc_unmarshal_handle() Fail(%d)", ret);
+			goto ERROR_RETURN;
+		}
+		ret = ctsvc_ipc_unmarshal_query(indata, &query);
+		if (ret != CONTACTS_ERROR_NONE) {
+			ERR("ctsvc_ipc_unmarshal_record() Fail");
+			goto ERROR_RETURN;
+		}
+		ret = ctsvc_ipc_unmarshal_string(indata, &keyword);
+		if (ret != CONTACTS_ERROR_NONE) {
+			ERR("ctsvc_ipc_unmarshal_record() Fail");
+			goto ERROR_RETURN;
+		}
+		ret = ctsvc_ipc_unmarshal_int(indata, &offset);
+		if (ret != CONTACTS_ERROR_NONE) {
+			ERR("ctsvc_ipc_unmarshal_int() Fail");
+			goto ERROR_RETURN;
+		}
+		ret = ctsvc_ipc_unmarshal_int(indata, &limit);
+		if (ret != CONTACTS_ERROR_NONE) {
+			ERR("ctsvc_ipc_unmarshal_int() Fail");
+			goto ERROR_RETURN;
+		}
+		ret = ctsvc_ipc_unmarshal_string(indata, &start_match);
+		if (ret != CONTACTS_ERROR_NONE) {
+			ERR("ctsvc_ipc_unmarshal_record() Fail");
+			goto ERROR_RETURN;
+		}
+		ret = ctsvc_ipc_unmarshal_string(indata, &end_match);
+		if (ret != CONTACTS_ERROR_NONE) {
+			ERR("ctsvc_ipc_unmarshal_record() Fail");
+			goto ERROR_RETURN;
+		}
+		ret = ctsvc_ipc_unmarshal_int(indata, &token_number);
+		if (ret != CONTACTS_ERROR_NONE) {
+			ERR("ctsvc_ipc_unmarshal_int() Fail(%d)", ret);
+			goto ERROR_RETURN;
+		}
+	} else {
+		ERR("ctsvc_ipc_server_db_insert_record() Fail");
+		goto ERROR_RETURN;
+	}
+
+	if (!ctsvc_have_permission(ipc, ctsvc_required_read_permission(((ctsvc_query_s*)query)->view_uri))) {
+		ret = CONTACTS_ERROR_PERMISSION_DENIED;
+		goto ERROR_RETURN;
+	}
+
+	ret = ctsvc_db_search_records_with_query_for_snippet(query, keyword, offset, limit,
+			start_match, end_match, token_number, &list);
+
+	if (outdata) {
+		*outdata = pims_ipc_data_create(0);
+		if (NULL == *outdata) {
+			ERR("pims_ipc_data_create() Fail");
+			goto DATA_FREE;
+		}
+		if (CONTACTS_ERROR_NONE != ctsvc_ipc_marshal_int(ret, *outdata)) {
+			pims_ipc_data_destroy(*outdata);
+			*outdata = NULL;
+			ERR("ctsvc_ipc_marshal_int() Fail");
+			goto DATA_FREE;
+		}
+
+		if (CONTACTS_ERROR_NO_DATA == ret) {
+			DBG("no data");
+		} else if (CONTACTS_ERROR_NONE == ret) {
+			ret = ctsvc_ipc_marshal_list(list, *outdata);
+
+			if (ret != CONTACTS_ERROR_NONE) {
+				ERR("ctsvc_ipc_marshal_list Fail");
+				goto DATA_FREE;
+			}
+		}
+	} else {
+		ERR("outdata is NULL");
+	}
+	goto DATA_FREE;
+
+ERROR_RETURN:
+	if (outdata) {
+		*outdata = pims_ipc_data_create(0);
+		if (NULL == *outdata) {
+			ERR("pims_ipc_data_create() Fail");
+			goto DATA_FREE;
+		}
+		if (CONTACTS_ERROR_NONE != ctsvc_ipc_marshal_int(ret, *outdata)) {
+			pims_ipc_data_destroy(*outdata);
+			*outdata = NULL;
+			ERR("ctsvc_ipc_marshal_int() Fail");
+			goto DATA_FREE;
+		}
+	} else {
+		ERR("outdata is NULL");
+	}
+DATA_FREE:
+	ctsvc_handle_destroy(contact);
+	contacts_list_destroy(list, true);
+	contacts_query_destroy(query);
+	free(keyword);
+	ctsvc_server_start_timeout();
+	return;
+}
+
 void ctsvc_ipc_server_db_search_records(pims_ipc_h ipc, pims_ipc_data_h indata,
 		pims_ipc_data_h *outdata, void *userdata)
 {
