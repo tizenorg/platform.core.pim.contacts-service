@@ -504,49 +504,49 @@ void ctsvc_db_data_delete_callback(sqlite3_context  *context,
 	datatype = sqlite3_value_int(argv[1]);
 
 	switch (datatype) {
-	case CTSVC_DATA_NAME:
+	case CONTACTS_DATA_TYPE_NAME:
 		ctsvc_set_name_noti();
 		break;
-	case CTSVC_DATA_POSTAL:
+	case CONTACTS_DATA_TYPE_POSTAL:
 		ctsvc_set_address_noti();
 		break;
-	case CTSVC_DATA_MESSENGER:
+	case CONTACTS_DATA_TYPE_MESSENGER:
 		ctsvc_set_messenger_noti();
 		break;
-	case CTSVC_DATA_URL:
+	case CONTACTS_DATA_TYPE_URL:
 		ctsvc_set_url_noti();
 		break;
-	case CTSVC_DATA_EVENT:
+	case CONTACTS_DATA_TYPE_EVENT:
 		ctsvc_set_event_noti();
 		break;
-	case CTSVC_DATA_COMPANY:
+	case CONTACTS_DATA_TYPE_COMPANY:
 		ctsvc_set_company_noti();
 		break;
-	case CTSVC_DATA_NICKNAME:
+	case CONTACTS_DATA_TYPE_NICKNAME:
 		ctsvc_set_nickname_noti();
 		break;
-	case CTSVC_DATA_NUMBER:
+	case CONTACTS_DATA_TYPE_NUMBER:
 		ctsvc_set_number_noti();
 		break;
-	case CTSVC_DATA_EMAIL:
+	case CONTACTS_DATA_TYPE_EMAIL:
 		ctsvc_set_email_noti();
 		break;
-	case CTSVC_DATA_PROFILE:
+	case CONTACTS_DATA_TYPE_PROFILE:
 		ctsvc_set_profile_noti();
 		break;
-	case CTSVC_DATA_RELATIONSHIP:
+	case CONTACTS_DATA_TYPE_RELATIONSHIP:
 		ctsvc_set_relationship_noti();
 		break;
-	case CTSVC_DATA_NOTE:
+	case CONTACTS_DATA_TYPE_NOTE:
 		ctsvc_set_note_noti();
 		break;
-	case CTSVC_DATA_IMAGE:
+	case CONTACTS_DATA_TYPE_IMAGE:
 		ctsvc_set_image_noti();
 		break;
-	case CTSVC_DATA_EXTENSION:
+	case CONTACTS_DATA_TYPE_EXTENSION:
 		ctsvc_set_data_noti();
 		break;
-	case CTSVC_DATA_SIP:
+	case CONTACTS_DATA_TYPE_SIP:
 		ctsvc_set_sip_noti();
 		break;
 	default:

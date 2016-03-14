@@ -62,7 +62,7 @@ static inline int __ctsvc_get_person_default_number_value(int id, contacts_recor
 			"FROM %s, %s ON data.is_primary_default=1 AND data.datatype=%d "
 			"AND data.contact_id = contacts.contact_id AND contacts.deleted = 0 "
 			"WHERE contacts.person_id = %d",
-			CTS_TABLE_CONTACTS, CTS_TABLE_DATA, CTSVC_DATA_NUMBER, id);
+			CTS_TABLE_CONTACTS, CTS_TABLE_DATA, CONTACTS_DATA_TYPE_NUMBER, id);
 
 	ret = ctsvc_query_prepare(query, &stmt);
 	RETVM_IF(NULL == stmt, ret, "ctsvc_query_prepare() Fail(%d)", ret);
@@ -112,7 +112,7 @@ static inline int __ctsvc_get_person_default_email_value(int id, contacts_record
 			"FROM %s, %s ON data.is_primary_default=1 AND data.datatype=%d "
 			"AND data.contact_id = contacts.contact_id AND contacts.deleted = 0 "
 			"WHERE contacts.person_id = %d",
-			CTS_TABLE_CONTACTS, CTS_TABLE_DATA, CTSVC_DATA_EMAIL, id);
+			CTS_TABLE_CONTACTS, CTS_TABLE_DATA, CONTACTS_DATA_TYPE_EMAIL, id);
 
 	ret = ctsvc_query_prepare(query, &stmt);
 	RETVM_IF(NULL == stmt, ret, "ctsvc_query_prepare() Fail(%d)", ret);
@@ -161,7 +161,7 @@ static inline int __ctsvc_get_person_default_image_value(int id, contacts_record
 			"ON data.is_primary_default=1 AND data.datatype=%d AND data.is_my_profile = 0 "
 			"AND data.contact_id = contacts.contact_id AND contacts.deleted = 0 "
 			"WHERE contacts.person_id = %d",
-			CTSVC_DATA_IMAGE, id);
+			CONTACTS_DATA_TYPE_IMAGE, id);
 
 	ret = ctsvc_query_prepare(query, &stmt);
 	RETVM_IF(NULL == stmt, ret, "ctsvc_query_prepare() Fail(%d)", ret);
@@ -287,7 +287,7 @@ static inline int __ctsvc_put_person_default_image(int person_id, int id)
 			"FROM "CTS_TABLE_DATA" D, "CTS_TABLE_CONTACTS" C "
 			"ON D.contact_id = C.contact_id AND C.deleted = 0 "
 			"WHERE D.datatype=%d AND D.is_my_profile = 0 AND C.person_id=%d AND D.id=%d",
-			CTSVC_DATA_IMAGE, person_id, id);
+			CONTACTS_DATA_TYPE_IMAGE, person_id, id);
 	ret = ctsvc_query_prepare(query, &stmt);
 	if (NULL == stmt) {
 		ERR("ctsvc_query_prepare Fail(%d)", ret);
@@ -312,7 +312,7 @@ static inline int __ctsvc_put_person_default_image(int person_id, int id)
 			"UPDATE "CTS_TABLE_DATA" SET is_primary_default=0 WHERE datatype=%d AND is_my_profile = 0 "
 			"AND contact_id IN (SELECT contact_id FROM "CTS_TABLE_CONTACTS" "
 			"WHERE person_id=%d AND deleted = 0) ",
-			CTSVC_DATA_IMAGE, person_id);
+			CONTACTS_DATA_TYPE_IMAGE, person_id);
 	ret = ctsvc_query_exec(query);
 	if (ret < CONTACTS_ERROR_NONE) {
 		ERR("ctsvc_query_exec() Fail(%d)", ret);
@@ -326,7 +326,7 @@ static inline int __ctsvc_put_person_default_image(int person_id, int id)
 		snprintf(query, sizeof(query),
 				"UPDATE "CTS_TABLE_DATA" SET is_default=0 WHERE datatype=%d  AND is_my_profile = 0 "
 				"AND contact_id = (SELECT contact_id FROM "CTS_TABLE_DATA" WHERE id=%d) ",
-				CTSVC_DATA_IMAGE, id);
+				CONTACTS_DATA_TYPE_IMAGE, id);
 
 		ret = ctsvc_query_exec(query);
 		if (CONTACTS_ERROR_NONE != ret) {
@@ -472,9 +472,9 @@ static inline int __ctsvc_put_person_default_data(int person_id, int id, int dat
 		return ret;
 	}
 
-	if (datatype == CTSVC_DATA_NUMBER)
+	if (datatype == CONTACTS_DATA_TYPE_NUMBER)
 		source_type = CONTACTS_DISPLAY_NAME_SOURCE_TYPE_NUMBER;
-	else if (datatype == CTSVC_DATA_EMAIL)
+	else if (datatype == CONTACTS_DATA_TYPE_EMAIL)
 		source_type = CONTACTS_DISPLAY_NAME_SOURCE_TYPE_EMAIL;
 
 	if (CONTACTS_DISPLAY_NAME_SOURCE_TYPE_INVALID != source_type)
@@ -629,7 +629,7 @@ int ctsvc_person_aggregate(int person_id)
 				"SELECT D.id FROM "CTS_TABLE_CONTACTS" C, "CTS_TABLE_DATA" D "
 				"WHERE C.person_id=%d AND C.contact_id=D.contact_id AND C.deleted = 0 "
 				"AND D.datatype=%d AND D.is_primary_default = 1 AND D.data3='%s'",
-				person->person_id, CTSVC_DATA_IMAGE, temp);
+				person->person_id, CONTACTS_DATA_TYPE_IMAGE, temp);
 		ret = ctsvc_query_get_first_int_result(query, &id);
 		if (ret == CONTACTS_ERROR_NONE)
 			image_thumbnail_path = SAFE_STRDUP(temp);
@@ -981,10 +981,10 @@ int ctsvc_person_link_person(int base_person_id, int person_id)
 	ctsvc_person_aggregate(base_person_id);
 
 	if (default_number_id)
-		__ctsvc_put_person_default_data(base_person_id, default_number_id, CTSVC_DATA_NUMBER);
+		__ctsvc_put_person_default_data(base_person_id, default_number_id, CONTACTS_DATA_TYPE_NUMBER);
 
 	if (default_email_id)
-		__ctsvc_put_person_default_data(base_person_id, default_email_id, CTSVC_DATA_EMAIL);
+		__ctsvc_put_person_default_data(base_person_id, default_email_id, CONTACTS_DATA_TYPE_EMAIL);
 
 	if (default_image_id)
 		__ctsvc_put_person_default_image(base_person_id, default_image_id);
@@ -1060,7 +1060,7 @@ static int __ctsvc_update_primary_default_data(int person_id)
 			snprintf(query, sizeof(query),
 					"SELECT id, is_default FROM %s "
 					"WHERE contact_id = %d AND datatype = %d AND is_default = 1 AND is_my_profile = 0",
-					CTS_TABLE_DATA, contact_id, CTSVC_DATA_NUMBER);
+					CTS_TABLE_DATA, contact_id, CONTACTS_DATA_TYPE_NUMBER);
 
 			ret = ctsvc_query_prepare(query, &stmt_number);
 			if (NULL == stmt_number) {
@@ -1071,7 +1071,7 @@ static int __ctsvc_update_primary_default_data(int person_id)
 
 			if (1 == ctsvc_stmt_step(stmt_number)) {
 				int default_number_id = ctsvc_stmt_get_int(stmt_number, 0);
-				__ctsvc_put_person_default_data(person_id, default_number_id, CTSVC_DATA_NUMBER);
+				__ctsvc_put_person_default_data(person_id, default_number_id, CONTACTS_DATA_TYPE_NUMBER);
 				ctsvc_stmt_finalize(stmt_number);
 				break;
 			}
@@ -1100,7 +1100,7 @@ static int __ctsvc_update_primary_default_data(int person_id)
 			snprintf(query, sizeof(query),
 					"SELECT id, is_default FROM %s "
 					"WHERE contact_id = %d AND datatype = %d AND is_default = 1 AND is_my_profile = 0",
-					CTS_TABLE_DATA, contact_id, CTSVC_DATA_EMAIL);
+					CTS_TABLE_DATA, contact_id, CONTACTS_DATA_TYPE_EMAIL);
 
 			ret = ctsvc_query_prepare(query, &stmt_email);
 			if (NULL == stmt_email) {
@@ -1111,7 +1111,7 @@ static int __ctsvc_update_primary_default_data(int person_id)
 
 			if (1 == ctsvc_stmt_step(stmt_email)) {
 				int default_email_id = ctsvc_stmt_get_int(stmt_email, 0);
-				__ctsvc_put_person_default_data(person_id, default_email_id, CTSVC_DATA_EMAIL);
+				__ctsvc_put_person_default_data(person_id, default_email_id, CONTACTS_DATA_TYPE_EMAIL);
 				ctsvc_stmt_finalize(stmt_email);
 				break;
 			}
@@ -1140,7 +1140,7 @@ static int __ctsvc_update_primary_default_data(int person_id)
 			snprintf(query, sizeof(query),
 					"SELECT id, is_default FROM %s "
 					"WHERE contact_id = %d AND datatype = %d AND is_default = 1 AND is_my_profile = 0",
-					CTS_TABLE_DATA, contact_id, CTSVC_DATA_IMAGE);
+					CTS_TABLE_DATA, contact_id, CONTACTS_DATA_TYPE_IMAGE);
 
 			ret = ctsvc_query_prepare(query, &stmt_image);
 			if (NULL == stmt_image) {
@@ -1408,10 +1408,10 @@ int ctsvc_person_set_default_property(contacts_person_property_e property, int p
 		ret = __ctsvc_put_person_default_name(person_id, id);		/* contact id */
 		break;
 	case CONTACTS_PERSON_PROPERTY_NUMBER:
-		ret = __ctsvc_put_person_default_data(person_id, id, CTSVC_DATA_NUMBER);	/* number id */
+		ret = __ctsvc_put_person_default_data(person_id, id, CONTACTS_DATA_TYPE_NUMBER);	/* number id */
 		break;
 	case CONTACTS_PERSON_PROPERTY_EMAIL:
-		ret = __ctsvc_put_person_default_data(person_id, id, CTSVC_DATA_EMAIL);		/* email id */
+		ret = __ctsvc_put_person_default_data(person_id, id, CONTACTS_DATA_TYPE_EMAIL);		/* email id */
 		break;
 	case CONTACTS_PERSON_PROPERTY_IMAGE:
 		ret = __ctsvc_put_person_default_image(person_id, id);		/* image id */
@@ -1455,21 +1455,21 @@ int ctsvc_person_get_default_property(contacts_person_property_e property, int p
 				"SELECT id FROM "CTS_TABLE_DATA" WHERE is_primary_default = 1 AND datatype = %d AND is_my_profile = 0 AND "
 				"contact_id in (SELECT contact_id FROM "CTS_TABLE_CONTACTS" "
 				"WHERE person_id = %d AND deleted = 0)",
-				CTSVC_DATA_NUMBER, person_id);
+				CONTACTS_DATA_TYPE_NUMBER, person_id);
 		break;
 	case CONTACTS_PERSON_PROPERTY_EMAIL:
 		snprintf(query, sizeof(query),
 				"SELECT id FROM "CTS_TABLE_DATA" WHERE is_primary_default = 1 AND datatype = %d AND is_my_profile = 0 AND "
 				"contact_id in (SELECT contact_id FROM "CTS_TABLE_CONTACTS" "
 				"WHERE person_id = %d AND deleted = 0)",
-				CTSVC_DATA_EMAIL, person_id);
+				CONTACTS_DATA_TYPE_EMAIL, person_id);
 		break;
 	case CONTACTS_PERSON_PROPERTY_IMAGE:
 		snprintf(query, sizeof(query),
 				"SELECT id FROM "CTS_TABLE_DATA" WHERE is_primary_default = 1 AND datatype = %d AND is_my_profile = 0 AND "
 				"contact_id in (SELECT contact_id FROM "CTS_TABLE_CONTACTS" "
 				"WHERE person_id = %d AND deleted = 0)",
-				CTSVC_DATA_IMAGE, person_id);
+				CONTACTS_DATA_TYPE_IMAGE, person_id);
 		break;
 	default:
 		ret = CONTACTS_ERROR_INVALID_PARAMETER;
@@ -1637,7 +1637,7 @@ static void __ctsvc_make_sub_query_by_num(GSList *nums, int person_id,
 			"ON C.contact_id=D.contact_id AND D.datatype=%d AND C.deleted = 0 "
 			"AND C.person_id <> %d AND D.is_my_profile = 0 "
 			"WHERE D.data4 = '",
-			CTSVC_DATA_NUMBER, person_id);
+			CONTACTS_DATA_TYPE_NUMBER, person_id);
 
 	for (cursor = nums; cursor; cursor = cursor->next) {
 		char *minmatch = cursor->data;
@@ -1665,7 +1665,7 @@ static void __ctsvc_make_sub_query_by_email(GSList *emails, int person_id,
 			"ON C.contact_id=D.contact_id AND D.datatype=%d AND C.deleted = 0 "
 			"AND C.person_id <> %d AND D.is_my_profile = 0 "
 			"WHERE D.data3 LIKE '",
-			CTSVC_DATA_EMAIL, person_id);
+			CONTACTS_DATA_TYPE_EMAIL, person_id);
 
 	for (cursor = emails; cursor; cursor = cursor->next) {
 		char *local_part = cursor->data;

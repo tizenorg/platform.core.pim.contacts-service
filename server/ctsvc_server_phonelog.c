@@ -149,7 +149,7 @@ static int __ctsvc_db_phone_log_find_person_id(char *number, char *normal_num,
 				"ON "CTS_TABLE_CONTACTS".contact_id = "CTS_TABLE_DATA".contact_id "
 				"AND datatype = %d AND is_my_profile = 0 AND deleted = 0 "
 				"WHERE data4 = ? AND _NUMBER_COMPARE_(data5, ?, NULL, NULL)",
-				CTSVC_DATA_NUMBER);
+				CONTACTS_DATA_TYPE_NUMBER);
 		bind_text = g_slist_append(bind_text, strdup(minmatch));
 		bind_text = g_slist_append(bind_text, strdup(normal_num));
 	}

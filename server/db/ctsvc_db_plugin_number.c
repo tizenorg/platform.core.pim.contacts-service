@@ -41,7 +41,7 @@ static int __ctsvc_db_number_get_person_default_number(int person_id)
 	snprintf(query, sizeof(query),
 			"SELECT id FROM "CTS_TABLE_CONTACTS" c, "CTS_TABLE_DATA" d "
 			"WHERE c.person_id = %d AND d.datatype = %d AND c.contact_id = d.contact_id AND d.is_default = 1",
-			person_id, CTSVC_DATA_NUMBER);
+			person_id, CONTACTS_DATA_TYPE_NUMBER);
 	ret = ctsvc_query_get_first_int_result(query, &default_number_id);
 	if (CONTACTS_ERROR_NONE != ret)
 		return 0;
@@ -70,7 +70,7 @@ static int __ctsvc_db_number_get_default_number_id(int contact_id)
 	char query[CTS_SQL_MAX_LEN] = {0};
 	snprintf(query, sizeof(query),
 			"SELECT id FROM "CTS_TABLE_DATA" WHERE datatype=%d AND contact_id=%d AND is_default=1",
-			CTSVC_DATA_NUMBER, contact_id);
+			CONTACTS_DATA_TYPE_NUMBER, contact_id);
 	ret = ctsvc_query_get_first_int_result(query, &number_id);
 	if (CONTACTS_ERROR_NONE != ret)
 		return 0;
@@ -98,7 +98,7 @@ static int __ctsvc_db_number_get_primary_default(int contact_id)
 	char query[CTS_SQL_MAX_LEN] = {0};
 	snprintf(query, sizeof(query),
 			"SELECT id FROM "CTS_TABLE_DATA" WHERE datatype=%d AND contact_id=%d AND is_primary_default=%d",
-			CTSVC_DATA_NUMBER, contact_id, 1);
+			CONTACTS_DATA_TYPE_NUMBER, contact_id, 1);
 	ret = ctsvc_query_get_first_int_result(query, &number_id);
 	if (CONTACTS_ERROR_NONE != ret)
 		return 0;
@@ -114,7 +114,7 @@ static int __ctsvc_db_number_get_primary_default_contact_id(int person_id)
 	snprintf(query, sizeof(query),
 			"SELECT c.contact_id FROM "CTS_TABLE_CONTACTS" c, "CTS_TABLE_DATA" d "
 			"WHERE c.person_id = %d AND d.datatype = %d AND c.contact_id = d.contact_id AND d.is_primary_default = 1",
-			person_id, CTSVC_DATA_NUMBER);
+			person_id, CONTACTS_DATA_TYPE_NUMBER);
 	ret = ctsvc_query_get_first_int_result(query, &default_contact_id);
 	if (CONTACTS_ERROR_NONE != ret)
 		return 0;
@@ -398,7 +398,7 @@ static int __ctsvc_db_number_delete_record(int id)
 
 	snprintf(query, sizeof(query),
 			"SELECT id FROM "CTS_TABLE_DATA" WHERE datatype = %d AND contact_id = %d AND is_my_profile = 0 limit 1",
-			CTSVC_DATA_NUMBER, contact_id);
+			CONTACTS_DATA_TYPE_NUMBER, contact_id);
 	ret = ctsvc_query_get_first_int_result(query, &number_id);
 	if (0 < ret)
 		has_phonenumber = true;
@@ -452,7 +452,7 @@ static int __ctsvc_db_number_get_all_records(int offset, int limit, contacts_lis
 			"FROM "CTS_TABLE_DATA", "CTSVC_DB_VIEW_CONTACT" "
 			"ON "CTS_TABLE_DATA".contact_id = "CTSVC_DB_VIEW_CONTACT".contact_id "
 			"WHERE datatype = %d AND is_my_profile=0 ",
-			CTSVC_DATA_NUMBER);
+			CONTACTS_DATA_TYPE_NUMBER);
 
 	if (0 != limit) {
 		len += snprintf(query+len, sizeof(query)-len, " LIMIT %d", limit);

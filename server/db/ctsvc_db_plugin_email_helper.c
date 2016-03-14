@@ -56,7 +56,7 @@ static int __ctsvc_db_email_reset_default(int email_id, int contact_id)
 	snprintf(query, sizeof(query),
 			"UPDATE "CTS_TABLE_DATA" SET is_default = 0, is_primary_default = 0 "
 			"WHERE id != %d AND contact_id = %d AND datatype = %d",
-			email_id, contact_id, CTSVC_DATA_EMAIL);
+			email_id, contact_id, CONTACTS_DATA_TYPE_EMAIL);
 	ret = ctsvc_query_exec(query);
 	WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_query_exec() Fail(%d)", ret);
 	return ret;
@@ -79,7 +79,7 @@ int ctsvc_db_email_insert(contacts_record_h record, int contact_id, bool is_my_p
 	snprintf(query, sizeof(query),
 			"INSERT INTO "CTS_TABLE_DATA"(contact_id, is_my_profile, datatype, is_default, data1, data2, data3) "
 			"VALUES(%d, %d, %d, %d, %d, ?, ?)",
-			contact_id, is_my_profile, CTSVC_DATA_EMAIL, email->is_default, email->type);
+			contact_id, is_my_profile, CONTACTS_DATA_TYPE_EMAIL, email->is_default, email->type);
 
 	ret = ctsvc_query_prepare(query, &stmt);
 	RETVM_IF(NULL == stmt, ret, "ctsvc_query_prepare() Fail(%d)", ret);
@@ -162,7 +162,7 @@ int ctsvc_db_email_delete(int id, bool is_my_profile)
 	char query[CTS_SQL_MIN_LEN] = {0};
 
 	snprintf(query, sizeof(query), "DELETE FROM "CTS_TABLE_DATA" WHERE id = %d AND datatype = %d",
-			id, CTSVC_DATA_EMAIL);
+			id, CONTACTS_DATA_TYPE_EMAIL);
 
 	ret = ctsvc_query_exec(query);
 	RETVM_IF(CONTACTS_ERROR_NONE != ret, ret, "ctsvc_query_exec() Fail(%d)", ret);

@@ -45,7 +45,7 @@ static int __ctsvc_db_speeddial_insert_record(contacts_record_h record, int *id)
 			"ON "CTS_TABLE_DATA".contact_id = "CTS_TABLE_CONTACTS".contact_id "
 			"AND contacts.deleted = 0  AND is_my_profile = 0 AND datatype = %d "
 			"WHERE id = %d ",
-			CTSVC_DATA_NUMBER, speeddial->number_id);
+			CONTACTS_DATA_TYPE_NUMBER, speeddial->number_id);
 	ret = ctsvc_query_get_first_int_result(query, &number_id);
 	if (CONTACTS_ERROR_NONE != ret) {
 		ERR("ctsvc_query_get_first_int_result() Fail(%d) : number_id is invalid", ret);
@@ -176,7 +176,7 @@ static int __ctsvc_db_speeddial_update_record(contacts_record_h record)
 			"ON "CTS_TABLE_DATA".contact_id = "CTS_TABLE_CONTACTS".contact_id "
 			"AND contacts.deleted = 0  AND is_my_profile = 0 AND datatype = %d "
 			"WHERE id = %d ",
-			CTSVC_DATA_NUMBER, speeddial->number_id);
+			CONTACTS_DATA_TYPE_NUMBER, speeddial->number_id);
 	ret = ctsvc_query_get_first_int_result(query, &number_id);
 	if (CONTACTS_ERROR_NONE != ret) {
 		ERR("ctsvc_query_get_first_int_result() Fail(%d) : number_id is invalid", ret);
