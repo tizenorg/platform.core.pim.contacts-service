@@ -116,7 +116,7 @@ int ctsvc_db_number_insert(contacts_record_h record, int contact_id, bool is_my_
 				"WHERE data.id = %d", number_id);
 		ret = ctsvc_query_get_first_int_result(query, &person_id);
 		if (0 < person_id)
-			ctsvc_db_phone_log_update_person_id(number->number, -1, person_id, false);
+			ctsvc_db_phone_log_update_person_id(number->number, -1, person_id, false, NULL);
 #endif /* ENABLE_LOG_FEATURE */
 		ctsvc_set_number_noti();
 	}
@@ -263,9 +263,9 @@ int ctsvc_db_number_update(contacts_record_h record, bool is_my_profile)
 #ifdef ENABLE_LOG_FEATURE
 		/* update phone log */
 		if (0 < person_id && pre_number)
-			ctsvc_db_phone_log_update_person_id(pre_number, person_id, -1, false);
+			ctsvc_db_phone_log_update_person_id(pre_number, person_id, -1, false, NULL);
 		if (0 < person_id)
-			ctsvc_db_phone_log_update_person_id(number->number, -1, person_id, false);
+			ctsvc_db_phone_log_update_person_id(number->number, -1, person_id, false, NULL);
 		ctsvc_stmt_finalize(stmt);
 #endif /* ENABLE_LOG_FEATURE */
 	} while (0);
@@ -328,7 +328,7 @@ int ctsvc_db_number_delete(int id, bool is_my_profile)
 #ifdef ENABLE_LOG_FEATURE
 	/* update phone log */
 	if (0 < person_id && pre_number)
-		ctsvc_db_phone_log_update_person_id(pre_number, person_id, -1, false);
+		ctsvc_db_phone_log_update_person_id(pre_number, person_id, -1, false, NULL);
 	ctsvc_stmt_finalize(stmt);
 #endif /* ENABLE_LOG_FEATURE */
 

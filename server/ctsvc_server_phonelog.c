@@ -29,6 +29,7 @@
 #include "ctsvc_number_utils.h"
 #include "ctsvc_localize_utils.h"
 #include "ctsvc_server_setting.h"
+#include "ctsvc_server_utils.h"
 
 #ifdef _CONTACTS_IPC_SERVER
 #include "ctsvc_server_change_subject.h"
@@ -46,6 +47,8 @@ int ctsvc_phone_log_reset_statistics_by_sim(int sim_slot_no)
 {
 	char query[CTS_SQL_MIN_LEN] = {0};
 	int sim_info_id;
+
+	RETVM_IF(false == ctsvc_server_have_telephony_feature(), CONTACTS_ERROR_NOT_SUPPORTED, "Telephony feature disabled");
 
 	sim_info_id = ctsvc_server_sim_get_info_id_by_sim_slot_no(sim_slot_no);
 	if (sim_info_id <= 0) {
@@ -205,7 +208,7 @@ static int __ctsvc_db_phone_log_find_person_id(char *number, char *normal_num,
 }
 
 int ctsvc_db_phone_log_update_person_id(const char *number, int old_person_id,
-		int candidate_person_id, bool person_link)
+		int candidate_person_id, bool person_link, int *found_person_id)
 {
 	CTS_FN_CALL;
 	int ret;
@@ -320,6 +323,9 @@ int ctsvc_db_phone_log_update_person_id(const char *number, int old_person_id,
 					minmatch_address, -1, &number_type);
 			if (new_person_id <= 0)
 				continue;
+
+			if (found_person_id)
+				*found_person_id = new_person_id;
 		} else if (number && 0 < old_person_id) {
 			/* CASE : number update/delete (contact update/delete) => find new_person_id by address */
 			/* CASE : phonelog insert with person_id */

@@ -480,7 +480,7 @@ static int  __ctsvc_db_phonelog_insert(ctsvc_phonelog_s *phonelog, int *id)
 	ctsvc_stmt_finalize(stmt);
 
 	/* update phonelog */
-	ctsvc_db_phone_log_update_person_id(phonelog->address, phonelog->person_id, -1, false);
+	ctsvc_db_phone_log_update_person_id(phonelog->address, phonelog->person_id, -1, false, &phonelog->person_id);
 
 	ctsvc_set_phonelog_noti();
 	return CONTACTS_ERROR_NONE;
