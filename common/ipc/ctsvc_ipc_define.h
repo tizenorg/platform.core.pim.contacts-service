@@ -54,6 +54,9 @@
 #define CTSVC_IPC_SERVER_DB_SEARCH_RECORDS            "search_records"
 #define CTSVC_IPC_SERVER_DB_SEARCH_RECORDS_WITH_RANGE		"search_records_with_range"
 #define CTSVC_IPC_SERVER_DB_SEARCH_RECORDS_WITH_QUERY    "search_records_with_query"
+#define CTSVC_IPC_SERVER_DB_SEARCH_RECORDS_FOR_SNIPPET            "search_records_for_snippet"
+#define CTSVC_IPC_SERVER_DB_SEARCH_RECORDS_WITH_RANGE_FOR_SNIPPET "search_records_with_range_for_snippet"
+#define CTSVC_IPC_SERVER_DB_SEARCH_RECORDS_WITH_QUERY_FOR_SNIPPET "search_records_with_query_for_snippet"
 #define CTSVC_IPC_SERVER_DB_GET_STATUS					"get_db_status"
 #define CTSVC_IPC_SERVER_DB_STATUS_CHANGED			"db_status_changed"
 
