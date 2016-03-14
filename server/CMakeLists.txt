@@ -138,6 +138,7 @@ SET(SRCS
 	ctsvc_server_bg.c
 	ctsvc_server.c
 	ctsvc_server_sim.c
+	ctsvc_utils_string.c
 )
 
 IF(ENABLE_LOG_FEATURE)
