@@ -35,7 +35,8 @@ static bool __ctsvc_query_property_check(const property_info_s *properties,
 		property_info_s *p = (property_info_s*)&(properties[i]);
 		if (property_id == p->property_id) {
 			if (property_type == QUERY_PROJECTION) {
-				if (p->property_type == CTSVC_SEARCH_PROPERTY_ALL || p->property_type == CTSVC_SEARCH_PROPERTY_PROJECTION)
+				if (p->property_type == CTSVC_SEARCH_PROPERTY_ALL ||
+						p->property_type == CTSVC_SEARCH_PROPERTY_PROJECTION)
 					return true;
 				else
 					return false;
@@ -76,7 +77,8 @@ API int contacts_query_set_projection(contacts_query_h query, unsigned int prope
 	query_s = (ctsvc_query_s*)query;
 
 	for (i = 0; i < count; i++) {
-		find = __ctsvc_query_property_check(query_s->properties, query_s->property_count, QUERY_PROJECTION, property_ids[i]);
+		find = __ctsvc_query_property_check(query_s->properties, query_s->property_count,
+				QUERY_PROJECTION, property_ids[i]);
 		RETVM_IF(false == find, CONTACTS_ERROR_INVALID_PARAMETER,
 				"property_id(%d) is not supported on view_uri(%s)", property_ids[i], query_s->view_uri);
 	}

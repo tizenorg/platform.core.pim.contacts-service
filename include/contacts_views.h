@@ -186,6 +186,8 @@ _CONTACTS_END_VIEW(_contacts_group)
  * <tr><td>string</td><td> addressbook_ids </td><td>read only</td><td> Addressbook IDs that the person belongs to (projection) </td></tr>
  * <tr><td>boolean</td><td> has_phonenumber </td><td>read only</td><td> The person has phone number or not </td></tr>
  * <tr><td>boolean</td><td> has_email </td><td>read only</td><td> The person has email or not </td></tr>
+ * <tr><td>integer</td><td> snippet_type </td><td>read only</td><td> kerword matched data type (Since 3.0) </td></tr>
+ * <tr><td>string</td><td> snippet_string </td><td>read only</td><td> keyword matched data string (Since 3.0) </td></tr>
  * </table>
  */
 _CONTACTS_BEGIN_VIEW()
@@ -204,6 +206,8 @@ _CONTACTS_BEGIN_VIEW()
 	_CONTACTS_PROPERTY_BOOL(has_phonenumber)      /* read only */
 	_CONTACTS_PROPERTY_BOOL(has_email)            /* read only */
 	_CONTACTS_PROPERTY_STR(message_alert)         /* read, write */
+	_CONTACTS_PROPERTY_INT(snippet_type)			/* read only (Since 3.0) */
+	_CONTACTS_PROPERTY_STR(snippet_string)			/* read only (Since 3.0) */
 _CONTACTS_END_VIEW(_contacts_person)
 
 /**
@@ -619,6 +623,8 @@ _CONTACTS_END_VIEW(_contacts_event)
  * <tr><td>integer</td><td> group_id </td><td>read, write once</td><td> DB record ID of the group </td></tr>
  * <tr><td>integer</td><td> contact_id </td><td>read, write once</td><td> DB record ID of the contact </td></tr>
  * <tr><td>string</td><td> name </td><td>read only</td><td> Group name </td></tr>
+ * <tr><td>integer</td><td> snippet_type </td><td>read only</td><td> kerword matched data type (Since 3.0) </td></tr>
+ * <tr><td>string</td><td> snippet_string </td><td>read only</td><td> keyword matched data string (Since 3.0) </td></tr>
  * </table>
  */
 _CONTACTS_BEGIN_VIEW()
@@ -626,6 +632,8 @@ _CONTACTS_BEGIN_VIEW()
 	_CONTACTS_PROPERTY_INT(group_id)          /* read, write once */
 	_CONTACTS_PROPERTY_INT(contact_id)        /* read, write once */
 	_CONTACTS_PROPERTY_STR(name)              /* read only */
+	_CONTACTS_PROPERTY_INT(snippet_type)		/* read only (Since 3.0) */
+	_CONTACTS_PROPERTY_STR(snippet_string)		/* read only (Since 3.0) */
 _CONTACTS_END_VIEW(_contacts_group_relation)
 
 /**
@@ -1154,6 +1162,8 @@ _CONTACTS_END_READ_ONLY_VIEW(_contacts_grouprel_updated_info)
  * <tr><td>integer</td><td> address_book_id </td><td> Addressbook ID that the person belongs to </td></tr>
  * <tr><td>integer</td><td> address_book_mode </td><td> Addressbook mode, refer to the @ref contacts_address_book_mode_e </td></tr>
  * <tr><td>string</td><td> address_book_name </td><td> Addressbook name that the person belongs to </td></tr>
+ * <tr><td>integer</td><td> snippet_type </td><td>read only</td><td> kerword matched data type (Since 3.0) </td></tr>
+ * <tr><td>string</td><td> snippet_string </td><td>read only</td><td> keyword matched data string (Since 3.0) </td></tr>
  * </table>
  */
 _CONTACTS_BEGIN_READ_ONLY_VIEW()
@@ -1175,6 +1185,8 @@ _CONTACTS_BEGIN_READ_ONLY_VIEW()
 	_CONTACTS_PROPERTY_STR(address_book_name)
 	_CONTACTS_PROPERTY_INT(address_book_mode)
 	_CONTACTS_PROPERTY_PROJECTION_STR(message_alert)
+	_CONTACTS_PROPERTY_INT(snippet_type)		/* read only (Since 3.0) */
+	_CONTACTS_PROPERTY_STR(snippet_string)		/* read only (Since 3.0) */
 _CONTACTS_END_READ_ONLY_VIEW(_contacts_person_contact)
 
 /**
@@ -1206,6 +1218,8 @@ _CONTACTS_END_READ_ONLY_VIEW(_contacts_person_contact)
  * <tr><td>string</td><td> number_filter </td><td> If you add filter with this property, the string will be normalized as minmatch length internally and the match rule will be applied CONTACTS_MATCH_EXACTLY </td></tr>
  * <tr><td>string</td><td> normalized_number </td><td> You can only use this property for search filter</td></tr>
  * <tr><td>string</td><td> cleaned_number </td><td>You can only use this property for search filter </td></tr>
+ * <tr><td>integer</td><td> snippet_type </td><td>read only</td><td> kerword matched data type (Since 3.0) </td></tr>
+ * <tr><td>string</td><td> snippet_string </td><td>read only</td><td> keyword matched data string (Since 3.0) </td></tr>
  * </table>
 
  */
@@ -1229,6 +1243,8 @@ _CONTACTS_BEGIN_READ_ONLY_VIEW()
 	_CONTACTS_PROPERTY_FILTER_STR(normalized_number)
 	_CONTACTS_PROPERTY_PROJECTION_STR(message_alert)
 	_CONTACTS_PROPERTY_FILTER_STR(cleaned_number)
+	_CONTACTS_PROPERTY_INT(snippet_type)		/* read only (Since 3.0) */
+	_CONTACTS_PROPERTY_STR(snippet_string)		/* read only (Since 3.0) */
 _CONTACTS_END_READ_ONLY_VIEW(_contacts_person_number)
 
 /**
@@ -1257,6 +1273,8 @@ _CONTACTS_END_READ_ONLY_VIEW(_contacts_person_number)
  * <tr><td>string</td><td> label </td><td> Custom mail type label, when the email type is #CONTACTS_EMAIL_TYPE_CUSTOM (projection) </td></tr>
  * <tr><td>boolean</td><td> is_primary_default </td><td> The email is default email or not </td></tr>
  * <tr><td>string</td><td> email </td><td> Email address</td></tr>
+ * <tr><td>integer</td><td> snippet_type </td><td>read only</td><td> kerword matched data type (Since 3.0) </td></tr>
+ * <tr><td>string</td><td> snippet_string </td><td>read only</td><td> keyword matched data string (Since 3.0) </td></tr>
  * </table>
  */
 _CONTACTS_BEGIN_READ_ONLY_VIEW()
@@ -1276,6 +1294,8 @@ _CONTACTS_BEGIN_READ_ONLY_VIEW()
 	_CONTACTS_PROPERTY_BOOL(is_primary_default)
 	_CONTACTS_PROPERTY_STR(email)
 	_CONTACTS_PROPERTY_PROJECTION_STR(message_alert)
+	_CONTACTS_PROPERTY_INT(snippet_type)		/* read only (Since 3.0) */
+	_CONTACTS_PROPERTY_STR(snippet_string)		/* read only (Since 3.0) */
 _CONTACTS_END_READ_ONLY_VIEW(_contacts_person_email)
 
 /**
@@ -1307,6 +1327,8 @@ _CONTACTS_END_READ_ONLY_VIEW(_contacts_person_email)
  * <tr><td>string</td><td> address_book_name </td><td> Addressbook name that the person belongs to </td></tr>
  * <tr><td>integer</td><td> group_id </td><td> Group ID that the person belongs to </td></tr>
  * <tr><td>integer</td><td> contact_id </td><td> Contact ID that the person belongs to (projection) </td></tr>
+ * <tr><td>integer</td><td> snippet_type </td><td>read only</td><td> kerword matched data type (Since 3.0) </td></tr>
+ * <tr><td>string</td><td> snippet_string </td><td>read only</td><td> keyword matched data string (Since 3.0) </td></tr>
  * </table>
  */
 _CONTACTS_BEGIN_READ_ONLY_VIEW()
@@ -1329,6 +1351,8 @@ _CONTACTS_BEGIN_READ_ONLY_VIEW()
 	_CONTACTS_PROPERTY_INT(address_book_mode)
 	_CONTACTS_PROPERTY_PROJECTION_INT(contact_id)
 	_CONTACTS_PROPERTY_PROJECTION_STR(message_alert)
+	_CONTACTS_PROPERTY_INT(snippet_type)		/* read only (Since 3.0) */
+	_CONTACTS_PROPERTY_STR(snippet_string)		/* read only (Since 3.0) */
 _CONTACTS_END_READ_ONLY_VIEW(_contacts_person_grouprel)
 
 /**
@@ -1358,7 +1382,9 @@ _CONTACTS_END_READ_ONLY_VIEW(_contacts_person_grouprel)
  * <tr><td>integer</td><td> address_book_id </td><td> Addressbook ID that the person belongs to </td></tr>
  * <tr><td>integer</td><td> address_book_mode </td><td> Addressbook mode, refer to the @ref contacts_address_book_mode_e </td></tr>
  * <tr><td>integer</td><td> group_id </td><td> Group ID that the person belongs to </td></tr>
- * <tr><td>integer</td><td> contact_id </td><td> Contact ID that the person belongs to (projection) </td></tr>
+ * <tr><td>integer<dtd><td> contact_id </td><td> Contact ID that the person belongs to (projection) </td></tr>
+ * <tr><td>integer</td><td> snippet_type </td><td>read only</td><td> kerword matched data type (Since 3.0) </td></tr>
+ * <tr><td>string</td><td> snippet_string </td><td>read only</td><td> keyword matched data string (Since 3.0) </td></tr>
  * </table>
  */
 _CONTACTS_BEGIN_READ_ONLY_VIEW()
@@ -1380,6 +1406,8 @@ _CONTACTS_BEGIN_READ_ONLY_VIEW()
 	_CONTACTS_PROPERTY_INT(address_book_mode)
 	_CONTACTS_PROPERTY_PROJECTION_INT(contact_id)
 	_CONTACTS_PROPERTY_PROJECTION_STR(message_alert)
+	_CONTACTS_PROPERTY_INT(snippet_type)		/* read only (Since 3.0) */
+	_CONTACTS_PROPERTY_STR(snippet_string)		/* read only (Since 3.0) */
 _CONTACTS_END_READ_ONLY_VIEW(_contacts_person_group_assigned)
 
 /**
@@ -1409,6 +1437,8 @@ _CONTACTS_END_READ_ONLY_VIEW(_contacts_person_group_assigned)
  * <tr><td>integer</td><td> address_book_id </td><td> Addressbook ID that the person belongs to </td></tr>
  * <tr><td>integer</td><td> address_book_mode </td><td> Addressbook mode, refer to the @ref contacts_address_book_mode_e </td></tr>
  * <tr><td>integer</td><td> contact_id </td><td> Contact ID that the person belongs to (projection) </td></tr>
+ * <tr><td>integer</td><td> snippet_type </td><td>read only</td><td> kerword matched data type (Since 3.0) </td></tr>
+ * <tr><td>string</td><td> snippet_string </td><td>read only</td><td> keyword matched data string (Since 3.0) </td></tr>
  * </table>
  */
 _CONTACTS_BEGIN_READ_ONLY_VIEW()
@@ -1429,6 +1459,8 @@ _CONTACTS_BEGIN_READ_ONLY_VIEW()
 	_CONTACTS_PROPERTY_INT(address_book_mode)
 	_CONTACTS_PROPERTY_PROJECTION_INT(contact_id)
 	_CONTACTS_PROPERTY_PROJECTION_STR(message_alert)
+	_CONTACTS_PROPERTY_INT(snippet_type)		/* read only (Since 3.0) */
+	_CONTACTS_PROPERTY_STR(snippet_string)		/* read only (Since 3.0) */
 _CONTACTS_END_READ_ONLY_VIEW(_contacts_person_group_not_assigned)
 
 /**

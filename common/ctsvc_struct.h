@@ -270,6 +270,8 @@ typedef struct {
 	char *status;
 	int link_count;
 	char *addressbook_ids;
+	int snippet_type;
+	char *snippet_string;
 } ctsvc_person_s;
 
 typedef struct {
