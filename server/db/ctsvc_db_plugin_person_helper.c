@@ -16,6 +16,7 @@
  * limitations under the License.
  *
  */
+
 #include "contacts.h"
 #include "ctsvc_internal.h"
 #include "ctsvc_db_schema.h"
@@ -31,12 +32,20 @@
 #include "ctsvc_record.h"
 #include "ctsvc_notification.h"
 #include "ctsvc_notify.h"
+#include "ctsvc_utils_string.h"
 
 #ifdef _CONTACTS_IPC_SERVER
 #include "ctsvc_server_change_subject.h"
 #endif
 
-int ctsvc_db_person_create_record_from_stmt_with_projection(cts_stmt stmt, unsigned int *projection, int projection_count, contacts_record_h *record)
+int ctsvc_db_person_create_record_from_stmt_with_projection(cts_stmt stmt,
+		unsigned int *projection,
+		int projection_count,
+		bool is_snippet,
+		const char *keyword,
+		const char *start_match,
+		const char *end_match,
+		contacts_record_h *record)
 {
 	ctsvc_person_s *person;
 	char full_path[CTSVC_IMG_FULL_PATH_SIZE_MAX] = {0};
@@ -118,6 +127,17 @@ int ctsvc_db_person_create_record_from_stmt_with_projection(cts_stmt stmt, unsig
 				value++; /* fix warning */
 			}
 			break;
+		case CTSVC_PROPERTY_PERSON_EXTRA_DATA1:
+			person->extra_data1 = ctsvc_stmt_get_int(stmt, i);
+			break;
+		case CTSVC_PROPERTY_PERSON_EXTRA_DATA2:
+			temp = ctsvc_stmt_get_text(stmt, i);
+			free(person->extra_data2);
+			person->extra_data2 = ctsvc_utils_get_modified_str(temp, is_snippet,
+					keyword, start_match, end_match);
+			if (NULL == person->extra_data2)
+				person->extra_data2 = SAFE_STRDUP(temp);
+			break;
 		default:
 			ASSERT_NOT_REACHED("property_id(0x%0x) is not supported in value(person)", property_id);
 			return CONTACTS_ERROR_INVALID_PARAMETER;
@@ -144,13 +164,15 @@ int ctsvc_db_person_create_record_from_stmt_with_query(cts_stmt stmt, contacts_q
 			projection[i] = s_query->properties[i].property_id;
 
 		int ret = ctsvc_db_person_create_record_from_stmt_with_projection(stmt,
-				projection, s_query->property_count, record);
+				projection, s_query->property_count, false, NULL, NULL, NULL, record);
 
 		free(projection);
 
 		return ret;
 	} else {
-		return ctsvc_db_person_create_record_from_stmt_with_projection(stmt, s_query->projection, s_query->projection_count, record);
+		return ctsvc_db_person_create_record_from_stmt_with_projection(stmt,
+				s_query->projection, s_query->projection_count, false, NULL, NULL, NULL,
+				record);
 	}
 
 }
