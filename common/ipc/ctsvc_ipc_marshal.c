@@ -516,7 +516,6 @@ int ctsvc_ipc_unmarshal_string(const pims_ipc_data_h ipc_data, char **ppbufchar)
 	length = *(int*)tmp;
 
 	if (length == -1) {
-		DBG("string is null");
 		ret = CONTACTS_ERROR_NONE;
 		*ppbufchar = NULL;
 		return ret;

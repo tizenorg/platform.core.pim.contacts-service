@@ -59,6 +59,8 @@ API const _contacts_person_property_ids _contacts_person = {
 	.addressbook_ids		= CTSVC_PROPERTY_PERSON_ADDRESSBOOK_IDS,
 	.has_phonenumber		= CTSVC_PROPERTY_PERSON_HAS_PHONENUMBER,
 	.has_email				= CTSVC_PROPERTY_PERSON_HAS_EMAIL,
+	.extra_data1            = CTSVC_PROPERTY_PERSON_EXTRA_DATA1,
+	.extra_data2            = CTSVC_PROPERTY_PERSON_EXTRA_DATA2,
 };
 
 API const _contacts_contact_property_ids _contacts_contact = {
@@ -706,6 +708,8 @@ const property_info_s __property_person[] = {
 	{CTSVC_PROPERTY_PERSON_ADDRESSBOOK_IDS,	CTSVC_SEARCH_PROPERTY_PROJECTION,	"addressbook_ids"},
 	{CTSVC_PROPERTY_PERSON_HAS_PHONENUMBER,	CTSVC_SEARCH_PROPERTY_ALL,	"has_phonenumber"},
 	{CTSVC_PROPERTY_PERSON_HAS_EMAIL,		CTSVC_SEARCH_PROPERTY_ALL,	"has_email"},
+	{CTSVC_PROPERTY_PERSON_EXTRA_DATA1,     CTSVC_SEARCH_PROPERTY_ALL,  NULL}, /* data type */
+	{CTSVC_PROPERTY_PERSON_EXTRA_DATA2,     CTSVC_SEARCH_PROPERTY_ALL,  NULL}, /* data string */
 };
 
 const property_info_s __property_simple_contact[] = {

@@ -186,6 +186,8 @@ _CONTACTS_END_VIEW(_contacts_group)
  * <tr><td>string</td><td> addressbook_ids </td><td>read only</td><td> Addressbook IDs that the person belongs to (projection) </td></tr>
  * <tr><td>boolean</td><td> has_phonenumber </td><td>read only</td><td> The person has phone number or not </td></tr>
  * <tr><td>boolean</td><td> has_email </td><td>read only</td><td> The person has email or not </td></tr>
+ * <tr><td>integer</td><td> extra_data1 </td><td>read only</td><td> kerword matched data type </td></tr>
+ * <tr><td>string</td><td> extra_data2 </td><td>read only</td><td> keyword matched data string </td></tr>
  * </table>
  */
 _CONTACTS_BEGIN_VIEW()
@@ -204,6 +206,8 @@ _CONTACTS_BEGIN_VIEW()
     _CONTACTS_PROPERTY_BOOL(has_phonenumber)      /* read only */
     _CONTACTS_PROPERTY_BOOL(has_email)            /* read only */
     _CONTACTS_PROPERTY_STR(message_alert)         /* read, write */
+	_CONTACTS_PROPERTY_INT(extra_data1)           /* read only */
+	_CONTACTS_PROPERTY_STR(extra_data2)           /* read only */
 _CONTACTS_END_VIEW(_contacts_person)
 
 /**

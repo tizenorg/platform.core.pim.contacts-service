@@ -16,6 +16,9 @@
  * limitations under the License.
  *
  */
+#define _GNU_SOURCE
+#include <string.h>
+
 #include "contacts.h"
 #include "ctsvc_internal.h"
 #include "ctsvc_db_schema.h"
@@ -31,12 +34,78 @@
 #include "ctsvc_record.h"
 #include "ctsvc_notification.h"
 #include "ctsvc_notify.h"
+#include "ctsvc_utils_string.h"
 
 #ifdef _CONTACTS_IPC_SERVER
 #include "ctsvc_server_change_subject.h"
 #endif
 
-int ctsvc_db_person_create_record_from_stmt_with_projection(cts_stmt stmt, unsigned int *projection, int projection_count, contacts_record_h *record)
+static bool _get_modified_number(char *temp, char *keyword, int *out_len_keyword,
+		int *out_len_offset)
+{
+	RETV_IF(NULL == temp, false);
+	RETV_IF(NULL == keyword, false);
+	RETV_IF(NULL == out_len_keyword, false);
+	RETV_IF(NULL == out_len_offset, false);
+
+	char *start_needle = NULL;
+	char *cursor_number = temp;
+	char *cursor_keyword = keyword;
+	bool is_start = false;
+	int len_keyword = 0;
+
+	while (1) {
+		if ('\0' == *cursor_keyword)
+			break;
+		if ('\0' == *cursor_number) {
+			if (true == is_start) /* ended even if keyword is remained */
+				is_start = false;
+			break;
+		}
+		if (*cursor_number < '0' || '9' < *cursor_number) {
+			if (true == is_start)
+				len_keyword++;
+			cursor_number++;
+			continue;
+		}
+		if (*cursor_keyword < '0' || '9' < *cursor_keyword) {
+			cursor_keyword++;
+			continue;
+		}
+		if (*cursor_keyword != *cursor_number) {
+			if (true == is_start) {
+				is_start = false;
+				cursor_keyword = keyword;
+				len_keyword = 0;
+			} else {
+				cursor_number++;
+			}
+			continue;
+		}
+		if (false == is_start)
+			start_needle = cursor_number;
+		is_start = true;
+		len_keyword++;
+		cursor_number++;
+		cursor_keyword++;
+	}
+	if (false == is_start) { /* false to search */
+		return false;
+	}
+	*out_len_keyword = len_keyword;
+	*out_len_offset = strlen(temp) - strlen(start_needle);
+
+	return true;
+}
+
+int ctsvc_db_person_create_record_from_stmt_with_projection(cts_stmt stmt,
+		unsigned int *projection,
+		int projection_count,
+		bool is_snippet,
+		const char *keyword,
+		const char *start_match,
+		const char *end_match,
+		contacts_record_h *record)
 {
 	ctsvc_person_s *person;
 	char full_path[CTSVC_IMG_FULL_PATH_SIZE_MAX] = {0};
@@ -118,6 +187,90 @@ int ctsvc_db_person_create_record_from_stmt_with_projection(cts_stmt stmt, unsig
 				value++; /* fix warning */
 			}
 			break;
+		case CTSVC_PROPERTY_PERSON_EXTRA_DATA1:
+			person->extra_data1 = ctsvc_stmt_get_int(stmt, i);
+			break;
+		case CTSVC_PROPERTY_PERSON_EXTRA_DATA2:
+			temp = ctsvc_stmt_get_text(stmt, i);
+			free(person->extra_data2);
+			person->extra_data2 = NULL;
+			do {
+				if (NULL == temp || '\0' == *temp) {
+					DBG("No data");
+					break;
+				}
+				if (false == is_snippet) {
+					DBG("No snippet");
+					break;
+				}
+				if (NULL == keyword || '\0' == *keyword) {
+					DBG("No keyword");
+					break;
+				}
+
+				bool is_modified = true;
+				int len_keyword = 0;
+				int len_offset = 0;
+				int len_full = 0;
+				int len_print = 0;
+				switch (person->extra_data1) {
+				case CTSVC_DATA_NAME:
+					DBG("NAME");
+					/* in name, temp is trash str. use display_name */
+					temp = person->display_name;
+					if (NULL == temp)
+						break;
+					len_offset = ctsvc_utils_string_strstr(temp, keyword, &len_keyword);
+					if (len_offset < 0) {
+						is_modified = false;
+						break;
+					}
+					break;
+
+				case CTSVC_DATA_NUMBER:
+					DBG("NUMBER");
+					is_modified = _get_modified_number(temp, keyword, &len_keyword,
+							&len_offset);
+					break;
+
+				default:
+					DBG("DATA");
+					char *pos_start = strcasestr(temp, keyword);
+					if (NULL == pos_start)
+						break;
+
+					len_keyword = strlen(keyword);
+					len_offset = strlen(temp) - strlen(pos_start);;
+					break;
+				}
+
+				if (false == is_modified)
+					break;
+
+				len_full = strlen(temp) + strlen(start_match) + strlen(end_match) + 1;
+
+				char *mod_temp = NULL;
+				mod_temp = calloc(len_full, sizeof(char));
+				if (NULL == mod_temp) {
+					ERR("calloc() Fail");
+					break;
+				}
+
+				snprintf(mod_temp, len_offset + 1, "%s", temp);
+				len_print = len_offset;
+				len_print += snprintf(mod_temp + len_print, len_full - len_print,
+						"%s", start_match);
+				snprintf(mod_temp + len_print, len_keyword + 1, "%s", temp + len_offset);
+				len_print += len_keyword;
+				len_print += snprintf(mod_temp + len_print, len_full - len_print,
+						"%s%s", end_match, temp + len_offset + len_keyword);
+
+				person->extra_data2 = mod_temp;
+			} while (0);
+
+			if (NULL == person->extra_data2)
+				person->extra_data2 = SAFE_STRDUP(temp);
+			break;
 		default:
 			ASSERT_NOT_REACHED("property_id(0x%0x) is not supported in value(person)", property_id);
 			return CONTACTS_ERROR_INVALID_PARAMETER;
@@ -144,13 +297,15 @@ int ctsvc_db_person_create_record_from_stmt_with_query(cts_stmt stmt, contacts_q
 			projection[i] = s_query->properties[i].property_id;
 
 		int ret = ctsvc_db_person_create_record_from_stmt_with_projection(stmt,
-				projection, s_query->property_count, record);
+				projection, s_query->property_count, false, NULL, NULL, NULL, record);
 
 		free(projection);
 
 		return ret;
 	} else {
-		return ctsvc_db_person_create_record_from_stmt_with_projection(stmt, s_query->projection, s_query->projection_count, record);
+		return ctsvc_db_person_create_record_from_stmt_with_projection(stmt,
+				s_query->projection, s_query->projection_count, false, NULL, NULL, NULL,
+				record);
 	}
 
 }
