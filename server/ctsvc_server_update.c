@@ -57,7 +57,7 @@ static int __ctsvc_server_find_person_id_of_phonelog(sqlite3 *__db, char *normal
 			"ON "CTS_TABLE_CONTACTS".contact_id = "CTS_TABLE_DATA".contact_id "
 			"AND datatype = %d AND is_my_profile = 0 AND deleted = 0 "
 			"WHERE data4 = ? AND _NUMBER_COMPARE_(data5, ?, NULL, NULL)",
-			CTSVC_DATA_NUMBER);
+			CONTACTS_DATA_TYPE_NUMBER);
 
 	bind_text = g_slist_append(bind_text, strdup(minmatch));
 	bind_text = g_slist_append(bind_text, strdup(normal_num));
@@ -181,7 +181,7 @@ static void __ctsvc_server_number_info_update(sqlite3 *__db)
 	/* update number of data table */
 	snprintf(query, sizeof(query),
 			"SELECT id, data3 FROM "CTS_TABLE_DATA" "
-			"WHERE datatype = %d", CTSVC_DATA_NUMBER);
+			"WHERE datatype = %d", CONTACTS_DATA_TYPE_NUMBER);
 	ret = sqlite3_prepare_v2(__db, query, strlen(query), &stmt, NULL);
 	if (SQLITE_OK != ret) {
 		ERR("sqlite3_prepare_v2() Fail(%s)", sqlite3_errmsg(__db));

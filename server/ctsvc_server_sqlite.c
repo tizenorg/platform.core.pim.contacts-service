@@ -552,19 +552,19 @@ static int __ctsvc_server_db_get_contact_data(sqlite3 *db, int id, ctsvc_contact
 	do {
 		datatype = ctsvc_stmt_get_int(stmt, 0);
 		switch (datatype) {
-		case CTSVC_DATA_NAME:
+		case CONTACTS_DATA_TYPE_NAME:
 			ctsvc_get_data_info_name(stmt, (contacts_list_h)contact->name);
 			break;
-		case CTSVC_DATA_NICKNAME:
+		case CONTACTS_DATA_TYPE_NICKNAME:
 			ctsvc_get_data_info_nickname(stmt, (contacts_list_h)contact->nicknames);
 			break;
-		case CTSVC_DATA_NUMBER:
+		case CONTACTS_DATA_TYPE_NUMBER:
 			ctsvc_get_data_info_number(stmt, (contacts_list_h)contact->numbers);
 			break;
-		case CTSVC_DATA_EMAIL:
+		case CONTACTS_DATA_TYPE_EMAIL:
 			ctsvc_get_data_info_email(stmt, (contacts_list_h)contact->emails);
 			break;
-		case CTSVC_DATA_COMPANY:
+		case CONTACTS_DATA_TYPE_COMPANY:
 			ctsvc_get_data_info_company(stmt, (contacts_list_h)contact->company);
 			break;
 		default:

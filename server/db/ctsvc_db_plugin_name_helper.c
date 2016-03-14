@@ -149,7 +149,7 @@ int ctsvc_db_name_insert(contacts_record_h record, int contact_id, bool is_my_pr
 				"DELETE FROM "CTS_TABLE_DATA" "
 				"WHERE contact_id = %d AND datatype=%d "
 				"AND is_my_profile = %d",
-				contact_id, CTSVC_DATA_NAME, is_my_profile);
+				contact_id, CONTACTS_DATA_TYPE_NAME, is_my_profile);
 		ret = ctsvc_query_exec(query);
 		if (CONTACTS_ERROR_NONE != ret) {
 			ERR("ctsvc_query_exec() Faild(%d)", ret);
@@ -160,7 +160,7 @@ int ctsvc_db_name_insert(contacts_record_h record, int contact_id, bool is_my_pr
 				"INSERT INTO "CTS_TABLE_DATA"(contact_id, is_my_profile, datatype, is_default, data1, data2, data3, "
 				"data4, data5, data6, data7, data8, data9, data10, data11, data12) "
 				"VALUES(%d, %d, %d, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-				contact_id, is_my_profile, CTSVC_DATA_NAME);
+				contact_id, is_my_profile, CONTACTS_DATA_TYPE_NAME);
 
 		ret = ctsvc_query_prepare(query, &stmt);
 		RETVM_IF(NULL == stmt, ret, "ctsvc_query_prepare() Fail(%d)", ret);
