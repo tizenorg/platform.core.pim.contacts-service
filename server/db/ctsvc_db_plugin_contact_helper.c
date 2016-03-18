@@ -303,7 +303,7 @@ int ctsvc_db_contact_delete(int contact_id)
 
 #ifdef ENABLE_LOG_FEATURE
 		/* update phonelog */
-		ctsvc_db_phone_log_update_person_id(NULL, person_id, -1, false);
+		ctsvc_db_phone_log_update_person_id(NULL, person_id, -1, false, NULL);
 #endif /* ENABLE_LOG_FEATURE */
 	} else {
 		ctsvc_set_person_noti();
