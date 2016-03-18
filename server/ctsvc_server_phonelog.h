@@ -28,6 +28,6 @@ int ctsvc_phone_log_reset_statistics_by_sim(int sim_slot_no);
 int ctsvc_phone_log_delete(contacts_phone_log_delete_e op, ...);
 void ctsvc_db_phone_log_delete_callback(sqlite3_context  *context,
 		int argc, sqlite3_value **argv);
-int ctsvc_db_phone_log_update_person_id(const char *number, int old_person_id, int candidate_person_id, bool person_link);
+int ctsvc_db_phone_log_update_person_id(const char *number, int old_person_id, int candidate_person_id, bool person_link, int *found_person_id);
 
 #endif /* __CTSVC_SERVER_PHONELOG_H__ */

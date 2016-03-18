@@ -541,7 +541,7 @@ void ctsvc_db_person_delete_callback(sqlite3_context  *context,
 	 * update phonelog
 	 * CASE : do not know the proper new person_id
 	 */
-	ctsvc_db_phone_log_update_person_id(NULL, person_id, -1, false);
+	ctsvc_db_phone_log_update_person_id(NULL, person_id, -1, false, NULL);
 #endif /* ENABLE_LOG_FEATURE */
 	sqlite3_result_null(context);
 	return;
@@ -996,7 +996,7 @@ int ctsvc_person_link_person(int base_person_id, int person_id)
 	 * Because, when deleting, ctsvc_db_person_delete_callback will be called
 	 * the logic takes more time to find proper person_id (base_person_id)
 	 */
-	ctsvc_db_phone_log_update_person_id(NULL, person_id, base_person_id, true);
+	ctsvc_db_phone_log_update_person_id(NULL, person_id, base_person_id, true, NULL);
 #endif /* ENABLE_LOG_FEATURE */
 
 	snprintf(query, sizeof(query), "DELETE FROM %s WHERE person_id = %d",
@@ -1267,7 +1267,7 @@ int ctsvc_person_unlink_contact(int person_id, int contact_id, int *out_person_i
 
 #ifdef ENABLE_LOG_FEATURE
 	/* update phonelog */
-	ctsvc_db_phone_log_update_person_id(NULL, person_id, id, false);
+	ctsvc_db_phone_log_update_person_id(NULL, person_id, id, false, NULL);
 #endif /* ENABLE_LOG_FEATURE */
 
 	if (out_person_id)
@@ -1299,7 +1299,7 @@ int ctsvc_person_do_garbage_collection(void)
 		ctsvc_person_aggregate(person_id);
 #ifdef ENABLE_LOG_FEATURE
 		/* update phonelog */
-		ctsvc_db_phone_log_update_person_id(NULL, person_id, -1, false);
+		ctsvc_db_phone_log_update_person_id(NULL, person_id, -1, false, NULL);
 #endif /* ENABLE_LOG_FEATURE */
 	}
 	ctsvc_stmt_finalize(stmt);

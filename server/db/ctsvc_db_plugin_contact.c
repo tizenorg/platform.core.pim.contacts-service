@@ -2215,7 +2215,7 @@ static int __ctsvc_db_contact_insert_record(contacts_record_h record, int *id)
 			do {
 				contacts_list_get_current_record_p((contacts_list_h)contact->numbers, (contacts_record_h*)&number_record);
 				if (number_record->number)
-					ctsvc_db_phone_log_update_person_id(number_record->number, -1, contact->person_id, false);
+					ctsvc_db_phone_log_update_person_id(number_record->number, -1, contact->person_id, false, NULL);
 			} while (CONTACTS_ERROR_NONE == contacts_list_next((contacts_list_h)contact->numbers));
 		}
 	}
