@@ -52,8 +52,8 @@ int ctsvc_db_open(void)
 
 	if (NULL == ctsvc_db) {
 		ret = db_util_open(CTSVC_DB_PATH, &ctsvc_db, 0);
-		if (SQLITE_OK != ret) {
-			ERR("db_util_open() Fail(%d)", ret);
+		if (SQLITE_OK != ret || NULL == ctsvc_db) {
+			ERR("db_util_open() Fail(%d), ctsvc_db(0x%x)", ret, ctsvc_db);
 			return CONTACTS_ERROR_DB; /*CTS_ERR_DB_NOT_OPENED*/
 		}
 

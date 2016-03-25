@@ -57,8 +57,8 @@ int ctsvc_server_db_open(sqlite3 **db)
 
 	if (NULL == server_db) {
 		ret = db_util_open(CTSVC_DB_PATH, &server_db, 0);
-		RETVM_IF(ret != SQLITE_OK, CONTACTS_ERROR_DB,
-				"db_util_open() Fail(%d)", ret);
+		RETVM_IF(ret != SQLITE_OK || NULL == server_db, CONTACTS_ERROR_DB,
+				"db_util_open() Fail(%d), server_db(0x%x)", ret, server_db);
 
 		ret = sqlite3_create_function(server_db, "_DATA_DELETE_", 2, SQLITE_UTF8, NULL,
 				ctsvc_db_data_delete_callback, NULL, NULL);
