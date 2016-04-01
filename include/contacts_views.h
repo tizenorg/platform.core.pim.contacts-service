@@ -119,10 +119,10 @@ extern "C"
  * </table>
  */
 _CONTACTS_BEGIN_VIEW()
-    _CONTACTS_PROPERTY_INT(id)                    /* read only */
-    _CONTACTS_PROPERTY_INT(account_id)            /* read, write once */
-    _CONTACTS_PROPERTY_STR(name)                  /* read, write */
-    _CONTACTS_PROPERTY_INT(mode)                  /* read, write */
+	_CONTACTS_PROPERTY_INT(id)                    /* read only */
+	_CONTACTS_PROPERTY_INT(account_id)            /* read, write once */
+	_CONTACTS_PROPERTY_STR(name)                  /* read, write */
+	_CONTACTS_PROPERTY_INT(mode)                  /* read, write */
 _CONTACTS_END_VIEW(_contacts_address_book)
 
 /**
@@ -149,15 +149,15 @@ _CONTACTS_END_VIEW(_contacts_address_book)
  *
  */
 _CONTACTS_BEGIN_VIEW()
-    _CONTACTS_PROPERTY_INT(id)                    /* read only */
-    _CONTACTS_PROPERTY_INT(address_book_id)       /* read, write once */
-    _CONTACTS_PROPERTY_STR(name)                  /* read, write */
-    _CONTACTS_PROPERTY_STR(ringtone_path)         /* read, write */
-    _CONTACTS_PROPERTY_STR(image_path)            /* read, write */
-    _CONTACTS_PROPERTY_STR(vibration)             /* read, write */
-    _CONTACTS_PROPERTY_STR(extra_data)            /* read, write, string */
-    _CONTACTS_PROPERTY_BOOL(is_read_only)         /* read, write once */
-    _CONTACTS_PROPERTY_STR(message_alert)         /* read, write */
+	_CONTACTS_PROPERTY_INT(id)                    /* read only */
+	_CONTACTS_PROPERTY_INT(address_book_id)       /* read, write once */
+	_CONTACTS_PROPERTY_STR(name)                  /* read, write */
+	_CONTACTS_PROPERTY_STR(ringtone_path)         /* read, write */
+	_CONTACTS_PROPERTY_STR(image_path)            /* read, write */
+	_CONTACTS_PROPERTY_STR(vibration)             /* read, write */
+	_CONTACTS_PROPERTY_STR(extra_data)            /* read, write, string */
+	_CONTACTS_PROPERTY_BOOL(is_read_only)         /* read, write once */
+	_CONTACTS_PROPERTY_STR(message_alert)         /* read, write */
 _CONTACTS_END_VIEW(_contacts_group)
 
 /**
@@ -189,21 +189,21 @@ _CONTACTS_END_VIEW(_contacts_group)
  * </table>
  */
 _CONTACTS_BEGIN_VIEW()
-    _CONTACTS_PROPERTY_INT(id)                    /* read only */
-    _CONTACTS_PROPERTY_STR(display_name)          /* read only */
-    _CONTACTS_PROPERTY_STR(display_name_index)    /* read only */
-    _CONTACTS_PROPERTY_INT(display_contact_id)    /* read, write */
-    _CONTACTS_PROPERTY_STR(ringtone_path)         /* read, write */
-    _CONTACTS_PROPERTY_STR(image_thumbnail_path)  /* read only */
-    _CONTACTS_PROPERTY_STR(vibration)             /* read, write */
-    _CONTACTS_PROPERTY_STR(status)                /* read only */
-    _CONTACTS_PROPERTY_BOOL(is_favorite)          /* read, write */
-    _CONTACTS_PROPERTY_DOUBLE(favorite_priority)  /* sort only */
-    _CONTACTS_PROPERTY_INT(link_count)            /* read only */
-    _CONTACTS_PROPERTY_STR(addressbook_ids)       /* read only */
-    _CONTACTS_PROPERTY_BOOL(has_phonenumber)      /* read only */
-    _CONTACTS_PROPERTY_BOOL(has_email)            /* read only */
-    _CONTACTS_PROPERTY_STR(message_alert)         /* read, write */
+	_CONTACTS_PROPERTY_INT(id)                    /* read only */
+	_CONTACTS_PROPERTY_STR(display_name)          /* read only */
+	_CONTACTS_PROPERTY_STR(display_name_index)    /* read only */
+	_CONTACTS_PROPERTY_INT(display_contact_id)    /* read, write */
+	_CONTACTS_PROPERTY_STR(ringtone_path)         /* read, write */
+	_CONTACTS_PROPERTY_STR(image_thumbnail_path)  /* read only */
+	_CONTACTS_PROPERTY_STR(vibration)             /* read, write */
+	_CONTACTS_PROPERTY_STR(status)                /* read only */
+	_CONTACTS_PROPERTY_BOOL(is_favorite)          /* read, write */
+	_CONTACTS_PROPERTY_DOUBLE(favorite_priority)  /* sort only */
+	_CONTACTS_PROPERTY_INT(link_count)            /* read only */
+	_CONTACTS_PROPERTY_STR(addressbook_ids)       /* read only */
+	_CONTACTS_PROPERTY_BOOL(has_phonenumber)      /* read only */
+	_CONTACTS_PROPERTY_BOOL(has_email)            /* read only */
+	_CONTACTS_PROPERTY_STR(message_alert)         /* read, write */
 _CONTACTS_END_VIEW(_contacts_person)
 
 /**
@@ -235,20 +235,20 @@ _CONTACTS_END_VIEW(_contacts_person)
  *
  */
 _CONTACTS_BEGIN_READ_ONLY_VIEW()
-    _CONTACTS_PROPERTY_INT(id)                    /* read only */
-    _CONTACTS_PROPERTY_STR(display_name)          /* read only */
-    _CONTACTS_PROPERTY_INT(display_source_type)   /* read only */
-    _CONTACTS_PROPERTY_INT(address_book_id)       /* read only */
-    _CONTACTS_PROPERTY_STR(ringtone_path)         /* read only */
-    _CONTACTS_PROPERTY_STR(image_thumbnail_path)  /* read only */
-    _CONTACTS_PROPERTY_BOOL(is_favorite)          /* read only */
-    _CONTACTS_PROPERTY_BOOL(has_phonenumber)      /* read only */
-    _CONTACTS_PROPERTY_BOOL(has_email)            /* read only */
-    _CONTACTS_PROPERTY_INT(person_id)             /* read only */
-    _CONTACTS_PROPERTY_STR(uid)                   /* read only */
-    _CONTACTS_PROPERTY_STR(vibration)             /* read only */
-    _CONTACTS_PROPERTY_INT(changed_time)          /* read only */
-    _CONTACTS_PROPERTY_STR(message_alert)         /* read only */
+	_CONTACTS_PROPERTY_INT(id)                    /* read only */
+	_CONTACTS_PROPERTY_STR(display_name)          /* read only */
+	_CONTACTS_PROPERTY_INT(display_source_type)   /* read only */
+	_CONTACTS_PROPERTY_INT(address_book_id)       /* read only */
+	_CONTACTS_PROPERTY_STR(ringtone_path)         /* read only */
+	_CONTACTS_PROPERTY_STR(image_thumbnail_path)  /* read only */
+	_CONTACTS_PROPERTY_BOOL(is_favorite)          /* read only */
+	_CONTACTS_PROPERTY_BOOL(has_phonenumber)      /* read only */
+	_CONTACTS_PROPERTY_BOOL(has_email)            /* read only */
+	_CONTACTS_PROPERTY_INT(person_id)             /* read only */
+	_CONTACTS_PROPERTY_STR(uid)                   /* read only */
+	_CONTACTS_PROPERTY_STR(vibration)             /* read only */
+	_CONTACTS_PROPERTY_INT(changed_time)          /* read only */
+	_CONTACTS_PROPERTY_STR(message_alert)         /* read only */
 _CONTACTS_END_READ_ONLY_VIEW(_contacts_simple_contact)
 
 /**
@@ -295,37 +295,37 @@ _CONTACTS_END_READ_ONLY_VIEW(_contacts_simple_contact)
  * </table>
  */
 _CONTACTS_BEGIN_VIEW()
-    _CONTACTS_PROPERTY_INT(id)                        /* read only */
-    _CONTACTS_PROPERTY_STR(display_name)              /* read only */
-    _CONTACTS_PROPERTY_INT(display_source_type)       /* read only */
-    _CONTACTS_PROPERTY_INT(address_book_id)           /* read, write once */
-    _CONTACTS_PROPERTY_STR(ringtone_path)             /* read, write */
-    _CONTACTS_PROPERTY_STR(image_thumbnail_path)      /* read only */
-    _CONTACTS_PROPERTY_BOOL(is_favorite)              /* read, write */
-    _CONTACTS_PROPERTY_BOOL(has_phonenumber)          /* read only */
-    _CONTACTS_PROPERTY_BOOL(has_email)                /* read only */
-    _CONTACTS_PROPERTY_INT(person_id)                 /* read, write once */
-    _CONTACTS_PROPERTY_STR(uid)                       /* read, write */
-    _CONTACTS_PROPERTY_STR(vibration)                 /* read, write */
-    _CONTACTS_PROPERTY_INT(changed_time)              /* read only */
-    _CONTACTS_PROPERTY_INT(link_mode)                 /* read, write */
-    _CONTACTS_PROPERTY_CHILD_SINGLE(name)             /* read, write */
-    _CONTACTS_PROPERTY_CHILD_MULTIPLE(image)          /* read, write */
-    _CONTACTS_PROPERTY_CHILD_MULTIPLE(company)        /* read, write */
-    _CONTACTS_PROPERTY_CHILD_MULTIPLE(note)           /* read, write */
-    _CONTACTS_PROPERTY_CHILD_MULTIPLE(number)         /* read, write */
-    _CONTACTS_PROPERTY_CHILD_MULTIPLE(email)          /* read, write */
-    _CONTACTS_PROPERTY_CHILD_MULTIPLE(event)          /* read, write */
-    _CONTACTS_PROPERTY_CHILD_MULTIPLE(messenger)      /* read, write */
-    _CONTACTS_PROPERTY_CHILD_MULTIPLE(address)        /* read, write */
-    _CONTACTS_PROPERTY_CHILD_MULTIPLE(url)            /* read, write */
-    _CONTACTS_PROPERTY_CHILD_MULTIPLE(nickname)       /* read, write */
-    _CONTACTS_PROPERTY_CHILD_MULTIPLE(profile)        /* read, write */
-    _CONTACTS_PROPERTY_CHILD_MULTIPLE(relationship)   /* read, write */
-    _CONTACTS_PROPERTY_CHILD_MULTIPLE(group_relation) /* read, write */
-    _CONTACTS_PROPERTY_CHILD_MULTIPLE(extension)      /* read, write */
-    _CONTACTS_PROPERTY_CHILD_MULTIPLE(sip)            /* read, write (Since 3.0) */
-    _CONTACTS_PROPERTY_STR(message_alert)             /* read, write */
+	_CONTACTS_PROPERTY_INT(id)                        /* read only */
+	_CONTACTS_PROPERTY_STR(display_name)              /* read only */
+	_CONTACTS_PROPERTY_INT(display_source_type)       /* read only */
+	_CONTACTS_PROPERTY_INT(address_book_id)           /* read, write once */
+	_CONTACTS_PROPERTY_STR(ringtone_path)             /* read, write */
+	_CONTACTS_PROPERTY_STR(image_thumbnail_path)      /* read only */
+	_CONTACTS_PROPERTY_BOOL(is_favorite)              /* read, write */
+	_CONTACTS_PROPERTY_BOOL(has_phonenumber)          /* read only */
+	_CONTACTS_PROPERTY_BOOL(has_email)                /* read only */
+	_CONTACTS_PROPERTY_INT(person_id)                 /* read, write once */
+	_CONTACTS_PROPERTY_STR(uid)                       /* read, write */
+	_CONTACTS_PROPERTY_STR(vibration)                 /* read, write */
+	_CONTACTS_PROPERTY_INT(changed_time)              /* read only */
+	_CONTACTS_PROPERTY_INT(link_mode)                 /* read, write */
+	_CONTACTS_PROPERTY_CHILD_SINGLE(name)             /* read, write */
+	_CONTACTS_PROPERTY_CHILD_MULTIPLE(image)          /* read, write */
+	_CONTACTS_PROPERTY_CHILD_MULTIPLE(company)        /* read, write */
+	_CONTACTS_PROPERTY_CHILD_MULTIPLE(note)           /* read, write */
+	_CONTACTS_PROPERTY_CHILD_MULTIPLE(number)         /* read, write */
+	_CONTACTS_PROPERTY_CHILD_MULTIPLE(email)          /* read, write */
+	_CONTACTS_PROPERTY_CHILD_MULTIPLE(event)          /* read, write */
+	_CONTACTS_PROPERTY_CHILD_MULTIPLE(messenger)      /* read, write */
+	_CONTACTS_PROPERTY_CHILD_MULTIPLE(address)        /* read, write */
+	_CONTACTS_PROPERTY_CHILD_MULTIPLE(url)            /* read, write */
+	_CONTACTS_PROPERTY_CHILD_MULTIPLE(nickname)       /* read, write */
+	_CONTACTS_PROPERTY_CHILD_MULTIPLE(profile)        /* read, write */
+	_CONTACTS_PROPERTY_CHILD_MULTIPLE(relationship)   /* read, write */
+	_CONTACTS_PROPERTY_CHILD_MULTIPLE(group_relation) /* read, write */
+	_CONTACTS_PROPERTY_CHILD_MULTIPLE(extension)      /* read, write */
+	_CONTACTS_PROPERTY_CHILD_MULTIPLE(sip)            /* read, write (Since 3.0) */
+	_CONTACTS_PROPERTY_STR(message_alert)             /* read, write */
 _CONTACTS_END_VIEW(_contacts_contact)
 
 /**
@@ -362,27 +362,27 @@ _CONTACTS_END_VIEW(_contacts_contact)
  * </table>
  */
 _CONTACTS_BEGIN_VIEW()
-    _CONTACTS_PROPERTY_INT(id)                        /* read only */
-    _CONTACTS_PROPERTY_STR(display_name)              /* read only */
-    _CONTACTS_PROPERTY_INT(address_book_id)           /* read, write once */
-    _CONTACTS_PROPERTY_STR(image_thumbnail_path)      /* read only */
-    _CONTACTS_PROPERTY_STR(uid)                       /* read, write */
-    _CONTACTS_PROPERTY_INT(changed_time)              /* read only */
-    _CONTACTS_PROPERTY_CHILD_SINGLE(name)             /* read, write */
-    _CONTACTS_PROPERTY_CHILD_MULTIPLE(image)          /* read, write */
-    _CONTACTS_PROPERTY_CHILD_MULTIPLE(company)        /* read, write */
-    _CONTACTS_PROPERTY_CHILD_MULTIPLE(note)           /* read, write */
-    _CONTACTS_PROPERTY_CHILD_MULTIPLE(number)         /* read, write */
-    _CONTACTS_PROPERTY_CHILD_MULTIPLE(email)          /* read, write */
-    _CONTACTS_PROPERTY_CHILD_MULTIPLE(event)          /* read, write */
-    _CONTACTS_PROPERTY_CHILD_MULTIPLE(messenger)      /* read, write */
-    _CONTACTS_PROPERTY_CHILD_MULTIPLE(address)        /* read, write */
-    _CONTACTS_PROPERTY_CHILD_MULTIPLE(url)            /* read, write */
-    _CONTACTS_PROPERTY_CHILD_MULTIPLE(nickname)       /* read, write */
-    _CONTACTS_PROPERTY_CHILD_MULTIPLE(profile)        /* read, write */
-    _CONTACTS_PROPERTY_CHILD_MULTIPLE(relationship)   /* read, write */
-    _CONTACTS_PROPERTY_CHILD_MULTIPLE(extension)      /* read, write */
-    _CONTACTS_PROPERTY_CHILD_MULTIPLE(sip)            /* read, write (Since 3.0) */
+	_CONTACTS_PROPERTY_INT(id)                        /* read only */
+	_CONTACTS_PROPERTY_STR(display_name)              /* read only */
+	_CONTACTS_PROPERTY_INT(address_book_id)           /* read, write once */
+	_CONTACTS_PROPERTY_STR(image_thumbnail_path)      /* read only */
+	_CONTACTS_PROPERTY_STR(uid)                       /* read, write */
+	_CONTACTS_PROPERTY_INT(changed_time)              /* read only */
+	_CONTACTS_PROPERTY_CHILD_SINGLE(name)             /* read, write */
+	_CONTACTS_PROPERTY_CHILD_MULTIPLE(image)          /* read, write */
+	_CONTACTS_PROPERTY_CHILD_MULTIPLE(company)        /* read, write */
+	_CONTACTS_PROPERTY_CHILD_MULTIPLE(note)           /* read, write */
+	_CONTACTS_PROPERTY_CHILD_MULTIPLE(number)         /* read, write */
+	_CONTACTS_PROPERTY_CHILD_MULTIPLE(email)          /* read, write */
+	_CONTACTS_PROPERTY_CHILD_MULTIPLE(event)          /* read, write */
+	_CONTACTS_PROPERTY_CHILD_MULTIPLE(messenger)      /* read, write */
+	_CONTACTS_PROPERTY_CHILD_MULTIPLE(address)        /* read, write */
+	_CONTACTS_PROPERTY_CHILD_MULTIPLE(url)            /* read, write */
+	_CONTACTS_PROPERTY_CHILD_MULTIPLE(nickname)       /* read, write */
+	_CONTACTS_PROPERTY_CHILD_MULTIPLE(profile)        /* read, write */
+	_CONTACTS_PROPERTY_CHILD_MULTIPLE(relationship)   /* read, write */
+	_CONTACTS_PROPERTY_CHILD_MULTIPLE(extension)      /* read, write */
+	_CONTACTS_PROPERTY_CHILD_MULTIPLE(sip)            /* read, write (Since 3.0) */
 _CONTACTS_END_VIEW(_contacts_my_profile)
 
 
@@ -410,16 +410,16 @@ _CONTACTS_END_VIEW(_contacts_my_profile)
  * </table>
  */
 _CONTACTS_BEGIN_VIEW()
-    _CONTACTS_PROPERTY_INT(id)                /* read only */
-    _CONTACTS_PROPERTY_INT(contact_id)        /* read, write once */
-    _CONTACTS_PROPERTY_STR(first)             /* read, write */
-    _CONTACTS_PROPERTY_STR(last)              /* read, write */
-    _CONTACTS_PROPERTY_STR(addition)          /* read, write */
-    _CONTACTS_PROPERTY_STR(suffix)            /* read, write */
-    _CONTACTS_PROPERTY_STR(prefix)            /* read, write */
-    _CONTACTS_PROPERTY_STR(phonetic_first)    /* read, write */
-    _CONTACTS_PROPERTY_STR(phonetic_middle)   /* read, write */
-    _CONTACTS_PROPERTY_STR(phonetic_last)     /* read, write */
+	_CONTACTS_PROPERTY_INT(id)                /* read only */
+	_CONTACTS_PROPERTY_INT(contact_id)        /* read, write once */
+	_CONTACTS_PROPERTY_STR(first)             /* read, write */
+	_CONTACTS_PROPERTY_STR(last)              /* read, write */
+	_CONTACTS_PROPERTY_STR(addition)          /* read, write */
+	_CONTACTS_PROPERTY_STR(suffix)            /* read, write */
+	_CONTACTS_PROPERTY_STR(prefix)            /* read, write */
+	_CONTACTS_PROPERTY_STR(phonetic_first)    /* read, write */
+	_CONTACTS_PROPERTY_STR(phonetic_middle)   /* read, write */
+	_CONTACTS_PROPERTY_STR(phonetic_last)     /* read, write */
 _CONTACTS_END_VIEW(_contacts_name)
 
 /**
@@ -446,15 +446,15 @@ _CONTACTS_END_VIEW(_contacts_name)
  * </table>
  */
 _CONTACTS_BEGIN_VIEW()
-    _CONTACTS_PROPERTY_INT(id)                /* read only */
-    _CONTACTS_PROPERTY_INT(contact_id)        /* read, write once */
-    _CONTACTS_PROPERTY_INT(type)              /* read, write */
-    _CONTACTS_PROPERTY_STR(label)             /* read, write */
-    _CONTACTS_PROPERTY_BOOL(is_default)       /* read, write */
-    _CONTACTS_PROPERTY_STR(number)            /* read, write */
-    _CONTACTS_PROPERTY_STR(normalized_number) /* filter only */
-    _CONTACTS_PROPERTY_STR(cleaned_number)    /* filter only */
-    _CONTACTS_PROPERTY_STR(number_filter)     /* filter only */
+	_CONTACTS_PROPERTY_INT(id)                /* read only */
+	_CONTACTS_PROPERTY_INT(contact_id)        /* read, write once */
+	_CONTACTS_PROPERTY_INT(type)              /* read, write */
+	_CONTACTS_PROPERTY_STR(label)             /* read, write */
+	_CONTACTS_PROPERTY_BOOL(is_default)       /* read, write */
+	_CONTACTS_PROPERTY_STR(number)            /* read, write */
+	_CONTACTS_PROPERTY_STR(normalized_number) /* filter only */
+	_CONTACTS_PROPERTY_STR(cleaned_number)    /* filter only */
+	_CONTACTS_PROPERTY_STR(number_filter)     /* filter only */
 _CONTACTS_END_VIEW(_contacts_number)
 
 /**
@@ -477,12 +477,12 @@ _CONTACTS_END_VIEW(_contacts_number)
  * </table>
  */
 _CONTACTS_BEGIN_VIEW()
-    _CONTACTS_PROPERTY_INT(id)                /* read only */
-    _CONTACTS_PROPERTY_INT(contact_id)        /* read, write once */
-    _CONTACTS_PROPERTY_INT(type)              /* read, write */
-    _CONTACTS_PROPERTY_STR(label)             /* read, write */
-    _CONTACTS_PROPERTY_BOOL(is_default)       /* read, write */
-    _CONTACTS_PROPERTY_STR(email)             /* read, write */
+	_CONTACTS_PROPERTY_INT(id)                /* read only */
+	_CONTACTS_PROPERTY_INT(contact_id)        /* read, write once */
+	_CONTACTS_PROPERTY_INT(type)              /* read, write */
+	_CONTACTS_PROPERTY_STR(label)             /* read, write */
+	_CONTACTS_PROPERTY_BOOL(is_default)       /* read, write */
+	_CONTACTS_PROPERTY_STR(email)             /* read, write */
 _CONTACTS_END_VIEW(_contacts_email)
 
 /**
@@ -511,18 +511,18 @@ _CONTACTS_END_VIEW(_contacts_email)
  * </table>
  */
 _CONTACTS_BEGIN_VIEW()
-    _CONTACTS_PROPERTY_INT(id)                /* read only */
-    _CONTACTS_PROPERTY_INT(contact_id)        /* read, write once */
-    _CONTACTS_PROPERTY_INT(type)              /* read, write */
-    _CONTACTS_PROPERTY_STR(label)             /* read, write */
-    _CONTACTS_PROPERTY_STR(postbox)           /* read, write */
-    _CONTACTS_PROPERTY_STR(extended)          /* read, write */
-    _CONTACTS_PROPERTY_STR(street)            /* read, write */
-    _CONTACTS_PROPERTY_STR(locality)          /* read, write */
-    _CONTACTS_PROPERTY_STR(region)            /* read, write */
-    _CONTACTS_PROPERTY_STR(postal_code)       /* read, write */
-    _CONTACTS_PROPERTY_STR(country)           /* read, write */
-    _CONTACTS_PROPERTY_BOOL(is_default)       /* read, write */
+	_CONTACTS_PROPERTY_INT(id)                /* read only */
+	_CONTACTS_PROPERTY_INT(contact_id)        /* read, write once */
+	_CONTACTS_PROPERTY_INT(type)              /* read, write */
+	_CONTACTS_PROPERTY_STR(label)             /* read, write */
+	_CONTACTS_PROPERTY_STR(postbox)           /* read, write */
+	_CONTACTS_PROPERTY_STR(extended)          /* read, write */
+	_CONTACTS_PROPERTY_STR(street)            /* read, write */
+	_CONTACTS_PROPERTY_STR(locality)          /* read, write */
+	_CONTACTS_PROPERTY_STR(region)            /* read, write */
+	_CONTACTS_PROPERTY_STR(postal_code)       /* read, write */
+	_CONTACTS_PROPERTY_STR(country)           /* read, write */
+	_CONTACTS_PROPERTY_BOOL(is_default)       /* read, write */
 _CONTACTS_END_VIEW(_contacts_address)
 
 /**
@@ -542,9 +542,9 @@ _CONTACTS_END_VIEW(_contacts_address)
  * </table>
  */
 _CONTACTS_BEGIN_VIEW()
-    _CONTACTS_PROPERTY_INT(id)            /* read only */
-    _CONTACTS_PROPERTY_INT(contact_id)    /* read, write once */
-    _CONTACTS_PROPERTY_STR(note)          /* read, write */
+	_CONTACTS_PROPERTY_INT(id)            /* read only */
+	_CONTACTS_PROPERTY_INT(contact_id)    /* read, write once */
+	_CONTACTS_PROPERTY_STR(note)          /* read, write */
 _CONTACTS_END_VIEW(_contacts_note)
 
 /**
@@ -566,11 +566,11 @@ _CONTACTS_END_VIEW(_contacts_note)
  * </table>
  */
 _CONTACTS_BEGIN_VIEW()
-    _CONTACTS_PROPERTY_INT(id)                /* read only */
-    _CONTACTS_PROPERTY_INT(contact_id)        /* read, write once */
-    _CONTACTS_PROPERTY_INT(type)              /* read, write */
-    _CONTACTS_PROPERTY_STR(label)             /* read, write */
-    _CONTACTS_PROPERTY_STR(url)               /* read, write */
+	_CONTACTS_PROPERTY_INT(id)                /* read only */
+	_CONTACTS_PROPERTY_INT(contact_id)        /* read, write once */
+	_CONTACTS_PROPERTY_INT(type)              /* read, write */
+	_CONTACTS_PROPERTY_STR(label)             /* read, write */
+	_CONTACTS_PROPERTY_STR(url)               /* read, write */
 _CONTACTS_END_VIEW(_contacts_url)
 
 /**
@@ -594,13 +594,13 @@ _CONTACTS_END_VIEW(_contacts_url)
  * </table>
  */
 _CONTACTS_BEGIN_VIEW()
-    _CONTACTS_PROPERTY_INT(id)                /* read only */
-    _CONTACTS_PROPERTY_INT(contact_id)        /* read, write once */
-    _CONTACTS_PROPERTY_INT(type)              /* read, write */
-    _CONTACTS_PROPERTY_STR(label)             /* read, write */
-    _CONTACTS_PROPERTY_INT(date)              /* read, write */
-    _CONTACTS_PROPERTY_INT(calendar_type)     /* read, write */
-    _CONTACTS_PROPERTY_BOOL(is_leap_month)    /* read, write (Deprecated since 2.4) */
+	_CONTACTS_PROPERTY_INT(id)                /* read only */
+	_CONTACTS_PROPERTY_INT(contact_id)        /* read, write once */
+	_CONTACTS_PROPERTY_INT(type)              /* read, write */
+	_CONTACTS_PROPERTY_STR(label)             /* read, write */
+	_CONTACTS_PROPERTY_INT(date)              /* read, write */
+	_CONTACTS_PROPERTY_INT(calendar_type)     /* read, write */
+	_CONTACTS_PROPERTY_BOOL(is_leap_month)    /* read, write (Deprecated since 2.4) */
 _CONTACTS_END_VIEW(_contacts_event)
 
 /**
@@ -622,10 +622,10 @@ _CONTACTS_END_VIEW(_contacts_event)
  * </table>
  */
 _CONTACTS_BEGIN_VIEW()
-    _CONTACTS_PROPERTY_INT(id)                /* read only, can not be used as filter */
-    _CONTACTS_PROPERTY_INT(group_id)          /* read, write once */
-    _CONTACTS_PROPERTY_INT(contact_id)        /* read, write once */
-    _CONTACTS_PROPERTY_STR(name)              /* read only */
+	_CONTACTS_PROPERTY_INT(id)                /* read only, can not be used as filter */
+	_CONTACTS_PROPERTY_INT(group_id)          /* read, write once */
+	_CONTACTS_PROPERTY_INT(contact_id)        /* read, write once */
+	_CONTACTS_PROPERTY_STR(name)              /* read only */
 _CONTACTS_END_VIEW(_contacts_group_relation)
 
 /**
@@ -648,11 +648,11 @@ _CONTACTS_END_VIEW(_contacts_group_relation)
  *
  */
 _CONTACTS_BEGIN_VIEW()
-    _CONTACTS_PROPERTY_INT(id)                /* read only */
-    _CONTACTS_PROPERTY_INT(contact_id)        /* read, write once */
-    _CONTACTS_PROPERTY_INT(type)              /* read, write */
-    _CONTACTS_PROPERTY_STR(label)             /* read, write */
-    _CONTACTS_PROPERTY_STR(name)              /* read, write */
+	_CONTACTS_PROPERTY_INT(id)                /* read only */
+	_CONTACTS_PROPERTY_INT(contact_id)        /* read, write once */
+	_CONTACTS_PROPERTY_INT(type)              /* read, write */
+	_CONTACTS_PROPERTY_STR(label)             /* read, write */
+	_CONTACTS_PROPERTY_STR(name)              /* read, write */
 _CONTACTS_END_VIEW(_contacts_relationship)
 
 /**
@@ -674,12 +674,12 @@ _CONTACTS_END_VIEW(_contacts_relationship)
  * </table>
  */
 _CONTACTS_BEGIN_VIEW()
-    _CONTACTS_PROPERTY_INT(id)                /* read only */
-    _CONTACTS_PROPERTY_INT(contact_id)        /* read, write once */
-    _CONTACTS_PROPERTY_INT(type)              /* read, write */
-    _CONTACTS_PROPERTY_STR(label)             /* read, write */
-    _CONTACTS_PROPERTY_STR(path)              /* read, write */
-    _CONTACTS_PROPERTY_BOOL(is_default)
+	_CONTACTS_PROPERTY_INT(id)                /* read only */
+	_CONTACTS_PROPERTY_INT(contact_id)        /* read, write once */
+	_CONTACTS_PROPERTY_INT(type)              /* read, write */
+	_CONTACTS_PROPERTY_STR(label)             /* read, write */
+	_CONTACTS_PROPERTY_STR(path)              /* read, write */
+	_CONTACTS_PROPERTY_BOOL(is_default)
 _CONTACTS_END_VIEW(_contacts_image)
 
 /**
@@ -709,19 +709,19 @@ _CONTACTS_END_VIEW(_contacts_image)
  * </table>
  */
 _CONTACTS_BEGIN_VIEW()
-    _CONTACTS_PROPERTY_INT(id)                    /* read only */
-    _CONTACTS_PROPERTY_INT(contact_id)            /* read, write once */
-    _CONTACTS_PROPERTY_INT(type)                  /* read, write */
-    _CONTACTS_PROPERTY_STR(label)                 /* read, write */
-    _CONTACTS_PROPERTY_STR(name)                  /* read, write */
-    _CONTACTS_PROPERTY_STR(department)            /* read, write */
-    _CONTACTS_PROPERTY_STR(job_title)             /* read, write */
-    _CONTACTS_PROPERTY_STR(assistant_name)        /* read, write */
-    _CONTACTS_PROPERTY_STR(role)                  /* read, write */
-    _CONTACTS_PROPERTY_STR(logo)                  /* read, write */
-    _CONTACTS_PROPERTY_STR(location)              /* read, write */
-    _CONTACTS_PROPERTY_STR(description)           /* read, write */
-    _CONTACTS_PROPERTY_STR(phonetic_name)         /* read, write */
+	_CONTACTS_PROPERTY_INT(id)                    /* read only */
+	_CONTACTS_PROPERTY_INT(contact_id)            /* read, write once */
+	_CONTACTS_PROPERTY_INT(type)                  /* read, write */
+	_CONTACTS_PROPERTY_STR(label)                 /* read, write */
+	_CONTACTS_PROPERTY_STR(name)                  /* read, write */
+	_CONTACTS_PROPERTY_STR(department)            /* read, write */
+	_CONTACTS_PROPERTY_STR(job_title)             /* read, write */
+	_CONTACTS_PROPERTY_STR(assistant_name)        /* read, write */
+	_CONTACTS_PROPERTY_STR(role)                  /* read, write */
+	_CONTACTS_PROPERTY_STR(logo)                  /* read, write */
+	_CONTACTS_PROPERTY_STR(location)              /* read, write */
+	_CONTACTS_PROPERTY_STR(description)           /* read, write */
+	_CONTACTS_PROPERTY_STR(phonetic_name)         /* read, write */
 _CONTACTS_END_VIEW(_contacts_company)
 
 /**
@@ -741,9 +741,9 @@ _CONTACTS_END_VIEW(_contacts_company)
  * </table>
  */
 _CONTACTS_BEGIN_VIEW()
-    _CONTACTS_PROPERTY_INT(id)                    /* read only */
-    _CONTACTS_PROPERTY_INT(contact_id)            /* read, write once */
-    _CONTACTS_PROPERTY_STR(name)                  /* read, write */
+	_CONTACTS_PROPERTY_INT(id)                    /* read only */
+	_CONTACTS_PROPERTY_INT(contact_id)            /* read, write once */
+	_CONTACTS_PROPERTY_STR(name)                  /* read, write */
 _CONTACTS_END_VIEW(_contacts_nickname)
 
 /**
@@ -765,11 +765,11 @@ _CONTACTS_END_VIEW(_contacts_nickname)
  * </table>
  */
 _CONTACTS_BEGIN_VIEW()
-    _CONTACTS_PROPERTY_INT(id)                    /* read only */
-    _CONTACTS_PROPERTY_INT(contact_id)            /* read, write once */
-    _CONTACTS_PROPERTY_INT(type)                  /* read, write */
-    _CONTACTS_PROPERTY_STR(label)                 /* read, write */
-    _CONTACTS_PROPERTY_STR(im_id)                 /* read, write */
+	_CONTACTS_PROPERTY_INT(id)                    /* read only */
+	_CONTACTS_PROPERTY_INT(contact_id)            /* read, write once */
+	_CONTACTS_PROPERTY_INT(type)                  /* read, write */
+	_CONTACTS_PROPERTY_STR(label)                 /* read, write */
+	_CONTACTS_PROPERTY_STR(im_id)                 /* read, write */
 _CONTACTS_END_VIEW(_contacts_messenger)
 
 /**
@@ -800,20 +800,20 @@ _CONTACTS_END_VIEW(_contacts_messenger)
  * </table>
  */
 _CONTACTS_BEGIN_VIEW()
-    _CONTACTS_PROPERTY_INT(id)                    /* read only */
-    _CONTACTS_PROPERTY_INT(contact_id)            /* read, write once */
-    _CONTACTS_PROPERTY_INT(data1)                 /* read, write */
-    _CONTACTS_PROPERTY_STR(data2)                 /* read, write */
-    _CONTACTS_PROPERTY_STR(data3)                 /* read, write */
-    _CONTACTS_PROPERTY_STR(data4)                 /* read, write */
-    _CONTACTS_PROPERTY_STR(data5)                 /* read, write */
-    _CONTACTS_PROPERTY_STR(data6)                 /* read, write */
-    _CONTACTS_PROPERTY_STR(data7)                 /* read, write */
-    _CONTACTS_PROPERTY_STR(data8)                 /* read, write */
-    _CONTACTS_PROPERTY_STR(data9)                 /* read, write */
-    _CONTACTS_PROPERTY_STR(data10)                /* read, write */
-    _CONTACTS_PROPERTY_STR(data11)                /* read, write */
-    _CONTACTS_PROPERTY_STR(data12)                /* read, write */
+	_CONTACTS_PROPERTY_INT(id)                    /* read only */
+	_CONTACTS_PROPERTY_INT(contact_id)            /* read, write once */
+	_CONTACTS_PROPERTY_INT(data1)                 /* read, write */
+	_CONTACTS_PROPERTY_STR(data2)                 /* read, write */
+	_CONTACTS_PROPERTY_STR(data3)                 /* read, write */
+	_CONTACTS_PROPERTY_STR(data4)                 /* read, write */
+	_CONTACTS_PROPERTY_STR(data5)                 /* read, write */
+	_CONTACTS_PROPERTY_STR(data6)                 /* read, write */
+	_CONTACTS_PROPERTY_STR(data7)                 /* read, write */
+	_CONTACTS_PROPERTY_STR(data8)                 /* read, write */
+	_CONTACTS_PROPERTY_STR(data9)                 /* read, write */
+	_CONTACTS_PROPERTY_STR(data10)                /* read, write */
+	_CONTACTS_PROPERTY_STR(data11)                /* read, write */
+	_CONTACTS_PROPERTY_STR(data12)                /* read, write */
 _CONTACTS_END_VIEW(_contacts_extension)
 
 /**
@@ -834,10 +834,10 @@ _CONTACTS_END_VIEW(_contacts_extension)
  * </table>
  */
 _CONTACTS_BEGIN_VIEW()
-    _CONTACTS_PROPERTY_INT(id)                    /* read only */
-    _CONTACTS_PROPERTY_STR(name)                  /* read only */
-    _CONTACTS_PROPERTY_STR(number)                /* read only */
-    _CONTACTS_PROPERTY_INT(sim_slot_no)           /* read only */
+	_CONTACTS_PROPERTY_INT(id)                    /* read only */
+	_CONTACTS_PROPERTY_STR(name)                  /* read only */
+	_CONTACTS_PROPERTY_STR(number)                /* read only */
+	_CONTACTS_PROPERTY_INT(sim_slot_no)           /* read only */
 _CONTACTS_END_VIEW(_contacts_sdn)
 
 /**
@@ -865,17 +865,17 @@ _CONTACTS_END_VIEW(_contacts_sdn)
  * </table>
  */
 _CONTACTS_BEGIN_VIEW()
-    _CONTACTS_PROPERTY_INT(id)                    /* read only */
-    _CONTACTS_PROPERTY_STR(uid)                   /* read, write */
-    _CONTACTS_PROPERTY_STR(text)                  /* read, write */
-    _CONTACTS_PROPERTY_INT(order)                 /* read, write */
-    _CONTACTS_PROPERTY_STR(service_operation)     /* read, write */
-    _CONTACTS_PROPERTY_STR(mime)                  /* read, write */
-    _CONTACTS_PROPERTY_STR(app_id)                /* read, write */
-    _CONTACTS_PROPERTY_STR(uri)                   /* read, write */
-    _CONTACTS_PROPERTY_STR(category)              /* read, write */
-    _CONTACTS_PROPERTY_STR(extra_data)            /* read, write */
-    _CONTACTS_PROPERTY_INT(contact_id)            /* read, write once */
+	_CONTACTS_PROPERTY_INT(id)                    /* read only */
+	_CONTACTS_PROPERTY_STR(uid)                   /* read, write */
+	_CONTACTS_PROPERTY_STR(text)                  /* read, write */
+	_CONTACTS_PROPERTY_INT(order)                 /* read, write */
+	_CONTACTS_PROPERTY_STR(service_operation)     /* read, write */
+	_CONTACTS_PROPERTY_STR(mime)                  /* read, write */
+	_CONTACTS_PROPERTY_STR(app_id)                /* read, write */
+	_CONTACTS_PROPERTY_STR(uri)                   /* read, write */
+	_CONTACTS_PROPERTY_STR(category)              /* read, write */
+	_CONTACTS_PROPERTY_STR(extra_data)            /* read, write */
+	_CONTACTS_PROPERTY_INT(contact_id)            /* read, write once */
 _CONTACTS_END_VIEW(_contacts_profile)
 
 /**
@@ -896,10 +896,10 @@ _CONTACTS_END_VIEW(_contacts_profile)
  * </table>
  */
 _CONTACTS_BEGIN_VIEW()
-    _CONTACTS_PROPERTY_INT(id)                    /* read only */
-    _CONTACTS_PROPERTY_INT(activity_id)           /* read, write once */
-    _CONTACTS_PROPERTY_STR(photo_url)             /* read, write */
-    _CONTACTS_PROPERTY_INT(sort_index)            /* read, write */
+	_CONTACTS_PROPERTY_INT(id)                    /* read only */
+	_CONTACTS_PROPERTY_INT(activity_id)           /* read, write once */
+	_CONTACTS_PROPERTY_STR(photo_url)             /* read, write */
+	_CONTACTS_PROPERTY_INT(sort_index)            /* read, write */
 _CONTACTS_END_VIEW(_contacts_activity_photo)
 
 /**
@@ -924,14 +924,14 @@ _CONTACTS_END_VIEW(_contacts_activity_photo)
  * </table>
  */
 _CONTACTS_BEGIN_VIEW()
-    _CONTACTS_PROPERTY_INT(id)                    /* read only */
-    _CONTACTS_PROPERTY_INT(contact_id)            /* read, write once */
-    _CONTACTS_PROPERTY_STR(source_name)           /* read, write */
-    _CONTACTS_PROPERTY_STR(status)                /* read, write */
-    _CONTACTS_PROPERTY_INT(timestamp)             /* read, write */
-    _CONTACTS_PROPERTY_STR(service_operation)     /* read, write */
-    _CONTACTS_PROPERTY_STR(uri)                   /* read, write */
-    _CONTACTS_PROPERTY_CHILD_MULTIPLE(photo)      /* read, write */
+	_CONTACTS_PROPERTY_INT(id)                    /* read only */
+	_CONTACTS_PROPERTY_INT(contact_id)            /* read, write once */
+	_CONTACTS_PROPERTY_STR(source_name)           /* read, write */
+	_CONTACTS_PROPERTY_STR(status)                /* read, write */
+	_CONTACTS_PROPERTY_INT(timestamp)             /* read, write */
+	_CONTACTS_PROPERTY_STR(service_operation)     /* read, write */
+	_CONTACTS_PROPERTY_STR(uri)                   /* read, write */
+	_CONTACTS_PROPERTY_CHILD_MULTIPLE(photo)      /* read, write */
 _CONTACTS_END_VIEW(_contacts_activity)
 
 /**
@@ -959,17 +959,17 @@ _CONTACTS_END_VIEW(_contacts_activity)
  * </table>
  */
 _CONTACTS_BEGIN_VIEW()
-    _CONTACTS_PROPERTY_INT(speeddial_number)      /* read, write once */
-    _CONTACTS_PROPERTY_INT(number_id)             /* read, write */
-    _CONTACTS_PROPERTY_STR(number)                /* read only */
-    _CONTACTS_PROPERTY_STR(number_label)          /* read only */
-    _CONTACTS_PROPERTY_INT(number_type)           /* read only */
-    _CONTACTS_PROPERTY_INT(person_id)             /* read only */
-    _CONTACTS_PROPERTY_STR(display_name)          /* read only */
-    _CONTACTS_PROPERTY_STR(image_thumbnail_path)  /* read only */
-    _CONTACTS_PROPERTY_STR(normalized_number)     /* filter only */
-    _CONTACTS_PROPERTY_STR(cleaned_number)        /* filter only */
-    _CONTACTS_PROPERTY_STR(number_filter)         /* filter only */
+	_CONTACTS_PROPERTY_INT(speeddial_number)      /* read, write once */
+	_CONTACTS_PROPERTY_INT(number_id)             /* read, write */
+	_CONTACTS_PROPERTY_STR(number)                /* read only */
+	_CONTACTS_PROPERTY_STR(number_label)          /* read only */
+	_CONTACTS_PROPERTY_INT(number_type)           /* read only */
+	_CONTACTS_PROPERTY_INT(person_id)             /* read only */
+	_CONTACTS_PROPERTY_STR(display_name)          /* read only */
+	_CONTACTS_PROPERTY_STR(image_thumbnail_path)  /* read only */
+	_CONTACTS_PROPERTY_STR(normalized_number)     /* filter only */
+	_CONTACTS_PROPERTY_STR(cleaned_number)        /* filter only */
+	_CONTACTS_PROPERTY_STR(number_filter)         /* filter only */
 _CONTACTS_END_VIEW(_contacts_speeddial)
 
 /**
@@ -997,17 +997,17 @@ _CONTACTS_END_VIEW(_contacts_speeddial)
  * </table>
  */
 _CONTACTS_BEGIN_VIEW()
-    _CONTACTS_PROPERTY_INT(id)                    /* read only */
-    _CONTACTS_PROPERTY_INT(person_id)             /* read, write once */
-    _CONTACTS_PROPERTY_STR(address)               /* read, write once, number or email */
-    _CONTACTS_PROPERTY_INT(log_time)              /* read, write once */
-    _CONTACTS_PROPERTY_INT(log_type)              /* read, write */
-    _CONTACTS_PROPERTY_INT(extra_data1)           /* read, write once : message or email ID, duration(seconds) */
-    _CONTACTS_PROPERTY_STR(extra_data2)           /* read, write once : shortmsg, subject */
-    _CONTACTS_PROPERTY_STR(normalized_address)    /* filter only */
-    _CONTACTS_PROPERTY_STR(cleaned_address)       /* filter only */
-    _CONTACTS_PROPERTY_STR(address_filter)        /* filter only */
-    _CONTACTS_PROPERTY_INT(sim_slot_no)           /* read, write once */
+	_CONTACTS_PROPERTY_INT(id)                    /* read only */
+	_CONTACTS_PROPERTY_INT(person_id)             /* read, write once */
+	_CONTACTS_PROPERTY_STR(address)               /* read, write once, number or email */
+	_CONTACTS_PROPERTY_INT(log_time)              /* read, write once */
+	_CONTACTS_PROPERTY_INT(log_type)              /* read, write */
+	_CONTACTS_PROPERTY_INT(extra_data1)           /* read, write once : message or email ID, duration(seconds) */
+	_CONTACTS_PROPERTY_STR(extra_data2)           /* read, write once : shortmsg, subject */
+	_CONTACTS_PROPERTY_STR(normalized_address)    /* filter only */
+	_CONTACTS_PROPERTY_STR(cleaned_address)       /* filter only */
+	_CONTACTS_PROPERTY_STR(address_filter)        /* filter only */
+	_CONTACTS_PROPERTY_INT(sim_slot_no)           /* read, write once */
 _CONTACTS_END_VIEW(_contacts_phone_log)
 
 /**
@@ -1028,11 +1028,11 @@ _CONTACTS_END_VIEW(_contacts_phone_log)
  * </table>
  */
 _CONTACTS_BEGIN_READ_ONLY_VIEW()
-    _CONTACTS_PROPERTY_INT(contact_id)
-    _CONTACTS_PROPERTY_INT(address_book_id)
-    _CONTACTS_PROPERTY_INT(type)               /* insert/update/delete */
-    _CONTACTS_PROPERTY_INT(version)
-    _CONTACTS_PROPERTY_BOOL(image_changed)
+	_CONTACTS_PROPERTY_INT(contact_id)
+	_CONTACTS_PROPERTY_INT(address_book_id)
+	_CONTACTS_PROPERTY_INT(type)               /* insert/update/delete */
+	_CONTACTS_PROPERTY_INT(version)
+	_CONTACTS_PROPERTY_BOOL(image_changed)
 _CONTACTS_END_READ_ONLY_VIEW(_contacts_contact_updated_info)
 
 /**
@@ -1051,9 +1051,9 @@ _CONTACTS_END_READ_ONLY_VIEW(_contacts_contact_updated_info)
  * </table>
  */
 _CONTACTS_BEGIN_READ_ONLY_VIEW()
-    _CONTACTS_PROPERTY_INT(address_book_id)
-    _CONTACTS_PROPERTY_INT(last_changed_type)
-    _CONTACTS_PROPERTY_INT(version)
+	_CONTACTS_PROPERTY_INT(address_book_id)
+	_CONTACTS_PROPERTY_INT(last_changed_type)
+	_CONTACTS_PROPERTY_INT(version)
 _CONTACTS_END_READ_ONLY_VIEW(_contacts_my_profile_updated_info)
 
 /**
@@ -1073,10 +1073,10 @@ _CONTACTS_END_READ_ONLY_VIEW(_contacts_my_profile_updated_info)
  * </table>
  */
 _CONTACTS_BEGIN_READ_ONLY_VIEW()
-    _CONTACTS_PROPERTY_INT(group_id)
-    _CONTACTS_PROPERTY_INT(address_book_id)
-    _CONTACTS_PROPERTY_INT(type)                /* insert/update/delete */
-    _CONTACTS_PROPERTY_INT(version)
+	_CONTACTS_PROPERTY_INT(group_id)
+	_CONTACTS_PROPERTY_INT(address_book_id)
+	_CONTACTS_PROPERTY_INT(type)                /* insert/update/delete */
+	_CONTACTS_PROPERTY_INT(version)
 _CONTACTS_END_READ_ONLY_VIEW(_contacts_group_updated_info)
 
 
@@ -1119,11 +1119,11 @@ _CONTACTS_END_READ_ONLY_VIEW(_contacts_group_member_updated_info)
  * </table>
  */
 _CONTACTS_BEGIN_READ_ONLY_VIEW()
-    _CONTACTS_PROPERTY_INT(group_id)
-    _CONTACTS_PROPERTY_INT(contact_id)
-    _CONTACTS_PROPERTY_INT(address_book_id)
-    _CONTACTS_PROPERTY_INT(type)                /* insert/delete */
-    _CONTACTS_PROPERTY_INT(version)
+	_CONTACTS_PROPERTY_INT(group_id)
+	_CONTACTS_PROPERTY_INT(contact_id)
+	_CONTACTS_PROPERTY_INT(address_book_id)
+	_CONTACTS_PROPERTY_INT(type)                /* insert/delete */
+	_CONTACTS_PROPERTY_INT(version)
 _CONTACTS_END_READ_ONLY_VIEW(_contacts_grouprel_updated_info)
 
 /**
@@ -1157,24 +1157,24 @@ _CONTACTS_END_READ_ONLY_VIEW(_contacts_grouprel_updated_info)
  * </table>
  */
 _CONTACTS_BEGIN_READ_ONLY_VIEW()
-    _CONTACTS_PROPERTY_INT(person_id)
-    _CONTACTS_PROPERTY_STR(display_name)
-    _CONTACTS_PROPERTY_PROJECTION_STR(display_name_index)
-    _CONTACTS_PROPERTY_PROJECTION_INT(display_contact_id)
-    _CONTACTS_PROPERTY_PROJECTION_STR(ringtone_path)
-    _CONTACTS_PROPERTY_PROJECTION_STR(image_thumbnail_path)
-    _CONTACTS_PROPERTY_PROJECTION_STR(vibration)
-    _CONTACTS_PROPERTY_PROJECTION_STR(status)
-    _CONTACTS_PROPERTY_BOOL(is_favorite)
-    _CONTACTS_PROPERTY_PROJECTION_INT(link_count)
-    _CONTACTS_PROPERTY_PROJECTION_STR(addressbook_ids)
-    _CONTACTS_PROPERTY_BOOL(has_phonenumber)
-    _CONTACTS_PROPERTY_BOOL(has_email)
-    _CONTACTS_PROPERTY_INT(contact_id)
-    _CONTACTS_PROPERTY_INT(address_book_id)
-    _CONTACTS_PROPERTY_STR(address_book_name)
-    _CONTACTS_PROPERTY_INT(address_book_mode)
-    _CONTACTS_PROPERTY_PROJECTION_STR(message_alert)
+	_CONTACTS_PROPERTY_INT(person_id)
+	_CONTACTS_PROPERTY_STR(display_name)
+	_CONTACTS_PROPERTY_PROJECTION_STR(display_name_index)
+	_CONTACTS_PROPERTY_PROJECTION_INT(display_contact_id)
+	_CONTACTS_PROPERTY_PROJECTION_STR(ringtone_path)
+	_CONTACTS_PROPERTY_PROJECTION_STR(image_thumbnail_path)
+	_CONTACTS_PROPERTY_PROJECTION_STR(vibration)
+	_CONTACTS_PROPERTY_PROJECTION_STR(status)
+	_CONTACTS_PROPERTY_BOOL(is_favorite)
+	_CONTACTS_PROPERTY_PROJECTION_INT(link_count)
+	_CONTACTS_PROPERTY_PROJECTION_STR(addressbook_ids)
+	_CONTACTS_PROPERTY_BOOL(has_phonenumber)
+	_CONTACTS_PROPERTY_BOOL(has_email)
+	_CONTACTS_PROPERTY_INT(contact_id)
+	_CONTACTS_PROPERTY_INT(address_book_id)
+	_CONTACTS_PROPERTY_STR(address_book_name)
+	_CONTACTS_PROPERTY_INT(address_book_mode)
+	_CONTACTS_PROPERTY_PROJECTION_STR(message_alert)
 _CONTACTS_END_READ_ONLY_VIEW(_contacts_person_contact)
 
 /**
@@ -1210,25 +1210,25 @@ _CONTACTS_END_READ_ONLY_VIEW(_contacts_person_contact)
 
  */
 _CONTACTS_BEGIN_READ_ONLY_VIEW()
-    _CONTACTS_PROPERTY_INT(person_id)
-    _CONTACTS_PROPERTY_STR(display_name)
-    _CONTACTS_PROPERTY_PROJECTION_STR(display_name_index)
-    _CONTACTS_PROPERTY_PROJECTION_INT(display_contact_id)
-    _CONTACTS_PROPERTY_PROJECTION_STR(ringtone_path)
-    _CONTACTS_PROPERTY_PROJECTION_STR(image_thumbnail_path)
-    _CONTACTS_PROPERTY_PROJECTION_STR(vibration)
-    _CONTACTS_PROPERTY_BOOL(is_favorite)
-    _CONTACTS_PROPERTY_BOOL(has_phonenumber)
-    _CONTACTS_PROPERTY_BOOL(has_email)
-    _CONTACTS_PROPERTY_INT(number_id)
-    _CONTACTS_PROPERTY_PROJECTION_INT(type)
-    _CONTACTS_PROPERTY_PROJECTION_STR(label)
-    _CONTACTS_PROPERTY_BOOL(is_primary_default)
-    _CONTACTS_PROPERTY_STR(number)
-    _CONTACTS_PROPERTY_FILTER_STR(number_filter)
-    _CONTACTS_PROPERTY_FILTER_STR(normalized_number)
-    _CONTACTS_PROPERTY_PROJECTION_STR(message_alert)
-    _CONTACTS_PROPERTY_FILTER_STR(cleaned_number)
+	_CONTACTS_PROPERTY_INT(person_id)
+	_CONTACTS_PROPERTY_STR(display_name)
+	_CONTACTS_PROPERTY_PROJECTION_STR(display_name_index)
+	_CONTACTS_PROPERTY_PROJECTION_INT(display_contact_id)
+	_CONTACTS_PROPERTY_PROJECTION_STR(ringtone_path)
+	_CONTACTS_PROPERTY_PROJECTION_STR(image_thumbnail_path)
+	_CONTACTS_PROPERTY_PROJECTION_STR(vibration)
+	_CONTACTS_PROPERTY_BOOL(is_favorite)
+	_CONTACTS_PROPERTY_BOOL(has_phonenumber)
+	_CONTACTS_PROPERTY_BOOL(has_email)
+	_CONTACTS_PROPERTY_INT(number_id)
+	_CONTACTS_PROPERTY_PROJECTION_INT(type)
+	_CONTACTS_PROPERTY_PROJECTION_STR(label)
+	_CONTACTS_PROPERTY_BOOL(is_primary_default)
+	_CONTACTS_PROPERTY_STR(number)
+	_CONTACTS_PROPERTY_FILTER_STR(number_filter)
+	_CONTACTS_PROPERTY_FILTER_STR(normalized_number)
+	_CONTACTS_PROPERTY_PROJECTION_STR(message_alert)
+	_CONTACTS_PROPERTY_FILTER_STR(cleaned_number)
 _CONTACTS_END_READ_ONLY_VIEW(_contacts_person_number)
 
 /**
@@ -1260,22 +1260,22 @@ _CONTACTS_END_READ_ONLY_VIEW(_contacts_person_number)
  * </table>
  */
 _CONTACTS_BEGIN_READ_ONLY_VIEW()
-    _CONTACTS_PROPERTY_INT(person_id)
-    _CONTACTS_PROPERTY_STR(display_name)
-    _CONTACTS_PROPERTY_PROJECTION_STR(display_name_index)
-    _CONTACTS_PROPERTY_PROJECTION_INT(display_contact_id)
-    _CONTACTS_PROPERTY_PROJECTION_STR(ringtone_path)
-    _CONTACTS_PROPERTY_PROJECTION_STR(image_thumbnail_path)
-    _CONTACTS_PROPERTY_PROJECTION_STR(vibration)
-    _CONTACTS_PROPERTY_BOOL(is_favorite)
-    _CONTACTS_PROPERTY_BOOL(has_phonenumber)
-    _CONTACTS_PROPERTY_BOOL(has_email)
-    _CONTACTS_PROPERTY_INT(email_id)
-    _CONTACTS_PROPERTY_PROJECTION_INT(type)
-    _CONTACTS_PROPERTY_PROJECTION_STR(label)
-    _CONTACTS_PROPERTY_BOOL(is_primary_default)
-    _CONTACTS_PROPERTY_STR(email)
-    _CONTACTS_PROPERTY_PROJECTION_STR(message_alert)
+	_CONTACTS_PROPERTY_INT(person_id)
+	_CONTACTS_PROPERTY_STR(display_name)
+	_CONTACTS_PROPERTY_PROJECTION_STR(display_name_index)
+	_CONTACTS_PROPERTY_PROJECTION_INT(display_contact_id)
+	_CONTACTS_PROPERTY_PROJECTION_STR(ringtone_path)
+	_CONTACTS_PROPERTY_PROJECTION_STR(image_thumbnail_path)
+	_CONTACTS_PROPERTY_PROJECTION_STR(vibration)
+	_CONTACTS_PROPERTY_BOOL(is_favorite)
+	_CONTACTS_PROPERTY_BOOL(has_phonenumber)
+	_CONTACTS_PROPERTY_BOOL(has_email)
+	_CONTACTS_PROPERTY_INT(email_id)
+	_CONTACTS_PROPERTY_PROJECTION_INT(type)
+	_CONTACTS_PROPERTY_PROJECTION_STR(label)
+	_CONTACTS_PROPERTY_BOOL(is_primary_default)
+	_CONTACTS_PROPERTY_STR(email)
+	_CONTACTS_PROPERTY_PROJECTION_STR(message_alert)
 _CONTACTS_END_READ_ONLY_VIEW(_contacts_person_email)
 
 /**
@@ -1310,25 +1310,25 @@ _CONTACTS_END_READ_ONLY_VIEW(_contacts_person_email)
  * </table>
  */
 _CONTACTS_BEGIN_READ_ONLY_VIEW()
-    _CONTACTS_PROPERTY_INT(person_id)
-    _CONTACTS_PROPERTY_STR(display_name)
-    _CONTACTS_PROPERTY_PROJECTION_STR(display_name_index)
-    _CONTACTS_PROPERTY_PROJECTION_INT(display_contact_id)
-    _CONTACTS_PROPERTY_PROJECTION_STR(ringtone_path)
-    _CONTACTS_PROPERTY_PROJECTION_STR(image_thumbnail_path)
-    _CONTACTS_PROPERTY_PROJECTION_STR(vibration)
-    _CONTACTS_PROPERTY_PROJECTION_STR(status)
-    _CONTACTS_PROPERTY_BOOL(is_favorite)
-    _CONTACTS_PROPERTY_PROJECTION_INT(link_count)
-    _CONTACTS_PROPERTY_PROJECTION_STR(addressbook_ids)
-    _CONTACTS_PROPERTY_BOOL(has_phonenumber)
-    _CONTACTS_PROPERTY_BOOL(has_email)
-    _CONTACTS_PROPERTY_INT(address_book_id)
-    _CONTACTS_PROPERTY_INT(group_id)
-    _CONTACTS_PROPERTY_STR(address_book_name)
-    _CONTACTS_PROPERTY_INT(address_book_mode)
-    _CONTACTS_PROPERTY_PROJECTION_INT(contact_id)
-    _CONTACTS_PROPERTY_PROJECTION_STR(message_alert)
+	_CONTACTS_PROPERTY_INT(person_id)
+	_CONTACTS_PROPERTY_STR(display_name)
+	_CONTACTS_PROPERTY_PROJECTION_STR(display_name_index)
+	_CONTACTS_PROPERTY_PROJECTION_INT(display_contact_id)
+	_CONTACTS_PROPERTY_PROJECTION_STR(ringtone_path)
+	_CONTACTS_PROPERTY_PROJECTION_STR(image_thumbnail_path)
+	_CONTACTS_PROPERTY_PROJECTION_STR(vibration)
+	_CONTACTS_PROPERTY_PROJECTION_STR(status)
+	_CONTACTS_PROPERTY_BOOL(is_favorite)
+	_CONTACTS_PROPERTY_PROJECTION_INT(link_count)
+	_CONTACTS_PROPERTY_PROJECTION_STR(addressbook_ids)
+	_CONTACTS_PROPERTY_BOOL(has_phonenumber)
+	_CONTACTS_PROPERTY_BOOL(has_email)
+	_CONTACTS_PROPERTY_INT(address_book_id)
+	_CONTACTS_PROPERTY_INT(group_id)
+	_CONTACTS_PROPERTY_STR(address_book_name)
+	_CONTACTS_PROPERTY_INT(address_book_mode)
+	_CONTACTS_PROPERTY_PROJECTION_INT(contact_id)
+	_CONTACTS_PROPERTY_PROJECTION_STR(message_alert)
 _CONTACTS_END_READ_ONLY_VIEW(_contacts_person_grouprel)
 
 /**
@@ -1362,24 +1362,24 @@ _CONTACTS_END_READ_ONLY_VIEW(_contacts_person_grouprel)
  * </table>
  */
 _CONTACTS_BEGIN_READ_ONLY_VIEW()
-    _CONTACTS_PROPERTY_INT(person_id)
-    _CONTACTS_PROPERTY_STR(display_name)
-    _CONTACTS_PROPERTY_PROJECTION_STR(display_name_index)
-    _CONTACTS_PROPERTY_PROJECTION_INT(display_contact_id)
-    _CONTACTS_PROPERTY_PROJECTION_STR(ringtone_path)
-    _CONTACTS_PROPERTY_PROJECTION_STR(image_thumbnail_path)
-    _CONTACTS_PROPERTY_PROJECTION_STR(vibration)
-    _CONTACTS_PROPERTY_PROJECTION_STR(status)
-    _CONTACTS_PROPERTY_BOOL(is_favorite)
-    _CONTACTS_PROPERTY_PROJECTION_INT(link_count)
-    _CONTACTS_PROPERTY_PROJECTION_STR(linked_address_book_ids)
-    _CONTACTS_PROPERTY_BOOL(has_phonenumber)
-    _CONTACTS_PROPERTY_BOOL(has_email)
-    _CONTACTS_PROPERTY_INT(address_book_id)
-    _CONTACTS_PROPERTY_INT(group_id)
-    _CONTACTS_PROPERTY_INT(address_book_mode)
-    _CONTACTS_PROPERTY_PROJECTION_INT(contact_id)
-    _CONTACTS_PROPERTY_PROJECTION_STR(message_alert)
+	_CONTACTS_PROPERTY_INT(person_id)
+	_CONTACTS_PROPERTY_STR(display_name)
+	_CONTACTS_PROPERTY_PROJECTION_STR(display_name_index)
+	_CONTACTS_PROPERTY_PROJECTION_INT(display_contact_id)
+	_CONTACTS_PROPERTY_PROJECTION_STR(ringtone_path)
+	_CONTACTS_PROPERTY_PROJECTION_STR(image_thumbnail_path)
+	_CONTACTS_PROPERTY_PROJECTION_STR(vibration)
+	_CONTACTS_PROPERTY_PROJECTION_STR(status)
+	_CONTACTS_PROPERTY_BOOL(is_favorite)
+	_CONTACTS_PROPERTY_PROJECTION_INT(link_count)
+	_CONTACTS_PROPERTY_PROJECTION_STR(linked_address_book_ids)
+	_CONTACTS_PROPERTY_BOOL(has_phonenumber)
+	_CONTACTS_PROPERTY_BOOL(has_email)
+	_CONTACTS_PROPERTY_INT(address_book_id)
+	_CONTACTS_PROPERTY_INT(group_id)
+	_CONTACTS_PROPERTY_INT(address_book_mode)
+	_CONTACTS_PROPERTY_PROJECTION_INT(contact_id)
+	_CONTACTS_PROPERTY_PROJECTION_STR(message_alert)
 _CONTACTS_END_READ_ONLY_VIEW(_contacts_person_group_assigned)
 
 /**
@@ -1412,23 +1412,23 @@ _CONTACTS_END_READ_ONLY_VIEW(_contacts_person_group_assigned)
  * </table>
  */
 _CONTACTS_BEGIN_READ_ONLY_VIEW()
-    _CONTACTS_PROPERTY_INT(person_id)
-    _CONTACTS_PROPERTY_STR(display_name)
-    _CONTACTS_PROPERTY_PROJECTION_STR(display_name_index)
-    _CONTACTS_PROPERTY_PROJECTION_INT(display_contact_id)
-    _CONTACTS_PROPERTY_PROJECTION_STR(ringtone_path)
-    _CONTACTS_PROPERTY_PROJECTION_STR(image_thumbnail_path)
-    _CONTACTS_PROPERTY_PROJECTION_STR(vibration)
-    _CONTACTS_PROPERTY_PROJECTION_STR(status)
-    _CONTACTS_PROPERTY_BOOL(is_favorite)
-    _CONTACTS_PROPERTY_PROJECTION_INT(link_count)
-    _CONTACTS_PROPERTY_PROJECTION_STR(linked_address_book_ids)
-    _CONTACTS_PROPERTY_BOOL(has_phonenumber)
-    _CONTACTS_PROPERTY_BOOL(has_email)
-    _CONTACTS_PROPERTY_INT(address_book_id)
-    _CONTACTS_PROPERTY_INT(address_book_mode)
-    _CONTACTS_PROPERTY_PROJECTION_INT(contact_id)
-    _CONTACTS_PROPERTY_PROJECTION_STR(message_alert)
+	_CONTACTS_PROPERTY_INT(person_id)
+	_CONTACTS_PROPERTY_STR(display_name)
+	_CONTACTS_PROPERTY_PROJECTION_STR(display_name_index)
+	_CONTACTS_PROPERTY_PROJECTION_INT(display_contact_id)
+	_CONTACTS_PROPERTY_PROJECTION_STR(ringtone_path)
+	_CONTACTS_PROPERTY_PROJECTION_STR(image_thumbnail_path)
+	_CONTACTS_PROPERTY_PROJECTION_STR(vibration)
+	_CONTACTS_PROPERTY_PROJECTION_STR(status)
+	_CONTACTS_PROPERTY_BOOL(is_favorite)
+	_CONTACTS_PROPERTY_PROJECTION_INT(link_count)
+	_CONTACTS_PROPERTY_PROJECTION_STR(linked_address_book_ids)
+	_CONTACTS_PROPERTY_BOOL(has_phonenumber)
+	_CONTACTS_PROPERTY_BOOL(has_email)
+	_CONTACTS_PROPERTY_INT(address_book_id)
+	_CONTACTS_PROPERTY_INT(address_book_mode)
+	_CONTACTS_PROPERTY_PROJECTION_INT(contact_id)
+	_CONTACTS_PROPERTY_PROJECTION_STR(message_alert)
 _CONTACTS_END_READ_ONLY_VIEW(_contacts_person_group_not_assigned)
 
 /**
@@ -1458,20 +1458,20 @@ _CONTACTS_END_READ_ONLY_VIEW(_contacts_person_group_not_assigned)
  * </table>
  */
 _CONTACTS_BEGIN_READ_ONLY_VIEW()
-    _CONTACTS_PROPERTY_INT(person_id)
-    _CONTACTS_PROPERTY_STR(display_name)
-    _CONTACTS_PROPERTY_PROJECTION_STR(image_thumbnail_path)
-    _CONTACTS_PROPERTY_INT(log_id)
-    _CONTACTS_PROPERTY_STR(address)
-    _CONTACTS_PROPERTY_PROJECTION_INT(address_type)
-    _CONTACTS_PROPERTY_INT(log_time)
-    _CONTACTS_PROPERTY_INT(log_type)
-    _CONTACTS_PROPERTY_PROJECTION_INT(extra_data1)
-    _CONTACTS_PROPERTY_PROJECTION_STR(extra_data2)
-    _CONTACTS_PROPERTY_FILTER_STR(normalized_address)
-    _CONTACTS_PROPERTY_FILTER_STR(cleaned_address)
-    _CONTACTS_PROPERTY_FILTER_STR(address_filter)
-    _CONTACTS_PROPERTY_INT(sim_slot_no)
+	_CONTACTS_PROPERTY_INT(person_id)
+	_CONTACTS_PROPERTY_STR(display_name)
+	_CONTACTS_PROPERTY_PROJECTION_STR(image_thumbnail_path)
+	_CONTACTS_PROPERTY_INT(log_id)
+	_CONTACTS_PROPERTY_STR(address)
+	_CONTACTS_PROPERTY_PROJECTION_INT(address_type)
+	_CONTACTS_PROPERTY_INT(log_time)
+	_CONTACTS_PROPERTY_INT(log_type)
+	_CONTACTS_PROPERTY_PROJECTION_INT(extra_data1)
+	_CONTACTS_PROPERTY_PROJECTION_STR(extra_data2)
+	_CONTACTS_PROPERTY_FILTER_STR(normalized_address)
+	_CONTACTS_PROPERTY_FILTER_STR(cleaned_address)
+	_CONTACTS_PROPERTY_FILTER_STR(address_filter)
+	_CONTACTS_PROPERTY_INT(sim_slot_no)
 _CONTACTS_END_READ_ONLY_VIEW(_contacts_person_phone_log)
 
 /**
@@ -1500,19 +1500,19 @@ _CONTACTS_END_READ_ONLY_VIEW(_contacts_person_phone_log)
  * </table>
  */
 _CONTACTS_BEGIN_READ_ONLY_VIEW()
-    _CONTACTS_PROPERTY_INT(person_id)
-    _CONTACTS_PROPERTY_STR(display_name)
-    _CONTACTS_PROPERTY_PROJECTION_STR(display_name_index)
-    _CONTACTS_PROPERTY_PROJECTION_INT(display_contact_id)
-    _CONTACTS_PROPERTY_PROJECTION_STR(ringtone_path)
-    _CONTACTS_PROPERTY_PROJECTION_STR(image_thumbnail_path)
-    _CONTACTS_PROPERTY_PROJECTION_STR(vibration)
-    _CONTACTS_PROPERTY_BOOL(is_favorite)
-    _CONTACTS_PROPERTY_BOOL(has_phonenumber)
-    _CONTACTS_PROPERTY_BOOL(has_email)
-    _CONTACTS_PROPERTY_INT(usage_type)
-    _CONTACTS_PROPERTY_INT(times_used)
-    _CONTACTS_PROPERTY_PROJECTION_STR(message_alert)
+	_CONTACTS_PROPERTY_INT(person_id)
+	_CONTACTS_PROPERTY_STR(display_name)
+	_CONTACTS_PROPERTY_PROJECTION_STR(display_name_index)
+	_CONTACTS_PROPERTY_PROJECTION_INT(display_contact_id)
+	_CONTACTS_PROPERTY_PROJECTION_STR(ringtone_path)
+	_CONTACTS_PROPERTY_PROJECTION_STR(image_thumbnail_path)
+	_CONTACTS_PROPERTY_PROJECTION_STR(vibration)
+	_CONTACTS_PROPERTY_BOOL(is_favorite)
+	_CONTACTS_PROPERTY_BOOL(has_phonenumber)
+	_CONTACTS_PROPERTY_BOOL(has_email)
+	_CONTACTS_PROPERTY_INT(usage_type)
+	_CONTACTS_PROPERTY_INT(times_used)
+	_CONTACTS_PROPERTY_PROJECTION_STR(message_alert)
 _CONTACTS_END_READ_ONLY_VIEW(_contacts_person_usage)
 
 /**
@@ -1543,21 +1543,21 @@ _CONTACTS_END_READ_ONLY_VIEW(_contacts_person_usage)
  * </table>
  */
 _CONTACTS_BEGIN_READ_ONLY_VIEW()
-    _CONTACTS_PROPERTY_INT(contact_id)
-    _CONTACTS_PROPERTY_STR(display_name)
-    _CONTACTS_PROPERTY_PROJECTION_INT(display_source_type)
-    _CONTACTS_PROPERTY_INT(address_book_id)
-    _CONTACTS_PROPERTY_INT(person_id)
-    _CONTACTS_PROPERTY_PROJECTION_STR(ringtone_path)
-    _CONTACTS_PROPERTY_PROJECTION_STR(image_thumbnail_path)
-    _CONTACTS_PROPERTY_INT(number_id)
-    _CONTACTS_PROPERTY_PROJECTION_INT(type)
-    _CONTACTS_PROPERTY_PROJECTION_STR(label)
-    _CONTACTS_PROPERTY_BOOL(is_default)
-    _CONTACTS_PROPERTY_STR(number)
-    _CONTACTS_PROPERTY_FILTER_STR(number_filter)
-    _CONTACTS_PROPERTY_FILTER_STR(normalized_number)
-    _CONTACTS_PROPERTY_FILTER_STR(cleaned_number)
+	_CONTACTS_PROPERTY_INT(contact_id)
+	_CONTACTS_PROPERTY_STR(display_name)
+	_CONTACTS_PROPERTY_PROJECTION_INT(display_source_type)
+	_CONTACTS_PROPERTY_INT(address_book_id)
+	_CONTACTS_PROPERTY_INT(person_id)
+	_CONTACTS_PROPERTY_PROJECTION_STR(ringtone_path)
+	_CONTACTS_PROPERTY_PROJECTION_STR(image_thumbnail_path)
+	_CONTACTS_PROPERTY_INT(number_id)
+	_CONTACTS_PROPERTY_PROJECTION_INT(type)
+	_CONTACTS_PROPERTY_PROJECTION_STR(label)
+	_CONTACTS_PROPERTY_BOOL(is_default)
+	_CONTACTS_PROPERTY_STR(number)
+	_CONTACTS_PROPERTY_FILTER_STR(number_filter)
+	_CONTACTS_PROPERTY_FILTER_STR(normalized_number)
+	_CONTACTS_PROPERTY_FILTER_STR(cleaned_number)
 _CONTACTS_END_READ_ONLY_VIEW(_contacts_contact_number)
 
 /**
@@ -1585,18 +1585,18 @@ _CONTACTS_END_READ_ONLY_VIEW(_contacts_contact_number)
  * </table>
  */
 _CONTACTS_BEGIN_READ_ONLY_VIEW()
-    _CONTACTS_PROPERTY_INT(contact_id)
-    _CONTACTS_PROPERTY_STR(display_name)
-    _CONTACTS_PROPERTY_PROJECTION_INT(display_source_type)
-    _CONTACTS_PROPERTY_INT(address_book_id)
-    _CONTACTS_PROPERTY_INT(person_id)
-    _CONTACTS_PROPERTY_PROJECTION_STR(ringtone_path)
-    _CONTACTS_PROPERTY_PROJECTION_STR(image_thumbnail_path)
-    _CONTACTS_PROPERTY_INT(email_id)
-    _CONTACTS_PROPERTY_PROJECTION_INT(type)
-    _CONTACTS_PROPERTY_PROJECTION_STR(label)
-    _CONTACTS_PROPERTY_BOOL(is_default)
-    _CONTACTS_PROPERTY_STR(email)
+	_CONTACTS_PROPERTY_INT(contact_id)
+	_CONTACTS_PROPERTY_STR(display_name)
+	_CONTACTS_PROPERTY_PROJECTION_INT(display_source_type)
+	_CONTACTS_PROPERTY_INT(address_book_id)
+	_CONTACTS_PROPERTY_INT(person_id)
+	_CONTACTS_PROPERTY_PROJECTION_STR(ringtone_path)
+	_CONTACTS_PROPERTY_PROJECTION_STR(image_thumbnail_path)
+	_CONTACTS_PROPERTY_INT(email_id)
+	_CONTACTS_PROPERTY_PROJECTION_INT(type)
+	_CONTACTS_PROPERTY_PROJECTION_STR(label)
+	_CONTACTS_PROPERTY_BOOL(is_default)
+	_CONTACTS_PROPERTY_STR(email)
 _CONTACTS_END_READ_ONLY_VIEW(_contacts_contact_email)
 
 /**
@@ -1621,15 +1621,15 @@ _CONTACTS_END_READ_ONLY_VIEW(_contacts_contact_email)
  * </table>
  */
 _CONTACTS_BEGIN_READ_ONLY_VIEW()
-    _CONTACTS_PROPERTY_INT(contact_id)
-    _CONTACTS_PROPERTY_STR(display_name)
-    _CONTACTS_PROPERTY_PROJECTION_INT(display_source_type)
-    _CONTACTS_PROPERTY_INT(address_book_id)
-    _CONTACTS_PROPERTY_INT(person_id)
-    _CONTACTS_PROPERTY_PROJECTION_STR(ringtone_path)
-    _CONTACTS_PROPERTY_PROJECTION_STR(image_thumbnail_path)
-    _CONTACTS_PROPERTY_INT(group_id)
-    _CONTACTS_PROPERTY_PROJECTION_STR(group_name)
+	_CONTACTS_PROPERTY_INT(contact_id)
+	_CONTACTS_PROPERTY_STR(display_name)
+	_CONTACTS_PROPERTY_PROJECTION_INT(display_source_type)
+	_CONTACTS_PROPERTY_INT(address_book_id)
+	_CONTACTS_PROPERTY_INT(person_id)
+	_CONTACTS_PROPERTY_PROJECTION_STR(ringtone_path)
+	_CONTACTS_PROPERTY_PROJECTION_STR(image_thumbnail_path)
+	_CONTACTS_PROPERTY_INT(group_id)
+	_CONTACTS_PROPERTY_PROJECTION_STR(group_name)
 _CONTACTS_END_READ_ONLY_VIEW(_contacts_contact_grouprel)
 
 /**
@@ -1658,20 +1658,20 @@ _CONTACTS_END_READ_ONLY_VIEW(_contacts_contact_grouprel)
  * </table>
  */
 _CONTACTS_BEGIN_READ_ONLY_VIEW()
-    _CONTACTS_PROPERTY_INT(contact_id)
-    _CONTACTS_PROPERTY_STR(display_name)
-    _CONTACTS_PROPERTY_PROJECTION_INT(display_source_type)
-    _CONTACTS_PROPERTY_INT(address_book_id)
-    _CONTACTS_PROPERTY_INT(account_id)
-    _CONTACTS_PROPERTY_INT(person_id)
-    _CONTACTS_PROPERTY_PROJECTION_STR(ringtone_path)
-    _CONTACTS_PROPERTY_PROJECTION_STR(image_thumbnail_path)
-    _CONTACTS_PROPERTY_INT(activity_id)
-    _CONTACTS_PROPERTY_STR(source_name)
-    _CONTACTS_PROPERTY_PROJECTION_STR(status)
-    _CONTACTS_PROPERTY_INT(timestamp)
-    _CONTACTS_PROPERTY_STR(service_operation)
-    _CONTACTS_PROPERTY_STR(uri)
+	_CONTACTS_PROPERTY_INT(contact_id)
+	_CONTACTS_PROPERTY_STR(display_name)
+	_CONTACTS_PROPERTY_PROJECTION_INT(display_source_type)
+	_CONTACTS_PROPERTY_INT(address_book_id)
+	_CONTACTS_PROPERTY_INT(account_id)
+	_CONTACTS_PROPERTY_INT(person_id)
+	_CONTACTS_PROPERTY_PROJECTION_STR(ringtone_path)
+	_CONTACTS_PROPERTY_PROJECTION_STR(image_thumbnail_path)
+	_CONTACTS_PROPERTY_INT(activity_id)
+	_CONTACTS_PROPERTY_STR(source_name)
+	_CONTACTS_PROPERTY_PROJECTION_STR(status)
+	_CONTACTS_PROPERTY_INT(timestamp)
+	_CONTACTS_PROPERTY_STR(service_operation)
+	_CONTACTS_PROPERTY_STR(uri)
 _CONTACTS_END_READ_ONLY_VIEW(_contacts_contact_activity)
 
 /**
@@ -1690,9 +1690,9 @@ _CONTACTS_END_READ_ONLY_VIEW(_contacts_contact_activity)
  * </table>
  */
 _CONTACTS_BEGIN_READ_ONLY_VIEW()
-    _CONTACTS_PROPERTY_PROJECTION_INT(log_count)
-    _CONTACTS_PROPERTY_INT(log_type)
-    _CONTACTS_PROPERTY_INT(sim_slot_no)   /*(Since 3.0)*/
+	_CONTACTS_PROPERTY_PROJECTION_INT(log_count)
+	_CONTACTS_PROPERTY_INT(log_type)
+	_CONTACTS_PROPERTY_INT(sim_slot_no)   /*(Since 3.0)*/
 _CONTACTS_END_READ_ONLY_VIEW(_contacts_phone_log_stat)
 
 /**
@@ -1714,11 +1714,11 @@ _CONTACTS_END_READ_ONLY_VIEW(_contacts_phone_log_stat)
  * </table>
  */
 _CONTACTS_BEGIN_VIEW()                        /* (Since 3.0) */
-    _CONTACTS_PROPERTY_INT(id)                /* read only */
-    _CONTACTS_PROPERTY_INT(contact_id)        /* read, write once */
-    _CONTACTS_PROPERTY_STR(address)           /* read, write */
-    _CONTACTS_PROPERTY_INT(type)              /* read, write */
-    _CONTACTS_PROPERTY_STR(label)             /* read, write */
+	_CONTACTS_PROPERTY_INT(id)                /* read only */
+	_CONTACTS_PROPERTY_INT(contact_id)        /* read, write once */
+	_CONTACTS_PROPERTY_STR(address)           /* read, write */
+	_CONTACTS_PROPERTY_INT(type)              /* read, write */
+	_CONTACTS_PROPERTY_STR(label)             /* read, write */
 _CONTACTS_END_VIEW(_contacts_sip)
 
 #ifdef __cplusplus
