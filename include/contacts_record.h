@@ -46,7 +46,7 @@ extern "C"
 /**
  * @brief Creates a record.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 3.0 @endif
  *
  * @remarks You must release @a record using contacts_record_destroy().
  *
@@ -70,7 +70,7 @@ int contacts_record_create(const char *view_uri, contacts_record_h *record);
 /**
  * @brief Destroys a record and releases its all resources.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 3.0 @endif
  *
  * @param[in]   record         The record handle
  * @param[in]   delete_child   Set @c true to destroy child records automatically,
@@ -89,7 +89,7 @@ int contacts_record_destroy(contacts_record_h record, bool delete_child);
 /**
  * @brief Makes a clone of a record.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 3.0 @endif
  *
  * @remarks You must release @a cloned_record using contacts_record_destroy().
  *
@@ -110,7 +110,7 @@ int contacts_record_clone(contacts_record_h record, contacts_record_h *cloned_re
 /**
  * @brief Gets a string from the record handle.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 3.0 @endif
  *
  * @remarks You must release @a value using free().
  *
@@ -133,7 +133,7 @@ int contacts_record_get_str(contacts_record_h record, unsigned int property_id, 
 /**
  * @brief Gets a string pointer from the record handle.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 3.0 @endif
  *
  * @remarks You MUST NOT release @a value.
  *
@@ -156,7 +156,7 @@ int contacts_record_get_str_p(contacts_record_h record, unsigned int property_id
 /**
  * @brief Sets a string to a record.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 3.0 @endif
  *
  * @param[in]   record          The record handle
  * @param[in]   property_id     The property ID
@@ -177,7 +177,7 @@ int contacts_record_set_str(contacts_record_h record, unsigned int property_id, 
 /**
  * @brief Gets a record's integer value.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 3.0 @endif
  *
  * @param[in]   record          The record handle
  * @param[in]   property_id     The property ID
@@ -197,7 +197,7 @@ int contacts_record_get_int(contacts_record_h record, unsigned int property_id, 
 /**
  * @brief Sets an integer value to a record.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 3.0 @endif
  *
  * @param[in]   record          The record handle
  * @param[in]   property_id     The property ID
@@ -217,7 +217,7 @@ int contacts_record_set_int(contacts_record_h record, unsigned int property_id, 
 /**
  * @brief Gets a record's long integer value.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 3.0 @endif
  *
  * @param[in]   record          The record handle
  * @param[in]   property_id     The property ID
@@ -237,7 +237,7 @@ int contacts_record_get_lli(contacts_record_h record, unsigned int property_id, 
 /**
  * @brief Sets a long long integer value to a record.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 3.0 @endif
  *
  * @param[in]   record          The record handle
  * @param[in]   property_id     The property ID
@@ -257,7 +257,7 @@ int contacts_record_set_lli(contacts_record_h record, unsigned int property_id, 
 /**
  * @brief Gets a record's boolean value.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 3.0 @endif
  *
  * @param[in]   record          The record handle
  * @param[in]   property_id     The property ID
@@ -277,7 +277,7 @@ int contacts_record_get_bool(contacts_record_h record, unsigned int property_id,
 /**
  * @brief Sets a boolean value to a record.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 3.0 @endif
  *
  * @param[in]   record          The record handle
  * @param[in]   property_id     The property ID
@@ -297,7 +297,7 @@ int contacts_record_set_bool(contacts_record_h record, unsigned int property_id,
 /**
  * @brief Gets a record's double value.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 3.0 @endif
  *
  * @param[in]   record          The record handle
  * @param[in]   property_id     The property ID
@@ -317,7 +317,7 @@ int contacts_record_get_double(contacts_record_h record, unsigned int property_i
 /**
  * @brief Sets a double value to a record.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 3.0 @endif
  *
  * @param[in]   record          The record handle
  * @param[in]   property_id     The property ID
@@ -337,7 +337,7 @@ int contacts_record_set_double(contacts_record_h record, unsigned int property_i
 /**
  * @brief Adds a child record to the parent record.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 3.0 @endif
  *
  * @param[in]   record          The parent record handle
  * @param[in]   property_id     The property ID
@@ -357,7 +357,7 @@ int contacts_record_add_child_record(contacts_record_h record, unsigned int prop
 /**
  * @brief Removes a child record from the parent record.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 3.0 @endif
  *
  * @param[in]   record          The parent record handle
  * @param[in]   property_id     The property ID
@@ -377,7 +377,7 @@ int contacts_record_remove_child_record(contacts_record_h record, unsigned int p
 /**
  * @brief Gets the number of child records of a parent record.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 3.0 @endif
  *
  * @param[in]   record          The parent record handle
  * @param[in]   property_id     The property ID
@@ -398,7 +398,7 @@ int contacts_record_get_child_record_count(contacts_record_h record, unsigned in
 /**
  * @brief Gets a child record handle pointer from the parent record.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 3.0 @endif
  *
  * @remarks You MUST NOT release @a child_record. It is released when the parent record is destroyed.
  *
@@ -424,7 +424,7 @@ int contacts_record_get_child_record_at_p(contacts_record_h record, unsigned int
 /**
  * @brief Clones a child record list of the given parent record.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 3.0 @endif
  *
  * @remarks You must release @a cloned_list using contacts_list_destroy().
  *
@@ -446,7 +446,7 @@ int contacts_record_clone_child_record_list(contacts_record_h record, unsigned i
 /**
  * @brief Gets URI string from a record.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 3.0 @endif
  *
  * @param[in]   record          The record handle
  * @param[out]  view_uri        The URI of record

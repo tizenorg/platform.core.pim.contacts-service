@@ -33,7 +33,7 @@ extern "C"
 /**
  * @brief Called when the designated view changes.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 3.0 @endif
  *
  * @param[in]   view_uri	The view URI, only _contacts_person and _contacts_phone_log are now supported
  * @param[in]   changes	It includes changes information ("type:id," string is repeated, you should parse it)
@@ -48,7 +48,7 @@ typedef void (*contacts_db_change_cb_with_info)(const char *view_uri, char *chan
  * @brief Registers a callback function.
  * @details Now, support only _contacts_person and _contacts_phone_log view_uri.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 3.0 @endif
  * @privlevel public
  * @privilege %http://tizen.org/privilege/contact.read
  * @privilege %http://tizen.org/privilege/callhistory.read
@@ -83,7 +83,7 @@ int contacts_db_add_changed_cb_with_info(const char *view_uri, contacts_db_chang
  * @brief Unregisters a callback function.
  * @details Now, support only _contacts_person and _contacts_phone_log view_uri.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 3.0 @endif
  *
  * @param[in]   view_uri	The view URI of records whose changes are monitored
  * @param[in]   callback	The callback function to register
