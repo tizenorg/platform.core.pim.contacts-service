@@ -52,7 +52,7 @@ static inline int ctsvc_record_copy_base(ctsvc_record_s *dest, ctsvc_record_s *s
 		(base)->property_max_count = 0;\
 		(base)->properties_flags = NULL;\
 		(base)->property_flag = 0;\
-	}\
+	} \
 } while (0)
 
 int ctsvc_record_set_property_flag(ctsvc_record_s *_record, int property_id, contacts_property_flag_e flag);

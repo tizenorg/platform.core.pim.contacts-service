@@ -84,8 +84,8 @@
 		if (expr) { \
 			ERR("(%s)", #expr); \
 			return; \
-		}\
-	} while(0)
+		} \
+	} while (0)
 
 #define RETV_IF(expr, val) \
 	do { \

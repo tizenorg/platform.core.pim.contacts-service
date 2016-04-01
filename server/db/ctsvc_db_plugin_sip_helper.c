@@ -122,7 +122,7 @@ int ctsvc_db_sip_update(contacts_record_h record, bool is_my_profile)
 	CTSVC_RECORD_RESET_PROPERTY_FLAGS((ctsvc_record_s *)record);
 	free(set);
 	if (bind_text) {
-		for (cursor=bind_text;cursor;cursor=cursor->next)
+		for (cursor = bind_text; cursor; cursor = cursor->next)
 			free(cursor->data);
 		g_slist_free(bind_text);
 	}
