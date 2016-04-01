@@ -46,7 +46,7 @@ extern "C"
 /**
  * @brief Called to get a record handle of @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_contact.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 3.0 @endif
  *
  * @param[in]   record     The record handle
  * @param[in]   user_data  The user data passed from the foreach function
@@ -63,7 +63,7 @@ typedef bool (*contacts_vcard_parse_cb)(contacts_record_h record, void *user_dat
 /**
  * @brief Retrieves all contacts with a record handle (_contacts_contact) from a vCard file.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 3.0 @endif
  *
  * @param[in]   vcard_file_path     The file path of vCard stream file
  * @param[in]   callback            The callback function to invoke
@@ -88,7 +88,7 @@ int contacts_vcard_parse_to_contact_foreach(const char *vcard_file_path, contact
 /**
  * @brief Retrieves all contacts with a contacts list from a vCard stream.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 3.0 @endif
  *
  * @param[in]   vcard_stream            The vCard stream
  * @param[out]  contacts_list           The contacts list handle
@@ -108,7 +108,7 @@ int contacts_vcard_parse_to_contacts(const char *vcard_stream, contacts_list_h *
 /**
  * @brief Retrieves the vCard stream from a contact.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 3.0 @endif
  *
  * @param[in]   contact                 The contact record handle
  * @param[out]  vcard_stream            The vCard stream
@@ -125,7 +125,7 @@ int contacts_vcard_make_from_contact(contacts_record_h contact, char **vcard_str
 /**
  * @brief Retrieves the vCard stream from a contact.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 3.0 @endif
  *
  * @param[in]   my_profile              The my_profile record handle
  * @param[out]  vcard_stream            The vCard stream
@@ -143,7 +143,7 @@ int contacts_vcard_make_from_my_profile(contacts_record_h my_profile, char **vca
 /**
  * @brief Retrieves the vCard stream from a person.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 3.0 @endif
  * @privlevel public
  * @privilege %http://tizen.org/privilege/contact.read
  *
@@ -169,7 +169,7 @@ int contacts_vcard_make_from_person(contacts_record_h person, char **vcard_strea
 /**
  * @brief Retrieves the count of contact entities from a vCard file.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 3.0 @endif
  *
  * @param[in]   vcard_file_path             The person record handle
  * @param[out]  count                       The count of contact entity
