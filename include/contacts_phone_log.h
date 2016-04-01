@@ -59,7 +59,7 @@ extern "C"
  * @brief   Resets the phone log's count.
  * @details The number of all types in the phone log will be @c 0.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 3.0 @endif
  * @privlevel public
  * @privilege %http://tizen.org/privilege/callhistory.write
  *

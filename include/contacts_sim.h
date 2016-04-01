@@ -56,7 +56,7 @@ extern "C"
 /**
  * @brief Imports all contacts from SIM to Contacts Database.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 3.0 @endif
  * @privlevel public
  * @privilege %http://tizen.org/privilege/contact.write
  *
@@ -82,7 +82,7 @@ int contacts_sim_import_all_contacts(void);
 /**
  * @brief Checks whether SIM initialization is completed.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 3.0 @endif
  * @privlevel public
  * @privilege %http://tizen.org/privilege/contact.read
  *
