@@ -200,8 +200,7 @@ typedef enum {
  *
  * @see  contacts_connect()
  */
-int contacts_person_set_default_property(contacts_person_property_e property,
-		int person_id,int id);
+int contacts_person_set_default_property(contacts_person_property_e property, int person_id, int id);
 
 /**
  * @brief Gets a default property for a record.

@@ -101,7 +101,7 @@ typedef enum {
 	CONTACTS_NUMBER_TYPE_RADIO = 1<<15,         /**< A radio phone number */
 	CONTACTS_NUMBER_TYPE_MAIN = 1<<29,          /**< An additional type for main */
 	CONTACTS_NUMBER_TYPE_ASSISTANT = 1<<30,     /**< An additional type for assistant */
-}contacts_number_type_e;
+} contacts_number_type_e;
 
 /**
  * @brief Enumeration for Contact email type.
@@ -115,7 +115,7 @@ typedef enum {
 	CONTACTS_EMAIL_TYPE_HOME = 1<<1,    /**< An email address associated with a residence */
 	CONTACTS_EMAIL_TYPE_WORK = 1<<2,    /**< An email address associated with a place of work */
 	CONTACTS_EMAIL_TYPE_MOBILE = 1<<3,  /**< A mobile email address */
-}contacts_email_type_e;
+} contacts_email_type_e;
 
 /**
  * @brief Enumeration for Contact company type.
@@ -127,7 +127,7 @@ typedef enum {
 	CONTACTS_COMPANY_TYPE_OTHER,            /**< Other company type */
 	CONTACTS_COMPANY_TYPE_CUSTOM = 1<<0,    /**< Custom company type */
 	CONTACTS_COMPANY_TYPE_WORK = 1<<1,      /**< Work company type */
-}contacts_company_type_e;
+} contacts_company_type_e;
 
 /**
  * @brief Enumeration for Contact address type.
@@ -144,7 +144,7 @@ typedef enum {
 	CONTACTS_ADDRESS_TYPE_INTL = 1<<4,      /**< An international delivery address */
 	CONTACTS_ADDRESS_TYPE_POSTAL = 1<<5,    /**< A postal delivery address */
 	CONTACTS_ADDRESS_TYPE_PARCEL = 1<<6,    /**< A parcel delivery address */
-}contacts_address_type_e;
+} contacts_address_type_e;
 
 /**
  * @brief Enumeration for Contact URL type.
@@ -157,7 +157,7 @@ typedef enum {
 	CONTACTS_URL_TYPE_CUSTOM,   /**< Custom URL type */
 	CONTACTS_URL_TYPE_HOME,     /**< Home URL type */
 	CONTACTS_URL_TYPE_WORK,     /**< Work URL type */
-}contacts_url_type_e;
+} contacts_url_type_e;
 
 /**
  * @brief Enumeration for Contact messenger type.
@@ -178,7 +178,7 @@ typedef enum {
 	CONTACTS_MESSENGER_TYPE_JABBER,     /**< Jabber type */
 	CONTACTS_MESSENGER_TYPE_SKYPE,      /**< Skype type */
 	CONTACTS_MESSENGER_TYPE_IRC,        /**< IRC type */
-}contacts_messenger_type_e;
+} contacts_messenger_type_e;
 
 /**
  * @brief Enumeration for Call history type.
@@ -211,7 +211,7 @@ typedef enum {
 	CONTACTS_PLOG_TYPE_EMAIL_RECEIVED = 201,        /**< Received email */
 	CONTACTS_PLOG_TYPE_EMAIL_SENT = 202,            /**< Sent email */
 
-}contacts_phone_log_type_e;
+} contacts_phone_log_type_e;
 
 /**
  * @brief Enumeration for Contact event type.
@@ -224,7 +224,7 @@ typedef enum {
 	CONTACTS_EVENT_TYPE_CUSTOM,         /**< Custom event type */
 	CONTACTS_EVENT_TYPE_BIRTH,          /**< Birthday event type */
 	CONTACTS_EVENT_TYPE_ANNIVERSARY     /**< Anniversary event type */
-}contacts_event_type_e;
+} contacts_event_type_e;
 
 /**
  * @brief Enumeration for Contact event calendar type.
@@ -233,9 +233,9 @@ typedef enum {
  *
  */
 typedef enum {
-	CONTACTS_EVENT_CALENDAR_TYPE_GREGORIAN, 	/**< Gregorian calendar */
+	CONTACTS_EVENT_CALENDAR_TYPE_GREGORIAN,     /**< Gregorian calendar */
 	CONTACTS_EVENT_CALENDAR_TYPE_CHINESE		/**< Chinese calenadr */
-}contacts_event_calendar_type_e;
+} contacts_event_calendar_type_e;
 
 /**
  * @brief Enumeration of Contact image type
@@ -246,7 +246,7 @@ typedef enum {
 typedef enum {
 	CONTACTS_IMAGE_TYPE_OTHER,       /**< Other type */
 	CONTACTS_IMAGE_TYPE_CUSTOM,      /**< Custom type */
-}contacts_image_type_e;
+} contacts_image_type_e;
 
 /**
  * @brief Enumeration for usage type.
@@ -266,7 +266,7 @@ typedef enum {
 	CONTACTS_USAGE_STAT_TYPE_REJECTED_CALL, /**< Rejected call (Since 3.0) */
 	CONTACTS_USAGE_STAT_TYPE_BLOCKED_CALL, /**< Blocked call (Since 3.0) */
 	CONTACTS_USAGE_STAT_TYPE_BLOCKED_MSG /**< Blocked message (Since 3.0) */
-}contacts_usage_type_e;
+} contacts_usage_type_e;
 
 /**
  * @brief Enumeration for Contact display name source type.
@@ -281,7 +281,7 @@ typedef enum {
 	CONTACTS_DISPLAY_NAME_SOURCE_TYPE_NICKNAME,     /**< Produced display name from nickname record */
 	CONTACTS_DISPLAY_NAME_SOURCE_TYPE_COMPANY,      /**< Produced display name from company record */
 	CONTACTS_DISPLAY_NAME_SOURCE_TYPE_NAME,         /**< Produced display name from name record */
-}contacts_display_name_source_type_e;
+} contacts_display_name_source_type_e;
 
 /**
  * @brief Enumeration for Address book mode.
@@ -292,7 +292,7 @@ typedef enum {
 typedef enum {
 	CONTACTS_ADDRESS_BOOK_MODE_NONE,        /**< All module can read and write contacts of this address_book */
 	CONTACTS_ADDRESS_BOOK_MODE_READONLY,    /**< All module can only read contacts of this address_book*/
-}contacts_address_book_mode_e;
+} contacts_address_book_mode_e;
 
 /**
  * @brief Enumeration for link mode when inserting contact.
@@ -303,7 +303,7 @@ typedef enum {
 typedef enum {
 	CONTACTS_CONTACT_LINK_MODE_NONE,            /**< Auto link immediately */
 	CONTACTS_CONTACT_LINK_MODE_IGNORE_ONCE,     /**< Do not auto link when the contact is inserted */
-}contacts_contact_link_mode_e;
+} contacts_contact_link_mode_e;
 
 /**
  * @brief Enumeration for Contact relationship type.
@@ -328,7 +328,7 @@ typedef enum {
 	CONTACTS_RELATIONSHIP_TYPE_SISTER,              /**< Sister type */
 	CONTACTS_RELATIONSHIP_TYPE_SPOUSE,              /**< Spouse type */
 	CONTACTS_RELATIONSHIP_TYPE_CUSTOM,              /**< Custom type */
-}contacts_relationship_type_e;
+} contacts_relationship_type_e;
 
 /**
  * @brief Enumeration for Contact search range.
@@ -341,7 +341,7 @@ typedef enum {
 	CONTACTS_SEARCH_RANGE_NUMBER = 0x00000002,  /**< Search record from name and number */
 	CONTACTS_SEARCH_RANGE_DATA = 0x00000004,    /**< Search record from name,number and data */
 	CONTACTS_SEARCH_RANGE_EMAIL = 0x00000008,   /**< Search record from name,number,data and email. Now, support only _contacts_person_email view_uri*/
-}contacts_search_range_e;
+} contacts_search_range_e;
 
 /**
  * @brief Enumeration for SIP(Session Intialion Protocol) type range
@@ -354,7 +354,7 @@ typedef enum {
 	CONTACTS_SIP_TYPE_CUSTOM,           /**< Custom sip type */
 	CONTACTS_SIP_TYPE_HOME,             /**< Home sip type */
 	CONTACTS_SIP_TYPE_WORK,             /**< Work sip type */
-}contacts_sip_type_e;
+} contacts_sip_type_e;
 
 /**
  * @}

@@ -646,7 +646,7 @@ API const _contacts_contact_activity_property_ids _contacts_contact_activity = {
 	.account_id		= CTSVC_PROPERTY_ADDRESSBOOK_ACCOUNT_ID,
 };
 
-API const _contacts_sip_property_ids _contacts_sip= {
+API const _contacts_sip_property_ids _contacts_sip = {
 	._uri		= CTSVC_VIEW_URI_SIP,
 	.id         = CTSVC_PROPERTY_SIP_ID,
 	.contact_id	= CTSVC_PROPERTY_SIP_CONTACT_ID,
