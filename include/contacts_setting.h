@@ -45,7 +45,7 @@ extern "C"
 /**
  * @brief Enumeration for name display order.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 3.0 @endif
  *
  */
 typedef enum {
@@ -56,7 +56,7 @@ typedef enum {
 /**
  * @brief Gets the contacts name display order.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 3.0 @endif
  * @privlevel public
  * @privilege %http://tizen.org/privilege/contact.read
  *
@@ -80,7 +80,7 @@ int contacts_setting_get_name_display_order(contacts_name_display_order_e *name_
 /**
  * @brief Sets the contacts name display order.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 3.0 @endif
  * @privlevel public
  * @privilege %http://tizen.org/privilege/contact.write
  *
@@ -107,7 +107,7 @@ int contacts_setting_set_name_display_order(contacts_name_display_order_e name_d
 /**
  * @brief Enumeration for name sorting order.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 3.0 @endif
  *
  */
 typedef enum {
@@ -119,7 +119,7 @@ typedef enum {
 /**
  * @brief Gets the contacts name sorting order in which contacts are returned.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 3.0 @endif
  * @privlevel public
  * @privilege %http://tizen.org/privilege/contact.read
  *
@@ -143,7 +143,7 @@ int contacts_setting_get_name_sorting_order(contacts_name_sorting_order_e *name_
 /**
  * @brief Sets the contacts name sorting order in which contacts are returned.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 3.0 @endif
  * @privlevel public
  * @privilege %http://tizen.org/privilege/contact.write
  *
@@ -169,7 +169,7 @@ int contacts_setting_set_name_sorting_order(contacts_name_sorting_order_e name_s
 /**
  * @brief Called when a designated view changes.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 3.0 @endif
  *
  * @param[in]   name_display_order  The name display order setting value
  * @param[in]   user_data           The user data passed from the callback registration function
@@ -186,7 +186,7 @@ typedef void (*contacts_setting_name_display_order_changed_cb)(contacts_name_dis
 /**
  * @brief Registers a callback function.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 3.0 @endif
  * @privlevel public
  * @privilege %http://tizen.org/privilege/contact.read
  *
@@ -214,7 +214,7 @@ int contacts_setting_add_name_display_order_changed_cb(contacts_setting_name_dis
 /**
  * @brief Unregisters a callback function.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 3.0 @endif
  * @param[in]   callback   The callback function to register
  * @param[in]   user_data  The user data to be passed to the callback function
  *
@@ -236,7 +236,7 @@ int contacts_setting_remove_name_display_order_changed_cb(contacts_setting_name_
 /**
  * @brief Called when a designated view changes.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 3.0 @endif
  * @param[in]   name_sorting_order  The name sorting order setting value
  * @param[in]   user_data           The user data passed from the callback registration function
  *
@@ -252,7 +252,7 @@ typedef void (*contacts_setting_name_sorting_order_changed_cb)(contacts_name_sor
 /**
  * @brief Registers a callback function.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 3.0 @endif
  * @privlevel public
  * @privilege %http://tizen.org/privilege/contact.read
  *
@@ -280,7 +280,7 @@ int contacts_setting_add_name_sorting_order_changed_cb(contacts_setting_name_sor
 /**
  * @brief Unregisters a callback function.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 3.0 @endif
  * @param[in]   callback    The callback function to register
  * @param[in]   user_data   The user data to be passed to the callback function
  *
