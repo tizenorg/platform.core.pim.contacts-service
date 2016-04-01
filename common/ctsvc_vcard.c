@@ -1596,6 +1596,7 @@ static inline int __ctsvc_vcard_put_photo(ctsvc_list_s *image_list, char **buf, 
 			image = calloc(1, img_buf_size);
 			if (NULL == image) {
 				ERR("calloc() Fail");
+				close(fd);
 				return CONTACTS_ERROR_OUT_OF_MEMORY;
 			}
 			read_len = 0;
