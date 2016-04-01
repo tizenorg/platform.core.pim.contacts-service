@@ -19,5 +19,5 @@
 #ifndef __CTSVC_DB_PLUGIN_SDN_H__
 #define __CTSVC_DB_PLUGIN_SDN_H__
 
-
 #endif /* __CTSVC_DB_PLUGIN_SDN_H__ */
+

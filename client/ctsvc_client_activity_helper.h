@@ -26,3 +26,4 @@ int ctsvc_client_activity_delete_by_contact_id(contacts_h contact, int contact_i
 int ctsvc_client_activity_delete_by_account_id(contacts_h contact, int account_id);
 
 #endif /* __CTSVC_CLIENT_ACTIVITY_HELPER_H__ */
+

@@ -63,10 +63,10 @@ typedef void (*contacts_db_change_cb_with_info)(const char *view_uri, char *chan
  * @return  @c 0 on sucess,
  *          otherwise a negative error value (#contacts_error_e)
  *
- * @retval	#CONTACTS_ERROR_NONE                Successful
- * @retval  #CONTACTS_ERROR_OUT_OF_MEMORY   		Out of memory
- * @retval	#CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
- * @retval  #CONTACTS_ERROR_IPC           		IPC error
+ * @retval  #CONTACTS_ERROR_NONE                Successful
+ * @retval  #CONTACTS_ERROR_OUT_OF_MEMORY       Out of memory
+ * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ * @retval  #CONTACTS_ERROR_IPC                 IPC error
  * @retval  #CONTACTS_ERROR_PERMISSION_DENIED   Permission denied
  * @retval  #CONTACTS_ERROR_NOT_SUPPORTED       Not supported
  *
@@ -108,7 +108,6 @@ int contacts_db_remove_changed_cb_with_info(const char *view_uri, contacts_db_ch
 #ifdef __cplusplus
 }
 #endif
-
 
 #endif /* __TIZEN_SOCIAL_CONTACTS_DB_EXTENSION_H__ */
 

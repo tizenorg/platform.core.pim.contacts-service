@@ -32,8 +32,8 @@ ctsvc_ipc_marshal_record_plugin_cb_s _ctsvc_ipc_record_sip_plugin_cb = {
 
 static int __ctsvc_ipc_unmarshal_sip(pims_ipc_data_h ipc_data, const char* view_uri, contacts_record_h record)
 {
-	RETV_IF(ipc_data==NULL,CONTACTS_ERROR_NO_DATA);
-	RETV_IF(record==NULL,CONTACTS_ERROR_NO_DATA);
+	RETV_IF(ipc_data == NULL, CONTACTS_ERROR_NO_DATA);
+	RETV_IF(record == NULL, CONTACTS_ERROR_NO_DATA);
 
 	ctsvc_sip_s* sip_p = (ctsvc_sip_s*) record;
 
@@ -54,15 +54,15 @@ static int __ctsvc_ipc_unmarshal_sip(pims_ipc_data_h ipc_data, const char* view_
 static int __ctsvc_ipc_marshal_sip(const contacts_record_h record, pims_ipc_data_h ipc_data)
 {
 	ctsvc_sip_s* sip_p = (ctsvc_sip_s*)record;
-	RETV_IF(ipc_data==NULL,CONTACTS_ERROR_NO_DATA);
-	RETV_IF(sip_p==NULL,CONTACTS_ERROR_NO_DATA);
+	RETV_IF(ipc_data == NULL, CONTACTS_ERROR_NO_DATA);
+	RETV_IF(sip_p == NULL, CONTACTS_ERROR_NO_DATA);
 
 	do {
-		if (ctsvc_ipc_marshal_int((sip_p->id),ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_int((sip_p->contact_id),ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_string((sip_p->address),ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_int((sip_p->type),ipc_data) != CONTACTS_ERROR_NONE) break;
-		if (ctsvc_ipc_marshal_string((sip_p->label),ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_int((sip_p->id), ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_int((sip_p->contact_id), ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_string((sip_p->address), ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_int((sip_p->type), ipc_data) != CONTACTS_ERROR_NONE) break;
+		if (ctsvc_ipc_marshal_string((sip_p->label), ipc_data) != CONTACTS_ERROR_NONE) break;
 
 		return CONTACTS_ERROR_NONE;
 	} while (0);

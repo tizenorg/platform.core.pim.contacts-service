@@ -44,27 +44,34 @@ void ctsvc_stmt_finalize(cts_stmt stmt);
 int ctsvc_stmt_get_first_int_result(cts_stmt stmt, int *result);
 
 
-static inline double ctsvc_stmt_get_dbl(cts_stmt stmt, int pos) {
+static inline double ctsvc_stmt_get_dbl(cts_stmt stmt, int pos)
+{
 	return sqlite3_column_double(stmt, pos);
 }
-static inline int ctsvc_stmt_get_int(cts_stmt stmt, int pos) {
+static inline int ctsvc_stmt_get_int(cts_stmt stmt, int pos)
+{
 	return sqlite3_column_int(stmt, pos);
 }
-static inline char* ctsvc_stmt_get_text(cts_stmt stmt, int pos) {
+static inline char* ctsvc_stmt_get_text(cts_stmt stmt, int pos)
+{
 	return (char *)sqlite3_column_text(stmt, pos);
 }
-static inline long long int ctsvc_stmt_get_int64(cts_stmt stmt, int pos) {
+static inline long long int ctsvc_stmt_get_int64(cts_stmt stmt, int pos)
+{
 	return sqlite3_column_int64(stmt, pos);
 }
 
-static inline int ctsvc_stmt_bind_int(cts_stmt stmt, int pos, int num) {
+static inline int ctsvc_stmt_bind_int(cts_stmt stmt, int pos, int num)
+{
 	return sqlite3_bind_int(stmt, pos, num);
 }
-static inline int ctsvc_stmt_bind_text(cts_stmt stmt, int pos, const char *str) {
+static inline int ctsvc_stmt_bind_text(cts_stmt stmt, int pos, const char *str)
+{
 	return sqlite3_bind_text(stmt, pos, str, strlen(str), SQLITE_STATIC);
 }
 static inline int ctsvc_stmt_bind_copy_text(cts_stmt stmt, int pos,
-		const char *str, int strlen) {
+		const char *str, int strlen)
+{
 	return sqlite3_bind_text(stmt, pos, str, strlen, SQLITE_TRANSIENT);
 }
 

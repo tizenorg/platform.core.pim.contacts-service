@@ -815,8 +815,7 @@ void ctsvc_ipc_person_get_aggregation_suggestions(pims_ipc_h ipc, pims_ipc_data_
 			ERR("ctsvc_ipc_unmarshal_int() Fail(%d)", ret);
 			goto ERROR_RETURN;
 		}
-	}
-	else {
+	} else {
 		ERR("ctsvc_ipc_person_get_aggregation_suggestions() Fail");
 		goto ERROR_RETURN;
 	}
@@ -845,8 +844,7 @@ ERROR_RETURN:
 
 		if (CONTACTS_ERROR_NO_DATA == ret) {
 			DBG("no data");
-		}
-		else if (CONTACTS_ERROR_NONE == ret) {
+		} else if (CONTACTS_ERROR_NONE == ret) {
 			ret = ctsvc_ipc_marshal_list(list, *outdata);
 
 			if (ret != CONTACTS_ERROR_NONE) {
@@ -854,13 +852,12 @@ ERROR_RETURN:
 				goto DATA_FREE;
 			}
 		}
-	}
-	else {
+	} else {
 		ERR("outdata is NULL");
 	}
 DATA_FREE:
 	ctsvc_handle_destroy(contact);
-	contacts_list_destroy(list,true);
+	contacts_list_destroy(list, true);
 	ctsvc_server_start_timeout();
 	return;
 }

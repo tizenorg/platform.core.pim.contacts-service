@@ -65,33 +65,33 @@
  * @section CAPI_SOCIAL_CONTACTS_SVC_MODULE_ENTITIES Entities
  * Contacts-Service manages information related to following entities.
  * - Contact
- * 	- Information for individuals, like name, phone number, email, address, job, instant messenger, company, etc.
+ *   - Information for individuals, like name, phone number, email, address, job, instant messenger, company, etc.
  * - Account
- * 	- Accounts are handled by account module. Contacts-service should use account ID which is created the module
- * 	- Exceptionally, Local device address book has no account and its related account ID is zero.
- * 	- Each account can create only one address book.
+ *   - Accounts are handled by account module. Contacts-service should use account ID which is created the module
+ *   - Exceptionally, Local device address book has no account and its related account ID is zero.
+ *   - Each account can create only one address book.
  * - Address book
- * 	- Represents where contacts and groups should belong to
- * 	- Created by one of contacts sources below
- * 		- Local device, which has no account
- * 		- Service providers such as Google or Yahoo, with account
- * 		- Applications like ChatON, Joyn, Facebook, etc.
+ *   - Represents where contacts and groups should belong to
+ *   - Created by one of contacts sources below
+ *   	- Local device, which has no account
+ *   	- Service providers such as Google or Yahoo, with account
+ *   	- Applications like ChatON, Joyn, Facebook, etc.
  * - Group
- * 	- Grouped contacts on a same address book
- * 	- Groups and contacts have many-to-many relationship
+ *   - Grouped contacts on a same address book
+ *   - Groups and contacts have many-to-many relationship
  * - Person
- * 	- A virtual contact that keeps merged information of contacts linked together
- * 	- When more than one contact from different sources designate same individual, then instead of showing each contacts separately, by Person concept, they can be shown and managed as one virtual contact.
- * 	- Every contact becomes to be linked to at least one person.
+ *   - A virtual contact that keeps merged information of contacts linked together
+ *   - When more than one contact from different sources designate same individual, then instead of showing each contacts separately, by Person concept, they can be shown and managed as one virtual contact.
+ *   - Every contact becomes to be linked to at least one person.
  * - My profile
- * 	- My information which has almost same properties as contact information but it has no properties such as group relation, ringtone and message alert.
- * 	- Single entry can be available on each address book
+ *   - My information which has almost same properties as contact information but it has no properties such as group relation, ringtone and message alert.
+ *   - Single entry can be available on each address book
  * - Activity
- * 	- Social activities are stored.
+ *   - Social activities are stored.
  * - Speed Dial
- *		- Shortcut dialing number key information
+ *   - Shortcut dialing number key information
  * - Phone Log
- * 	- Call or message logs are stored
+ *   - Call or message logs are stored
  *
  *
  * @subsection CAPI_SOCIAL_CONTACTS_SVC_MODULE_ENTITIES_RELATIONSHIP Relationship between entities
@@ -169,8 +169,8 @@
  * <table>
  * <caption> Table: Contact editable views </caption>
  * <tr>
- * 	<th>View (Editable)</th>
- * 	<th>Description</th>
+ * <th>View (Editable)</th>
+ * <th>Description</th>
  * </tr>
  * <tr>	<td>	_contacts_address_book	</td>	<td>	Describes the properties of the address book		</td>	</tr>
  * <tr>	<td>	_contacts_group	</td>	<td>	Describes the properties of the group		</td>	</tr>
@@ -203,27 +203,27 @@
  * <table>
  * <caption> Table: Contact read only views </caption>
  * <tr>
- * 	<th>View (Read only)</th>
- * 	<th>Description</th>
- *	</tr>
- *	<tr>	<td>	_contacts_contact_updated_info	</td>	<td>	used when identifying contact changes depending on version.	</td>	</tr>
- *	<tr>	<td>	_contacts_my_profile_updated_info	</td>	<td>	used when identifying my profile changes depending on version.	</td>	</tr>
- *	<tr>	<td>	_contacts_group_updated_info	</td>	<td>	used when identifying group changes depending on version.	</td>	</tr>
- *	<tr>	<td>	_contacts_group_member_updated_info	</td>	<td>	used when identifying group member changes depending on version.	</td>	</tr>
- *	<tr>	<td>	_contacts_grouprel_updated_info	</td>	<td>	used when identifying group relation profile changes depending on version.	</td>	</tr>
- *	<tr>	<td>	_contacts_person_contact	</td>	<td>	used when querying to merge information of person and contact	</td>	</tr>
- *	<tr>	<td>	_contacts_person_number	</td>	<td>	used when querying to merge information of person and number	</td>	</tr>
- *	<tr>	<td>	_contacts_person_email	</td>	<td>	used when querying to merge information of person and email	</td>	</tr>
- *	<tr>	<td>	_contacts_person_grouprel	</td>	<td>	used when querying to merge information of person and group relation	</td>	</tr>
- *	<tr>	<td>	_contacts_person_group_assigned	</td>	<td>	used when querying to information of person who assigned group	</td>	</tr>
- *	<tr>	<td>	_contacts_person_group_not_assigned	</td>	<td>	used when querying to information of person who not assigned group	</td>	</tr>
- *	<tr>	<td>	_contacts_person_phone_log	</td>	<td>	used when querying to merge information of person and phone log	</td>	</tr>
- *	<tr>	<td>	_contacts_person_usage	</td>	<td>	used when querying to information of person usage	</td>	</tr>
- *	<tr>	<td>	_contacts_contact_number	</td>	<td>	used when querying to merge information of contact and number	</td>	</tr>
- *	<tr>	<td>	_contacts_contact_email	</td>	<td>	used when querying to merge information of contact and email	</td>	</tr>
- *	<tr>	<td>	_contacts_contact_grouprel	</td>	<td>	used when querying to merge information of contact and group relation	</td>	</tr>
- *	<tr>	<td>	_contacts_contact_activity	</td>	<td>	used when querying to merge information of contact and activity	</td>	</tr>
- *	<tr>	<td>	_contacts_phone_log_stat	</td>	<td>	used when querying to information of phone log status	</td>	</tr>
+ * <th>View (Read only)</th>
+ * <th>Description</th>
+ * </tr>
+ * <tr>	<td>	_contacts_contact_updated_info	</td>	<td>	used when identifying contact changes depending on version.	</td>	</tr>
+ * <tr>	<td>	_contacts_my_profile_updated_info	</td>	<td>	used when identifying my profile changes depending on version.	</td>	</tr>
+ * <tr>	<td>	_contacts_group_updated_info	</td>	<td>	used when identifying group changes depending on version.	</td>	</tr>
+ * <tr>	<td>	_contacts_group_member_updated_info	</td>	<td>	used when identifying group member changes depending on version.	</td>	</tr>
+ * <tr>	<td>	_contacts_grouprel_updated_info	</td>	<td>	used when identifying group relation profile changes depending on version.	</td>	</tr>
+ * <tr>	<td>	_contacts_person_contact	</td>	<td>	used when querying to merge information of person and contact	</td>	</tr>
+ * <tr>	<td>	_contacts_person_number	</td>	<td>	used when querying to merge information of person and number	</td>	</tr>
+ * <tr>	<td>	_contacts_person_email	</td>	<td>	used when querying to merge information of person and email	</td>	</tr>
+ * <tr>	<td>	_contacts_person_grouprel	</td>	<td>	used when querying to merge information of person and group relation	</td>	</tr>
+ * <tr>	<td>	_contacts_person_group_assigned	</td>	<td>	used when querying to information of person who assigned group	</td>	</tr>
+ * <tr>	<td>	_contacts_person_group_not_assigned	</td>	<td>	used when querying to information of person who not assigned group	</td>	</tr>
+ * <tr>	<td>	_contacts_person_phone_log	</td>	<td>	used when querying to merge information of person and phone log	</td>	</tr>
+ * <tr>	<td>	_contacts_person_usage	</td>	<td>	used when querying to information of person usage	</td>	</tr>
+ * <tr>	<td>	_contacts_contact_number	</td>	<td>	used when querying to merge information of contact and number	</td>	</tr>
+ * <tr>	<td>	_contacts_contact_email	</td>	<td>	used when querying to merge information of contact and email	</td>	</tr>
+ * <tr>	<td>	_contacts_contact_grouprel	</td>	<td>	used when querying to merge information of contact and group relation	</td>	</tr>
+ * <tr>	<td>	_contacts_contact_activity	</td>	<td>	used when querying to merge information of contact and activity	</td>	</tr>
+ * <tr>	<td>	_contacts_phone_log_stat	</td>	<td>	used when querying to information of phone log status	</td>	</tr>
  * </table>
  *
  *
@@ -470,9 +470,9 @@
  * contacts_db_get_record(_contacts_contact._uri, contact_id, &contact);
  * contacts_record_get_child_record_count(contact, _contacts_contact.address, &address_num);
  * for (i = 0; i < address_num; i++) {
- * 	contacts_record_h address = NULL;
- * 	contacts_record_get_child_record_at_p(contact, _contacts_contact.address, i, &address);
- * 	contacts_record_set_str(address, _contacts_address.country, "Korea");
+ *  contacts_record_h address = NULL;
+ *  contacts_record_get_child_record_at_p(contact, _contacts_contact.address, i, &address);
+ *  contacts_record_set_str(address, _contacts_address.country, "Korea");
  * }
  * contacts_db_update_record(contact);
  * contacts_record_destroy(contact, true);
@@ -538,12 +538,12 @@
  * contacts_record_h record = NULL;
  * contacts_db_get_all_records(_contacts_person._uri, 0, 0, &list);
  * do {
- * 	contacts_list_get_current_record_p(list, &record);
- * 	if (NULL == record)
- *			break;
- * 	char *name = NULL;
- * 	contacts_record_get_str_p(record, _contacts_person.display_name, &name);
- * 	printf(“name=%s\n”, name);
+ *  contacts_list_get_current_record_p(list, &record);
+ *  if (NULL == record)
+ *   break;
+ *  char *name = NULL;
+ *  contacts_record_get_str_p(record, _contacts_person.display_name, &name);
+ *  printf(“name=%s\n”, name);
  * } while (CONTACTS_ERROR_NONE == contacts_list_next(list));
  * contacts_list_destroy(list, true); // destroy child records automatically
  * @endcode
@@ -770,13 +770,13 @@
  *
  * //set projections to get
  * unsigned int person_projection[] = {
- * 	_contacts_person.id,
- *		_contacts_person.display_name,
- *		_contacts_person.image_thumbnail_path,
- *	};
- *	contacts_query_set_projection(query, person_projection, sizeof(person_projection)/sizeof(int));
+ *  _contacts_person.id,
+ *  _contacts_person.display_name,
+ *  _contacts_person.image_thumbnail_path,
+ * };
+ * contacts_query_set_projection(query, person_projection, sizeof(person_projection)/sizeof(int));
  *
- *	contacts_db_get_records_with_query(query, 0, 0, &person_list);
+ * contacts_db_get_records_with_query(query, 0, 0, &person_list);
  *
  * // use list
  * // ...
@@ -797,15 +797,15 @@
  * Sample code: Remove duplicates
  * @code
  * unsigned int projection[] = {
- * 	_contacts_person_number.person_id,
- *		_contacts_person_number.display_name,
- *	};
- *	contacts_filter_create(_contacts_person_number._uri, &filter);
- *	contacts_filter_add_bool(filter, _contacts_person_number.has_phonenumber, true);
+ * _contacts_person_number.person_id,
+ * _contacts_person_number.display_name,
+ * };
+ * contacts_filter_create(_contacts_person_number._uri, &filter);
+ * contacts_filter_add_bool(filter, _contacts_person_number.has_phonenumber, true);
  *
  * contacts_query_create(_contacts_person_number._uri, &query);
- *	contacts_query_set_projection(query, projection, sizeof(projection)/sizeof(int));
- *	contacts_query_set_filter(query, filter);
+ * contacts_query_set_projection(query, projection, sizeof(projection)/sizeof(int));
+ * contacts_query_set_filter(query, filter);
  *
  * // set distinct (remove duplicats)
  * contacts_query_set_distinct(query, true);
@@ -832,7 +832,7 @@
  * // callback function
  * static void __person_changed_ cb(const char *view_uri, void *user_data)
  * {
- * 	// jobs for callback
+ * // jobs for callback
  * }
  * // add changed noti callback
  * contacts_db_add_changed_cb(_contacts_person._uri,  __person_changed_cb,  NULL);
@@ -869,13 +869,13 @@
  * // called to get a record handle of _contacts_contact view
  * static bool __vcard_parse_cb(contacts_record_h record, void *user_data)
  * {
- * 	int id = 0;
- * 	contacts_db_insert_record(record, &id);
+ * int id = 0;
+ * contacts_db_insert_record(record, &id);
  *
- * 	// return false to break out of the loop
- * 	// return true to continue with the next iteration of the loop
- * 	return true;
- *	}
+ * // return false to break out of the loop
+ * // return true to continue with the next iteration of the loop
+ * return true;
+ * }
  *
  * // parse vCard from file
  * char *resource_path = app_get_resource_path();

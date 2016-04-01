@@ -114,5 +114,5 @@ int contacts_phone_log_reset_statistics_by_sim(int sim_slot_no);
 }
 #endif
 
-
 #endif /* __TIZEN_SOCIAL_CONTACTS_PHONELOG_H__ */
+

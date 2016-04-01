@@ -45,9 +45,9 @@ typedef enum {
  * @privlevel public
  * @privilege %http://tizen.org/privilege/callhistory.write
  *
- * @param[in]	op 				Operation #contacts_phone_log_delete_e
- * @param[in]	address (optional)	Address to delete (number, email,  etc)
- * @param[in]	extra_data1 (optional)	Extra_data1 to delete
+ * @param[in]    op                 Operation #contacts_phone_log_delete_e
+ * @param[in]    address (optional) Address to delete (number, email,  etc)
+ * @param[in]    extra_data1 (optional) Extra_data1 to delete
  *
  * @return  @c 0 on sucess,
  *          otherwise a negative error value (#contacts_error_e)

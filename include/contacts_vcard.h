@@ -234,5 +234,5 @@ int contacts_vcard_set_limit_size_of_photo(unsigned int limit_size);
 }
 #endif
 
-
 #endif /* __TIZEN_SOCIAL_CONTACTS_VCARD_H__ */
+

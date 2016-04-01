@@ -50,12 +50,12 @@ extern "C"
  */
 typedef enum
 {
-    CONTACTS_MATCH_EXACTLY,         /**< Full string, case-sensitive */
-    CONTACTS_MATCH_FULLSTRING,      /**< Full string, case-insensitive */
-    CONTACTS_MATCH_CONTAINS,        /**< Sub string, case-insensitive */
-    CONTACTS_MATCH_STARTSWITH,      /**< Start with, case-insensitive */
-    CONTACTS_MATCH_ENDSWITH,        /**< End with, case-insensitive */
-    CONTACTS_MATCH_EXISTS           /**< IS NOT NULL */
+	CONTACTS_MATCH_EXACTLY,         /**< Full string, case-sensitive */
+	CONTACTS_MATCH_FULLSTRING,      /**< Full string, case-insensitive */
+	CONTACTS_MATCH_CONTAINS,        /**< Sub string, case-insensitive */
+	CONTACTS_MATCH_STARTSWITH,      /**< Start with, case-insensitive */
+	CONTACTS_MATCH_ENDSWITH,        /**< End with, case-insensitive */
+	CONTACTS_MATCH_EXISTS           /**< IS NOT NULL */
 } contacts_match_str_flag_e;
 
 /**
@@ -66,13 +66,13 @@ typedef enum
  */
 typedef enum
 {
-    CONTACTS_MATCH_EQUAL,                   /**< '=' */
-    CONTACTS_MATCH_GREATER_THAN,            /**< '>' */
-    CONTACTS_MATCH_GREATER_THAN_OR_EQUAL,   /**< '>=' */
-    CONTACTS_MATCH_LESS_THAN,               /**< '<' */
-    CONTACTS_MATCH_LESS_THAN_OR_EQUAL,      /**< '<=' */
-    CONTACTS_MATCH_NOT_EQUAL,               /**< '<>', this flag can yield poor performance */
-    CONTACTS_MATCH_NONE,                    /**< IS NULL */
+	CONTACTS_MATCH_EQUAL,                   /**< '=' */
+	CONTACTS_MATCH_GREATER_THAN,            /**< '>' */
+	CONTACTS_MATCH_GREATER_THAN_OR_EQUAL,   /**< '>=' */
+	CONTACTS_MATCH_LESS_THAN,               /**< '<' */
+	CONTACTS_MATCH_LESS_THAN_OR_EQUAL,      /**< '<=' */
+	CONTACTS_MATCH_NOT_EQUAL,               /**< '<>', this flag can yield poor performance */
+	CONTACTS_MATCH_NONE,                    /**< IS NULL */
 } contacts_match_int_flag_e;
 
 /**
@@ -82,8 +82,8 @@ typedef enum
  *
  */
 typedef enum {
-    CONTACTS_FILTER_OPERATOR_AND,   /**< AND */
-    CONTACTS_FILTER_OPERATOR_OR     /**< OR */
+	CONTACTS_FILTER_OPERATOR_AND,   /**< AND */
+	CONTACTS_FILTER_OPERATOR_OR     /**< OR */
 } contacts_filter_operator_e;
 
 
@@ -278,5 +278,5 @@ int contacts_filter_add_filter(contacts_filter_h parent_filter, contacts_filter_
 }
 #endif
 
-
 #endif /* __TIZEN_SOCIAL_CONTACTS_FILTER_H__ */
+

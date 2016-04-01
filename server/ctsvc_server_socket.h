@@ -27,3 +27,4 @@ int ctsvc_server_socket_return(GIOChannel *src, int value, int attach_num, int *
 int ctsvc_server_socket_return_sim_int(GIOChannel *src, int value);
 
 #endif /* __CTSVC_SERVER_SOCKET_H__ */
+

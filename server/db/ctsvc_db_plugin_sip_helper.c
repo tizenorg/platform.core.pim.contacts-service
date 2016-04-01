@@ -82,7 +82,7 @@ int ctsvc_db_sip_get_value_from_stmt(cts_stmt stmt, contacts_record_h *record, i
 
 	sip->id = ctsvc_stmt_get_int(stmt, start_count++);
 	sip->contact_id = ctsvc_stmt_get_int(stmt, start_count++);
-	start_count++; // is_default
+	start_count++; /* is_default */
 	temp = ctsvc_stmt_get_text(stmt, start_count++);
 	sip->address = SAFE_STRDUP(temp);
 	sip->type = ctsvc_stmt_get_int(stmt, start_count++);

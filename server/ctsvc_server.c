@@ -164,9 +164,8 @@ void ctsvc_create_file_set_permission(const char *file, mode_t mode)
 {
 	int fd;
 	fd = creat(file, mode);
-	if (0 <= fd) {
+	if (0 <= fd)
 		close(fd);
-	}
 }
 
 void ctsvc_create_rep_set_permission(const char *directory, mode_t mode)

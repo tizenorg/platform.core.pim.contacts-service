@@ -76,8 +76,7 @@ static int __ctsvc_db_sip_insert_record(contacts_record_h record, int *id)
 		if (CONTACTS_ERROR_NO_DATA == ret) {
 			ERR("No data : contact_id (%d) is not exist", sip->contact_id);
 			return CONTACTS_ERROR_INVALID_PARAMETER;
-		}
-		else {
+		} else {
 			ERR("ctsvc_query_get_first_int_result Fail(%d)", ret);
 			return ret;
 		}
@@ -109,8 +108,8 @@ static int __ctsvc_db_sip_insert_record(contacts_record_h record, int *id)
 		ERR("DB error : ctsvc_end_trans() Fail(%d)", ret);
 		return ret;
 	}
-	else
-		return CONTACTS_ERROR_NONE;
+
+	return CONTACTS_ERROR_NONE;
 }
 
 static int __ctsvc_db_sip_get_record(int id, contacts_record_h* out_record)
@@ -198,8 +197,8 @@ static int __ctsvc_db_sip_update_record(contacts_record_h record)
 		ERR("DB error : ctsvc_end_trans() Fail(%d)", ret);
 		return ret;
 	}
-	else
-		return CONTACTS_ERROR_NONE;
+
+	return CONTACTS_ERROR_NONE;
 }
 
 static int __ctsvc_db_sip_delete_record(int id)
@@ -266,8 +265,8 @@ static int __ctsvc_db_sip_delete_record(int id)
 		ERR("DB error : ctsvc_end_trans() Fail(%d)", ret);
 		return ret;
 	}
-	else
-		return CONTACTS_ERROR_NONE;
+
+	return CONTACTS_ERROR_NONE;
 }
 
 static int __ctsvc_db_sip_get_all_records(int offset, int limit, contacts_list_h* out_list)
@@ -353,7 +352,7 @@ static int __ctsvc_db_sip_get_records_with_query(contacts_query_h query, int off
 				ASSERT_NOT_REACHED("To set projection is Fail.\n");
 		}
 
-		for (i=0;i<field_count;i++) {
+		for (i = 0; i < field_count; i++) {
 			char *temp;
 			int property_id;
 			if (0 == s_query->projection_count)
@@ -361,7 +360,7 @@ static int __ctsvc_db_sip_get_records_with_query(contacts_query_h query, int off
 			else
 				property_id = s_query->projection[i];
 
-			switch(property_id) {
+			switch (property_id) {
 			case CTSVC_PROPERTY_SIP_ID:
 				sip->id = ctsvc_stmt_get_int(stmt, i);
 				break;

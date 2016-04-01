@@ -164,10 +164,10 @@ int contacts_person_set_favorite_order(int person_id, int previous_person_id, in
  *
  */
 typedef enum {
-    CONTACTS_PERSON_PROPERTY_NAME_CONTACT,      /**< Default contacts record */
-    CONTACTS_PERSON_PROPERTY_NUMBER,            /**< Default number record */
-    CONTACTS_PERSON_PROPERTY_EMAIL,             /**< Default email record */
-    CONTACTS_PERSON_PROPERTY_IMAGE,             /**< Default image record */
+	CONTACTS_PERSON_PROPERTY_NAME_CONTACT,      /**< Default contacts record */
+	CONTACTS_PERSON_PROPERTY_NUMBER,            /**< Default number record */
+	CONTACTS_PERSON_PROPERTY_EMAIL,             /**< Default email record */
+	CONTACTS_PERSON_PROPERTY_IMAGE,             /**< Default image record */
 } contacts_person_property_e;
 
 /**
@@ -200,8 +200,8 @@ typedef enum {
  *
  * @see  contacts_connect()
  */
-int contacts_person_set_default_property(contacts_person_property_e property, int person_id,
-        int id);
+int contacts_person_set_default_property(contacts_person_property_e property,
+		int person_id,int id);
 
 /**
  * @brief Gets a default property for a record.
@@ -231,8 +231,8 @@ int contacts_person_set_default_property(contacts_person_property_e property, in
  *
  * @see  contacts_connect()
  */
-int contacts_person_get_default_property(contacts_person_property_e property, int person_id,
-        int *id);
+int contacts_person_get_default_property(contacts_person_property_e property,
+		int person_id, int *id);
 
 /**
  * @brief Gets aggregation suggestions.
@@ -273,5 +273,5 @@ int contacts_person_get_aggregation_suggestions(int person_id, int limit, contac
 }
 #endif
 
-
 #endif /* __TIZEN_SOCIAL_CONTACTS_PERSON_H__ */
+

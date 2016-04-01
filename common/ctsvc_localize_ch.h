@@ -32,3 +32,4 @@ void ctsvc_pinyin_free(pinyin_name_s *pinyinname, int size);
 bool ctsvc_has_chinese(const char *src);
 
 #endif /* __CTSVC_LOCALIZE_CH_H__ */
+

@@ -24,7 +24,7 @@
 #include "ctsvc_localize_jp.h"
 #include "ctsvc_localize_kor.h"
 
-enum SORTTYPE{
+enum SORTTYPE {
 	CTSVC_SORT_OTHERS = 0,
 	CTSVC_SORT_NUMBER,
 	CTSVC_SORT_PRIMARY,

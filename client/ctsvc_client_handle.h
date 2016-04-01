@@ -28,3 +28,4 @@ int ctsvc_client_handle_remove(unsigned int id, contacts_h contact);
 int ctsvc_client_handle_create(unsigned int id, contacts_h *p_contact);
 
 #endif /* __CTSVC_CLIENT_HANDLE_H__ */
+

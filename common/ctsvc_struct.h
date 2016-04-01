@@ -34,16 +34,16 @@
 #define CTSVC_STR_SHORT_LEN 1024
 #define STRING_EQUAL 0
 
-#define SAFE_STR(src) (src)?src:""
-#define SAFE_STRDUP(src) (src)?strdup(src):NULL
-#define SAFE_STRLEN(src) ((src)?strlen(src):0)
+#define SAFE_STR(src) (src) ? src : ""
+#define SAFE_STRDUP(src) (src) ? strdup(src) : NULL
+#define SAFE_STRLEN(src) ((src) ? strlen(src) : 0)
 #define FREEandSTRDUP(dest, src) \
 	do { \
 		free(dest);\
 		if (src) dest = strdup(src);\
 		else dest = NULL; \
 	} while (0)
-#define GET_STR(copy, str)	(copy)?(SAFE_STRDUP(str)):(str)
+#define GET_STR(copy, str)	(copy) ? (SAFE_STRDUP(str)) : (str)
 #define CHECK_DIRTY_STR(src1, src2, is_dirty) \
 	do { \
 		if (src1 && NULL == src2) \
@@ -57,7 +57,7 @@
 	do { \
 		if (src1 != src2) \
 			*is_dirty = true; \
-	} while(0)
+	} while (0)
 
 enum {
 	CTSVC_DATA_NAME = 1,
@@ -127,18 +127,18 @@ typedef enum {
 	CTSVC_FILTER_COMPOSITE,
 } ctsvc_filter_type_e;
 
-typedef struct{
+typedef struct {
 	unsigned int property_id;
 	int property_type;
 	void *fields;
-}property_info_s;
+} property_info_s;
 
 typedef int (*__ctsvc_record_create_cb)(contacts_record_h *out_record);
 typedef int (*__ctsvc_record_destroy_cb)(contacts_record_h record, bool delete_child);
 typedef int (*__ctsvc_record_clone_cb)(contacts_record_h record, contacts_record_h *out_record);
 
-typedef int (*__ctsvc_record_get_str_cb)(contacts_record_h record, unsigned int property_id,char **out_str);
-typedef int (*__ctsvc_record_get_str_p_cb)(contacts_record_h record, unsigned int property_id,char **out_str);
+typedef int (*__ctsvc_record_get_str_cb)(contacts_record_h record, unsigned int property_id, char **out_str);
+typedef int (*__ctsvc_record_get_str_p_cb)(contacts_record_h record, unsigned int property_id, char **out_str);
 typedef int (*__ctsvc_record_get_int_cb)(contacts_record_h record, unsigned int property_id, int *out_value);
 typedef int (*__ctsvc_record_get_bool_cb)(contacts_record_h record, unsigned int property_id, bool *value);
 typedef int (*__ctsvc_record_get_lli_cb)(contacts_record_h record, unsigned int property_id, long long int *value);
@@ -210,7 +210,7 @@ typedef struct {
 		char *s;
 		long long int l;
 		double d;
-	}value;
+	} value;
 } ctsvc_attribute_filter_s;
 
 typedef struct {
@@ -611,7 +611,7 @@ typedef struct {
 	char *address;
 	int type;
 	char *label;
-}ctsvc_sip_s;
+} ctsvc_sip_s;
 
 typedef struct {
 	int property_id;
@@ -622,7 +622,7 @@ typedef struct {
 		char *s;
 		long long int l;
 		double d;
-	}value;
+	} value;
 } ctsvc_result_value_s;
 
 typedef struct {

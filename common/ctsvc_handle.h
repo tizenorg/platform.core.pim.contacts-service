@@ -26,3 +26,4 @@ int ctsvc_handle_destroy(contacts_h contact);
 int ctsvc_handle_clone(contacts_h contact, contacts_h *pcontact);
 
 #endif /* __CTSVC_HANDLE_H__ */
+
