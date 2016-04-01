@@ -1586,18 +1586,20 @@ static inline int __ctsvc_vcard_put_photo(ctsvc_list_s *image_list, char **buf, 
 		if (CONTACTS_ERROR_NONE != ret) {
 			INFO("__ctsvc_vcard_encode_photo() Fail(%d)", ret);
 
-			fd = open(data->path, O_RDONLY);
-			if (fd < 0) {
-				ERR("System : Open Fail(%d)", errno);
-				return CONTACTS_ERROR_SYSTEM;
-			}
-
 			img_buf_size = CTSVC_VCARD_PHOTO_MAX_SIZE * sizeof(unsigned char);
 			image = calloc(1, img_buf_size);
 			if (NULL == image) {
 				ERR("calloc() Fail");
 				return CONTACTS_ERROR_OUT_OF_MEMORY;
 			}
+
+			fd = open(data->path, O_RDONLY);
+			if (fd < 0) {
+				ERR("System : Open Fail(%d)", errno);
+				free(image);
+				return CONTACTS_ERROR_SYSTEM;
+			}
+
 			read_len = 0;
 			while ((ret = read(fd, image+read_len, img_buf_size-read_len))) {
 				if (-1 == ret) {
