@@ -73,9 +73,9 @@
  * - Address book
  *   - Represents where contacts and groups should belong to
  *   - Created by one of contacts sources below
- *   	- Local device, which has no account
- *   	- Service providers such as Google or Yahoo, with account
- *   	- Applications like ChatON, Joyn, Facebook, etc.
+ *      - Local device, which has no account
+ *      - Service providers such as Google or Yahoo, with account
+ *      - Applications like ChatON, Joyn, Facebook, etc.
  * - Group
  *   - Grouped contacts on a same address book
  *   - Groups and contacts have many-to-many relationship

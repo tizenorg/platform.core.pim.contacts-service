@@ -74,8 +74,7 @@
 #define CTSVC_VIEW_URI_READ_ONLY_PHONELOG_STAT "tizen.contacts_view.phonelog_stat"
 
 
-typedef enum
-{
+typedef enum {
 	CTSVC_PROPERTY_FLAG_PROJECTION = 0x00000001,
 	CTSVC_PROPERTY_FLAG_DIRTY = 0x00000002,  /* for dirty bit */
 } contacts_property_flag_e;
@@ -89,7 +88,7 @@ typedef enum
 #define CTSVC_VIEW_DATA_TYPE_STR 0x00040000
 #define CTSVC_VIEW_DATA_TYPE_DOUBLE 0x00050000
 #define CTSVC_VIEW_DATA_TYPE_REC 0x00060000
-#define CTSVC_VIEW_CHECK_DATA_TYPE(property_id,data_type) \
+#define CTSVC_VIEW_CHECK_DATA_TYPE(property_id, data_type) \
 	((property_id&CTSVC_VIEW_DATA_TYPE_MASK) == data_type ? true : false)
 
 #define CTSVC_READ_WRITE_TYPE_MASK 0x0000F000
@@ -133,7 +132,7 @@ typedef enum
 #define CTSVC_PROPERTY_ACTIVITY_PHOTO 0x02100000
 #define CTSVC_PROPERTY_SIP 0x02200000
 
-#define CTSVC_PROPERTY_CHECK(property_id,data_type) \
+#define CTSVC_PROPERTY_CHECK(property_id, data_type) \
 	((property_id & CTSVC_PROPERTY_MASK) == data_type ? true : false)
 
 #define CTSVC_SEARCH_PROPERTY_MASK 0xF0000000
@@ -141,7 +140,7 @@ typedef enum
 #define CTSVC_SEARCH_PROPERTY_FILTER 0x20000000
 #define CTSVC_SEARCH_PROPERTY_PROJECTION 0x30000000
 #define CTSVC_SEARCH_PROPERTY_ALL 0x40000000
-#define CTSVC_SEARCH_PROPERTY_CHECK(property_id,data_type) \
+#define CTSVC_SEARCH_PROPERTY_CHECK(property_id, data_type) \
 	((property_id & CTSVC_SEARCH_PROPERTY_MASK) == data_type ? true : false)
 
 typedef enum {

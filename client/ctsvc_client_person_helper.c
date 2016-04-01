@@ -507,7 +507,7 @@ int ctsvc_client_person_get_aggregation_suggestions(contacts_h contact,
 	pims_ipc_data_h outdata = NULL;
 
 	RETV_IF(NULL == contact, CONTACTS_ERROR_INVALID_PARAMETER);
-	RETV_IF(person_id <= 0 ||NULL == out_list, CONTACTS_ERROR_INVALID_PARAMETER);
+	RETV_IF(person_id <= 0 || NULL == out_list, CONTACTS_ERROR_INVALID_PARAMETER);
 
 	/* make indata */
 	indata = pims_ipc_data_create(0);

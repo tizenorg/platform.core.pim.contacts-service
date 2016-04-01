@@ -47,8 +47,7 @@ extern "C"
  * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
  *
  */
-typedef enum
-{
+typedef enum {
 	CONTACTS_CHANGE_INSERTED,	/**< Inserted */
 	CONTACTS_CHANGE_UPDATED,	/**< Updated */
 	CONTACTS_CHANGE_DELETED,	/**< Deleted */

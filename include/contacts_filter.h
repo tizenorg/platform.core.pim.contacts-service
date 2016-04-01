@@ -48,8 +48,7 @@ extern "C"
  * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
  *
  */
-typedef enum
-{
+typedef enum {
 	CONTACTS_MATCH_EXACTLY,         /**< Full string, case-sensitive */
 	CONTACTS_MATCH_FULLSTRING,      /**< Full string, case-insensitive */
 	CONTACTS_MATCH_CONTAINS,        /**< Sub string, case-insensitive */
@@ -64,8 +63,7 @@ typedef enum
  * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
  *
  */
-typedef enum
-{
+typedef enum {
 	CONTACTS_MATCH_EQUAL,                   /**< '=' */
 	CONTACTS_MATCH_GREATER_THAN,            /**< '>' */
 	CONTACTS_MATCH_GREATER_THAN_OR_EQUAL,   /**< '>=' */

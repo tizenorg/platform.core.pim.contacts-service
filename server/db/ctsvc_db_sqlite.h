@@ -25,7 +25,7 @@
 #define CTS_SQL_MAX_LEN 2048 /* normal string length */
 #define CTS_SQL_MIN_LEN 1024 /* short sql string length */
 
-typedef sqlite3_stmt* cts_stmt;
+typedef sqlite3_stmt * cts_stmt;
 
 int ctsvc_db_open(void);
 int ctsvc_db_close(void);
