@@ -343,7 +343,7 @@ static int __ctsvc_my_profile_get_record_list_p(contacts_record_h record,
 	case CTSVC_PROPERTY_MY_PROFILE_SIP:
 		*list = (contacts_list_h)contact->sips;
 		break;
-	default :
+	default:
 		ERR("property_id(%d) is not supported in value(contact)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
@@ -465,7 +465,7 @@ static int __ctsvc_my_profile_reset_child_record_id(contacts_record_h child_reco
 	case CTSVC_RECORD_SIP:
 		((ctsvc_sip_s *)record)->id = 0;
 		break;
-	default :
+	default:
 		ERR("record(%d) is not child of contact", record->r_type);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
@@ -542,7 +542,7 @@ static int __ctsvc_my_profile_get_child_record_id(contacts_record_h child_record
 		return ((ctsvc_extension_s*)record)->id;
 	case CTSVC_RECORD_SIP:
 		return ((ctsvc_sip_s *)record)->id;
-	default :
+	default:
 		ERR("record(%d) is not child of contact", record->r_type);
 		return 0;
 	}

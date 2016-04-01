@@ -1889,7 +1889,7 @@ static int __ctsvc_sip_get_int(contacts_record_h record, unsigned int property_i
 {
 	ctsvc_sip_s *sip = (ctsvc_sip_s *)record;
 
-	switch(property_id) {
+	switch (property_id) {
 	case CTSVC_PROPERTY_SIP_ID:
 		*out = sip->id;
 		break;
@@ -2451,7 +2451,7 @@ static int __ctsvc_sip_set_int(contacts_record_h record, unsigned int property_i
 {
 	ctsvc_sip_s *sip = (ctsvc_sip_s *)record;
 
-	switch(property_id) {
+	switch (property_id) {
 	case CTSVC_PROPERTY_SIP_ID:
 		CHECK_DIRTY_VAL(sip->id, value, is_dirty);
 		sip->id = value;
@@ -2568,7 +2568,7 @@ static int __ctsvc_contact_get_record_list_p(contacts_record_h record,
 	case CTSVC_PROPERTY_CONTACT_SIP:
 		*list = (contacts_list_h)contact->sips;
 		break;
-	default :
+	default:
 		ERR("property_id(%d) is not supported in value(contact)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
@@ -2691,7 +2691,7 @@ static int __ctsvc_contact_reset_child_record_id(contacts_record_h child_record)
 	case CTSVC_RECORD_SIP:
 		((ctsvc_sip_s *)record)->id = 0;
 		break;
-	default :
+	default:
 		ERR("record(%d) is not child of contact", record->r_type);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
@@ -2737,7 +2737,7 @@ static int __ctsvc_contact_get_child_record_id(contacts_record_h child_record)
 		return ((ctsvc_extension_s*)record)->id;
 	case CTSVC_RECORD_SIP:
 		return ((ctsvc_sip_s *)record)->id;
-	default :
+	default:
 		ERR("record(%d) is not child of contact", record->r_type);
 		return 0;
 	}
@@ -3405,14 +3405,14 @@ static int __ctsvc_sip_get_str_real(contacts_record_h record, unsigned int prope
 {
 	ctsvc_sip_s *sip = (ctsvc_sip_s *)record;
 
-	switch(property_id) {
+	switch (property_id) {
 	case CTSVC_PROPERTY_SIP_ADDRESS:
 		*out_str = GET_STR(copy, sip->address);
 		break;
 	case CTSVC_PROPERTY_SIP_LABEL:
 		*out_str = GET_STR(copy, sip->label);
 		break;
-	default :
+	default:
 		ERR("Invalid parameter : property_id(%d) is not supported in value(sip)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}
@@ -3997,11 +3997,12 @@ static int __ctsvc_extension_set_str(contacts_record_h record, unsigned int prop
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_sip_set_str(contacts_record_h record, unsigned int property_id, const char* str, bool *is_dirty )
+static int __ctsvc_sip_set_str(contacts_record_h record, unsigned int property_id,
+		const char* str, bool *is_dirty)
 {
 	ctsvc_sip_s *sip = (ctsvc_sip_s *)record;
 
-	switch(property_id) {
+	switch (property_id) {
 	case CTSVC_PROPERTY_SIP_ADDRESS:
 		CHECK_DIRTY_STR(sip->address, str, is_dirty);
 		FREEandSTRDUP(sip->address, str);
@@ -4010,7 +4011,7 @@ static int __ctsvc_sip_set_str(contacts_record_h record, unsigned int property_i
 		CHECK_DIRTY_STR(sip->label, str, is_dirty);
 		FREEandSTRDUP(sip->label, str);
 		break;
-	default :
+	default:
 		ERR("Invalid parameter : property_id(%d) is not supported in value(sip)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
 	}

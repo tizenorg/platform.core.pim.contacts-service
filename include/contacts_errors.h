@@ -42,33 +42,32 @@ extern "C"
  * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
  *
  */
-typedef enum
-{
-    /* GENERAL */
-    CONTACTS_ERROR_NONE                 = TIZEN_ERROR_NONE,                      /**< Successful */
-    CONTACTS_ERROR_OUT_OF_MEMORY        = TIZEN_ERROR_OUT_OF_MEMORY,             /**< Out of memory */
-    CONTACTS_ERROR_INVALID_PARAMETER    = TIZEN_ERROR_INVALID_PARAMETER,         /**< Invalid parameter */
-    CONTACTS_ERROR_FILE_NO_SPACE        = TIZEN_ERROR_FILE_NO_SPACE_ON_DEVICE,   /**< FS Full */
-    CONTACTS_ERROR_PERMISSION_DENIED    = TIZEN_ERROR_PERMISSION_DENIED,         /**< Permission denied */
-    CONTACTS_ERROR_NOT_SUPPORTED        = TIZEN_ERROR_NOT_SUPPORTED,             /**< Not supported */
+typedef enum {
+	/* GENERAL */
+	CONTACTS_ERROR_NONE                 = TIZEN_ERROR_NONE,                      /**< Successful */
+	CONTACTS_ERROR_OUT_OF_MEMORY        = TIZEN_ERROR_OUT_OF_MEMORY,             /**< Out of memory */
+	CONTACTS_ERROR_INVALID_PARAMETER    = TIZEN_ERROR_INVALID_PARAMETER,         /**< Invalid parameter */
+	CONTACTS_ERROR_FILE_NO_SPACE        = TIZEN_ERROR_FILE_NO_SPACE_ON_DEVICE,   /**< FS Full */
+	CONTACTS_ERROR_PERMISSION_DENIED    = TIZEN_ERROR_PERMISSION_DENIED,         /**< Permission denied */
+	CONTACTS_ERROR_NOT_SUPPORTED        = TIZEN_ERROR_NOT_SUPPORTED,             /**< Not supported */
 
-    /* LOGIC & DATA */
-    CONTACTS_ERROR_NO_DATA	              = TIZEN_ERROR_NO_DATA,                   /**< Requested data does not exist */
+	/* LOGIC & DATA */
+	CONTACTS_ERROR_NO_DATA	              = TIZEN_ERROR_NO_DATA,                   /**< Requested data does not exist */
 
-    /* DB */
-    CONTACTS_ERROR_DB_LOCKED            = TIZEN_ERROR_CONTACTS | 0x81,           /**< Database table locked or file locked */
-    CONTACTS_ERROR_DB                   = TIZEN_ERROR_CONTACTS | 0x9F,           /**< Unknown DB error */
+	/* DB */
+	CONTACTS_ERROR_DB_LOCKED            = TIZEN_ERROR_CONTACTS | 0x81,           /**< Database table locked or file locked */
+	CONTACTS_ERROR_DB                   = TIZEN_ERROR_CONTACTS | 0x9F,           /**< Unknown DB error */
 
-    /* IPC */
-    CONTACTS_ERROR_IPC_NOT_AVALIABLE    = TIZEN_ERROR_CONTACTS | 0xB1,           /**< IPC server is not available */
-    CONTACTS_ERROR_IPC                  = TIZEN_ERROR_CONTACTS | 0xBF,           /**< Unknown IPC error */
+	/* IPC */
+	CONTACTS_ERROR_IPC_NOT_AVALIABLE    = TIZEN_ERROR_CONTACTS | 0xB1,           /**< IPC server is not available */
+	CONTACTS_ERROR_IPC                  = TIZEN_ERROR_CONTACTS | 0xBF,           /**< Unknown IPC error */
 
-    /* ENVIRONMENT & OTHER MODULE */
-    /* Socket, inotify, vconf, icu, tapi, security/smack, account and so on */
-    CONTACTS_ERROR_SYSTEM               = TIZEN_ERROR_CONTACTS | 0xEF,           /**< Internal system module error */
+	/* ENVIRONMENT & OTHER MODULE */
+	/* Socket, inotify, vconf, icu, tapi, security/smack, account and so on */
+	CONTACTS_ERROR_SYSTEM               = TIZEN_ERROR_CONTACTS | 0xEF,           /**< Internal system module error */
 
-    /* UNHANDLED EXCEPTION */
-    CONTACTS_ERROR_INTERNAL				= TIZEN_ERROR_CONTACTS | 0xFF,            /**< Implementation Error, Temporary Use */
+	/* UNHANDLED EXCEPTION */
+	CONTACTS_ERROR_INTERNAL				= TIZEN_ERROR_CONTACTS | 0xFF,            /**< Implementation Error, Temporary Use */
 } contacts_error_e;
 
 /**

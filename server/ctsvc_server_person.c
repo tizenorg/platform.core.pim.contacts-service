@@ -1639,8 +1639,7 @@ static void __ctsvc_make_sub_query_by_num(GSList *nums, int person_id,
 			"WHERE D.data4 = '",
 			CTSVC_DATA_NUMBER, person_id);
 
-	for (cursor = nums; cursor; cursor = cursor->next)
-	{
+	for (cursor = nums; cursor; cursor = cursor->next) {
 		char *minmatch = cursor->data;
 		if (NULL == minmatch)
 			continue;
@@ -1668,8 +1667,7 @@ static void __ctsvc_make_sub_query_by_email(GSList *emails, int person_id,
 			"WHERE D.data3 LIKE '",
 			CTSVC_DATA_EMAIL, person_id);
 
-	for (cursor = emails; cursor; cursor = cursor->next)
-	{
+	for (cursor = emails; cursor; cursor = cursor->next) {
 		char *local_part = cursor->data;
 		if (NULL == local_part)
 			continue;
@@ -1696,8 +1694,7 @@ static void __ctsvc_make_sub_query_by_name(GSList *names, int person_id,
 			"AND reverse_sort_name LIKE '",
 			person_id, CONTACTS_DISPLAY_NAME_SOURCE_TYPE_NAME);
 
-	for (cursor = names; cursor; cursor = cursor->next)
-	{
+	for (cursor = names; cursor; cursor = cursor->next) {
 		char *name = cursor->data;
 		if (NULL == name)
 			continue;
@@ -1814,9 +1811,7 @@ int ctsvc_person_get_aggregation_suggestions(int person_id, int limit, contacts_
 		/* Add 2 points whenever a email id or a number is matched */
 		/* and 1 point whenever some part of name is matched */
 		/* Aggregation suggestions: the persons who get more than 2 points */
-		if (CTSVC_AGGREGATION_SUGGESTION_SCORE <= score
-			&& (0 == limit || cnt < limit))
-		{
+		if (CTSVC_AGGREGATION_SUGGESTION_SCORE <= score && (0 == limit || cnt < limit)) {
 			cnt++;
 			if (sub_len)
 				sub_len += snprintf(sub_query + sub_len, sub_size -sub_len, ", %d", id);

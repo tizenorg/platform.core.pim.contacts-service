@@ -448,8 +448,8 @@ int contacts_record_clone_child_record_list(contacts_record_h record, unsigned i
  *
  * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
  *
- * @param[in]   record			The record handle
- * @param[out]  view_uri 			The URI of record
+ * @param[in]   record          The record handle
+ * @param[out]  view_uri        The URI of record
  *
  * @return  @c 0 on success,
  *          otherwise a negative error value
@@ -468,5 +468,5 @@ int contacts_record_get_uri_p(contacts_record_h record, const char **view_uri);
 }
 #endif
 
-
 #endif /* __TIZEN_SOCIAL_CONTACTS_RECORD_H__ */
+

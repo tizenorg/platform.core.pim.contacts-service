@@ -35,8 +35,8 @@ typedef int (*ctsvc_ipc_unmarshal_record_cb)(const pims_ipc_data_h ipc_data, con
 typedef int (*ctsvc_ipc_marshal_record_cb)(const contacts_record_h record, pims_ipc_data_h ipc_data);
 
 typedef struct {
-    ctsvc_ipc_unmarshal_record_cb unmarshal_record;
-    ctsvc_ipc_marshal_record_cb marshal_record;
+	ctsvc_ipc_unmarshal_record_cb unmarshal_record;
+	ctsvc_ipc_marshal_record_cb marshal_record;
 } ctsvc_ipc_marshal_record_plugin_cb_s;
 
 int ctsvc_ipc_unmarshal_record(const pims_ipc_data_h ipc_data, contacts_record_h *precord);

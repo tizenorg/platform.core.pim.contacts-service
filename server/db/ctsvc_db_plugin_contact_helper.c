@@ -2153,7 +2153,7 @@ int ctsvc_contact_update_data_sip(contacts_list_h sip_list, int contact_id, bool
 
 	RETV_IF(NULL == sip_list, CONTACTS_ERROR_INVALID_PARAMETER);
 
-	for (cursor = list->deleted_records;cursor;cursor=cursor->next) {
+	for (cursor = list->deleted_records; cursor; cursor = cursor->next) {
 		sip = (ctsvc_sip_s *)cursor->data;
 		ctsvc_db_sip_delete(sip->id, is_my_profile);
 	}
@@ -2171,9 +2171,9 @@ int ctsvc_contact_update_data_sip(contacts_list_h sip_list, int contact_id, bool
 				ret = ctsvc_db_sip_update(record, is_my_profile);
 			else
 				ret = ctsvc_db_sip_delete(sip->id, is_my_profile);
-		}
-		else
+		} else {
 			ret = ctsvc_db_sip_insert(record, contact_id, is_my_profile, NULL);
+		}
 		if (CONTACTS_ERROR_DB == ret) {
 			ERR("DB error : return (%d)", ret);
 			break;

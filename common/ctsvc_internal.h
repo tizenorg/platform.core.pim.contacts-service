@@ -121,8 +121,8 @@
 
 /* TO DISABLE THIS MACRO, DEFINE "G_DISABLE_ASSERT" */
 #define ASSERT_NOT_REACHED(fmt, arg...) do { \
-        ERR(fmt, ##arg); \
-        assert(!"DO NOT REACH HERE!"); \
+	ERR(fmt, ##arg); \
+	assert(!"DO NOT REACH HERE!"); \
 	} while (0)
 
 

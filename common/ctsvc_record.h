@@ -40,16 +40,14 @@ static inline int ctsvc_record_copy_base(ctsvc_record_s *dest, ctsvc_record_s *s
 			ERR("calloc() Fail");
 			return CONTACTS_ERROR_OUT_OF_MEMORY;
 		}
-		if (dest->properties_flags) {
-			memcpy(dest->properties_flags,src->properties_flags,sizeof(char)*dest->property_max_count);
-		}
+		if (dest->properties_flags)
+			memcpy(dest->properties_flags, src->properties_flags, sizeof(char)*dest->property_max_count);
 	}
 	return CONTACTS_ERROR_NONE;
 }
 
 #define CTSVC_RECORD_RESET_PROPERTY_FLAGS(base)do {\
-	if ((base)->properties_flags) \
-	{\
+	if ((base)->properties_flags) {\
 		free((base)->properties_flags); \
 		(base)->property_max_count = 0;\
 		(base)->properties_flags = NULL;\

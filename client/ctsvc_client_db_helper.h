@@ -46,3 +46,4 @@ int ctsvc_client_db_add_status_changed_cb(contacts_h contact, contacts_db_status
 int ctsvc_client_db_remove_status_changed_cb(contacts_h contact, contacts_db_status_changed_cb cb, void *user_data);
 
 #endif /* __CTSVC_CLIENT_DB_HELPER_H__ */
+

@@ -42,20 +42,20 @@ typedef int (*ctsvc_db_get_count_cb)(int *out_count);
 typedef int (*ctsvc_db_get_count_with_query_cb)(contacts_query_h query, int *out_count);
 
 typedef struct {
-    bool is_query_only;
-    ctsvc_db_insert_record_cb insert_record;
-    ctsvc_db_get_record_cb get_record;
-    ctsvc_db_update_record_cb update_record;
-    ctsvc_db_delete_record_cb delete_record;
-    ctsvc_db_replace_record_cb replace_record;
-    ctsvc_db_get_all_records_cb get_all_records;
-    ctsvc_db_get_records_with_query_cb get_records_with_query;
-    ctsvc_db_insert_records_cb insert_records;
-    ctsvc_db_update_records_cb update_records;
-    ctsvc_db_delete_records_cb delete_records;
-    ctsvc_db_replace_records_cb replace_records;
-    ctsvc_db_get_count_cb get_count;
-    ctsvc_db_get_count_with_query_cb get_count_with_query;
+	bool is_query_only;
+	ctsvc_db_insert_record_cb insert_record;
+	ctsvc_db_get_record_cb get_record;
+	ctsvc_db_update_record_cb update_record;
+	ctsvc_db_delete_record_cb delete_record;
+	ctsvc_db_replace_record_cb replace_record;
+	ctsvc_db_get_all_records_cb get_all_records;
+	ctsvc_db_get_records_with_query_cb get_records_with_query;
+	ctsvc_db_insert_records_cb insert_records;
+	ctsvc_db_update_records_cb update_records;
+	ctsvc_db_delete_records_cb delete_records;
+	ctsvc_db_replace_records_cb replace_records;
+	ctsvc_db_get_count_cb get_count;
+	ctsvc_db_get_count_with_query_cb get_count_with_query;
 } ctsvc_db_plugin_info_s;
 
 int ctsvc_db_init();

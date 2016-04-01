@@ -48,10 +48,9 @@ extern "C"
  * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
  *
  */
-typedef enum
-{
-    CONTACTS_NAME_DISPLAY_ORDER_FIRSTLAST,   /**< First name comes at the first */
-    CONTACTS_NAME_DISPLAY_ORDER_LASTFIRST    /**< First name comes at the last */
+typedef enum {
+	CONTACTS_NAME_DISPLAY_ORDER_FIRSTLAST,   /**< First name comes at the first */
+	CONTACTS_NAME_DISPLAY_ORDER_LASTFIRST    /**< First name comes at the last */
 } contacts_name_display_order_e;
 
 /**
@@ -111,10 +110,9 @@ int contacts_setting_set_name_display_order(contacts_name_display_order_e name_d
  * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
  *
  */
-typedef enum
-{
-    CONTACTS_NAME_SORTING_ORDER_FIRSTLAST,   /**< Contacts are first sorted based on the first name  */
-    CONTACTS_NAME_SORTING_ORDER_LASTFIRST    /**< Contacts are first sorted based on the last name  */
+typedef enum {
+	CONTACTS_NAME_SORTING_ORDER_FIRSTLAST,   /**< Contacts are first sorted based on the first name  */
+	CONTACTS_NAME_SORTING_ORDER_LASTFIRST    /**< Contacts are first sorted based on the last name  */
 } contacts_name_sorting_order_e;
 
 
@@ -309,5 +307,5 @@ int contacts_setting_remove_name_sorting_order_changed_cb(contacts_setting_name_
 }
 #endif
 
-
 #endif /* __TIZEN_SOCIAL_CONTACTS_SETTING_H__ */
+

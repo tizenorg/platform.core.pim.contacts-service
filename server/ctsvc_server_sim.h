@@ -33,7 +33,7 @@ typedef struct {
 	char *email3;
 	char *email4;
 	char *nickname;
-}sim_contact_s;
+} sim_contact_s;
 
 
 int ctsvc_server_sim_init(void);

@@ -102,7 +102,7 @@ typedef void (*contacts_db_changed_cb)(const char *view_uri, void *user_data);
  * @retval  #CONTACTS_ERROR_IPC                 IPC error
  *
  * @pre     contacts_connect() should be called to open a connection to the contacts service.
- * @post 	contacts_db_changed_cb() callback wil be called upon success.
+ * @post    contacts_db_changed_cb() callback wil be called upon success.
  *
  * @see contacts_connect()
  * @see contacts_db_update_record()
@@ -189,7 +189,7 @@ int contacts_db_get_record(const char *view_uri, int record_id, contacts_record_
  * @retval  #CONTACTS_ERROR_IPC                 IPC error
  *
  * @pre     contacts_connect() should be called to open a connection to the contacts service.
- * @post 	contacts_db_changed_cb() callback wil be called upon success.
+ * @post    contacts_db_changed_cb() callback wil be called upon success.
  *
  * @see contacts_connect()
  * @see contacts_db_insert_record()
@@ -231,7 +231,7 @@ int contacts_db_update_record(contacts_record_h record);
  * @retval  #CONTACTS_ERROR_IPC                 IPC error
  *
  * @pre     contacts_connect() should be called to open a connection to the contacts service.
- * @post 	contacts_db_changed_cb() callback wil be called upon success.
+ * @post    contacts_db_changed_cb() callback wil be called upon success.
  *
  * @see contacts_connect()
  * @see contacts_db_insert_record()
@@ -267,7 +267,7 @@ int contacts_db_delete_record(const char *view_uri, int record_id);
  * @retval  #CONTACTS_ERROR_IPC                 IPC error
  *
  * @pre     contacts_connect() should be called to open a connection to the contacts service.
- * @post 	contacts_db_changed_cb() callback wil be called upon success.
+ * @post    contacts_db_changed_cb() callback wil be called upon success.
  *
  * @see contacts_connect()
  * @see contacts_db_update_record()
@@ -398,7 +398,7 @@ int contacts_db_get_records_with_query(contacts_query_h query, int offset, int l
  * @retval  #CONTACTS_ERROR_IPC                 IPC error
  *
  * @pre     contacts_connect() should be called to open a connection to the contacts service.
- * @post 	contacts_db_changed_cb() callback wil be called upon success.
+ * @post    contacts_db_changed_cb() callback wil be called upon success.
  *
  * @see contacts_connect()
  * @see contacts_db_update_records()
@@ -438,7 +438,7 @@ int contacts_db_insert_records(contacts_list_h record_list, int **ids, int *coun
  * @retval  #CONTACTS_ERROR_IPC                 IPC error
  *
  * @pre     contacts_connect() should be called to open a connection to the contacts service.
- * @post 	contacts_db_changed_cb() callback wil be called upon success.
+ * @post    contacts_db_changed_cb() callback wil be called upon success.
  *
  * @see contacts_connect()
  * @see contacts_db_insert_records()
@@ -480,7 +480,7 @@ int contacts_db_update_records(contacts_list_h record_list);
  * @retval  #CONTACTS_ERROR_IPC                 IPC error
  *
  * @pre     contacts_connect() should be called to open a connection to the contacts service.
- * @post 	contacts_db_changed_cb() callback wil be called upon success.
+ * @post    contacts_db_changed_cb() callback wil be called upon success.
  *
  * @see contacts_connect()
  * @see contacts_db_insert_records()
@@ -498,9 +498,9 @@ int contacts_db_delete_records(const char *view_uri, int record_id_array[], int 
  * @remarks The write-once value of record is not replaced.\n
  * This API works only for @ref CAPI_SOCIAL_CONTACTS_SVC_VIEW_MODULE_contacts_contact
  *
- * @param[in]   list          			      The new record list handle to replace
- * @param[in]   record_id_array		The record IDs to replace
- * @param[in]   count				The size of record ID array
+ * @param[in]   list                The new record list handle to replace
+ * @param[in]   record_id_array     The record IDs to replace
+ * @param[in]   count               The size of record ID array
  *
  * @return  @c 0 on success,
  *          otherwise a negative error value
@@ -516,7 +516,7 @@ int contacts_db_delete_records(const char *view_uri, int record_id_array[], int 
  * @retval  #CONTACTS_ERROR_IPC                 IPC error
  *
  * @pre     contacts_connect() should be called to open a connection to the contacts service.
- * @post 	contacts_db_changed_cb() callback wil be called upon success.
+ * @post    contacts_db_changed_cb() callback wil be called upon success.
  *
  * @see contacts_connect()
  * @see contacts_db_update_record()
@@ -890,5 +890,5 @@ int contacts_db_get_last_change_version(int *last_change_version);
 }
 #endif
 
-
 #endif /* __TIZEN_SOCIAL_CONTACTS_DB_H__ */
+

@@ -244,5 +244,5 @@ int contacts_list_last(contacts_list_h contacts_list);
 }
 #endif
 
-
 #endif /* __TIZEN_SOCIAL_CONTACTS_LIST_H__ */
+

@@ -35,7 +35,7 @@ enum {
 
 #define CTSVC_SOCKET_MSG_REQUEST_MAX_ATTACH 5
 
-typedef struct{
+typedef struct {
 	int type;
 	int val;
 	int attach_num;

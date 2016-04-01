@@ -29,8 +29,7 @@ static const char CONTACTS_WRITE_PRIVILEGE_ID[] = "http://tizen.org/privilege/co
 static const char PHONELOG_READ_PRIVILEGE_ID[] = "http://tizen.org/privilege/callhistory.read";
 static const char PHONELOG_WRITE_PRIVILEGE_ID[] = "http://tizen.org/privilege/callhistory.write";
 
-int ctsvc_client_person_link_person(contacts_h contact, int base_person_id,
-		int person_id)
+int ctsvc_client_person_link_person(contacts_h contact, int base_person_id, int person_id)
 {
 	int ret = CONTACTS_ERROR_NONE;
 
