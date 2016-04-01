@@ -41,7 +41,7 @@ typedef enum {
 /**
  * @brief Deletes a phone log with extra_data1.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 3.0 @endif
  * @privlevel public
  * @privilege %http://tizen.org/privilege/callhistory.write
  *

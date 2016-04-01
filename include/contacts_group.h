@@ -45,7 +45,7 @@ extern "C"
 /**
  * @brief Adds a contact and a group relationship to the contacts database.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 3.0 @endif
  * @privlevel public
  * @privilege %http://tizen.org/privilege/contact.write
  *
@@ -72,7 +72,7 @@ int contacts_group_add_contact(int group_id, int contact_id);
 /**
  * @brief Removes a contact and a group relationship from the contacts database.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 3.0 @endif
  * @privlevel public
  * @privilege %http://tizen.org/privilege/contact.write
  *
@@ -99,7 +99,7 @@ int contacts_group_remove_contact(int group_id, int contact_id);
 /**
  * @brief Sets a group between the previous group and the next group.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 2.4 @endif
+ * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 3.0 @endif
  * @privlevel public
  * @privilege %http://tizen.org/privilege/contact.write
  *
