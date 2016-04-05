@@ -1559,8 +1559,11 @@ static int __db_append_search_query(const char *keyword, char **query, int *quer
 			int len_keyword = strlen(half_keyword);
 			char *clean_number = calloc(len_keyword + 1, sizeof(char));
 			int err = ctsvc_clean_number(half_keyword, clean_number, len_keyword + 1, false);
-			if (err <= 0)
+			if (err <= 0) {
+				ERR("ctsvc_clean_number() Fail(%d)", err);
+				free(clean_number);
 				break;
+			}
 
 			const char *cc = ctsvc_get_network_cc(false);
 			temp_len = SAFE_SNPRINTF(query, query_size, len, " UNION SELECT contact_id "
