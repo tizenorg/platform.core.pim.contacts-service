@@ -8,9 +8,6 @@ Source0:    %{name}-%{version}.tar.gz
 Source1:    %{name}.service
 Source2:    %{name}.socket
 Source1001: %{name}.manifest
-%if "%{?profile}" == "wearable"
-ExcludeArch: %{arm} %ix86 x86_64
-%endif
 BuildRequires: cmake
 BuildRequires: pkgconfig(db-util)
 BuildRequires: pkgconfig(vconf)
