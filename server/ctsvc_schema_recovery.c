@@ -62,28 +62,6 @@ static inline int __ctsvc_server_remake_db_file()
 
 	ctsvc_server_db_close();
 
-	fd = open(CTSVC_DB_PATH, O_CREAT | O_RDWR, 0660);
-	RETVM_IF(-1 == fd, CONTACTS_ERROR_SYSTEM, "open Fail");
-
-	ret = fchown(fd, getuid(), CTS_SECURITY_FILE_GROUP);
-	if (0 != ret)
-		ERR("fchown(%s) Fail(%d)", CTSVC_DB_PATH, ret);
-	ret = fchmod(fd, CTS_SECURITY_DEFAULT_PERMISSION);
-	if (0 != ret)
-		ERR("fchown(%s) Fail(%d)", CTSVC_DB_PATH, ret);
-	close(fd);
-
-	fd = open(CTSVC_DB_JOURNAL_PATH, O_CREAT | O_RDWR, 0660);
-	RETVM_IF(-1 == fd, CONTACTS_ERROR_SYSTEM, "open Fail");
-
-	ret = fchown(fd, getuid(), CTS_SECURITY_FILE_GROUP);
-	if (0 != ret)
-		ERR("fchown(%s) Fail(%d)", CTSVC_DB_JOURNAL_PATH, ret);
-	ret = fchmod(fd, CTS_SECURITY_DEFAULT_PERMISSION);
-	if (0 != ret)
-		ERR("fchown(%s) Fail(%d)", CTSVC_DB_JOURNAL_PATH, ret);
-	close(fd);
-
 	return CONTACTS_ERROR_NONE;
 }
 

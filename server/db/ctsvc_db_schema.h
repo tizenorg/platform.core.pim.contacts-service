@@ -22,7 +22,6 @@
 #include <tzplatform_config.h>
 
 #define CTSVC_DB_PATH tzplatform_mkpath(TZ_USER_DB, "/.contacts-svc.db")
-#define CTSVC_DB_JOURNAL_PATH tzplatform_mkpath(TZ_USER_DB, "/.contacts-svc.db-journal")
 
 /* For Security */
 #define CTS_SECURITY_FILE_GROUP 5000
