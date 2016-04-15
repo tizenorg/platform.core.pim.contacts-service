@@ -1684,7 +1684,7 @@ static int __db_append_search_query(const char *keyword, char **query, int *quer
 
 		if (range & CONTACTS_SEARCH_RANGE_NAME) {
 			int len_keyword = strlen(half_keyword);
-			int len_chosung= 0;
+			int len_chosung = 0;
 			char *chosung = NULL;
 			char *korean_pattern = NULL;
 			char *search_chosung = NULL;
@@ -1699,7 +1699,7 @@ static int __db_append_search_query(const char *keyword, char **query, int *quer
 				 */
 				chosung = calloc(len_keyword * 5, sizeof(char));
 				len_chosung = ctsvc_get_chosung(half_keyword, chosung, len_keyword * 5);
-				mod_keyword = __ctsvc_db_make_search_keyword(0 < len_chosung? chosung : half_keyword);
+				mod_keyword = __ctsvc_db_make_search_keyword(0 < len_chosung ? chosung : half_keyword);
 				break;
 			case CTSVC_LANG_JAPANESE:
 				mod_keyword = search_hiragana;
