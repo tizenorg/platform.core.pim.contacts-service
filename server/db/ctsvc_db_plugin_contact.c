@@ -1229,6 +1229,7 @@ static int __ctsvc_db_contact_update_record(contacts_record_h record)
 		int ret = CONTACTS_ERROR_NONE;
 		int count = 0;
 		ctsvc_image_s *image;
+		char *contact_image_path = NULL;
 
 		contacts_list_get_count((contacts_list_h)contact->images, &count);
 		if (count) {
@@ -1245,16 +1246,20 @@ static int __ctsvc_db_contact_update_record(contacts_record_h record)
 					break;
 			} while (CONTACTS_ERROR_NONE == contacts_list_next((contacts_list_h)contact->images));
 
-			if ((NULL == contact->image_thumbnail_path && image->path) ||
-					(contact->image_thumbnail_path && NULL == image->path) ||
-					(contact->image_thumbnail_path && image->path && (STRING_EQUAL != strcmp(contact->image_thumbnail_path, image->path)))) {
+			contact_image_path = ctsvc_utils_get_image_path(contact->image_thumbnail_path);
+
+			if ((NULL == contact_image_path && image->path) ||
+					(contact_image_path && NULL == image->path) ||
+					(contact_image_path && image->path && (STRING_EQUAL != strcmp(contact_image_path, image->path)))) {
 				ctsvc_record_set_property_flag((ctsvc_record_s*)contact, _contacts_contact.image_thumbnail_path, CTSVC_PROPERTY_FLAG_DIRTY);
 
-				if (ctsvc_contact_check_image_location(image->path))
-					contact->image_thumbnail_path = SAFE_STRDUP(image->path + strlen(CTSVC_CONTACT_IMG_FULL_LOCATION) + 1);
-				else
-					contact->image_thumbnail_path = SAFE_STRDUP(image->path);
+				free(contact->image_thumbnail_path);
+				contact->image_thumbnail_path = NULL;
+
+				if (image->path)
+					contact->image_thumbnail_path = ctsvc_utils_make_thumbnail(image->path);
 			}
+			free(contact_image_path);
 		} else if (contact->image_thumbnail_path) {
 			free(contact->image_thumbnail_path);
 			contact->image_thumbnail_path = NULL;
@@ -2079,7 +2084,7 @@ static int __ctsvc_db_contact_insert_record(contacts_record_h record, int *id)
 				}
 
 				if (image->path && image->is_default) {
-					contact->image_thumbnail_path = strdup(image->path);
+					contact->image_thumbnail_path = ctsvc_utils_make_thumbnail(image->path);
 					break;
 				}
 			} while (CONTACTS_ERROR_NONE == contacts_list_next((contacts_list_h)contact->images));
@@ -2322,6 +2327,7 @@ static int __ctsvc_db_contact_replace_record(contacts_record_h record, int conta
 		int ret = CONTACTS_ERROR_NONE;
 		int count = 0;
 		ctsvc_image_s *image;
+		char *contact_image_path = NULL;
 
 		contacts_list_get_count((contacts_list_h)contact->images, &count);
 		if (count) {
@@ -2339,16 +2345,19 @@ static int __ctsvc_db_contact_replace_record(contacts_record_h record, int conta
 					break;
 			} while (CONTACTS_ERROR_NONE == contacts_list_next((contacts_list_h)contact->images));
 
-			if ((NULL == contact->image_thumbnail_path && image->path) ||
-					(contact->image_thumbnail_path && NULL == image->path) ||
-					(contact->image_thumbnail_path && image->path && STRING_EQUAL != strcmp(contact->image_thumbnail_path, image->path))) {
+			contact_image_path = ctsvc_utils_get_image_path(contact->image_thumbnail_path);
+			if ((NULL == contact_image_path && image->path) ||
+					(contact_image_path && NULL == image->path) ||
+					(contact_image_path && image->path && STRING_EQUAL != strcmp(contact_image_path, image->path))) {
 				ctsvc_record_set_property_flag((ctsvc_record_s*)contact, _contacts_contact.image_thumbnail_path, CTSVC_PROPERTY_FLAG_DIRTY);
 
-				if (ctsvc_contact_check_image_location(image->path))
-					contact->image_thumbnail_path = SAFE_STRDUP(image->path + strlen(CTSVC_CONTACT_IMG_FULL_LOCATION) + 1);
-				else
-					contact->image_thumbnail_path = SAFE_STRDUP(image->path);
+				free(contact->image_thumbnail_path);
+				contact->image_thumbnail_path = NULL;
+
+				if (image->path)
+					contact->image_thumbnail_path = ctsvc_utils_make_thumbnail(image->path);
 			}
+			free(contact_image_path);
 		} else if (contact->image_thumbnail_path) {
 			free(contact->image_thumbnail_path);
 			contact->image_thumbnail_path = NULL;

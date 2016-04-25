@@ -206,7 +206,7 @@ void ctsvc_utils_make_image_file_name(int parent_id, int id, char *src_img, char
 	free(lower_ext);
 }
 
-static inline bool ctsvc_check_available_image_space(void)
+static inline bool _ctsvc_check_available_image_space(int need_size)
 {
 	int ret;
 	struct statfs buf;
@@ -217,7 +217,7 @@ static inline bool ctsvc_check_available_image_space(void)
 
 	size = (long long)buf.f_bavail * (buf.f_bsize);
 
-	if (1024*1024 < size)  /* if available space to copy a image is larger than 1M */
+	if (need_size < size)  /* if available space to copy a image is larger than need_size */
 		return true;
 	return false;
 }
@@ -279,6 +279,7 @@ static image_util_rotation_e _ctsvc_image_get_rotation_info(const char *path)
 typedef struct {
 	const char *src;
 	const char *dest;
+	int max_size;
 	int ret;
 } image_info;
 
@@ -351,7 +352,7 @@ static bool _ctsvc_image_util_supported_jpeg_colorspace_cb(
 		buffer = buffer_temp;
 	}
 
-	if (CTSVC_IMAGE_MAX_SIZE < width || CTSVC_IMAGE_MAX_SIZE < height) { /* need resize */
+	if (info->max_size < width || info->max_size < height) { /* need resize */
 		int resized_width;
 		int resized_height;
 		media_format_h fmt;
@@ -359,11 +360,11 @@ static bool _ctsvc_image_util_supported_jpeg_colorspace_cb(
 
 		/* set resize */
 		if (width > height) {
-			resized_width = CTSVC_IMAGE_MAX_SIZE;
-			resized_height = height * CTSVC_IMAGE_MAX_SIZE / width;
+			resized_width = info->max_size;
+			resized_height = height * info->max_size / width;
 		} else {
-			resized_height = CTSVC_IMAGE_MAX_SIZE;
-			resized_width = width * CTSVC_IMAGE_MAX_SIZE / height;
+			resized_height = info->max_size;
+			resized_width = width * info->max_size / height;
 		}
 
 		if (resized_height % 8)
@@ -436,10 +437,10 @@ static bool _ctsvc_image_util_supported_jpeg_colorspace_cb(
 	return false;
 }
 
-static int _ctsvc_image_encode(const char *src, const char *dest)
+static int _ctsvc_image_encode(const char *src, const char *dest, int max_size)
 {
 	int ret;
-	image_info info = {.src = src, .dest = dest, ret = CONTACTS_ERROR_SYSTEM};
+	image_info info = {src, dest, max_size, CONTACTS_ERROR_SYSTEM};
 
 	ret = image_util_foreach_supported_jpeg_colorspace(
 			_ctsvc_image_util_supported_jpeg_colorspace_cb, &info);
@@ -464,10 +465,10 @@ int ctsvc_utils_copy_image(const char *dir, const char *src, const char *file)
 	char dest[strlen(dir) + strlen(file) + 2];
 	snprintf(dest, sizeof(dest), "%s/%s", dir, file);
 
-	if (false == ctsvc_check_available_image_space())
+	if (false == _ctsvc_check_available_image_space(1204 * 1204)) /*need larger than 1M*/
 		return CONTACTS_ERROR_FILE_NO_SPACE;
 
-	ret = _ctsvc_image_encode(src, dest);
+	ret = _ctsvc_image_encode(src, dest, CTSVC_IMAGE_MAX_SIZE);
 	if (CONTACTS_ERROR_NONE == ret)
 		return ret;
 	else
@@ -514,6 +515,106 @@ int ctsvc_utils_copy_image(const char *dir, const char *src, const char *file)
 
 	return CONTACTS_ERROR_NONE;
 }
+
+char* ctsvc_utils_make_thumbnail(const char *image_path)
+{
+	int ret;
+	char src[CTSVC_IMG_FULL_PATH_SIZE_MAX] = {0};
+	char dest[CTSVC_IMG_FULL_PATH_SIZE_MAX] = {0};
+	char *thumbnail_path = NULL;
+	image_info info = {src, dest, CTSVC_IMAGE_THUMBNAIL_SIZE, CONTACTS_ERROR_SYSTEM};
+
+	RETV_IF(NULL == image_path, NULL);
+	RETV_IF(NULL != strrstr(image_path, CTSVC_IMAGE_THUMBNAIL_SUFFIX), NULL);
+
+	if (false == _ctsvc_check_available_image_space(
+			CTSVC_IMAGE_THUMBNAIL_SIZE * CTSVC_IMAGE_THUMBNAIL_SIZE)) {
+			ERR("No space to make thumbnail");
+			return NULL;
+	}
+
+	thumbnail_path = ctsvc_image_util_get_thumbnail_path(image_path);
+	if (NULL == thumbnail_path) {
+		ERR("ctsvc_image_util_get_thumbnail_path() Fail");
+		return NULL;
+	}
+
+	if (0 == access(dest, F_OK)) {
+		DBG("already exist");
+		return thumbnail_path;
+	}
+
+	snprintf(src, sizeof(src), "%s/%s", CTSVC_CONTACT_IMG_FULL_LOCATION, image_path);
+	snprintf(dest, sizeof(dest), "%s/%s", CTSVC_CONTACT_IMG_FULL_LOCATION, thumbnail_path);
+	free(thumbnail_path);
+
+	ret = _ctsvc_image_encode(src, dest, CTSVC_IMAGE_THUMBNAIL_SIZE);
+	if (CONTACTS_ERROR_NONE != ret) {
+		ERR("_ctsvc_image_encode() Fail(%d)", ret);
+		return NULL;
+	}
+
+	return strdup(dest);
+}
+
+char* ctsvc_utils_get_thumbnail_path(const char *image_path)
+{
+	int name_len = 0;
+	int full_len = 0;
+	char *thumbnail_path = NULL;
+	char *ext = NULL;
+
+	RETV_IF(NULL == image_path, NULL);
+	RETV_IF(NULL != strrstr(image_path, CTSVC_IMAGE_THUMBNAIL_SUFFIX), NULL);
+
+	full_len = strlen(image_path) + strlen(CTSVC_IMAGE_THUMBNAIL_SUFFIX) + 1;
+	thumbnail_path = calloc(1, full_len);
+	if (NULL == thumbnail_path) {
+		ERR("calloc() Fail");
+		return NULL;
+	}
+
+	ext = strrchr(image_path, '.');
+	if (ext) {
+		name_len = ext -image_path;
+		strncpy(thumbnail_path, image_path, name_len);
+		snprintf(thumbnail_path+name_len, full_len-name_len, "%s%s", CTSVC_IMAGE_THUMBNAIL_SUFFIX, ext);
+	} else {
+		snprintf(thumbnail_path, full_len, "%s%s", image_path, CTSVC_IMAGE_THUMBNAIL_SUFFIX);
+	}
+
+	return thumbnail_path;
+}
+
+char* ctsvc_utils_get_image_path(const char *thumbnail_path)
+{
+	int name_len = 0;
+	int full_len = 0;
+	char *image_path = NULL;
+	char *ext = NULL;
+
+	RETV_IF(NULL == thumbnail_path, NULL);
+	RETV_IF(NULL == strrstr(thumbnail_path, CTSVC_IMAGE_THUMBNAIL_SUFFIX), NULL);
+
+	full_len = strlen(thumbnail_path) - strlen(CTSVC_IMAGE_THUMBNAIL_SUFFIX) + 1;
+       image_path = calloc(1, full_len);
+	if (NULL == image_path) {
+	   ERR("calloc() Fail");
+	   return NULL;
+	}
+
+	ext = strrchr(thumbnail_path, '.');
+	if (ext) {
+		name_len = ext -thumbnail_path - strlen(CTSVC_IMAGE_THUMBNAIL_SUFFIX);
+		strncpy(image_path, thumbnail_path, name_len);
+		snprintf(image_path + name_len, full_len -name_len, "%s", ext);
+	} else {
+		name_len = strlen(thumbnail_path) - strlen(CTSVC_IMAGE_THUMBNAIL_SUFFIX);
+		strncpy(image_path, thumbnail_path, name_len);
+	}
+	return image_path;
+}
+
 
 int ctsvc_get_next_ver(void)
 {
