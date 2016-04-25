@@ -364,7 +364,7 @@ static inline int __ctsvc_db_update_person_default(int person_id, int datatype)
 	cts_stmt stmt = NULL;
 	char query[CTS_SQL_MIN_LEN] = {0};
 	char *temp = NULL;
-	char *image_thumbnail_path = NULL;
+	char *image_path = NULL;
 
 	snprintf(query, sizeof(query),
 			"SELECT D.id FROM "CTS_TABLE_CONTACTS" C, "CTS_TABLE_DATA" D "
@@ -397,28 +397,33 @@ static inline int __ctsvc_db_update_person_default(int person_id, int datatype)
 				ctsvc_stmt_finalize(stmt);
 				return ret;
 			}
-			temp = ctsvc_stmt_get_text(stmt, 1);
-			image_thumbnail_path = SAFE_STRDUP(temp);
+
+			if (CTSVC_DATA_IMAGE == datatype) {
+				temp = ctsvc_stmt_get_text(stmt, 1);
+				image_path = SAFE_STRDUP(temp);
+			}
 		}
 		ctsvc_stmt_finalize(stmt);
 
 		if (CTSVC_DATA_IMAGE == datatype) {
-			if (image_thumbnail_path) {
+			if (image_path) {
+				char *thumbnail_path = NULL;
+
 				snprintf(query, sizeof(query),
 						"UPDATE "CTS_TABLE_PERSONS" SET image_thumbnail_path=? WHERE person_id=%d", person_id);
 				ret = ctsvc_query_prepare(query, &stmt);
 				RETVM_IF(NULL == stmt, ret, "ctsvc_query_prepare() Fail(%d)", ret);
-				ctsvc_stmt_bind_text(stmt, 1, image_thumbnail_path);
+				thumbnail_path = ctsvc_utils_get_thumbnail_path(image_path);
+				ctsvc_stmt_bind_text(stmt, 1, thumbnail_path);
 				ret = ctsvc_stmt_step(stmt);
 				ctsvc_stmt_finalize(stmt);
-				free(image_thumbnail_path);
+				free(image_path);
+				free(thumbnail_path);
 				if (CONTACTS_ERROR_NONE != ret) {
 					ERR("ctsvc_stmt_step() Fail(%d)", ret);
 					return ret;
 				}
 			}
-		} else {
-			free(image_thumbnail_path);
 		}
 	}
 
