@@ -28,6 +28,7 @@
 #include "ctsvc_notification.h"
 #include "ctsvc_db_access_control.h"
 #include "ctsvc_notify.h"
+#include "ctsvc_db_utils.h"
 
 int ctsvc_db_image_get_value_from_stmt(cts_stmt stmt, contacts_record_h *record,
 		int start_count)
@@ -240,4 +241,30 @@ void ctsvc_db_image_delete_callback(sqlite3_context *context, int argc, sqlite3_
 	return;
 }
 
+int ctsvc_db_image_set_primary_default(int contact_id, const char *image_thumbnail_path,
+		bool is_primary_default)
+{
+	int ret;
+	char *image_path = NULL;
+	char query[CTS_SQL_MAX_LEN] = {0};
+
+	RETV_IF(contact_id <= 0, CONTACTS_ERROR_INVALID_PARAMETER);
+	RETV_IF(NULL == image_thumbnail_path, CONTACTS_ERROR_INVALID_PARAMETER);
+
+	image_path = ctsvc_utils_get_image_path(image_thumbnail_path);
+
+	if (NULL == image_path) {
+		ERR("ctsvc_utils_get_image_path() Fail");
+		return CONTACTS_ERROR_INTERNAL;
+	}
+
+	snprintf(query, sizeof(query),
+			"UPDATE "CTS_TABLE_DATA" SET is_primary_default = %d WHERE contact_id = %d AND datatype = %d AND data3 = %s",
+			is_primary_default, contact_id, CONTACTS_DATA_TYPE_IMAGE, image_path);
+
+	free(image_path);
+	ret = ctsvc_query_exec(query);
+	WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_query_exec() Fail(%d)", ret);
+	return ret;
+}
 
