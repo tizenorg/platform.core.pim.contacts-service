@@ -22,6 +22,8 @@
 #include <image_util.h>
 
 #define CTSVC_IMAGE_MAX_SIZE 1080
+#define CTSVC_IMAGE_THUMBNAIL_SIZE 96
+#define CTSVC_IMAGE_THUMBNAIL_SUFFIX "_thumbnail"
 #define CTSVC_IMAGE_ENCODE_QUALITY 50
 
 int ctsvc_image_util_get_mimetype(image_util_colorspace_e colorspace, int *p_mimetype);
@@ -32,5 +34,4 @@ int ctsvc_image_util_rotate(media_packet_h packet, image_util_rotation_e rotatio
 		void **p_buffer, uint64_t *p_size);
 int ctsvc_image_util_resize(media_packet_h packet, int width, int height,
 		void **p_buffer, uint64_t *p_size);
-
 #endif /* __CTSVC_IMAGE_UTIL_H__ */

@@ -163,6 +163,7 @@ int ctsvc_contact_update_image_file(int parent_id, int img_id,
 {
 	int ret;
 	char dest[CTSVC_IMG_FULL_PATH_SIZE_MAX] = {0};
+	char *thumbnail_path = NULL;
 
 	ret = __ctsvc_contact_get_current_image_file(img_id, dest, sizeof(dest));
 
@@ -177,6 +178,14 @@ int ctsvc_contact_update_image_file(int parent_id, int img_id,
 		ret = unlink(dest);
 		if (ret < 0)
 			WARN("unlink() Fail(%d)", errno);
+
+		/* remove thumbnail */
+		thumbnail_path = ctsvc_utils_get_thumbnail_path(dest);
+		if (thumbnail_path && 0 == access(thumbnail_path, F_OK)) {
+			ret = unlink(thumbnail_path);
+			if (ret < 0)
+				WARN("unlink() Fail(%d)", errno);
+		}
 	}
 
 	if (src_img) {
