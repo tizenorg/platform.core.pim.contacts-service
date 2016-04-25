@@ -22,6 +22,8 @@
 #include <image_util.h>
 
 #define CTSVC_IMAGE_MAX_SIZE 1080
+#define CTSVC_IMAGE_THUMBNAIL_SIZE 96
+#define CTSVC_IMAGE_THUMBNAIL_SUFFIX "_thumbnail"
 #define CTSVC_IMAGE_ENCODE_QUALITY 50
 
 int ctsvc_image_util_get_mimetype(image_util_colorspace_e colorspace, int *p_mimetype);

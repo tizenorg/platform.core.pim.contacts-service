@@ -32,6 +32,9 @@ int ctsvc_get_transaction_ver(void);
 int ctsvc_utils_copy_image(const char *dir, const char *src, const char *file);
 void ctsvc_utils_make_image_file_name(int parent_id, int id, char *src_img, char *dest,
 		int dest_size);
+char* ctsvc_utils_get_thumbnail_path(const char *image_path);
+char* ctsvc_utils_get_image_path(const char *thumbnail_path);
+char* ctsvc_utils_make_thumbnail(const char *image_path);
 
 int SAFE_SNPRINTF(char **buf, int *buf_size, int len, const char *src);
 
