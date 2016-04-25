@@ -278,6 +278,7 @@ static inline int __ctsvc_put_person_default_image(int person_id, int id)
 	cts_stmt stmt;
 	char *image_path;
 	char query[CTS_SQL_MAX_LEN] = {0};
+	char *thumbnail_path;
 
 	ret = ctsvc_begin_trans();
 	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "ctsvc_begin_trans() Fail(%d)", ret);
@@ -325,8 +326,7 @@ static inline int __ctsvc_put_person_default_image(int person_id, int id)
 	if (false == is_default) {
 		snprintf(query, sizeof(query),
 				"UPDATE "CTS_TABLE_DATA" SET is_default=0 WHERE datatype=%d  AND is_my_profile = 0 "
-				"AND contact_id = (SELECT contact_id FROM "CTS_TABLE_DATA" WHERE id=%d) ",
-				CTSVC_DATA_IMAGE, id);
+				"AND contact_id = %d ", CTSVC_DATA_IMAGE, contact_id);
 
 		ret = ctsvc_query_exec(query);
 		if (CONTACTS_ERROR_NONE != ret) {
@@ -335,7 +335,13 @@ static inline int __ctsvc_put_person_default_image(int person_id, int id)
 			ctsvc_end_trans(false);
 			return ret;
 		}
+
+		thumbnail_path = ctsvc_utils_make_thumbnail(image_path);
+	} else {
+		thumbnail_path = ctsvc_utils_get_thumbnail_path(image_path);
 	}
+
+	free(image_path);
 
 	/* set is_default, is _primary_default */
 	snprintf(query, sizeof(query),
@@ -343,7 +349,7 @@ static inline int __ctsvc_put_person_default_image(int person_id, int id)
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
 		ERR("ctsvc_query_exec() Fail(%d)", ret);
-		free(image_path);
+		free(thumbnail_path);
 		ctsvc_end_trans(false);
 		return ret;
 	}
@@ -354,45 +360,47 @@ static inline int __ctsvc_put_person_default_image(int person_id, int id)
 	ret = ctsvc_query_prepare(query, &stmt);
 	if (NULL == stmt) {
 		ERR("ctsvc_query_prepare() Fail(%d)", ret);
-		free(image_path);
+		free(thumbnail_path);
 		ctsvc_end_trans(false);
 		return ret;
 	}
 
-	ctsvc_stmt_bind_text(stmt, 1, image_path);
+	ctsvc_stmt_bind_text(stmt, 1, thumbnail_path);
 	ret = ctsvc_stmt_step(stmt);
 	if (CONTACTS_ERROR_NONE != ret) {
 		ERR("ctsvc_stmt_step() Fail(%d)", ret);
 		ctsvc_stmt_finalize(stmt);
-		free(image_path);
+		free(thumbnail_path);
 		ctsvc_end_trans(false);
 		return ret;
 	}
 	ctsvc_stmt_finalize(stmt);
 
 	/* update contact's image_thumbnail_path */
-	snprintf(query, sizeof(query),
-			"UPDATE "CTS_TABLE_CONTACTS" SET image_thumbnail_path=? WHERE contact_id=%d ", contact_id);
-	ret = ctsvc_query_prepare(query, &stmt);
-	if (NULL == stmt) {
-		ERR("ctsvc_query_prepare() Fail(%d)", ret);
-		free(image_path);
-		ctsvc_end_trans(false);
-		return ret;
-	}
+	if (false == is_default) {
+		snprintf(query, sizeof(query),
+				"UPDATE "CTS_TABLE_CONTACTS" SET image_thumbnail_path=? WHERE contact_id=%d ", contact_id);
+		ret = ctsvc_query_prepare(query, &stmt);
+		if (NULL == stmt) {
+			ERR("ctsvc_query_prepare() Fail(%d)", ret);
+			free(thumbnail_path);
+			ctsvc_end_trans(false);
+			return ret;
+		}
 
-	ctsvc_stmt_bind_text(stmt, 1, image_path);
-	ret = ctsvc_stmt_step(stmt);
-	if (CONTACTS_ERROR_NONE != ret) {
-		ERR("ctsvc_stmt_step() Fail(%d)", ret);
+		ctsvc_stmt_bind_text(stmt, 1, thumbnail_path);
+		ret = ctsvc_stmt_step(stmt);
+		if (CONTACTS_ERROR_NONE != ret) {
+			ERR("ctsvc_stmt_step() Fail(%d)", ret);
+			ctsvc_stmt_finalize(stmt);
+			free(thumbnail_path);
+			ctsvc_end_trans(false);
+			return ret;
+		}
 		ctsvc_stmt_finalize(stmt);
-		free(image_path);
-		ctsvc_end_trans(false);
-		return ret;
 	}
-	ctsvc_stmt_finalize(stmt);
 
-	free(image_path);
+	free(thumbnail_path);
 
 	ret = ctsvc_end_trans(true);
 	return ret;
@@ -624,17 +632,18 @@ int ctsvc_person_aggregate(int person_id)
 
 	/* check image_thumbnail_path */
 	if (person->image_thumbnail_path) {
-		temp = __ctsvc_get_image_filename(person->image_thumbnail_path);
+		char *image_path = NULL;
+
+		image_path = ctsvc_utils_get_image_path(person->image_thumbnail_path);
 		snprintf(query, sizeof(query),
 				"SELECT D.id FROM "CTS_TABLE_CONTACTS" C, "CTS_TABLE_DATA" D "
 				"WHERE C.person_id=%d AND C.contact_id=D.contact_id AND C.deleted = 0 "
 				"AND D.datatype=%d AND D.is_primary_default = 1 AND D.data3='%s'",
-				person->person_id, CTSVC_DATA_IMAGE, temp);
+				person->person_id, CTSVC_DATA_IMAGE, image_path);
+		free(image_path);
 		ret = ctsvc_query_get_first_int_result(query, &id);
 		if (ret == CONTACTS_ERROR_NONE)
-			image_thumbnail_path = SAFE_STRDUP(temp);
-	} else {
-		image_thumbnail_path = NULL;
+			image_thumbnail_path = SAFE_STRDUP(person->image_thumbnail_path);
 	}
 
 	/* check name_contact_id */
@@ -787,9 +796,8 @@ int ctsvc_person_aggregate(int person_id)
 		len += snprintf(addressbook_ids + len, addressbooks_len -len, "%d%s", addressbook_id, ADDRESSBOOK_ID_DELIM);
 
 		if (NULL == image_thumbnail_path && contact_image_thumbnail_path && *contact_image_thumbnail_path) {
-			temp = __ctsvc_get_image_filename(contact_image_thumbnail_path);
-			image_thumbnail_path = SAFE_STRDUP(temp);
-			/* update data table : is_primary_default */
+			image_thumbnail_path = SAFE_STRDUP(contact_image_thumbnail_path);
+			/* Todo update data table : is_primary_default */
 		}
 		free(contact_image_thumbnail_path);
 
