@@ -1555,7 +1555,7 @@ static inline int __ctsvc_vcard_encode_photo(const char *src,
 		unsigned char **image, unsigned int *image_size)
 {
 	int ret;
-	vcard_image_info info = {.src = src, .image = image, .image_size = image_size, ret = CONTACTS_ERROR_SYSTEM};
+	vcard_image_info info = {src, image, image_size, CONTACTS_ERROR_SYSTEM};
 
 	ret = image_util_foreach_supported_jpeg_colorspace(
 			_ctsvc_vcard_image_util_supported_jpeg_colorspace_cb, &info);
