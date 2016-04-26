@@ -87,8 +87,14 @@ int ctsvc_db_group_name_sort_callback(void *context, int str1_len, const void *s
 	char str_src2[CTSVC_STR_SHORT_LEN] = {0};
 	int prim_sort  = ctsvc_get_primary_sort();
 
+	if (CTSVC_STR_SHORT_LEN <= str1_len)
+		str1_len = CTSVC_STR_SHORT_LEN -1;
+	if (CTSVC_STR_SHORT_LEN <= str2_len)
+		str2_len = CTSVC_STR_SHORT_LEN -1;
+
 	strncpy(str_src1, str1, str1_len);
 	strncpy(str_src2, str2, str2_len);
+
 	str1_sort_type = ctsvc_get_name_sort_type(str_src1);
 	str2_sort_type = ctsvc_get_name_sort_type(str_src2);
 
