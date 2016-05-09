@@ -324,8 +324,8 @@ _CONTACTS_BEGIN_VIEW()
 	_CONTACTS_PROPERTY_CHILD_MULTIPLE(relationship)   /* read, write */
 	_CONTACTS_PROPERTY_CHILD_MULTIPLE(group_relation) /* read, write */
 	_CONTACTS_PROPERTY_CHILD_MULTIPLE(extension)      /* read, write */
-	_CONTACTS_PROPERTY_CHILD_MULTIPLE(sip)            /* read, write (Since 3.0) */
 	_CONTACTS_PROPERTY_STR(message_alert)             /* read, write */
+	_CONTACTS_PROPERTY_CHILD_MULTIPLE(sip)            /* read, write (Since 3.0) */
 _CONTACTS_END_VIEW(_contacts_contact)
 
 /**
