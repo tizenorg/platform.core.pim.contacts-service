@@ -105,7 +105,7 @@ static bool __ctsvc_tapi_cb = false;
 static bool __ctsvc_sim_cb = false;
 
 static void __ctsvc_server_sim_get_meta_info_cb(TapiHandle *handle, int result, void *data, void *user_data);
-static int __ctsvc_server_sim_init_info(ctsvc_sim_info_s *info);
+static int __ctsvc_server_sim_get_type_and_iccid(ctsvc_sim_info_s *info);
 
 static TapiHandle* __ctsvc_server_sim_get_tapi_handle(ctsvc_sim_info_s *info)
 {
@@ -773,8 +773,8 @@ static int __ctsvc_server_sim_init_meta_info(ctsvc_sim_info_s *info)
 	int err = CONTACTS_ERROR_NONE;
 
 	if (TAPI_SIM_PB_UNKNOWNN == info->sim_type) {
-		err = __ctsvc_server_sim_init_info(info);
-		WARN_IF(CONTACTS_ERROR_NONE != err, "__ctsvc_server_sim_init_info() Fail(%d)", err);
+		err = __ctsvc_server_sim_get_type_and_iccid(info);
+		WARN_IF(CONTACTS_ERROR_NONE != err, "__ctsvc_server_sim_get_type_and_iccid() Fail(%d)", err);
 	}
 
 	if (TAPI_SIM_PB_3GSIM == info->sim_type) {
@@ -792,7 +792,7 @@ static int __ctsvc_server_sim_init_meta_info(ctsvc_sim_info_s *info)
 	return CONTACTS_ERROR_NONE;
 }
 
-static int __ctsvc_server_sim_init_info(ctsvc_sim_info_s *info)
+static int __ctsvc_server_sim_get_type_and_iccid(ctsvc_sim_info_s *info)
 {
 	CTS_FN_CALL;
 	int ret;
@@ -852,7 +852,25 @@ static void __ctsvc_server_sim_noti_sim_refreshed(TapiHandle *handle, const char
 	__ctsvc_server_sim_destroy_import_contacts(info);
 }
 
-static int __ctsvc_server_sim_info_init()
+static void __ctsvc_server_sim_status_events_cb(TapiHandle *handle, const char *noti_id, void *data, void *user_data)
+{
+	RET_IF(NULL == data);
+
+	TelSimCardStatus_t status = *(int *)data;
+
+	if (TAPI_SIM_STATUS_SIM_INIT_COMPLETED != status) {
+		/* Todo : handle other statuses */
+		ERR("sim is not ready (%d)", status);
+		return;
+	}
+	INFO("sim is Ready");
+
+	ctsvc_server_stop_timeout();
+	__ctsvc_server_sim_info_init();
+	ctsvc_server_start_timeout();
+}
+
+static int __ctsvc_server_sim_init_info()
 {
 	int ret;
 	int sim_stat = -1;
@@ -875,7 +893,9 @@ static int __ctsvc_server_sim_info_init()
 
 	cp_index = 0;
 	while (cp_name[cp_index]) {
-		TapiHandle *handle;
+		TapiHandle *handle = NULL;
+		TelSimCardStatus_t *status = TAPI_SIM_STATUS_CARD_ERROR;
+		int card_changed = 0;
 		ctsvc_sim_info_s *info = calloc(1, sizeof(ctsvc_sim_info_s));
 		if (NULL == info) {
 			ERR("calloc() Fail");
@@ -900,9 +920,22 @@ static int __ctsvc_server_sim_info_init()
 		}
 
 		handle = __ctsvc_server_sim_get_tapi_handle(info);
-		if (handle) {
-			ret = __ctsvc_server_sim_init_info(info);
-			WARN_IF(CONTACTS_ERROR_NONE != ret, "__ctsvc_server_sim_init_info() Fail(%d)", ret);
+		if (NULL == handle) {
+			ERR("__ctsvc_server_sim_get_tapi_handle() Fail");
+			continue;
+		}
+		__ctsvc_sim_info = g_slist_append(__ctsvc_sim_info, (void*)info);
+		cp_index++;
+
+		ret = tel_get_sim_init_info(handle, &status, &card_changed)
+		if (TAPI_API_SUCCESS != ret || TAPI_SIM_STATUS_SIM_INIT_COMPLETED != status ) {
+			ERR("tel_get_sim_init_info() ret(%d), status(%d)", ret, status);
+			ret = tel_register_noti_event(handle, TAPI_NOTI_SIM_STATUS, __ctsvc_server_sim_status_events_cb, info);
+			if (TAPI_API_SUCCESS != ret)
+				ERR("tel_register_noti_event() Fail(%d)", ret);
+		} else {
+			ret = __ctsvc_server_sim_get_type_and_iccid(info);
+			WARN_IF(CONTACTS_ERROR_NONE != ret, "__ctsvc_server_sim_get_type_and_iccid() Fail(%d)", ret);
 			ret = tel_get_sim_pb_init_info(handle, &sim_stat, &pb_list);
 			if (TAPI_API_SUCCESS == ret && ((1 == pb_list.b_3g) || (1 == pb_list.b_adn))) {
 				ret = __ctsvc_server_sim_init_meta_info(info);
@@ -914,35 +947,12 @@ static int __ctsvc_server_sim_info_init()
 
 			ret = tel_register_noti_event(handle, TAPI_NOTI_SIM_REFRESHED, __ctsvc_server_sim_noti_sim_refreshed, info);
 			WARN_IF(TAPI_API_SUCCESS != ret, "tel_register_noti_event() Fail(%d)", ret);
-		} else {
-			ERR("tel_init() Fail");
 		}
-
-		__ctsvc_sim_info = g_slist_append(__ctsvc_sim_info, (void*)info);
-		cp_index++;
 	}
 
 	g_strfreev(cp_name);
 
 	return CONTACTS_ERROR_NONE;
-}
-
-static void __ctsvc_server_sim_ready_cb(keynode_t *key, void *data)
-{
-	int status = 0;
-	vconf_get_int(VCONFKEY_TELEPHONY_SIM_STATUS, &status);
-
-	if (VCONFKEY_TELEPHONY_SIM_STATUS_INIT_COMPLETED != status) {
-		ERR("sim is not ready (%d)", status);
-		return;
-	}
-	INFO("sim is Ready");
-	__ctsvc_sim_cb = false;
-	vconf_ignore_key_changed(VCONFKEY_TELEPHONY_SIM_STATUS, __ctsvc_server_sim_ready_cb);
-
-	ctsvc_server_stop_timeout();
-	__ctsvc_server_sim_info_init();
-	ctsvc_server_start_timeout();
 }
 
 static void __ctsvc_server_telephony_ready_cb(keynode_t *key, void *data)
@@ -959,17 +969,8 @@ static void __ctsvc_server_telephony_ready_cb(keynode_t *key, void *data)
 	vconf_ignore_key_changed(VCONFKEY_TELEPHONY_READY, __ctsvc_server_telephony_ready_cb);
 	__ctsvc_tapi_cb = false;
 
-	int status = 0;
-	vconf_get_int(VCONFKEY_TELEPHONY_SIM_STATUS, &status);
-	if (VCONFKEY_TELEPHONY_SIM_STATUS_INIT_COMPLETED != status) {
-		ERR("sim is not ready (%d)", status);
-		vconf_notify_key_changed(VCONFKEY_TELEPHONY_SIM_STATUS, __ctsvc_server_sim_ready_cb, NULL);
-		__ctsvc_sim_cb = true;
-		return;
-	}
-
 	ctsvc_server_stop_timeout();
-	__ctsvc_server_sim_info_init();
+	__ctsvc_server_sim_init_info();
 	ctsvc_server_start_timeout();
 }
 
@@ -986,16 +987,7 @@ int ctsvc_server_sim_init()
 		return CONTACTS_ERROR_NONE;
 	}
 
-	int status = 0;
-	vconf_get_int(VCONFKEY_TELEPHONY_SIM_STATUS, &status);
-	if (VCONFKEY_TELEPHONY_SIM_STATUS_INIT_COMPLETED != status) {
-		ERR("sim is not ready (%d)", status);
-		vconf_notify_key_changed(VCONFKEY_TELEPHONY_SIM_STATUS, __ctsvc_server_sim_ready_cb, NULL);
-		__ctsvc_sim_cb = true;
-		return CONTACTS_ERROR_NONE;
-	}
-
-	return __ctsvc_server_sim_info_init();
+	return __ctsvc_server_sim_init_info();
 }
 
 int ctsvc_server_sim_final(void)
