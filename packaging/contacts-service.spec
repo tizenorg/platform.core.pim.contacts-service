@@ -72,7 +72,12 @@ export FFLAGS="$FFLAGS -DTIZEN_ENGINEER_MODE"
 
 MAJORVER=`echo %{version} | awk 'BEGIN {FS="."}{print $1}'`
 %cmake . -DCMAKE_VERBOSE_MAKEFILE=OFF -DMAJORVER=${MAJORVER} -DFULLVER=%{version} -DBIN_INSTALL_DIR:PATH=%{_bindir} \
-		-DTZ_SYS_ETC=%TZ_SYS_ETC -DENABLE_LOG_FEATURE:BOOL=ON
+		-DTZ_SYS_ETC=%TZ_SYS_ETC -DENABLE_LOG_FEATURE:BOOL=ON \
+%if "%{profile}" == "wearable"
+		-DTIZEN_WEARABLE=YES
+%else
+		-DTIZEN_MOBILE=YES
+%endif
 
 %__make %{?_smp_mflags}
 
