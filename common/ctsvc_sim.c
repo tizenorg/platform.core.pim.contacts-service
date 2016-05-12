@@ -46,3 +46,30 @@ API int contacts_sim_get_initialization_status(bool *completed)
 	return ret;
 }
 
+API int contacts_sim_import_all_contacts_by_sim_slot_no(int sim_slot_no)
+{
+	int ret;
+
+	RETV_IF(sim_slot_no < 0, CONTACTS_ERROR_INVALID_PARAMETER);
+
+	ctsvc_mutex_lock(CTS_MUTEX_SOCKET_FD);
+	ret = ctsvc_request_sim_import(sim_slot_no);
+	ctsvc_mutex_unlock(CTS_MUTEX_SOCKET_FD);
+
+	return ret;
+}
+
+API int contacts_sim_get_initialization_status_by_sim_slot_no(int sim_slot_no, bool *completed)
+{
+	int ret;
+
+	RETV_IF(NULL == completed, CONTACTS_ERROR_INVALID_PARAMETER);
+	RETV_IF(sim_slot_no < 0, CONTACTS_ERROR_INVALID_PARAMETER);
+
+	ctsvc_mutex_lock(CTS_MUTEX_SOCKET_FD);
+	ret = ctsvc_request_sim_get_initialization_status(sim_slot_no, completed);
+	ctsvc_mutex_unlock(CTS_MUTEX_SOCKET_FD);
+
+	return ret;
+}
+

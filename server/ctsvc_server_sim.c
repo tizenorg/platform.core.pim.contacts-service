@@ -520,8 +520,11 @@ static void __ctsvc_server_sim_import_contact_cb(TapiHandle *handle, int result,
 int ctsvc_server_sim_import_contact(void *data, int sim_slot_no)
 {
 	CTS_FN_CALL;
-	int ret;
+	int ret = TAPI_API_SUCCESS;
 	ctsvc_sim_info_s *info;
+	unsigned int sim_slot_cnt = g_slist_length(__ctsvc_sim_info);
+
+	RETV_IF(sim_slot_cnt <= sim_slot_no, CONTACTS_ERROR_INVALID_PARAMETER);
 
 	info = __ctsvc_server_sim_get_info_by_sim_slot_no(sim_slot_no);
 	RETV_IF(NULL == info, CONTACTS_ERROR_SYSTEM);
@@ -553,6 +556,9 @@ int ctsvc_server_socket_get_sim_init_status(void *data, int sim_slot_no)
 {
 	CTS_FN_CALL;
 	ctsvc_sim_info_s *info;
+	unsigned int sim_slot_cnt = g_slist_length(__ctsvc_sim_info);
+
+	RETV_IF(sim_slot_cnt <= sim_slot_no, CONTACTS_ERROR_INVALID_PARAMETER);
 
 	info = __ctsvc_server_sim_get_info_by_sim_slot_no(sim_slot_no);
 	RETVM_IF(NULL == info, CONTACTS_ERROR_SYSTEM, "sim init is not completed");
@@ -948,7 +954,7 @@ static int __ctsvc_server_sim_init_info()
 		cp_index++;
 
 		ret = tel_get_sim_init_info(info->handle, &status, &card_changed);
-		if (TAPI_API_SUCCESS != ret || TAPI_SIM_STATUS_SIM_INIT_COMPLETED != status ) {
+		if (TAPI_API_SUCCESS != ret || TAPI_SIM_STATUS_SIM_INIT_COMPLETED != status) {
 			ERR("tel_get_sim_init_info() ret(%d), status(%d)", ret, status);
 			ret = tel_register_noti_event(info->handle, TAPI_NOTI_SIM_STATUS, __ctsvc_server_sim_status_events_cb, info);
 			if (TAPI_API_SUCCESS != ret)
