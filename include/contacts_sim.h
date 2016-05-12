@@ -54,7 +54,8 @@ extern "C"
  */
 
 /**
- * @brief Imports all contacts from SIM to Contacts Database.
+ * @deprecated Deprecated since 3.0. Use contacts_sim_import_all_contacts_by_sim_slot_no() instead.
+ * @brief Imports all contacts from first SIM to Contacts Database.
  *
  * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 3.0 @endif
  * @privlevel public
@@ -80,7 +81,8 @@ int contacts_sim_import_all_contacts(void);
 
 
 /**
- * @brief Checks whether SIM initialization is completed.
+ * @deprecated Deprecated since 3.0.
+ * @brief Checks whether first SIM initialization is completed. Use contacts_sim_get_initialization_status_by_sim_slot_no() instead.
  *
  * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 3.0 @endif
  * @privlevel public
@@ -104,6 +106,60 @@ int contacts_sim_import_all_contacts(void);
  * @see  contacts_connect()
  */
 int contacts_sim_get_initialization_status(bool *completed);
+
+/**
+ * @brief Imports all contacts from SIM of the given SIM slot number to Contacts Database.
+ *
+ * @since_tizen 3.0
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/contact.write
+ *
+ * @param[in]   sim_slot_no       It is related to the SIM slot number. sim_slot_no 0 means first SIM, sim_slot_no 1 means second SIM
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
+ * @retval  #CONTACTS_ERROR_NONE                Successful
+ * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ * @retval  #CONTACTS_ERROR_NO_DATA             Requested data does not exist
+ * @retval  #CONTACTS_ERROR_PERMISSION_DENIED   Permission denied. This application does not have the privilege to call this method.
+ * @retval  #CONTACTS_ERROR_NOT_SUPPORTED       Not supported
+ * @retval  #CONTACTS_ERROR_IPC                 Unknown IPC error
+ * @retval  #CONTACTS_ERROR_SYSTEM              Internal system module error
+ *
+ * @pre     contacts_connect() should be called to open a connection to the contacts service.
+ *
+ * @see  contacts_connect()
+ */
+int contacts_sim_import_all_contacts_by_sim_slot_no(int sim_slot_no);
+
+
+/**
+ * @brief Checks whether SIM of the given SIM slot number is initialized.
+ *
+ * @since_tizen 3.0
+ * @privlevel public
+ * @privilege %http://tizen.org/privilege/contact.read
+ *
+ * @param[in]   sim_slot_no       It is related to the SIM slot number. sim_slot_no 0 means first SIM, sim_slot_no 1 means second SIM
+ * @param[out]  completed    @c true if SIM is initialized,
+ *                           otherwise @c false if SIM is not initialized
+ *
+ * @return  @c 0 on success,
+ *          otherwise a negative error value
+ *
+ * @retval  #CONTACTS_ERROR_NONE                Successful
+ * @retval  #CONTACTS_ERROR_INVALID_PARAMETER   Invalid parameter
+ * @retval  #CONTACTS_ERROR_PERMISSION_DENIED   Permission denied. This application does not have the privilege to call this method.
+ * @retval  #CONTACTS_ERROR_NOT_SUPPORTED       Not supported
+ * @retval  #CONTACTS_ERROR_IPC                 Unknown IPC error
+ * @retval  #CONTACTS_ERROR_SYSTEM              Internal system module error
+ *
+ * @pre     contacts_connect() should be called to open a connection to the contacts service.
+ *
+ * @see  contacts_connect()
+ */
+int contacts_sim_get_initialization_status_by_sim_slot_no(int sim_slot_no, bool *completed);
 
 /**
  * @}
