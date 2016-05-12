@@ -520,13 +520,16 @@ static void __ctsvc_server_sim_import_contact_cb(TapiHandle *handle, int result,
 int ctsvc_server_sim_import_contact(void *data, int sim_slot_no)
 {
 	CTS_FN_CALL;
-	int ret;
+	int ret = TAPI_API_SUCCESS;
 	ctsvc_sim_info_s *info;
+	unsigned int sim_slot_cnt = g_slist_length(__ctsvc_sim_info);
+
+	RETV_IF(sim_slot_cnt <= sim_slot_no, CONTACTS_ERROR_INVALID_PARAMETER);
 
 	info = __ctsvc_server_sim_get_info_by_sim_slot_no(sim_slot_no);
 	RETV_IF(NULL == info, CONTACTS_ERROR_SYSTEM);
-	RETV_IF(false == info->initialized, CONTACTS_ERROR_SYSTEM);
-	RETVM_IF(__ctsvc_server_sim_get_return_data(), CONTACTS_ERROR_INTERNAL,
+	RETV_IF(false == info->initialized, CONTACTS_ERROR_NO_DATA);
+	RETVM_IF(__ctsvc_server_sim_get_return_data(), CONTACTS_ERROR_SYSTEM,
 			"Server is already processing with sim");
 
 	__ctsvc_server_sim_set_return_data(data);
@@ -553,6 +556,9 @@ int ctsvc_server_socket_get_sim_init_status(void *data, int sim_slot_no)
 {
 	CTS_FN_CALL;
 	ctsvc_sim_info_s *info;
+	unsigned int sim_slot_cnt = g_slist_length(__ctsvc_sim_info);
+
+	RETV_IF(sim_slot_cnt <= sim_slot_no, CONTACTS_ERROR_INVALID_PARAMETER);
 
 	info = __ctsvc_server_sim_get_info_by_sim_slot_no(sim_slot_no);
 	RETVM_IF(NULL == info, CONTACTS_ERROR_SYSTEM, "sim init is not completed");
