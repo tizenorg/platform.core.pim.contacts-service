@@ -54,11 +54,13 @@ extern "C"
  */
 
 /**
- * @brief Imports all contacts from SIM to Contacts Database.
+ * @brief Imports all contacts from SIM of the given SIM slot number to Contacts Database.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 3.0 @endif
+ * @since_tizen 3.0
  * @privlevel public
  * @privilege %http://tizen.org/privilege/contact.write
+ *
+ * @param[in]   sim_slot_no       It is related to the SIM slot number. sim_slot_no 0 means first SIM, sim_slot_no 1 means second SIM
  *
  * @return  @c 0 on success,
  *          otherwise a negative error value
@@ -70,22 +72,22 @@ extern "C"
  * @retval  #CONTACTS_ERROR_NOT_SUPPORTED       Not supported
  * @retval  #CONTACTS_ERROR_IPC                 Unknown IPC error
  * @retval  #CONTACTS_ERROR_SYSTEM              Internal system module error
- * @retval  #CONTACTS_ERROR_INTERNAL            Implementation Error, Temporary Use
  *
  * @pre     contacts_connect() should be called to open a connection to the contacts service.
  *
  * @see  contacts_connect()
  */
-int contacts_sim_import_all_contacts(void);
+int contacts_sim_import_all_contacts_by_sim_slot_no(int sim_slot_no);
 
 
 /**
- * @brief Checks whether SIM initialization is completed.
+ * @brief Checks whether SIM of the given SIM slot number is initialized.
  *
- * @since_tizen @if MOBILE 2.3 @elseif WEARABLE 3.0 @endif
+ * @since_tizen 3.0
  * @privlevel public
  * @privilege %http://tizen.org/privilege/contact.read
  *
+ * @param[in]   sim_slot_no       It is related to the SIM slot number. sim_slot_no 0 means first SIM, sim_slot_no 1 means second SIM
  * @param[out]  completed    @c true if SIM is initialized,
  *                           otherwise @c false if SIM is not initialized
  *
@@ -103,7 +105,7 @@ int contacts_sim_import_all_contacts(void);
  *
  * @see  contacts_connect()
  */
-int contacts_sim_get_initialization_status(bool *completed);
+int contacts_sim_get_initialization_status_by_sim_slot_no(int sim_slot_no, bool *completed);
 
 /**
  * @}
