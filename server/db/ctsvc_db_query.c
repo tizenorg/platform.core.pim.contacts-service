@@ -402,7 +402,7 @@ static char *_get_search_query_for_name(const char *keyword)
 	}
 
 	int len_keyword = strlen(half_keyword);
-	int len_chosung= 0;
+	int len_chosung = 0;
 	char *chosung = NULL;
 	char *korean_pattern = NULL;
 	char *search_chosung = NULL;
@@ -419,7 +419,7 @@ static char *_get_search_query_for_name(const char *keyword)
 		 */
 		chosung = calloc(len_keyword * 5, sizeof(char));
 		len_chosung = ctsvc_get_chosung(half_keyword, chosung, len_keyword * 5);
-		mod_keyword = __ctsvc_db_make_search_keyword(0 < len_chosung? chosung : half_keyword);
+		mod_keyword = __ctsvc_db_make_search_keyword(0 < len_chosung ? chosung : half_keyword);
 		break;
 	case CTSVC_LANG_JAPANESE:
 		mod_keyword = search_hiragana;
@@ -1820,23 +1820,22 @@ static bool __ctsvc_db_view_can_keyword_search(const char *view_uri, int *out_en
 
 	int enum_uri = -1;
 
-	if (STRING_EQUAL == strcmp(view_uri, CTSVC_VIEW_URI_PERSON)) {
+	if (STRING_EQUAL == strcmp(view_uri, CTSVC_VIEW_URI_PERSON))
 		enum_uri = CTSVC_ENUM_URI_PERSON;
-	} else if (STRING_EQUAL == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_CONTACT)) {
+	else if (STRING_EQUAL == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_CONTACT))
 		enum_uri = CTSVC_ENUM_URI_READ_ONLY_PERSON_CONTACT;
-	} else if (STRING_EQUAL == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_NUMBER)) {
+	else if (STRING_EQUAL == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_NUMBER))
 		enum_uri = CTSVC_ENUM_URI_READ_ONLY_PERSON_NUMBER;
-	} else if (STRING_EQUAL == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_EMAIL)) {
+	else if (STRING_EQUAL == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_EMAIL))
 		enum_uri = CTSVC_ENUM_URI_READ_ONLY_PERSON_EMAIL;
-	} else if (STRING_EQUAL == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP)) {
+	else if (STRING_EQUAL == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP))
 		enum_uri = CTSVC_ENUM_URI_READ_ONLY_PERSON_GROUP;
-	} else if (STRING_EQUAL == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP_ASSIGNED)) {
+	else if (STRING_EQUAL == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP_ASSIGNED))
 		enum_uri = CTSVC_ENUM_URI_READ_ONLY_PERSON_GROUP_ASSIGNED;
-	} else if (STRING_EQUAL == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP_NOT_ASSIGNED)) {
+	else if (STRING_EQUAL == strcmp(view_uri, CTSVC_VIEW_URI_READ_ONLY_PERSON_GROUP_NOT_ASSIGNED))
 		enum_uri = CTSVC_ENUM_URI_READ_ONLY_PERSON_GROUP_NOT_ASSIGNED;
-	} else {
+	else
 		ERR("Invalid uri[%s]", view_uri);
-	}
 
 	*out_enum_uri = enum_uri;
 
@@ -2529,11 +2528,11 @@ static int __ctsvc_db_search_records_exec(const char *view_uri,
 		}
 
 		if (range & CONTACTS_SEARCH_RANGE_NAME) {
-			if (need_or) {
+			if (need_or)
 				temp_len = SAFE_SNPRINTF(&query, &query_size, len, " OR ");
-			} else {
+			else
 				temp_len = SAFE_SNPRINTF(&query, &query_size, len, " WHERE ");
-			}
+
 			if (0 <= temp_len)
 				len += temp_len;
 

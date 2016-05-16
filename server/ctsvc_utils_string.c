@@ -49,9 +49,8 @@ static inline bool __ctsvc_is_choseong(const char *src)
 	tmp = (src[1] << 8) | src[2];
 	if (((char)0xE1 == src[0] && CTSVC_COMPARE_BETWEEN(0x8480, tmp, 0x859F)) /* korean -Hangul Jamo*/
 			|| ((char)0xEA == src[0] && CTSVC_COMPARE_BETWEEN(0xA5A0, tmp, 0xA5BC))) /* korean -Hangul Jamo extended A*/
-	{
 		return true;
-	}
+
 	return false;
 }
 
@@ -65,16 +64,15 @@ static inline bool __ctsvc_is_diacritical(const char *src)
 	tmp = (src[0] << 8) | src[1];
 	if (CTSVC_COMPARE_BETWEEN(0xCC80, tmp, 0xCCBF)
 			|| CTSVC_COMPARE_BETWEEN(0xCD80, tmp, 0xCDAF))
-	{
 		return true;
-	}
+
 	return false;
 }
 
 static inline bool __ctsvc_compare_utf8(const char *str1, const char *str2, int str2_len)
 {
 	int k;
-	for (k=0; k<str2_len;k++)
+	for (k = 0; k < str2_len; k++)
 		if (!str1[k] || !str2[k] || str1[k] != str2[k])
 			return false;
 	return true;
@@ -82,7 +80,7 @@ static inline bool __ctsvc_compare_utf8(const char *str1, const char *str2, int 
 
 static int __ctsvc_copy_and_remove_special_char(const char *src, char *dest, int dest_size)
 {
-	int s_pos=0, d_pos=0, char_type, src_size;
+	int s_pos = 0, d_pos = 0, char_type, src_size;
 
 	if (NULL == src) {
 		ERR("The parameter(src) is NULL");
@@ -98,8 +96,7 @@ static int __ctsvc_copy_and_remove_special_char(const char *src, char *dest, int
 			memcpy(dest+d_pos, src+s_pos, char_type);
 			d_pos += char_type;
 			s_pos += char_type;
-		}
-		else {
+		} else {
 			ERR("The parameter(src:%s) has invalid character set", src);
 			dest[d_pos] = '\0';
 			return CONTACTS_ERROR_INVALID_PARAMETER;
@@ -161,58 +158,54 @@ static bool __ctsvc_compare_pinyin_letter(const char *haystack, int haystack_lan
 	if (haystack_lang != CTSVC_LANG_CHINESE || needle_lang != CTSVC_LANG_ENGLISH)
 		return false;
 
-	for(i=0, k=0; i < sizeof(temp_needle); i++)
-	{
+	for (i = 0, k = 0; i < sizeof(temp_needle); i++) {
 		if (isupper(needle[i]))
 			temp_needle[i] = tolower(needle[i]);
 		else
 			temp_needle[i] = needle[i];
 	}
 
-	for(i=0, j=0; i < strlen(haystack) && j < strlen(temp_needle) ; i+=len)
-	{
+	for (i = 0, j = 0; i < strlen(haystack) && j < strlen(temp_needle) ; i += len) {
 		len = ctsvc_check_utf8(haystack[i]);
 		if (len < 0)
 			return false;
-		memcpy(temp, haystack + i, len );
+		memcpy(temp, haystack + i, len);
 		temp[len] = '\0';
 
 		ret = ctsvc_convert_chinese_to_pinyin(temp, &pinyinname, &size);
 		if (ret != CONTACTS_ERROR_NONE) {
+			ERR("ctsvc_convert_chinese_to_pinyin Fail(%d)", ret);
 			return false;
 		}
 
-		for(k=0; k<size; k++) {
+		for (k = 0; k < size; k++) {
 			if (!initial_match &&
 					strlen(pinyinname[k].pinyin_name) <= strlen(temp_needle + j) &&
 					strncmp(pinyinname[k].pinyin_name, temp_needle + j, strlen(pinyinname[k].pinyin_name)) == 0) {
 				match = true;
-				j+=strlen(pinyinname[k].pinyin_name);
+				j += strlen(pinyinname[k].pinyin_name);
 				break;
 
-			}
-			else if (!initial_match &&
+			} else if (!initial_match &&
 					strlen(pinyinname[k].pinyin_name) > strlen(temp_needle + j) &&
 					strncmp(pinyinname[k].pinyin_name, temp_needle + j, strlen(temp_needle + j)) == 0) {
 				match = true;
-				j+=strlen(temp_needle + j);
+				j += strlen(temp_needle + j);
 				break;
 
-			}
-			else if (pinyinname[k].pinyin_initial[0] ==  temp_needle[j]) {
+			} else if (pinyinname[k].pinyin_initial[0] ==  temp_needle[j]) {
 				initial_match = true;
 				match = true;
 				j++;
 				break;
-			}
-			else
+			} else {
 				match = false;
+			}
 		}
 		ctsvc_pinyin_free(pinyinname, size);
 
-		if (match==false) {
+		if (match == false)
 			break;
-		}
 
 	}
 
@@ -229,17 +222,15 @@ static bool __ctsvc_compare_unicode_letter(const UChar* haystack, int haystack_l
 	int i, j;
 	bool ret = false;
 
-	switch (haystack_lang)
-	{
+	switch (haystack_lang) {
 	case CTSVC_LANG_NUMBER:
 	case CTSVC_LANG_OTHERS:
 		{
-			if (haystack_lang == needle_lang)
-			{
-				for(i=0, j=0; i<u_strlen(haystack) && j<u_strlen(needle);) {
-					if(haystack[i] == needle[j])
+			if (haystack_lang == needle_lang) {
+				for (i = 0, j = 0; i < u_strlen(haystack) && j < u_strlen(needle);) {
+					if (haystack[i] == needle[j]) {
 						ret = true;
-					else {
+					} else {
 						ret = false;
 						break;
 					}
@@ -251,10 +242,9 @@ static bool __ctsvc_compare_unicode_letter(const UChar* haystack, int haystack_l
 		}
 	case CTSVC_LANG_ENGLISH:
 		{
-			switch(needle_lang)
-			{
+			switch (needle_lang) {
 			case CTSVC_LANG_ENGLISH:
-				for(i=0, j=0; i<u_strlen(haystack) && j<u_strlen(needle);) {
+				for (i = 0, j = 0; i < u_strlen(haystack) && j < u_strlen(needle);) {
 					if (CTSVC_COMPARE_BETWEEN(CTSVC_COMBINING_DIACRITICAL_MARKS_START,
 							haystack[i], CTSVC_COMBINING_DIACRITICAL_MARKS_END)) {
 						i++;
@@ -266,9 +256,9 @@ static bool __ctsvc_compare_unicode_letter(const UChar* haystack, int haystack_l
 						continue;
 					}
 
-					if(haystack[i] == needle[j])
+					if (haystack[i] == needle[j]) {
 						ret = true;
-					else {
+					} else {
 						ret = false;
 						break;
 					}
@@ -284,19 +274,18 @@ static bool __ctsvc_compare_unicode_letter(const UChar* haystack, int haystack_l
 		break;
 	case CTSVC_LANG_KOREAN:
 		{
-			if(needle_lang != CTSVC_LANG_KOREAN)
+			if (needle_lang != CTSVC_LANG_KOREAN)
 				break;
 
 			if (u_strlen(needle) == 1
 					&& CTSVC_COMPARE_BETWEEN(0x3130, needle[0], 0x314e)
-					&& haystack[0] == needle[0]) {
+					&& haystack[0] == needle[0])
 				return true;
-			}
 
-			for(i=0, j=0; i<u_strlen(haystack) && j<u_strlen(needle);) {
-				if(haystack[i] == needle[j])
+			for (i = 0, j = 0; i < u_strlen(haystack) && j < u_strlen(needle);) {
+				if (haystack[i] == needle[j]) {
 					ret = true;
-				else {
+				} else {
 					ret = false;
 					break;
 				}
@@ -308,12 +297,12 @@ static bool __ctsvc_compare_unicode_letter(const UChar* haystack, int haystack_l
 		break;
 	case CTSVC_LANG_JAPANESE:
 		{
-			if(needle_lang != CTSVC_LANG_JAPANESE)
+			if (needle_lang != CTSVC_LANG_JAPANESE)
 				break;
 
-			if (haystack[0] == needle[0])
+			if (haystack[0] == needle[0]) {
 				ret = true;
-			else {
+			} else {
 				UChar temp_haystack[2] = {0x00,};
 				UChar temp_needle[2] = {0x00,};
 				UChar hiragana_haystack[2] = {0x00,};
@@ -321,7 +310,7 @@ static bool __ctsvc_compare_unicode_letter(const UChar* haystack, int haystack_l
 				temp_haystack[0] = haystack[0];
 				temp_needle[0] = needle[0];
 
-				ctsvc_convert_japanese_to_hiragana_unicode(temp_haystack, hiragana_haystack, 2 );
+				ctsvc_convert_japanese_to_hiragana_unicode(temp_haystack, hiragana_haystack, 2);
 
 				ctsvc_convert_japanese_to_hiragana_unicode(temp_needle, hiragana_needle,  2);
 
@@ -332,8 +321,7 @@ static bool __ctsvc_compare_unicode_letter(const UChar* haystack, int haystack_l
 		}
 	case CTSVC_LANG_CHINESE:
 		{
-			if(needle_lang == haystack_lang
-					&& haystack[0] == needle[0])
+			if (needle_lang == haystack_lang && haystack[0] == needle[0])
 				ret = true;
 		}
 		return ret;
@@ -352,7 +340,7 @@ int ctsvc_utils_string_strstr(const char *haystack, const char *needle, int *len
 	int needle_letter_lang;
 	int first_needle_letter_lang;
 
-	bool matching=false;
+	bool matching = false;
 	int match_len = 0;
 	int match_start = -1;
 
@@ -373,7 +361,7 @@ int ctsvc_utils_string_strstr(const char *haystack, const char *needle, int *len
 	first_needle_letter_lang = __ctsvc_normalize_str_to_unicode(temp_needle, n_len, first_needle_letter, SMALL_BUFFER_SIZE);
 	RETVM_IF(first_needle_letter_lang < CONTACTS_ERROR_NONE , -1, "The __ctsvc_normalize_str_to_unicode failed(%d)", first_needle_letter_lang);
 
-	for (i=0, j=0;i<strlen(temp_haystack) && j<strlen(temp_needle);i+=h_len) {
+	for (i = 0, j = 0; i < strlen(temp_haystack) && j < strlen(temp_needle); i += h_len) {
 		h_len_temp = ctsvc_check_utf8(temp_haystack[i]);
 
 		haystack_letter_lang = __ctsvc_normalize_str_to_unicode(temp_haystack + i, h_len_temp, haystack_letter, SMALL_BUFFER_SIZE);
@@ -383,7 +371,7 @@ int ctsvc_utils_string_strstr(const char *haystack, const char *needle, int *len
 			if (__ctsvc_compare_unicode_letter(haystack_letter, haystack_letter_lang, first_needle_letter, first_needle_letter_lang)
 					|| __ctsvc_compare_pinyin_letter(temp_haystack + i, haystack_letter_lang, temp_needle + j, first_needle_letter_lang, &h_len_temp, &n_len)) {
 				matching = true;
-				j+=n_len;
+				j += n_len;
 				match_start = i;
 				match_len = h_len_temp;
 
@@ -394,15 +382,14 @@ int ctsvc_utils_string_strstr(const char *haystack, const char *needle, int *len
 			}
 			h_len = h_len_temp;
 			continue;
-		}
-		else {
+		} else {
 			n_len = ctsvc_check_utf8(temp_needle[j]);
 
 			needle_letter_lang = __ctsvc_normalize_str_to_unicode(temp_needle + j, n_len, needle_letter, SMALL_BUFFER_SIZE);
 			RETVM_IF(needle_letter_lang < CONTACTS_ERROR_NONE , -1, "The __ctsvc_normalize_str_to_unicode failed(%d)", needle_letter_lang);
 
-			if (__ctsvc_compare_unicode_letter(haystack_letter, haystack_letter_lang, needle_letter, needle_letter_lang )){
-				j+=n_len;
+			if (__ctsvc_compare_unicode_letter(haystack_letter, haystack_letter_lang, needle_letter, needle_letter_lang)) {
+				j += n_len;
 				match_len += h_len_temp;
 
 				if (temp_needle[j] == '\0') {
@@ -411,13 +398,12 @@ int ctsvc_utils_string_strstr(const char *haystack, const char *needle, int *len
 				}
 				h_len = h_len_temp;
 				continue;
-			}
-			else {
+			} else {
 				j = 0;
 				matching = false;
 				match_start = -1;
 				match_len = 0;
-				i-=h_len;
+				i -= h_len;
 			}
 		}
 
