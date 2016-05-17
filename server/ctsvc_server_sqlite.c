@@ -48,6 +48,8 @@
 #include "ctsvc_server_phonelog.h"
 #endif /* ENABLE_LOG_FEATURE */
 
+#define SORT_NAME_UPDATE_BULK_COUNT 100
+
 static sqlite3 *server_db;
 
 int ctsvc_server_db_open(sqlite3 **db)
@@ -577,14 +579,57 @@ static int __ctsvc_server_db_get_contact_data(sqlite3 *db, int id, ctsvc_contact
 	return SQLITE_DONE;
 }
 
+static int __ctsvc_server_get_contact_id_list(sqlite3* db, GList** contact_id_list)
+{
+	GList* list = NULL;
+	cts_stmt stmt = NULL;
+	char query[CTS_SQL_MIN_LEN] = {0};
+
+	snprintf(query, sizeof(query),
+			"SELECT contact_id "
+				"FROM "CTS_TABLE_CONTACTS" WHERE deleted = 0");
+
+	int ret = sqlite3_prepare_v2(db, query, strlen(query), &stmt, NULL);
+	if (SQLITE_OK != ret) {
+		ERR("sqlite3_prepare_v2(%s) Fail(%s)", query, sqlite3_errmsg(db));
+		return CONTACTS_ERROR_SYSTEM;
+	}
+
+	int contact_id = 0;
+	while (SQLITE_ROW == (ret = sqlite3_step(stmt))) {
+		contact_id = sqlite3_column_int(stmt, 0);
+		list = g_list_prepend(list, GINT_TO_POINTER(contact_id));
+	}
+
+	if (NULL == list && SQLITE_DONE == ret) {
+		sqlite3_finalize(stmt);
+		return CONTACTS_ERROR_NO_DATA;
+	}
+
+	if (SQLITE_ROW != ret && SQLITE_DONE != ret) {
+		ERR("sqlite3_step() Fail(%d)", ret);
+		g_list_free(list);
+		sqlite3_finalize(stmt);
+		return CONTACTS_ERROR_DB;
+	}
+
+	list = g_list_reverse(list);
+	*contact_id_list = list;
+
+	sqlite3_finalize(stmt);
+
+	return CONTACTS_ERROR_NONE;
+}
+
 int ctsvc_server_update_sort_name()
 {
 	int ret = 0;
 	sqlite3 *db = NULL;
-	cts_stmt stmt = NULL;
 	cts_stmt update_stmt = NULL;
 	cts_stmt search_name_stmt = NULL;
 	char query[CTS_SQL_MIN_LEN] = {0};
+	GList* contact_id_list = NULL;
+	GList *cursor;
 
 	INFO("Start to update sort_name");
 
@@ -597,24 +642,21 @@ int ctsvc_server_update_sort_name()
 		return ret;
 	}
 
-	ret = ctsvc_server_begin_trans();
-	if (CONTACTS_ERROR_NONE != ret) {
-		ERR("ctsvc_server_begin_trans() Fail(%d)", ret);
+	ret = __ctsvc_server_get_contact_id_list(db, &contact_id_list);
+	if (ret != CONTACTS_ERROR_NONE) {
+		ERR("__ctsvc_server_get_contact_id_list() Fail(%d)", ret);
 		ctsvc_server_db_close();
 		ctsvc_db_set_status(CONTACTS_DB_STATUS_NORMAL);
 		return ret;
 	}
 
-	snprintf(query, sizeof(query),
-			"SELECT contact_id "
-			"FROM "CTS_TABLE_CONTACTS" WHERE deleted = 0");
-	ret = sqlite3_prepare_v2(db, query, strlen(query), &stmt, NULL);
-	if (SQLITE_OK != ret) {
-		ERR("sqlite3_prepare_v2(%s) Fail(%s)", query, sqlite3_errmsg(db));
-		ctsvc_server_end_trans(false);
+	ret = ctsvc_server_begin_trans();
+	if (CONTACTS_ERROR_NONE != ret) {
+		ERR("ctsvc_server_begin_trans() Fail(%d)", ret);
+		g_list_free(contact_id_list);
 		ctsvc_server_db_close();
 		ctsvc_db_set_status(CONTACTS_DB_STATUS_NORMAL);
-		return CONTACTS_ERROR_DB;
+		return ret;
 	}
 
 	/* Update sort_name, sortkey, display_name_language of contact table */
@@ -642,9 +684,12 @@ int ctsvc_server_update_sort_name()
 		goto DATA_FREE;
 	}
 
-	while (SQLITE_ROW == (ret = sqlite3_step(stmt))) {
-		int contact_id = sqlite3_column_int(stmt, 0);
-		char *search_name = NULL;
+	int count = 0;
+	int contact_id = 0;
+	char *search_name = NULL;
+	cursor = contact_id_list;
+	while (cursor) {
+		contact_id = GPOINTER_TO_INT(cursor->data);
 
 		/* get_contact_info */
 		ctsvc_contact_s *contact = NULL;
@@ -698,17 +743,31 @@ int ctsvc_server_update_sort_name()
 		}
 
 		contacts_record_destroy((contacts_record_h)contact, true);
-	}
 
-	if (SQLITE_ROW != ret && SQLITE_DONE != ret) {
-		ERR("sqlite3_step() Fail(%d)", ret);
-		ret = CONTACTS_ERROR_DB;
-		goto DATA_FREE;
+		count++;
+		cursor = cursor->next;
+		if (cursor && 0 == count % SORT_NAME_UPDATE_BULK_COUNT) {
+			DBG("separate transaction");
+			ret = ctsvc_server_end_trans(true);
+			usleep(100*1000);
+			ret = ctsvc_server_begin_trans();
+			if (CONTACTS_ERROR_NONE != ret) {
+				ERR("ctsvc_server_begin_trans() Fail(%d)", ret);
+				g_list_free(contact_id_list);
+				if (update_stmt)
+					sqlite3_finalize(update_stmt);
+				if (search_name_stmt)
+					sqlite3_finalize(search_name_stmt);
+				ctsvc_server_db_close();
+				ctsvc_db_set_status(CONTACTS_DB_STATUS_NORMAL);
+				return ret;
+			}
+		}
 	}
 
 DATA_FREE:
-	if (stmt)
-		sqlite3_finalize(stmt);
+	g_list_free(contact_id_list);
+
 	if (update_stmt)
 		sqlite3_finalize(update_stmt);
 	if (search_name_stmt)
