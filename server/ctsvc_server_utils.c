@@ -37,9 +37,16 @@
 
 #define CTSVC_FEATURE_TELEPHONY "http://tizen.org/feature/network.telephony"
 
+typedef struct {
+	char *langset;
+	char *new_langset;
+} cts_language_update_thread_info_s;
+
 static int system_language = -1;
 static bool _ctsvc_have_telephony_feature = false;
 static guint _ctsvc_timeout = 0;
+static void __ctsvc_server_change_language_cb(keynode_t *key, void *data);
+
 
 int ctsvc_server_load_feature_list(void)
 {
@@ -60,11 +67,84 @@ inline int ctsvc_server_set_default_sort(int sort)
 	return CONTACTS_ERROR_NONE;
 }
 
-static void __ctsvc_server_change_language_cb(keynode_t *key, void *data)
+static void* __ctsvc_server_update_language_on_thread(void *data)
 {
-	int ret = -1;
+	int ret;
+	char *new_langset = NULL;
 	int new_primary_sort, new_secondary_sort;
 	int old_primary_sort, old_secondary_sort;
+	bool sort_name_update = false;
+	cts_language_update_thread_info_s *info = (cts_language_update_thread_info_s *)data;
+
+	RETV_IF(NULL == info, NULL);
+	RETV_IF(NULL == info->langset, NULL);
+	RETV_IF(NULL == info->new_langset, NULL);
+
+	old_primary_sort = ctsvc_get_primary_sort();
+	old_secondary_sort = ctsvc_get_secondary_sort();
+
+	if (old_primary_sort < 0 || old_secondary_sort < 0) {
+		ERR("old_primary_sort (%d), old_secondary_sort(%d)", old_primary_sort, old_secondary_sort);
+		free(info->langset);
+		free(info->new_langset);
+		free(info);
+		ret = vconf_notify_key_changed(VCONFKEY_LANGSET, __ctsvc_server_change_language_cb, NULL);
+		WARN_IF(ret < 0, "vconf_notify_key_changed(%s) Fail(%d)", VCONFKEY_LANGSET, ret);
+		return NULL;
+	}
+
+	ctsvc_server_stop_timeout();
+
+	if (STRING_EQUAL == strncmp(info->langset, "zh", strlen("zh")) ||
+			STRING_EQUAL == strncmp(info->langset, "ko", strlen("ko")) ||
+			STRING_EQUAL == strncmp(info->langset, "ja", strlen("ja")) ||
+			STRING_EQUAL == strncmp(info->new_langset, "zh", strlen("zh")) ||
+			STRING_EQUAL == strncmp(info->new_langset, "ko", strlen("ko")) ||
+			STRING_EQUAL == strncmp(info->new_langset, "ja", strlen("ja"))) {
+		sort_name_update = true;
+	}
+	ctsvc_set_langset(SAFE_STRDUP(info->new_langset));
+
+	system_language = ctsvc_get_language_type(info->new_langset);
+	new_primary_sort = ctsvc_get_sort_type_from_language(system_language);
+	if (new_primary_sort == CTSVC_SORT_OTHERS)
+		new_primary_sort = CTSVC_SORT_WESTERN;
+
+	new_secondary_sort = CTSVC_SORT_WESTERN;
+
+	if (sort_name_update) {
+		ctsvc_server_set_default_sort(new_primary_sort);
+		ctsvc_server_update_sort_name();
+	} else {
+		if (new_primary_sort != old_primary_sort)
+			ret = ctsvc_server_update_sort(old_primary_sort, old_secondary_sort,
+					new_primary_sort, new_secondary_sort);
+
+		ctsvc_server_update_collation();
+	}
+
+	new_langset = vconf_get_str(VCONFKEY_LANGSET);
+	WARN_IF(NULL == new_langset, "language setting is return NULL");
+	if (new_langset && STRING_EQUAL != strcmp(info->new_langset, new_langset)) {
+		free(info->langset);
+		info->langset = SAFE_STRDUP(info->new_langset);
+		free(info->new_langset);
+		info->new_langset = SAFE_STRDUP(new_langset);
+		__ctsvc_server_update_language_on_thread(info);
+	} else {
+		free(info->langset);
+		free(info->new_langset);
+		free(info);
+		ret = vconf_notify_key_changed(VCONFKEY_LANGSET, __ctsvc_server_change_language_cb, NULL);
+		WARN_IF(ret < 0, "vconf_notify_key_changed(%s) Fail(%d)", VCONFKEY_LANGSET, ret);
+		ctsvc_server_start_timeout();
+	}
+	return NULL;
+}
+
+static void __ctsvc_server_change_language_cb(keynode_t *key, void *data)
+{
+	int ret;
 	char *new_langset = NULL;
 	char *langset = NULL;
 
@@ -76,48 +156,22 @@ static void __ctsvc_server_change_language_cb(keynode_t *key, void *data)
 	langset = ctsvc_get_langset();
 	INFO("%s --> %s", langset, new_langset);
 
-	ctsvc_server_stop_timeout();
-
 	if (STRING_EQUAL != strcmp(langset, new_langset)) {
-		bool sort_name_update = false;
-		old_primary_sort = ctsvc_get_primary_sort();
-		if (old_primary_sort < 0)
-			RETM_IF(ret < 0, "ctsvc_get_primary_sort() Fail(%d)", ret);
-
-		old_secondary_sort = ctsvc_get_secondary_sort();
-		if (old_secondary_sort < 0)
-			RETM_IF(ret < 0, "ctsvc_get_secondary_sort() Fail(%d)", ret);
-
-		if (STRING_EQUAL == strncmp(langset, "zh", strlen("zh")) ||
-				STRING_EQUAL == strncmp(langset, "ko", strlen("ko")) ||
-				STRING_EQUAL == strncmp(langset, "ja", strlen("ja")) ||
-				STRING_EQUAL == strncmp(new_langset, "zh", strlen("zh")) ||
-				STRING_EQUAL == strncmp(new_langset, "ko", strlen("ko")) ||
-				STRING_EQUAL == strncmp(new_langset, "ja", strlen("ja"))) {
-			sort_name_update = true;
+		cts_language_update_thread_info_s *info = calloc(1, sizeof(cts_language_update_thread_info_s));
+		if (NULL == info) {
+			ERR("calloc() Fail");
+			return;
 		}
-		ctsvc_set_langset(strdup(new_langset));
-		langset = new_langset;
 
-		system_language = ctsvc_get_language_type(langset);
-		new_primary_sort = ctsvc_get_sort_type_from_language(system_language);
-		if (new_primary_sort == CTSVC_SORT_OTHERS)
-			new_primary_sort = CTSVC_SORT_WESTERN;
+		ret = vconf_ignore_key_changed(VCONFKEY_LANGSET, __ctsvc_server_change_language_cb);
+		WARN_IF(ret < 0, "vconf_ignore_key_changed(%s) Fail(%d)", VCONFKEY_LANGSET, ret);
 
-		new_secondary_sort = CTSVC_SORT_WESTERN;
+		info->langset = SAFE_STRDUP(langset);
+		info->new_langset = SAFE_STRDUP(new_langset);
 
-		if (sort_name_update) {
-			ctsvc_server_set_default_sort(new_primary_sort);
-			ctsvc_server_update_sort_name();
-		} else {
-			if (new_primary_sort != old_primary_sort)
-				ret = ctsvc_server_update_sort(old_primary_sort, old_secondary_sort, new_primary_sort, new_secondary_sort);
-
-			ctsvc_server_update_collation();
-		}
+		pthread_t worker;
+		pthread_create(&worker, NULL, __ctsvc_server_update_language_on_thread, info);
 	}
-
-	ctsvc_server_start_timeout();
 }
 
 void ctsvc_server_final_configuration(void)
