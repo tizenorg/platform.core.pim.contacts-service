@@ -691,6 +691,11 @@ void ctsvc_ipc_person_set_default_property(pims_ipc_h ipc, pims_ipc_data_h indat
 		goto ERROR_RETURN;
 	}
 
+	if (!ctsvc_have_permission(ipc, CTSVC_PERMISSION_CONTACT_WRITE)) {
+		ret = CONTACTS_ERROR_PERMISSION_DENIED;
+		goto ERROR_RETURN;
+	}
+
 	ret = ctsvc_person_set_default_property(property, person_id, id);
 
 ERROR_RETURN:
