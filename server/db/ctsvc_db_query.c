@@ -2434,12 +2434,13 @@ static int __ctsvc_db_search_records_exec(const char *view_uri,
 		break;
 
 	case CTSVC_ENUM_URI_READ_ONLY_PERSON_NUMBER:
+	{
+		bool need_or = false;
 		if (range & CONTACTS_SEARCH_RANGE_DATA || range & CONTACTS_SEARCH_RANGE_EMAIL) {
 			ERR("Invalid range");
 			free(query);
 			return CONTACTS_ERROR_INVALID_PARAMETER;
 		}
-		bool need_or = false;
 		temp_len = SAFE_SNPRINTF(&query, &query_size, len, "SELECT ");
 		if (0 <= temp_len) len += temp_len;
 		temp_len = SAFE_SNPRINTF(&query, &query_size, len, projection);
@@ -2559,9 +2560,12 @@ static int __ctsvc_db_search_records_exec(const char *view_uri,
 		temp_len = SAFE_SNPRINTF(&query, &query_size, len, ") as temp_contacts");
 		if (0 <= temp_len)
 			len += temp_len;
+	}
 		break;
 
 	case CTSVC_ENUM_URI_READ_ONLY_PERSON_EMAIL:
+	{
+		bool need_or = false;
 		if (range & CONTACTS_SEARCH_RANGE_NUMBER || range & CONTACTS_SEARCH_RANGE_DATA) {
 			free(query);
 			return CONTACTS_ERROR_INVALID_PARAMETER;
@@ -2637,6 +2641,7 @@ static int __ctsvc_db_search_records_exec(const char *view_uri,
 		temp_len = SAFE_SNPRINTF(&query, &query_size, len, ") ");
 		if (0 <= temp_len)
 			len += temp_len;
+	}
 		break;
 
 	case CTSVC_ENUM_URI_PERSON:

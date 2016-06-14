@@ -449,7 +449,7 @@ int ctsvc_is_owner(int addressbook_id)
 	saved_smack = ctsvc_stmt_get_text(stmt, 1);
 	smack = ctsvc_get_client_smack_label();
 
-	if (smack && STRING_EQUAL == strcmp(smack, saved_smack))
+	if (smack && saved_smack && STRING_EQUAL == strcmp(smack, saved_smack))
 		ret = CONTACTS_ERROR_NONE;
 
 	ctsvc_stmt_finalize(stmt);

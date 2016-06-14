@@ -557,19 +557,6 @@ void ctsvc_db_person_delete_callback(sqlite3_context  *context,
 #endif
 }
 
-static inline const char *__ctsvc_get_image_filename(const char *src)
-{
-	const char *dir = CTSVC_CONTACT_IMG_FULL_LOCATION;
-	int pos = 0;
-	while (dir[pos] == src[pos])
-		pos++;
-
-	if ('/' == src[pos])
-		return src + pos + 1;
-
-	return src+pos;
-}
-
 int ctsvc_person_aggregate(int person_id)
 {
 	int ret, len = 0;
