@@ -228,6 +228,10 @@ static inline const char* __ctsvc_get_image_filename(const char *src)
 {
 	const char *dir = CTSVC_CONTACT_IMG_FULL_LOCATION;
 	int pos = 0;
+
+	if (NULL == dir)
+		return src;
+
 	while (dir[pos] == src[pos])
 		pos++;
 
