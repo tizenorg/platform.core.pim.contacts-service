@@ -324,11 +324,12 @@ static bool _ctsvc_image_util_supported_jpeg_colorspace_cb(
 		}
 
 		packet = ctsvc_image_util_create_media_packet(fmt, buffer, (unsigned int)size);
+		free(buffer);
+
 		if (NULL == packet) {
 			ERR("ctsvc_image_util_create_media_packet() Fail");
 			media_format_unref(fmt);
 			info->ret = CONTACTS_ERROR_SYSTEM;
-			free(buffer);
 			return false;
 		}
 
@@ -338,7 +339,6 @@ static bool _ctsvc_image_util_supported_jpeg_colorspace_cb(
 		media_format_unref(fmt);
 
 		if (CONTACTS_ERROR_NONE != ret) {
-			free(buffer);
 			info->ret = CONTACTS_ERROR_SYSTEM;
 			return false;
 		}
@@ -348,7 +348,6 @@ static bool _ctsvc_image_util_supported_jpeg_colorspace_cb(
 			width = height;
 			height = temp;
 		}
-		free(buffer);
 		buffer = buffer_temp;
 	}
 
@@ -382,11 +381,12 @@ static bool _ctsvc_image_util_supported_jpeg_colorspace_cb(
 		}
 
 		packet = ctsvc_image_util_create_media_packet(fmt, buffer, (unsigned int)size);
+		free(buffer);
+
 		if (NULL == packet) {
 			ERR("ctsvc_image_util_create_media_packet() Fail");
 			media_format_unref(fmt);
 			info->ret = CONTACTS_ERROR_SYSTEM;
-			free(buffer);
 			return false;
 		}
 
@@ -397,11 +397,9 @@ static bool _ctsvc_image_util_supported_jpeg_colorspace_cb(
 		media_format_unref(fmt);
 
 		if (CONTACTS_ERROR_NONE != ret) {
-			free(buffer);
 			info->ret = -1;
 			return false;
 		}
-		free(buffer);
 		buffer = buffer_temp;
 
 		width = resized_width;
@@ -596,13 +594,13 @@ char* ctsvc_utils_make_thumbnail(const char *image_path)
 		return NULL;
 	}
 
+	snprintf(src, sizeof(src), "%s/%s", CTSVC_CONTACT_IMG_FULL_LOCATION, image_path);
+	snprintf(dest, sizeof(dest), "%s/%s", CTSVC_CONTACT_IMG_FULL_LOCATION, thumbnail_path);
+
 	if (0 == access(dest, F_OK)) {
 		DBG("already exist");
 		return thumbnail_path;
 	}
-
-	snprintf(src, sizeof(src), "%s/%s", CTSVC_CONTACT_IMG_FULL_LOCATION, image_path);
-	snprintf(dest, sizeof(dest), "%s/%s", CTSVC_CONTACT_IMG_FULL_LOCATION, thumbnail_path);
 
 	ret = _ctsvc_image_encode(src, dest, CTSVC_IMAGE_THUMBNAIL_SIZE);
 	if (CONTACTS_ERROR_NONE != ret) {

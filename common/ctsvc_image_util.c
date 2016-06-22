@@ -167,7 +167,7 @@ media_packet_h ctsvc_image_util_create_media_packet(media_format_h fmt,
 	}
 
 	if (mp_buffer)
-		memcpy(mp_buffer, buffer, (int)buffer_size);
+		memcpy(mp_buffer, buffer, (int)((buffer_size < mp_buffer_size) ? buffer_size : mp_buffer_size));
 
 	return packet;
 }
@@ -182,6 +182,7 @@ static void _image_transform_completed_cb(media_packet_h *dst,
 	struct image_transform *info = user_data;
 
 	if (NULL == info) {
+		ERR("NULL == info");
 		media_packet_destroy(*dst);
 		return;
 	}
@@ -209,7 +210,7 @@ static void _image_transform_completed_cb(media_packet_h *dst,
 			return;
 		}
 
-		info->buffer = calloc(1, (int)size);
+		info->buffer = calloc(1, (size_t)size);
 		if (NULL == info->buffer) {
 			ERR("calloc() Fail");
 			info->ret = CONTACTS_ERROR_SYSTEM;
@@ -219,7 +220,7 @@ static void _image_transform_completed_cb(media_packet_h *dst,
 			g_mutex_unlock(&info->mutex);
 			return;
 		}
-		memcpy(info->buffer, buffer, (int)size);
+		memcpy(info->buffer, buffer, (size_t)size);
 		info->size = size;
 		info->ret = CONTACTS_ERROR_NONE;
 	} else {
@@ -255,10 +256,13 @@ static int _ctsvc_image_util_transform_run(transformation_h transform,
 	ret = image_util_transform_run(transform, packet, _image_transform_completed_cb, info);
 	if (IMAGE_UTIL_ERROR_NONE != ret) {
 		ERR("image_util_transform_run() Fail(%d)", ret);
+		g_mutex_unlock(&info->mutex);
+		g_mutex_clear(&info->mutex);
+		g_cond_clear(&info->cond);
 		return CONTACTS_ERROR_SYSTEM;
 	}
 
-	end_time = g_get_monotonic_time() + 2000 * G_TIME_SPAN_MILLISECOND;
+	end_time = g_get_monotonic_time() + 4000 * G_TIME_SPAN_MILLISECOND;
 	if (!g_cond_wait_until(&info->cond, &info->mutex, end_time)) {
 		/* timeout has passed */
 		ERR("g_cond_wait_until() return FALSE");
@@ -278,7 +282,6 @@ static int _ctsvc_image_util_transform_run(transformation_h transform,
 	*p_size = info->size;
 	*p_buffer = info->buffer;
 	free(info);
-
 	return CONTACTS_ERROR_NONE;
 }
 
