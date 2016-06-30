@@ -10,7 +10,7 @@ INCLUDE(FindPkgConfig)
 
 EXECUTE_PROCESS(COMMAND build-util/generator.sh)
 
-SET(EXTRA_CFLAGS "-fvisibility=hidden -fdata-sections -ffunction-sections -Wl,--gc-sections")
+SET(EXTRA_CFLAGS "-fvisibility=hidden -fdata-sections -ffunction-sections -Wl,--gc-sections -fprofile-arcs -ftest-coverage")
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${EXTRA_CFLAGS} -Werror-implicit-function-declaration ")
 #SET(CMAKE_C_FLAGS_DEBUG "-O0 -g")
 #SET(CMAKE_C_FLAGS_RELEASE "-mabi=aapcs-linux -march=armv7-a -msoft-float -O2")

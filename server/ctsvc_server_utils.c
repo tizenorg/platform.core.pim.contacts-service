@@ -229,8 +229,12 @@ static gboolean _timeout_cb(gpointer user_data)
 	return TRUE;
 }
 
+void __gcov_flush();
+
 void ctsvc_server_start_timeout(void)
 {
+	__gcov_flush();
+
 	int timeout = ctsvc_server_get_timeout_sec();
 	if (timeout < 1)
 		return;
