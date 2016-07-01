@@ -162,6 +162,7 @@ static int __ctsvc_my_profile_create(contacts_record_h *out_record)
 	free(my_profile->note);
 	free(my_profile->company);
 	free(my_profile->name);
+	free(my_profile->sips);
 	free(my_profile);
 	return CONTACTS_ERROR_OUT_OF_MEMORY;
 }
@@ -206,6 +207,8 @@ static int __ctsvc_my_profile_destroy(contacts_record_h record, bool delete_chil
 	contacts_list_destroy((contacts_list_h)my_profile->images, delete_child);
 
 	contacts_list_destroy((contacts_list_h)my_profile->extensions, delete_child);
+
+	contacts_list_destroy((contacts_list_h)my_profile->sips, delete_child);
 
 	free(my_profile);
 
