@@ -885,7 +885,7 @@ static int __ctsvc_sip_create(contacts_record_h *out_record)
 	ctsvc_sip_s *sip;
 	sip = calloc(1, sizeof(ctsvc_sip_s));
 	RETVM_IF(NULL == sip, CONTACTS_ERROR_OUT_OF_MEMORY,
-			"Out of memory : calloc is Fail");
+			"calloc() Fail");
 
 	*out_record = (contacts_record_h)sip;
 	return CONTACTS_ERROR_NONE;

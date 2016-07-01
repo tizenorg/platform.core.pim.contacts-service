@@ -122,7 +122,7 @@ int ctsvc_client_activity_delete_by_account_id(contacts_h contact, int account_i
 
 	ret = ctsvc_ipc_marshal_int(account_id, indata);
 	if (ret != CONTACTS_ERROR_NONE) {
-		ERR("ctsvc_ipc_marshal_record() Fail");
+		ERR("ctsvc_ipc_marshal_int() Fail");
 		pims_ipc_data_destroy(indata);
 		return ret;
 	}
