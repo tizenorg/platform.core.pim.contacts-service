@@ -56,8 +56,10 @@ static int _client_noti_check_read_permission(const char *view_uri)
 			|| STRING_EQUAL == strncmp(view_uri, CTSVC_VIEW_URI_SIP, strlen(CTSVC_VIEW_URI_SIP))) {
 		ret = ctsvc_ipc_client_check_permission(CTSVC_PERMISSION_CONTACT_READ, &result);
 		if (CONTACTS_ERROR_NONE != ret) {
+			//LCOV_EXCL_START
 			ERR("ctsvc_ipc_client_check_permission() Fail(%d)", ret);
 			return ret;
+			//LCOV_EXCL_STOP
 		}
 
 		RETVM_IF(result == false, CONTACTS_ERROR_PERMISSION_DENIED,
@@ -65,8 +67,10 @@ static int _client_noti_check_read_permission(const char *view_uri)
 	} else if (STRING_EQUAL == strncmp(view_uri, CTSVC_VIEW_URI_PHONELOG, strlen(CTSVC_VIEW_URI_PHONELOG))) {
 		ret = ctsvc_ipc_client_check_permission(CTSVC_PERMISSION_PHONELOG_READ, &result);
 		if (CONTACTS_ERROR_NONE != ret) {
+			//LCOV_EXCL_START
 			ERR("ctsvc_ipc_client_check_permission() Fail(%d)", ret);
 			return ret;
+			//LCOV_EXCL_STOP
 		}
 
 		RETVM_IF(result == false, CONTACTS_ERROR_PERMISSION_DENIED,
@@ -90,8 +94,10 @@ API int contacts_db_add_changed_cb(const char *view_uri, contacts_db_changed_cb 
 
 	ret = ctsvc_inotify_subscribe(view_uri, cb, user_data);
 	if (CONTACTS_ERROR_NONE != ret) {
+		//LCOV_EXCL_START
 		ERR("ctsvc_inotify_subscribe(%s) Fail(%d)", view_uri, ret);
 		return ret;
+		//LCOV_EXCL_STOP
 	}
 
 	return CONTACTS_ERROR_NONE;
@@ -107,8 +113,10 @@ API int contacts_db_remove_changed_cb(const char *view_uri, contacts_db_changed_
 
 	ret = ctsvc_inotify_unsubscribe(view_uri, cb, user_data);
 	if (CONTACTS_ERROR_NONE != ret) {
+		//LCOV_EXCL_START
 		ERR("ctsvc_inotify_unsubscribe(%s) Fail(%d)", view_uri, ret);
 		return ret;
+		//LCOV_EXCL_STOP
 	}
 
 	return CONTACTS_ERROR_NONE;
