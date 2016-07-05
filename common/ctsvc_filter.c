@@ -120,34 +120,46 @@ static int _filter_create_attribute(ctsvc_composite_filter_s *com_filter,
 			"property_id(%d) is not supported on view_uri(%s)", property_id, com_filter->view_uri);
 
 	if (type == CTSVC_VIEW_DATA_TYPE_INT && CTSVC_FILTER_INT != filter_type) {
-		ERR("use contacts_filter_add_int() (%d)", filter_type);
+		//LCOV_EXCL_START
+	ERR("use contacts_filter_add_int() (%d)", filter_type);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 
 	if (type == CTSVC_VIEW_DATA_TYPE_STR && CTSVC_FILTER_STR != filter_type) {
-		ERR("use contacts_filter_add_str() (%d)", filter_type);
+		//LCOV_EXCL_START
+	ERR("use contacts_filter_add_str() (%d)", filter_type);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 
 	if (type == CTSVC_VIEW_DATA_TYPE_BOOL && CTSVC_FILTER_BOOL != filter_type) {
-		ERR("use contacts_filter_add_bool() (%d)", filter_type);
+		//LCOV_EXCL_START
+	ERR("use contacts_filter_add_bool() (%d)", filter_type);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 
 	if (type == CTSVC_VIEW_DATA_TYPE_LLI && CTSVC_FILTER_LLI != filter_type) {
-		ERR("use contacts_filter_add_lli() (%d)", filter_type);
+		//LCOV_EXCL_START
+	ERR("use contacts_filter_add_lli() (%d)", filter_type);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 
 	if (type == CTSVC_VIEW_DATA_TYPE_DOUBLE && CTSVC_FILTER_DOUBLE != filter_type) {
-		ERR("use contacts_filter_add_double() (%d)", filter_type);
+		//LCOV_EXCL_START
+	ERR("use contacts_filter_add_double() (%d)", filter_type);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 
 	filter = calloc(1, sizeof(ctsvc_attribute_filter_s));
 	if (NULL == filter) {
+		//LCOV_EXCL_START
 		ERR("calloc() Fail");
 		return CONTACTS_ERROR_OUT_OF_MEMORY;
+		//LCOV_EXCL_STOP
 	}
 	filter->filter_type = filter_type;
 	filter->property_id = property_id;
@@ -309,8 +321,10 @@ static int __ctsvc_attribute_filter_clone(ctsvc_attribute_filter_s *src,
 	ctsvc_attribute_filter_s *out;
 	out = calloc(1, sizeof(ctsvc_attribute_filter_s));
 	if (NULL == out) {
-		ERR("calloc() Fail");
+		//LCOV_EXCL_START
+	ERR("calloc() Fail");
 		return CONTACTS_ERROR_OUT_OF_MEMORY;
+		//LCOV_EXCL_STOP
 	}
 	out->filter_type = src->filter_type;
 	out->property_id = src->property_id;

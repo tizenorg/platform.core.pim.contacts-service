@@ -29,8 +29,10 @@ API int contacts_activity_delete_by_contact_id(int contact_id)
 
 	ret = ctsvc_client_handle_get_p(&contact);
 	if (CONTACTS_ERROR_NONE != ret) {
+		//LCOV_EXCL_START
 		ERR("ctsvc_client_handle_get_p() Fail(%d)", ret);
 		return ret;
+		//LCOV_EXCL_STOP
 	}
 
 	ret = ctsvc_client_activity_delete_by_contact_id(contact, contact_id);
@@ -45,8 +47,10 @@ API int contacts_activity_delete_by_account_id(int account_id)
 
 	ret = ctsvc_client_handle_get_p(&contact);
 	if (CONTACTS_ERROR_NONE != ret) {
+		//LCOV_EXCL_START
 		ERR("ctsvc_client_handle_get_p() Fail(%d)", ret);
 		return ret;
+		//LCOV_EXCL_STOP
 	}
 
 	ret = ctsvc_client_activity_delete_by_account_id(contact, account_id);
