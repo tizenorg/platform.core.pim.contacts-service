@@ -683,9 +683,11 @@ static int __ctsvc_activity_create(contacts_record_h *out_record)
 
 	activity->photos = calloc(1, sizeof(ctsvc_list_s));
 	if (NULL == activity->photos) {
+		//LCOV_EXCL_START
 		ERR("calloc() Fail");
 		free(activity);
 		return CONTACTS_ERROR_OUT_OF_MEMORY;
+		//LCOV_EXCL_STOP
 	}
 	activity->photos->l_type = CTSVC_RECORD_ACTIVITY_PHOTO;
 
@@ -1312,6 +1314,7 @@ static int __ctsvc_contact_create(contacts_record_h *out_record)
 		return CONTACTS_ERROR_NONE;
 	} while (0);
 
+	//LCOV_EXCL_START
 	ERR("calloc() Fail");
 	free(contact->extensions);
 	free(contact->images);
@@ -1331,6 +1334,7 @@ static int __ctsvc_contact_create(contacts_record_h *out_record)
 	free(contact->sips);
 	free(contact);
 	return CONTACTS_ERROR_OUT_OF_MEMORY;
+	//LCOV_EXCL_STOP
 }
 
 static int __ctsvc_contact_destroy(contacts_record_h record, bool delete_child)
@@ -1412,8 +1416,10 @@ static int __ctsvc_contact_get_int(contacts_record_h record, unsigned int proper
 		*out = contact->link_mode;
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(contact)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -1439,8 +1445,10 @@ static int __ctsvc_simple_contact_get_int(contacts_record_h record, unsigned int
 		*out = contact->changed_time;
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(simple contact)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -1457,8 +1465,10 @@ static int __ctsvc_name_get_int(contacts_record_h record, unsigned int property_
 		*out = name->contact_id;
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(name)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -1478,8 +1488,10 @@ static int __ctsvc_company_get_int(contacts_record_h record, unsigned int proper
 		*out = company->type;
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(company)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -1496,8 +1508,10 @@ static int __ctsvc_note_get_int(contacts_record_h record, unsigned int property_
 		*out = note->contact_id;
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(note)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -1517,8 +1531,10 @@ static int __ctsvc_number_get_int(contacts_record_h record, unsigned int propert
 		*out = number->type;
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(number)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -1538,8 +1554,10 @@ static int __ctsvc_email_get_int(contacts_record_h record, unsigned int property
 		*out = email->type;
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(email)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -1559,8 +1577,10 @@ static int __ctsvc_url_get_int(contacts_record_h record, unsigned int property_i
 		*out = url->type;
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(url)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -1586,8 +1606,10 @@ static int __ctsvc_event_get_int(contacts_record_h record, unsigned int property
 		*out = event->calendar_type;
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(event)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -1604,8 +1626,10 @@ static int __ctsvc_nickname_get_int(contacts_record_h record, unsigned int prope
 		*out = nickname->contact_id;
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(nickname)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -1625,8 +1649,10 @@ static int __ctsvc_address_get_int(contacts_record_h record, unsigned int proper
 		*out = address->type;
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(address)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -1646,8 +1672,10 @@ static int __ctsvc_messenger_get_int(contacts_record_h record, unsigned int prop
 		*out = messenger->type;
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(messenger)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -1667,8 +1695,10 @@ static int __ctsvc_group_relation_get_int(contacts_record_h record, unsigned int
 		*out = group->group_id;
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(group)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -1688,8 +1718,10 @@ static int __ctsvc_activity_get_int(contacts_record_h record, unsigned int prope
 		*out = activity->timestamp;
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(activity)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -1754,9 +1786,11 @@ static int __ctsvc_activity_get_child_record_at_p(contacts_record_h record,
 		contacts_list_get_count((contacts_list_h)s_activity->photos, &count);
 
 	if (count < index) {
+		//LCOV_EXCL_START
 		ERR("The index(%d) is greather than total length(%d)", index, count);
 		*out_record = NULL;
 		return CONTACTS_ERROR_NO_DATA;
+		//LCOV_EXCL_STOP
 	}
 
 	return ctsvc_list_get_nth_record_p((contacts_list_h)s_activity->photos, index, out_record);
@@ -1795,8 +1829,10 @@ static int __ctsvc_activity_photo_get_int(contacts_record_h record, unsigned int
 		*out = photo->sort_index;
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(activity)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -1816,8 +1852,10 @@ static int __ctsvc_profile_get_int(contacts_record_h record, unsigned int proper
 		*out = profile->order;
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(profile)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -1837,8 +1875,10 @@ static int __ctsvc_relationship_get_int(contacts_record_h record, unsigned int p
 		*out = relationship->type;
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(relationship)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -1858,8 +1898,10 @@ static int __ctsvc_image_get_int(contacts_record_h record, unsigned int property
 		*out = image->type;
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(image)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -1879,8 +1921,10 @@ static int __ctsvc_extension_get_int(contacts_record_h record, unsigned int prop
 		*out = extension->data1;
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(extension)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -1900,8 +1944,10 @@ static int __ctsvc_sip_get_int(contacts_record_h record, unsigned int property_i
 		*out = sip->type;
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("Invalid parameter : property_id(%d) is not supported in value(sip)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -1945,8 +1991,10 @@ static int __ctsvc_contact_set_int(contacts_record_h record, unsigned int proper
 		contact->link_mode = value;
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value (contact)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -1975,8 +2023,10 @@ static int __ctsvc_simple_contact_set_int(contacts_record_h record, unsigned int
 		contact->addressbook_id = value;
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(simple contact)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -1997,8 +2047,10 @@ static int __ctsvc_name_set_int(contacts_record_h record, unsigned int property_
 		name->contact_id = value;
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(name)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -2027,8 +2079,10 @@ static int __ctsvc_company_set_int(contacts_record_h record, unsigned int proper
 		company->type = value;
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(company)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -2049,8 +2103,10 @@ static int __ctsvc_note_set_int(contacts_record_h record, unsigned int property_
 		note->contact_id = value;
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(note)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -2075,8 +2131,10 @@ static int __ctsvc_number_set_int(contacts_record_h record, unsigned int propert
 		number->type = value;
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(number)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -2105,8 +2163,10 @@ static int __ctsvc_email_set_int(contacts_record_h record, unsigned int property
 		email->type = value;
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(email)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -2135,8 +2195,10 @@ static int __ctsvc_url_set_int(contacts_record_h record, unsigned int property_i
 		url->type = value;
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(url)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -2172,8 +2234,10 @@ static int __ctsvc_event_set_int(contacts_record_h record, unsigned int property
 		event->calendar_type = value;
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(event)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -2194,8 +2258,10 @@ static int __ctsvc_nickname_set_int(contacts_record_h record, unsigned int prope
 		nickname->contact_id = value;
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(nickname)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -2223,8 +2289,10 @@ static int __ctsvc_address_set_int(contacts_record_h record, unsigned int proper
 		address->type = value;
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(address)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -2253,8 +2321,10 @@ static int __ctsvc_messenger_set_int(contacts_record_h record, unsigned int prop
 		messenger->type = value;
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(messenger)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -2281,8 +2351,10 @@ static int __ctsvc_group_relation_set_int(contacts_record_h record, unsigned int
 		group->group_id = value;
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(group relation)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -2307,8 +2379,10 @@ static int __ctsvc_activity_set_int(contacts_record_h record, unsigned int prope
 		activity->timestamp = value;
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(activity)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -2331,8 +2405,10 @@ static int __ctsvc_activity_photo_set_int(contacts_record_h record, unsigned int
 		photo->sort_index = value;
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(activity)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -2357,8 +2433,10 @@ static int __ctsvc_profile_set_int(contacts_record_h record, unsigned int proper
 		profile->order = value;
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(profile)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -2386,8 +2464,10 @@ static int __ctsvc_relationship_set_int(contacts_record_h record, unsigned int p
 		relationship->type = value;
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(relationship)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -2415,8 +2495,10 @@ static int __ctsvc_image_set_int(contacts_record_h record, unsigned int property
 		image->type = value;
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(image)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -2441,8 +2523,10 @@ static int __ctsvc_extension_set_int(contacts_record_h record, unsigned int prop
 		extension->data1 = value;
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(extension)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -2469,8 +2553,10 @@ static int __ctsvc_sip_set_int(contacts_record_h record, unsigned int property_i
 		sip->type = value;
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("Invalid parameter : property_id(0x%x) is not supported in value(sip)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -2498,8 +2584,10 @@ static int __ctsvc_contact_get_str_real(contacts_record_h record, unsigned int p
 		*out_str = GET_STR(copy, contact->message_alert);
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(contact)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -2569,8 +2657,10 @@ static int __ctsvc_contact_get_record_list_p(contacts_record_h record,
 		*list = (contacts_list_h)contact->sips;
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(contact)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -2605,9 +2695,11 @@ static int __ctsvc_contact_get_child_record_at_p(contacts_record_h record,
 
 	contacts_list_get_count(list, &count);
 	if (count < index) {
+		//LCOV_EXCL_START
 		ERR("The index(%d) is greather than total length(%d)", index, count);
 		*out_record = NULL;
 		return CONTACTS_ERROR_NO_DATA;
+		//LCOV_EXCL_STOP
 	} else {
 		return ctsvc_list_get_nth_record_p(list, index, out_record);
 	}
@@ -2692,8 +2784,10 @@ static int __ctsvc_contact_reset_child_record_id(contacts_record_h child_record)
 		((ctsvc_sip_s *)record)->id = 0;
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("record(%d) is not child of contact", record->r_type);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -2738,8 +2832,10 @@ static int __ctsvc_contact_get_child_record_id(contacts_record_h child_record)
 	case CTSVC_RECORD_SIP:
 		return ((ctsvc_sip_s *)record)->id;
 	default:
+		//LCOV_EXCL_START
 		ERR("record(%d) is not child of contact", record->r_type);
 		return 0;
+		//LCOV_EXCL_STOP
 	}
 	return 0;
 }
@@ -2756,8 +2852,10 @@ static int __ctsvc_contact_add_child_record(contacts_record_h record,
 		return ret;
 
 	if (CTSVC_RECORD_NAME == s_record->r_type && 1 == ((ctsvc_list_s*)list)->count) {
+		//LCOV_EXCL_START
 		ERR("This type(%d) of child_record can not be added anymore", s_record->r_type);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 
 	ret = __ctsvc_contact_reset_child_record_id(child_record);
@@ -2811,8 +2909,10 @@ static int __ctsvc_simple_contact_get_str_real(contacts_record_h record,
 		*out_str = GET_STR(copy, contact->message_alert);
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(simple_contact)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -2857,8 +2957,10 @@ static int __ctsvc_name_get_str_real(contacts_record_h record, unsigned int prop
 		*out_str = GET_STR(copy, name->phonetic_last);
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(name)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -2909,8 +3011,10 @@ static int __ctsvc_company_get_str_real(contacts_record_h record, unsigned int p
 		*out_str = GET_STR(copy, company->phonetic_name);
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(company)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -2934,8 +3038,10 @@ static int __ctsvc_note_get_str_real(contacts_record_h record, unsigned int prop
 		*out_str = GET_STR(copy, note->note);
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(note)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -2962,8 +3068,10 @@ static int __ctsvc_number_get_str_real(contacts_record_h record, unsigned int pr
 		*out_str = GET_STR(copy, number->number);
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(number)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -2990,8 +3098,10 @@ static int __ctsvc_email_get_str_real(contacts_record_h record, unsigned int pro
 		*out_str = GET_STR(copy, email->label);
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(email)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -3018,8 +3128,10 @@ static int __ctsvc_url_get_str_real(contacts_record_h record, unsigned int prope
 		*out_str = GET_STR(copy, url->label);
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(url)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -3043,8 +3155,10 @@ static int __ctsvc_event_get_str_real(contacts_record_h record, unsigned int pro
 		*out_str = GET_STR(copy, event->label);
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(event)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -3068,8 +3182,10 @@ static int __ctsvc_nickname_get_str_real(contacts_record_h record, unsigned int 
 		*out_str = GET_STR(copy, nickname->nickname);
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(nickname)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -3114,8 +3230,10 @@ static int __ctsvc_address_get_str_real(contacts_record_h record, unsigned int p
 		*out_str = GET_STR(copy, address->extended);
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(address)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -3142,8 +3260,10 @@ static int __ctsvc_messenger_get_str_real(contacts_record_h record, unsigned int
 		*out_str = GET_STR(copy, messenger->im_id);
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(messenger)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -3168,8 +3288,10 @@ static int __ctsvc_group_relation_get_str_real(contacts_record_h record,
 		*out_str = GET_STR(copy, group_relation->group_name);
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(group_relation)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -3203,8 +3325,10 @@ static int __ctsvc_activity_get_str_real(contacts_record_h record, unsigned int 
 		*out_str = GET_STR(copy, activity->uri);
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(activity)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -3228,8 +3352,10 @@ static int __ctsvc_activity_photo_get_str_real(contacts_record_h record, unsigne
 		*out_str = GET_STR(copy, photo->photo_url);
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(activity)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -3274,8 +3400,10 @@ static int __ctsvc_profile_get_str_real(contacts_record_h record, unsigned int p
 		*out_str = GET_STR(copy, profile->extra_data);
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(profile)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -3302,8 +3430,10 @@ static int __ctsvc_relationship_get_str_real(contacts_record_h record, unsigned 
 		*out_str = GET_STR(copy, relationship->name);
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(relationship)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -3330,8 +3460,10 @@ static int __ctsvc_image_get_str_real(contacts_record_h record, unsigned int pro
 		*out_str = GET_STR(copy, image->path);
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(image)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -3385,8 +3517,10 @@ static int __ctsvc_extension_get_str_real(contacts_record_h record, unsigned int
 		*out_str = GET_STR(copy, extension->data12);
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(extension)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -3413,8 +3547,10 @@ static int __ctsvc_sip_get_str_real(contacts_record_h record, unsigned int prope
 		*out_str = GET_STR(copy, sip->label);
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("Invalid parameter : property_id(%d) is not supported in value(sip)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -3464,8 +3600,10 @@ static int __ctsvc_contact_set_str(contacts_record_h record, unsigned int proper
 		FREEandSTRDUP(contact->message_alert, str);
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(contact)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -3505,8 +3643,10 @@ static int __ctsvc_simple_contact_set_str(contacts_record_h record, unsigned int
 		FREEandSTRDUP(contact->message_alert, str);
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(simple_contact)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -3549,8 +3689,10 @@ static int __ctsvc_name_set_str(contacts_record_h record, unsigned int property_
 		FREEandSTRDUP(name->phonetic_last, str);
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(name)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -3605,8 +3747,10 @@ static int __ctsvc_company_set_str(contacts_record_h record, unsigned int proper
 		FREEandSTRDUP(company->phonetic_name, str);
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(company)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -3621,8 +3765,10 @@ static int __ctsvc_note_set_str(contacts_record_h record, unsigned int property_
 		FREEandSTRDUP(note->note, str);
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(note)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -3641,8 +3787,10 @@ static int __ctsvc_number_set_str(contacts_record_h record, unsigned int propert
 		FREEandSTRDUP(number->number, str);
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(number)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -3661,8 +3809,10 @@ static int __ctsvc_email_set_str(contacts_record_h record, unsigned int property
 		FREEandSTRDUP(email->label, str);
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(email)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -3681,8 +3831,10 @@ static int __ctsvc_url_set_str(contacts_record_h record, unsigned int property_i
 		FREEandSTRDUP(url->label, str);
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(url)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -3697,8 +3849,10 @@ static int __ctsvc_event_set_str(contacts_record_h record, unsigned int property
 		FREEandSTRDUP(event->label, str);
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(event)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -3713,8 +3867,10 @@ static int __ctsvc_nickname_set_str(contacts_record_h record, unsigned int prope
 		FREEandSTRDUP(nickname->nickname, str);
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(nickname)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -3757,8 +3913,10 @@ static int __ctsvc_address_set_str(contacts_record_h record, unsigned int proper
 		FREEandSTRDUP(address->extended, str);
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(address)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -3777,8 +3935,10 @@ static int __ctsvc_messenger_set_str(contacts_record_h record, unsigned int prop
 		FREEandSTRDUP(messenger->im_id, str);
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(messenger)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -3797,8 +3957,10 @@ static int __ctsvc_group_relation_set_str(contacts_record_h record, unsigned int
 		   return CONTACTS_ERROR_INVALID_PARAMETER;
 		   */
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(group_relation)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -3825,8 +3987,10 @@ static int __ctsvc_activity_set_str(contacts_record_h record, unsigned int prope
 		FREEandSTRDUP(activity->uri, str);
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(activity)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -3842,8 +4006,10 @@ static int __ctsvc_activity_photo_set_str(contacts_record_h record, unsigned int
 		FREEandSTRDUP(photo->photo_url, str);
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(activity)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -3887,8 +4053,10 @@ static int __ctsvc_profile_set_str(contacts_record_h record, unsigned int proper
 		FREEandSTRDUP(profile->extra_data, str);
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(profile)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -3908,8 +4076,10 @@ static int __ctsvc_relationship_set_str(contacts_record_h record, unsigned int p
 		FREEandSTRDUP(relationship->name, str);
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(relationship)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -3934,8 +4104,10 @@ static int __ctsvc_image_set_str(contacts_record_h record, unsigned int property
 		FREEandSTRDUP(image->path, str);
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(image)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -3991,8 +4163,10 @@ static int __ctsvc_extension_set_str(contacts_record_h record, unsigned int prop
 		FREEandSTRDUP(extension->data12, str);
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(extension)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -4012,8 +4186,10 @@ static int __ctsvc_sip_set_str(contacts_record_h record, unsigned int property_i
 		FREEandSTRDUP(sip->label, str);
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("Invalid parameter : property_id(%d) is not supported in value(sip)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -4032,8 +4208,10 @@ static int __ctsvc_contact_get_bool(contacts_record_h record, unsigned int prope
 		*value = contact->has_email;
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(0x%x) is not supported in value(contact)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -4052,8 +4230,10 @@ static int __ctsvc_simple_contact_get_bool(contacts_record_h record, unsigned in
 		*value = contact->has_email;
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(0x%x) is not supported in value(contact)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -4067,8 +4247,10 @@ static int __ctsvc_number_get_bool(contacts_record_h record, unsigned int proper
 		*value = number->is_default;
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(0x%x) is not supported in value(number)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -4081,8 +4263,10 @@ static int __ctsvc_email_get_bool(contacts_record_h record, unsigned int propert
 		*value = email->is_default;
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(0x%x) is not supported in value(email)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -4095,8 +4279,10 @@ static int __ctsvc_event_get_bool(contacts_record_h record, unsigned int propert
 		*value = event->is_leap_month;
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(0x%x) is not supported in value(event)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -4109,8 +4295,10 @@ static int __ctsvc_image_get_bool(contacts_record_h record, unsigned int propert
 		*value = image->is_default;
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(0x%x) is not supported in value(image)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -4123,8 +4311,10 @@ static int __ctsvc_address_get_bool(contacts_record_h record, unsigned int prope
 		*value = address->is_default;
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(0x%x) is not supported in value(address)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -4151,8 +4341,10 @@ static int __ctsvc_contact_set_bool(contacts_record_h record, unsigned int prope
 		   break;
 		   */
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(0x%x) is not supported in value(contact)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -4167,8 +4359,10 @@ static int __ctsvc_number_set_bool(contacts_record_h record, unsigned int proper
 		number->is_default = value;
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(number)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -4183,8 +4377,10 @@ static int __ctsvc_email_set_bool(contacts_record_h record, unsigned int propert
 		email->is_default = value;
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(email)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -4199,8 +4395,10 @@ static int __ctsvc_event_set_bool(contacts_record_h record, unsigned int propert
 		event->is_leap_month = value;
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(event)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -4215,8 +4413,10 @@ static int __ctsvc_image_set_bool(contacts_record_h record, unsigned int propert
 		image->is_default = value;
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(0x%x) is not supported in value(image)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -4231,8 +4431,10 @@ static int __ctsvc_address_set_bool(contacts_record_h record, unsigned int prope
 		address->is_default = value;
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("property_id(%d) is not supported in value(address)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -4321,9 +4523,11 @@ static int __ctsvc_contact_clone(contacts_record_h record, contacts_record_h *ou
 
 	int ret = ctsvc_record_copy_base(&(out_data->base), &(src_data->base));
 	if (CONTACTS_ERROR_NONE != ret) {
+		//LCOV_EXCL_START
 		ERR("ctsvc_record_copy_base() Fail");
 		__ctsvc_contact_destroy((contacts_record_h)out_data, true);
 		return ret;
+		//LCOV_EXCL_STOP
 	}
 
 	*out_record = (contacts_record_h)out_data;
@@ -4354,9 +4558,11 @@ static int __ctsvc_activity_clone(contacts_record_h record, contacts_record_h *o
 
 	int ret = ctsvc_record_copy_base(&(out_data->base), &(src_data->base));
 	if (CONTACTS_ERROR_NONE != ret) {
+		//LCOV_EXCL_START
 		ERR("ctsvc_record_copy_base() Fail");
 		__ctsvc_activity_destroy((contacts_record_h)out_data, true);
 		return ret;
+		//LCOV_EXCL_STOP
 	}
 
 	*out_record = (contacts_record_h)out_data;
@@ -4379,9 +4585,11 @@ static int __ctsvc_activity_photo_clone(contacts_record_h record, contacts_recor
 
 	int ret = ctsvc_record_copy_base(&(out_data->base), &(src_data->base));
 	if (CONTACTS_ERROR_NONE != ret) {
+		//LCOV_EXCL_START
 		ERR("ctsvc_record_copy_base() Fail");
 		__ctsvc_activity_photo_destroy((contacts_record_h)out_data, true);
 		return ret;
+		//LCOV_EXCL_STOP
 	}
 
 	*out_record = (contacts_record_h)out_data;
@@ -4412,9 +4620,11 @@ static int __ctsvc_address_clone(contacts_record_h record, contacts_record_h *ou
 
 	int ret = ctsvc_record_copy_base(&(out_data->base), &(src_data->base));
 	if (CONTACTS_ERROR_NONE != ret) {
+		//LCOV_EXCL_START
 		ERR("ctsvc_record_copy_base() Fail");
 		__ctsvc_address_destroy((contacts_record_h)out_data, true);
 		return ret;
+		//LCOV_EXCL_STOP
 	}
 
 	*out_record = (contacts_record_h)out_data;
@@ -4450,9 +4660,11 @@ static int __ctsvc_company_clone(contacts_record_h record, contacts_record_h *ou
 
 	int ret = ctsvc_record_copy_base(&(out_data->base), &(src_data->base));
 	if (CONTACTS_ERROR_NONE != ret) {
+		//LCOV_EXCL_START
 		ERR("ctsvc_record_copy_base() Fail");
 		__ctsvc_company_destroy((contacts_record_h)out_data, true);
 		return ret;
+		//LCOV_EXCL_STOP
 	}
 
 	*out_record = (contacts_record_h)out_data;
@@ -4477,9 +4689,11 @@ static int __ctsvc_email_clone(contacts_record_h record, contacts_record_h *out_
 
 	int ret = ctsvc_record_copy_base(&(out_data->base), &(src_data->base));
 	if (CONTACTS_ERROR_NONE != ret) {
+		//LCOV_EXCL_START
 		ERR("ctsvc_record_copy_base() Fail");
 		__ctsvc_email_destroy((contacts_record_h)out_data, true);
 		return ret;
+		//LCOV_EXCL_STOP
 	}
 
 	*out_record = (contacts_record_h)out_data;
@@ -4505,9 +4719,11 @@ static int __ctsvc_event_clone(contacts_record_h record, contacts_record_h *out_
 
 	int ret = ctsvc_record_copy_base(&(out_data->base), &(src_data->base));
 	if (CONTACTS_ERROR_NONE != ret) {
+		//LCOV_EXCL_START
 		ERR("ctsvc_record_copy_base() Fail");
 		__ctsvc_event_destroy((contacts_record_h)out_data, true);
 		return ret;
+		//LCOV_EXCL_STOP
 	}
 
 	*out_record = (contacts_record_h)out_data;
@@ -4541,9 +4757,11 @@ static int __ctsvc_extension_clone(contacts_record_h record, contacts_record_h *
 
 	int ret = ctsvc_record_copy_base(&(out_data->base), &(src_data->base));
 	if (CONTACTS_ERROR_NONE != ret) {
+		//LCOV_EXCL_START
 		ERR("ctsvc_record_copy_base() Fail");
 		__ctsvc_extension_destroy((contacts_record_h)out_data, true);
 		return ret;
+		//LCOV_EXCL_STOP
 	}
 
 	*out_record = (contacts_record_h)out_data;
@@ -4566,9 +4784,11 @@ static int __ctsvc_group_relation_clone(contacts_record_h record, contacts_recor
 
 	int ret = ctsvc_record_copy_base(&(out_data->base), &(src_data->base));
 	if (CONTACTS_ERROR_NONE != ret) {
+		//LCOV_EXCL_START
 		ERR("ctsvc_record_copy_base() Fail");
 		__ctsvc_group_relation_destroy((contacts_record_h)out_data, true);
 		return ret;
+		//LCOV_EXCL_STOP
 	}
 
 	*out_record = (contacts_record_h)out_data;
@@ -4592,9 +4812,11 @@ static int __ctsvc_messenger_clone(contacts_record_h record, contacts_record_h *
 
 	int ret = ctsvc_record_copy_base(&(out_data->base), &(src_data->base));
 	if (CONTACTS_ERROR_NONE != ret) {
+		//LCOV_EXCL_START
 		ERR("ctsvc_record_copy_base() Fail");
 		__ctsvc_messenger_destroy((contacts_record_h)out_data, true);
 		return ret;
+		//LCOV_EXCL_STOP
 	}
 
 	*out_record = (contacts_record_h)out_data;
@@ -4628,9 +4850,11 @@ static int __ctsvc_name_clone(contacts_record_h record, contacts_record_h *out_r
 
 	int ret = ctsvc_record_copy_base(&(out_data->base), &(src_data->base));
 	if (CONTACTS_ERROR_NONE != ret) {
+		//LCOV_EXCL_START
 		ERR("ctsvc_record_copy_base() Fail");
 		__ctsvc_name_destroy((contacts_record_h)out_data, true);
 		return ret;
+		//LCOV_EXCL_STOP
 	}
 
 	*out_record = (contacts_record_h)out_data;
@@ -4654,9 +4878,11 @@ static int __ctsvc_nickname_clone(contacts_record_h record, contacts_record_h *o
 
 	int ret = ctsvc_record_copy_base(&(out_data->base), &(src_data->base));
 	if (CONTACTS_ERROR_NONE != ret) {
+		//LCOV_EXCL_START
 		ERR("ctsvc_record_copy_base() Fail");
 		__ctsvc_nickname_destroy((contacts_record_h)out_data, true);
 		return ret;
+		//LCOV_EXCL_STOP
 	}
 
 	*out_record = (contacts_record_h)out_data;
@@ -4678,9 +4904,11 @@ static int __ctsvc_note_clone(contacts_record_h record, contacts_record_h *out_r
 
 	int ret = ctsvc_record_copy_base(&(out_data->base), &(src_data->base));
 	if (CONTACTS_ERROR_NONE != ret) {
+		//LCOV_EXCL_START
 		ERR("ctsvc_record_copy_base() Fail");
 		__ctsvc_note_destroy((contacts_record_h)out_data, true);
 		return ret;
+		//LCOV_EXCL_STOP
 	}
 
 	*out_record = (contacts_record_h)out_data;
@@ -4706,9 +4934,11 @@ static int __ctsvc_number_clone(contacts_record_h record, contacts_record_h *out
 
 	int ret = ctsvc_record_copy_base(&(out_data->base), &(src_data->base));
 	if (CONTACTS_ERROR_NONE != ret) {
+		//LCOV_EXCL_START
 		ERR("ctsvc_record_copy_base() Fail");
 		__ctsvc_number_destroy((contacts_record_h)out_data, true);
 		return ret;
+		//LCOV_EXCL_STOP
 	}
 
 	*out_record = (contacts_record_h)out_data;
@@ -4738,9 +4968,11 @@ static int __ctsvc_profile_clone(contacts_record_h record, contacts_record_h *ou
 
 	int ret = ctsvc_record_copy_base(&(out_data->base), &(src_data->base));
 	if (CONTACTS_ERROR_NONE != ret) {
+		//LCOV_EXCL_START
 		ERR("ctsvc_record_copy_base() Fail");
 		__ctsvc_profile_destroy((contacts_record_h)out_data, true);
 		return ret;
+		//LCOV_EXCL_STOP
 	}
 
 	*out_record = (contacts_record_h)out_data;
@@ -4765,9 +4997,11 @@ static int __ctsvc_relationship_clone(contacts_record_h record, contacts_record_
 
 	int ret = ctsvc_record_copy_base(&(out_data->base), &(src_data->base));
 	if (CONTACTS_ERROR_NONE != ret) {
+		//LCOV_EXCL_START
 		ERR("ctsvc_record_copy_base() Fail");
 		__ctsvc_relationship_destroy((contacts_record_h)out_data, true);
 		return ret;
+		//LCOV_EXCL_STOP
 	}
 
 	*out_record = (contacts_record_h)out_data;
@@ -4795,9 +5029,11 @@ static int __ctsvc_image_clone(contacts_record_h record, contacts_record_h *out_
 
 	int ret = ctsvc_record_copy_base(&(out_data->base), &(src_data->base));
 	if (CONTACTS_ERROR_NONE != ret) {
+		//LCOV_EXCL_START
 		ERR("ctsvc_record_copy_base() Fail");
 		__ctsvc_image_destroy((contacts_record_h)out_data, true);
 		return ret;
+		//LCOV_EXCL_STOP
 	}
 
 	*out_record = (contacts_record_h)out_data;
@@ -4831,9 +5067,11 @@ static int __ctsvc_simple_contact_clone(contacts_record_h record, contacts_recor
 
 	int ret = ctsvc_record_copy_base(&(out_data->base), &(src_data->base));
 	if (CONTACTS_ERROR_NONE != ret) {
+		//LCOV_EXCL_START
 		ERR("ctsvc_record_copy_base() Fail");
 		__ctsvc_simple_contact_destroy((contacts_record_h)out_data, true);
 		return ret;
+		//LCOV_EXCL_STOP
 	}
 
 	*out_record = (contacts_record_h)out_data;
@@ -4857,9 +5095,11 @@ static int __ctsvc_url_clone(contacts_record_h record, contacts_record_h *out_re
 
 	int ret = ctsvc_record_copy_base(&(out_data->base), &(src_data->base));
 	if (CONTACTS_ERROR_NONE != ret) {
+		//LCOV_EXCL_START
 		ERR("ctsvc_record_copy_base() Fail");
 		__ctsvc_url_destroy((contacts_record_h)out_data, true);
 		return ret;
+		//LCOV_EXCL_STOP
 	}
 
 	*out_record = (contacts_record_h)out_data;
@@ -4884,9 +5124,11 @@ static int __ctsvc_sip_clone(contacts_record_h record, contacts_record_h *out_re
 
 	int ret = ctsvc_record_copy_base(&(out_data->base), &(src_data->base));
 	if (CONTACTS_ERROR_NONE != ret) {
+		//LCOV_EXCL_START
 		ERR("ctsvc_record_copy_base() Fail");
 		__ctsvc_sip_destroy((contacts_record_h)out_data, true);
 		return ret;
+		//LCOV_EXCL_STOP
 	}
 
 	*out_record = (contacts_record_h)out_data;

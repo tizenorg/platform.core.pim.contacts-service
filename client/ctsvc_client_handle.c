@@ -54,8 +54,10 @@ int ctsvc_client_handle_get_p_with_id(unsigned int id, contacts_h *p_contact)
 	ctsvc_mutex_unlock(CTS_MUTEX_HANDLE);
 
 	if (NULL == contact) {
+		//LCOV_EXCL_START
 		ERR("g_hash_table_lookup() Fail. key[%s]", key);
 		return CONTACTS_ERROR_NO_DATA;
+		//LCOV_EXCL_STOP
 	}
 
 	*p_contact = contact;

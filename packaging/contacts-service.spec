@@ -69,6 +69,7 @@ cp %{SOURCE1001} ./%{name}-test.manifest
 export CFLAGS="$CFLAGS -DTIZEN_ENGINEER_MODE"
 export CXXFLAGS="$CXXFLAGS -DTIZEN_ENGINEER_MODE"
 export FFLAGS="$FFLAGS -DTIZEN_ENGINEER_MODE"
+export LDFLAGS+="-lgcov"
 
 MAJORVER=`echo %{version} | awk 'BEGIN {FS="."}{print $1}'`
 %cmake . -DCMAKE_VERBOSE_MAKEFILE=OFF -DMAJORVER=${MAJORVER} -DFULLVER=%{version} -DBIN_INSTALL_DIR:PATH=%{_bindir} \
