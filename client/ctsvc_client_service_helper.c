@@ -72,6 +72,7 @@ int ctsvc_client_connect_with_flags(contacts_h contact, unsigned int flags)
 	return ret;
 }
 
+//LCOV_EXCL_START
 static void _ctsvc_ipc_initialized_cb(void *user_data)
 {
 	CTS_FN_CALL;
@@ -81,6 +82,7 @@ static void _ctsvc_ipc_initialized_cb(void *user_data)
 		ctsvc_ipc_recover_for_change_subscription();
 	}
 }
+//LCOV_EXCL_STOP
 
 int ctsvc_client_connect(contacts_h contact)
 {

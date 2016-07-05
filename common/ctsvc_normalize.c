@@ -60,9 +60,11 @@ static int __ctsvc_remove_special_char(const char *src, char *dest, int dest_siz
 	int s_pos = 0, d_pos = 0, char_type, src_size;
 
 	if (NULL == src) {
+		//LCOV_EXCL_START
 		ERR("The parameter(src) is NULL");
 		dest[d_pos] = '\0';
 		return 0;
+		//LCOV_EXCL_STOP
 	}
 	src_size = strlen(src);
 
@@ -74,9 +76,11 @@ static int __ctsvc_remove_special_char(const char *src, char *dest, int dest_siz
 			d_pos += char_type;
 			s_pos += char_type;
 		} else {
+			//LCOV_EXCL_START
 			ERR("The parameter(src:%s) has invalid character set", src);
 			dest[d_pos] = '\0';
 			return CONTACTS_ERROR_INVALID_PARAMETER;
+			//LCOV_EXCL_STOP
 		}
 	}
 
@@ -93,8 +97,10 @@ static inline int __ctsvc_collation_str(const char *src, char **dest)
 
 	char *region = strdup(ctsvc_get_langset());
 	if (NULL == region) {
+		//LCOV_EXCL_START
 		ERR("strdup() Fail");
 		return CONTACTS_ERROR_OUT_OF_MEMORY;
+		//LCOV_EXCL_STOP
 	}
 
 	char *dot = strchr(region, '.');
@@ -103,35 +109,43 @@ static inline int __ctsvc_collation_str(const char *src, char **dest)
 
 	collator = ucol_open(region, &status);
 	if (U_FAILURE(status)) {
+		//LCOV_EXCL_START
 		ERR("ucol_open Fail(%s)", u_errorName(status));
 		free(region);
 		return CONTACTS_ERROR_SYSTEM;
+		//LCOV_EXCL_STOP
 	}
 
 	/* TODO: ucol_setAttribute is not called */
 	if (U_FAILURE(status)) {
+		//LCOV_EXCL_START
 		ERR("ucol_setAttribute Fail(%s)", u_errorName(status));
 		free(region);
 		ucol_close(collator);
 		return CONTACTS_ERROR_SYSTEM;
+		//LCOV_EXCL_STOP
 	}
 
 	u_strFromUTF8(NULL, 0, &size, src, strlen(src), &status);
 	if (U_FAILURE(status) && status != U_BUFFER_OVERFLOW_ERROR) {
+		//LCOV_EXCL_START
 		ERR("u_strFromUTF8 to get the dest length Fail(%s)", u_errorName(status));
 		free(region);
 		ucol_close(collator);
 		return CONTACTS_ERROR_SYSTEM;
+		//LCOV_EXCL_STOP
 	}
 	status = U_ZERO_ERROR;
 	tmp_result = calloc(1, sizeof(UChar) * (size + 1));
 	u_strFromUTF8(tmp_result, size + 1, NULL, src, -1, &status);
 	if (U_FAILURE(status)) {
+		//LCOV_EXCL_START
 		ERR("u_strFromUTF8 Fail(%s)", u_errorName(status));
 		free(region);
 		free(tmp_result);
 		ucol_close(collator);
 		return CONTACTS_ERROR_SYSTEM;
+		//LCOV_EXCL_STOP
 	}
 
 	size = ucol_getSortKey(collator, tmp_result, -1, NULL, 0);
@@ -167,8 +181,10 @@ static int __ctsvc_normalize_str(const char *src, char **dest, bool is_index)
 
 	tmp_result = calloc(1, sizeof(UChar)*(tmp_size+1));
 	if (NULL == tmp_result) {
+		//LCOV_EXCL_START
 		ERR("calloc() Fail");
 		return CONTACTS_ERROR_OUT_OF_MEMORY;
+		//LCOV_EXCL_STOP
 	}
 
 	u_strFromUTF8(tmp_result, tmp_size + 1, &tmp_size, src, -1, &status);
@@ -177,27 +193,35 @@ static int __ctsvc_normalize_str(const char *src, char **dest, bool is_index)
 		free(tmp_result);
 		tmp_result = calloc(1, sizeof(UChar) * (tmp_size + 1));
 		if (NULL == tmp_result) {
+			//LCOV_EXCL_START
 			ERR("calloc() Fail");
 			return CONTACTS_ERROR_OUT_OF_MEMORY;
+			//LCOV_EXCL_STOP
 		}
 
 		u_strFromUTF8(tmp_result, tmp_size + 1, NULL, src, -1, &status);
 		if (U_FAILURE(status)) {
+			//LCOV_EXCL_START
 			ERR("u_strFromUTF8()Fail(%s)", u_errorName(status));
 			free(tmp_result);
 			return CONTACTS_ERROR_SYSTEM;
+			//LCOV_EXCL_STOP
 		}
 	} else if (U_FAILURE(status)) {
+		//LCOV_EXCL_START
 		ERR("u_strFromUTF8() Fail(%s)", u_errorName(status));
 		free(tmp_result);
 		return CONTACTS_ERROR_SYSTEM;
+		//LCOV_EXCL_STOP
 	}
 
 	tmp_upper = calloc(1, sizeof(UChar)*(tmp_size+1));
 	if (NULL == tmp_upper) {
+		//LCOV_EXCL_START
 		ERR("calloc() Fail");
 		free(tmp_result);
 		return CONTACTS_ERROR_OUT_OF_MEMORY;
+		//LCOV_EXCL_STOP
 	}
 
 	upper_size = u_strToUpper(tmp_upper, tmp_size+1, tmp_result, -1, NULL, &status);
@@ -206,31 +230,39 @@ static int __ctsvc_normalize_str(const char *src, char **dest, bool is_index)
 		free(tmp_upper);
 		tmp_upper = calloc(1, sizeof(UChar) * (upper_size + 1));
 		if (NULL == tmp_upper) {
+			//LCOV_EXCL_START
 			ERR("calloc() Fail");
 			free(tmp_result);
 			return CONTACTS_ERROR_OUT_OF_MEMORY;
+			//LCOV_EXCL_STOP
 		}
 
 		u_strFromUTF8(tmp_upper, upper_size + 1, NULL, src, -1, &status);
 		if (U_FAILURE(status)) {
+			//LCOV_EXCL_START
 			ERR("u_strFromUTF8()Fail(%s)", u_errorName(status));
 			free(tmp_result);
 			free(tmp_upper);
 			return CONTACTS_ERROR_SYSTEM;
+			//LCOV_EXCL_STOP
 		}
 	} else if (U_FAILURE(status)) {
+		//LCOV_EXCL_START
 		ERR("u_strToUpper() Fail(%s)", u_errorName(status));
 		free(tmp_result);
 		free(tmp_upper);
 		return CONTACTS_ERROR_SYSTEM;
+		//LCOV_EXCL_STOP
 	}
 
 	result = calloc(1, sizeof(UChar)*(size+1));
 	if (NULL == result) {
+		//LCOV_EXCL_START
 		ERR("calloc() Fail");
 		free(tmp_result);
 		free(tmp_upper);
 		return CONTACTS_ERROR_OUT_OF_MEMORY;
+		//LCOV_EXCL_STOP
 	}
 
 	size = unorm_normalize(tmp_upper, -1, UNORM_NFD, 0, result, size+1, &status);
@@ -239,26 +271,32 @@ static int __ctsvc_normalize_str(const char *src, char **dest, bool is_index)
 		free(result);
 		result = calloc(1, sizeof(UChar)*(size + 1));
 		if (NULL == result) {
+			//LCOV_EXCL_START
 			ERR("calloc() Fail");
 			free(tmp_result);
 			free(tmp_upper);
 			return CONTACTS_ERROR_OUT_OF_MEMORY;
+			//LCOV_EXCL_STOP
 		}
 
 		unorm_normalize(tmp_upper, -1, UNORM_NFD, 0, result, size+1, &status);
 		if (U_FAILURE(status)) {
+			//LCOV_EXCL_START
 			ERR("unorm_normalize() Fail(%s)", u_errorName(status));
 			free(tmp_result);
 			free(tmp_upper);
 			free(result);
 			return CONTACTS_ERROR_SYSTEM;
+			//LCOV_EXCL_STOP
 		}
 	} else if (U_FAILURE(status)) {
+		//LCOV_EXCL_START
 		ERR("unorm_normalize() Fail(%s)", u_errorName(status));
 		free(tmp_result);
 		free(tmp_upper);
 		free(result);
 		return CONTACTS_ERROR_SYSTEM;
+		//LCOV_EXCL_STOP
 	}
 
 	ctsvc_check_language(result);
@@ -272,11 +310,13 @@ static int __ctsvc_normalize_str(const char *src, char **dest, bool is_index)
 	UChar *temp_result = NULL;
 	temp_result = calloc(1, sizeof(UChar)*(size+1));
 	if (NULL == temp_result) {
+		//LCOV_EXCL_START
 		ERR("calloc() Fail");
 		free(tmp_result);
 		free(tmp_upper);
 		free(result);
 		return CONTACTS_ERROR_OUT_OF_MEMORY;
+		//LCOV_EXCL_STOP
 	}
 
 	bool replaced = false;
@@ -301,15 +341,18 @@ static int __ctsvc_normalize_str(const char *src, char **dest, bool is_index)
 	status = U_ZERO_ERROR;
 	*dest = calloc(1, sizeof(char) * (size+1));
 	if (NULL == *dest) {
+		//LCOV_EXCL_START
 		ERR("calloc() Fail");
 		free(tmp_result);
 		free(tmp_upper);
 		free(result);
 		return CONTACTS_ERROR_OUT_OF_MEMORY;
+		//LCOV_EXCL_STOP
 	}
 
 	u_strToUTF8(*dest, size+1, NULL, result, -1, &status);
 	if (U_FAILURE(status)) {
+		//LCOV_EXCL_START
 		ERR("u_strToUTF8() Fail(%s)", u_errorName(status));
 		free(*dest);
 		*dest = NULL;
@@ -317,6 +360,7 @@ static int __ctsvc_normalize_str(const char *src, char **dest, bool is_index)
 		free(tmp_upper);
 		free(result);
 		return CONTACTS_ERROR_SYSTEM;
+		//LCOV_EXCL_STOP
 	}
 	free(tmp_result);
 	free(tmp_upper);
@@ -332,8 +376,10 @@ static int __ctsvc_convert_halfwidth_ascii_and_symbol(const char *src, UChar *de
 
 	u_strFromUTF8(dest, dest_size, &size, src, strlen(src), &status);
 	if (U_FAILURE(status)) {
+		//LCOV_EXCL_START
 		ERR("u_strFromUTF8() Fail(%s)", u_errorName(status));
 		return CONTACTS_ERROR_SYSTEM;
+		//LCOV_EXCL_STOP
 	}
 
 	*str_size = size;
@@ -380,8 +426,10 @@ int ctsvc_get_halfwidth_string(const char *src, char **dest, int *dest_size)
 	int ustr_size = 0;
 
 	if (CONTACTS_ERROR_NONE != __ctsvc_convert_halfwidth_ascii_and_symbol(src, unicodes, LARGE_BUFFER_SIZE, &ustr_size)) {
+		//LCOV_EXCL_START
 		ERR("__ctsvc_convert_halfwidth_ascii_and_symbol() Fail");
 		return CONTACTS_ERROR_SYSTEM;
+		//LCOV_EXCL_STOP
 	}
 
 	UErrorCode status = 0;
@@ -394,6 +442,7 @@ int ctsvc_get_halfwidth_string(const char *src, char **dest, int *dest_size)
 
 	u_strToUTF8(*dest, size+1, dest_size, unicodes, ustr_size, &status);
 	if (U_FAILURE(status)) {
+		//LCOV_EXCL_START
 		ERR("u_strToUTF8() Fail(%s)", u_errorName(status));
 
 		free(*dest);
@@ -401,6 +450,7 @@ int ctsvc_get_halfwidth_string(const char *src, char **dest, int *dest_size)
 		*dest_size = 0;
 
 		return CONTACTS_ERROR_SYSTEM;
+		//LCOV_EXCL_STOP
 	}
 
 	return CONTACTS_ERROR_NONE;
@@ -464,8 +514,10 @@ int ctsvc_normalize_index(const char *src, char **dest)
 		memset(first_str, 0x00, sizeof(first_str));
 		strncpy(first_str, src, length);
 		if (length != strlen(first_str)) {
+			//LCOV_EXCL_START
 			ERR("length : %d, first_str : %s, strlne : %d", length, first_str, strlen(first_str));
 			return CONTACTS_ERROR_INVALID_PARAMETER;
+			//LCOV_EXCL_STOP
 		}
 	}
 	ret = __ctsvc_normalize_str(first_str, dest, true);

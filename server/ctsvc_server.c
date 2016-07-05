@@ -306,7 +306,7 @@ int main(int argc, char *argv[])
 	CTS_FN_CALL;
 	INFO("Start contacts-service");
 	int ret;
-
+	setenv("GCOV_PREFIX", "/tmp/server", 1);
 	if (getuid() == 0) {   /* root */
 		gid_t glist[] = {CTS_SECURITY_FILE_GROUP};
 		ret = setgroups(1, glist);   /* client and server should have same Groups */

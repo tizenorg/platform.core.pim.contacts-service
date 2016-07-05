@@ -2180,8 +2180,10 @@ bool ctsvc_has_chinese(const char *src)
 
 	u_strFromUTF8(temp, array_sizeof(temp), NULL, src, -1, &status);
 	if (U_FAILURE(status)) {
+		//LCOV_EXCL_START
 		ERR("u_strFromUTF8 Fail(%s)", u_errorName(status));
 		return false;
+		//LCOV_EXCL_STOP
 	}
 
 	return __ctsvc_has_chinese(temp);
@@ -2212,8 +2214,10 @@ int ctsvc_convert_chinese_to_pinyin(const char *src, pinyin_name_s **name, int *
 
 	u_strFromUTF8(temp_result, array_sizeof(temp_result), NULL, src, -1, &status);
 	if (U_FAILURE(status)) {
+		//LCOV_EXCL_START
 		ERR("u_strFromUTF8 Fail(%s)", u_errorName(status));
 		return CONTACTS_ERROR_SYSTEM;
+		//LCOV_EXCL_STOP
 	}
 
 	len = u_strlen(temp_result);

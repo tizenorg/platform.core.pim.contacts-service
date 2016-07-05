@@ -173,11 +173,13 @@ int ctsvc_inotify_init(void)
 
 	__inoti_handler = __ctsvc_inotify_attach_handler(__inoti_fd);
 	if (__inoti_handler <= 0) {
+		//LCOV_EXCL_START
 		ERR("__ctsvc_inotify_attach_handler() Fail");
 		close(__inoti_fd);
 		__inoti_fd = -1;
 		__inoti_handler = 0;
 		return CONTACTS_ERROR_SYSTEM;
+		//LCOV_EXCL_STOP
 	}
 
 	__ctsvc_inoti_ref++;
@@ -259,8 +261,10 @@ static inline const char* __ctsvc_noti_get_file_path(const char *view_uri)
 		return CTSVC_NOTI_SIP_CHANGED;
 	case CTSVC_RECORD_RESULT:
 	default:
+		//LCOV_EXCL_START
 		ERR("The type(%s) is not supported", view_uri);
 		return NULL;
+		//LCOV_EXCL_STOP
 	}
 	return NULL;
 }
@@ -278,22 +282,28 @@ int ctsvc_inotify_subscribe_ipc_ready(void (*cb)(void *), void *user_data)
 	if (NULL == noti_info) {
 		int wd = __ctsvc_inotify_get_wd(__inoti_fd, noti_path);
 		if (-1 == wd) {
+			//LCOV_EXCL_START
 			ERR("__ctsvc_inotify_get_wd() Fail(noti_path=%s, errno : %d)", noti_path, errno);
 			if (errno == EACCES)
 				return CONTACTS_ERROR_PERMISSION_DENIED;
 			return CONTACTS_ERROR_SYSTEM;
+			//LCOV_EXCL_STOP
 		}
 
 		int ret = __ctsvc_inotify_watch(__inoti_fd, noti_path);
 		if (CONTACTS_ERROR_NONE != ret) {
+			//LCOV_EXCL_START
 			ERR("__ctsvc_inotify_watch() Fail");
 			return ret;
+			//LCOV_EXCL_STOP
 		}
 
 		noti_info = calloc(1, sizeof(struct socket_init_noti_info));
 		if (NULL == noti_info) {
+			//LCOV_EXCL_START
 			ERR("calloc() return NULL");
 			return ret;
+			//LCOV_EXCL_STOP
 		}
 
 		noti_info->wd = wd;
@@ -314,8 +324,10 @@ int ctsvc_inotify_unsubscribe_ipc_ready()
 
 	noti_info = g_hash_table_lookup(_ctsvc_socket_init_noti_table, noti_path);
 	if (NULL == noti_info) {
+		//LCOV_EXCL_START
 		ERR("g_hash_table_lookup() return NULL");
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 
 	if (1 == noti_info->subscribe_count) {
@@ -348,10 +360,12 @@ int ctsvc_inotify_subscribe(const char *view_uri, void *cb, void *data)
 
 	wd = __ctsvc_inotify_get_wd(__inoti_fd, path);
 	if (-1 == wd) {
+		//LCOV_EXCL_START
 		ERR("__ctsvc_inotify_get_wd() Fail(errno : %d)", errno);
 		if (errno == EACCES)
 			return CONTACTS_ERROR_PERMISSION_DENIED;
 		return CONTACTS_ERROR_SYSTEM;
+		//LCOV_EXCL_STOP
 	}
 
 	for (it = __noti_list; it; it = it->next) {
@@ -369,8 +383,10 @@ int ctsvc_inotify_subscribe(const char *view_uri, void *cb, void *data)
 
 	if (same_noti) {
 		__ctsvc_inotify_watch(__inoti_fd, path);
+		//LCOV_EXCL_START
 		ERR("The same callback(%s) is already exist", view_uri);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 
 	ret = __ctsvc_inotify_watch(__inoti_fd, path);
@@ -438,10 +454,12 @@ int ctsvc_inotify_unsubscribe(const char *view_uri, void *cb, void *user_data)
 
 	wd = __ctsvc_inotify_get_wd(__inoti_fd, path);
 	if (-1 == wd) {
+		//LCOV_EXCL_START
 		ERR("__ctsvc_inotify_get_wd() Fail(errno : %d)", errno);
 		if (errno == EACCES)
 			return CONTACTS_ERROR_PERMISSION_DENIED;
 		return CONTACTS_ERROR_SYSTEM;
+		//LCOV_EXCL_STOP
 	}
 
 	ret = __ctsvc_del_noti(&__noti_list, wd, view_uri, cb, user_data);
