@@ -101,8 +101,10 @@ int ctsvc_db_image_insert(contacts_record_h record, int contact_id, bool is_my_p
 	image_id = ctsvc_db_get_next_id(CTS_TABLE_DATA);
 	ret = ctsvc_contact_add_image_file(contact_id, image_id, image->path, image_path, sizeof(image_path));
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_contact_add_image_file() Fail(%d)", ret);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 	free(image->path);
 	image->path = strdup(image_path);
@@ -119,9 +121,11 @@ int ctsvc_db_image_insert(contacts_record_h record, int contact_id, bool is_my_p
 
 	ret = ctsvc_stmt_step(stmt);
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_stmt_step() Fail(%d)", ret);
 		ctsvc_stmt_finalize(stmt);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	/* image->id = ctsvc_db_get_last_insert_id(); */
@@ -163,8 +167,10 @@ int ctsvc_db_image_update(contacts_record_h record, int contact_id, bool is_my_p
 		if (image->path) {
 			ret = ctsvc_have_file_read_permission(image->path);
 			if (ret != CONTACTS_ERROR_NONE) {
+				/* LCOV_EXCL_START */
 				ERR("ctsvc_have_file_read_permission Fail(%d)", ret);
 				return ret;
+				/* LCOV_EXCL_STOP */
 			}
 		}
 
@@ -254,8 +260,10 @@ int ctsvc_db_image_set_primary_default(int contact_id, const char *image_thumbna
 	image_path = ctsvc_utils_get_image_path(image_thumbnail_path);
 
 	if (NULL == image_path) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_utils_get_image_path() Fail");
 		return CONTACTS_ERROR_INTERNAL;
+		/* LCOV_EXCL_STOP */
 	}
 
 	snprintf(query, sizeof(query),

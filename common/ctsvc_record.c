@@ -631,8 +631,10 @@ int ctsvc_record_set_projection_flags(contacts_record_h record,
 
 	_record->properties_flags = calloc(property_max_count, sizeof(char));
 	if (NULL == _record->properties_flags) {
+		/* LCOV_EXCL_START */
 		ERR("calloc fail");
 		return CONTACTS_ERROR_OUT_OF_MEMORY;
+		/* LCOV_EXCL_STOP */
 	}
 
 	_record->property_max_count = property_max_count;

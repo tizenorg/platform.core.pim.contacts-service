@@ -41,8 +41,10 @@ static int __ctsvc_db_activity_photo_insert_record(contacts_record_h record, int
 
 	ret = ctsvc_begin_trans();
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_begin_trans() Fail(%d)", ret);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	snprintf(query, sizeof(query),
@@ -50,6 +52,7 @@ static int __ctsvc_db_activity_photo_insert_record(contacts_record_h record, int
 			"WHERE contact_id = (SELECT contact_id from "CTS_TABLE_ACTIVITIES" WHERE id = %d)", activity_photo->activity_id);
 	ret = ctsvc_query_get_first_int_result(query, &addressbook_id);
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ctsvc_end_trans(false);
 		if (CONTACTS_ERROR_NO_DATA == ret) {
 			ERR("No data : activity_id (%d) is not exist", activity_photo->activity_id);
@@ -58,19 +61,24 @@ static int __ctsvc_db_activity_photo_insert_record(contacts_record_h record, int
 			ERR("ctsvc_query_get_first_int_result() Fail(%d)", ret);
 			return ret;
 		}
+		/* LCOV_EXCL_STOP */
 	}
 
 	if (false == ctsvc_have_ab_write_permission(addressbook_id, false)) {
+		/* LCOV_EXCL_START */
 		ERR("No permission in this addresbook_id(%d)", addressbook_id);
 		ctsvc_end_trans(false);
 		return CONTACTS_ERROR_PERMISSION_DENIED;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ret = ctsvc_db_activity_photo_insert(record, activity_photo->activity_id, id);
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_db_activity_photo_insert() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ret = ctsvc_end_trans(true);
@@ -99,12 +107,14 @@ static int __ctsvc_db_activity_photo_get_record(int id, contacts_record_h *out_r
 
 	ret = ctsvc_stmt_step(stmt);
 	if (1 /*CTS_TRUE*/ != ret) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_stmt_step() Fail(%d)", ret);
 		ctsvc_stmt_finalize(stmt);
 		if (CONTACTS_ERROR_NONE == ret)
 			return CONTACTS_ERROR_NO_DATA;
 		else
 			return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ctsvc_db_activity_photo_get_value_from_stmt(stmt, out_record);
@@ -125,8 +135,10 @@ static int __ctsvc_db_activity_photo_update_record(contacts_record_h record)
 
 	ret = ctsvc_begin_trans();
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_begin_trans() Fail(%d)", ret);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	snprintf(query, sizeof(query),
@@ -136,22 +148,28 @@ static int __ctsvc_db_activity_photo_update_record(contacts_record_h record)
 
 	ret = ctsvc_query_get_first_int_result(query, &addressbook_id);
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("No data : activity_id (%d) is not exist", activity_photo->activity_id);
 		ctsvc_end_trans(false);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	if (false == ctsvc_have_ab_write_permission(addressbook_id, false)) {
+		/* LCOV_EXCL_START */
 		ERR("No permission in this addresbook_id(%d)", addressbook_id);
 		ctsvc_end_trans(false);
 		return CONTACTS_ERROR_PERMISSION_DENIED;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ret = ctsvc_db_activity_photo_update(record);
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("Update record Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ret = ctsvc_end_trans(true);
@@ -168,8 +186,10 @@ static int __ctsvc_db_activity_photo_delete_record(int id)
 
 	ret = ctsvc_begin_trans();
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_begin_trans() Fail(%d)", ret);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	snprintf(query, sizeof(query),
@@ -179,22 +199,28 @@ static int __ctsvc_db_activity_photo_delete_record(int id)
 
 	ret = ctsvc_query_get_first_int_result(query, &addressbook_id);
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("No data : id (%d) is not exist", id);
 		ctsvc_end_trans(false);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	if (false == ctsvc_have_ab_write_permission(addressbook_id, false)) {
+		/* LCOV_EXCL_START */
 		ERR("No permission in this addresbook_id(%d)", addressbook_id);
 		ctsvc_end_trans(false);
 		return CONTACTS_ERROR_PERMISSION_DENIED;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ret = ctsvc_db_activity_photo_delete(id);
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_db_activity_photo_delete() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ret = ctsvc_end_trans(true);
@@ -229,10 +255,12 @@ static int __ctsvc_db_activity_photo_get_all_records(int offset, int limit, cont
 	contacts_list_create(&list);
 	while ((ret = ctsvc_stmt_step(stmt))) {
 		if (1 /*CTS_TRUE */ != ret) {
+			/* LCOV_EXCL_START */
 			ERR("DB : ctsvc_stmt_step fail(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
 			contacts_list_destroy(list, true);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 		ctsvc_db_activity_photo_get_value_from_stmt(stmt, (contacts_record_h*)&activity_photo);
 		ctsvc_list_prepend(list, (contacts_record_h)activity_photo);
@@ -265,10 +293,12 @@ static int __ctsvc_db_activity_photo_get_records_with_query(contacts_query_h que
 	while ((ret = ctsvc_stmt_step(stmt))) {
 		contacts_record_h record;
 		if (1 /*CTS_TRUE */ != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_stmt_step() Fail(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
 			contacts_list_destroy(list, true);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 
 		contacts_record_create(_contacts_activity_photo._uri, &record);

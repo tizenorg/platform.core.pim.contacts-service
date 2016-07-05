@@ -35,14 +35,18 @@ API int contacts_connect_with_flags(unsigned int flags)
 	if (CONTACTS_ERROR_NO_DATA == ret) {
 		ret = ctsvc_client_handle_create(id, &contact);
 		if (CONTACTS_ERROR_NONE != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_client_handle_create() Fail(%d)", ret);
 			if (CONTACTS_ERROR_INVALID_PARAMETER == ret)
 				return CONTACTS_ERROR_INTERNAL;
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 	} else if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_client_handle_get_p_with_id() Fail(%d)", ret);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ret = ctsvc_client_connect_with_flags(contact, flags);
@@ -64,14 +68,18 @@ API int contacts_connect(void)
 	if (CONTACTS_ERROR_NO_DATA == ret) {
 		ret = ctsvc_client_handle_create(id, &contact);
 		if (CONTACTS_ERROR_NONE != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_client_handle_create() Fail(%d)", ret);
 			if (CONTACTS_ERROR_INVALID_PARAMETER == ret)
 				return CONTACTS_ERROR_INTERNAL;
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 	} else if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_client_handle_get_p_with_id() Fail(%d)", ret);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 	ret = ctsvc_client_connect(contact);
 	if ((CONTACTS_ERROR_IPC_NOT_AVALIABLE == ret)
@@ -111,14 +119,17 @@ API int contacts_connect_on_thread(void)
 	if (CONTACTS_ERROR_NO_DATA == ret) {
 		ret = ctsvc_client_handle_create(id, &contact);
 		if (CONTACTS_ERROR_NONE != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_client_handle_create() Fail(%d)", ret);
 			if (CONTACTS_ERROR_INVALID_PARAMETER == ret)
 				return CONTACTS_ERROR_INTERNAL;
 			return ret;
 		}
 	} else if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_client_handle_get_p_with_id() Fail(%d)", ret);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ret = ctsvc_client_connect_on_thread(contact);

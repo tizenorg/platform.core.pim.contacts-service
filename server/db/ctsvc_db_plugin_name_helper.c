@@ -46,16 +46,20 @@ static inline void __ctsvc_make_name_lookup(int op_code, const char *name_first,
 		if (CONTACTS_NAME_DISPLAY_ORDER_FIRSTLAST == op_code) {
 			*name_lookup = calloc(1, SAFE_STRLEN(name_first) + SAFE_STRLEN(name_last) + 3);
 			if (NULL == *name_lookup) {
+				/* LCOV_EXCL_START */
 				ERR("calloc() Fail");
 				return;
+				/* LCOV_EXCL_STOP */
 			}
 			snprintf(*name_lookup, SAFE_STRLEN(name_first) + SAFE_STRLEN(name_last) + 3, "%s %c%s",
 					SAFE_STR(name_first), 0x7E, SAFE_STR(name_last));
 		} else {
 			*name_lookup = calloc(1, SAFE_STRLEN(name_first) + SAFE_STRLEN(name_last) + 5);
 			if (NULL == *name_lookup) {
+				/* LCOV_EXCL_START */
 				ERR("calloc() Fail");
 				return;
+				/* LCOV_EXCL_STOP */
 			}
 			snprintf(*name_lookup, SAFE_STRLEN(name_first) + SAFE_STRLEN(name_last) + 5, "%s,%c %c%s",
 					SAFE_STR(name_last), 0x7E, 0x7E, SAFE_STR(name_first));
@@ -152,8 +156,10 @@ int ctsvc_db_name_insert(contacts_record_h record, int contact_id, bool is_my_pr
 				contact_id, CONTACTS_DATA_TYPE_NAME, is_my_profile);
 		ret = ctsvc_query_exec(query);
 		if (CONTACTS_ERROR_NONE != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_query_exec() Faild(%d)", ret);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 
 		snprintf(query, sizeof(query),
@@ -218,9 +224,11 @@ int ctsvc_db_name_insert(contacts_record_h record, int contact_id, bool is_my_pr
 
 		ret = ctsvc_stmt_step(stmt);
 		if (CONTACTS_ERROR_NONE != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_stmt_step() Fail(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 
 		/* name->id = ctsvc_db_get_last_insert_id(); */
@@ -304,8 +312,10 @@ int ctsvc_db_name_update(contacts_record_h record, bool is_my_profile)
 
 	ret = __ctsvc_normalize_name(name, normal_name);
 	if (ret < CONTACTS_ERROR_NONE) {
+		/* LCOV_EXCL_START */
 		ERR("cts_normalize_name() Fail(%d)", ret);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	switch (ret) {

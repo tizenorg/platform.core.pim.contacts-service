@@ -71,8 +71,10 @@ int ctsvc_image_util_get_mimetype(image_util_colorspace_e colorspace,
 	case IMAGE_UTIL_COLORSPACE_YV12: /* not supported */
 	case IMAGE_UTIL_COLORSPACE_I420: /* not supported */
 	default:
+		/* LCOV_EXCL_START */
 		ERR("Not supported %d", colorspace);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		/* LCOV_EXCL_STOP */
 	}
 	*p_mimetype = mimetype;
 	return CONTACTS_ERROR_NONE;
@@ -86,43 +88,55 @@ media_format_h ctsvc_image_util_create_media_format(int mimetype, int width,
 
 	ret = media_format_create(&fmt);
 	if (MEDIA_FORMAT_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("media_format_create() Fail(%d)", ret);
 		return NULL;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ret = media_format_set_video_mime(fmt, mimetype);
 	if (MEDIA_FORMAT_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("media_format_set_video_mime() Fail(%d)", ret);
 		media_format_unref(fmt);
 		return NULL;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ret = media_format_set_video_width(fmt, width);
 	if (MEDIA_FORMAT_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("media_format_set_video_width() Fail(%d)", ret);
 		media_format_unref(fmt);
 		return NULL;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ret = media_format_set_video_height(fmt, height);
 	if (MEDIA_FORMAT_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("media_format_set_video_height() Fail(%d)", ret);
 		media_format_unref(fmt);
 		return NULL;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ret = media_format_set_video_avg_bps(fmt, 2000000); /* image_util guide */
 	if (MEDIA_FORMAT_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("media_format_set_video_avg_bps() Fail(%d)", ret);
 		media_format_unref(fmt);
 		return NULL;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ret = media_format_set_video_max_bps(fmt, 15000000); /* image_util guide */
 	if (MEDIA_FORMAT_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("media_format_set_video_max_bps() Fail(%d)", ret);
 		media_format_unref(fmt);
 		return NULL;
+		/* LCOV_EXCL_STOP */
 	}
 
 	return fmt;
@@ -148,22 +162,28 @@ media_packet_h ctsvc_image_util_create_media_packet(media_format_h fmt,
 	ret = media_packet_create_alloc(fmt, _ctsvc_image_packet_create_alloc_finalize_cb,
 			NULL, &packet);
 	if (MEDIA_PACKET_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("media_packet_create_alloc() Fail(%d)", ret);
 		return NULL;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ret = media_packet_get_buffer_size(packet, &mp_buffer_size);
 	if (MEDIA_PACKET_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("media_packet_get_buffer_size() Fail(%d)", ret);
 		media_packet_destroy(packet);
 		return NULL;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ret = media_packet_get_buffer_data_ptr(packet, &mp_buffer);
 	if (MEDIA_PACKET_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("media_packet_get_buffer_data_ptr() Fail(%d)", ret);
 		media_packet_destroy(packet);
 		return NULL;
+		/* LCOV_EXCL_STOP */
 	}
 
 	if (mp_buffer)
@@ -190,6 +210,7 @@ static void _image_transform_completed_cb(media_packet_h *dst,
 	if (IMAGE_UTIL_ERROR_NONE == error) {
 		ret = media_packet_get_buffer_size(*dst, &size);
 		if (MEDIA_PACKET_ERROR_NONE != ret) {
+			/* LCOV_EXCL_START */
 			ERR("media_packet_get_buffer_size() Fail(%d)", ret);
 			info->ret = CONTACTS_ERROR_SYSTEM;
 			media_packet_destroy(*dst);
@@ -197,10 +218,12 @@ static void _image_transform_completed_cb(media_packet_h *dst,
 			g_cond_signal(&info->cond);
 			g_mutex_unlock(&info->mutex);
 			return;
+			/* LCOV_EXCL_STOP */
 		}
 
 		ret = media_packet_get_buffer_data_ptr(*dst, &buffer);
 		if (MEDIA_PACKET_ERROR_NONE != ret) {
+			/* LCOV_EXCL_START */
 			ERR("media_packet_get_buffer_data_ptr() Fail(%d)", ret);
 			info->ret = CONTACTS_ERROR_SYSTEM;
 			media_packet_destroy(*dst);
@@ -208,10 +231,12 @@ static void _image_transform_completed_cb(media_packet_h *dst,
 			g_cond_signal(&info->cond);
 			g_mutex_unlock(&info->mutex);
 			return;
+			/* LCOV_EXCL_STOP */
 		}
 
 		info->buffer = calloc(1, (size_t)size);
 		if (NULL == info->buffer) {
+			/* LCOV_EXCL_START */
 			ERR("calloc() Fail");
 			info->ret = CONTACTS_ERROR_SYSTEM;
 			media_packet_destroy(*dst);
@@ -219,6 +244,7 @@ static void _image_transform_completed_cb(media_packet_h *dst,
 			g_cond_signal(&info->cond);
 			g_mutex_unlock(&info->mutex);
 			return;
+			/* LCOV_EXCL_STOP */
 		}
 		memcpy(info->buffer, buffer, (size_t)size);
 		info->size = size;
@@ -245,8 +271,10 @@ static int _ctsvc_image_util_transform_run(transformation_h transform,
 
 	info = calloc(1, sizeof(struct image_transform));
 	if (NULL == info) {
+		/* LCOV_EXCL_START */
 		ERR("calloc() Fail");
 		return CONTACTS_ERROR_OUT_OF_MEMORY;
+		/* LCOV_EXCL_STOP */
 	}
 
 	g_cond_init(&info->cond);
@@ -255,11 +283,13 @@ static int _ctsvc_image_util_transform_run(transformation_h transform,
 	g_mutex_lock(&info->mutex);
 	ret = image_util_transform_run(transform, packet, _image_transform_completed_cb, info);
 	if (IMAGE_UTIL_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("image_util_transform_run() Fail(%d)", ret);
 		g_mutex_unlock(&info->mutex);
 		g_mutex_clear(&info->mutex);
 		g_cond_clear(&info->cond);
 		return CONTACTS_ERROR_SYSTEM;
+		/* LCOV_EXCL_STOP */
 	}
 
 	end_time = g_get_monotonic_time() + 4000 * G_TIME_SPAN_MILLISECOND;
@@ -273,10 +303,12 @@ static int _ctsvc_image_util_transform_run(transformation_h transform,
 	g_cond_clear(&info->cond);
 
 	if (CONTACTS_ERROR_NONE != info->ret) {
+		/* LCOV_EXCL_START */
 		ERR("image_util_transform_run() Fail(%d)", info->ret);
 		free(info->buffer);
 		free(info);
 		return CONTACTS_ERROR_SYSTEM;
+		/* LCOV_EXCL_STOP */
 	}
 
 	*p_size = info->size;
@@ -294,15 +326,19 @@ int ctsvc_image_util_rotate(media_packet_h packet, image_util_rotation_e rotatio
 
 	ret = image_util_transform_create(&transform);
 	if (IMAGE_UTIL_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("image_util_transform_create() Fail(%d)", ret);
 		return CONTACTS_ERROR_SYSTEM;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ret = image_util_transform_set_rotation(transform, rotation);
 	if (IMAGE_UTIL_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("image_util_transform_set_rotation() Fail(%d)", ret);
 		image_util_transform_destroy(transform);
 		return CONTACTS_ERROR_SYSTEM;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ret = _ctsvc_image_util_transform_run(transform, packet, p_buffer, p_size);
@@ -319,15 +355,19 @@ int ctsvc_image_util_resize(media_packet_h packet, int width, int height,
 
 	ret = image_util_transform_create(&transform);
 	if (IMAGE_UTIL_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("image_util_transform_create() Fail(%d)", ret);
 		return CONTACTS_ERROR_SYSTEM;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ret = image_util_transform_set_resolution(transform, width, height);
 	if (IMAGE_UTIL_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("image_util_transform_set_resolution() Fail(%d)", ret);
 		image_util_transform_destroy(transform);
 		return CONTACTS_ERROR_SYSTEM;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ret = _ctsvc_image_util_transform_run(transform, packet, p_buffer, p_size);

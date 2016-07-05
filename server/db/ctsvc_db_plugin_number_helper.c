@@ -91,9 +91,11 @@ int ctsvc_db_number_insert(contacts_record_h record, int contact_id, bool is_my_
 
 	ret = ctsvc_stmt_step(stmt);
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_stmt_step() Fail(%d)", ret);
 		ctsvc_stmt_finalize(stmt);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	number_id = ctsvc_db_get_last_insert_id();
@@ -318,11 +320,13 @@ int ctsvc_db_number_delete(int id, bool is_my_profile)
 
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_query_exec() Fail(%d)", ret);
 #ifdef ENABLE_LOG_FEATURE
 		ctsvc_stmt_finalize(stmt);
 #endif /* ENABLE_LOG_FEATURE */
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 #ifdef ENABLE_LOG_FEATURE

@@ -74,20 +74,24 @@ static int __ctsvc_db_addressbook_get_record(int id, contacts_record_h *out_reco
 
 	ret = ctsvc_stmt_step(stmt);
 	if (1 /*CTS_TRUE*/ != ret) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_stmt_step() Fail(%d)", ret);
 		ctsvc_stmt_finalize(stmt);
 		if (CONTACTS_ERROR_NONE == ret)
 			return CONTACTS_ERROR_NO_DATA;
 		else
 			return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ret = __ctsvc_db_addressbook_value_set(stmt, &record);
 
 	ctsvc_stmt_finalize(stmt);
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("__ctsvc_db_addressbook_value_set(ALL) Fail(%d)", ret);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	*out_record = record;
@@ -120,6 +124,7 @@ static int __ctsvc_db_addressbook_insert_record(contacts_record_h record, int *i
 			addressbook->account_id);
 	ret = ctsvc_query_get_first_int_result(query, &addresbook_id);
 	if (CONTACTS_ERROR_NO_DATA != ret) {
+		/* LCOV_EXCL_START */
 		ctsvc_end_trans(false);
 		if (CONTACTS_ERROR_NONE == ret) {
 			ERR("One addressbook which has account_id(%d) already exists", addressbook->account_id);
@@ -128,22 +133,27 @@ static int __ctsvc_db_addressbook_insert_record(contacts_record_h record, int *i
 			ERR("ctsvc_query_get_first_int_result() Fail(%d)", ret);
 			return ret;
 		}
+		/* LCOV_EXCL_STOP */
 	}
 
 	/* check account_id validation */
 	ret = account_create(&account);
 	if (ACCOUNT_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("account_create() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return CONTACTS_ERROR_SYSTEM;
+		/* LCOV_EXCL_STOP */
 	}
 	ret = account_query_account_by_account_id(addressbook->account_id, &account);
 	if (ACCOUNT_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("account_query_account_by_account_id Faild(%d) : account_id(%d)", ret, addressbook->account_id);
 		ret = account_destroy(account);
 		WARN_IF(ret != ACCOUNT_ERROR_NONE, "account_destroy Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		/* LCOV_EXCL_STOP */
 	}
 	ret = account_destroy(account);
 	WARN_IF(ret != ACCOUNT_ERROR_NONE, "account_destroy Fail(%d)", ret);
@@ -155,9 +165,11 @@ static int __ctsvc_db_addressbook_insert_record(contacts_record_h record, int *i
 
 	ret = ctsvc_query_prepare(query, &stmt);
 	if (NULL == stmt) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_query_prepare() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ctsvc_stmt_bind_text(stmt, 1, addressbook->name);
@@ -170,9 +182,11 @@ static int __ctsvc_db_addressbook_insert_record(contacts_record_h record, int *i
 	do {
 		ret = ctsvc_stmt_step(stmt);
 		if (CONTACTS_ERROR_NONE != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_stmt_step() Fail(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
 			break;
+			/* LCOV_EXCL_STOP */
 		}
 
 		/* int index = ctsvc_db_get_last_insert_id(); */
@@ -183,9 +197,11 @@ static int __ctsvc_db_addressbook_insert_record(contacts_record_h record, int *i
 		ctsvc_set_addressbook_noti();
 		ret = ctsvc_end_trans(true);
 		if (ret < CONTACTS_ERROR_NONE) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_end_trans() Fail(%d)", ret);
 			free(smack);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 		/* addressbook->id = index; */
 
@@ -219,12 +235,14 @@ static int __ctsvc_db_addressbook_update_record(contacts_record_h record)
 
 	ret = ctsvc_is_owner(addressbook->id);
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		if (CONTACTS_ERROR_PERMISSION_DENIED == ret)
 			ERR("Does not have permission of address_book (%d)", addressbook->id);
 		else
 			ERR("ctsvc_is_owner Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	do {
@@ -309,8 +327,10 @@ static int __ctsvc_db_addressbook_delete_record(int addressbook_id)
 	do {
 		ret = ctsvc_query_exec(query);
 		if (CONTACTS_ERROR_NONE != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_query_exec() Fail(%d)", ret);
 			break;
+			/* LCOV_EXCL_STOP */
 		}
 
 		ret = ctsvc_db_change();
@@ -327,14 +347,18 @@ static int __ctsvc_db_addressbook_delete_record(int addressbook_id)
 
 		ret = ctsvc_person_do_garbage_collection();
 		if (CONTACTS_ERROR_NONE != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_person_garbagecollection() Fail(%d)", ret);
 			break;
+			/* LCOV_EXCL_STOP */
 		}
 
 		ret = ctsvc_end_trans(true);
 		if (ret < CONTACTS_ERROR_NONE) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_end_trans() Fail(%d)", ret);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 
 		return CONTACTS_ERROR_NONE;
@@ -375,10 +399,12 @@ static int __ctsvc_db_addressbook_get_all_records(int offset, int limit,
 	while ((ret = ctsvc_stmt_step(stmt))) {
 		contacts_record_h record;
 		if (1 != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_stmt_step() Fail(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
 			contacts_list_destroy(list, true);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 		__ctsvc_db_addressbook_value_set(stmt, &record);
 
@@ -411,10 +437,12 @@ static int __ctsvc_db_addressbook_get_records_with_query(contacts_query_h query,
 	while ((ret = ctsvc_stmt_step(stmt))) {
 		contacts_record_h record;
 		if (1 != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_stmt_step() Fail(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
 			contacts_list_destroy(list, true);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 
 		contacts_record_create(_contacts_address_book._uri, &record);

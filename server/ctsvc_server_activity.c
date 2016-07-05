@@ -39,9 +39,11 @@ int ctsvc_activity_delete_by_contact_id(int contact_id)
 
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_STOP */
 		ERR("ctsvc_query_exec() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ctsvc_set_activity_noti();
@@ -67,9 +69,11 @@ int ctsvc_activity_delete_by_account_id(int account_id)
 
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_query_exec() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ctsvc_set_activity_noti();

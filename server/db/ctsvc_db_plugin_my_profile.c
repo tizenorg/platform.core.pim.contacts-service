@@ -62,12 +62,14 @@ static int __ctsvc_db_get_my_profile_base_info(int id, ctsvc_my_profile_s *my_pr
 
 	ret = ctsvc_stmt_step(stmt);
 	if (1 /*CTS_TRUE*/ != ret) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_stmt_step() Fail(%d)", ret);
 		ctsvc_stmt_finalize(stmt);
 		if (CONTACTS_ERROR_NONE == ret)
 			return CONTACTS_ERROR_NO_DATA;
 		else
 			return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	i = 0;
@@ -105,9 +107,11 @@ static int __ctsvc_db_my_profile_get_data(int id, ctsvc_my_profile_s *my_profile
 
 	ret = ctsvc_stmt_step(stmt);
 	if (1 /*CTS_TRUE */!= ret) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_stmt_step() Fail(%d)", ret);
 		ctsvc_stmt_finalize(stmt);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	do {
@@ -159,8 +163,10 @@ static int __ctsvc_db_my_profile_get_data(int id, ctsvc_my_profile_s *my_profile
 			ctsvc_get_data_info_sip(stmt, (contacts_list_h)my_profile->sips);
 			break;
 		default:
+			/* LCOV_EXCL_START */
 			ERR("Intenal : Not supported data type (%d)", datatype);
 			break;
+			/* LCOV_EXCL_STOP */
 		}
 
 	} while (1 /*CTS_TRUE*/ == ctsvc_stmt_step(stmt));
@@ -184,16 +190,20 @@ static int __ctsvc_db_my_profile_get_record(int id, contacts_record_h *out_recor
 	my_profile = (ctsvc_my_profile_s*)record;
 	ret = __ctsvc_db_get_my_profile_base_info(id, my_profile);
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("cts_get_main_contacts_info(ALL) Fail(%d)", ret);
 		contacts_record_destroy(record, true);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ret = __ctsvc_db_my_profile_get_data(id, my_profile);
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("__ctsvc_db_my_profile_get_data Fail(%d)", ret);
 		contacts_record_destroy(record, true);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	*out_record = record;
@@ -215,32 +225,40 @@ static int __ctsvc_db_my_profile_delete_record(int id)
 			"SELECT addressbook_id FROM "CTSVC_DB_VIEW_MY_PROFILE" WHERE my_profile_id = %d", id);
 	ret  = ctsvc_query_get_first_int_result(query, &addressbook_id);
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_query_get_first_int_result() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	if (false == ctsvc_have_ab_write_permission(addressbook_id, false)) {
+		/* LCOV_EXCL_START */
 		ERR("No permission in this addresbook_id(%d)", addressbook_id);
 		ctsvc_end_trans(false);
 		return CONTACTS_ERROR_PERMISSION_DENIED;
+		/* LCOV_EXCL_STOP */
 	}
 
 	snprintf(query, sizeof(query), "UPDATE "CTS_TABLE_MY_PROFILES" "
 			"SET deleted = 1, changed_ver = %d WHERE my_profile_id = %d", ctsvc_get_next_ver(), id);
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_query_exec() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ctsvc_set_my_profile_noti();
 
 	ret = ctsvc_end_trans(true);
 	if (ret < CONTACTS_ERROR_NONE) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_end_trans() Fail(%d)", ret);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	} else {
 		return CONTACTS_ERROR_NONE;
 	}
@@ -253,64 +271,80 @@ static inline int __ctsvc_my_profile_update_data(ctsvc_my_profile_s *my_profile)
 	if (my_profile->name) {
 		ret = ctsvc_contact_update_data_name((contacts_list_h)my_profile->name, my_profile->id, true);
 		if (CONTACTS_ERROR_NONE != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_contact_update_data_name() Fail(%d)", ret);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 	}
 
 	if (my_profile->company) {
 		ret = ctsvc_contact_update_data_company((contacts_list_h)my_profile->company, my_profile->id, true);
 		if (CONTACTS_ERROR_NONE != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_contact_update_data_company() Fail(%d)", ret);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 	}
 
 	if (my_profile->note) {
 		ret = ctsvc_contact_update_data_note((contacts_list_h)my_profile->note, my_profile->id, true);
 		if (CONTACTS_ERROR_NONE != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_contact_update_data_note() Fail(%d)", ret);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 	}
 
 	if (my_profile->events) {
 		ret = ctsvc_contact_update_data_event((contacts_list_h)my_profile->events, my_profile->id, true);
 		if (CONTACTS_ERROR_NONE != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_contact_update_data_events() Fail(%d)", ret);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 	}
 
 	if (my_profile->messengers) {
 		ret = ctsvc_contact_update_data_messenger((contacts_list_h)my_profile->messengers, my_profile->id, true);
 		if (CONTACTS_ERROR_NONE != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_contact_update_data_messengers() Fail(%d)", ret);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 	}
 
 	if (my_profile->postal_addrs) {
 		ret = ctsvc_contact_update_data_address((contacts_list_h)my_profile->postal_addrs, my_profile->id, true);
 		if (CONTACTS_ERROR_NONE != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_contact_update_data_address() Fail(%d)", ret);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 	}
 
 	if (my_profile->urls) {
 		ret = ctsvc_contact_update_data_url((contacts_list_h)my_profile->urls, my_profile->id, true);
 		if (CONTACTS_ERROR_NONE != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_contact_update_data_url() Fail(%d)", ret);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 	}
 
 	if (my_profile->nicknames) {
 		ret = ctsvc_contact_update_data_nickname((contacts_list_h)my_profile->nicknames, my_profile->id, true);
 		if (CONTACTS_ERROR_NONE != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_contact_update_data_nickname() Fail(%d)", ret);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 	}
 
@@ -318,8 +352,10 @@ static inline int __ctsvc_my_profile_update_data(ctsvc_my_profile_s *my_profile)
 		bool had_phonenumber;
 		ret = ctsvc_contact_update_data_number((contacts_list_h)my_profile->numbers, my_profile->id, true, &had_phonenumber);
 		if (CONTACTS_ERROR_NONE != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_contact_update_data_number() Fail(%d)", ret);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 	}
 
@@ -327,40 +363,50 @@ static inline int __ctsvc_my_profile_update_data(ctsvc_my_profile_s *my_profile)
 		bool had_email;
 		ret = ctsvc_contact_update_data_email((contacts_list_h)my_profile->emails, my_profile->id, true, &had_email);
 		if (CONTACTS_ERROR_NONE != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_contact_update_data_email() Fail(%d)", ret);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 	}
 
 	if (my_profile->profiles) {
 		ret = ctsvc_contact_update_data_profile((contacts_list_h)my_profile->profiles, my_profile->id, true);
 		if (CONTACTS_ERROR_NONE != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_contact_update_data_profile() Fail(%d)", ret);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 	}
 
 	if (my_profile->relationships) {
 		ret = ctsvc_contact_update_data_relationship((contacts_list_h)my_profile->relationships, my_profile->id, true);
 		if (CONTACTS_ERROR_NONE != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_contact_update_data_relationship() Fail(%d)", ret);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 	}
 
 	if (my_profile->images) {
 		ret = ctsvc_contact_update_data_image((contacts_list_h)my_profile->images, my_profile->id, true);
 		if (CONTACTS_ERROR_NONE != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_contact_update_data_image() Fail(%d)", ret);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 	}
 
 	if (my_profile->extensions) {
 		ret = ctsvc_contact_update_data_extension((contacts_list_h)my_profile->extensions, my_profile->id, true);
 		if (CONTACTS_ERROR_NONE != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_contact_update_data_extension() Fail(%d)", ret);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 	}
 
@@ -414,8 +460,10 @@ static void __ctsvc_make_my_profile_display_name(ctsvc_my_profile_s *my_profile)
 			temp_display_len += 7;
 			temp_display = calloc(1, temp_display_len);
 			if (NULL == temp_display) {
+				/* LCOV_EXCL_START */
 				ERR("calloc() Fail");
 				return;
+				/* LCOV_EXCL_STOP */
 			}
 			len = 0;
 
@@ -502,9 +550,11 @@ static void __ctsvc_make_my_profile_display_name(ctsvc_my_profile_s *my_profile)
 			display_len = SAFE_STRLEN(name->prefix) + temp_display_len + 2;
 			display = calloc(1, display_len);
 			if (NULL == display) {
+				/* LCOV_EXCL_START */
 				ERR("calloc() Fail");
 				free(temp_display);
 				return;
+				/* LCOV_EXCL_STOP */
 			}
 			snprintf(display, display_len, "%s %s", name->prefix, temp_display);
 			my_profile->reverse_display_name = display;
@@ -538,8 +588,10 @@ static void __ctsvc_make_my_profile_display_name(ctsvc_my_profile_s *my_profile)
 				/* make reverse_temp_display_name */
 				temp_display = calloc(1, temp_display_len);
 				if (NULL == temp_display) {
+					/* LCOV_EXCL_START */
 					ERR("calloc() Fail");
 					return;
+					/* LCOV_EXCL_STOP */
 				}
 				len = 0;
 
@@ -577,9 +629,11 @@ static void __ctsvc_make_my_profile_display_name(ctsvc_my_profile_s *my_profile)
 				display_len = SAFE_STRLEN(name->prefix) + temp_display_len + 2;
 				display = calloc(1, display_len);
 				if (NULL == display) {
+					/* LCOV_EXCL_START */
 					ERR("calloc() Fail");
 					free(temp_display);
 					return;
+					/* LCOV_EXCL_STOP */
 				}
 				snprintf(display, display_len, "%s %s", name->prefix, temp_display);
 				my_profile->display_name = display;
@@ -674,15 +728,19 @@ static int __ctsvc_db_my_profile_update_record(contacts_record_h record)
 			"SELECT my_profile_id FROM "CTSVC_DB_VIEW_MY_PROFILE" WHERE my_profile_id = %d", my_profile->id);
 	ret = ctsvc_query_get_first_int_result(query, &id);
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("The index(%d) is Invalid. %d Record(s) is(are) found", my_profile->id, ret);
 		ctsvc_end_trans(false);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	if (false == ctsvc_have_ab_write_permission(my_profile->addressbook_id, false)) {
+		/* LCOV_EXCL_START */
 		ERR("No permission in this addresbook_id(%d)", my_profile->addressbook_id);
 		ctsvc_end_trans(false);
 		return CONTACTS_ERROR_PERMISSION_DENIED;
+		/* LCOV_EXCL_STOP */
 	}
 
 	__ctsvc_make_my_profile_display_name(my_profile);
@@ -691,9 +749,11 @@ static int __ctsvc_db_my_profile_update_record(contacts_record_h record)
 	/* update data */
 	ret = __ctsvc_my_profile_update_data(my_profile);
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("__ctsvc_my_profile_update_data() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	/* thumbnail */
@@ -708,9 +768,11 @@ static int __ctsvc_db_my_profile_update_record(contacts_record_h record)
 			do {
 				ret = contacts_list_get_current_record_p((contacts_list_h)my_profile->images, (contacts_record_h*)&image);
 				if (CONTACTS_ERROR_NONE != ret) {
+					/* LCOV_EXCL_START */
 					ERR("contacts_list_get_current_record_p() Fail(%d)", ret);
 					ctsvc_end_trans(false);
 					return CONTACTS_ERROR_DB;
+					/* LCOV_EXCL_STOP */
 				}
 
 				if (image->is_default)
@@ -761,8 +823,10 @@ static int __ctsvc_db_my_profile_update_record(contacts_record_h record)
 
 		ret = ctsvc_query_prepare(query, &stmt);
 		if (NULL == stmt) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_query_prepare() Fail(%d)", ret);
 			break;
+			/* LCOV_EXCL_STOP */
 		}
 
 		if (bind_text) {
@@ -776,9 +840,11 @@ static int __ctsvc_db_my_profile_update_record(contacts_record_h record)
 
 		ret = ctsvc_stmt_step(stmt);
 		if (CONTACTS_ERROR_NONE != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_stmt_step() Fail(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
 			break;
+			/* LCOV_EXCL_STOP */
 		}
 		ctsvc_stmt_finalize(stmt);
 	} while (0);
@@ -827,18 +893,22 @@ static int __ctsvc_db_my_profile_get_all_records(int offset, int limit, contacts
 	while ((ret = ctsvc_stmt_step(stmt))) {
 		contacts_record_h record;
 		if (1 != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_stmt_step() Fail(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
 			contacts_list_destroy(list, true);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 		my_profile_id = ctsvc_stmt_get_int(stmt, 0);
 		ret = ctsvc_db_get_record(_contacts_my_profile._uri, my_profile_id, &record);
 		if (CONTACTS_ERROR_NONE != ret) {
+			/* LCOV_EXCL_START */
 			ERR("contacts_db_get_record() Fail(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
 			contacts_list_destroy(list, true);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 		ctsvc_list_prepend(list, record);
 	}
@@ -880,8 +950,10 @@ static int __ctsvc_db_my_profile_get_records_with_query(contacts_query_h query, 
 	if (false == had_my_profile_id) {
 		s_query->projection = realloc(s_query->projection, s_query->projection_count+1);
 		if (NULL == s_query->projection) {
+			/* LCOV_EXCL_START */
 			ERR("realloc() Fail");
 			return CONTACTS_ERROR_OUT_OF_MEMORY;
+			/* LCOV_EXCL_STOP */
 		}
 		s_query->projection[s_query->projection_count] = CTSVC_PROPERTY_MY_PROFILE_ID;
 		s_query->projection_count++;
@@ -894,10 +966,12 @@ static int __ctsvc_db_my_profile_get_records_with_query(contacts_query_h query, 
 	while ((ret = ctsvc_stmt_step(stmt))) {
 		contacts_record_h record;
 		if (1 != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_stmt_step() Fail(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
 			contacts_list_destroy(list, true);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 
 		contacts_record_create(_contacts_my_profile._uri, &record);
@@ -957,10 +1031,12 @@ static int __ctsvc_db_my_profile_get_records_with_query(contacts_query_h query, 
 		}
 		ret = __ctsvc_db_my_profile_get_data(my_profile_id, my_profile);
 		if (CONTACTS_ERROR_NONE != ret) {
+			/* LCOV_EXCL_START */
 			ERR("__ctsvc_db_my_profile_get_data Fail(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
 			contacts_list_destroy(list, true);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 
 		ctsvc_list_prepend(list, record);
@@ -981,8 +1057,10 @@ static int __ctsvc_my_profile_insert_data(ctsvc_my_profile_s *contact)
 	if (contact->name) {
 		ret = ctsvc_contact_insert_data_name((contacts_list_h)contact->name, contact->id, true);
 		if (CONTACTS_ERROR_NONE != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_contact_insert_data_name() Fail(%d)", ret);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 	}
 
@@ -990,8 +1068,10 @@ static int __ctsvc_my_profile_insert_data(ctsvc_my_profile_s *contact)
 	if (contact->company) {
 		ret = ctsvc_contact_insert_data_company((contacts_list_h)contact->company, contact->id, true);
 		if (CONTACTS_ERROR_NONE != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_insert_my_profile_data_company() Fail(%d)", ret);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 	}
 
@@ -999,8 +1079,10 @@ static int __ctsvc_my_profile_insert_data(ctsvc_my_profile_s *contact)
 	if (contact->events) {
 		ret = ctsvc_contact_insert_data_event((contacts_list_h)contact->events, contact->id, true);
 		if (CONTACTS_ERROR_NONE != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_insert_my_profile_data_event() Fail(%d)", ret);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 	}
 
@@ -1008,8 +1090,10 @@ static int __ctsvc_my_profile_insert_data(ctsvc_my_profile_s *contact)
 	if (contact->messengers) {
 		ret = ctsvc_contact_insert_data_messenger((contacts_list_h)contact->messengers, contact->id, true);
 		if (CONTACTS_ERROR_NONE != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_insert_my_profile_data_messenger() Fail(%d)", ret);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 	}
 
@@ -1017,8 +1101,10 @@ static int __ctsvc_my_profile_insert_data(ctsvc_my_profile_s *contact)
 	if (contact->postal_addrs) {
 		ret = ctsvc_contact_insert_data_address((contacts_list_h)contact->postal_addrs, contact->id, true);
 		if (CONTACTS_ERROR_NONE != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_insert_my_profile_data_postal() Fail(%d)", ret);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 	}
 
@@ -1026,8 +1112,10 @@ static int __ctsvc_my_profile_insert_data(ctsvc_my_profile_s *contact)
 	if (contact->urls) {
 		ret = ctsvc_contact_insert_data_url((contacts_list_h)contact->urls, contact->id, true);
 		if (CONTACTS_ERROR_NONE != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_insert_my_profile_data_web() Fail(%d)", ret);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 	}
 
@@ -1035,8 +1123,10 @@ static int __ctsvc_my_profile_insert_data(ctsvc_my_profile_s *contact)
 	if (contact->nicknames) {
 		ret = ctsvc_contact_insert_data_nickname((contacts_list_h)contact->nicknames, contact->id, true);
 		if (CONTACTS_ERROR_NONE != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_insert_my_profile_data_nickname() Fail(%d)", ret);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 	}
 
@@ -1044,8 +1134,10 @@ static int __ctsvc_my_profile_insert_data(ctsvc_my_profile_s *contact)
 	if (contact->numbers) {
 		ret = ctsvc_contact_insert_data_number((contacts_list_h)contact->numbers, contact->id, true);
 		if (ret < CONTACTS_ERROR_NONE) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_contact_insert_data_number() Fail(%d)", ret);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 	}
 
@@ -1053,8 +1145,10 @@ static int __ctsvc_my_profile_insert_data(ctsvc_my_profile_s *contact)
 	if (contact->emails) {
 		ret = ctsvc_contact_insert_data_email((contacts_list_h)contact->emails, contact->id, true);
 		if (ret < CONTACTS_ERROR_NONE) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_insert_my_profile_data_email() Fail(%d)", ret);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 	}
 
@@ -1062,8 +1156,10 @@ static int __ctsvc_my_profile_insert_data(ctsvc_my_profile_s *contact)
 	if (contact->profiles) {
 		ret = ctsvc_contact_insert_data_profile((contacts_list_h)contact->profiles, contact->id, true);
 		if (CONTACTS_ERROR_NONE != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_insert_my_profile_data_profile() Fail(%d)", ret);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 	}
 
@@ -1071,8 +1167,10 @@ static int __ctsvc_my_profile_insert_data(ctsvc_my_profile_s *contact)
 	if (contact->relationships) {
 		ret = ctsvc_contact_insert_data_relationship((contacts_list_h)contact->relationships, contact->id, true);
 		if (CONTACTS_ERROR_NONE != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_contact_insert_data_relationship() Fail(%d)", ret);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 	}
 
@@ -1080,8 +1178,10 @@ static int __ctsvc_my_profile_insert_data(ctsvc_my_profile_s *contact)
 	if (contact->images) {
 		ret = ctsvc_contact_insert_data_image((contacts_list_h)contact->images, contact->id, true);
 		if (CONTACTS_ERROR_NONE != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_contact_insert_data_image() Fail(%d)", ret);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 	}
 
@@ -1089,8 +1189,10 @@ static int __ctsvc_my_profile_insert_data(ctsvc_my_profile_s *contact)
 	if (contact->note) {
 		ret = ctsvc_contact_insert_data_note((contacts_list_h)contact->note, contact->id, true);
 		if (CONTACTS_ERROR_NONE != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_contact_insert_data_note() Fail(%d)", ret);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 	}
 
@@ -1098,8 +1200,10 @@ static int __ctsvc_my_profile_insert_data(ctsvc_my_profile_s *contact)
 	if (contact->extensions) {
 		ret = ctsvc_contact_insert_data_extension((contacts_list_h)contact->extensions, contact->id, true);
 		if (CONTACTS_ERROR_NONE != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_contact_insert_data_extension() Fail(%d)", ret);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 	}
 
@@ -1127,9 +1231,11 @@ static int __ctsvc_db_my_profile_insert_record(contacts_record_h record, int *id
 	RETVM_IF(ret < CONTACTS_ERROR_NONE, ret, "ctsvc_begin_trans() Fail(%d)", ret);
 
 	if (false == ctsvc_have_ab_write_permission(my_profile->addressbook_id, false)) {
+		/* LCOV_EXCL_START */
 		ERR("No permission in this addresbook_id(%d)", my_profile->addressbook_id);
 		ctsvc_end_trans(false);
 		return CONTACTS_ERROR_PERMISSION_DENIED;
+		/* LCOV_EXCL_STOP */
 	}
 
 	snprintf(query, sizeof(query), "DELETE FROM "CTS_TABLE_MY_PROFILES" WHERE addressbook_id = %d AND deleted = 1", my_profile->addressbook_id);
@@ -1138,9 +1244,11 @@ static int __ctsvc_db_my_profile_insert_record(contacts_record_h record, int *id
 
 	ret = ctsvc_db_get_next_id(CTS_TABLE_MY_PROFILES);
 	if (ret < CONTACTS_ERROR_NONE) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_db_get_next_id() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 	my_profile->id = ret;
 	if (id)
@@ -1152,9 +1260,11 @@ static int __ctsvc_db_my_profile_insert_record(contacts_record_h record, int *id
 	/* Insert Data */
 	ret = __ctsvc_my_profile_insert_data(my_profile);
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("cts_insert_my_profile_data() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	/* thumbnail */
@@ -1170,9 +1280,11 @@ static int __ctsvc_db_my_profile_insert_record(contacts_record_h record, int *id
 			do {
 				ret = contacts_list_get_current_record_p((contacts_list_h)my_profile->images, (contacts_record_h*)&image);
 				if (CONTACTS_ERROR_NONE != ret) {
+					/* LCOV_EXCL_START */
 					ERR("contacts_list_get_current_record_p() Fail(%d)", ret);
 					ctsvc_end_trans(false);
 					return CONTACTS_ERROR_DB;
+					/* LCOV_EXCL_STOP */
 				}
 
 				if (image->path && image->is_default) {
@@ -1194,9 +1306,11 @@ static int __ctsvc_db_my_profile_insert_record(contacts_record_h record, int *id
 
 	ret = ctsvc_query_prepare(query, &stmt);
 	if (NULL == stmt) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_query_prepare() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	if (my_profile->display_name)
@@ -1210,10 +1324,12 @@ static int __ctsvc_db_my_profile_insert_record(contacts_record_h record, int *id
 
 	ret = ctsvc_stmt_step(stmt);
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_stmt_step() Fail(%d)", ret);
 		ctsvc_stmt_finalize(stmt);
 		ctsvc_end_trans(false);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 	ctsvc_stmt_finalize(stmt);
 

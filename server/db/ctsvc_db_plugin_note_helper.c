@@ -74,9 +74,11 @@ int ctsvc_db_note_insert(contacts_record_h record, int contact_id, bool is_my_pr
 
 	ret = ctsvc_stmt_step(stmt);
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_stmt_step() Fail(%d)", ret);
 		ctsvc_stmt_finalize(stmt);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 	if (id)
 		*id = ctsvc_db_get_last_insert_id();

@@ -90,6 +90,7 @@ int ctsvc_have_file_read_permission(const char *path)
 	RETV_IF(NULL == path, CONTACTS_ERROR_INVALID_PARAMETER);
 
 	if (0 != access(path, F_OK|R_OK)) {
+		/* LCOV_EXCL_START */
 		ERR("access(%s) Fail(%d)", path, errno);
 		switch (errno) {
 		case EACCES:
@@ -97,6 +98,7 @@ int ctsvc_have_file_read_permission(const char *path)
 		default:
 			return CONTACTS_ERROR_SYSTEM;
 		}
+		/* LCOV_EXCL_STOP */
 	}
 
 	return CONTACTS_ERROR_NONE;
@@ -128,16 +130,20 @@ static void __ctsvc_set_permission_info(ctsvc_permission_info_s *info)
 			"SELECT count(addressbook_id) FROM "CTS_TABLE_ADDRESSBOOKS);
 	ret = ctsvc_query_get_first_int_result(query, &count);
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR(" ctsvc_query_get_first_int_result() Fail(%d)", ret);
 		return;
+		/* LCOV_EXCL_STOP */
 	}
 
 	snprintf(query, sizeof(query),
 			"SELECT addressbook_id, mode, smack_label FROM "CTS_TABLE_ADDRESSBOOKS);
 	ret = ctsvc_query_prepare(query, &stmt);
 	if (NULL == stmt) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_query_prepare() Fail(%d)", ret);
 		return;
+		/* LCOV_EXCL_STOP */
 	}
 
 	while ((ret = ctsvc_stmt_step(stmt))) {
@@ -146,9 +152,11 @@ static void __ctsvc_set_permission_info(ctsvc_permission_info_s *info)
 		char *temp = NULL;
 
 		if (1 != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_stmt_step() Fail(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
 			return;
+			/* LCOV_EXCL_STOP */
 		}
 
 		id = ctsvc_stmt_get_int(stmt, 0);
@@ -157,8 +165,10 @@ static void __ctsvc_set_permission_info(ctsvc_permission_info_s *info)
 
 		ctsvc_writable_info_s *wi = calloc(1, sizeof(ctsvc_writable_info_s));
 		if (NULL == wi) {
+			/* LCOV_EXCL_START */
 			ERR("calloc() Fail");
 			break;
+			/* LCOV_EXCL_STOP */
 		}
 
 		if (!smack_enabled) { /* smack disabled */
@@ -242,9 +252,11 @@ void ctsvc_set_client_access_info(pims_ipc_h ipc, const char *smack)
 	if (NULL == info) {
 		info = calloc(1, sizeof(ctsvc_permission_info_s));
 		if (NULL == info) {
+			/* LCOV_EXCL_START */
 			ERR("Thread(0x%x), calloc() Fail", thread_id);
 			ctsvc_mutex_unlock(CTS_MUTEX_ACCESS_CONTROL);
 			return;
+			/* LCOV_EXCL_STOP */
 		}
 		__thread_list  = g_list_append(__thread_list, info);
 	}
@@ -319,15 +331,19 @@ bool ctsvc_have_ab_write_permission(int addressbook_id, bool allow_readonly)
 	thread_id = (unsigned int)pthread_self();
 	find = __ctsvc_find_access_info(thread_id);
 	if (NULL == find) {
+		/* LCOV_EXCL_START */
 		ctsvc_mutex_unlock(CTS_MUTEX_ACCESS_CONTROL);
 		ERR("can not found access info");
 		return false;
+		/* LCOV_EXCL_STOP */
 	}
 
 	if (NULL == find->writable_list) {
+		/* LCOV_EXCL_START */
 		ctsvc_mutex_unlock(CTS_MUTEX_ACCESS_CONTROL);
 		ERR("there is no write access info");
 		return false;
+		/* LCOV_EXCL_STOP */
 	}
 
 	GList *cursor = find->writable_list;
@@ -346,9 +362,11 @@ bool ctsvc_have_ab_write_permission(int addressbook_id, bool allow_readonly)
 		cursor = g_list_next(cursor);
 	}
 
+	/* LCOV_EXCL_START */
 	ctsvc_mutex_unlock(CTS_MUTEX_ACCESS_CONTROL);
 	ERR("Thread(0x%x), Does not have write permission of addressbook(%d)", thread_id, addressbook_id);
 	return false;
+	/* LCOV_EXCL_STOP */
 }
 
 int ctsvc_get_write_permitted_addressbook_ids(int **addressbook_ids, int *count)
@@ -362,23 +380,29 @@ int ctsvc_get_write_permitted_addressbook_ids(int **addressbook_ids, int *count)
 	thread_id = (unsigned int)pthread_self();
 	find = __ctsvc_find_access_info(thread_id);
 	if (NULL == find) {
+		/* LCOV_EXCL_START */
 		ERR("__ctsvc_find_access_info() Fail");
 		ctsvc_mutex_unlock(CTS_MUTEX_ACCESS_CONTROL);
 		return CONTACTS_ERROR_PERMISSION_DENIED;
+		/* LCOV_EXCL_STOP */
 	}
 
 	if (NULL == find->writable_list) {
+		/* LCOV_EXCL_START */
 		ERR("No permission info");
 		ctsvc_mutex_unlock(CTS_MUTEX_ACCESS_CONTROL);
 		return CONTACTS_ERROR_PERMISSION_DENIED;
+		/* LCOV_EXCL_STOP */
 	}
 
 	int book_count = g_list_length(find->writable_list);
 	int *book_ids = calloc(book_count, sizeof(int));
 	if (NULL == book_ids) {
+		/* LCOV_EXCL_START */
 		ERR("Thread(0x%x), calloc() Fail", thread_id);
 		ctsvc_mutex_unlock(CTS_MUTEX_ACCESS_CONTROL);
 		return CONTACTS_ERROR_OUT_OF_MEMORY;
+		/* LCOV_EXCL_STOP */
 	}
 	int i = 0;
 	GList *cursor = find->writable_list;
@@ -433,15 +457,19 @@ int ctsvc_is_owner(int addressbook_id)
 			"WHERE addressbook_id = %d", addressbook_id);
 	ret = ctsvc_query_prepare(query, &stmt);
 	if (NULL == stmt) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_query_prepare() Fail(%d)", ret);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ret = ctsvc_stmt_step(stmt);
 	if (1 != ret) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_stmt_step() Fail(%d)", ret);
 		ctsvc_stmt_finalize(stmt);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ret = CONTACTS_ERROR_PERMISSION_DENIED;

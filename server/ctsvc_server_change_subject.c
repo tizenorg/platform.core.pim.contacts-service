@@ -45,20 +45,26 @@ static gboolean __ctsvc_publish_changes_with_data(const char *view_uri, char *da
 
 	indata = pims_ipc_data_create(0);
 	if (NULL == indata) {
+		/* LCOV_EXCL_START */
 		ERR("pims_ipc_data_create error\n");
 		return false;
+		/* LCOV_EXCL_STOP */
 	}
 
 	if (CONTACTS_ERROR_NONE != ctsvc_ipc_marshal_string(data, indata)) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_ipc_marshal_string() Fail");
 		pims_ipc_data_destroy(indata);
 		return false;
+		/* LCOV_EXCL_STOP */
 	}
 
 	if (pims_ipc_svc_publish(CTSVC_IPC_SUBSCRIBE_MODULE, (char*)view_uri, indata) != 0) {
+		/* LCOV_EXCL_START */
 		ERR("pims_ipc_svc_publish error (%s)\n", view_uri);
 		pims_ipc_data_destroy(indata);
 		return false;
+		/* LCOV_EXCL_STOP */
 	}
 
 	pims_ipc_data_destroy(indata);
@@ -155,13 +161,17 @@ void ctsvc_change_subject_publish_setting(const char *setting_id, int value)
 	RETM_IF(NULL == indata, "pims_ipc_data_create() Fail");
 
 	if (CONTACTS_ERROR_NONE != ctsvc_ipc_marshal_int(value, indata)) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_ipc_marshal_int() Fail");
 		pims_ipc_data_destroy(indata);
 		return;
+		/* LCOV_EXCL_STOP */
 	}
 
 	if (pims_ipc_svc_publish(CTSVC_IPC_SUBSCRIBE_MODULE, (char*)setting_id, indata) != 0)
+		/* LCOV_EXCL_START */
 		ERR("pims_ipc_svc_publish error (%s)", setting_id);
+	/* LCOV_EXCL_STOP */
 
 	pims_ipc_data_destroy(indata);
 }
@@ -175,15 +185,19 @@ void ctsvc_change_subject_publish_status(contacts_db_status_e status)
 	RETM_IF(NULL == indata, "pims_ipc_data_create() Fail");
 
 	if (CONTACTS_ERROR_NONE != ctsvc_ipc_marshal_int(status, indata)) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_ipc_marshal_int() Fail");
 		pims_ipc_data_destroy(indata);
 		return;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ret = pims_ipc_svc_publish(CTSVC_IPC_SUBSCRIBE_MODULE,
 			CTSVC_IPC_SERVER_DB_STATUS_CHANGED, indata);
 	if (0 != ret)
+		/* LCOV_EXCL_START */
 		ERR("pims_ipc_svc_publish(service status) Fail(%d)", ret);
+	/* LCOV_EXCL_STOP */
 
 	pims_ipc_data_destroy(indata);
 }

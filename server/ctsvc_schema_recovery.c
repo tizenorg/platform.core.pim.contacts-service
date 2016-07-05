@@ -56,8 +56,10 @@ static inline int __ctsvc_server_remake_db_file()
 
 	ret = sqlite3_exec(db, schema_query, NULL, 0, &errmsg);
 	if (SQLITE_OK != ret) {
+		/* LCOV_EXCL_START */
 		ERR("remake contacts DB file is Fail : %s", errmsg);
 		sqlite3_free(errmsg);
+		/* LCOV_EXCL_STOP */
 	}
 
 	ctsvc_server_db_close();
@@ -80,17 +82,21 @@ static int __ctsvc_server_check_table()
 			CTS_TABLE_CONTACTS);
 	ret = sqlite3_prepare_v2(db, query, strlen(query), &stmt, NULL);
 	if (SQLITE_OK != ret) {
+		/* LCOV_EXCL_START */
 		ERR("sqlite3_prepare_v2(%s) Fail(%s)", query, sqlite3_errmsg(db));
 		ctsvc_server_db_close();
 		return CONTACTS_ERROR_DB;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ret = sqlite3_step(stmt);
 	if (SQLITE_ROW != ret) {
+		/* LCOV_EXCL_START */
 		ERR("contacts table does not exist in contacts DB file : %s", sqlite3_errmsg(db));
 		sqlite3_finalize(stmt);
 		ctsvc_server_db_close();
 		return CTSVC_ERR_NO_TABLE;
+		/* LCOV_EXCL_STOP */
 	}
 
 	sqlite3_finalize(stmt);

@@ -70,12 +70,14 @@ static inline int __ctsvc_get_person_default_number_value(int id, contacts_recor
 
 	ret = ctsvc_stmt_step(stmt);
 	if (1 /*CTS_TRUE*/ != ret) {
+		/* LCOV_EXCL_START */
 		ctsvc_stmt_finalize(stmt);
 		ERR("ctsvc_stmt_step() Fail(%d)", ret);
 		if (CONTACTS_ERROR_NONE == ret)
 			return CONTACTS_ERROR_NO_DATA;
 		else
 			return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ret = contacts_record_create(_contacts_number._uri, (contacts_record_h*)&number);
@@ -94,7 +96,9 @@ static inline int __ctsvc_get_person_default_number_value(int id, contacts_recor
 		*record = (contacts_record_h)number;
 		ret = CONTACTS_ERROR_NONE;
 	} else {
+		/* LCOV_EXCL_START */
 		ERR("contacts_record_create() Fail");
+		/* LCOV_EXCL_STOP */
 	}
 
 	ctsvc_stmt_finalize(stmt);
@@ -120,12 +124,14 @@ static inline int __ctsvc_get_person_default_email_value(int id, contacts_record
 
 	ret = ctsvc_stmt_step(stmt);
 	if (1 /*CTS_TRUE*/ != ret) {
+		/* LCOV_EXCL_START */
 		ctsvc_stmt_finalize(stmt);
 		ERR("ctsvc_stmt_step() Fail(%d)", ret);
 		if (CONTACTS_ERROR_NONE == ret)
 			return CONTACTS_ERROR_NO_DATA;
 		else
 			return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ret = contacts_record_create(_contacts_email._uri, (contacts_record_h*)&email);
@@ -142,7 +148,9 @@ static inline int __ctsvc_get_person_default_email_value(int id, contacts_record
 		*record = (contacts_record_h)email;
 		ret = CONTACTS_ERROR_NONE;
 	} else {
+		/* LCOV_EXCL_START */
 		ERR("contacts_record_create() Fail");
+		/* LCOV_EXCL_STOP */
 	}
 
 	ctsvc_stmt_finalize(stmt);
@@ -169,12 +177,14 @@ static inline int __ctsvc_get_person_default_image_value(int id, contacts_record
 
 	ret = ctsvc_stmt_step(stmt);
 	if (1 /*CTS_TRUE*/ != ret) {
+		/* LCOV_EXCL_START */
 		ctsvc_stmt_finalize(stmt);
 		ERR("ctsvc_stmt_step() Fail(%d)", ret);
 		if (CONTACTS_ERROR_NONE == ret)
 			return CONTACTS_ERROR_NO_DATA;
 		else
 			return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ret = contacts_record_create(_contacts_image._uri, (contacts_record_h*)&image);
@@ -191,7 +201,9 @@ static inline int __ctsvc_get_person_default_image_value(int id, contacts_record
 		*record = (contacts_record_h)image;
 		ret = CONTACTS_ERROR_NONE;
 	} else {
+		/* LCOV_EXCL_START */
 		ERR("contacts_record_create() Fail");
+		/* LCOV_EXCL_STOP */
 	}
 
 	ctsvc_stmt_finalize(stmt);
@@ -219,8 +231,10 @@ static int __ctsvc_get_person_value(int op_code,
 		RETVM_IF(ret != CONTACTS_ERROR_NONE, ret, "__ctsvc_get_person_default_image_value() Fail(%d)", ret);
 		break;
 	default:
+		/* LCOV_EXCL_START */
 		ERR("The op_code(%d) is not supported", op_code);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		/* LCOV_EXCL_STOP */
 	}
 
 	if (NULL == *record)
@@ -251,21 +265,27 @@ static inline int __ctsvc_put_person_default_name(int person_id, int contact_id)
 
 		ret = ctsvc_query_exec(query);
 		if (CONTACTS_ERROR_NONE != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_query_exec() Fail(%d)", ret);
 			ctsvc_end_trans(false);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		} else {
 			ret = ctsvc_end_trans(true);
 			if (ret < CONTACTS_ERROR_NONE) {
+				/* LCOV_EXCL_START */
 				ERR("ctsvc_end_trans() Fail(%d)", ret);
 				return ret;
 			} else {
 				return CONTACTS_ERROR_NONE;
 			}
+			/* LCOV_EXCL_STOP */
 		}
 	} else {
+		/* LCOV_EXCL_START */
 		ERR("contact(%d) does not belong to person(%d), to person(%d)", contact_id, person_id, ret);
 		ret = CONTACTS_ERROR_NO_DATA;
+		/* LCOV_EXCL_STOP */
 	}
 
 	return ret;
@@ -292,16 +312,20 @@ static inline int __ctsvc_put_person_default_image(int person_id, int id)
 			CONTACTS_DATA_TYPE_IMAGE, person_id, id);
 	ret = ctsvc_query_prepare(query, &stmt);
 	if (NULL == stmt) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_query_prepare Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ret = ctsvc_stmt_step(stmt);
 	if (1 != ret) {
+		/* LCOV_EXCL_START */
 		ctsvc_stmt_finalize(stmt);
 		ctsvc_end_trans(false);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	is_default = ctsvc_stmt_get_int(stmt, 0);
@@ -317,10 +341,12 @@ static inline int __ctsvc_put_person_default_image(int person_id, int id)
 			CONTACTS_DATA_TYPE_IMAGE, person_id);
 	ret = ctsvc_query_exec(query);
 	if (ret < CONTACTS_ERROR_NONE) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_query_exec() Fail(%d)", ret);
 		free(image_path);
 		ctsvc_end_trans(false);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	/* unset is_default of all data of person if the data is not default */
@@ -331,10 +357,12 @@ static inline int __ctsvc_put_person_default_image(int person_id, int id)
 
 		ret = ctsvc_query_exec(query);
 		if (CONTACTS_ERROR_NONE != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_query_exec() Fail(%d)", ret);
 			free(image_path);
 			ctsvc_end_trans(false);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 
 		thumbnail_path = ctsvc_utils_make_thumbnail(image_path);
@@ -349,10 +377,12 @@ static inline int __ctsvc_put_person_default_image(int person_id, int id)
 			"UPDATE "CTS_TABLE_DATA" SET is_primary_default=1, is_default=1 WHERE id=%d ", id);
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_query_exec() Fail(%d)", ret);
 		free(thumbnail_path);
 		ctsvc_end_trans(false);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	/* update person's image_thumbnail_path */
@@ -360,20 +390,24 @@ static inline int __ctsvc_put_person_default_image(int person_id, int id)
 			"UPDATE "CTS_TABLE_PERSONS" SET image_thumbnail_path=? WHERE person_id=%d ", person_id);
 	ret = ctsvc_query_prepare(query, &stmt);
 	if (NULL == stmt) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_query_prepare() Fail(%d)", ret);
 		free(thumbnail_path);
 		ctsvc_end_trans(false);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ctsvc_stmt_bind_text(stmt, 1, thumbnail_path);
 	ret = ctsvc_stmt_step(stmt);
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_stmt_step() Fail(%d)", ret);
 		ctsvc_stmt_finalize(stmt);
 		free(thumbnail_path);
 		ctsvc_end_trans(false);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 	ctsvc_stmt_finalize(stmt);
 
@@ -383,20 +417,24 @@ static inline int __ctsvc_put_person_default_image(int person_id, int id)
 				"UPDATE "CTS_TABLE_CONTACTS" SET image_thumbnail_path=? WHERE contact_id=%d ", contact_id);
 		ret = ctsvc_query_prepare(query, &stmt);
 		if (NULL == stmt) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_query_prepare() Fail(%d)", ret);
 			free(thumbnail_path);
 			ctsvc_end_trans(false);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 
 		ctsvc_stmt_bind_text(stmt, 1, thumbnail_path);
 		ret = ctsvc_stmt_step(stmt);
 		if (CONTACTS_ERROR_NONE != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_stmt_step() Fail(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
 			free(thumbnail_path);
 			ctsvc_end_trans(false);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 		ctsvc_stmt_finalize(stmt);
 	}
@@ -428,9 +466,11 @@ static inline int __ctsvc_put_person_default_data(int person_id, int id, int dat
 
 	ret = ctsvc_stmt_step(stmt);
 	if (1 != ret) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_stmt_step() Fail(%d)", ret);
 		ctsvc_stmt_finalize(stmt);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	is_default = ctsvc_stmt_get_int(stmt, 0);
@@ -450,9 +490,11 @@ static inline int __ctsvc_put_person_default_data(int person_id, int id, int dat
 
 	ret = ctsvc_query_exec(query);
 	if (ret < CONTACTS_ERROR_NONE) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_query_exec() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	/* unset is_default of all data of person if the data is not default */
@@ -464,9 +506,11 @@ static inline int __ctsvc_put_person_default_data(int person_id, int id, int dat
 
 		ret = ctsvc_query_exec(query);
 		if (CONTACTS_ERROR_NONE != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_query_exec() Fail(%d)", ret);
 			ctsvc_end_trans(false);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 	}
 
@@ -476,9 +520,11 @@ static inline int __ctsvc_put_person_default_data(int person_id, int id, int dat
 
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_query_exec() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	if (datatype == CONTACTS_DATA_TYPE_NUMBER)
@@ -493,9 +539,11 @@ static inline int __ctsvc_put_person_default_data(int person_id, int id, int dat
 			"SELECT name_contact_id FROM "CTS_TABLE_PERSONS" WHERE person_id = %d", person_id);
 	ret = ctsvc_query_get_first_int_result(query, &name_contact_id);
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_query_get_first_int_result() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	if (name_contact_id != contact_id) {
@@ -504,9 +552,11 @@ static inline int __ctsvc_put_person_default_data(int person_id, int id, int dat
 				"SELECT display_name_source FROM "CTS_TABLE_CONTACTS" WHERE contact_id = %d", name_contact_id);
 		ret = ctsvc_query_get_first_int_result(query, &org_source_type);
 		if (CONTACTS_ERROR_NONE != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_query_get_first_int_result() Fail(%d)", ret);
 			ctsvc_end_trans(false);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 
 		if (org_source_type <= source_type) {
@@ -515,17 +565,21 @@ static inline int __ctsvc_put_person_default_data(int person_id, int id, int dat
 					CTS_TABLE_PERSONS, contact_id, person_id);
 			ret = ctsvc_query_exec(query);
 			if (CONTACTS_ERROR_NONE != ret) {
+				/* LCOV_EXCL_START */
 				ERR("ctsvc_query_exec() Fail(%d)", ret);
 				ctsvc_end_trans(false);
 				return ret;
+				/* LCOV_EXCL_STOP */
 			}
 		}
 	}
 
 	ret = ctsvc_end_trans(true);
 	if (ret < CONTACTS_ERROR_NONE) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_end_trans() Fail(%d)", ret);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	} else {
 		return CONTACTS_ERROR_NONE;
 	}
@@ -598,13 +652,17 @@ int ctsvc_person_aggregate(int person_id)
 	RETVM_IF(NULL == stmt, ret, "ctsvc_query_prepare() Fail(%d)", ret);
 
 	if (1 != ctsvc_stmt_step(stmt)) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_stmt_step() Fail\n");
 		return CONTACTS_ERROR_DB;
+		/* LCOV_EXCL_STOP */
 	}
 	ret = contacts_record_create(_contacts_person._uri, (contacts_record_h*)&person);
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("contacts_record_create() Fail\n");
 		return CONTACTS_ERROR_INTERNAL;
+		/* LCOV_EXCL_STOP */
 	}
 	person->person_id = ctsvc_stmt_get_int(stmt, 0);
 	person->name_contact_id = ctsvc_stmt_get_int(stmt, 1);
@@ -658,10 +716,12 @@ int ctsvc_person_aggregate(int person_id)
 			CTS_TABLE_CONTACTS, CTS_TABLE_ACTIVITIES, person->person_id);
 	ret = ctsvc_query_prepare(query, &stmt);
 	if (NULL == stmt) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_query_prepare() Fail(%d)", ret);
 		free(image_thumbnail_path);
 		contacts_record_destroy((contacts_record_h)person, true);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	if (1 == ctsvc_stmt_step(stmt)) {
@@ -722,6 +782,7 @@ int ctsvc_person_aggregate(int person_id)
 			CTS_TABLE_CONTACTS, person_id);
 	ret = ctsvc_query_prepare(query, &stmt);
 	if (NULL == stmt) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_query_prepare() Fail(%d)", ret);
 		free(image_thumbnail_path);
 		free(ringtone_path);
@@ -729,6 +790,7 @@ int ctsvc_person_aggregate(int person_id)
 		free(message_alert);
 		free(status);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	link_count = 0;
@@ -825,6 +887,7 @@ int ctsvc_person_aggregate(int person_id)
 
 	ret = ctsvc_query_prepare(query, &stmt);
 	if (NULL == stmt) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_query_prepare() Fail(%d)", ret);
 		free(addressbook_ids);
 		free(image_thumbnail_path);
@@ -833,6 +896,7 @@ int ctsvc_person_aggregate(int person_id)
 		free(message_alert);
 		free(status);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	if (addressbook_ids)
@@ -850,6 +914,7 @@ int ctsvc_person_aggregate(int person_id)
 
 	ret = ctsvc_stmt_step(stmt);
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_stmt_step() Fail(%d)", ret);
 		ctsvc_stmt_finalize(stmt);
 		free(addressbook_ids);
@@ -859,6 +924,7 @@ int ctsvc_person_aggregate(int person_id)
 		free(message_alert);
 		free(status);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ctsvc_stmt_finalize(stmt);
@@ -875,8 +941,10 @@ int ctsvc_person_aggregate(int person_id)
 				"DELETE FROM "CTS_TABLE_FAVORITES" WHERE person_id = %d", person_id);
 		ret = ctsvc_query_exec(query);
 		if (CONTACTS_ERROR_NONE != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_query_exec() Fail(%d)", ret);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 	}
 
@@ -971,9 +1039,11 @@ int ctsvc_person_link_person(int base_person_id, int person_id)
 			CTS_TABLE_CONTACTS, base_person_id, person_id);
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_query_exec() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ctsvc_person_aggregate(base_person_id);
@@ -1001,9 +1071,11 @@ int ctsvc_person_link_person(int base_person_id, int person_id)
 			CTS_TABLE_PERSONS, person_id);
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_query_exec() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 	/*
 	 *#ifdef _CONTACTS_IPC_SERVER
@@ -1017,17 +1089,21 @@ int ctsvc_person_link_person(int base_person_id, int person_id)
 				"INSERT INTO "CTS_TABLE_FAVORITES" values(%d, %f)", base_person_id, favorite_prio);
 		ret = ctsvc_query_exec(query);
 		if (CONTACTS_ERROR_NONE != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_query_exec() Fail(%d)", ret);
 			ctsvc_end_trans(false);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 	}
 
 	ctsvc_set_person_noti();
 	ret = ctsvc_end_trans(true);
 	if (ret < CONTACTS_ERROR_NONE) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_end_trans() Fail(%d)", ret);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	} else {
 		return CONTACTS_ERROR_NONE;
 	}
@@ -1062,9 +1138,11 @@ static int __ctsvc_update_primary_default_data(int person_id)
 
 			ret = ctsvc_query_prepare(query, &stmt_number);
 			if (NULL == stmt_number) {
+				/* LCOV_EXCL_START */
 				ERR("ctsvc_query_prepare() Fail(%d)", ret);
 				ctsvc_stmt_finalize(stmt);
 				return ret;
+				/* LCOV_EXCL_STOP */
 			}
 
 			if (1 == ctsvc_stmt_step(stmt_number)) {
@@ -1102,9 +1180,11 @@ static int __ctsvc_update_primary_default_data(int person_id)
 
 			ret = ctsvc_query_prepare(query, &stmt_email);
 			if (NULL == stmt_email) {
+				/* LCOV_EXCL_START */
 				ERR("ctsvc_query_prepare() Fail(%d)", ret);
 				ctsvc_stmt_finalize(stmt);
 				return ret;
+				/* LCOV_EXCL_STOP */
 			}
 
 			if (1 == ctsvc_stmt_step(stmt_email)) {
@@ -1142,9 +1222,11 @@ static int __ctsvc_update_primary_default_data(int person_id)
 
 			ret = ctsvc_query_prepare(query, &stmt_image);
 			if (NULL == stmt_image) {
+				/* LCOV_EXCL_START */
 				ERR("ctsvc_query_prepare() Fail(%d)", ret);
 				ctsvc_stmt_finalize(stmt);
 				return ret;
+				/* LCOV_EXCL_STOP */
 			}
 
 			if (1 == ctsvc_stmt_step(stmt_image)) {
@@ -1191,25 +1273,31 @@ int ctsvc_person_unlink_contact(int person_id, int contact_id, int *out_person_i
 	}
 
 	if (link_count == 1) {
+		/* LCOV_EXCL_START */
 		ERR("This person(%d) has one contact(%d)", person_id, contact_id);
 		ctsvc_end_trans(false);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ret = ctsvc_db_contact_get(contact_id, (contacts_record_h*)&record);
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_db_contact_get() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	/* create new person */
 	id = ctsvc_db_insert_person(record);
 	if (id < CONTACTS_ERROR_NONE) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_db_insert_person() Fail(%d)", id);
 		ctsvc_end_trans(false);
 		contacts_record_destroy(record, true);
 		return id;
+		/* LCOV_EXCL_STOP */
 	}
 
 	/* insert statistic info for new person */
@@ -1219,10 +1307,12 @@ int ctsvc_person_unlink_contact(int person_id, int contact_id, int *out_person_i
 			CTS_TABLE_CONTACT_STAT, id, CTS_TABLE_CONTACT_STAT, person_id);
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_query_exec() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		contacts_record_destroy(record, true);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	is_favorite = __ctsvc_get_person_favorite_info(person_id, &priority);
@@ -1233,19 +1323,23 @@ int ctsvc_person_unlink_contact(int person_id, int contact_id, int *out_person_i
 			CTS_TABLE_CONTACTS, id, contact_id);
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_query_exec() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		contacts_record_destroy(record, true);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	/* update bsae person info */
 	ret = ctsvc_person_aggregate(person_id);
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_person_aggregate(%d) Fail(%d)", person_id, ret);
 		ctsvc_end_trans(false);
 		contacts_record_destroy(record, true);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	if (is_favorite && ((ctsvc_contact_s*)record)->is_favorite) {
@@ -1253,10 +1347,12 @@ int ctsvc_person_unlink_contact(int person_id, int contact_id, int *out_person_i
 				"INSERT OR REPLACE INTO "CTS_TABLE_FAVORITES" values(%d, %f)", id, priority);
 		ret = ctsvc_query_exec(query);
 		if (CONTACTS_ERROR_NONE != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_query_exec() Fail(%d)", ret);
 			ctsvc_end_trans(false);
 			contacts_record_destroy(record, true);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 	}
 	contacts_record_destroy(record, true);
@@ -1273,8 +1369,10 @@ int ctsvc_person_unlink_contact(int person_id, int contact_id, int *out_person_i
 	ctsvc_set_person_noti();
 	ret = ctsvc_end_trans(true);
 	if (ret < CONTACTS_ERROR_NONE) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_end_trans() Fail(%d)", ret);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	} else {
 		return CONTACTS_ERROR_NONE;
 	}
@@ -1321,15 +1419,19 @@ int ctsvc_person_reset_usage(int person_id, contacts_usage_type_e type)
 
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_query_exec() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ret = ctsvc_end_trans(true);
 	if (ret < CONTACTS_ERROR_NONE) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_end_trans() Fail(%d)", ret);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	} else {
 		return CONTACTS_ERROR_NONE;
 	}
@@ -1377,17 +1479,21 @@ int ctsvc_person_set_favorite_order(int person_id, int front_person_id, int back
 
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret)	{
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_query_exec() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ctsvc_set_person_noti();
 
 	ret = ctsvc_end_trans(true);
 	if (ret < CONTACTS_ERROR_NONE) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_end_trans() Fail(%d)", ret);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	} else {
 		return CONTACTS_ERROR_NONE;
 	}
@@ -1419,9 +1525,11 @@ int ctsvc_person_set_default_property(contacts_person_property_e property, int p
 		break;
 	}
 	if (ret < CONTACTS_ERROR_NONE) {
+		/* LCOV_EXCL_START */
 		ERR("contacts_person_set_default_property() Fail(%d) : person property (%d)", ret, property);
 		ctsvc_end_trans(false);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 #ifdef _CONTACTS_IPC_SERVER
@@ -1554,11 +1662,11 @@ static void __ctsvc_collate_names(contacts_record_h record, GSList **names)
 	if (name && comp_name_len <= strlen(name)) {
 		if (CTSVC_SORT_KOREAN == contact->display_name_language) { /*compare first name*/
 			strncpy(comp_name, name + (strlen(name) -comp_name_len),
-						comp_name_len);
-		 } else {  /*compare last name*/
+					comp_name_len);
+		} else {  /*compare last name*/
 			comp_name_len = strcspn(name, ", ");
 			strncpy(comp_name, name, comp_name_len);
-		 }
+		}
 
 		if (NULL == *names || NULL == g_slist_find(*names, comp_name))
 			*names = g_slist_append(*names, strdup(comp_name));
@@ -1586,9 +1694,11 @@ static int __ctsvc_get_person_info_by_person_id(int person_id, GSList **nums, GS
 		int contact_id = 0;
 
 		if (1 != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_stmt_step() Fail(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 		contact_id = ctsvc_stmt_get_int(stmt, 0);
 
@@ -1597,8 +1707,10 @@ static int __ctsvc_get_person_info_by_person_id(int person_id, GSList **nums, GS
 	ctsvc_stmt_finalize(stmt);
 
 	if (NULL == contact_ids) {
+		/* LCOV_EXCL_START */
 		ERR("Fail to get contacts by person_id");
 		return CONTACTS_ERROR_DB;
+		/* LCOV_EXCL_STOP */
 	}
 
 	for (cursor = contact_ids; cursor; cursor = cursor->next) {
@@ -1738,22 +1850,26 @@ int ctsvc_person_get_aggregation_suggestions(int person_id, int limit, contacts_
 
 	ret = __ctsvc_get_person_info_by_person_id(person_id, &nums, &emails, &names);
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("__ctsvc_get_person_info_by_person_id() Fail(%d)", ret);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	sub_query = calloc(1, sub_size);
 	if (NULL == sub_query) {
+		/* LCOV_EXCL_START */
 		ERR("calloc() Fail");
 		g_slist_free_full(nums, free);
 		g_slist_free_full(emails, free);
 		g_slist_free_full(names, free);
 		return CONTACTS_ERROR_OUT_OF_MEMORY;
+		/* LCOV_EXCL_STOP */
 	}
 
 	if (nums) {
-		 __ctsvc_make_sub_query_by_num(nums, person_id, &sub_query, &sub_size, &sub_len);
-		 g_slist_free_full(nums, free);
+		__ctsvc_make_sub_query_by_num(nums, person_id, &sub_query, &sub_size, &sub_len);
+		g_slist_free_full(nums, free);
 	}
 
 	if (emails) {
@@ -1776,9 +1892,11 @@ int ctsvc_person_get_aggregation_suggestions(int person_id, int limit, contacts_
 	query_size = CTS_SQL_MIN_LEN + sub_len;
 	query = calloc(1, query_size);
 	if (NULL == query) {
+		/* LCOV_EXCL_START */
 		ERR("calloc() Fail");
 		free(sub_query);
 		return CONTACTS_ERROR_OUT_OF_MEMORY;
+		/* LCOV_EXCL_STOP */
 	}
 
 	snprintf(query, query_size,
@@ -1787,20 +1905,24 @@ int ctsvc_person_get_aggregation_suggestions(int person_id, int limit, contacts_
 			sub_query);
 	ret = ctsvc_query_prepare(query, &stmt);
 	if (NULL == stmt) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_query_prepare fail(%d)", ret);
 		free(sub_query);
 		free(query);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	sub_len = 0;
 	while ((ret = ctsvc_stmt_step(stmt))) {
 		if (1 != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_stmt_step() Fail(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
 			free(sub_query);
 			free(query);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 		id = ctsvc_stmt_get_int(stmt, 0);
 		score = ctsvc_stmt_get_int(stmt, 1);
@@ -1852,25 +1974,31 @@ int ctsvc_person_get_aggregation_suggestions(int person_id, int limit, contacts_
 	ret = ctsvc_query_prepare(query, &stmt);
 	free(query);
 	if (NULL == stmt) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_query_prepare fail(%d)", ret);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	contacts_list_create(&list);
 	while ((ret = ctsvc_stmt_step(stmt))) {
 		contacts_record_h record;
 		if (1 != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_stmt_step() Fail(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
 			contacts_list_destroy(list, true);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 		ret = ctsvc_db_person_create_record_from_stmt(stmt, &record);
 		if (CONTACTS_ERROR_NONE != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_db_person_create_record_from_stmt() Fail(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
 			contacts_list_destroy(list, true);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 
 		ctsvc_list_prepend(list, record);

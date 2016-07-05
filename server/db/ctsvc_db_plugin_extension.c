@@ -46,8 +46,10 @@ static int __ctsvc_db_extension_insert_record(contacts_record_h record, int *id)
 
 	ret = ctsvc_begin_trans();
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_begin_trans() Fail(%d)", ret);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	snprintf(query, sizeof(query),
@@ -56,39 +58,51 @@ static int __ctsvc_db_extension_insert_record(contacts_record_h record, int *id)
 	if (CONTACTS_ERROR_NONE != ret) {
 		ctsvc_end_trans(false);
 		if (CONTACTS_ERROR_NO_DATA == ret) {
+			/* LCOV_EXCL_START */
 			ERR("No data : contact_id (%d) is not exist", extension->contact_id);
 			return CONTACTS_ERROR_INVALID_PARAMETER;
+			/* LCOV_EXCL_STOP */
 		} else {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_query_get_first_int_result() Fail(%d)", ret);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 	}
 
 	if (false == ctsvc_have_ab_write_permission(addressbook_id, false)) {
+		/* LCOV_EXCL_START */
 		ERR("No permission in this addresbook_id(%d)", addressbook_id);
 		ctsvc_end_trans(false);
 		return CONTACTS_ERROR_PERMISSION_DENIED;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ret = ctsvc_db_extension_insert(record, extension->contact_id, false, id);
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_begin_trans() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ret = ctsvc_db_contact_update_changed_time(extension->contact_id);
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_db_contact_update_changed_time() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 	ctsvc_set_person_noti();
 
 	ret = ctsvc_end_trans(true);
 	if (ret < CONTACTS_ERROR_NONE) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_end_trans() Fail(%d)", ret);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	} else {
 		return CONTACTS_ERROR_NONE;
 	}
@@ -116,12 +130,14 @@ static int __ctsvc_db_extension_get_record(int id, contacts_record_h *out_record
 
 	ret = ctsvc_stmt_step(stmt);
 	if (1 /*CTS_TRUE*/ != ret) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_stmt_step() Fail(%d)", ret);
 		ctsvc_stmt_finalize(stmt);
 		if (CONTACTS_ERROR_NONE == ret)
 			return CONTACTS_ERROR_NO_DATA;
 		else
 			return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ctsvc_db_extension_get_value_from_stmt(stmt, out_record, 0);
@@ -145,44 +161,56 @@ static int __ctsvc_db_extension_update_record(contacts_record_h record)
 
 	ret = ctsvc_begin_trans();
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_begin_trans() Fail(%d)", ret);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	snprintf(query, sizeof(query),
 			"SELECT addressbook_id FROM "CTSVC_DB_VIEW_CONTACT" WHERE contact_id = %d", extension->contact_id);
 	ret = ctsvc_query_get_first_int_result(query, &addressbook_id);
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("No data : contact_id (%d) is not exist", extension->contact_id);
 		ctsvc_end_trans(false);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	if (false == ctsvc_have_ab_write_permission(addressbook_id, false)) {
+		/* LCOV_EXCL_START */
 		ERR("No permission in this addresbook_id(%d)", addressbook_id);
 		ctsvc_end_trans(false);
 		return CONTACTS_ERROR_PERMISSION_DENIED;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ret = ctsvc_db_extension_update(record);
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("update record Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ret = ctsvc_db_contact_update_changed_time(extension->contact_id);
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_db_contact_update_changed_time() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 	ctsvc_set_person_noti();
 
 	ret = ctsvc_end_trans(true);
 	if (ret < CONTACTS_ERROR_NONE) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_end_trans() Fail(%d)", ret);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	} else {
 		return CONTACTS_ERROR_NONE;
 	}
@@ -198,8 +226,10 @@ static int __ctsvc_db_extension_delete_record(int id)
 
 	ret = ctsvc_begin_trans();
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_begin_trans() Fail(%d)", ret);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	snprintf(query, sizeof(query),
@@ -207,12 +237,15 @@ static int __ctsvc_db_extension_delete_record(int id)
 			"WHERE contact_id = (SELECT contact_id FROM "CTS_TABLE_DATA" WHERE id = %d)", id);
 	ret = ctsvc_query_prepare(query, &stmt);
 	if (NULL == stmt) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_query_prepare Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 	ret = ctsvc_stmt_step(stmt);
 	if (1 != ret) {
+		/* LCOV_EXCL_START */
 		ERR("The id(%d) is Invalid(%d)", id, ret);
 		ctsvc_stmt_finalize(stmt);
 		ctsvc_end_trans(false);
@@ -220,6 +253,7 @@ static int __ctsvc_db_extension_delete_record(int id)
 			return CONTACTS_ERROR_NO_DATA;
 		else
 			return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	contact_id = ctsvc_stmt_get_int(stmt, 0);
@@ -227,30 +261,38 @@ static int __ctsvc_db_extension_delete_record(int id)
 	ctsvc_stmt_finalize(stmt);
 
 	if (false == ctsvc_have_ab_write_permission(addressbook_id, false)) {
+		/* LCOV_EXCL_START */
 		ERR("No permission in this addresbook_id(%d)", addressbook_id);
 		ctsvc_end_trans(false);
 		return CONTACTS_ERROR_PERMISSION_DENIED;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ret = ctsvc_db_extension_delete(id, false);
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_begin_trans() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ret = ctsvc_db_contact_update_changed_time(contact_id);
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_db_contact_update_changed_time() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 	ctsvc_set_person_noti();
 
 	ret = ctsvc_end_trans(true);
 	if (ret < CONTACTS_ERROR_NONE) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_end_trans() Fail(%d)", ret);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	} else {
 		return CONTACTS_ERROR_NONE;
 	}
@@ -285,10 +327,12 @@ static int __ctsvc_db_extension_get_all_records(int offset, int limit, contacts_
 	contacts_list_create(&list);
 	while ((ret = ctsvc_stmt_step(stmt))) {
 		if (1 /*CTS_TRUE */ != ret) {
+			/* LCOV_EXCL_START */
 			ERR("DB : ctsvc_stmt_step fail(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
 			contacts_list_destroy(list, true);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 		ctsvc_db_extension_get_value_from_stmt(stmt, (contacts_record_h*)&extension, 0);
 		ctsvc_list_prepend(list, (contacts_record_h)extension);
@@ -321,10 +365,12 @@ static int __ctsvc_db_extension_get_records_with_query(contacts_query_h query, i
 	while ((ret = ctsvc_stmt_step(stmt))) {
 		contacts_record_h record;
 		if (1 /*CTS_TRUE */ != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_stmt_step() Fail(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
 			contacts_list_destroy(list, true);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 
 		contacts_record_create(_contacts_extension._uri, &record);

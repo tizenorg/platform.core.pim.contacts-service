@@ -135,9 +135,11 @@ static void __ctsvc_server_socket_import_sim(GIOChannel *src, int size)
 	if (0 < size) {
 		g_io_channel_read_chars(src, receiver, size, &len, &gerr);
 		if (gerr) {
+			/* LCOV_EXCL_START */
 			ERR("g_io_channel_read_chars() Fail(%s)", gerr->message);
 			g_error_free(gerr);
 			return;
+			/* LCOV_EXCL_STOP */
 		}
 		DBG("Receiver = %s(%d), read_size = %d", receiver, len, size);
 	}
@@ -151,8 +153,10 @@ static void __ctsvc_server_socket_import_sim(GIOChannel *src, int size)
 	}
 
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_server_sim_import_contact() Fail(%d)", ret);
 		ctsvc_server_socket_return(src, ret, 0, NULL);
+		/* LCOV_EXCL_STOP */
 	}
 }
 
@@ -168,9 +172,11 @@ static void __ctsvc_server_socket_get_sim_init_status(GIOChannel *src, int size)
 	if (0 < size) {
 		g_io_channel_read_chars(src, receiver, size, &len, &gerr);
 		if (gerr) {
+			/* LCOV_EXCL_START */
 			ERR("g_io_channel_read_chars() Fail(%s)", gerr->message);
 			g_error_free(gerr);
 			return;
+			/* LCOV_EXCL_STOP */
 		}
 		DBG("Receiver = %s(%d), read_size = %d", receiver, len, size);
 	}
@@ -184,8 +190,10 @@ static void __ctsvc_server_socket_get_sim_init_status(GIOChannel *src, int size)
 	}
 
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_server_socket_get_sim_init_status() Fail(%d)", ret);
 		ctsvc_server_socket_return(src, ret, 0, NULL);
+		/* LCOV_EXCL_STOP */
 	}
 }
 
@@ -217,8 +225,10 @@ static void __ctsvc_server_socket_read_flush(GIOChannel *src, int size)
 
 	g_io_channel_read_chars(src, receiver, size, &len, &gerr);
 	if (gerr) {
+		/* LCOV_EXCL_START */
 		ERR("g_io_channel_read_chars() Fail(%s)", gerr->message);
 		g_error_free(gerr);
+		/* LCOV_EXCL_STOP */
 	}
 }
 
@@ -231,10 +241,12 @@ static int _ctsvc_server_initialize_cynara()
 	ret = cynara_initialize(&_cynara, NULL);
 	ctsvc_mutex_unlock(CTS_MUTEX_CYNARA);
 	if (CYNARA_API_SUCCESS != ret) {
+		/* LCOV_EXCL_START */
 		char errmsg[1024] = {0};
 		cynara_strerror(ret, errmsg, sizeof(errmsg));
 		ERR("cynara_initialize() Fail(%d,%s)", ret, errmsg);
 		return CONTACTS_ERROR_SYSTEM;
+		/* LCOV_EXCL_STOP */
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -248,9 +260,11 @@ static void _ctsvc_server_finalize_cynara()
 	_cynara = NULL;
 	ctsvc_mutex_unlock(CTS_MUTEX_CYNARA);
 	if (CYNARA_API_SUCCESS != ret) {
+		/* LCOV_EXCL_START */
 		char errmsg[1024] = {0};
 		cynara_strerror(ret, errmsg, sizeof(errmsg));
 		ERR("cynara_finish() Fail(%d,%s)", ret, errmsg);
+		/* LCOV_EXCL_STOP */
 	}
 }
 
@@ -296,10 +310,12 @@ static gboolean __ctsvc_server_socket_request_handler(GIOChannel *src, GIOCondit
 	bool have_telephony_feature = false;
 	have_telephony_feature = ctsvc_server_have_telephony_feature();
 	if (false == have_telephony_feature) {
+		/* LCOV_EXCL_START */
 		ERR("Telephony feature disabled");
 		__ctsvc_server_socket_read_flush(src, msg.attach_sizes[0]);  /* sim_id */
 		ctsvc_server_socket_return(src, CONTACTS_ERROR_NOT_SUPPORTED, 0, NULL);
 		return TRUE;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ctsvc_mutex_lock(CTS_MUTEX_SOCKET_CLIENT_INFO);
@@ -316,25 +332,31 @@ static gboolean __ctsvc_server_socket_request_handler(GIOChannel *src, GIOCondit
 	switch (msg.type) {
 	case CTSVC_SOCKET_MSG_TYPE_REQUEST_IMPORT_SIM:
 		if (false == have_write_permission) {
+			/* LCOV_EXCL_START */
 			ERR("write permission denied");
 			__ctsvc_server_socket_read_flush(src, msg.attach_sizes[0]);  /* sim_id */
 			ctsvc_server_socket_return(src, CONTACTS_ERROR_PERMISSION_DENIED, 0, NULL);
 			return TRUE;
+			/* LCOV_EXCL_STOP */
 		}
 		__ctsvc_server_socket_import_sim(src, msg.attach_sizes[0]);
 		break;
 	case CTSVC_SOCKET_MSG_TYPE_REQUEST_SIM_INIT_COMPLETE:
 		if (false == have_read_permission) {
+			/* LCOV_EXCL_START */
 			ERR("read permission denied");
 			__ctsvc_server_socket_read_flush(src, msg.attach_sizes[0]);  /* sim_id */
 			ctsvc_server_socket_return(src, CONTACTS_ERROR_PERMISSION_DENIED, 0, NULL);
 			return TRUE;
+			/* LCOV_EXCL_STOP */
 		}
 		__ctsvc_server_socket_get_sim_init_status(src, msg.attach_sizes[0]);
 		break;
 	default:
+		/* LCOV_EXCL_START */
 		ERR("Unknown request type(%d)", msg.type);
 		break;
+		/* LCOV_EXCL_STOP */
 	}
 	return TRUE;
 }
@@ -359,39 +381,49 @@ static int _ctsvc_server_create_client_info(int fd, struct client_info **p_info)
 
 	struct client_info *info = calloc(1, sizeof(struct client_info));
 	if (NULL == info) {
+		/* LCOV_EXCL_START */
 		ERR("calloc() return NULL");
 		return CONTACTS_ERROR_SYSTEM;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ret = cynara_creds_socket_get_client(fd, CLIENT_METHOD_SMACK, &(info->smack));
 	if (CYNARA_API_SUCCESS != ret) {
+		/* LCOV_EXCL_START */
 		cynara_strerror(ret, errmsg, sizeof(errmsg));
 		ERR("cynara_creds_socket_get_client() Fail(%d,%s)", ret, errmsg);
 		_ctsvc_server_destroy_client_info(info);
 		return CONTACTS_ERROR_SYSTEM;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ret = cynara_creds_socket_get_user(fd, USER_METHOD_UID, &(info->uid));
 	if (CYNARA_API_SUCCESS != ret) {
+		/* LCOV_EXCL_START */
 		cynara_strerror(ret, errmsg, sizeof(errmsg));
 		ERR("cynara_creds_socket_get_user() Fail(%d,%s)", ret, errmsg);
 		_ctsvc_server_destroy_client_info(info);
 		return CONTACTS_ERROR_SYSTEM;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ret = cynara_creds_socket_get_pid(fd, &pid);
 	if (CYNARA_API_SUCCESS != ret) {
+		/* LCOV_EXCL_START */
 		cynara_strerror(ret, errmsg, sizeof(errmsg));
 		ERR("cynara_creds_socket_get_pid() Fail(%d,%s)", ret, errmsg);
 		_ctsvc_server_destroy_client_info(info);
 		return CONTACTS_ERROR_SYSTEM;
+		/* LCOV_EXCL_STOP */
 	}
 
 	info->client_session = cynara_session_from_pid(pid);
 	if (NULL == info->client_session) {
+		/* LCOV_EXCL_START */
 		ERR("cynara_session_from_pid() return NULL");
 		_ctsvc_server_destroy_client_info(info);
 		return CONTACTS_ERROR_SYSTEM;
+		/* LCOV_EXCL_STOP */
 	}
 	*p_info = info;
 
@@ -418,7 +450,9 @@ static gboolean __ctsvc_server_socket_handler(GIOChannel *src,
 	struct client_info *info = NULL;
 	ret = _ctsvc_server_create_client_info(client_sockfd, &info);
 	if (CONTACTS_ERROR_NONE != ret)
+		/* LCOV_EXCL_START */
 		ERR("_create_client_info() Fail(%d)", ret);
+	/* LCOV_EXCL_STOP */
 	else
 		g_hash_table_insert(_client_info_table, GINT_TO_POINTER(client_sockfd), info);
 
@@ -452,24 +486,32 @@ int ctsvc_server_socket_init(void)
 
 	ret = bind(sockfd, (struct sockaddr *)&addr, sizeof(addr));
 	if (-1 == ret) {
+		/* LCOV_EXCL_START */
 		close(sockfd);
 		ERR("bind() Fail(errno = %d)", errno);
 		return CONTACTS_ERROR_SYSTEM;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ret = chown(sock_file, getuid(), CTS_SECURITY_FILE_GROUP);
 	if (0 != ret)
+		/* LCOV_EXCL_START */
 		ERR("chown(%s) Fail(%d)", sock_file, ret);
+	/* LCOV_EXCL_STOP */
 
 	ret = chmod(sock_file, CTS_SECURITY_DEFAULT_PERMISSION);
 	if (0 != ret)
+		/* LCOV_EXCL_START */
 		ERR("chmod(%s) Fail(%d)", sock_file, ret);
+	/* LCOV_EXCL_STOP */
 
 	ret = listen(sockfd, 30);
 	if (-1 == ret) {
+		/* LCOV_EXCL_START */
 		close(sockfd);
 		ERR("listen() Fail(errno = %d)", errno);
 		return CONTACTS_ERROR_SYSTEM;
+		/* LCOV_EXCL_STOP */
 	}
 
 	gio = g_io_channel_unix_new(sockfd);

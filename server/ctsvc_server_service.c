@@ -43,9 +43,11 @@ int ctsvc_connect()
 	if (0 == ctsvc_connection) {
 		ret = ctsvc_inotify_init();
 		if (ret != CONTACTS_ERROR_NONE) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_inotify_init() Fail(%d)", ret);
 			ctsvc_mutex_unlock(CTS_MUTEX_CONNECTION);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 		ctsvc_db_plugin_init();
 		ctsvc_view_uri_init();
@@ -59,9 +61,11 @@ int ctsvc_connect()
 	if (0 == thread_connection) {
 		ret = ctsvc_db_init();
 		if (ret != CONTACTS_ERROR_NONE) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_db_init() Fail(%d)", ret);
 			ctsvc_mutex_unlock(CTS_MUTEX_CONNECTION);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 	}
 	thread_connection++;

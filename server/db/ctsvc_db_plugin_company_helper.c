@@ -89,9 +89,11 @@ int ctsvc_db_company_insert(contacts_record_h record, int contact_id, bool is_my
 
 		ret = ctsvc_db_get_next_id(CTS_TABLE_DATA);
 		if (ret < CONTACTS_ERROR_NONE) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_db_get_next_id() Fail(%d)", ret);
 			ctsvc_end_trans(false);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 		company_id = ret;
 
@@ -109,25 +111,31 @@ int ctsvc_db_company_insert(contacts_record_h record, int contact_id, bool is_my
 			char image[CTSVC_IMG_FULL_PATH_SIZE_MAX] = {0};
 			ret = ctsvc_have_file_read_permission(company->logo);
 			if (ret != CONTACTS_ERROR_NONE) {
+				/* LCOV_EXCL_START */
 				ERR("ctsvc_have_file_read_permission Fail(%d)", ret);
 				ctsvc_stmt_finalize(stmt);
 				return ret;
+				/* LCOV_EXCL_STOP */
 			}
 			ctsvc_utils_make_image_file_name(contact_id, company_id, company->logo, image, sizeof(image));
 			ret = ctsvc_utils_copy_image(CTS_LOGO_IMAGE_LOCATION, company->logo, image);
 			if (CONTACTS_ERROR_NONE != ret) {
+				/* LCOV_EXCL_START */
 				ERR("ctsvc_utils_copy_image() Fail(%d)", ret);
 				ctsvc_stmt_finalize(stmt);
 				return ret;
+				/* LCOV_EXCL_STOP */
 			}
 			ctsvc_stmt_bind_text(stmt, 9, image);
 		}
 
 		ret = ctsvc_stmt_step(stmt);
 		if (CONTACTS_ERROR_NONE != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_stmt_step() Fail(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 		ctsvc_stmt_finalize(stmt);
 
@@ -234,9 +242,11 @@ int ctsvc_db_company_update(contacts_record_h record, int contact_id, bool is_my
 				if (company->logo) {
 					ret = ctsvc_have_file_read_permission(company->logo);
 					if (ret != CONTACTS_ERROR_NONE) {
+						/* LCOV_EXCL_START */
 						ERR("ctsvc_have_file_read_permission Fail(%d)", ret);
 						ctsvc_stmt_finalize(stmt);
 						return ret;
+						/* LCOV_EXCL_STOP */
 					}
 					check_permission = true;
 				}
@@ -252,17 +262,21 @@ int ctsvc_db_company_update(contacts_record_h record, int contact_id, bool is_my
 			if (false == check_permission) {
 				ret = ctsvc_have_file_read_permission(company->logo);
 				if (ret != CONTACTS_ERROR_NONE) {
+					/* LCOV_EXCL_START */
 					ERR("ctsvc_have_file_read_permission Fail(%d)", ret);
 					ctsvc_stmt_finalize(stmt);
 					return ret;
+					/* LCOV_EXCL_STOP */
 				}
 			}
 			ctsvc_utils_make_image_file_name(contact_id, company->id, company->logo, dest, sizeof(dest));
 			ret = ctsvc_utils_copy_image(CTS_LOGO_IMAGE_LOCATION, company->logo, dest);
 			if (CONTACTS_ERROR_NONE != ret) {
+				/* LCOV_EXCL_START */
 				ERR("cts_copy_file() Fail(%d)", ret);
 				ctsvc_stmt_finalize(stmt);
 				return ret;
+				/* LCOV_EXCL_STOP */
 			}
 			free(company->logo);
 			company->logo = strdup(dest);
