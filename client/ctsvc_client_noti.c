@@ -59,9 +59,11 @@ static void _cnoti_subscribe_cb(pims_ipc_h ipc, pims_ipc_data_h data,
 	}
 
 	if (NULL == str) {
+		//LCOV_EXCL_START
 		ERR("There is no changed data");
 		free(str);
 		return;
+		//LCOV_EXCL_STOP
 	}
 
 	if (info) {
@@ -75,6 +77,7 @@ static void _cnoti_subscribe_cb(pims_ipc_h ipc, pims_ipc_data_h data,
 	free(str);
 }
 
+//LCOV_EXCL_START
 int _cnoti_recover_for_change_subscription()
 {
 	GSList *it = NULL;
@@ -96,6 +99,7 @@ int _cnoti_recover_for_change_subscription()
 
 	return CONTACTS_ERROR_NONE;
 }
+//LCOV_EXCL_STOP
 
 
 /* This API should be called in CTS_MUTEX_PIMS_IPC_PUBSUB mutex */
@@ -120,9 +124,11 @@ int ctsvc_ipc_create_for_change_subscription()
 				getuid(), CTSVC_IPC_SERVICE);
 		__ipc = pims_ipc_create_for_subscribe(sock_file);
 		if (NULL == __ipc) {
+			//LCOV_EXCL_START
 			ERR("pims_ipc_create_for_subscribe() Fail");
 			ctsvc_mutex_unlock(CTS_MUTEX_PIMS_IPC_PUBSUB);
 			return CONTACTS_ERROR_IPC;
+			//LCOV_EXCL_STOP
 		}
 	}
 	__ipc_pubsub_ref++;
@@ -130,6 +136,7 @@ int ctsvc_ipc_create_for_change_subscription()
 	return CONTACTS_ERROR_NONE;
 }
 
+//LCOV_EXCL_START
 int ctsvc_ipc_recover_for_change_subscription()
 {
 	int ret;
@@ -165,6 +172,7 @@ int ctsvc_ipc_recover_for_change_subscription()
 	ctsvc_mutex_unlock(CTS_MUTEX_PIMS_IPC_PUBSUB);
 	return CONTACTS_ERROR_NONE;
 }
+//LCOV_EXCL_STOP
 
 int ctsvc_ipc_destroy_for_change_subscription(bool is_disconnect)
 {
@@ -212,8 +220,10 @@ API int contacts_db_add_changed_cb_with_info(const char *view_uri,
 	if (STRING_EQUAL == strncmp(view_uri, CTSVC_VIEW_URI_PHONELOG, strlen(CTSVC_VIEW_URI_PHONELOG))) {
 		ret = ctsvc_ipc_client_check_permission(CTSVC_PERMISSION_PHONELOG_READ, &result);
 		if (CONTACTS_ERROR_NONE != ret) {
+			//LCOV_EXCL_START
 			ERR("ctsvc_ipc_client_check_permission() Fail(%d)", ret);
 			return ret;
+			//LCOV_EXCL_STOP
 		}
 
 		RETVM_IF(result == false, CONTACTS_ERROR_PERMISSION_DENIED,
@@ -221,22 +231,28 @@ API int contacts_db_add_changed_cb_with_info(const char *view_uri,
 	} else if (STRING_EQUAL == strncmp(view_uri, CTSVC_VIEW_URI_PERSON, strlen(CTSVC_VIEW_URI_PERSON))) {
 		ret = ctsvc_ipc_client_check_permission(CTSVC_PERMISSION_CONTACT_READ, &result);
 		if (CONTACTS_ERROR_NONE != ret) {
+			//LCOV_EXCL_START
 			ERR("ctsvc_ipc_client_check_permission() Fail(%d)", ret);
 			return ret;
+			//LCOV_EXCL_STOP
 		}
 
 		RETVM_IF(result == false, CONTACTS_ERROR_PERMISSION_DENIED,
 				"Permission denied (contact read)");
 	} else {
+		//LCOV_EXCL_START
 		ERR("We support this API for only %s and %s", CTSVC_VIEW_URI_PERSON,
 				CTSVC_VIEW_URI_PHONELOG);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 
 	ret = ctsvc_ipc_create_for_change_subscription();
 	if (CONTACTS_ERROR_NONE != ret) {
+		//LCOV_EXCL_START
 		ERR("ctsvc_ipc_create_for_change_subscription() Fail(%d)", ret);
 		return ret;
+		//LCOV_EXCL_STOP
 	}
 
 	ctsvc_mutex_lock(CTS_MUTEX_PIMS_IPC_PUBSUB);
@@ -254,17 +270,21 @@ API int contacts_db_add_changed_cb_with_info(const char *view_uri,
 	if (NULL == info) {
 		info = calloc(1, sizeof(subscribe_info_s));
 		if (NULL == info) {
+			//LCOV_EXCL_START
 			ERR("calloc() Fail");
 			ctsvc_mutex_unlock(CTS_MUTEX_PIMS_IPC_PUBSUB);
 			return CONTACTS_ERROR_OUT_OF_MEMORY;
+			//LCOV_EXCL_STOP
 		}
 
 		if (pims_ipc_subscribe(__ipc, CTSVC_IPC_SUBSCRIBE_MODULE, (char*)view_uri,
 					_cnoti_subscribe_cb, (void*)info) != 0) {
+			//LCOV_EXCL_START
 			ERR("pims_ipc_subscribe() Fail");
 			free(info);
 			ctsvc_mutex_unlock(CTS_MUTEX_PIMS_IPC_PUBSUB);
 			return CONTACTS_ERROR_IPC;
+			//LCOV_EXCL_STOP
 		}
 		info->view_uri = strdup(view_uri);
 		__db_change_subscribe_list = g_slist_append(__db_change_subscribe_list, info);
@@ -273,18 +293,22 @@ API int contacts_db_add_changed_cb_with_info(const char *view_uri,
 		for (l = info->callbacks; l; l = l->next) {
 			db_callback_info_s *cb_info = l->data;
 			if (cb_info->cb == cb && cb_info->user_data == user_data) {
+				//LCOV_EXCL_START
 				ERR("The same callback(%s) is already exist", view_uri);
 				ctsvc_mutex_unlock(CTS_MUTEX_PIMS_IPC_PUBSUB);
 				return CONTACTS_ERROR_INVALID_PARAMETER;
+				//LCOV_EXCL_STOP
 			}
 		}
 	}
 
 	cb_info = calloc(1, sizeof(db_callback_info_s));
 	if (NULL == cb_info) {
+		//LCOV_EXCL_START
 		ERR("calloc() Fail");
 		ctsvc_mutex_unlock(CTS_MUTEX_PIMS_IPC_PUBSUB);
 		return CONTACTS_ERROR_OUT_OF_MEMORY;
+		//LCOV_EXCL_STOP
 	}
 	cb_info->user_data = user_data;
 	cb_info->cb = cb;
@@ -306,15 +330,19 @@ API int contacts_db_remove_changed_cb_with_info(const char *view_uri,
 
 	if (STRING_EQUAL != strcmp(view_uri, CTSVC_VIEW_URI_PHONELOG)
 			&& STRING_EQUAL != strcmp(view_uri, CTSVC_VIEW_URI_PERSON)) {
+		//LCOV_EXCL_START
 		ERR("We support this API for only %s and %s", CTSVC_VIEW_URI_PERSON,
 				CTSVC_VIEW_URI_PHONELOG);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 
 	ret = ctsvc_ipc_destroy_for_change_subscription(false);
 	if (CONTACTS_ERROR_NONE != ret) {
+		//LCOV_EXCL_START
 		ERR("ctsvc_ipc_destroy_for_change_subscription() Fail(%d)", ret);
 		return ret;
+		//LCOV_EXCL_STOP
 	}
 
 	ctsvc_mutex_lock(CTS_MUTEX_PIMS_IPC_PUBSUB);

@@ -144,56 +144,70 @@ int ctsvc_convert_japanese_to_hiragana(const char *src, char **dest)
 
 	u_strFromUTF8(NULL, 0, &size, src, strlen(src), &status);
 	if (U_FAILURE(status) && status != U_BUFFER_OVERFLOW_ERROR) {
+		//LCOV_EXCL_START
 		ERR("u_strFromUTF8 to get the dest length Fail(%s)", u_errorName(status));
 		return CONTACTS_ERROR_SYSTEM;
+		//LCOV_EXCL_STOP
 	}
 	status = U_ZERO_ERROR;
 	tmp_result = calloc(1, sizeof(UChar) * (size + 1));
 	if (NULL == tmp_result) {
+		//LCOV_EXCL_START
 		ERR("calloc() Fail");
 		return CONTACTS_ERROR_OUT_OF_MEMORY;
+		//LCOV_EXCL_STOP
 	}
 
 	u_strFromUTF8(tmp_result, size + 1, NULL, src, -1, &status);
 	if (U_FAILURE(status)) {
+		//LCOV_EXCL_START
 		ERR("u_strFromUTF8 Fail(%s)", u_errorName(status));
 		free(tmp_result);
 		return CONTACTS_ERROR_SYSTEM;
+		//LCOV_EXCL_STOP
 	}
 
 	result = calloc(1, sizeof(UChar) * (size + 1));
 	if (NULL == result) {
+		//LCOV_EXCL_START
 		ERR("calloc() Fail");
 		free(tmp_result);
 		return CONTACTS_ERROR_OUT_OF_MEMORY;
+		//LCOV_EXCL_STOP
 	}
 
 	ctsvc_convert_japanese_to_hiragana_unicode(tmp_result, result, size + 1);
 	u_strToUTF8(NULL, 0, &size, result, -1, &status);
 	if (U_FAILURE(status) && status != U_BUFFER_OVERFLOW_ERROR) {
+		//LCOV_EXCL_START
 		ERR("u_strToUTF8 to get the dest length Fail(%s)", u_errorName(status));
 		free(tmp_result);
 		free(result);
 		return CONTACTS_ERROR_SYSTEM;
+		//LCOV_EXCL_STOP
 	}
 
 	status = U_ZERO_ERROR;
 	*dest = calloc(1, sizeof(char)*(size+1));
 	if (NULL == *dest) {
+		//LCOV_EXCL_START
 		ERR("calloc() Fail");
 		free(tmp_result);
 		free(result);
 		return CONTACTS_ERROR_OUT_OF_MEMORY;
+		//LCOV_EXCL_STOP
 	}
 
 	u_strToUTF8(*dest, size + 1, &size, result, -1, &status);
 	if (U_FAILURE(status)) {
+		//LCOV_EXCL_START
 		ERR("u_strToUTF8 Fail(%s)", u_errorName(status));
 		free(tmp_result);
 		free(result);
 		free(*dest);
 		*dest = NULL;
 		return CONTACTS_ERROR_SYSTEM;
+		//LCOV_EXCL_STOP
 	}
 
 	free(tmp_result);

@@ -47,40 +47,50 @@ int ctsvc_client_phone_log_reset_statistics(contacts_h contact)
 	/* make indata */
 	indata = pims_ipc_data_create(0);
 	if (indata == NULL) {
+		//LCOV_EXCL_START
 		ERR("pims_ipc_data_create() Fail");
 		return CONTACTS_ERROR_OUT_OF_MEMORY;
+		//LCOV_EXCL_STOP
 	}
 
 	ret = ctsvc_ipc_marshal_handle(contact, indata);
 	if (CONTACTS_ERROR_NONE != ret) {
+		//LCOV_EXCL_START
 		ERR("ctsvc_ipc_marshal_handle() Fail(%d)", ret);
 		pims_ipc_data_destroy(indata);
 		return ret;
+		//LCOV_EXCL_STOP
 	}
 
 	/* ipc call */
 	if (ctsvc_ipc_call(CTSVC_IPC_PHONELOG_MODULE, CTSVC_IPC_SERVER_PHONELOG_RESET_STATISTICS,
 				indata, &outdata) != 0) {
+		//LCOV_EXCL_START
 		ERR("ctsvc_ipc_call() Fail");
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
+		//LCOV_EXCL_STOP
 	}
 
 	pims_ipc_data_destroy(indata);
 
 	if (outdata) {
 		if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(outdata, &ret)) {
+			//LCOV_EXCL_START
 			ERR("ctsvc_ipc_unmarshal_int() Fail");
 			pims_ipc_data_destroy(outdata);
 			return CONTACTS_ERROR_IPC;
+			//LCOV_EXCL_STOP
 		}
 
 		if (CONTACTS_ERROR_NONE == ret) {
 			int transaction_ver = 0;
 			if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(outdata, &transaction_ver)) {
+				//LCOV_EXCL_START
 				ERR("ctsvc_ipc_unmarshal_int() Fail");
 				pims_ipc_data_destroy(outdata);
 				return CONTACTS_ERROR_IPC;
+				//LCOV_EXCL_STOP
 			}
 			ctsvc_client_ipc_set_change_version(contact, transaction_ver);
 		}
@@ -110,49 +120,61 @@ int ctsvc_client_phone_log_reset_statistics_by_sim(contacts_h contact,
 	/* make indata */
 	indata = pims_ipc_data_create(0);
 	if (indata == NULL) {
+		//LCOV_EXCL_START
 		ERR("pims_ipc_data_create() Fail");
 		ret = CONTACTS_ERROR_OUT_OF_MEMORY;
 		return ret;
+		//LCOV_EXCL_STOP
 	}
 
 	ret = ctsvc_ipc_marshal_handle(contact, indata);
 	if (CONTACTS_ERROR_NONE != ret) {
+		//LCOV_EXCL_START
 		ERR("ctsvc_ipc_marshal_handle() Fail(%d)", ret);
 		pims_ipc_data_destroy(indata);
 		return ret;
+		//LCOV_EXCL_STOP
 	}
 
 	ret = ctsvc_ipc_marshal_int(sim_slot_no, indata);
 	if (CONTACTS_ERROR_NONE != ret) {
+		//LCOV_EXCL_START
 		ERR("ctsvc_ipc_marshal_int() Fail(%d)", ret);
 		pims_ipc_data_destroy(indata);
 		return ret;
+		//LCOV_EXCL_STOP
 	}
 
 	/* ipc call */
 	if (ctsvc_ipc_call(CTSVC_IPC_PHONELOG_MODULE,
 			CTSVC_IPC_SERVER_PHONELOG_RESET_STATISTICS_BY_SIM,
 			indata, &outdata) != 0) {
+		//LCOV_EXCL_START
 		ERR("ctsvc_ipc_call() Fail");
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
+		//LCOV_EXCL_STOP
 	}
 
 	pims_ipc_data_destroy(indata);
 
 	if (outdata) {
 		if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(outdata, &ret)) {
+			//LCOV_EXCL_START
 			ERR("ctsvc_ipc_unmarshal_int() Fail");
 			pims_ipc_data_destroy(outdata);
 			return CONTACTS_ERROR_IPC;
+			//LCOV_EXCL_STOP
 		}
 
 		if (CONTACTS_ERROR_NONE == ret) {
 			int transaction_ver = 0;
 			if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(outdata, &transaction_ver)) {
+				//LCOV_EXCL_START
 				ERR("ctsvc_ipc_unmarshal_int() Fail");
 				pims_ipc_data_destroy(outdata);
 				return CONTACTS_ERROR_IPC;
+				//LCOV_EXCL_STOP
 			}
 			ctsvc_client_ipc_set_change_version(contact, transaction_ver);
 		}
@@ -181,22 +203,28 @@ int ctsvc_client_phone_log_delete(contacts_h contact, contacts_phone_log_delete_
 
 	indata = pims_ipc_data_create(0);
 	if (indata == NULL) {
+		//LCOV_EXCL_START
 		ERR("pims_ipc_data_create() Fail");
 		return CONTACTS_ERROR_OUT_OF_MEMORY;
+		//LCOV_EXCL_STOP
 	}
 
 	ret = ctsvc_ipc_marshal_handle(contact, indata);
 	if (CONTACTS_ERROR_NONE != ret) {
+		//LCOV_EXCL_START
 		ERR("ctsvc_ipc_marshal_handle() Fail(%d)", ret);
 		pims_ipc_data_destroy(indata);
 		return ret;
+		//LCOV_EXCL_STOP
 	}
 
 	ret = ctsvc_ipc_marshal_int(op, indata);
 	if (ret != CONTACTS_ERROR_NONE) {
+		//LCOV_EXCL_START
 		ERR("ctsvc_ipc_marshal_int fail");
 		pims_ipc_data_destroy(indata);
 		return ret;
+		//LCOV_EXCL_STOP
 	}
 
 	switch (op) {
@@ -208,9 +236,11 @@ int ctsvc_client_phone_log_delete(contacts_h contact, contacts_phone_log_delete_
 		}
 		ret = ctsvc_ipc_marshal_string(number, indata);
 		if (ret != CONTACTS_ERROR_NONE) {
+			//LCOV_EXCL_START
 			ERR("ctsvc_ipc_marshal_string fail");
 			pims_ipc_data_destroy(indata);
 			return ret;
+			//LCOV_EXCL_STOP
 		}
 		break;
 	case CONTACTS_PHONE_LOG_DELETE_BY_MESSAGE_EXTRA_DATA1:
@@ -218,38 +248,48 @@ int ctsvc_client_phone_log_delete(contacts_h contact, contacts_phone_log_delete_
 		extra_data1 = va_arg(args, int);
 		ret = ctsvc_ipc_marshal_int(extra_data1, indata);
 		if (ret != CONTACTS_ERROR_NONE) {
+			//LCOV_EXCL_START
 			ERR("ctsvc_ipc_marshal_int fail");
 			pims_ipc_data_destroy(indata);
 			return ret;
+			//LCOV_EXCL_STOP
 		}
 		break;
 	default:
+		//LCOV_EXCL_START
 		ERR("operation is not proper (%d)", ret);
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		//LCOV_EXCL_STOP
 	}
 
 	if (ctsvc_ipc_call(CTSVC_IPC_PHONELOG_MODULE,
 				CTSVC_IPC_SERVER_PHONELOG_DELETE, indata, &outdata) != 0) {
+		//LCOV_EXCL_START
 		ERR("ctsvc_ipc_call() Fail");
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
+		//LCOV_EXCL_STOP
 	}
 
 	pims_ipc_data_destroy(indata);
 
 	if (outdata) {
 		if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(outdata, &ret)) {
+			//LCOV_EXCL_START
 			ERR("ctsvc_ipc_unmarshal_int() Fail");
 			pims_ipc_data_destroy(outdata);
 			return CONTACTS_ERROR_IPC;
+			//LCOV_EXCL_STOP
 		}
 		if (CONTACTS_ERROR_NONE == ret) {
 			int transaction_ver = 0;
 			if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(outdata, &transaction_ver)) {
+				//LCOV_EXCL_START
 				ERR("ctsvc_ipc_unmarshal_int() Fail");
 				pims_ipc_data_destroy(outdata);
 				return CONTACTS_ERROR_IPC;
+				//LCOV_EXCL_STOP
 			}
 			ctsvc_client_ipc_set_change_version(contact, transaction_ver);
 		}
