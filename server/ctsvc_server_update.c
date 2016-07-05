@@ -64,6 +64,7 @@ static int __ctsvc_server_find_person_id_of_phonelog(sqlite3 *__db, char *normal
 
 	ret = sqlite3_prepare_v2(__db, query, sizeof(query), &stmt, NULL);
 	if (stmt == NULL) {
+		//LCOV_EXCL_START
 		ERR("sqlite3_prepare_v2 Fail(%d)", ret);
 		if (bind_text) {
 			for (cursor = bind_text; cursor; cursor = cursor->next, i++)
@@ -71,6 +72,7 @@ static int __ctsvc_server_find_person_id_of_phonelog(sqlite3 *__db, char *normal
 			g_slist_free(bind_text);
 		}
 		return CONTACTS_ERROR_DB;
+		//LCOV_EXCL_STOP
 	}
 
 	if (bind_text) {
@@ -123,8 +125,10 @@ static void __ctsvc_server_number_info_update(sqlite3 *__db)
 			"WHERE log_type < %d", CONTACTS_PLOG_TYPE_EMAIL_RECEIVED);
 	ret = sqlite3_prepare_v2(__db, query, strlen(query), &stmt, NULL);
 	if (SQLITE_OK != ret) {
+		//LCOV_EXCL_START
 		ERR("sqlite3_prepare_v2() Fail(%s)", sqlite3_errmsg(__db));
 		return;
+		//LCOV_EXCL_STOP
 	}
 
 	snprintf(query, sizeof(query),
@@ -132,9 +136,11 @@ static void __ctsvc_server_number_info_update(sqlite3 *__db)
 			"minmatch=?, person_id=?, number_type=? WHERE id = ?");
 	ret = sqlite3_prepare_v2(__db, query, strlen(query), &update_stmt, NULL);
 	if (SQLITE_OK != ret) {
+		//LCOV_EXCL_START
 		ERR("sqlite3_prepare_v2() Fail(%s)", sqlite3_errmsg(__db));
 		sqlite3_finalize(stmt);
 		return;
+		//LCOV_EXCL_STOP
 	}
 
 	while (SQLITE_ROW == (ret = sqlite3_step(stmt))) {
@@ -184,17 +190,21 @@ static void __ctsvc_server_number_info_update(sqlite3 *__db)
 			"WHERE datatype = %d", CONTACTS_DATA_TYPE_NUMBER);
 	ret = sqlite3_prepare_v2(__db, query, strlen(query), &stmt, NULL);
 	if (SQLITE_OK != ret) {
+		//LCOV_EXCL_START
 		ERR("sqlite3_prepare_v2() Fail(%s)", sqlite3_errmsg(__db));
 		return;
+		//LCOV_EXCL_STOP
 	}
 
 	snprintf(query, sizeof(query),
 			"UPDATE "CTS_TABLE_DATA" SET data4=?, data5=?, data6=?  WHERE id = ?");
 	ret = sqlite3_prepare_v2(__db, query, strlen(query), &update_stmt, NULL);
 	if (SQLITE_OK != ret) {
+		//LCOV_EXCL_START
 		ERR("sqlite3_prepare_v2() Fail(%s)", sqlite3_errmsg(__db));
 		sqlite3_finalize(stmt);
 		return;
+		//LCOV_EXCL_STOP
 	}
 
 	while (SQLITE_ROW == (ret = sqlite3_step(stmt))) {
@@ -217,8 +227,10 @@ static void __ctsvc_server_number_info_update(sqlite3 *__db)
 			sqlite3_bind_int(update_stmt, 4, id);
 			ret = sqlite3_step(update_stmt);
 			if (SQLITE_DONE != ret) {
+				//LCOV_EXCL_START
 				ERR("sqlite3_step() Fail(%d, %s)", ret, sqlite3_errmsg(__db));
 				break;
+				//LCOV_EXCL_STOP
 			}
 			sqlite3_reset(update_stmt);
 		}
@@ -240,14 +252,18 @@ static int __ctsvc_server_get_db_version(sqlite3 *db, int *version)
 	snprintf(query, sizeof(query), "PRAGMA user_version;");
 	ret = sqlite3_prepare_v2(db, query, strlen(query), &stmt, NULL);
 	if (SQLITE_OK != ret) {
+		//LCOV_EXCL_START
 		ERR("sqlite3_prepare_v2() Fail(%s)", sqlite3_errmsg(db));
 		return CONTACTS_ERROR_DB;
+		//LCOV_EXCL_STOP
 	}
 	ret = sqlite3_step(stmt);
 	if (SQLITE_ROW != ret) {
+		//LCOV_EXCL_START
 		ERR("sqlite3_step() Fail(%s)", sqlite3_errmsg(db));
 		sqlite3_finalize(stmt);
 		return CONTACTS_ERROR_DB;
+		//LCOV_EXCL_STOP
 	}
 	*version = sqlite3_column_int(stmt, 0);
 	sqlite3_finalize(stmt);

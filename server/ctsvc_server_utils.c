@@ -84,6 +84,7 @@ static void* __ctsvc_server_update_language_on_thread(void *data)
 	old_secondary_sort = ctsvc_get_secondary_sort();
 
 	if (old_primary_sort < 0 || old_secondary_sort < 0) {
+		//LCOV_EXCL_START
 		ERR("old_primary_sort (%d), old_secondary_sort(%d)", old_primary_sort, old_secondary_sort);
 		free(info->langset);
 		free(info->new_langset);
@@ -91,6 +92,7 @@ static void* __ctsvc_server_update_language_on_thread(void *data)
 		ret = vconf_notify_key_changed(VCONFKEY_LANGSET, __ctsvc_server_change_language_cb, NULL);
 		WARN_IF(ret < 0, "vconf_notify_key_changed(%s) Fail(%d)", VCONFKEY_LANGSET, ret);
 		return NULL;
+		//LCOV_EXCL_STOP
 	}
 
 	ctsvc_server_stop_timeout();
@@ -151,8 +153,10 @@ static void __ctsvc_server_change_language_cb(keynode_t *key, void *data)
 
 	new_langset = vconf_keynode_get_str(key);
 	if (NULL == new_langset) {
+		//LCOV_EXCL_START
 		ERR("vconf_keynode_get_str() Fail");
 		return;
+		//LCOV_EXCL_STOP
 	}
 	langset = ctsvc_get_langset();
 	INFO("%s --> %s", langset, new_langset);
@@ -160,8 +164,10 @@ static void __ctsvc_server_change_language_cb(keynode_t *key, void *data)
 	if (STRING_EQUAL != strcmp(langset, new_langset)) {
 		cts_language_update_thread_info_s *info = calloc(1, sizeof(cts_language_update_thread_info_s));
 		if (NULL == info) {
+			//LCOV_EXCL_START
 			ERR("calloc() Fail");
 			return;
+			//LCOV_EXCL_STOP
 		}
 
 		ret = vconf_ignore_key_changed(VCONFKEY_LANGSET, __ctsvc_server_change_language_cb);
