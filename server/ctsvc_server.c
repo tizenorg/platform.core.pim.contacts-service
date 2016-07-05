@@ -312,6 +312,7 @@ int main(int argc, char *argv[])
 		ret = setgroups(1, glist);   /* client and server should have same Groups */
 		WARN_IF(ret < 0, "setgroups Fail(%d)", ret);
 	}
+	setenv("GCOV_PREFIX", "/tmp/server", 1);
 
 	if (2 <= argc && STRING_EQUAL == strcmp(argv[1], "timeout"))
 		ctsvc_timeout_sec = atoi(argv[2]);
