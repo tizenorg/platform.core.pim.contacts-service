@@ -265,9 +265,7 @@ API const _contacts_group_relation_property_ids _contacts_group_relation = {
 	.id			= CTSVC_PROPERTY_GROUP_RELATION_ID,
 	.group_id	= CTSVC_PROPERTY_GROUP_RELATION_GROUP_ID,
 	.contact_id	= CTSVC_PROPERTY_GROUP_RELATION_CONTACT_ID,
-	.name		= CTSVC_PROPERTY_GROUP_RELATION_GROUP_NAME,
-	.snippet_type			= CTSVC_PROPERTY_PERSON_SNIPPET_TYPE,
-	.snippet_string			= CTSVC_PROPERTY_PERSON_SNIPPET_STRING
+	.name		= CTSVC_PROPERTY_GROUP_RELATION_GROUP_NAME
 };
 
 API const _contacts_relationship_property_ids _contacts_relationship = {

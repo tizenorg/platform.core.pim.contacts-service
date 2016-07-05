@@ -623,8 +623,6 @@ _CONTACTS_END_VIEW(_contacts_event)
  * <tr><td>integer</td><td> group_id </td><td>read, write once</td><td> DB record ID of the group </td></tr>
  * <tr><td>integer</td><td> contact_id </td><td>read, write once</td><td> DB record ID of the contact </td></tr>
  * <tr><td>string</td><td> name </td><td>read only</td><td> Group name </td></tr>
- * <tr><td>integer</td><td> snippet_type </td><td>read only</td><td> kerword matched data type, refer to they @ref contacts_data_type_e (Since 3.0) </td></tr>
- * <tr><td>string</td><td> snippet_string </td><td>read only</td><td> keyword matched data string (Since 3.0) </td></tr>
  * </table>
  */
 _CONTACTS_BEGIN_VIEW()
@@ -632,8 +630,6 @@ _CONTACTS_BEGIN_VIEW()
 	_CONTACTS_PROPERTY_INT(group_id)          /* read, write once */
 	_CONTACTS_PROPERTY_INT(contact_id)        /* read, write once */
 	_CONTACTS_PROPERTY_STR(name)              /* read only */
-	_CONTACTS_PROPERTY_INT(snippet_type)      /* read only (Since 3.0) */
-	_CONTACTS_PROPERTY_STR(snippet_string)    /* read only (Since 3.0) */
 _CONTACTS_END_VIEW(_contacts_group_relation)
 
 /**
