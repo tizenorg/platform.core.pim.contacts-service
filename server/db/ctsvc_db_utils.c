@@ -68,8 +68,10 @@ int ctsvc_begin_trans(void)
 			progress *= 2;
 		}
 		if (CONTACTS_ERROR_NONE != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_query_exec() Fail(%d)", ret);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 
 		transaction_count = 0;
@@ -110,7 +112,9 @@ int ctsvc_end_trans(bool is_success)
 				CTS_TABLE_VERSION, transaction_ver);
 		ret = ctsvc_query_exec(query);
 		if (CONTACTS_ERROR_NONE != ret)
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_query_exec(version up) Fail(%d)", ret);
+		/* LCOV_EXCL_STOP */
 	}
 
 	INFO("start commit");
@@ -124,6 +128,7 @@ int ctsvc_end_trans(bool is_success)
 	INFO("%s", (CONTACTS_ERROR_NONE == ret) ? "commit" : "rollback");
 
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		int tmp_ret;
 		ERR("ctsvc_query_exec() Fail(%d)", ret);
 		ctsvc_nofitication_cancel();
@@ -134,6 +139,7 @@ int ctsvc_end_trans(bool is_success)
 			ERR("ctsvc_query_exec(ROLLBACK) Fail(%d)", tmp_ret);
 
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ctsvc_notification_send();
@@ -190,8 +196,10 @@ void ctsvc_utils_make_image_file_name(int parent_id, int id, char *src_img, char
 
 	lower_ext = strdup(ext);
 	if (NULL == lower_ext) {
+		/* LCOV_EXCL_START */
 		ERR("strdup() Fail");
 		return;
+		/* LCOV_EXCL_STOP */
 	}
 	temp = lower_ext;
 	while (*temp) {
@@ -231,8 +239,10 @@ static image_util_rotation_e _ctsvc_image_get_rotation_info(const char *path)
 
 	ed = exif_data_new_from_file(path);
 	if (NULL == ed) {
+		/* LCOV_EXCL_START */
 		ERR("exif_data_new_from_file() Fail");
 		return IMAGE_UTIL_ROTATION_NONE;
+		/* LCOV_EXCL_STOP */
 	}
 
 	entry = exif_data_get_entry(ed, EXIF_TAG_ORIENTATION);
@@ -317,20 +327,24 @@ static bool _ctsvc_image_util_supported_jpeg_colorspace_cb(
 
 		fmt = ctsvc_image_util_create_media_format(mimetype, width, height);
 		if (NULL == fmt) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_image_util_create_media_format() Fail");
 			info->ret = CONTACTS_ERROR_SYSTEM;
 			free(buffer);
 			return false;
+			/* LCOV_EXCL_STOP */
 		}
 
 		packet = ctsvc_image_util_create_media_packet(fmt, buffer, (unsigned int)size);
 		free(buffer);
 
 		if (NULL == packet) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_image_util_create_media_packet() Fail");
 			media_format_unref(fmt);
 			info->ret = CONTACTS_ERROR_SYSTEM;
 			return false;
+			/* LCOV_EXCL_STOP */
 		}
 
 		ret = ctsvc_image_util_rotate(packet, rotation, &buffer_temp, &size);
@@ -339,8 +353,10 @@ static bool _ctsvc_image_util_supported_jpeg_colorspace_cb(
 		media_format_unref(fmt);
 
 		if (CONTACTS_ERROR_NONE != ret) {
+			/* LCOV_EXCL_START */
 			info->ret = CONTACTS_ERROR_SYSTEM;
 			return false;
+			/* LCOV_EXCL_STOP */
 		}
 
 		if (rotation == IMAGE_UTIL_ROTATION_90 || rotation == IMAGE_UTIL_ROTATION_270) {
@@ -374,20 +390,24 @@ static bool _ctsvc_image_util_supported_jpeg_colorspace_cb(
 
 		fmt = ctsvc_image_util_create_media_format(mimetype, width, height);
 		if (NULL == fmt) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_image_util_create_media_format() Fail");
 			info->ret = CONTACTS_ERROR_SYSTEM;
 			free(buffer);
 			return false;
+			/* LCOV_EXCL_STOP */
 		}
 
 		packet = ctsvc_image_util_create_media_packet(fmt, buffer, (unsigned int)size);
 		free(buffer);
 
 		if (NULL == packet) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_image_util_create_media_packet() Fail");
 			media_format_unref(fmt);
 			info->ret = CONTACTS_ERROR_SYSTEM;
 			return false;
+			/* LCOV_EXCL_STOP */
 		}
 
 		ret = ctsvc_image_util_resize(packet, resized_width, resized_height, &buffer_temp,
@@ -410,24 +430,30 @@ static bool _ctsvc_image_util_supported_jpeg_colorspace_cb(
 			CTSVC_IMAGE_ENCODE_QUALITY, info->dest);
 	free(buffer);
 	if (IMAGE_UTIL_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("image_util_encode_jpeg Fail(%d)", ret);
 		info->ret = CONTACTS_ERROR_SYSTEM;
 		return false;
+		/* LCOV_EXCL_STOP */
 	}
 
 	dest_fd = open(info->dest, O_RDONLY);
 	if (dest_fd < 0) {
+		/* LCOV_EXCL_START */
 		ERR("System : Open Fail(%d)", errno);
 		info->ret = CONTACTS_ERROR_SYSTEM;
 		return false;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ret = fchmod(dest_fd, CTS_SECURITY_IMAGE_PERMISSION);
 	if (0 != ret) {
+		/* LCOV_EXCL_START */
 		ERR("fchmod Fail(%d)", errno);
 		info->ret = CONTACTS_ERROR_SYSTEM;
 		close(dest_fd);
 		return false;
+		/* LCOV_EXCL_STOP */
 	}
 	close(dest_fd);
 
@@ -470,19 +496,25 @@ int ctsvc_utils_copy_image(const char *dir, const char *src, const char *file)
 	if (CONTACTS_ERROR_NONE == ret)
 		return ret;
 	else
+		/* LCOV_EXCL_START */
 		ERR("_ctsvc_image_encode Fail(%d)", ret);
+	/* LCOV_EXCL_STOP */
 
 	src_fd = open(src, O_RDONLY);
 	if (src_fd < 0) {
+		/* LCOV_EXCL_START */
 		ERR("System : Open(%s) Fail(%d)", src, errno);
 		return CONTACTS_ERROR_SYSTEM;
+		/* LCOV_EXCL_STOP */
 	}
 
 	dest_fd = open(dest, O_WRONLY|O_CREAT|O_TRUNC, 0660);
 	if (dest_fd < 0) {
+		/* LCOV_EXCL_START */
 		ERR("Open Fail(%d)", errno);
 		close(src_fd);
 		return CONTACTS_ERROR_SYSTEM;
+		/* LCOV_EXCL_STOP */
 	}
 
 	while (0 < (size = read(src_fd, buf, CTSVC_COPY_SIZE_MAX))) {
@@ -491,6 +523,7 @@ int ctsvc_utils_copy_image(const char *dir, const char *src, const char *file)
 			if (EINTR == errno) {
 				continue;
 			} else {
+				/* LCOV_EXCL_START */
 				ERR("write() Fail(%d)", errno);
 				if (ENOSPC == errno)
 					ret = CONTACTS_ERROR_FILE_NO_SPACE; /* No space */
@@ -500,13 +533,16 @@ int ctsvc_utils_copy_image(const char *dir, const char *src, const char *file)
 				close(dest_fd);
 				unlink(dest);
 				return ret;
+				/* LCOV_EXCL_STOP */
 			}
 		}
 	}
 
 	ret = fchmod(dest_fd, CTS_SECURITY_IMAGE_PERMISSION);
 	if (0 != ret)
+		/* LCOV_EXCL_START */
 		ERR("fchmod() Fail(%d)", ret);
+	/* LCOV_EXCL_STOP */
 
 	close(src_fd);
 	close(dest_fd);
@@ -527,8 +563,10 @@ char* ctsvc_utils_get_thumbnail_path(const char *image_path)
 	full_len = strlen(image_path) + strlen(CTSVC_IMAGE_THUMBNAIL_SUFFIX) + 1;
 	thumbnail_path = calloc(1, full_len);
 	if (NULL == thumbnail_path) {
+		/* LCOV_EXCL_START */
 		ERR("calloc() Fail");
 		return NULL;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ext = strrchr(image_path, '.');
@@ -556,8 +594,10 @@ char* ctsvc_utils_get_image_path(const char *thumbnail_path)
 	full_len = strlen(thumbnail_path) - strlen(CTSVC_IMAGE_THUMBNAIL_SUFFIX) + 1;
 	image_path = calloc(1, full_len);
 	if (NULL == image_path) {
-	   ERR("calloc() Fail");
-	   return NULL;
+		/* LCOV_EXCL_START */
+		ERR("calloc() Fail");
+		return NULL;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ext = strrchr(thumbnail_path, '.');
@@ -583,15 +623,19 @@ char* ctsvc_utils_make_thumbnail(const char *image_path)
 	RETV_IF(NULL != strstr(image_path, CTSVC_IMAGE_THUMBNAIL_SUFFIX), NULL);
 
 	if (false == _ctsvc_check_available_image_space(
-			CTSVC_IMAGE_THUMBNAIL_SIZE * CTSVC_IMAGE_THUMBNAIL_SIZE)) {
-			ERR("No space to make thumbnail");
-			return NULL;
+				CTSVC_IMAGE_THUMBNAIL_SIZE * CTSVC_IMAGE_THUMBNAIL_SIZE)) {
+		/* LCOV_EXCL_START */
+		ERR("No space to make thumbnail");
+		return NULL;
+		/* LCOV_EXCL_STOP */
 	}
 
 	thumbnail_path = ctsvc_utils_get_thumbnail_path(image_path);
 	if (NULL == thumbnail_path) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_image_util_get_thumbnail_path() Fail");
 		return NULL;
+		/* LCOV_EXCL_STOP */
 	}
 
 	snprintf(src, sizeof(src), "%s/%s", CTSVC_CONTACT_IMG_FULL_LOCATION, image_path);
@@ -604,9 +648,11 @@ char* ctsvc_utils_make_thumbnail(const char *image_path)
 
 	ret = _ctsvc_image_encode(src, dest, CTSVC_IMAGE_THUMBNAIL_SIZE);
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("_ctsvc_image_encode() Fail(%d)", ret);
 		free(thumbnail_path);
 		return NULL;
+		/* LCOV_EXCL_STOP */
 	}
 
 	return strdup(thumbnail_path);
@@ -628,7 +674,9 @@ int ctsvc_get_next_ver(void)
 
 	/* In this case, contacts-service already works abnormally. */
 	if (CONTACTS_ERROR_NONE != ret)
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_query_get_first_int_result : get version error(%d)", ret);
+	/* LCOV_EXCL_STOP */
 
 	return (1 + version);
 }
@@ -642,8 +690,10 @@ int ctsvc_get_current_version(int *out_current_version)
 
 		ret = ctsvc_query_get_first_int_result(query, &version);
 		if (CONTACTS_ERROR_NONE != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_query_get_first_int_result() Fail(%d)", ret);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 
 		*out_current_version = version;

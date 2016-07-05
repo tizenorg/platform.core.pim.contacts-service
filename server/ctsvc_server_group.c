@@ -113,38 +113,48 @@ int ctsvc_group_add_contact(int group_id, int contact_id)
 			"SELECT addressbook_id from "CTSVC_DB_VIEW_CONTACT"  WHERE contact_id = %d", contact_id);
 	ret = ctsvc_query_get_first_int_result(query, &addressbook_id);
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("No data : contact_id (%d) is not exist", contact_id);
 		ctsvc_end_trans(false);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	if (false == ctsvc_have_ab_write_permission(addressbook_id, true)) {
+		/* LCOV_EXCL_START */
 		ERR("No permission in this addresbook_id(%d)", addressbook_id);
 		ctsvc_end_trans(false);
 		return CONTACTS_ERROR_PERMISSION_DENIED;
+		/* LCOV_EXCL_STOP */
 	}
 
 	/* DOING JOB */
 	do {
 		int changed = ctsvc_group_add_contact_in_transaction(group_id, contact_id);
 		if (changed < CONTACTS_ERROR_NONE) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_group_add_contact_in_transaction() Fail(%d)", changed);
 			ret = changed;
 			break;
+			/* LCOV_EXCL_STOP */
 		}
 
 		ret = ctsvc_db_contact_update_changed_time(contact_id);
 		if (CONTACTS_ERROR_NONE != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_db_contact_update_changed_time() Fail(%d)", ret);
 			ret = CONTACTS_ERROR_DB;
 			break;
+			/* LCOV_EXCL_STOP */
 		}
 		ctsvc_set_person_noti();
 
 		ret = ctsvc_end_trans(true);
 		if (ret < CONTACTS_ERROR_NONE) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_end_trans() Fail(%d)", ret);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 
 		return CONTACTS_ERROR_NONE;
@@ -210,38 +220,48 @@ int ctsvc_group_remove_contact(int group_id, int contact_id)
 			"SELECT addressbook_id from "CTSVC_DB_VIEW_CONTACT"  WHERE contact_id = %d", contact_id);
 	ret = ctsvc_query_get_first_int_result(query, &addressbook_id);
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("No data : contact_id (%d) is not exist", contact_id);
 		ctsvc_end_trans(false);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	if (false == ctsvc_have_ab_write_permission(addressbook_id, true)) {
+		/* LCOV_EXCL_START */
 		ERR("No permission in this addresbook_id(%d)", addressbook_id);
 		ctsvc_end_trans(false);
 		return CONTACTS_ERROR_PERMISSION_DENIED;
+		/* LCOV_EXCL_STOP */
 	}
 
 	/* DOING JOB */
 	do {
 		int changed = ctsvc_group_remove_contact_in_transaction(group_id, contact_id);
 		if (changed < CONTACTS_ERROR_NONE) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_group_remove_contact_in_transaction() Fail(%d)", changed);
 			ret = changed;
 			break;
+			/* LCOV_EXCL_STOP */
 		}
 
 		ret = ctsvc_db_contact_update_changed_time(contact_id);
 		if (CONTACTS_ERROR_NONE != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_db_contact_update_changed_time() Fail(%d)", ret);
 			ret = CONTACTS_ERROR_DB;
 			break;
+			/* LCOV_EXCL_STOP */
 		}
 		ctsvc_set_person_noti();
 
 		ret = ctsvc_end_trans(true);
 		if (ret < CONTACTS_ERROR_NONE) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_end_trans() Fail(%d)", ret);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 
 		return CONTACTS_ERROR_NONE;
@@ -269,13 +289,17 @@ int ctsvc_group_set_group_order(int group_id, int previous_group_id, int next_gr
 			"SELECT addressbook_id from "CTS_TABLE_GROUPS"  WHERE group_id = %d", group_id);
 	ret = ctsvc_query_get_first_int_result(query, &addressbook_id);
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("No data : group_id (%d) is not exist", group_id);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	if (false == ctsvc_have_ab_write_permission(addressbook_id, true)) {
+		/* LCOV_EXCL_START */
 		ERR("No permission in this addresbook_id(%d)", addressbook_id);
 		return CONTACTS_ERROR_PERMISSION_DENIED;
+		/* LCOV_EXCL_STOP */
 	}
 
 	snprintf(query, sizeof(query), "SELECT group_prio, addressbook_id FROM "CTS_TABLE_GROUPS" WHERE group_id = ?");
@@ -327,17 +351,21 @@ int ctsvc_group_set_group_order(int group_id, int previous_group_id, int next_gr
 
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_query_exec() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ctsvc_set_group_noti();
 
 	ret = ctsvc_end_trans(true);
 	if (ret < CONTACTS_ERROR_NONE) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_end_trans() Fail(%d)", ret);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	} else {
 		return CONTACTS_ERROR_NONE;
 	}

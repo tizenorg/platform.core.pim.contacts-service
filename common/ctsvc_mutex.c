@@ -78,9 +78,11 @@ static inline pthread_mutex_t* __ctsvc_mutex_get_mutex(int type)
 		ret_val = &cynara_mutex;
 		break;
 	default:
+		/* LCOV_EXCL_START */
 		ERR("unknown type(%d)", type);
 		ret_val = NULL;
 		break;
+		/* LCOV_EXCL_STOP */
 	}
 	return ret_val;
 }

@@ -30,26 +30,34 @@
 
 static int __ctsvc_db_grouprelation_insert_record(contacts_record_h record, int *id)
 {
+	/* LCOV_EXCL_START */
 	ERR("Please use the contacts_group_add_contact()");
 	return CONTACTS_ERROR_INVALID_PARAMETER;
+	/* LCOV_EXCL_STOP */
 }
 
 static int __ctsvc_db_grouprelation_get_record(int id, contacts_record_h *out_record)
 {
+	/* LCOV_EXCL_START */
 	ERR("Not support get group-relation");
 	return CONTACTS_ERROR_INVALID_PARAMETER;
+	/* LCOV_EXCL_STOP */
 }
 
 static int __ctsvc_db_grouprelation_update_record(contacts_record_h record)
 {
+	/* LCOV_EXCL_START */
 	ERR("Not support update group-relation");
 	return CONTACTS_ERROR_INVALID_PARAMETER;
+	/* LCOV_EXCL_STOP */
 }
 
 static int __ctsvc_db_grouprelation_delete_record(int id)
 {
+	/* LCOV_EXCL_START */
 	ERR("Please use the contacts_group_remove_contact()");
 	return CONTACTS_ERROR_INVALID_PARAMETER;
+	/* LCOV_EXCL_STOP */
 }
 
 static int __ctsvc_db_grouprelation_get_all_records(int offset, int limit, contacts_list_h *out_list)
@@ -77,10 +85,12 @@ static int __ctsvc_db_grouprelation_get_all_records(int offset, int limit, conta
 	contacts_list_create(&list);
 	while ((ret = ctsvc_stmt_step(stmt))) {
 		if (1 != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_stmt_step() Fail(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
 			contacts_list_destroy(list, true);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 		contacts_record_create(_contacts_group_relation._uri, (contacts_record_h*)&grouprel);
 
@@ -123,10 +133,12 @@ static int __ctsvc_db_grouprelation_get_records_with_query(contacts_query_h quer
 	while ((ret = ctsvc_stmt_step(stmt))) {
 		contacts_record_h record;
 		if (1 != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_stmt_step() Fail(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
 			contacts_list_destroy(list, true);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 
 		contacts_record_create(_contacts_group_relation._uri, &record);

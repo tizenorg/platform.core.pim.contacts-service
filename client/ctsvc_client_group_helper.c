@@ -43,52 +43,66 @@ int ctsvc_client_group_add_contact(contacts_h contact, int group_id, int contact
 	/* make indata */
 	indata = pims_ipc_data_create(0);
 	if (indata == NULL) {
+		/* LCOV_EXCL_START */
 		ERR("pims_ipc_data_create() Fail");
 		return CONTACTS_ERROR_OUT_OF_MEMORY;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ret = ctsvc_ipc_marshal_handle(contact, indata);
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_ipc_marshal_handle() Fail(%d)", ret);
 		pims_ipc_data_destroy(indata);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ret = ctsvc_ipc_marshal_int(group_id, indata);
 	if (ret != CONTACTS_ERROR_NONE) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_ipc_marshal_int() Fail(%d)", ret);
 		pims_ipc_data_destroy(indata);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 	ret = ctsvc_ipc_marshal_int(contact_id, indata);
 	if (ret != CONTACTS_ERROR_NONE) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_ipc_marshal_int() Fail(%d)", ret);
 		pims_ipc_data_destroy(indata);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	/* ipc call */
 	if (ctsvc_ipc_call(CTSVC_IPC_GROUP_MODULE, CTSVC_IPC_SERVER_GROUP_ADD_CONTACT, indata, &outdata) != 0) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_ipc_call() Fail");
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
+		/* LCOV_EXCL_STOP */
 	}
 
 	pims_ipc_data_destroy(indata);
 
 	if (outdata) {
 		if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(outdata, &ret)) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_ipc_unmarshal_int() Fail");
 			pims_ipc_data_destroy(outdata);
 			return CONTACTS_ERROR_IPC;
+			/* LCOV_EXCL_STOP */
 		}
 
 		if (CONTACTS_ERROR_NONE == ret) {
 			int transaction_ver = 0;
 			if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(outdata, &transaction_ver)) {
+				/* LCOV_EXCL_START */
 				ERR("ctsvc_ipc_unmarshal_int() Fail");
 				pims_ipc_data_destroy(outdata);
 				return CONTACTS_ERROR_IPC;
+				/* LCOV_EXCL_STOP */
 			}
 			ctsvc_client_ipc_set_change_version(contact, transaction_ver);
 		}
@@ -112,53 +126,67 @@ int ctsvc_client_group_remove_contact(contacts_h contact, int group_id, int cont
 	/* make indata */
 	indata = pims_ipc_data_create(0);
 	if (indata == NULL) {
+		/* LCOV_EXCL_START */
 		ERR("pims_ipc_data_create() Fail");
 		return CONTACTS_ERROR_OUT_OF_MEMORY;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ret = ctsvc_ipc_marshal_handle(contact, indata);
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_ipc_marshal_handle() Fail(%d)", ret);
 		pims_ipc_data_destroy(indata);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 
 	ret = ctsvc_ipc_marshal_int(group_id, indata);
 	if (ret != CONTACTS_ERROR_NONE) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_ipc_marshal_int() Fail(%d)", ret);
 		pims_ipc_data_destroy(indata);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 	ret = ctsvc_ipc_marshal_int(contact_id, indata);
 	if (ret != CONTACTS_ERROR_NONE) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_ipc_marshal_int() Fail(%d)", ret);
 		pims_ipc_data_destroy(indata);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	/* ipc call */
 	if (ctsvc_ipc_call(CTSVC_IPC_GROUP_MODULE, CTSVC_IPC_SERVER_GROUP_REMOVE_CONTACT, indata, &outdata) != 0) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_ipc_call() Fail");
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
+		/* LCOV_EXCL_STOP */
 	}
 
 	pims_ipc_data_destroy(indata);
 
 	if (outdata) {
 		if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(outdata, &ret)) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_ipc_unmarshal_int() Fail");
 			pims_ipc_data_destroy(outdata);
 			return CONTACTS_ERROR_IPC;
+			/* LCOV_EXCL_STOP */
 		}
 
 		if (CONTACTS_ERROR_NONE == ret) {
 			int transaction_ver = 0;
 			if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(outdata, &transaction_ver)) {
+				/* LCOV_EXCL_START */
 				ERR("ctsvc_ipc_unmarshal_int() Fail");
 				pims_ipc_data_destroy(outdata);
 				return CONTACTS_ERROR_IPC;
+				/* LCOV_EXCL_STOP */
 			}
 			ctsvc_client_ipc_set_change_version(contact, transaction_ver);
 		}
@@ -182,58 +210,74 @@ int ctsvc_client_group_set_group_order(contacts_h contact, int group_id, int pre
 	/* make indata */
 	indata = pims_ipc_data_create(0);
 	if (indata == NULL) {
+		/* LCOV_EXCL_START */
 		ERR("pims_ipc_data_create() Fail");
 		return CONTACTS_ERROR_OUT_OF_MEMORY;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ret = ctsvc_ipc_marshal_handle(contact, indata);
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_ipc_marshal_handle() Fail(%d)", ret);
 		pims_ipc_data_destroy(indata);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ret = ctsvc_ipc_marshal_int(group_id, indata);
 	if (ret != CONTACTS_ERROR_NONE) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_ipc_marshal_int() Fail(%d)", ret);
 		pims_ipc_data_destroy(indata);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 	ret = ctsvc_ipc_marshal_int(previous_group_id, indata);
 	if (ret != CONTACTS_ERROR_NONE) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_ipc_marshal_int() Fail(%d)", ret);
 		pims_ipc_data_destroy(indata);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 	ret = ctsvc_ipc_marshal_int(next_group_id, indata);
 	if (ret != CONTACTS_ERROR_NONE) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_ipc_marshal_int() Fail(%d)", ret);
 		pims_ipc_data_destroy(indata);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	/* ipc call */
 	if (ctsvc_ipc_call(CTSVC_IPC_GROUP_MODULE, CTSVC_IPC_SERVER_GROUP_SET_GROUP_ORDER, indata, &outdata) != 0) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_ipc_call() Fail");
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
+		/* LCOV_EXCL_STOP */
 	}
 
 	pims_ipc_data_destroy(indata);
 
 	if (outdata) {
 		if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(outdata, &ret)) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_ipc_unmarshal_int() Fail");
 			pims_ipc_data_destroy(outdata);
 			return CONTACTS_ERROR_IPC;
+			/* LCOV_EXCL_STOP */
 		}
 
 		if (CONTACTS_ERROR_NONE == ret) {
 			int transaction_ver = 0;
 			if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(outdata, &transaction_ver)) {
+				/* LCOV_EXCL_START */
 				ERR("ctsvc_ipc_unmarshal_int() Fail");
 				pims_ipc_data_destroy(outdata);
 				return CONTACTS_ERROR_IPC;
+				/* LCOV_EXCL_STOP */
 			}
 			ctsvc_client_ipc_set_change_version(contact, transaction_ver);
 		}

@@ -83,9 +83,11 @@ static int __ctsvc_copy_and_remove_special_char(const char *src, char *dest, int
 	int s_pos = 0, d_pos = 0, char_type, src_size;
 
 	if (NULL == src) {
+		/* LCOV_EXCL_START */
 		ERR("The parameter(src) is NULL");
 		dest[d_pos] = '\0';
 		return 0;
+		/* LCOV_EXCL_STOP */
 	}
 	src_size = strlen(src);
 
@@ -97,9 +99,11 @@ static int __ctsvc_copy_and_remove_special_char(const char *src, char *dest, int
 			d_pos += char_type;
 			s_pos += char_type;
 		} else {
+			/* LCOV_EXCL_START */
 			ERR("The parameter(src:%s) has invalid character set", src);
 			dest[d_pos] = '\0';
 			return CONTACTS_ERROR_INVALID_PARAMETER;
+			/* LCOV_EXCL_STOP */
 		}
 	}
 
@@ -119,21 +123,27 @@ static int __ctsvc_normalize_str_to_unicode(const char *src, int src_size, UChar
 	u_strFromUTF8(tmp_result, dest_size, &size, src, src_size, &status);
 
 	if (U_FAILURE(status)) {
+		/* LCOV_EXCL_START */
 		ERR("u_strFromUTF8() Failed(%s)", u_errorName(status));
 		return CONTACTS_ERROR_SYSTEM;
+		/* LCOV_EXCL_STOP */
 	}
 
 	u_strToUpper(tmp_result, dest_size, tmp_result, -1, NULL, &status);
 	if (U_FAILURE(status)) {
+		/* LCOV_EXCL_START */
 		ERR("u_strToUpper() Failed(%s)", u_errorName(status));
 		return CONTACTS_ERROR_SYSTEM;
+		/* LCOV_EXCL_STOP */
 	}
 
 	size = unorm_normalize(tmp_result, -1, UNORM_NFD, 0,
 			(UChar *)dest, dest_size, &status);
 	if (U_FAILURE(status)) {
+		/* LCOV_EXCL_START */
 		ERR("unorm_normalize() Failed(%s)", u_errorName(status));
 		return CONTACTS_ERROR_SYSTEM;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ret = ctsvc_check_language(dest);
@@ -174,8 +184,10 @@ static bool __ctsvc_compare_pinyin_letter(const char *haystack, int haystack_lan
 
 		ret = ctsvc_convert_chinese_to_pinyin(temp, &pinyinname, &size);
 		if (ret != CONTACTS_ERROR_NONE) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_convert_chinese_to_pinyin Fail(%d)", ret);
 			return false;
+			/* LCOV_EXCL_STOP */
 		}
 
 		for (k = 0; k < size; k++) {
@@ -491,8 +503,10 @@ static char *_strrchr_with_nth(char *ori, char *s, int c, int nth)
 	char *cursor = s;
 	while (*cursor) {
 		if (cursor <= ori) {
+			/* LCOV_EXCL_START */
 			ERR("over");
 			return ori;
+			/* LCOV_EXCL_STOP */
 		}
 
 		if (*cursor == c)
@@ -526,8 +540,10 @@ char *ctsvc_utils_get_modified_str(char *temp, bool is_snippet, const char *keyw
 
 	char *pos_at = strstr(temp, "@");
 	if (NULL == pos_at) {
+		/* LCOV_EXCL_START */
 		ERR("Invalid value[%s]", temp);
 		return NULL;
+		/* LCOV_EXCL_STOP */
 	}
 	DBG("[%s]", temp);
 	*pos_at = '\0';
@@ -568,8 +584,10 @@ char *ctsvc_utils_get_modified_str(char *temp, bool is_snippet, const char *keyw
 
 	mod_temp = calloc(len_full, sizeof(char));
 	if (NULL == mod_temp) {
+		/* LCOV_EXCL_START */
 		ERR("calloc() Fail");
 		return NULL;
+		/* LCOV_EXCL_STOP */
 	}
 
 	char *keyword_start = NULL;

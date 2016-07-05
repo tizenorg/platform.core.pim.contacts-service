@@ -110,8 +110,10 @@ static TapiHandle* __ctsvc_server_sim_get_tapi_handle(ctsvc_sim_info_s *info)
 		vconf_get_bool(VCONFKEY_TELEPHONY_READY, &bReady);
 
 		if (0 == bReady) {
+			/* LCOV_EXCL_START */
 			ERR("telephony is not ready ");
 			return NULL;
+			/* LCOV_EXCL_STOP */
 		} else {
 			info->handle = tel_init(info->cp_name);
 			RETVM_IF(NULL == info->handle, NULL, "tel_init() Fail");
@@ -155,8 +157,10 @@ static sim_contact_s * __ctsvc_server_sim_record_clone(TelSimPbRecord_t *sim_rec
 {
 	sim_contact_s *record = calloc(1, sizeof(sim_contact_s));
 	if (NULL == record) {
+		/* LCOV_EXCL_START */
 		ERR("calloc() Fail");
 		return NULL;
+		/* LCOV_EXCL_STOP */
 	}
 
 	record->sim_index = sim_record->index;
@@ -378,23 +382,29 @@ static int __ctsvc_server_sim_insert_records_to_db(ctsvc_sim_info_s *info)
 	/* insert contacts to DB */
 	ret = contacts_list_create(&list);
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("contacts_list_create() Fail(%d)", ret);
 		return CONTACTS_ERROR_INTERNAL;
+		/* LCOV_EXCL_STOP */
 	}
 
 	for (cursor = info->import_contacts, i = 0; cursor; i++) {
 		record = cursor->data;
 		ret = __ctsvc_server_sim_ctsvc_record_clone(record, DEFAULT_ADDRESS_BOOK_ID, &contact);
 		if (CONTACTS_ERROR_NONE != ret) {
+			/* LCOV_EXCL_START */
 			ERR("__ctsvc_server_sim_ctsvc_record_clone() Fail(%d)", ret);
 			contacts_list_destroy(list, true);
 			return CONTACTS_ERROR_INTERNAL;
+			/* LCOV_EXCL_STOP */
 		}
 		ret = contacts_list_add(list, contact);
 		if (CONTACTS_ERROR_NONE != ret) {
+			/* LCOV_EXCL_START */
 			ERR("contacts_list_add() Fail(%d)", ret);
 			contacts_list_destroy(list, true);
 			return CONTACTS_ERROR_INTERNAL;
+			/* LCOV_EXCL_STOP */
 		}
 		cursor = cursor->next;
 	}
@@ -404,9 +414,11 @@ static int __ctsvc_server_sim_insert_records_to_db(ctsvc_sim_info_s *info)
 	if (0 < count) {
 		ret = ctsvc_db_insert_records(list, NULL, NULL);
 		if (CONTACTS_ERROR_NONE != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_db_insert_records() Fail(%d)", ret);
 			contacts_list_destroy(list, true);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 	}
 
@@ -424,20 +436,24 @@ static void __ctsvc_server_sim_import_contact_cb(TapiHandle *handle, int result,
 	ctsvc_sim_info_s *info;
 
 	if (NULL == sim_info) {
+		/* LCOV_EXCL_START */
 		ERR("sim_info is NULL, result = %d", access_rt);
 		ret = ctsvc_server_socket_return(__ctsvc_server_sim_get_return_data(), CONTACTS_ERROR_SYSTEM, 0, NULL);
 		WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_server_socket_return() Fail(%d)", ret);
 		__ctsvc_server_sim_set_return_data(NULL);
 		return;
+		/* LCOV_EXCL_STOP */
 	}
 
 	info = __ctsvc_server_sim_get_info_by_tapi_handle(handle);
 	if (NULL == info) {
+		/* LCOV_EXCL_START */
 		ERR("__ctsvc_server_sim_get_info_by_tapi_handle() Fail");
 		ret = ctsvc_server_socket_return(__ctsvc_server_sim_get_return_data(), CONTACTS_ERROR_INTERNAL, 0, NULL);
 		WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_server_socket_return() Fail(%d)", ret);
 		__ctsvc_server_sim_set_return_data(NULL);
 		return;
+		/* LCOV_EXCL_STOP */
 	}
 
 	if (TAPI_SIM_PB_INVALID_INDEX == access_rt) {
@@ -447,6 +463,7 @@ static void __ctsvc_server_sim_import_contact_cb(TapiHandle *handle, int result,
 		DBG("TAPI_SIM_PB_INVALID_INDEX : start_index = %d", start_index);
 		start_index++;
 		if (info->file_record[TAPI_PB_3G_NAME].index_max < start_index) {
+			/* LCOV_EXCL_START */
 			ERR("start_index is invalid start_index = %d, total = %d", start_index,
 					info->file_record[TAPI_PB_3G_NAME].index_max);
 			ret = ctsvc_server_socket_return(__ctsvc_server_sim_get_return_data(), CONTACTS_ERROR_INTERNAL, 0, NULL);
@@ -454,27 +471,32 @@ static void __ctsvc_server_sim_import_contact_cb(TapiHandle *handle, int result,
 			__ctsvc_server_sim_destroy_import_contacts(info);
 			__ctsvc_server_sim_set_return_data(NULL);
 			return;
+			/* LCOV_EXCL_STOP */
 		}
 		ret = tel_read_sim_pb_record(handle, info->sim_type, start_index,
 				__ctsvc_server_sim_import_contact_cb, (void*)start_index);
 		if (TAPI_API_SUCCESS != ret) {
+			/* LCOV_EXCL_START */
 			ERR("SIM phonebook access Fail(%d) start_indext(%d)", access_rt, start_index);
 			ret = ctsvc_server_socket_return(__ctsvc_server_sim_get_return_data(), CONTACTS_ERROR_SYSTEM, 0, NULL);
 			WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_server_socket_return() Fail(%d)", ret);
 			__ctsvc_server_sim_destroy_import_contacts(info);
 			__ctsvc_server_sim_set_return_data(NULL);
 			return;
+			/* LCOV_EXCL_STOP */
 		}
 		return;
 	}
 
 	if (TAPI_SIM_PB_SUCCESS != access_rt) {
+		/* LCOV_EXCL_START */
 		ERR("SIM phonebook access Fail(%d)", access_rt);
 		ret = ctsvc_server_socket_return(__ctsvc_server_sim_get_return_data(), CONTACTS_ERROR_SYSTEM, 0, NULL);
 		WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_server_socket_return() Fail(%d)", ret);
 		__ctsvc_server_sim_destroy_import_contacts(info);
 		__ctsvc_server_sim_set_return_data(NULL);
 		return;
+		/* LCOV_EXCL_STOP */
 	}
 
 	switch (sim_info->phonebook_type) {
@@ -486,12 +508,14 @@ static void __ctsvc_server_sim_import_contact_cb(TapiHandle *handle, int result,
 	case TAPI_SIM_PB_FDN:
 	case TAPI_SIM_PB_SDN:
 	default:
+		/* LCOV_EXCL_START */
 		ERR("Unknown storage type(%d)", sim_info->phonebook_type);
 		ret = ctsvc_server_socket_return(__ctsvc_server_sim_get_return_data(), CONTACTS_ERROR_SYSTEM, 0, NULL);
 		WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_server_socket_return() Fail(%d)", ret);
 		__ctsvc_server_sim_destroy_import_contacts(info);
 		__ctsvc_server_sim_set_return_data(NULL);
 		return;
+		/* LCOV_EXCL_STOP */
 	}
 
 	if (sim_info->next_index && CTSVC_TAPI_SIM_PB_MAX != sim_info->next_index) {
@@ -500,12 +524,14 @@ static void __ctsvc_server_sim_import_contact_cb(TapiHandle *handle, int result,
 				sim_info->next_index, __ctsvc_server_sim_import_contact_cb, NULL);
 
 		if (TAPI_API_SUCCESS != ret) {
+			/* LCOV_EXCL_START */
 			ERR("tel_read_sim_pb_record() Fail(%d)", ret);
 			ret = ctsvc_server_socket_return(__ctsvc_server_sim_get_return_data(), CONTACTS_ERROR_SYSTEM, 0, NULL);
 			WARN_IF(CONTACTS_ERROR_NONE != ret, "ctsvc_server_socket_return() Fail(%d)", ret);
 			__ctsvc_server_sim_destroy_import_contacts(info);
 			__ctsvc_server_sim_set_return_data(NULL);
 			return;
+			/* LCOV_EXCL_STOP */
 		}
 	} else {
 		/* insert imported contact to DB */
@@ -544,9 +570,11 @@ int ctsvc_server_sim_import_contact(void *data, int sim_slot_no)
 	ret = tel_read_sim_pb_record(__ctsvc_server_sim_get_tapi_handle(info), info->sim_type, 1,
 			__ctsvc_server_sim_import_contact_cb, NULL);
 	if (TAPI_API_SUCCESS != ret) {
+		/* LCOV_EXCL_START */
 		ERR("tel_read_sim_pb_record = %d", ret);
 		__ctsvc_server_sim_set_return_data(NULL);
 		return CONTACTS_ERROR_SYSTEM;
+		/* LCOV_EXCL_STOP */
 	}
 
 	return CONTACTS_ERROR_NONE;
@@ -583,9 +611,11 @@ static void __ctsvc_server_sim_sdn_read_cb(TapiHandle *handle, int result, void 
 					__ctsvc_server_sim_sdn_read_cb, info);
 			RETM_IF(TAPI_API_SUCCESS != ret,  "tel_read_sim_pb_record() Fail(%d)", ret);
 		}
+		/* LCOV_EXCL_START */
 		ERR("SIM phonebook access Fail(%d)", access_rt);
 		ctsvc_server_trim_memory();
 		return;
+		/* LCOV_EXCL_STOP */
 	}
 
 	switch (sim_info->phonebook_type) {
@@ -597,9 +627,11 @@ static void __ctsvc_server_sim_sdn_read_cb(TapiHandle *handle, int result, void 
 	case TAPI_SIM_PB_3GSIM:
 	case TAPI_SIM_PB_FDN:
 	default:
+		/* LCOV_EXCL_START */
 		ERR("Not SDN type(%d)", sim_info->phonebook_type);
 		ctsvc_server_trim_memory();
 		return;
+		/* LCOV_EXCL_STOP */
 	}
 
 	if (sim_info->next_index && CTSVC_TAPI_SIM_PB_MAX != sim_info->next_index) {
@@ -607,9 +639,11 @@ static void __ctsvc_server_sim_sdn_read_cb(TapiHandle *handle, int result, void 
 		ret = tel_read_sim_pb_record(handle, sim_info->phonebook_type, sim_info->next_index,
 				__ctsvc_server_sim_sdn_read_cb, info);
 		if (TAPI_API_SUCCESS != ret) {
+			/* LCOV_EXCL_START */
 			ERR("tel_read_sim_pb_record() Fail(%d)", ret);
 			ctsvc_server_trim_memory();
 			return;
+			/* LCOV_EXCL_STOP */
 		}
 	} else {
 		ctsvc_server_trim_memory();
@@ -630,12 +664,16 @@ static void __ctsvc_server_sim_sdn_count_cb(TapiHandle *handle, int result, void
 	if (0 < ps->UsedRecordCount) {
 		ret = tel_read_sim_pb_record(info->handle, TAPI_SIM_PB_SDN, 1, __ctsvc_server_sim_sdn_read_cb, info);
 		if (TAPI_API_SUCCESS != ret) {
+			/* LCOV_EXCL_START */
 			ERR("tel_read_sim_pb_record() Fail(%d)", ret);
 			ctsvc_server_trim_memory();
 			return;
+			/* LCOV_EXCL_STOP */
 		}
 	} else {
+		/* LCOV_EXCL_START */
 		ERR("ps->UsedRecordCount:0. No SDN!!!!");
+		/* LCOV_EXCL_STOP */
 	}
 	ctsvc_server_trim_memory();
 }
@@ -652,37 +690,47 @@ static int __ctsvc_server_sim_sdn_read(ctsvc_sim_info_s *info)
 
 	ret = tel_get_sim_init_info(info->handle, &sim_status, &card_changed);
 	if (TAPI_API_SUCCESS != ret) {
+		/* LCOV_EXCL_START */
 		ERR("tel_get_sim_init_info() Fail(%d)", ret);
 		DBG("sim_status = %d, card_changed = %d", sim_status, card_changed);
 		ctsvc_server_trim_memory();
 		return CONTACTS_ERROR_SYSTEM;
+		/* LCOV_EXCL_STOP */
 	}
 
 	if (TAPI_SIM_STATUS_CARD_NOT_PRESENT == sim_status ||
 			TAPI_SIM_STATUS_CARD_REMOVED == sim_status) {
 		ret = ctsvc_server_delete_sdn_contact(info->sim_slot_no);
 		if (CONTACTS_ERROR_NONE != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_server_delete_sdn_contact() Fail(%d)", ret);
 			ctsvc_server_trim_memory();
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 	} else if (TAPI_SIM_STATUS_SIM_INIT_COMPLETED == sim_status) {
 		ret = ctsvc_server_delete_sdn_contact(info->sim_slot_no);
 		if (CONTACTS_ERROR_NONE != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_server_delete_sdn_contact() Fail(%d)", ret);
 			ctsvc_server_trim_memory();
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 
 		ret = tel_get_sim_pb_count(info->handle, TAPI_SIM_PB_SDN, __ctsvc_server_sim_sdn_count_cb, info);
 		if (TAPI_API_SUCCESS != ret) {
+			/* LCOV_EXCL_START */
 			ERR("tel_get_sim_pb_meta_info() Fail(%d)", ret);
 			ctsvc_server_trim_memory();
 			return CONTACTS_ERROR_SYSTEM;
+			/* LCOV_EXCL_STOP */
 		}
 	} else {
+		/* LCOV_EXCL_START */
 		ERR("sim_status Fail(%d)", sim_status);
 		return CONTACTS_ERROR_SYSTEM;
+		/* LCOV_EXCL_STOP */
 	}
 
 	return CONTACTS_ERROR_NONE;
@@ -738,8 +786,10 @@ static void __ctsvc_server_sim_get_meta_info_cb(TapiHandle *handle, int result, 
 				info->file_record[CTSVC_2GSIM_NAME].text_max,
 				info->file_record[CTSVC_2GSIM_NAME].used_count);
 	} else {
+		/* LCOV_EXCL_START */
 		ERR("sim_type [%d]error ", info->sim_type);
 		return;
+		/* LCOV_EXCL_STOP */
 	}
 
 	if (false == info->initialized) {
@@ -783,8 +833,10 @@ static int __ctsvc_server_sim_get_type_and_iccid(ctsvc_sim_info_s *info)
 	} else if (TAPI_SIM_CARD_TYPE_GSM == cardtype) {
 		info->sim_type = TAPI_SIM_PB_ADN;
 	} else {
+		/* LCOV_EXCL_START */
 		ERR("cardtype(%d)is invalid!!!", cardtype);
 		return CONTACTS_ERROR_SYSTEM;
+		/* LCOV_EXCL_STOP */
 	}
 
 	/* set iccid : unique info of SIM */
@@ -811,8 +863,10 @@ static int __ctsvc_server_sim_init_meta_info(ctsvc_sim_info_s *info)
 	} else if (TAPI_SIM_PB_ADN == info->sim_type) {
 		ret = tel_get_sim_pb_meta_info(info->handle, info->sim_type, __ctsvc_server_sim_get_meta_info_cb, info);
 	} else {
+		/* LCOV_EXCL_START */
 		ERR("info->sim_type is invalid(%d) stop sim init !!!", info->sim_type);
 		return CONTACTS_ERROR_SYSTEM;
+		/* LCOV_EXCL_STOP */
 	}
 
 	RETVM_IF(TAPI_API_SUCCESS != ret, CONTACTS_ERROR_SYSTEM,
@@ -842,7 +896,9 @@ static void __ctsvc_server_sim_noti_pb_status(TapiHandle *handle, const char *no
 		info->initialized = false;
 		__ctsvc_server_sim_destroy_import_contacts(info);
 	} else {
+		/* LCOV_EXCL_START */
 		ERR("This noti did not control !!!");
+		/* LCOV_EXCL_STOP */
 	}
 }
 
@@ -888,8 +944,10 @@ static void __ctsvc_server_sim_status_events_cb(TapiHandle *handle, const char *
 	ctsvc_sim_info_s *info = (ctsvc_sim_info_s *)user_data;
 
 	if (TAPI_SIM_STATUS_SIM_INIT_COMPLETED != status) {
+		/* LCOV_EXCL_START */
 		ERR("sim is not ready (%d)", status);
 		return;
+		/* LCOV_EXCL_STOP */
 	}
 	INFO("sim is Ready");
 
@@ -926,9 +984,11 @@ static int __ctsvc_server_sim_init_info()
 		int card_changed = 0;
 		ctsvc_sim_info_s *info = calloc(1, sizeof(ctsvc_sim_info_s));
 		if (NULL == info) {
+			/* LCOV_EXCL_START */
 			ERR("calloc() Fail");
 			g_strfreev(cp_name);
 			return CONTACTS_ERROR_OUT_OF_MEMORY;
+			/* LCOV_EXCL_STOP */
 		}
 		info->cp_name = strdup(cp_name[cp_index]);
 		INFO("SIM cp_name[%d] : %s", cp_index, info->cp_name);
@@ -949,18 +1009,24 @@ static int __ctsvc_server_sim_init_info()
 
 		__ctsvc_server_sim_get_tapi_handle(info);
 		if (NULL == info->handle) {
+			/* LCOV_EXCL_START */
 			ERR("__ctsvc_server_sim_get_tapi_handle() Fail");
 			continue;
+			/* LCOV_EXCL_STOP */
 		}
 		__ctsvc_sim_info = g_slist_append(__ctsvc_sim_info, (void*)info);
 		cp_index++;
 
 		ret = tel_get_sim_init_info(info->handle, &status, &card_changed);
 		if (TAPI_API_SUCCESS != ret || TAPI_SIM_STATUS_SIM_INIT_COMPLETED != status) {
+			/* LCOV_EXCL_START */
 			ERR("tel_get_sim_init_info() ret(%d), status(%d)", ret, status);
 			ret = tel_register_noti_event(info->handle, TAPI_NOTI_SIM_STATUS, __ctsvc_server_sim_status_events_cb, info);
+			/* LCOV_EXCL_STOP */
 			if (TAPI_API_SUCCESS != ret)
+				/* LCOV_EXCL_START */
 				ERR("tel_register_noti_event() Fail(%d)", ret);
+			/* LCOV_EXCL_STOP */
 		} else {
 			__ctsvc_server_sim_get_info(info);
 		}
@@ -977,8 +1043,10 @@ static void __ctsvc_server_telephony_ready_cb(keynode_t *key, void *data)
 	vconf_get_bool(VCONFKEY_TELEPHONY_READY, &bReady);
 
 	if (0 == bReady) {
+		/* LCOV_EXCL_START */
 		ERR("telephony is not ready ");
 		return;
+		/* LCOV_EXCL_STOP */
 	}
 	INFO("telephony is Ready");
 
@@ -997,10 +1065,12 @@ int ctsvc_server_sim_init()
 	vconf_get_bool(VCONFKEY_TELEPHONY_READY, &bReady);
 
 	if (0 == bReady) {
+		/* LCOV_EXCL_START */
 		ERR("telephony is not ready ");
 		vconf_notify_key_changed(VCONFKEY_TELEPHONY_READY, __ctsvc_server_telephony_ready_cb, NULL);
 		__ctsvc_tapi_cb = true;
 		return CONTACTS_ERROR_NONE;
+		/* LCOV_EXCL_STOP */
 	}
 
 	return __ctsvc_server_sim_init_info();

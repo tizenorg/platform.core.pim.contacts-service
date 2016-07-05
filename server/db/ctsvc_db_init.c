@@ -188,7 +188,9 @@ int ctsvc_db_get_table_name(const char *view_uri, const char **out_table)
 			return CONTACTS_ERROR_NONE;
 		}
 	} else {
+		/* LCOV_EXCL_START */
 		ERR("Please check contact_connect()");
+		/* LCOV_EXCL_STOP */
 	}
 
 	return CONTACTS_ERROR_INVALID_PARAMETER;
@@ -205,7 +207,9 @@ int ctsvc_required_read_permission(const char *view_uri)
 		if (db_view_info)
 			return db_view_info->read_permission;
 	} else {
+		/* LCOV_EXCL_START */
 		ERR("Please check contact_connect()");
+		/* LCOV_EXCL_STOP */
 	}
 
 	return CTSVC_PERMISSION_CONTACT_NONE;
@@ -222,7 +226,9 @@ int ctsvc_required_write_permission(const char *view_uri)
 		if (db_view_info)
 			return db_view_info->write_permission;
 	} else {
+		/* LCOV_EXCL_START */
 		ERR("Please check contact_connect()");
+		/* LCOV_EXCL_STOP */
 	}
 
 	return CTSVC_PERMISSION_CONTACT_NONE;
@@ -239,7 +245,9 @@ bool ctsvc_should_ab_access_control(const char *view_uri)
 		if (db_view_info)
 			return db_view_info->need_ab_access_control;
 	} else {
+		/* LCOV_EXCL_START */
 		ERR("Please check contact_connect()");
+		/* LCOV_EXCL_STOP */
 	}
 
 	return false;
@@ -932,15 +940,19 @@ int ctsvc_db_init()
 	int ret = CONTACTS_ERROR_NONE;
 	ret = ctsvc_db_open();
 	if (ret != CONTACTS_ERROR_NONE) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_db_open() Fail(%d)", ret);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 #ifdef _CONTACTS_IPC_SERVER
 	ret = __ctsvc_db_create_views();
 	if (ret != CONTACTS_ERROR_NONE) {
+		/* LCOV_EXCL_START */
 		ERR("__ctsvc_db_create_views() Fail(%d)", ret);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 #endif
 
@@ -952,8 +964,10 @@ int ctsvc_db_deinit()
 	int ret = CONTACTS_ERROR_NONE;
 	ret = ctsvc_db_close();
 	if (ret != CONTACTS_ERROR_NONE) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_db_close() Fail(%d)", ret);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	return CONTACTS_ERROR_NONE;

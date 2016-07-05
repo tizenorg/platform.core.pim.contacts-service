@@ -86,21 +86,27 @@ API int contacts_setting_get_name_sorting_order(
 
 	if (ctsvc_ipc_call(CTSVC_IPC_SETTING_MODULE, CTSVC_IPC_SERVER_SETTING_GET_NAME_SORTING_ORDER,
 				NULL, &outdata) != 0) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_ipc_call Fail");
 		return CONTACTS_ERROR_IPC;
+		/* LCOV_EXCL_STOP */
 	}
 
 	if (outdata) {
 		if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(outdata, &ret)) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_ipc_unmarshal_int() Fail");
 			pims_ipc_data_destroy(outdata);
 			return CONTACTS_ERROR_IPC;
+			/* LCOV_EXCL_STOP */
 		}
 		if (CONTACTS_ERROR_NONE == ret) {
 			if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(outdata, (int*)name_sorting_order)) {
+				/* LCOV_EXCL_START */
 				ERR("ctsvc_ipc_unmarshal_int() Fail");
 				pims_ipc_data_destroy(outdata);
 				return CONTACTS_ERROR_IPC;
+				/* LCOV_EXCL_STOP */
 			}
 		}
 		pims_ipc_data_destroy(outdata);
@@ -123,30 +129,38 @@ API int contacts_setting_set_name_display_order(
 
 	indata = pims_ipc_data_create(0);
 	if (indata == NULL) {
+		/* LCOV_EXCL_START */
 		ERR("pims_ipc_data_create() Fail");
 		return CONTACTS_ERROR_OUT_OF_MEMORY;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ret = ctsvc_ipc_marshal_int(name_display_order, indata);
 	if (ret != CONTACTS_ERROR_NONE) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_ipc_marshal_int() Fail(%d)", ret);
 		pims_ipc_data_destroy(indata);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	if (ctsvc_ipc_call(CTSVC_IPC_SETTING_MODULE, CTSVC_IPC_SERVER_SETTING_SET_NAME_DISPLAY_ORDER,
 				indata, &outdata) != 0) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_ipc_call Fail");
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
+		/* LCOV_EXCL_STOP */
 	}
 	pims_ipc_data_destroy(indata);
 
 	if (outdata) {
 		if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(outdata, &ret)) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_ipc_unmarshal_int() Fail");
 			pims_ipc_data_destroy(outdata);
 			return CONTACTS_ERROR_IPC;
+			/* LCOV_EXCL_STOP */
 		}
 		pims_ipc_data_destroy(outdata);
 	}
@@ -168,30 +182,38 @@ API int contacts_setting_set_name_sorting_order(
 
 	indata = pims_ipc_data_create(0);
 	if (indata == NULL) {
+		/* LCOV_EXCL_START */
 		ERR("pims_ipc_data_create() Fail");
 		return CONTACTS_ERROR_OUT_OF_MEMORY;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ret = ctsvc_ipc_marshal_int(name_sorint_order, indata);
 	if (ret != CONTACTS_ERROR_NONE) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_ipc_marshal_int() Fail(%d)", ret);
 		pims_ipc_data_destroy(indata);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	if (ctsvc_ipc_call(CTSVC_IPC_SETTING_MODULE, CTSVC_IPC_SERVER_SETTING_SET_NAME_SORTING_ORDER,
 				indata, &outdata) != 0) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_ipc_call Fail");
 		pims_ipc_data_destroy(indata);
 		return CONTACTS_ERROR_IPC;
+		/* LCOV_EXCL_STOP */
 	}
 	pims_ipc_data_destroy(indata);
 
 	if (outdata) {
 		if (CONTACTS_ERROR_NONE != ctsvc_ipc_unmarshal_int(outdata, &ret)) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_ipc_unmarshal_int() Fail");
 			pims_ipc_data_destroy(outdata);
 			return CONTACTS_ERROR_IPC;
+			/* LCOV_EXCL_STOP */
 		}
 		pims_ipc_data_destroy(outdata);
 	}
@@ -199,6 +221,7 @@ API int contacts_setting_set_name_sorting_order(
 	return ret;
 }
 
+/* LCOV_EXCL_START */
 static void _csetting_name_display_order_subscribe_cb(pims_ipc_h ipc,
 		pims_ipc_data_h data, void *user_data)
 {
@@ -218,7 +241,9 @@ static void _csetting_name_display_order_subscribe_cb(pims_ipc_h ipc,
 		}
 	}
 }
+/* LCOV_EXCL_STOP */
 
+/* LCOV_EXCL_START */
 static void _csetting_name_sorting_order_subscribe_cb(pims_ipc_h ipc,
 		pims_ipc_data_h data, void *user_data)
 {
@@ -239,7 +264,9 @@ static void _csetting_name_sorting_order_subscribe_cb(pims_ipc_h ipc,
 		}
 	}
 }
+/* LCOV_EXCL_STOP */
 
+/* LCOV_EXCL_START */
 int ctsvc_setting_recover_for_change_subscription()
 {
 	GSList *it;
@@ -263,8 +290,10 @@ int ctsvc_setting_recover_for_change_subscription()
 			if (pims_ipc_subscribe(ctsvc_ipc_get_handle_for_change_subsciption(),
 						CTSVC_IPC_SUBSCRIBE_MODULE, CTSVC_SETTING_SORTING_ORDER_CHANGED,
 						_csetting_name_sorting_order_subscribe_cb, NULL) != 0) {
+				/* LCOV_EXCL_START */
 				ERR("pims_ipc_subscribe() Fail");
 				return CONTACTS_ERROR_IPC;
+				/* LCOV_EXCL_STOP */
 			}
 			break;
 		}
@@ -272,6 +301,7 @@ int ctsvc_setting_recover_for_change_subscription()
 
 	return CONTACTS_ERROR_NONE;
 }
+/* LCOV_EXCL_STOP */
 
 API int contacts_setting_add_name_display_order_changed_cb(
 		contacts_setting_name_display_order_changed_cb cb, void *user_data)
@@ -289,8 +319,10 @@ API int contacts_setting_add_name_display_order_changed_cb(
 
 	ret = ctsvc_ipc_create_for_change_subscription();
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_ipc_create_for_change_subscription() Fail(%d)", ret);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ctsvc_mutex_lock(CTS_MUTEX_PIMS_IPC_PUBSUB);
@@ -299,9 +331,11 @@ API int contacts_setting_add_name_display_order_changed_cb(
 		if (pims_ipc_subscribe(ctsvc_ipc_get_handle_for_change_subsciption(),
 					CTSVC_IPC_SUBSCRIBE_MODULE, CTSVC_SETTING_DISPLAY_ORDER_CHANGED,
 					_csetting_name_display_order_subscribe_cb, NULL) != 0) {
+			/* LCOV_EXCL_START */
 			ERR("pims_ipc_subscribe() Fail");
 			ctsvc_mutex_unlock(CTS_MUTEX_PIMS_IPC_PUBSUB);
 			return CONTACTS_ERROR_IPC;
+			/* LCOV_EXCL_STOP */
 		}
 	}
 
@@ -316,9 +350,11 @@ API int contacts_setting_add_name_display_order_changed_cb(
 
 	cb_info = calloc(1, sizeof(ctsvc_name_display_order_changed_cb_info_s));
 	if (NULL == cb_info) {
+		/* LCOV_EXCL_START */
 		ERR("calloc() Fail");
 		ctsvc_mutex_unlock(CTS_MUTEX_PIMS_IPC_PUBSUB);
 		return CONTACTS_ERROR_OUT_OF_MEMORY;
+		/* LCOV_EXCL_STOP */
 	}
 	cb_info->user_data = user_data;
 	cb_info->cb = cb;
@@ -337,8 +373,10 @@ API int contacts_setting_remove_name_display_order_changed_cb(
 
 	ret = ctsvc_ipc_destroy_for_change_subscription(false);
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_ipc_destroy_for_change_subscription() Fail(%d)", ret);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ctsvc_mutex_lock(CTS_MUTEX_PIMS_IPC_PUBSUB);
@@ -381,8 +419,10 @@ API int contacts_setting_add_name_sorting_order_changed_cb(
 
 	ret = ctsvc_ipc_create_for_change_subscription();
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_ipc_create_for_change_subscription() Fail(%d)", ret);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ctsvc_mutex_lock(CTS_MUTEX_PIMS_IPC_PUBSUB);
@@ -391,26 +431,32 @@ API int contacts_setting_add_name_sorting_order_changed_cb(
 		if (pims_ipc_subscribe(ctsvc_ipc_get_handle_for_change_subsciption(),
 					CTSVC_IPC_SUBSCRIBE_MODULE, CTSVC_SETTING_SORTING_ORDER_CHANGED,
 					_csetting_name_sorting_order_subscribe_cb, NULL) != 0) {
+			/* LCOV_EXCL_START */
 			ERR("pims_ipc_subscribe() Fail");
 			ctsvc_mutex_unlock(CTS_MUTEX_PIMS_IPC_PUBSUB);
 			return CONTACTS_ERROR_IPC;
+			/* LCOV_EXCL_STOP */
 		}
 	}
 
 	for (l = __setting_name_sorting_order_subscribe_list; l; l = l->next) {
 		ctsvc_name_sorting_order_changed_cb_info_s *cb_info = l->data;
 		if (cb_info->cb == cb && cb_info->user_data == user_data) {
+			/* LCOV_EXCL_START */
 			ERR("The same callback(%x) is already exist", cb);
 			ctsvc_mutex_unlock(CTS_MUTEX_PIMS_IPC_PUBSUB);
 			return CONTACTS_ERROR_INVALID_PARAMETER;
+			/* LCOV_EXCL_STOP */
 		}
 	}
 
 	cb_info = calloc(1, sizeof(ctsvc_name_sorting_order_changed_cb_info_s));
 	if (NULL == cb_info) {
+		/* LCOV_EXCL_START */
 		ERR("calloc() Fail");
 		ctsvc_mutex_unlock(CTS_MUTEX_PIMS_IPC_PUBSUB);
 		return CONTACTS_ERROR_OUT_OF_MEMORY;
+		/* LCOV_EXCL_STOP */
 	}
 	cb_info->user_data = user_data;
 	cb_info->cb = cb;
@@ -428,8 +474,10 @@ API int contacts_setting_remove_name_sorting_order_changed_cb(
 
 	ret = ctsvc_ipc_destroy_for_change_subscription(false);
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_ipc_destroy_for_change_subscription() Fail(%d)", ret);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ctsvc_mutex_lock(CTS_MUTEX_PIMS_IPC_PUBSUB);

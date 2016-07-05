@@ -140,10 +140,12 @@ static int __ctsvc_server_bg_contact_delete_step2(__ctsvc_delete_data_s *data)
 
 		ret = ctsvc_query_exec(query);
 		if (ret != CONTACTS_ERROR_NONE) {
+			/* LCOV_EXCL_START */
 			ERR("DB Fail");
 			ctsvc_end_trans(false);
 			g_slist_free(list);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 		cursor = g_slist_next(cursor);
 	}
@@ -194,10 +196,12 @@ static int __ctsvc_server_bg_contact_delete_step3(__ctsvc_delete_data_s *data)
 
 		ret = ctsvc_query_exec(query);
 		if (ret != CONTACTS_ERROR_NONE) {
+			/* LCOV_EXCL_START */
 			ERR("DB Fail");
 			ctsvc_end_trans(false);
 			g_slist_free(list);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 		cursor = g_slist_next(cursor);
 	}
@@ -219,18 +223,22 @@ static int __ctsvc_server_bg_contact_delete_step4(__ctsvc_delete_data_s *data)
 			data->current_contact_id);
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("DB Fail");
 		ctsvc_end_trans(false);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	snprintf(query, sizeof(query), "DELETE FROM "CTS_TABLE_CONTACTS" WHERE contact_id = %d",
 			data->current_contact_id);
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("DB Fail");
 		ctsvc_end_trans(false);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	ret = ctsvc_end_trans(true);
@@ -240,19 +248,23 @@ static int __ctsvc_server_bg_contact_delete_step4(__ctsvc_delete_data_s *data)
 static bool __ctsvc_server_bg_contact_delete_step(int ret, __ctsvc_delete_data_s *data)
 {
 	if (ret != CONTACTS_ERROR_NONE && ret != CONTACTS_ERROR_NO_DATA) {
+		/* LCOV_EXCL_START */
 		if (data->contact_ids)
 			g_slist_free(data->contact_ids);
 		ERR("Fail(%d)", ret);
 		return false;
+		/* LCOV_EXCL_STOP */
 	}
 
 	switch (data->step) {
 	case STEP_1:
 		if (ret == CONTACTS_ERROR_NO_DATA) {
+			/* LCOV_EXCL_START */
 			if (data->contact_ids)
 				g_slist_free(data->contact_ids);
 			ERR("step_1 no_data");
 			return false;
+			/* LCOV_EXCL_STOP */
 		}
 		data->step = STEP_2;
 		break;
@@ -300,10 +312,12 @@ static bool  __ctsvc_server_db_delete_run(__ctsvc_delete_data_s *data)
 		ret = __ctsvc_server_bg_contact_delete_step4(data);
 		break;
 	default:
+		/* LCOV_EXCL_START */
 		ERR("invalid step");
 		if (data->contact_ids)
 			g_slist_free(data->contact_ids);
 		return false;
+		/* LCOV_EXCL_STOP */
 	}
 
 	return __ctsvc_server_bg_contact_delete_step(ret, data);
@@ -337,8 +351,10 @@ static process_stat* __ctsvc_get_cpu_stat()
 
 	result = calloc(1, sizeof(process_stat));
 	if (NULL == result) {
+		/* LCOV_EXCL_START */
 		ERR("calloc() Fail");
 		return NULL;
+		/* LCOV_EXCL_STOP */
 	}
 	for (i = 0; i < 10; i++) {
 		if (i < 3)
@@ -388,25 +404,31 @@ static gpointer __ctsvc_server_bg_delete(gpointer user_data)
 	while (1) {
 		callback_data = calloc(1, sizeof(__ctsvc_delete_data_s));
 		if (callback_data == NULL) {
+			/* LCOV_EXCL_START */
 			ERR("calloc fail");
 			continue;
+			/* LCOV_EXCL_STOP */
 		}
 		callback_data->step = STEP_1;
 
 		ret = ctsvc_connect();
 		if (CONTACTS_ERROR_NONE != ret) {
+			/* LCOV_EXCL_START */
 			ERR("contacts_connect() fail(%d)", ret);
 			free(callback_data);
 			continue;
+			/* LCOV_EXCL_STOP */
 		}
 		ctsvc_set_client_access_info(NULL, NULL);
 
 		ctsvc_server_stop_timeout();
 		while (1) {
 			if (__ctsvc_cpu_is_busy()) { /* sleep 1 sec in function */
+				/* LCOV_EXCL_START */
 				ERR("Now CPU is busy.. waiting");
 				sleep(CTSVC_SERVER_BG_DELETE_STEP_TIME*59); /* sleep 60 sec(1 min) totally */
 				continue;
+				/* LCOV_EXCL_STOP */
 			}
 			if (__ctsvc_server_db_delete_run(callback_data) == false) {
 				DBG("end");
@@ -420,7 +442,9 @@ static gpointer __ctsvc_server_bg_delete(gpointer user_data)
 		ret = ctsvc_disconnect();
 
 		if (CONTACTS_ERROR_NONE != ret)
+			/* LCOV_EXCL_START */
 			ERR("contacts_disconnect Fail(%d)", ret);
+		/* LCOV_EXCL_STOP */
 		ctsvc_server_start_timeout();
 
 		g_mutex_lock(&__ctsvc_server_bg_delete_mutex);
@@ -488,9 +512,13 @@ void ctsvc_server_bg_add_cb()
 	if (ACCOUNT_ERROR_NONE == ret) {
 		ret = account_subscribe_notification(account, __ctsvc_server_account_delete_cb, NULL);
 		if (ACCOUNT_ERROR_NONE != ret)
+			/* LCOV_EXCL_START */
 			ERR("account_subscribe_notification() Fail(%d)", ret);
+		/* LCOV_EXCL_STOP */
 	} else {
+		/* LCOV_EXCL_START */
 		ERR("account_subscribe_create() Fail(%d)", ret);
+		/* LCOV_EXCL_STOP */
 	}
 }
 

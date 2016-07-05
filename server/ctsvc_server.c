@@ -247,8 +247,10 @@ static int __server_main(void)
 
 		ret = ctsvc_connect();
 		if (CONTACTS_ERROR_NONE != ret) {
+			/* LCOV_EXCL_START */
 			ERR("contacts_connect fail(%d)", ret);
 			break;
+			/* LCOV_EXCL_STOP */
 		}
 		ctsvc_set_client_access_info(NULL, NULL);
 		ctsvc_server_bg_add_cb();
@@ -271,8 +273,10 @@ static int __server_main(void)
 		return 0;
 	} while (0);
 
+	/* LCOV_EXCL_START */
 	ERR("pims_ipc_svc_register error");
 	return -1;
+	/* LCOV_EXCL_STOP */
 }
 
 void ctsvc_server_quit(void)
@@ -305,6 +309,7 @@ int main(int argc, char *argv[])
 {
 	CTS_FN_CALL;
 	INFO("Start contacts-service");
+	setenv("GCOV_PREFIX", "/tmp/server", 1);
 	int ret;
 
 	if (getuid() == 0) {   /* root */

@@ -79,9 +79,11 @@ int ctsvc_db_messenger_insert(contacts_record_h record, int contact_id, bool is_
 
 	ret = ctsvc_stmt_step(stmt);
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_stmt_step() Fail(%d)", ret);
 		ctsvc_stmt_finalize(stmt);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	/* messenger->id = ctsvc_db_get_last_insert_id(); */

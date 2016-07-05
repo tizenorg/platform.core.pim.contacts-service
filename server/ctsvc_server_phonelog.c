@@ -52,8 +52,10 @@ int ctsvc_phone_log_reset_statistics_by_sim(int sim_slot_no)
 
 	sim_info_id = ctsvc_server_sim_get_info_id_by_sim_slot_no(sim_slot_no);
 	if (sim_info_id <= 0) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_server_sim_get_info_id_by_sim_slot_no() Fail(%d)", sim_info_id);
 		return CONTACTS_ERROR_NO_DATA;
+		/* LCOV_EXCL_STOP */
 	}
 
 	snprintf(query, sizeof(query), "DELETE FROM "CTS_TABLE_PHONELOG_STAT
@@ -96,17 +98,21 @@ int ctsvc_phone_log_delete(contacts_phone_log_delete_e op, ...)
 				extra_data1, CONTACTS_PLOG_TYPE_EMAIL_RECEIVED, CONTACTS_PLOG_TYPE_EMAIL_SENT);
 		break;
 	default:
+		/* LCOV_EXCL_START */
 		ERR("the operation is not proper (op : %d)", op);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		/* LCOV_EXCL_STOP */
 	}
 	ret = ctsvc_begin_trans();
 	RETVM_IF(ret, ret, "ctsvc_begin_trans() Fail(%d)", ret);
 
 	ret = ctsvc_query_exec(query);
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_query_exec() Fail(%d)", ret);
 		ctsvc_end_trans(false);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 	ctsvc_set_phonelog_noti();
 	ret = ctsvc_end_trans(true);
@@ -133,7 +139,7 @@ void ctsvc_db_phone_log_delete_callback(sqlite3_context  *context,
 }
 
 static int __ctsvc_db_phone_log_find_person_id(char *number, char *normal_num,
-			char *minmatch, int person_id, int *find_number_type)
+		char *minmatch, int person_id, int *find_number_type)
 {
 	int ret;
 	int find_person_id = -1;
@@ -162,6 +168,7 @@ static int __ctsvc_db_phone_log_find_person_id(char *number, char *normal_num,
 
 		ret = ctsvc_query_prepare(query, &stmt);
 		if (stmt == NULL) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_query_prepare fail(%d)", ret);
 			if (bind_text) {
 				for (cursor = bind_text; cursor; cursor = cursor->next)
@@ -169,6 +176,7 @@ static int __ctsvc_db_phone_log_find_person_id(char *number, char *normal_num,
 				g_slist_free(bind_text);
 			}
 			return CONTACTS_ERROR_DB;
+			/* LCOV_EXCL_STOP */
 		}
 
 		if (bind_text) {
@@ -265,6 +273,7 @@ int ctsvc_db_phone_log_update_person_id(const char *number, int old_person_id,
 
 	ret = ctsvc_query_prepare(query, &get_log);
 	if (get_log == NULL) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_query_prepare() Fail(%d)", ret);
 		if (bind_text) {
 			for (cursor = bind_text; cursor; cursor = cursor->next)
@@ -272,6 +281,7 @@ int ctsvc_db_phone_log_update_person_id(const char *number, int old_person_id,
 			g_slist_free(bind_text);
 		}
 		return CONTACTS_ERROR_DB;
+		/* LCOV_EXCL_STOP */
 	}
 
 	if (bind_text) {
@@ -286,6 +296,7 @@ int ctsvc_db_phone_log_update_person_id(const char *number, int old_person_id,
 			"UPDATE "CTS_TABLE_PHONELOGS" SET person_id=?, number_type = ? WHERE id = ?");
 	ret = ctsvc_query_prepare(query, &update_log);
 	if (update_log == NULL) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_query_prepare() Fail(%d)", ret);
 		ctsvc_stmt_finalize(get_log);
 
@@ -295,6 +306,7 @@ int ctsvc_db_phone_log_update_person_id(const char *number, int old_person_id,
 			g_slist_free(bind_text);
 		}
 		return CONTACTS_ERROR_DB;
+		/* LCOV_EXCL_STOP */
 	}
 
 	while ((ret = ctsvc_stmt_step(get_log))) {

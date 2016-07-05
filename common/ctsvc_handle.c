@@ -25,8 +25,10 @@ int ctsvc_handle_create(contacts_h *contact)
 	RETV_IF(NULL == contact, CONTACTS_ERROR_INVALID_PARAMETER);
 	ctsvc_base_s *base = calloc(1, sizeof(ctsvc_base_s));
 	if (NULL == base) {
+		/* LCOV_EXCL_START */
 		ERR("calloc() Fail");
 		return CONTACTS_ERROR_OUT_OF_MEMORY;
+		/* LCOV_EXCL_STOP */
 	}
 	*contact = (contacts_h)base;
 	return CONTACTS_ERROR_NONE;

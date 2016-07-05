@@ -73,9 +73,11 @@ int ctsvc_db_activity_photo_insert(contacts_record_h record, int activity_id, in
 
 	ret = ctsvc_stmt_step(stmt);
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_stmt_step() Fail(%d)", ret);
 		ctsvc_stmt_finalize(stmt);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 	if (id)
 		*id = ctsvc_db_get_last_insert_id();
@@ -161,10 +163,12 @@ int ctsvc_db_activity_photo_get_records(int activity_id, contacts_record_h recor
 	contacts_list_create(&list);
 	while ((ret = ctsvc_stmt_step(stmt))) {
 		if (1 != ret) {
+			/* LCOV_EXCL_START */
 			ERR("ctsvc_stmt_step() Fail(%d)", ret);
 			ctsvc_stmt_finalize(stmt);
 			contacts_list_destroy(list, true);
 			return ret;
+			/* LCOV_EXCL_STOP */
 		}
 		contacts_record_h record = NULL;
 		ctsvc_db_activity_photo_get_value_from_stmt(stmt, &record);

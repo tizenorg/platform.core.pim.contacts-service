@@ -559,13 +559,17 @@ void ctsvc_db_data_delete_callback(sqlite3_context  *context,
 API int contacts_db_add_status_changed_cb(
 		contacts_db_status_changed_cb cb, void *user_data)
 {
+	/* LCOV_EXCL_START */
 	ERR("Please use contacts-service2 instead of contacts-service3");
 	return CONTACTS_ERROR_INTERNAL;
+	/* LCOV_EXCL_STOP */
 }
 
 API int contacts_db_remove_status_changed_cb(
 		contacts_db_status_changed_cb cb, void *user_data)
 {
+	/* LCOV_EXCL_START */
 	ERR("Please use contacts-service2 instead of contacts-service3");
 	return CONTACTS_ERROR_INTERNAL;
+	/* LCOV_EXCL_STOP */
 }

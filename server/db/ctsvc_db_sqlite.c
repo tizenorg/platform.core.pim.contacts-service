@@ -53,72 +53,92 @@ int ctsvc_db_open(void)
 	if (NULL == ctsvc_db) {
 		ret = db_util_open(CTSVC_DB_PATH, &ctsvc_db, 0);
 		if (SQLITE_OK != ret || NULL == ctsvc_db) {
+			/* LCOV_EXCL_START */
 			ERR("db_util_open() Fail(%d), ctsvc_db(0x%x)", ret, ctsvc_db);
 			return CONTACTS_ERROR_DB; /*CTS_ERR_DB_NOT_OPENED*/
+			/* LCOV_EXCL_STOP */
 		}
 
 		ret = sqlite3_create_function(ctsvc_db, "_DATA_DELETE_", 2, SQLITE_UTF8,
 				NULL, ctsvc_db_data_delete_callback, NULL, NULL);
 		if (SQLITE_OK != ret) {
+			/* LCOV_EXCL_START */
 			ERR("sqlite3_create_function() Fail(%d)", ret);
 			return CONTACTS_ERROR_DB;
+			/* LCOV_EXCL_STOP */
 		}
 
 		ret = sqlite3_create_function(ctsvc_db, "_DATA_IMAGE_DELETE_", 1, SQLITE_UTF8,
 				NULL, ctsvc_db_image_delete_callback, NULL, NULL);
 		if (SQLITE_OK != ret) {
+			/* LCOV_EXCL_START */
 			ERR("sqlite3_create_function() Fail(%d)", ret);
 			return CONTACTS_ERROR_DB;
+			/* LCOV_EXCL_STOP */
 		}
 
 		ret = sqlite3_create_function(ctsvc_db, "_DATA_COMPANY_DELETE_", 1, SQLITE_UTF8,
 				NULL, ctsvc_db_company_delete_callback, NULL, NULL);
 		if (SQLITE_OK != ret) {
+			/* LCOV_EXCL_START */
 			ERR("sqlite3_create_function() Fail(%d)", ret);
 			return CONTACTS_ERROR_DB;
+			/* LCOV_EXCL_STOP */
 		}
 
 		ret = sqlite3_create_function(ctsvc_db, "_NORMALIZE_INDEX_", 2, SQLITE_UTF8,
 				NULL, ctsvc_db_normalize_str_callback, NULL, NULL);
 		if (SQLITE_OK != ret) {
+			/* LCOV_EXCL_START */
 			ERR("sqlite3_create_function() Fail(%d)", ret);
 			return CONTACTS_ERROR_DB;
+			/* LCOV_EXCL_STOP */
 		}
 #ifdef ENABLE_LOG_FEATURE
 		ret = sqlite3_create_function(ctsvc_db, "_PHONE_LOG_DELETE_", 1, SQLITE_UTF8,
 				NULL, ctsvc_db_phone_log_delete_callback, NULL, NULL);
 		if (SQLITE_OK != ret) {
+			/* LCOV_EXCL_START */
 			ERR("sqlite3_create_function() Fail(%d)", ret);
 			return CONTACTS_ERROR_DB;
+			/* LCOV_EXCL_STOP */
 		}
 #endif /* ENABLE_LOG_FEATURE */
 
 		ret = sqlite3_create_function(ctsvc_db, "_PERSON_DELETE_", 1, SQLITE_UTF8,
 				NULL, ctsvc_db_person_delete_callback, NULL, NULL);
 		if (SQLITE_OK != ret) {
+			/* LCOV_EXCL_START */
 			ERR("sqlite3_create_function() Fail(%d)", ret);
 			return CONTACTS_ERROR_DB;
+			/* LCOV_EXCL_STOP */
 		}
 
 		ret = sqlite3_create_function(ctsvc_db, "_GROUP_DELETE_", 1, SQLITE_UTF8,
 				NULL, ctsvc_db_group_delete_callback, NULL, NULL);
 		if (SQLITE_OK != ret) {
+			/* LCOV_EXCL_START */
 			ERR("sqlite3_create_function() Fail(%d)", ret);
 			return CONTACTS_ERROR_DB;
+			/* LCOV_EXCL_STOP */
 		}
 
 		ret = sqlite3_create_function(ctsvc_db, "_NUMBER_COMPARE_", 4, SQLITE_UTF8,
 				NULL, ctsvc_db_phone_number_equal_callback, NULL, NULL);
 		if (SQLITE_OK != ret) {
+			/* LCOV_EXCL_START */
 			ERR("sqlite3_create_function() Fail(%d)", ret);
 			return CONTACTS_ERROR_DB;
+			/* LCOV_EXCL_STOP */
 		}
 
 		ret = sqlite3_create_collation(ctsvc_db, "_NAME_SORT_", SQLITE_UTF8,
 				(void *)SQLITE_UTF8, ctsvc_db_group_name_sort_callback);
 		if (SQLITE_OK != ret) {
+			/* LCOV_EXCL_START */
 			ERR("sqlite3_create_collation() Fail(%d)", ret);
 			return CONTACTS_ERROR_DB;
+			/* LCOV_EXCL_STOP */
 		}
 	}
 
@@ -182,7 +202,9 @@ int ctsvc_query_get_first_int_result(const char *query, int *result)
 	do {
 		ret = sqlite3_prepare_v2(ctsvc_db, query, strlen(query), &stmt, NULL);
 		if (ret != SQLITE_OK)
+			/* LCOV_EXCL_START */
 			ERR("sqlite3_prepare_v2() Fail(%d, %s)", ret, sqlite3_errmsg(ctsvc_db));
+		/* LCOV_EXCL_STOP */
 
 		if (ret == SQLITE_BUSY || ret == SQLITE_LOCKED) {
 			gettimeofday(&now, NULL);
@@ -196,11 +218,13 @@ int ctsvc_query_get_first_int_result(const char *query, int *result)
 	} while (retry);
 
 	if (SQLITE_OK != ret) {
+		/* LCOV_EXCL_START */
 		ERR("sqlite3_prepare_v2() Fail(%s)", sqlite3_errmsg(ctsvc_db));
 		if (ret == SQLITE_BUSY || ret == SQLITE_LOCKED)
 			return CONTACTS_ERROR_DB_LOCKED;
 		else
 			return CONTACTS_ERROR_DB;
+		/* LCOV_EXCL_STOP */
 	}
 
 	retry = false;
@@ -208,8 +232,10 @@ int ctsvc_query_get_first_int_result(const char *query, int *result)
 	do {
 		ret = sqlite3_step(stmt);
 		if (ret != SQLITE_ROW && SQLITE_DONE != ret) {
+			/* LCOV_EXCL_START */
 			ERR("sqlite3_step() Fail(%d, %s, %d)", ret, sqlite3_errmsg(ctsvc_db),
 					sqlite3_extended_errcode(ctsvc_db));
+			/* LCOV_EXCL_STOP */
 		}
 
 		if (ret == SQLITE_BUSY || ret == SQLITE_LOCKED) {
@@ -230,12 +256,14 @@ int ctsvc_query_get_first_int_result(const char *query, int *result)
 					ret, sqlite3_errmsg(ctsvc_db));
 			return CONTACTS_ERROR_NO_DATA /*CONTACTS_ERR_DB_RECORD_NOT_FOUND*/;
 		}
+		/* LCOV_EXCL_START */
 		ERR("sqlite3_step() Fail(%d, %s, %d)", ret, sqlite3_errmsg(ctsvc_db),
 				sqlite3_extended_errcode(ctsvc_db));
 		if (ret == SQLITE_BUSY || ret == SQLITE_LOCKED)
 			return CONTACTS_ERROR_DB_LOCKED;
 		else
 			return CONTACTS_ERROR_DB;
+		/* LCOV_EXCL_STOP */
 	}
 
 	*result = sqlite3_column_int(stmt, 0);
@@ -257,7 +285,9 @@ int ctsvc_query_exec(const char *query)
 
 	ret = ctsvc_stmt_step(stmt);
 	if (CONTACTS_ERROR_NONE != ret)
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_stmt_step() Fail(%d, %s)", ret, err_msg);
+	/* LCOV_EXCL_STOP */
 
 	ctsvc_stmt_finalize(stmt);
 
@@ -277,7 +307,9 @@ int ctsvc_query_prepare(char *query, cts_stmt *stmt)
 	do {
 		ret = sqlite3_prepare_v2(ctsvc_db, query, strlen(query), stmt, NULL);
 		if (ret != SQLITE_OK)
+			/* LCOV_EXCL_START */
 			ERR("sqlite3_prepare_v2() Fail(%d, %s)", ret, sqlite3_errmsg(ctsvc_db));
+		/* LCOV_EXCL_STOP */
 
 		if (ret == SQLITE_BUSY || ret == SQLITE_LOCKED) {
 			gettimeofday(&now, NULL);
@@ -309,8 +341,10 @@ int ctsvc_stmt_get_first_int_result(cts_stmt stmt, int *result)
 	do {
 		ret = sqlite3_step(stmt);
 		if (SQLITE_ROW != ret && SQLITE_DONE != ret)
+			/* LCOV_EXCL_START */
 			ERR("sqlite3_step() Fail(%d, %s, %d)", ret, sqlite3_errmsg(ctsvc_db),
 					sqlite3_extended_errcode(ctsvc_db));
+		/* LCOV_EXCL_STOP */
 
 		if (ret == SQLITE_BUSY || ret == SQLITE_LOCKED) {
 			gettimeofday(&now, NULL);
@@ -324,8 +358,10 @@ int ctsvc_stmt_get_first_int_result(cts_stmt stmt, int *result)
 	} while (retry);
 
 	if (SQLITE_ROW != ret) {
+		/* LCOV_EXCL_START */
 		ERR("sqlite3_step() Fail(%d, %s, %d)", ret, sqlite3_errmsg(ctsvc_db),
 				sqlite3_extended_errcode(ctsvc_db));
+		/* LCOV_EXCL_STOP */
 
 		sqlite3_finalize(stmt);
 		if (SQLITE_DONE == ret)
@@ -354,8 +390,10 @@ int ctsvc_stmt_step(cts_stmt stmt)
 		ret = sqlite3_step(stmt);
 
 		if (ret != SQLITE_ROW && ret != SQLITE_DONE) {
+			/* LCOV_EXCL_START */
 			ERR("sqlite3_step() Fail(%d, %s, %d)", ret, sqlite3_errmsg(ctsvc_db),
 					sqlite3_extended_errcode(ctsvc_db));
+			/* LCOV_EXCL_STOP */
 		}
 
 		if (ret == SQLITE_BUSY || ret == SQLITE_LOCKED) {
@@ -394,8 +432,10 @@ int ctsvc_stmt_step(cts_stmt stmt)
 		ret = CONTACTS_ERROR_DB;
 		break;
 	default:
+		/* LCOV_EXCL_START */
 		ERR("sqlite3_step() Fail(%d)", ret);
 		ret = CONTACTS_ERROR_DB;
+		/* LCOV_EXCL_STOP */
 	}
 
 	return ret;

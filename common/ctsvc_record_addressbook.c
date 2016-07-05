@@ -87,9 +87,11 @@ static int __ctsvc_addressbook_clone(contacts_record_h record, contacts_record_h
 
 	int ret = ctsvc_record_copy_base(&(dest->base), &(src->base));
 	if (CONTACTS_ERROR_NONE != ret) {
+		/* LCOV_EXCL_START */
 		ERR("ctsvc_record_copy_base() Fail");
 		free(dest);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	dest->id = src->id;
@@ -112,8 +114,10 @@ static int __ctsvc_addressbook_get_str_real(contacts_record_h record,
 		*out_str = GET_STR(copy, addressbook->name);
 		break;
 	default:
+		/* LCOV_EXCL_START */
 		ERR("This field(%d) is not supported in value(addressbook)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		/* LCOV_EXCL_STOP */
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -139,8 +143,10 @@ static int __ctsvc_addressbook_set_str(contacts_record_h record,
 		FREEandSTRDUP(addressbook->name, str);
 		break;
 	default:
+		/* LCOV_EXCL_START */
 		ERR("This field(%d) is not supported in value(addressbook)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		/* LCOV_EXCL_STOP */
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -161,8 +167,10 @@ static int __ctsvc_addressbook_get_int(contacts_record_h record,
 		*out = addressbook->mode;
 		break;
 	default:
+		/* LCOV_EXCL_START */
 		ERR("property_id(%d) is not supported in value(addressbook)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		/* LCOV_EXCL_STOP */
 	}
 	return CONTACTS_ERROR_NONE;
 }
@@ -191,8 +199,10 @@ static int __ctsvc_addressbook_set_int(contacts_record_h record,
 		addressbook->account_id = value;
 		break;
 	default:
+		/* LCOV_EXCL_START */
 		ERR("property_id(%d) is not supported in value(addressbook)", property_id);
 		return CONTACTS_ERROR_INVALID_PARAMETER;
+		/* LCOV_EXCL_STOP */
 	}
 	return CONTACTS_ERROR_NONE;
 }

@@ -296,9 +296,11 @@ char* ctsvc_get_network_cc(bool reload)
 
 	ret = tel_get_property_int(handle, TAPI_PROP_NETWORK_SERVICE_TYPE, &state);
 	if (ret != TAPI_API_SUCCESS) {
+		/* LCOV_EXCL_START */
 		ERR("tel_get_property_int Fail(%d)", ret);
 		tel_deinit(handle);
 		return NULL;
+		/* LCOV_EXCL_STOP */
 	}
 
 	if (state == TAPI_NETWORK_SERVICE_TYPE_UNKNOWN
@@ -311,8 +313,10 @@ char* ctsvc_get_network_cc(bool reload)
 
 	ret = tel_get_property_string(handle, TAPI_PROP_NETWORK_PLMN,  &temp);
 	if (ret != TAPI_API_SUCCESS) {
+		/* LCOV_EXCL_START */
 		ERR("tel_get_property_string Fail(%d)", ret);
 		return NULL;
+		/* LCOV_EXCL_STOP */
 	}
 
 	if (temp) {
@@ -347,7 +351,9 @@ void* ctsvc_init_tapi_handle_for_cc()
 				TAPI_PROP_NETWORK_PLMN, _numutil_network_cc_changed, NULL);
 		WARN_IF(ret != TAPI_API_SUCCESS, "tel_register_noti_event Fail(%d)", ret);
 	} else {
+		/* LCOV_EXCL_START */
 		ERR("tel_init() Fail");
+		/* LCOV_EXCL_STOP */
 	}
 
 	return handle_for_cc;
@@ -391,7 +397,9 @@ static inline int _numutil_has_country_code(const char *src, int len)
 			ret += 1;
 			break;
 		default:
+			/* LCOV_EXCL_START */
 			ERR("The parameter(src:%s) has invalid character set", src);
+			/* LCOV_EXCL_STOP */
 		}
 		break;
 	case 3:
@@ -411,7 +419,9 @@ static inline int _numutil_has_country_code(const char *src, int len)
 			ret += 1;
 			break;
 		default:
+			/* LCOV_EXCL_START */
 			ERR("The parameter(src:%s) has invalid character set", src);
+			/* LCOV_EXCL_STOP */
 		}
 		break;
 	case 4:
@@ -431,7 +441,9 @@ static inline int _numutil_has_country_code(const char *src, int len)
 			ret += 1;
 			break;
 		default:
+			/* LCOV_EXCL_START */
 			ERR("The parameter(src:%s) has invalid character set", src);
+			/* LCOV_EXCL_STOP */
 		}
 		break;
 	case 5:
@@ -451,7 +463,9 @@ static inline int _numutil_has_country_code(const char *src, int len)
 			ret += 1;
 			break;
 		default:
+			/* LCOV_EXCL_START */
 			ERR("The parameter(src:%s) has invalid character set", src);
+			/* LCOV_EXCL_STOP */
 		}
 		break;
 	case 6:
@@ -471,7 +485,9 @@ static inline int _numutil_has_country_code(const char *src, int len)
 			ret += 1;
 			break;
 		default:
+			/* LCOV_EXCL_START */
 			ERR("The parameter(src:%s) has invalid character set", src);
+			/* LCOV_EXCL_STOP */
 		}
 		break;
 	case 8:
@@ -491,7 +507,9 @@ static inline int _numutil_has_country_code(const char *src, int len)
 			ret += 1;
 			break;
 		default:
+			/* LCOV_EXCL_START */
 			ERR("The parameter(src:%s) has invalid character set", src);
+			/* LCOV_EXCL_STOP */
 		}
 		break;
 	case 9:
@@ -511,13 +529,17 @@ static inline int _numutil_has_country_code(const char *src, int len)
 			ret += 1;
 			break;
 		default:
+			/* LCOV_EXCL_START */
 			ERR("The parameter(src:%s) has invalid character set", src);
+			/* LCOV_EXCL_STOP */
 		}
 		break;
 	case 0:
 	default:
+		/* LCOV_EXCL_START */
 		ERR("The parameter(src:%s) has invalid character set", src);
 		return 0;
+		/* LCOV_EXCL_STOP */
 	}
 
 	return ret;
@@ -894,8 +916,10 @@ static int _numutil_minmatch_number(const char *src, char *dest, int dest_size,
 		while (0 <= (len-d_pos-1) && temp_number[len-d_pos-1]
 				&& d_pos < min_match) {
 			if (dest_size-d_pos == 0) {
+				/* LCOV_EXCL_START */
 				ERR("Destination string buffer is not enough(%s)", src);
 				return CONTACTS_ERROR_INTERNAL;
+				/* LCOV_EXCL_STOP */
 			}
 
 			dest[d_pos] = temp_number[len-d_pos-1];
@@ -927,8 +951,10 @@ int ctsvc_get_minmatch_number(const char *src, char *dest, int dest_size, int mi
 
 	ret = _numutil_minmatch_number(src, dest, dest_size, min_match);
 	if (ret != CONTACTS_ERROR_NONE) {
+		/* LCOV_EXCL_START */
 		ERR("_numutil_minmatch_number() Fail(%d)", ret);
 		return ret;
+		/* LCOV_EXCL_STOP */
 	}
 
 	return CONTACTS_ERROR_NONE;
@@ -943,8 +969,10 @@ static bool _numutil_is_phonenumber_halfwidth(const char *keyword)
 	/* TODO: finally, we try to check the number with regular expression. */
 	for (i = 0; i < len; i++) {
 		if ((keyword[i] < '0' || '9' < keyword[i]) && keyword[i] != '+') {
+			/* LCOV_EXCL_START */
 			ERR("keyword[%d]: %c is not number)", i, keyword[i]);
 			return false;
+			/* LCOV_EXCL_STOP */
 		}
 	}
 	return true;
@@ -1090,9 +1118,11 @@ void ctsvc_db_phone_number_equal_callback(sqlite3_context  *context,
 	char *number2;
 
 	if (argc < 4) {
+		/* LCOV_EXCL_START */
 		sqlite3_result_int(context, 0);
 		ERR("argc invalid");
 		return;
+		/* LCOV_EXCL_STOP */
 	}
 
 	number1 = (char*)sqlite3_value_text(argv[0]);
