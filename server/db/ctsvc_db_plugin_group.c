@@ -130,7 +130,8 @@ static int __ctsvc_db_group_insert_record(contacts_record_h record, int *id)
 
 		free(group->image_thumbnail_path);
 		group->image_thumbnail_path = strdup(image);
-		ctsvc_stmt_bind_text(stmt, 7, group->image_thumbnail_path);
+		if (group->image_thumbnail_path)
+			ctsvc_stmt_bind_text(stmt, 7, group->image_thumbnail_path);
 	}
 
 	if (group->extra_data)
