@@ -505,24 +505,28 @@ static int test_search_records_for_snippet(int argc, char **argv)
 					start_match, end_match, 0, &get_list);
 			_check_list(uri, get_list, true);
 			contacts_list_destroy(get_list, true);
+			get_list = NULL;
 
 			DBG("search_records_with_range_for_snippet:CONTACTS_SEARCH_RANGE_NAME");
 			contacts_db_search_records_with_range_for_snippet(uri, keyword, offset,
 					limit, CONTACTS_SEARCH_RANGE_NAME, start_match, end_match, 0, &get_list);
 			_check_list(uri, get_list, true);
 			contacts_list_destroy(get_list, true);
+			get_list = NULL;
 
 			DBG("search_records_with_range_for_snippet:CONTACTS_SEARCH_RANGE_NUMBER");
 			contacts_db_search_records_with_range_for_snippet(uri, keyword, offset,
 					limit, CONTACTS_SEARCH_RANGE_NUMBER, start_match, end_match, 0, &get_list);
 			_check_list(uri, get_list, true);
 			contacts_list_destroy(get_list, true);
+			get_list = NULL;
 
 			DBG("search_records_with_range_for_snippet:CONTACTS_SEARCH_RANGE_DATA");
 			contacts_db_search_records_with_range_for_snippet(uri, keyword, offset,
 					limit, CONTACTS_SEARCH_RANGE_DATA, start_match, end_match, 0, &get_list);
 			_check_list(uri, get_list, true);
 			contacts_list_destroy(get_list, true);
+			get_list = NULL;
 
 			DBG("search_records_with_query_for_snippet");
 			contacts_query_h query = NULL;
@@ -531,6 +535,7 @@ static int test_search_records_for_snippet(int argc, char **argv)
 					limit, start_match, end_match, 0, &get_list);
 			_check_list(uri, get_list, true);
 			contacts_list_destroy(get_list, true);
+			get_list = NULL;
 			contacts_query_destroy(query);
 		}
 	}
